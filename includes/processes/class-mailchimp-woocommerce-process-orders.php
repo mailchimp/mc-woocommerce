@@ -14,6 +14,7 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abtstra
      * @var string
      */
     protected $action = 'mailchimp_woocommerce_process_orders';
+    public $items = array();
 
     /**
      * @return string
@@ -33,7 +34,12 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abtstra
         if ($item instanceof MailChimp_Order) {
             $type = $this->mailchimp()->getStoreOrder($this->store_id, $item->getId()) ? 'update' : 'create';
             $call = $type === 'create' ? 'addStoreOrder' : 'updateStoreOrder';
-            $this->mailchimp()->$call($this->store_id, $item);
+            try {
+                $response = $this->mailchimp()->$call($this->store_id, $item);
+                $this->items[] = array('response' => $response, 'item' => $item);
+            } catch (\Exception $e) {
+                error_log('MailChimp@ProcessOrders :: '.$call.' :: '.$e->getMessage());
+            }
         }
         return false;
     }

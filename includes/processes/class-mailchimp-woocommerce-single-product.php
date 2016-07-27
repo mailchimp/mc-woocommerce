@@ -29,9 +29,9 @@ class MailChimp_WooCommerce_Single_Product extends WP_Job
     public function handle()
     {
         $options = get_option('mailchimp-woocommerce', array());
-        $store_id = get_option('mailchimp-woocommerce-store_id', false);
+        $store_id = mailchimp_get_store_id();
 
-        if (!empty($store_id) && !is_array($options) && isset($options['mailchimp_api_key'])) {
+        if (!empty($store_id) && is_array($options) && isset($options['mailchimp_api_key'])) {
 
             $job = new MailChimp_WooCommerce_Transform_Products();
             $api = new MailChimpApi($options['mailchimp_api_key']);

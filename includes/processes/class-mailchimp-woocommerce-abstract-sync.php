@@ -55,6 +55,14 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
     }
 
     /**
+     * @return string
+     */
+    public function getStoreID()
+    {
+        return md5(get_option('siteurl'));
+    }
+
+    /**
      * Task
      *
      * Override this method to perform any actions required on each
@@ -68,7 +76,7 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
      */
     public function handle() {
 
-        if (!($page = $this->getResources()) || !($this->store_id = $this->getData('store_id'))) {
+        if (!($page = $this->getResources()) || !($this->store_id = $this->getStoreID())) {
             return false;
         }
 

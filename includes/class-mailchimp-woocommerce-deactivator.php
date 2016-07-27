@@ -32,7 +32,6 @@ class MailChimp_Woocommerce_Deactivator {
 	public static function deactivate() {
 		delete_option('mailchimp-woocommerce');
 		delete_option('mailchimp-woocommerce-errors.store_info');
-		delete_option('mailchimp-woocommerce-store_id');
 		delete_option('mailchimp-woocommerce-sync.orders.completed_at');
 		delete_option('mailchimp-woocommerce-sync.orders.current_page');
 		delete_option('mailchimp-woocommerce-sync.products.completed_at');

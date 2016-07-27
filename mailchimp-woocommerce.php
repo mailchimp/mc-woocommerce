@@ -42,6 +42,13 @@ function mailchimp_environment_variables() {
 }
 
 /**
+ * @return string
+ */
+function mailchimp_get_store_id() {
+	return md5(get_option('siteurl'));
+}
+
+/**
  * @param array $data
  * @return mixed
  */

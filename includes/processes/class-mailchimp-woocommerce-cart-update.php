@@ -50,13 +50,24 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
     {
         try {
             $options = get_option('mailchimp-woocommerce', array());
-            $store_id = get_option('mailchimp-woocommerce-store_id', false);
+            $store_id = mailchimp_get_store_id();
 
             if (!empty($store_id) && is_array($options) && isset($options['mailchimp_api_key'])) {
 
                 $this->cart_data = json_decode($this->cart_data, true);
 
                 if (!is_array($this->cart_data)) {
+                    error_log('MailChimp::abandonedCart :: Cart data was not set properly.');
+                    return false;
+                }
+
+                $api = new MailChimpApi($options['mailchimp_api_key']);
+
+                // delete it and the add it back.
+                $api->deleteCartByID($store_id, $this->unique_id);
+
+                // if they emptied the cart ignore it.
+                if (empty($this->cart_data)) {
                     return false;
                 }
 
@@ -93,11 +104,11 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
 
                 $cart->setOrderTotal($order_total);
 
-                $api = new MailChimpApi($options['mailchimp_api_key']);
-                $call = $api->getCart($store_id, $this->unique_id) ? 'updateCart' : 'addCart';
+                // need to get the cart by id to see if we 'update' or 'add'... super lame.
+                //$call = $api->getCart($store_id, $this->unique_id) ? 'updateCart' : 'addCart';
 
                 // update or create the cart.
-                $api->$call($store_id, $cart);
+                $api->addCart($store_id, $cart);
             }
         } catch (\Exception $e) {
             update_option('mailchimp-woocommerce-cart-error', $e->getMessage());

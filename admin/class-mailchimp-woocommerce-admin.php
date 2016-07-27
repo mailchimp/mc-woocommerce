@@ -431,6 +431,116 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 		return true;
 	}
 
+    /**
+     * @param $action
+     */
+    public function job($action)
+    {
+        switch ($action) {
+            case 'lists';
+                try {
+                    print_r(array('getting_lists' => $this->api()->getLists(true)));die();
+                } catch (\Exception $e) {
+                    print $e->getMessage(); die();
+                }
+                break;
+
+            case 'list_delete';
+                try {
+                    $list_id = isset($_GET['list_id']) ? $_GET['list_id'] : null;
+                    print_r(array('deleting_list_by_id' => $this->api()->deleteList($list_id)));die();
+                } catch (\Exception $e) {
+                    print $e->getMessage(); die();
+                }
+                break;
+
+            case 'stores_list';
+                try {
+                    print_r(array('getting_lists' => $this->api()->stores()));die();
+                } catch (\Exception $e) {
+                    print $e->getMessage(); die();
+                }
+                break;
+
+            case 'store_get';
+
+                try {
+                    print_r(array('getting_store_by_id' => $this->api()->getStore($this->getUniqueStoreID())));die();
+                } catch (\Exception $e) {
+                    print $e->getMessage(); die();
+                }
+                break;
+
+            case 'stores_delete':
+                try {
+                    print_r(array('deleting_store' => $this->api()->deleteStore($this->getUniqueStoreID())));die();
+                } catch (\Exception $e) {
+                    print $e->getMessage(); die();
+                }
+                break;
+
+            case 'submit_order' :
+
+                $order_id = isset($_GET['order_id']) ? $_GET['order_id'] : null;
+                if (!empty($order_id)) {
+                    $job = new MailChimp_WooCommerce_Single_Order($order_id);
+                    print_r(array('submitting_single_order' => $job->handle()));die();
+                }
+
+                break;
+
+            case 'delete_order' :
+
+                $order_id = isset($_GET['order_id']) ? $_GET['order_id'] : null;
+                if (!empty($order_id)) {
+                    $response = $this->api()->deleteStoreOrder($this->getUniqueStoreID(), $order_id);
+                    print_r(array('deleting_order' => array('handled delete store order' => $response)));die();
+                }
+
+                break;
+
+            case 'stores_orders':
+                $paging_limit = isset($_GET['limit']) ? $_GET['limit'] : 10;
+                $paging_page = isset($_GET['page']) ? $_GET['page'] : 1;
+                print_r(array('getting_store_orders' => $this->api()->orders($this->getUniqueStoreID(), $paging_page, $paging_limit)));die();
+                break;
+
+            case 'stores_products':
+                $paging_limit = isset($_GET['limit']) ? $_GET['limit'] : 10;
+                $paging_page = isset($_GET['page']) ? $_GET['page'] : 1;
+                print_r(array('getting_store_products' => $this->api()->products($this->getUniqueStoreID(), $paging_page, $paging_limit)));die();
+                break;
+
+            case 'stores_carts':
+                $paging_limit = isset($_GET['limit']) ? $_GET['limit'] : 10;
+                $paging_page = isset($_GET['page']) ? $_GET['page'] : 1;
+                print_r(array('getting_store_carts' => $this->api()->carts($this->getUniqueStoreID(), $paging_page, $paging_limit)));die();
+                break;
+
+            case 'delete_cart':
+                $cart_id = isset($_GET['cart_id']) ? $_GET['cart_id'] : null;
+                print_r(array('deleting_cart_by_id' => $this->api()->deleteCartByID($this->getUniqueStoreID(), $cart_id)));die();
+                break;
+
+            case 'test_queue':
+
+                $this->removeData('sync.completed_at');
+                $this->removeData('sync.orders.completed_at');
+                $this->removeData('sync.orders.current_page');
+
+                $job = new MailChimp_WooCommerce_Process_Products();
+                $job->flagStartSync();
+
+                //$job = new MailChimp_WooCommerce_Process_Orders();
+                //$job->go();
+
+                wp_queue($job);
+                print 'submitted store sync'; die();
+
+                break;
+        }
+    }
+
 	/**
 	 * @param null|array $data
 	 * @return bool|string
@@ -498,9 +608,8 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 	}
 
 	/**
-	 * Once all the data is compiled, we can try to add or update the store on demand.
-	 *
-	 * @param array|null $data
+	 * @param null $data
+	 * @return bool
 	 */
 	private function syncStore($data = null)
 	{
@@ -545,9 +654,13 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 			$this->setData('errors.store_info', false);
 			$this->setData($time_key, time());
 
+			return true;
+
 		} catch (\Exception $e) {
 			$this->setData('errors.store_info', $e->getMessage());
 		}
+
+		return false;
 	}
 
 	/**
@@ -589,14 +702,6 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 		$address->setCountryCode($this->array_get($data, 'store_currency_code', 'USD'));
 
 		return $address;
-	}
-
-	/**
-	 * @return string
-	 */
-	private function getUniqueStoreID()
-	{
-		return md5(get_option('siteurl'));
 	}
 
 	/**

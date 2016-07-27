@@ -13,6 +13,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     protected $user_email = null;
     protected $force_cart_post = false;
     protected $pushed_orders = array();
+    protected $unique_id = null;
 
     /**
      * hook fired when we know everything is booted
@@ -53,6 +54,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     public function handleOrderStatusChanged($order_id)
     {
         if ($this->hasOption('mailchimp_api_key') && !array_key_exists($order_id, $this->pushed_orders)) {
+
             // register this order is already in process..
             $this->pushed_orders[$order_id] = true;
 
@@ -62,7 +64,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
 
             // queue up the single order to be processed.
             $handler = new MailChimp_WooCommerce_Single_Order($order_id, $session_id, $campaign_id);
-            wp_queue($handler, 5);
+            wp_queue($handler);
         }
     }
 
@@ -78,19 +80,19 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
         if (($user_email = $this->getCurrentUserEmail())) {
 
             // if we don't have a session id, we need to create one
-            if (!($unique_id = $this->cookie('mailchimp_session_id', false))) {
-                $unique_id = uniqid('mailchimp_');
-                @setcookie('mailchimp_session_id', $unique_id, $this->getCookieDuration(), '/');
+            if (empty($this->unique_id) && !($this->unique_id = $this->cookie('mailchimp_session_id', false))) {
+                $this->unique_id = uniqid('mailchimp_');
+                @setcookie('mailchimp_session_id', $this->unique_id, $this->getCookieDuration(), '/');
             }
 
             // grab the cookie data that could play important roles in the submission
             $campaign = $this->cookie('mailchimp_campaign_id');
 
             // fire up the job handler
-            $handler = new MailChimp_WooCommerce_Cart_Update($unique_id, $user_email, $campaign, $this->getCartItems());
+            $handler = new MailChimp_WooCommerce_Cart_Update($this->unique_id, $user_email, $campaign, $this->getCartItems());
 
             // queue it up to happen
-            wp_queue($handler, 5);
+            wp_queue($handler);
         }
 
         return false;
@@ -201,6 +203,11 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
 
         if (($action = $this->get('action'))) {
 
+            if ($action === 'get_ip') {
+                $this->getIPAddress();
+                return;
+            }
+
             if ($action === 'sync') {
                 return $this->startSync();
             }
@@ -212,6 +219,53 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
                 $this->respondJSON($this->{$methods[$action]}());
             }
         }
+    }
+
+    protected function getIPAddress()
+    {
+        error_reporting(E_ERROR);
+
+        $headers =  array (
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_X_FORWARDED',
+            'HTTP_FORWARDED_FOR',
+            'HTTP_FORWARDED',
+            'HTTP_VIA',
+            'HTTP_X_COMING_FROM',
+            'HTTP_COMING_FROM',
+            'HTTP_CLIENT_IP'
+        );
+
+        $callback = isset($_GET['cb']) ? $_GET['cb'] : 'vextras.submitIpAddressCallback';
+        $ip = false;
+
+        foreach ( $headers as $header ) {
+            if (isset ( $_SERVER [$header]  )) {
+                //Check server
+                if (($pos = strpos ( $_SERVER [$header], ',' )) != false) {
+                    $ip = substr ( $_SERVER [$header], 0, $pos );//True
+                } else {
+                    $ip = $_SERVER [$header]; //False
+                }
+                $ipnumber = ip2long ( $ip );
+                if ($ipnumber !== - 1 && $ipnumber !== false && (long2ip ( $ipnumber ) === $ip)) {
+                    if (($ipnumber - 184549375) && // Not in 10.0.0.0/8
+                        ($ipnumber  - 1407188993) && // Not in 172.16.0.0/12
+                        ($ipnumber  - 1062666241)) // Not in 192.168.0.0/16
+                        if (($pos = strpos ( $_SERVER [$header], ',' )) != false) {
+                            $ip = substr ( $_SERVER [$header], 0, $pos );
+                        } else {
+                            $ip = $_SERVER [$header];
+                        }
+                    break;
+                }
+            }
+            if ($ip) die($ip);
+        }
+
+        header("Content-Type: application/json");
+        echo $callback.'('.json_encode((object) array('ip' => $ip)).');';
+        exit;
     }
 
     /**
@@ -297,7 +351,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     protected function authenticate()
     {
-        if (trim((string) $this->getData('store_id', false)) !== trim((string) $this->get('store_id'))) {
+        if (trim((string) $this->getUniqueStoreID()) !== trim((string) $this->get('store_id'))) {
             $this->respondJSON(array('success' => false, 'message' => 'Not Authorized'));
         }
 

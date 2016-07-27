@@ -60,6 +60,14 @@ abstract class MailChimp_Woocommerce_Options
     }
 
     /**
+     * @return string
+     */
+    public function getUniqueStoreID()
+    {
+        return md5(get_option('siteurl'));
+    }
+
+    /**
      * @param $env
      * @return bool|string
      */
@@ -146,6 +154,7 @@ abstract class MailChimp_Woocommerce_Options
     {
         return get_option($this->plugin_name.'-'.$key, $default);
     }
+
 
     /**
      * @param $key

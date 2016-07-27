@@ -45,7 +45,7 @@ if ( ! class_exists( 'WP_Queue' ) ) {
 				'created_at'   => $this->datetime(),
 			);
 
-			$wpdb->insert( $this->table, $data );
+			$id = $wpdb->insert( $this->table, $data );
 
 			return $this;
 		}

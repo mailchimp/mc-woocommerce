@@ -15,16 +15,18 @@ class MailChimp_Newsletter extends MailChimp_Woocommerce_Options
      */
     public function applyNewsletterField($checkout)
     {
-        $status = is_user_logged_in() ? get_user_meta(get_current_user_id(), 'mailchimp_woocommerce_is_subscribed',
-            true) : true;
+        if (!is_admin()) {
+            $status = is_user_logged_in() ? get_user_meta(get_current_user_id(), 'mailchimp_woocommerce_is_subscribed',
+                true) : true;
 
-        $checkbox = '<p class="form-row form-row-wide create-account">';
-        $checkbox .= '<input class="input-checkbox" id="mailchimp_woocommerce_newsletter" type="checkbox" name="mailchimp_woocommerce_newsletter" value="1" checked="' . ($status ? 'checked' : '') . '"> ';
-        $checkbox .= '<label for="mailchimp_woocommerce_newsletter" class="checkbox">' . $this->getOption('newsletter_label',
-                'Subscribe to our newsletter') . '</label></p>';
-        $checkbox .= '<div class="clear"></div>';
+            $checkbox = '<p class="form-row form-row-wide create-account">';
+            $checkbox .= '<input class="input-checkbox" id="mailchimp_woocommerce_newsletter" type="checkbox" name="mailchimp_woocommerce_newsletter" value="1" checked="' . ($status ? 'checked' : '') . '"> ';
+            $checkbox .= '<label for="mailchimp_woocommerce_newsletter" class="checkbox">' . $this->getOption('newsletter_label',
+                    'Subscribe to our newsletter') . '</label></p>';
+            $checkbox .= '<div class="clear"></div>';
 
-        echo $checkbox;
+            echo $checkbox;
+        }
     }
 
     /**

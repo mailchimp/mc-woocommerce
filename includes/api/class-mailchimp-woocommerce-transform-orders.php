@@ -90,6 +90,7 @@ class MailChimp_WooCommerce_Transform_Orders
             $order->addItem($this->buildLineItem($key, $order_detail));
         }
 
+        //print_r($order->toArray());die();
         return $order;
     }
 
@@ -173,33 +174,40 @@ class MailChimp_WooCommerce_Transform_Orders
         $item->setId($key);
 
         // wrap the order detail meta.
-        $meta = new WC_Order_Item_Meta($order_detail);
+        //$meta = new WC_Order_Item_Meta($order_detail);
 
-        if (isset($meta->meta['item_meta_array']) && is_array($meta->meta['item_meta_array'])) {
+        if (isset($order_detail['item_meta']) && is_array($order_detail['item_meta'])) {
 
-            foreach ($meta->meta['item_meta_array'] as $meta_object) {
+            foreach ($order_detail['item_meta'] as $meta_key => $meta_data_array) {
 
-                switch ($meta_object->key) {
+                if (!isset($meta_data_array[0])) {
+                    continue;
+                }
+
+                switch ($meta_key) {
 
                     case '_line_total':
-                        $item->setPrice($meta_object->value);
+                        $item->setPrice($meta_data_array[0]);
                         break;
 
                     case '_product_id':
-                        $item->setProductId($meta_object->value);
+                        $item->setProductId($meta_data_array[0]);
                         break;
 
                     case '_variation_id':
-                        $item->setProductVariantId($meta_object->value);
+                        $item->setProductVariantId($meta_data_array[0]);
                         break;
 
                     case '_qty':
-                        $item->setQuantity($meta_object->value);
+                        $item->setQuantity($meta_data_array[0]);
                         break;
 
                 }
             }
 
+            if ($item->getProductVariantId() <= 0) {
+                $item->setProductVariantId($item->getProductId());
+            }
         }
         return $item;
     }

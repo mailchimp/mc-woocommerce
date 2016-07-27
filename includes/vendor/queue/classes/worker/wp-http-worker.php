@@ -302,6 +302,7 @@ if ( ! class_exists( 'WP_Http_Worker' ) ) {
 		 */
 		public function maybe_schedule_cron() {
 			if ( $this->is_http_worker_disabled() ) {
+				die('http worker is disabled');
 				// Remove health check cron event, if scheduled
 				$timestamp = wp_next_scheduled( 'http_worker_cron' );
 

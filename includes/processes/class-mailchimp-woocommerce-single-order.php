@@ -39,10 +39,10 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
     public function handle()
     {
         $options = get_option('mailchimp-woocommerce', array());
-        $store_id = get_option('mailchimp-woocommerce-store_id', false);
+        $store_id = mailchimp_get_store_id();
 
         // only if we have the right parameters to do the work
-        if (!empty($store_id) && !is_array($options) && isset($options['mailchimp_api_key'])) {
+        if (!empty($store_id) && is_array($options) && isset($options['mailchimp_api_key'])) {
 
             $job = new MailChimp_WooCommerce_Transform_Orders();
             $api = new MailChimpApi($options['mailchimp_api_key']);
@@ -56,7 +56,11 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
             }
 
             // will either add or update the order
-            $api->$call($store_id, ($order = $job->transform(get_post($this->order_id))));
+            try {
+                $api->$call($store_id, ($order = $job->transform(get_post($this->order_id))));
+            } catch (\Exception $e) {
+                error_log('MailChimp::processSingleOrder :: #'.$this->order_id.' :: '.$e->getMessage());
+            }
 
             // if we're adding a new order and the session id is here, we need to delete the AC cart record.
             if ($call === 'addStoreOrder' && !empty($this->cart_session_id)) {

@@ -32,7 +32,6 @@ var mailchimp_cart;
 	 * practising this, we should strive to set a better example in our own work.
 	 */
 
-	var mailchimp_base_url = 'https://app.mailchimp.com';
 	var requestTransport = null;
 	var scriptTagCounter = 1, head;
 	var storageLife = "30";
@@ -145,14 +144,6 @@ var mailchimp_cart;
 				}
 			}
 			return t
-		},
-		ip:function () {
-			saved_ip = mailchimpStorage.get('clientIP', false);
-			if (!saved_ip) {
-				var jsonpURL = mailchimp_base_url+'/ip.php?cb=mailchimp.submitIpAddressCallback';
-				requestTransport = Jsonp.invoke(jsonpURL);
-			}
-			return saved_ip;
 		}
 	};
 
@@ -212,16 +203,8 @@ var mailchimp_cart;
 	mailchimp =
 	{
 		storage : mailchimpStorage,
-		submitIpAddressCallback : function(data)
-		{
-			if (data && (undefined !== data.ip && data.ip)) {
-				mailchimp.storage.set('clientIP', data.ip, mailchimp.utils.createDate(1));
-			}
-		},
 		utils : mailchimpUtils
 	};
-
-	mailchimpUtils.ip();
 
 	function MailChimpCart() {
 

@@ -74,7 +74,6 @@ class MailChimpApi
             $this->get('/');
             return true;
         } catch (MailChimp_Error $e) {
-            die(print_r(array('method' => 'ping', 'message' => $e->getMessage()), true));
             return false;
         }
     }
@@ -284,6 +283,15 @@ class MailChimpApi
     }
 
     /**
+     * @param $id
+     * @return array|bool
+     */
+    public function deleteList($id)
+    {
+        return $this->delete('lists/'.$id);
+    }
+
+    /**
      * @return array|mixed
      */
     public function getListsWithMergeFields()
@@ -338,17 +346,19 @@ class MailChimpApi
     }
 
     /**
+     * @param $store_id
      * @param int $page
      * @param int $count
-     * @param \DateTime $since
+     * @param DateTime|null $since
      * @param null $campaign_id
-     * @return mixed
+     * @return array|bool
      */
-    public function orders($page = 1, $count = 10, \DateTime $since = null, $campaign_id = null)
+    public function orders($store_id, $page = 1, $count = 10, \DateTime $since = null, $campaign_id = null)
     {
-        $result = $this->get('ecomm/orders', array(
+        $result = $this->get('ecommerce/stores/'.$store_id.'/orders', array(
             'start' => $page,
-            'limit' => $count,
+            'count' => $count,
+            'offset' => ($page * $count),
             'since' => $since ? $since->format('Y-m-d H:i:s') : null,
             'cid' => $campaign_id,
         ));
@@ -364,10 +374,10 @@ class MailChimpApi
     {
         try {
             $data = $this->get("ecommerce/stores/$store_id");
-            if (!isset($data['stores']) || !isset($data['stores'][0])) {
+            if (!isset($data['id']) || !isset($data['name'])) {
                 return false;
             }
-            return (new MailChimp_Store)->fromArray($data['stores'][0]);
+            return (new MailChimp_Store)->fromArray($data);
         } catch (MailChimp_Error $e) {
             return false;
         }
@@ -460,6 +470,23 @@ class MailChimpApi
         $this->validateStoreSubmission($store);
         $data = $this->post("ecommerce/stores", $store->toArray());
         return (new MailChimp_Customer)->fromArray($data);
+    }
+
+    /**
+     * @param $store_id
+     * @param int $page
+     * @param int $count
+     * @return array|bool
+     */
+    public function carts($store_id, $page = 1, $count = 10)
+    {
+        $result = $this->get('ecommerce/stores/'.$store_id.'/carts', array(
+            'start' => $page,
+            'count' => $count,
+            'offset' => ($page * $count),
+        ));
+
+        return $result;
     }
 
     /**
@@ -596,6 +623,21 @@ class MailChimpApi
 
     /**
      * @param $store_id
+     * @param $order_id
+     * @return bool
+     */
+    public function deleteStoreOrder($store_id, $order_id)
+    {
+        try {
+            $this->delete("ecommerce/stores/$store_id/orders/$order_id");
+            return true;
+        } catch (MailChimp_Error $e) {
+            return false;
+        }
+    }
+
+    /**
+     * @param $store_id
      * @param $product_id
      * @return MailChimp_Product|bool
      */
@@ -607,6 +649,23 @@ class MailChimpApi
         } catch (MailChimp_Error $e) {
             return false;
         }
+    }
+
+    /**
+     * @param $store_id
+     * @param int $page
+     * @param int $count
+     * @return array|bool
+     */
+    public function products($store_id, $page = 1, $count = 10)
+    {
+        $result = $this->get('ecommerce/stores/'.$store_id.'/products', array(
+            'start' => $page,
+            'count' => $count,
+            'offset' => ($page * $count),
+        ));
+
+        return $result;
     }
 
     /**
@@ -786,13 +845,13 @@ class MailChimpApi
         $response = curl_exec($curl);
         $err = curl_error($curl);
 
+        $info = curl_getinfo($curl);
+
         curl_close($curl);
 
         if ($err) {
             throw new MailChimp_Error('CURL error :: '.$err, '500');
         }
-
-        $info = curl_getinfo($curl);
 
         /*
         $response = explode("\r\n\r\nHTTP/", $response, 2);    //to deal with "HTTP/1.1 100 Continue\r\n\r\nHTTP/1.1 200 OK...\r\n\r\n..." header

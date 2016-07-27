@@ -56,7 +56,7 @@ class MailChimp_Cart
     public function getStoreID()
     {
         if (empty($this->store_id)) {
-            $this->store_id = get_option('mailchimp-woocommerce-store-id', null);
+            $this->store_id = mailchimp_get_store_id();
         }
 
         return $this->store_id;

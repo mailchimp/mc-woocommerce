@@ -1,7 +1,13 @@
 <?php
 $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'api_key';
 
+$active_job = isset($_GET['job']) ? $_GET['job'] : null;
+
 $handler = MailChimp_Woocommerce_Admin::connect();
+
+if ($active_job !== null) {
+    $handler->job($active_job);
+}
 
 //Grab all options for this particular tab we're viewing.
 $options = get_option($this->plugin_name, array());

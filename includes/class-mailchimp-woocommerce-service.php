@@ -221,53 +221,6 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
         }
     }
 
-    protected function getIPAddress()
-    {
-        error_reporting(E_ERROR);
-
-        $headers =  array (
-            'HTTP_X_FORWARDED_FOR',
-            'HTTP_X_FORWARDED',
-            'HTTP_FORWARDED_FOR',
-            'HTTP_FORWARDED',
-            'HTTP_VIA',
-            'HTTP_X_COMING_FROM',
-            'HTTP_COMING_FROM',
-            'HTTP_CLIENT_IP'
-        );
-
-        $callback = isset($_GET['cb']) ? $_GET['cb'] : 'vextras.submitIpAddressCallback';
-        $ip = false;
-
-        foreach ( $headers as $header ) {
-            if (isset ( $_SERVER [$header]  )) {
-                //Check server
-                if (($pos = strpos ( $_SERVER [$header], ',' )) != false) {
-                    $ip = substr ( $_SERVER [$header], 0, $pos );//True
-                } else {
-                    $ip = $_SERVER [$header]; //False
-                }
-                $ipnumber = ip2long ( $ip );
-                if ($ipnumber !== - 1 && $ipnumber !== false && (long2ip ( $ipnumber ) === $ip)) {
-                    if (($ipnumber - 184549375) && // Not in 10.0.0.0/8
-                        ($ipnumber  - 1407188993) && // Not in 172.16.0.0/12
-                        ($ipnumber  - 1062666241)) // Not in 192.168.0.0/16
-                        if (($pos = strpos ( $_SERVER [$header], ',' )) != false) {
-                            $ip = substr ( $_SERVER [$header], 0, $pos );
-                        } else {
-                            $ip = $_SERVER [$header];
-                        }
-                    break;
-                }
-            }
-            if ($ip) die($ip);
-        }
-
-        header("Content-Type: application/json");
-        echo $callback.'('.json_encode((object) array('ip' => $ip)).');';
-        exit;
-    }
-
     /**
      * @return bool
      */

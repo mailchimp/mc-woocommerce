@@ -19,13 +19,6 @@ abstract class MailChimp_Woocommerce_Options
     protected $version = '1.0.0';
     protected $plugin_options = null;
     protected $is_admin = false;
-    protected $endpoint = 'https://app.mailchimp.com/third_party/notify/woo';
-    protected $endpoints = array(
-        'order.created' => 'order_created/{{PK}}',
-        'order.updated' => 'order_update/{{PK}}',
-        'cart.add' => 'cart/{{PK}}',
-        'cart.removed' => 'cart-remove/{{PK}}',
-    );
 
     /**
      * hook calls this so that we know the admin is here.
@@ -33,6 +26,12 @@ abstract class MailChimp_Woocommerce_Options
     public function adminReady()
     {
         $this->is_admin = true;
+        if (get_option('mailchimp_woocommerce_plugin_do_activation_redirect', false)) {
+            delete_option('mailchimp_woocommerce_plugin_do_activation_redirect');
+            if (!isset($_GET['activate-multi'])) {
+                wp_redirect("options-general.php?page=mailchimp-woocommerce");
+            }
+        }
     }
 
     /**
@@ -69,26 +68,12 @@ abstract class MailChimp_Woocommerce_Options
 
     /**
      * @param $env
-     * @return bool|string
+     * @return $this
      */
     public function setEnvironment($env)
     {
         $this->environment = $env;
-
-        switch ($env) {
-            case 'production':
-            case 'prod':
-            case 'p':
-                return $this->endpoint = 'https://app.mailchimp.com/third_party/notify/woo';
-                break;
-            case 'staging':
-            case 'stage':
-            case 's':
-                return $this->endpoint = 'https://staging.mailchimp.com/third_party/notify/woo';
-                break;
-        }
-
-        return false;
+        return $this;
     }
 
     /**

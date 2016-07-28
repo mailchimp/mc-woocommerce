@@ -299,10 +299,10 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 	protected function validatePostNewsletterSettings($input)
 	{
 		$data = array(
-			'mailchimp_list' => isset($input['mailchimp_list']) ? $input['mailchimp_list'] : '',
-			'newsletter_label' => isset($input['newsletter_label']) ? $input['newsletter_label'] : 'Subscribe to our newsletter',
-			'notify_on_subscribe' => isset($input['notify_on_subscribe']) && is_email($input['notify_on_subscribe']) ? $input['notify_on_subscribe'] : false,
-			'notify_on_unsubscribe' => isset($input['notify_on_unsubscribe']) && is_email($input['notify_on_unsubscribe']) ? $input['notify_on_unsubscribe'] : false,
+			'mailchimp_list' => isset($input['mailchimp_list']) ? $input['mailchimp_list'] : $this->getOption('mailchimp_list', ''),
+			'newsletter_label' => isset($input['newsletter_label']) ? $input['newsletter_label'] : $this->getOption('newsletter_label', 'Subscribe to our newsletter'),
+			'notify_on_subscribe' => isset($input['notify_on_subscribe']) && is_email($input['notify_on_subscribe']) ? $input['notify_on_subscribe'] : $this->getOption('notify_on_subscribe', false),
+			'notify_on_unsubscribe' => isset($input['notify_on_unsubscribe']) && is_email($input['notify_on_unsubscribe']) ? $input['notify_on_unsubscribe'] : $this->getOption('notify_on_unsubscribe', false),
 		);
 
 		if ($data['mailchimp_list'] === 'create_new') {
@@ -311,13 +311,15 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 
 		// as long as we have a list set, and it's currently in MC as a valid list, let's sync the store.
 		if (!empty($data['mailchimp_list']) && $this->api()->hasList($data['mailchimp_list'])) {
+
+            // sync the store with MC
 			$this->syncStore(array_merge($this->getOptions(), $data));
 
 			// start the sync automatically if the sync is false
 			if ((bool) $this->getData('sync.started_at', false) === false) {
 				$job = new MailChimp_WooCommerce_Process_Products();
-				$job->flagStartSync();
 				wp_queue($job);
+				$job->flagStartSync();
 			}
 		}
 

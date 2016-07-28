@@ -37,6 +37,7 @@ class MailChimp_WooCommerce_Transform_Orders
                     $response->drafts++;
                     continue;
                 }
+
                 $response->valid++;
                 $response->items[] = $this->transform($post);
             }
@@ -65,10 +66,10 @@ class MailChimp_WooCommerce_Transform_Orders
         }
 
         $order->setFulfillmentStatus($woo->get_status());
-        $order->setProcessedAt(new \DateTime($woo->order_date));
+        $order->setProcessedAt(mailchimp_date_utc($woo->order_date));
 
         if ($woo->get_status() === 'cancelled') {
-            $order->setCancelledAt(new \DateTime($woo->modified_date));
+            $order->setCancelledAt(mailchimp_date_utc($woo->modified_date));
         }
 
         $order->setCurrencyCode($woo->get_order_currency());

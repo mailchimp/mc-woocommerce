@@ -29,3 +29,16 @@
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
+
+delete_option('mailchimp-woocommerce');
+delete_option('mailchimp-woocommerce-errors.store_info');
+delete_option('mailchimp-woocommerce-sync.orders.completed_at');
+delete_option('mailchimp-woocommerce-sync.orders.current_page');
+delete_option('mailchimp-woocommerce-sync.products.completed_at');
+delete_option('mailchimp-woocommerce-sync.products.current_page');
+delete_option('mailchimp-woocommerce-sync.syncing');
+delete_option('mailchimp-woocommerce-sync.started_at');
+delete_option('mailchimp-woocommerce-sync.completed_at');
+delete_option('mailchimp-woocommerce-validation.api.ping');
+delete_option('mailchimp-woocommerce-cached-api-lists');
+delete_option('mailchimp-woocommerce-cached-api-ping-check');

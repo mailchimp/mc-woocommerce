@@ -15,16 +15,18 @@ $options = get_option($this->plugin_name, array());
 $show_sync_tab = false;
 $show_campaign_defaults = true;
 $has_valid_api_key = false;
+$allow_new_list = true;
 
 if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
     $has_valid_api_key = true;
     // if we don't have a valid api key we need to redirect back to the 'api_key' tab.
     if (($mailchimp_lists = $handler->getMailChimpLists()) && is_array($mailchimp_lists)) {
         $show_campaign_defaults = false;
+        $allow_new_list = false;
     }
 
     // only display this button if the data is not syncing and we have a valid api key
-    if ((bool) $this->getData('sync.syncing', false) === false) {
+    if ((bool) $this->getData('sync.started_at', false)) {
         $show_sync_tab = true;
     }
 }
@@ -45,7 +47,9 @@ if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
         <a href="?page=mailchimp-woocommerce&tab=campaign_defaults" class="nav-tab <?php echo $active_tab == 'campaign_defaults' ? 'nav-tab-active' : ''; ?>">List Defaults</a>
         <?php endif; ?>
         <a href="?page=mailchimp-woocommerce&tab=newsletter_settings" class="nav-tab <?php echo $active_tab == 'newsletter_settings' ? 'nav-tab-active' : ''; ?>">Newsletter Settings</a>
+        <?php if($show_sync_tab): ?>
         <a href="?page=mailchimp-woocommerce&tab=sync" class="nav-tab <?php echo $active_tab == 'sync' ? 'nav-tab-active' : ''; ?>">Sync Status</a>
+        <?php endif; ?>
         <?php endif;?>
         <?php endif; ?>
     </h2>
@@ -55,7 +59,7 @@ if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
         <?php
         settings_fields($this->plugin_name);
         do_settings_sections($this->plugin_name);
-        settings_errors();
+        //settings_errors();
         include('tabs/notices.php');
         ?>
 
@@ -65,7 +69,7 @@ if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
             <?php include_once 'tabs/api_key.php'; ?>
         <?php endif; ?>
 
-        <?php if( $active_tab == 'store_info' ): ?>
+        <?php if( $active_tab == 'store_info' && $has_valid_api_key): ?>
             <?php include_once 'tabs/store_info.php'; ?>
         <?php endif; ?>
 
@@ -77,7 +81,7 @@ if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
             <?php include_once 'tabs/newsletter_settings.php'; ?>
         <?php endif; ?>
 
-        <?php if( $active_tab == 'sync' ): ?>
+        <?php if( $active_tab == 'sync' && $show_sync_tab): ?>
             <?php include_once 'tabs/store_sync.php'; ?>
         <?php endif; ?>
 

@@ -16,6 +16,7 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
     public $campaign_id;
     public $cart_data;
     public $ip_address;
+    public $show_trace = false;
 
     /**
      * MailChimp_WooCommerce_Cart_Update constructor.
@@ -58,16 +59,23 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
 
                 if (!is_array($this->cart_data)) {
                     error_log('MailChimp::abandonedCart :: Cart data was not set properly.');
+                    if ($this->show_trace) {
+                        return 'MailChimp::abandonedCart :: Cart data was not set properly.';
+                    }
                     return false;
                 }
 
                 $api = new MailChimpApi($options['mailchimp_api_key']);
 
                 // delete it and the add it back.
-                $api->deleteCartByID($store_id, $this->unique_id);
+
+                $deleted = $api->deleteCartByID($store_id, $this->unique_id);
 
                 // if they emptied the cart ignore it.
                 if (empty($this->cart_data)) {
+                    if ($this->show_trace) {
+                        return 'no cart data';
+                    }
                     return false;
                 }
 
@@ -108,12 +116,24 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
                 //$call = $api->getCart($store_id, $this->unique_id) ? 'updateCart' : 'addCart';
 
                 // update or create the cart.
-                $api->addCart($store_id, $cart);
+                $response = $api->addCart($store_id, $cart);
+
+                if ($this->show_trace) {
+                    return $response;
+                }
+
+                return false;
             }
         } catch (\Exception $e) {
             update_option('mailchimp-woocommerce-cart-error', $e->getMessage());
+            if ($this->show_trace) {
+                return 'Error :: '.$e->getMessage();
+            }
         }
 
+        if ($this->show_trace) {
+            return 'not submitted';
+        }
         return false;
     }
 }

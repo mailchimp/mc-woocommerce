@@ -49,6 +49,65 @@ function mailchimp_get_store_id() {
 }
 
 /**
+ * @return bool|MailChimpApi
+ */
+function mailchimp_get_api() {
+	if (($options = get_option('mailchimp-woocommerce', false)) && is_array($options)) {
+		if (isset($options['mailchimp_api_key'])) {
+			return new MailChimpApi($options['mailchimp_api_key']);
+		}
+	}
+	return false;
+}
+
+/**
+ * @param $key
+ * @param null $default
+ * @return null
+ */
+function mailchimp_get_option($key, $default = null) {
+	$options = get_option('mailchimp-woocommerce');
+	if (!is_array($options)) {
+		return $default;
+	}
+	if (!array_key_exists($key, $options)) {
+		return $default;
+	}
+	return $options[$key];
+}
+
+/**
+ * @param $key
+ * @param $default
+ * @return mixed|void
+ */
+function mailchimp_get_data($key, $default) {
+	return get_option('mailchimp-woocommerce-'.$key, $default);
+}
+
+/**
+ * @param $date
+ * @return DateTime
+ */
+function mailchimp_date_utc($date) {
+	$timezone = mailchimp_get_option('store_timezone', 'America/New_York');
+	$date = new \DateTime($date, new DateTimeZone($timezone));
+	$date->setTimezone(new DateTimeZone('UTC'));
+	return $date;
+}
+
+/**
+ * @param $date
+ * @return DateTime
+ */
+function mailchimp_date_local($date) {
+    $timezone = mailchimp_get_option('store_timezone', 'America/New_York');
+    $date = new \DateTime($date, new DateTimeZone('UTC'));
+    $date->setTimezone(new DateTimeZone($timezone));
+    return $date;
+}
+
+/**
  * @param array $data
  * @return mixed
  */

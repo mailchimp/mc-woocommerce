@@ -57,7 +57,7 @@ class MailChimp_WooCommerce_Transform_Products
         $product->setHandle($post->post_name);
         $product->setImageUrl(get_the_post_thumbnail_url($post));
         $product->setDescription($post->post_content);
-        $product->setPublishedAtForeign(new \DateTime($post->post_date));
+        $product->setPublishedAtForeign(mailchimp_date_utc($post->post_date));
         $product->setTitle($woo->get_title());
         $product->setUrl($woo->get_permalink());
 

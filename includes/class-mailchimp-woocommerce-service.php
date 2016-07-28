@@ -79,6 +79,19 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
 
         if (($user_email = $this->getCurrentUserEmail())) {
 
+            $previous = $this->getPreviousEmailFromSession();
+
+            if (!empty($previous) && $previous !== $user_email) {
+
+                if (!empty($this->unique_id) || ($this->unique_id = $this->cookie('mailchimp_session_id', false))) {
+                    $this->api()->deleteCartByID($this->getUniqueStoreID(), $this->unique_id);
+                }
+
+                $this->unique_id = uniqid('mailchimp_');
+                @setcookie('mailchimp_session_id', $this->unique_id, $this->getCookieDuration(), '/');
+
+            }
+
             // if we don't have a session id, we need to create one
             if (empty($this->unique_id) && !($this->unique_id = $this->cookie('mailchimp_session_id', false))) {
                 $this->unique_id = uniqid('mailchimp_');
@@ -90,8 +103,6 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
 
             // fire up the job handler
             $handler = new MailChimp_WooCommerce_Cart_Update($this->unique_id, $user_email, $campaign, $this->getCartItems());
-
-            // queue it up to happen
             wp_queue($handler);
         }
 
@@ -158,6 +169,14 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     }
 
     /**
+     * @return bool
+     */
+    protected function getPreviousEmailFromSession()
+    {
+        return $this->cookie('mailchimp_user_previous_email', false);
+    }
+
+    /**
      * @param $key
      * @param null $default
      * @return mixed|null
@@ -202,11 +221,6 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
         );
 
         if (($action = $this->get('action'))) {
-
-            if ($action === 'get_ip') {
-                $this->getIPAddress();
-                return;
-            }
 
             if ($action === 'sync') {
                 return $this->startSync();
@@ -279,7 +293,6 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
                 'success' => true,
                 'email' => $this->getCurrentUserEmail(),
                 'previous' => $current_email,
-                'has_ac' => $this->hasOption('abandoned-cart'),
                 're_submitting' => $repost,
             );
         }

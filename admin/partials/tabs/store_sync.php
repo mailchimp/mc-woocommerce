@@ -8,14 +8,14 @@ $handler = MailChimp_Woocommerce_Admin::connect();
 //}
 
 if (($sync_started_at = $this->getData('sync.started_at', false))) {
-    $date = new DateTime(date("c", $sync_started_at));
+    $date = mailchimp_date_local(date("c", $sync_started_at));
     $sync_started_at = $date->format('D, M j, Y g:i A');
 } else {
     $sync_started_at = 'N/A';
 }
 
 if (($sync_complete_at = $this->getData('sync.completed_at', false))) {
-    $date = new DateTime(date("c", $sync_complete_at));
+    $date = mailchimp_date_local(date("c", $sync_complete_at));
     $sync_complete_at = $date->format('D, M j, Y g:i A');
 } else {
     $sync_complete_at = $sync_started_at !== 'N/A' ? 'In Progress' : 'N/A';

@@ -20,7 +20,6 @@ if (empty($mailchimp_lists) && !$handler->hasValidCampaignDefaults()) {
 }
 
 $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mailchimp_list'])) && array_key_exists($options['mailchimp_list'], $mailchimp_lists);
-
 ?>
 
 <?php if(($newsletter_settings_error = $this->getData('errors.mailchimp_list', false))) : ?>
@@ -38,7 +37,15 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-mailchimp-list-label">
         <select name="<?php echo $this->plugin_name; ?>[mailchimp_list]]" style="width:30%" required <?php if($list_is_configured): ?> disabled <?php endif; ?>>
+
+            <?php if(!isset($allow_new_list) || $allow_new_list === true): ?>
             <option value="create_new">Create New List</option>
+            <?php endif ?>
+
+            <?php if(isset($allow_new_list) && $allow_new_list === false): ?>
+                <option value="">-- Select List --</option>
+            <?php endif; ?>
+
             <?php
             if (is_array($mailchimp_lists)) {
                 foreach ($mailchimp_lists as $key => $value ) {

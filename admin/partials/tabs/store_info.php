@@ -24,6 +24,16 @@ if (!$handler->hasValidApiKey()) {
 
 <fieldset>
     <legend class="screen-reader-text">
+        <span>Admin Email</span>
+    </legend>
+    <label for="<?php echo $this->plugin_name; ?>-admin-email-label">
+        <input style="width: 30%;" type="email" id="<?php echo $this->plugin_name; ?>-admin-email-label" name="<?php echo $this->plugin_name; ?>[admin_email]" value="<?php echo isset($options['admin_email']) ? $options['admin_email'] : get_option('admin_email') ?>" />
+        <span><?php esc_attr_e('Email notifications for subscriber activity', $this->plugin_name); ?></span>
+    </label>
+</fieldset>
+
+<fieldset>
+    <legend class="screen-reader-text">
         <span>Street Address</span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-address-label">

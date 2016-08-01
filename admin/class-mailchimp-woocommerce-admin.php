@@ -244,6 +244,10 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 			'store_locale' => isset($input['store_locale']) ? $input['store_locale'] : false,
 			'store_timezone' => isset($input['store_timezone']) ? $input['store_timezone'] : false,
 			'store_currency_code' => isset($input['store_currency_code']) ? $input['store_currency_code'] : false,
+
+			'notify_on_subscribe' => isset($input['admin_email']) && is_email($input['admin_email']) ? $input['admin_email'] : $this->getOption('admin_email', false),
+			'notify_on_unsubscribe' => isset($input['admin_email']) && is_email($input['admin_email']) ? $input['admin_email'] : $this->getOption('admin_email', false),
+
 		);
 
 		if (!$this->hasValidStoreInfo($data)) {
@@ -301,8 +305,6 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 		$data = array(
 			'mailchimp_list' => isset($input['mailchimp_list']) ? $input['mailchimp_list'] : $this->getOption('mailchimp_list', ''),
 			'newsletter_label' => isset($input['newsletter_label']) ? $input['newsletter_label'] : $this->getOption('newsletter_label', 'Subscribe to our newsletter'),
-			'notify_on_subscribe' => isset($input['notify_on_subscribe']) && is_email($input['notify_on_subscribe']) ? $input['notify_on_subscribe'] : $this->getOption('notify_on_subscribe', false),
-			'notify_on_unsubscribe' => isset($input['notify_on_unsubscribe']) && is_email($input['notify_on_unsubscribe']) ? $input['notify_on_unsubscribe'] : $this->getOption('notify_on_unsubscribe', false),
 		);
 
 		if ($data['mailchimp_list'] === 'create_new') {
@@ -433,116 +435,6 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 		return true;
 	}
 
-    /**
-     * @param $action
-     */
-    public function job($action)
-    {
-        switch ($action) {
-            case 'lists';
-                try {
-                    print_r(array('getting_lists' => $this->api()->getLists(true)));die();
-                } catch (\Exception $e) {
-                    print $e->getMessage(); die();
-                }
-                break;
-
-            case 'list_delete';
-                try {
-                    $list_id = isset($_GET['list_id']) ? $_GET['list_id'] : null;
-                    print_r(array('deleting_list_by_id' => $this->api()->deleteList($list_id)));die();
-                } catch (\Exception $e) {
-                    print $e->getMessage(); die();
-                }
-                break;
-
-            case 'stores_list';
-                try {
-                    print_r(array('getting_lists' => $this->api()->stores()));die();
-                } catch (\Exception $e) {
-                    print $e->getMessage(); die();
-                }
-                break;
-
-            case 'store_get';
-
-                try {
-                    print_r(array('getting_store_by_id' => $this->api()->getStore($this->getUniqueStoreID())));die();
-                } catch (\Exception $e) {
-                    print $e->getMessage(); die();
-                }
-                break;
-
-            case 'stores_delete':
-                try {
-                    print_r(array('deleting_store' => $this->api()->deleteStore($this->getUniqueStoreID())));die();
-                } catch (\Exception $e) {
-                    print $e->getMessage(); die();
-                }
-                break;
-
-            case 'submit_order' :
-
-                $order_id = isset($_GET['order_id']) ? $_GET['order_id'] : null;
-                if (!empty($order_id)) {
-                    $job = new MailChimp_WooCommerce_Single_Order($order_id);
-                    print_r(array('submitting_single_order' => $job->handle()));die();
-                }
-
-                break;
-
-            case 'delete_order' :
-
-                $order_id = isset($_GET['order_id']) ? $_GET['order_id'] : null;
-                if (!empty($order_id)) {
-                    $response = $this->api()->deleteStoreOrder($this->getUniqueStoreID(), $order_id);
-                    print_r(array('deleting_order' => array('handled delete store order' => $response)));die();
-                }
-
-                break;
-
-            case 'stores_orders':
-                $paging_limit = isset($_GET['limit']) ? $_GET['limit'] : 10;
-                $paging_page = isset($_GET['page']) ? $_GET['page'] : 1;
-                print_r(array('getting_store_orders' => $this->api()->orders($this->getUniqueStoreID(), $paging_page, $paging_limit)));die();
-                break;
-
-            case 'stores_products':
-                $paging_limit = isset($_GET['limit']) ? $_GET['limit'] : 10;
-                $paging_page = isset($_GET['page']) ? $_GET['page'] : 1;
-                print_r(array('getting_store_products' => $this->api()->products($this->getUniqueStoreID(), $paging_page, $paging_limit)));die();
-                break;
-
-            case 'stores_carts':
-                $paging_limit = isset($_GET['limit']) ? $_GET['limit'] : 10;
-                $paging_page = isset($_GET['page']) ? $_GET['page'] : 1;
-                print_r(array('getting_store_carts' => $this->api()->carts($this->getUniqueStoreID(), $paging_page, $paging_limit)));die();
-                break;
-
-            case 'delete_cart':
-                $cart_id = isset($_GET['cart_id']) ? $_GET['cart_id'] : null;
-                print_r(array('deleting_cart_by_id' => $this->api()->deleteCartByID($this->getUniqueStoreID(), $cart_id)));die();
-                break;
-
-            case 'test_queue':
-
-                $this->removeData('sync.completed_at');
-                $this->removeData('sync.orders.completed_at');
-                $this->removeData('sync.orders.current_page');
-
-                $job = new MailChimp_WooCommerce_Process_Products();
-                $job->flagStartSync();
-
-                //$job = new MailChimp_WooCommerce_Process_Orders();
-                //$job->go();
-
-                wp_queue($job);
-                print 'submitted store sync'; die();
-
-                break;
-        }
-    }
-
 	/**
 	 * @param null|array $data
 	 * @return bool|string
@@ -584,12 +476,9 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 		// set the permission reminder message.
 		$submission->setPermissionReminder($data['campaign_permission_reminder']);
 
-		if (isset($data['notify_on_subscribe']) && !empty($data['notify_on_subscribe'])) {
-			$submission->setNotifyOnSubscribe($data['notify_on_subscribe']);
-		}
-
-		if (isset($data['notify_on_unsubscribe']) && !empty($data['notify_on_unsubscribe'])) {
-			$submission->setNotifyOnUnSubscribe($data['notify_on_unsubscribe']);
+		if (isset($data['admin_email']) && !empty($data['admin_email'])) {
+			$submission->setNotifyOnSubscribe($data['admin_email']);
+			$submission->setNotifyOnUnSubscribe($data['admin_email']);
 		}
 
 		$submission->setContact($this->address($data));

@@ -68,22 +68,3 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
     </label>
 </fieldset>
 
-<fieldset>
-    <legend class="screen-reader-text">
-        <span>Notification On Subscribe</span>
-    </legend>
-    <label for="<?php echo $this->plugin_name; ?>-notify-subscribe-label">
-        <input style="width: 30%;" type="email" id="<?php echo $this->plugin_name; ?>-notify-subscribe-label" name="<?php echo $this->plugin_name; ?>[notify_on_subscribe]" value="<?php echo isset($options['notify_on_subscribe']) ? $options['notify_on_subscribe'] : '' ?>" />
-        <span><?php esc_attr_e('Email notification for new subscribers', $this->plugin_name); ?></span>
-    </label>
-</fieldset>
-
-<fieldset>
-    <legend class="screen-reader-text">
-        <span>Notification On Un-Subscribe</span>
-    </legend>
-    <label for="<?php echo $this->plugin_name; ?>-notify-unsubscribe-label">
-        <input style="width: 30%;" type="email" id="<?php echo $this->plugin_name; ?>-notify-unsubscribe-label" name="<?php echo $this->plugin_name; ?>[notify_on_unsubscribe]" value="<?php echo isset($options['notify_on_unsubscribe']) ? $options['notify_on_unsubscribe'] : '' ?>" />
-        <span><?php esc_attr_e('Email notification for unsubscribes', $this->plugin_name); ?></span>
-    </label>
-</fieldset>

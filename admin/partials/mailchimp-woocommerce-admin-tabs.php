@@ -1,13 +1,7 @@
 <?php
 $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'api_key';
 
-$active_job = isset($_GET['job']) ? $_GET['job'] : null;
-
 $handler = MailChimp_Woocommerce_Admin::connect();
-
-if ($active_job !== null) {
-    $handler->job($active_job);
-}
 
 //Grab all options for this particular tab we're viewing.
 $options = get_option($this->plugin_name, array());
@@ -86,6 +80,10 @@ if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
         <?php endif; ?>
 
         <?php if ($active_tab !== 'sync') submit_button('Save all changes', 'primary','submit', TRUE); ?>
+
+        <?php if($show_sync_tab && isset($_GET['show_sync']) && $_GET['show_sync'] === '1'): ?>
+            <p><a style="float:left;" class="btn" href="/?mailchimp_woocommerce[action]=sync">Re-Sync</a></p>
+        <?php endif; ?>
 
     </form>
 

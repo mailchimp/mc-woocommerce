@@ -16,7 +16,7 @@
  * Plugin Name:       MailChimp WooCommerce
  * Plugin URI:        https://mailchimp.com
  * Description:       MailChimp - WooCommerce plugin
- * Version:           1.0.4
+ * Version:           1.0.0
  * Author:            Ryan Hungate
  * Author URI:        https://mailchimp.com
  * License:           GPL-2.0+
@@ -37,7 +37,7 @@ function mailchimp_environment_variables() {
 	return (object) array(
 		'repo' => 'staging',
 		'environment' => 'staging',
-		'version' => '1.0.4',
+		'version' => '1.0.0',
 	);
 }
 
@@ -170,6 +170,19 @@ function deactivate_mailchimp_woocommerce() {
 	MailChimp_Woocommerce_Deactivator::deactivate();
 }
 
+/**
+ * See if we need to run any updates.
+ */
+function run_mailchimp_plugin_updater() {
+	if (!class_exists('PucFactory')) {
+		require plugin_dir_path( __FILE__ ) . 'includes/plugin-update-checker/plugin-update-checker.php';
+	}
+
+	$updater = PucFactory::getLatestClassVersion('PucGitHubChecker');
+	$checker = new $updater('https://github.com/mailchimp/mc-woocommerce/', __FILE__, 'master', 1);
+	$checker->handleManualCheck();
+}
+
 register_activation_hook( __FILE__, 'activate_mailchimp_woocommerce' );
 register_deactivation_hook( __FILE__, 'deactivate_mailchimp_woocommerce' );
 
@@ -198,6 +211,9 @@ if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
 	$forwarded_address = explode(',',$_SERVER['HTTP_X_FORWARDED_FOR']);
 	$_SERVER['REMOTE_ADDR'] = $forwarded_address[0];
 }
+
+/** Add the plugin updater function ONLY when they are logged in as admin. */
+//add_action('admin_init', 'run_vextras_plugin_updater');
 
 /** Add all the MailChimp hooks. */
 run_mailchimp_woocommerce();

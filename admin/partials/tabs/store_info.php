@@ -10,7 +10,7 @@ if (!$handler->hasValidApiKey()) {
 ?>
 
 <h2 style="padding-top: 1em;">Store Settings</h2>
-<p>Please fill out the store information so we can provide you better merge variables in your marketing emails.</p>
+<p>Please provide the following information about your WooCommerce store.</p>
 
 <fieldset>
     <legend class="screen-reader-text">
@@ -24,7 +24,7 @@ if (!$handler->hasValidApiKey()) {
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span>Admin Email</span>
+        <span>Email</span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-admin-email-label">
         <input style="width: 30%;" type="email" id="<?php echo $this->plugin_name; ?>-admin-email-label" name="<?php echo $this->plugin_name; ?>[admin_email]" value="<?php echo isset($options['admin_email']) ? $options['admin_email'] : get_option('admin_email') ?>" />

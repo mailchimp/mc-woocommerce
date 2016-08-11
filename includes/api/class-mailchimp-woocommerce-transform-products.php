@@ -65,11 +65,15 @@ class MailChimp_WooCommerce_Transform_Products
 
             $product_variant = $this->variant($is_variant, $variant);
 
-            if (empty($product_variant->getTitle())) {
+            $product_variant_title = $product_variant->getTitle();
+
+            if (empty($product_variant_title)) {
                 $product_variant->setTitle($woo->get_title());
             }
 
-            if (empty($product_variant->getImageUrl())) {
+            $product_variant_image = $product_variant->getImageUrl();
+
+            if (empty($product_variant_image)) {
                 $product_variant->setImageUrl($product->getImageUrl());
             }
 

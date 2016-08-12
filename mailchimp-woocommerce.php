@@ -38,6 +38,8 @@ function mailchimp_environment_variables() {
 		'repo' => 'staging',
 		'environment' => 'staging',
 		'version' => '1.0.0',
+		'slack_token' => false,
+		'slack_channel' => false,
 	);
 }
 
@@ -181,6 +183,14 @@ function run_mailchimp_plugin_updater() {
 	$updater = PucFactory::getLatestClassVersion('PucGitHubChecker');
 	$checker = new $updater('https://github.com/mailchimp/mc-woocommerce/', __FILE__, 'master', 1);
 	$checker->handleManualCheck();
+}
+
+/**
+ * @return \Frlnc\Slack\Logger
+ */
+function slack()
+{
+	return Frlnc\Slack\Logger::instance();
 }
 
 register_activation_hook( __FILE__, 'activate_mailchimp_woocommerce' );

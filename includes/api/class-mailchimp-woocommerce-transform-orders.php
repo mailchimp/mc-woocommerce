@@ -103,7 +103,7 @@ class MailChimp_WooCommerce_Transform_Orders
     {
         $customer = new MailChimp_Customer();
 
-        $customer->setId($order->customer_user);
+        $customer->setId(md5($order->billing_email));
         $customer->setCompany($order->billing_company);
         $customer->setEmailAddress($order->billing_email);
         $customer->setFirstName($order->billing_first_name);
@@ -132,10 +132,22 @@ class MailChimp_WooCommerce_Transform_Orders
 
         if (($user = get_userdata($order->customer_user))) {
 
+            /** IF we wanted to use the user data instead we would do it here.
+             * but we discussed using the billing address instead.
+             */
+
+            /*
             $customer->setId($user->ID);
             $customer->setEmailAddress($user->user_email);
             $customer->setFirstName($user->first_name);
             $customer->setLastName($user->last_name);
+
+            if (($address = $this->getUserAddress($user->ID))) {
+                if (count($address->toArray()) > 3) {
+                    $customer->setAddress($address);
+                }
+            }
+            */
 
             if (!$subscribed_on_order) {
 
@@ -152,12 +164,6 @@ class MailChimp_WooCommerce_Transform_Orders
 
             $customer->setOrdersCount($stats->count);
             $customer->setTotalSpent($stats->total);
-
-            if (($address = $this->getUserAddress($user->ID))) {
-                if (count($address->toArray()) > 3) {
-                    $customer->setAddress($address);
-                }
-            }
         }
 
         return $customer;

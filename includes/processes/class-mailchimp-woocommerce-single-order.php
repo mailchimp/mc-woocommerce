@@ -57,9 +57,46 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
             // will either add or update the order
             try {
-                $api->$call($store_id, ($order = $job->transform(get_post($this->order_id))));
+
+                // transform the order
+                $order = $order = $job->transform(get_post($this->order_id));
+
+                // update or create
+                $api->$call($store_id, $order);
+
+                slack()->notice('MailChimp_WooCommerce_Single_Order :: order #'.$this->order_id.' :: '.$call.' COMPLETED');
+
             } catch (\Exception $e) {
-                error_log('MailChimp::processSingleOrder :: #'.$this->order_id.' :: '.$e->getMessage());
+                $message = strtolower($e->getMessage());
+
+                slack()->notice('MailChimp_WooCommerce_Single_Order :: order #'.$this->order_id.' :: '.$call.' :: '.$message);
+
+                if (!isset($order)) {
+                    // transform the order
+                    $order = $job->transform(get_post($this->order_id));
+                }
+
+                // this can happen when a customer changes their email.
+                if (isset($order) && strpos($message, 'not be changed')) {
+
+                    try {
+
+                        // delete the customer before adding it again.
+                        $api->deleteCustomer($store_id, $order->getCustomer()->getId());
+
+                        // update or create
+                        $api->$call($order);
+
+                        slack()->notice('MailChimp_WooCommerce_Single_Order :: after-deleted-customer #'.$order->getCustomer()->getId().':: order #'.$this->order_id.' :: '.$call);
+
+                    } catch (\Exception $e) {
+                        slack()->notice('MailChimp_WooCommerce_Single_Order :: deleting-customer-re-add :: #'.$this->order_id.' :: '.$message);
+
+                        error_log('MailChimp_WooCommerce_Single_Order :: deleting-customer-re-add :: #'.$this->order_id.' :: '.$message);
+                    }
+                } else {
+                    slack()->notice('MailChimp_WooCommerce_Single_Order :: failure #'.$order->getCustomer()->getId().':: order #'.$this->order_id.' :: '.$call.' :: '.$message);
+                }
             }
 
             // if we're adding a new order and the session id is here, we need to delete the AC cart record.

@@ -32,7 +32,7 @@ class Logger
         if (empty(static::$instance)) {
             $vars = mailchimp_environment_variables();
             static::$instance = new Logger(
-                isset($vars->slack_token) ? $vars->slack_token : null,
+                (isset($vars->slack_token) ? $vars->slack_token : null),
                 (isset($vars->slack_channel) ? $vars->slack_channel : null)
             );
         }
@@ -46,7 +46,7 @@ class Logger
      */
     public function __construct($api_token = null, $channel = null)
     {
-        if ($api_token && $this->channel) {
+        if ($api_token && $channel) {
             $this->setup($api_token, $channel);
         }
     }

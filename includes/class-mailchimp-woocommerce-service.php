@@ -217,6 +217,8 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
         $methods = array(
             'plugin-version' => 'respondAdminGetPluginVersion',
             'submit-email' => 'respondAdminSubmitEmail',
+            'track-campaign' => 'respondAdminTrackCampaign',
+            'get-tracking-data' => 'respondAdminGetTrackingData',
             'verify' => 'respondAdminVerify',
         );
 
@@ -227,7 +229,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
             }
 
             if (array_key_exists($action, $methods)) {
-                if (!in_array($action, array('submit-email'))) {
+                if (!in_array($action, array('submit-email', 'track-campaign', 'get-tracking-data'))) {
                     $this->authenticate();
                 }
                 $this->respondJSON($this->{$methods[$action]}());
@@ -307,6 +309,40 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
             );
         }
         return array('success' => false);
+    }
+
+    /**
+     * @return array
+     */
+    protected function respondAdminTrackCampaign()
+    {
+        $submission = $this->get('submission');
+
+        if (is_array($submission) && isset($submission['campaign_id'])) {
+
+            $duration = $this->getCookieDuration();
+
+            $campaign_id = trim($submission['campaign_id']);
+            $email_id = trim($submission['email_id']);
+
+            @setcookie('mailchimp_campaign_id', $campaign_id, $duration, '/');
+            @setcookie('mailchimp_email_id', $email_id, $duration, '/');
+
+            return $this->respondAdminGetTrackingData();
+        }
+        return array('success' => false);
+    }
+
+    /**
+     * @return array
+     */
+    protected function respondAdminGetTrackingData()
+    {
+        return array(
+            'success' => true,
+            'campaign_id' => $this->cookie('mailchimp_campaign_id', 'n/a'),
+            'email_id' => $this->cookie('mailchimp_email_id', 'n/a')
+        );
     }
 
     /**

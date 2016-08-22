@@ -255,7 +255,6 @@ class MailChimp_Woocommerce {
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
-
 	}
 
 	/**
@@ -300,7 +299,7 @@ class MailChimp_Woocommerce {
 			$this->loader->add_filter('http_request_args', $service, 'addHttpRequestArgs', 10, 2);
 
 			// campaign tracking
-			$this->loader->add_action( 'init', $service, 'handleCampaignTracking' );
+			//$this->loader->add_action( 'init', $service, 'handleCampaignTracking' );
 
 			// order hooks
 			$this->loader->add_action('woocommerce_api_create_order', $service, 'handleOrderStatusChanged');

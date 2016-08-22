@@ -282,4 +282,28 @@ var mailchimp_cart;
 
 	mailchimp_cart = new MailChimpCart();
 
+	var qsc = mailchimpUtils.getQueryStringVars();
+
+	// MailChimp Data //
+	if (qsc.mc_cid !== undefined && qsc.mc_eid !== undefined) {
+		$.ajax({
+			beforeSend: function (xhrObj) {
+				xhrObj.setRequestHeader("Content-Type", "application/json");
+				xhrObj.setRequestHeader("Accept", "application/json");
+			},
+			crossDomain: true,
+			dataType: "json",
+			type: 'POST',
+			url: document.location.origin+'?mailchimp-woocommerce[action]=track-campaign&mailchimp-woocommerce[submission][campaign_id]='+qsc.mc_cid[0]+'&mailchimp-woocommerce[submission][email_id]='+qsc.mc_eid[0],
+			data: {},
+			success: function (responseData, textStatus, jqXHR) {
+				console.log('campaign data saved', responseData);
+			},
+			error: function (responseData, textStatus, errorThrown) {
+				mailchimp_cart.post_error = errorThrown;
+				console.log('error while saving campaign data', responseData);
+			}
+		});
+	}
+
 })( jQuery );

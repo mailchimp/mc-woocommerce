@@ -149,15 +149,6 @@ class MailChimp_WooCommerce_Transform_Orders
             }
             */
 
-            if (!$subscribed_on_order) {
-
-                // we are saving the post meta for subscribers on each order... so if they have subscribed on checkout
-                $subscriber_meta = get_user_meta($user->ID, 'mailchimp_woocommerce_is_subscribed', true);
-                $subscribed_on_order = $subscriber_meta === '' ? true : (bool) $subscriber_meta;
-
-                $customer->setOptInStatus($subscribed_on_order);
-            }
-
             if (!($stats = $this->getCustomerOrderTotals($order->customer_user))) {
                 $stats = (object) array('count' => 0, 'total' => 0);
             }

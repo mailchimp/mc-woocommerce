@@ -17,7 +17,7 @@ if (!$handler->hasValidStoreInfo()) {
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span>From Name</span>
+        <span>Contact Name</span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-campaign-from-name-label">
         <input style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-campaign-from-name-label" name="<?php echo $this->plugin_name; ?>[campaign_from_name]" value="<?php echo isset($options['campaign_from_name']) ? $options['campaign_from_name'] : '' ?>" />

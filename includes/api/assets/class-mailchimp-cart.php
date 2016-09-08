@@ -250,7 +250,7 @@ class MailChimp_Cart
     public function fromArray(array $data)
     {
         $singles = [
-            'id', 'campaign_id', 'checkout_url',
+            'store_id', 'id', 'campaign_id', 'checkout_url',
             'currency_code', 'order_total', 'tax_total',
         ];
 

@@ -14,7 +14,7 @@ if (!$handler->hasValidApiKey()) {
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span>Name</span>
+        <span>Store Name</span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-name-label">
         <input style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-name-label" name="<?php echo $this->plugin_name; ?>[store_name]" value="<?php echo isset($options['store_name']) ? $options['store_name'] : get_option('blogname') ?>" />

@@ -33,7 +33,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span>MailChimp List</span>
+        <span>List Name</span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-mailchimp-list-label">
         <select name="<?php echo $this->plugin_name; ?>[mailchimp_list]]" style="width:30%" required <?php if($list_is_configured): ?> disabled <?php endif; ?>>

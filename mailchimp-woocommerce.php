@@ -35,8 +35,8 @@ if ( ! defined( 'WPINC' ) ) {
  */
 function mailchimp_environment_variables() {
 	return (object) array(
-		'repo' => 'staging',
-		'environment' => 'staging',
+		'repo' => 'master',
+		'environment' => 'production',
 		'version' => '1.0.0',
 		'slack_token' => false,
 		'slack_channel' => false,

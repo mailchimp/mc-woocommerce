@@ -73,6 +73,7 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
 
                 // if they emptied the cart ignore it.
                 if (empty($this->cart_data)) {
+                    slack()->notice('Cart Data Empty :: '.$this->email);
                     if ($this->show_trace) {
                         return 'no cart data';
                     }
@@ -116,7 +117,9 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
                 //$call = $api->getCart($store_id, $this->unique_id) ? 'updateCart' : 'addCart';
 
                 // update or create the cart.
-                $response = $api->addCart($store_id, $cart);
+                if (($response = $api->addCart($store_id, $cart))) {
+                    slack()->notice('Cart Data Submitted :: '.$this->email.(print_r($response, true)));
+                }
 
                 if ($this->show_trace) {
                     return $response;
@@ -129,6 +132,7 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
             if ($this->show_trace) {
                 return 'Error :: '.$e->getMessage();
             }
+            slack()->notice("Abandoned Cart Error :: {$e->getMessage()} on {$e->getLine()} in {$e->getFile()}");
         }
 
         if ($this->show_trace) {

@@ -11,6 +11,7 @@
 class MailChimp_Service extends MailChimp_Woocommerce_Options
 {
     protected $user_email = null;
+    protected $previous_email = null;
     protected $force_cart_post = false;
     protected $pushed_orders = array();
     protected $unique_id = null;
@@ -74,10 +75,11 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     public function handleCartUpdated()
     {
         if (is_admin() || $this->is_admin || !$this->hasOption('mailchimp_api_key')) {
+            slack()->notice('Abandoned Cart Halted');
             return false;
         }
 
-        if (($user_email = $this->getCurrentUserEmail())) {
+        if ($this->force_cart_post && ($user_email = $this->getCurrentUserEmail())) {
 
             $previous = $this->getPreviousEmailFromSession();
 
@@ -104,6 +106,10 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
             // fire up the job handler
             $handler = new MailChimp_WooCommerce_Cart_Update($this->unique_id, $user_email, $campaign, $this->getCartItems());
             wp_queue($handler);
+
+            slack()->notice('Abandoned Cart Queued :: '.$user_email);
+
+            return true;
         }
 
         return false;
@@ -173,6 +179,9 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     protected function getPreviousEmailFromSession()
     {
+        if ($this->previous_email) {
+            return $this->previous_email;
+        }
         return $this->cookie('mailchimp_user_previous_email', false);
     }
 
@@ -292,6 +301,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
             $this->user_email = trim($submission['email']);
 
             if (($current_email = $this->getEmailFromSession()) && $current_email !== $this->user_email) {
+                $this->previous_email = $current_email;
                 $this->force_cart_post = true;
                 @setcookie('mailchimp_user_previous_email',$this->user_email, $this->getCookieDuration(), '/' );
             }

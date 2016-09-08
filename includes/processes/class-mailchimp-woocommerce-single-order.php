@@ -64,7 +64,13 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                 // update or create
                 $api->$call($store_id, $order);
 
-                slack()->notice('MailChimp_WooCommerce_Single_Order :: order #'.$this->order_id.' :: '.$call.' COMPLETED');
+                $message = 'MailChimp_WooCommerce_Single_Order :: order #'.$this->order_id.' :: '.$call.' COMPLETED';
+
+                if (!empty($job->campaign_id)) {
+                    $message .= ' :: campaign id '.$job->campaign_id;
+                }
+
+                slack()->notice($message);
 
             } catch (\Exception $e) {
                 $message = strtolower($e->getMessage());

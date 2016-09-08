@@ -184,7 +184,7 @@ class MailChimp_WooCommerce_Transform_Orders
 
                 switch ($meta_key) {
 
-                    case '_line_total':
+                    case '_line_subtotal':
                         $item->setPrice($meta_data_array[0]);
                         break;
 
@@ -198,6 +198,41 @@ class MailChimp_WooCommerce_Transform_Orders
 
                     case '_qty':
                         $item->setQuantity($meta_data_array[0]);
+                        break;
+
+                }
+            }
+
+            if ($item->getProductVariantId() <= 0) {
+                $item->setProductVariantId($item->getProductId());
+            }
+
+        } elseif (isset($order_detail['item_meta_array']) && is_array($order_detail['item_meta_array'])) {
+
+            /// Some users have the newer version of the item meta.
+
+            foreach ($order_detail['item_meta_array'] as $meta_id => $object) {
+
+                if (!isset($object->key)) {
+                    continue;
+                }
+
+                switch ($object->key) {
+
+                    case '_line_subtotal':
+                        $item->setPrice($object->value);
+                        break;
+
+                    case '_product_id':
+                        $item->setProductId($object->value);
+                        break;
+
+                    case '_variation_id':
+                        $item->setProductVariantId($object->value);
+                        break;
+
+                    case '_qty':
+                        $item->setQuantity($object->value);
                         break;
 
                 }

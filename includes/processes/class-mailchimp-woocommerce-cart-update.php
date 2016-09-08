@@ -58,7 +58,7 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
                 $this->cart_data = json_decode($this->cart_data, true);
 
                 if (!is_array($this->cart_data)) {
-                    error_log('MailChimp::abandonedCart :: Cart data was not set properly.');
+                    slack()->notice('MailChimp::abandonedCart :: Cart data was not set properly.');
                     if ($this->show_trace) {
                         return 'MailChimp::abandonedCart :: Cart data was not set properly.';
                     }

@@ -75,7 +75,6 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     public function handleCartUpdated()
     {
         if (is_admin() || $this->is_admin || !$this->hasOption('mailchimp_api_key')) {
-            slack()->notice('Abandoned Cart Halted');
             return false;
         }
 

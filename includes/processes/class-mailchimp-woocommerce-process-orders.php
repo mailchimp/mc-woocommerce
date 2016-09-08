@@ -38,7 +38,7 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abtstra
                 $response = $this->mailchimp()->$call($this->store_id, $item);
                 $this->items[] = array('response' => $response, 'item' => $item);
             } catch (\Exception $e) {
-                error_log('MailChimp@ProcessOrders :: '.$call.' :: '.$e->getMessage());
+                slack()->notice('MailChimp@ProcessOrders :: '.$call.' :: '.$e->getMessage());
             }
         }
         return false;

@@ -85,7 +85,7 @@ class Logger
                 'text'    => $message
             ]);
         } catch (\Exception $e) {
-            error_log('SLACK LOGGER :: '.$e->getMessage());
+            slack()->notice('SLACK LOGGER :: '.$e->getMessage());
         }
 
         return $this;

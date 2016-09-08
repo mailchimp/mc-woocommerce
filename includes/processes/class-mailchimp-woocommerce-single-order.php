@@ -98,7 +98,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                     } catch (\Exception $e) {
                         slack()->notice('MailChimp_WooCommerce_Single_Order :: deleting-customer-re-add :: #'.$this->order_id.' :: '.$message);
 
-                        error_log('MailChimp_WooCommerce_Single_Order :: deleting-customer-re-add :: #'.$this->order_id.' :: '.$message);
+                        slack()->notice('MailChimp_WooCommerce_Single_Order :: deleting-customer-re-add :: #'.$this->order_id.' :: '.$message);
                     }
                 } else {
                     slack()->notice('MailChimp_WooCommerce_Single_Order :: failure #'.$order->getCustomer()->getId().':: order #'.$this->order_id.' :: '.$call.' :: '.$message);

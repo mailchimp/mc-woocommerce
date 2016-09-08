@@ -39,9 +39,9 @@ class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abtst
             try {
                 $this->mailchimp()->addStoreProduct($this->store_id, $item);
             } catch (MailChimp_Error $e) {
-                error_log('MailChimp_WooCommerce_Process_Products::iterate - '.$e->getMessage());
+                slack()->notice('MailChimp_WooCommerce_Process_Products::iterate - '.$e->getMessage());
             } catch (MailChimp_ServerError $e) {
-                error_log('MailChimp_WooCommerce_Process_Products::iterate - '.$e->getMessage());
+                slack()->notice('MailChimp_WooCommerce_Process_Products::iterate - '.$e->getMessage());
             }
         }
 

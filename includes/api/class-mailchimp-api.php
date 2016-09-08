@@ -500,7 +500,7 @@ class MailChimpApi
             $data = $this->post("/ecommerce/stores/$store_id/carts", $cart->toArray());
             return (new MailChimp_Cart)->fromArray($data);
         } catch (MailChimp_Error $e) {
-            error_log('MailChimpApi::addCart - '.$e->getMessage());
+            slack()->notice('MailChimpApi::addCart - '.$e->getMessage());
             return false;
         }
     }
@@ -516,7 +516,7 @@ class MailChimpApi
             $data = $this->patch("/ecommerce/stores/$store_id/carts/{$cart->getId()}", $cart->toArrayForUpdate());
             return (new MailChimp_Cart)->fromArray($data);
         } catch (MailChimp_Error $e) {
-            error_log('MailChimpApi::updateCart - '.$e->getMessage());
+            slack()->notice('MailChimpApi::updateCart - '.$e->getMessage());
             return false;
         }
     }
@@ -879,12 +879,12 @@ class MailChimpApi
         }
 
         if ($info['http_code'] >= 400 && $info['http_code'] <= 500) {
-            error_log('MailChimpApi::processCurlResponse - '.$data['title'] .' :: '.$data['detail']);
+            slack()->notice('MailChimpApi::processCurlResponse - '.$data['title'] .' :: '.$data['detail']);
             throw new MailChimp_Error($data['title'] .' :: '.$data['detail'], $data['status']);
         }
 
         if ($info['http_code'] >= 500) {
-            error_log('MailChimpApi::processCurlResponse - '.$data['detail']);
+            slack()->notice('MailChimpApi::processCurlResponse - '.$data['detail']);
             throw new MailChimp_ServerError($data['detail'], $data['status']);
         }
 
@@ -904,13 +904,13 @@ class MailChimpApi
             foreach ($data['errors'] as $error) {
                 $message .= '<p>'.$error['field'].': '.$error['message'].'</p>';
             }
-            error_log('MailChimpApi::checkForErrors - '.$message);
+            slack()->notice('MailChimpApi::checkForErrors - '.$message);
             throw new MailChimp_Error($message, $data['status']);
         }
 
         // make sure the response is correct from the data in the response array
         if (isset($data['status']) && $data['status'] >= 400) {
-            error_log('MailChimpApi::checkForErrors - '.$data['detail']);
+            slack()->notice('MailChimpApi::checkForErrors - '.$data['detail']);
             throw new MailChimp_Error($data['detail'], $data['status']);
         }
 

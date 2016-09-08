@@ -73,6 +73,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                 slack()->notice($message);
 
             } catch (\Exception $e) {
+
                 $message = strtolower($e->getMessage());
 
                 slack()->notice('MailChimp_WooCommerce_Single_Order :: order #'.$this->order_id.' :: '.$call.' :: '.$message);
@@ -93,15 +94,9 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                         // update or create
                         $api->$call($order);
 
-                        slack()->notice('MailChimp_WooCommerce_Single_Order :: after-deleted-customer #'.$order->getCustomer()->getId().':: order #'.$this->order_id.' :: '.$call);
-
                     } catch (\Exception $e) {
                         slack()->notice('MailChimp_WooCommerce_Single_Order :: deleting-customer-re-add :: #'.$this->order_id.' :: '.$message);
-
-                        slack()->notice('MailChimp_WooCommerce_Single_Order :: deleting-customer-re-add :: #'.$this->order_id.' :: '.$message);
                     }
-                } else {
-                    slack()->notice('MailChimp_WooCommerce_Single_Order :: failure #'.$order->getCustomer()->getId().':: order #'.$this->order_id.' :: '.$call.' :: '.$message);
                 }
             }
 

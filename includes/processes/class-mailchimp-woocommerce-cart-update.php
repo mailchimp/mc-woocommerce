@@ -16,7 +16,6 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
     public $campaign_id;
     public $cart_data;
     public $ip_address;
-    public $show_trace = false;
 
     /**
      * MailChimp_WooCommerce_Cart_Update constructor.
@@ -59,9 +58,6 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
 
                 if (!is_array($this->cart_data)) {
                     slack()->notice('MailChimp::abandonedCart :: Cart data was not set properly.');
-                    if ($this->show_trace) {
-                        return 'MailChimp::abandonedCart :: Cart data was not set properly.';
-                    }
                     return false;
                 }
 
@@ -74,9 +70,6 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
                 // if they emptied the cart ignore it.
                 if (empty($this->cart_data)) {
                     slack()->notice('Cart Data Empty :: '.$this->email);
-                    if ($this->show_trace) {
-                        return 'no cart data';
-                    }
                     return false;
                 }
 
@@ -121,23 +114,13 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
                     slack()->notice('Cart Data Submitted :: '.$this->email.(print_r($response, true)));
                 }
 
-                if ($this->show_trace) {
-                    return $response;
-                }
-
                 return false;
             }
         } catch (\Exception $e) {
             update_option('mailchimp-woocommerce-cart-error', $e->getMessage());
-            if ($this->show_trace) {
-                return 'Error :: '.$e->getMessage();
-            }
             slack()->notice("Abandoned Cart Error :: {$e->getMessage()} on {$e->getLine()} in {$e->getFile()}");
         }
 
-        if ($this->show_trace) {
-            return 'not submitted';
-        }
         return false;
     }
 }

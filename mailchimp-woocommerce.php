@@ -14,11 +14,11 @@
  *
  * @wordpress-plugin
  * Plugin Name:       MailChimp WooCommerce
- * Plugin URI:        https://mailchimp.com
+ * Plugin URI:        https://woocommerce.mailchimpapp.com
  * Description:       MailChimp - WooCommerce plugin
  * Version:           1.0.0
- * Author:            Ryan Hungate
- * Author URI:        https://mailchimp.com
+ * Author:            MailChimp
+ * Author URI:        https://woocommerce.mailchimpapp.com
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       mailchimp-woocommerce
@@ -35,8 +35,8 @@ if ( ! defined( 'WPINC' ) ) {
  */
 function mailchimp_environment_variables() {
 	return (object) array(
-		'repo' => 'master',
-		'environment' => 'production',
+		'repo' => 'staging',
+		'environment' => 'staging',
 		'version' => '1.0.0',
 		'slack_token' => false,
 		'slack_channel' => false,

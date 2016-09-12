@@ -15,6 +15,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     protected $force_cart_post = false;
     protected $pushed_orders = array();
     protected $unique_id = null;
+    protected $cart_was_submitted = false;
 
     /**
      * hook fired when we know everything is booted
@@ -74,11 +75,13 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function handleCartUpdated()
     {
-        if (is_admin() || $this->is_admin || !$this->hasOption('mailchimp_api_key')) {
+        if ($this->cart_was_submitted || is_admin() || $this->is_admin || !$this->hasOption('mailchimp_api_key')) {
             return false;
         }
 
-        if ($this->force_cart_post && ($user_email = $this->getCurrentUserEmail())) {
+        $this->cart_was_submitted = true;
+
+        if (($user_email = $this->getCurrentUserEmail())) {
 
             $previous = $this->getPreviousEmailFromSession();
 
@@ -134,7 +137,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function getCurrentUserEmail()
     {
-        if (isset($this->user_email)) {
+        if (isset($this->user_email) && !empty($this->user_email)) {
             return $this->user_email;
         }
 
@@ -147,6 +150,14 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function getCartItems() {
         return WC()->cart->get_cart();
+    }
+
+    /**
+     * @return int
+     */
+    public function getCartItemCount()
+    {
+        return WC()->cart->get_cart_contents_count();
     }
 
     /**
@@ -312,9 +323,11 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
 
             return array(
                 'success' => true,
+                'cart_item_count' => count($cart),
                 'email' => $this->getCurrentUserEmail(),
                 'previous' => $current_email,
                 're_submitting' => $repost,
+                'cart' => $cart,
             );
         }
         return array('success' => false);

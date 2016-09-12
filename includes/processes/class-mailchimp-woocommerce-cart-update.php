@@ -56,20 +56,13 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
 
                 $this->cart_data = json_decode($this->cart_data, true);
 
-                if (!is_array($this->cart_data)) {
-                    slack()->notice('MailChimp::abandonedCart :: Cart data was not set properly.');
-                    return false;
-                }
-
                 $api = new MailChimpApi($options['mailchimp_api_key']);
 
                 // delete it and the add it back.
-
-                $deleted = $api->deleteCartByID($store_id, $this->unique_id);
+                $api->deleteCartByID($store_id, $this->unique_id);
 
                 // if they emptied the cart ignore it.
-                if (empty($this->cart_data)) {
-                    slack()->notice('Cart Data Empty :: '.$this->email);
+                if (!is_array($this->cart_data) || empty($this->cart_data)) {
                     return false;
                 }
 
@@ -106,12 +99,9 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
 
                 $cart->setOrderTotal($order_total);
 
-                // need to get the cart by id to see if we 'update' or 'add'... super lame.
-                //$call = $api->getCart($store_id, $this->unique_id) ? 'updateCart' : 'addCart';
-
                 // update or create the cart.
                 if (($response = $api->addCart($store_id, $cart))) {
-                    slack()->notice('Cart Data Submitted :: '.$this->email.(print_r($response, true)));
+                    slack()->notice('Cart Data Submitted :: '.$this->email.' :: '."\n".(print_r($response->toArray(), true)));
                 }
 
                 return false;

@@ -14,7 +14,6 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     protected $previous_email = null;
     protected $force_cart_post = false;
     protected $pushed_orders = array();
-    protected $unique_id = null;
     protected $cart_was_submitted = false;
 
     /**
@@ -85,31 +84,20 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
 
             $previous = $this->getPreviousEmailFromSession();
 
+            $uid = md5(trim($user_email));
+
             if (!empty($previous) && $previous !== $user_email) {
-
-                if (!empty($this->unique_id) || ($this->unique_id = $this->cookie('mailchimp_session_id', false))) {
-                    $this->api()->deleteCartByID($this->getUniqueStoreID(), $this->unique_id);
-                }
-
-                $this->unique_id = uniqid('mailchimp_');
-                @setcookie('mailchimp_session_id', $this->unique_id, $this->getCookieDuration(), '/');
-
-            }
-
-            // if we don't have a session id, we need to create one
-            if (empty($this->unique_id) && !($this->unique_id = $this->cookie('mailchimp_session_id', false))) {
-                $this->unique_id = uniqid('mailchimp_');
-                @setcookie('mailchimp_session_id', $this->unique_id, $this->getCookieDuration(), '/');
+                $this->api()->deleteCartByID($this->getUniqueStoreID(), md5(trim($previous)));
             }
 
             // grab the cookie data that could play important roles in the submission
             $campaign = $this->cookie('mailchimp_campaign_id');
 
-            // fire up the job handler
-            $handler = new MailChimp_WooCommerce_Cart_Update($this->unique_id, $user_email, $campaign, $this->getCartItems());
-            wp_queue($handler);
+            slack()->notice('Abandoned Cart Queued :: '.$user_email.' :: ID ['.$uid.']');
 
-            slack()->notice('Abandoned Cart Queued :: '.$user_email);
+            // fire up the job handler
+            $handler = new MailChimp_WooCommerce_Cart_Update($uid, $user_email, $campaign, $this->getCartItems());
+            wp_queue($handler);
 
             return true;
         }
@@ -149,7 +137,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      * @return mixed
      */
     public function getCartItems() {
-        return WC()->cart->get_cart();
+        return WC()->cart->cart_contents;
     }
 
     /**

@@ -103,9 +103,9 @@ class MailChimp_WooCommerce_Transform_Orders
     {
         $customer = new MailChimp_Customer();
 
-        $customer->setId(md5($order->billing_email));
+        $customer->setId(md5(trim($order->billing_email)));
         $customer->setCompany($order->billing_company);
-        $customer->setEmailAddress($order->billing_email);
+        $customer->setEmailAddress(trim($order->billing_email));
         $customer->setFirstName($order->billing_first_name);
         $customer->setLastName($order->billing_last_name);
         $customer->setOrdersCount(1);

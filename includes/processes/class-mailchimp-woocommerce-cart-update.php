@@ -69,7 +69,7 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
                 $customer = new MailChimp_Customer();
                 $customer->setId($this->unique_id);
                 $customer->setEmailAddress($this->email);
-                $customer->setOptInStatus(true);
+                $customer->setOptInStatus(false);
 
                 $cart = new MailChimp_Cart();
                 $cart->setId($this->unique_id);

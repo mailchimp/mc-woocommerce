@@ -61,11 +61,10 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
             $this->pushed_orders[$order_id] = true;
 
             // see if we have a session id and a campaign id, also only do this when this user is not the admin.
-            $session_id = $this->cookie('mailchimp_session_id');
-            $campaign_id = $this->cookie('mailchimp_campaign_id');
+            $campaign_id = $this->getCampaignTrackingID();
 
             // queue up the single order to be processed.
-            $handler = new MailChimp_WooCommerce_Single_Order($order_id, $session_id, $campaign_id);
+            $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $campaign_id);
             wp_queue($handler);
         }
     }
@@ -101,7 +100,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
                 $this->cart_was_submitted = true;
 
                 // grab the cookie data that could play important roles in the submission
-                $campaign = $this->cookie('mailchimp_campaign_id');
+                $campaign = $this->getCampaignTrackingID();
 
                 // fire up the job handler
                 $handler = new MailChimp_WooCommerce_Cart_Update($uid, $user_email, $campaign, $this->cart);
@@ -168,13 +167,41 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
         $cookie_duration = $this->getCookieDuration();
 
         if (isset($_REQUEST['mc_cid'])) {
-            slack()->notice('Tracking MailChimp Campaign :: '.trim($_REQUEST['mc_cid']));
-            @setcookie('mailchimp_campaign_id', trim($_REQUEST['mc_cid']), $cookie_duration, '/' );
+            $this->setCampaignTrackingID($_REQUEST['mc_cid'], $cookie_duration);
         }
 
         if (isset($_REQUEST['mc_eid'])) {
             @setcookie('mailchimp_email_id', trim($_REQUEST['mc_eid']), $cookie_duration, '/' );
         }
+    }
+
+    /**
+     * @return mixed|null
+     */
+    public function getCampaignTrackingID()
+    {
+        $cookie = $this->cookie('mailchimp_campaign_id', false);
+        if (empty($cookie)) {
+            $cookie = $this->getWooSession('mailchimp_tracking_id', false);
+        }
+        return $cookie;
+    }
+
+    /**
+     * @param $id
+     * @param $cookie_duration
+     * @return $this
+     */
+    public function setCampaignTrackingID($id, $cookie_duration)
+    {
+        $cid = trim($id);
+
+        slack()->notice('Tracking MailChimp Campaign :: '.$cid);
+
+        @setcookie('mailchimp_campaign_id', $cid, $cookie_duration, '/' );
+        $this->setWooSession('mailchimp_campaign_id', $cid);
+
+        return $this;
     }
 
     /**

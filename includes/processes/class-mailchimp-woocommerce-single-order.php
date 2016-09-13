@@ -47,6 +47,9 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
             $job = new MailChimp_WooCommerce_Transform_Orders();
             $api = new MailChimpApi($options['mailchimp_api_key']);
 
+            // set the campaign ID
+            $job->campaign_id = $this->campaign_id;
+
             $call = $api->getStoreOrder($store_id, $this->order_id) ? 'updateStoreOrder' : 'addStoreOrder';
 
             // if we already pushed this order into the system, we need to unset it now just in case there
@@ -59,7 +62,10 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
             try {
 
                 // transform the order
-                $order = $order = $job->transform(get_post($this->order_id));
+                $order = $job->transform(get_post($this->order_id));
+
+                $this->cart_session_id = $order->getCustomer()->getId();
+
 
                 // update or create
                 $api->$call($store_id, $order);
@@ -81,6 +87,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                 if (!isset($order)) {
                     // transform the order
                     $order = $job->transform(get_post($this->order_id));
+                    $this->cart_session_id = $order->getCustomer()->getId();
                 }
 
                 // this can happen when a customer changes their email.

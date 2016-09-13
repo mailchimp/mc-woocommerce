@@ -245,9 +245,7 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 			'store_timezone' => isset($input['store_timezone']) ? $input['store_timezone'] : false,
 			'store_currency_code' => isset($input['store_currency_code']) ? $input['store_currency_code'] : false,
 
-			'notify_on_subscribe' => isset($input['admin_email']) && is_email($input['admin_email']) ? $input['admin_email'] : $this->getOption('admin_email', false),
-			'notify_on_unsubscribe' => isset($input['admin_email']) && is_email($input['admin_email']) ? $input['admin_email'] : $this->getOption('admin_email', false),
-
+			'admin_email' => isset($input['admin_email']) && is_email($input['admin_email']) ? $input['admin_email'] : $this->getOption('admin_email', false),
 		);
 
 		if (!$this->hasValidStoreInfo($data)) {

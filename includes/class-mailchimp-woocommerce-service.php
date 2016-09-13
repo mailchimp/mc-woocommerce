@@ -15,6 +15,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     protected $force_cart_post = false;
     protected $pushed_orders = array();
     protected $cart_was_submitted = false;
+    protected $cart = [];
 
     /**
      * hook fired when we know everything is booted
@@ -78,7 +79,9 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
             return false;
         }
 
-        $this->cart_was_submitted = true;
+        if (empty($this->cart)) {
+            $this->cart = $this->getCartItems();
+        }
 
         if (($user_email = $this->getCurrentUserEmail())) {
 
@@ -86,18 +89,24 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
 
             $uid = md5(trim($user_email));
 
+            // delete the previous records.
             if (!empty($previous) && $previous !== $user_email) {
-                $this->api()->deleteCartByID($this->getUniqueStoreID(), md5(trim($previous)));
+                if ($this->api()->deleteCartByID($this->getUniqueStoreID(), $previous_email = md5(trim($previous)))) {
+                    slack()->notice("CART SWAP :: Deleted cart for $previous :: ID [$previous_email]");
+                }
             }
 
-            // grab the cookie data that could play important roles in the submission
-            $campaign = $this->cookie('mailchimp_campaign_id');
+            if ($this->cart && !empty($this->cart)) {
 
-            slack()->notice('Abandoned Cart Queued :: '.$user_email.' :: ID ['.$uid.']');
+                $this->cart_was_submitted = true;
 
-            // fire up the job handler
-            $handler = new MailChimp_WooCommerce_Cart_Update($uid, $user_email, $campaign, $this->getCartItems());
-            wp_queue($handler);
+                // grab the cookie data that could play important roles in the submission
+                $campaign = $this->cookie('mailchimp_campaign_id');
+
+                // fire up the job handler
+                $handler = new MailChimp_WooCommerce_Cart_Update($uid, $user_email, $campaign, $this->cart);
+                wp_queue($handler);
+            }
 
             return true;
         }
@@ -134,18 +143,21 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     }
 
     /**
-     * @return mixed
+     * @return bool|array
      */
     public function getCartItems() {
-        return WC()->cart->cart_contents;
-    }
+        if (!($this->cart = $this->getWooSession('cart', false))) {
+            $this->cart = WC()->cart->get_cart();
+        } else {
+            $cart_session = array();
+            foreach ( $this->cart as $key => $values ) {
+                $cart_session[$key] = $values;
+                unset($cart_session[$key]['data']); // Unset product object
+            }
+            return $this->cart = $cart_session;
+        }
 
-    /**
-     * @return int
-     */
-    public function getCartItemCount()
-    {
-        return WC()->cart->get_cart_contents_count();
+        return is_array($this->cart) ? $this->cart : false;
     }
 
     /**
@@ -221,6 +233,22 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     protected function handleAdminFunctions()
     {
+        if (isset($_GET['reset_cookies'])) {
+            $buster = time()-300;
+
+            setcookie('mailchimp_user_previous_email', '', $buster);
+            setcookie('mailchimp_user_email', '', $buster);
+            setcookie('mailchimp_campaign_id', '', $buster);
+            setcookie('mailchimp_email_id', '', $buster);
+
+            $this->previous_email = null;
+            $this->user_email = null;
+        }
+
+        if (isset($_GET['print_cart'])) {
+            print_r($this->getCartItems());die();
+        }
+
         $methods = array(
             'plugin-version' => 'respondAdminGetPluginVersion',
             'submit-email' => 'respondAdminSubmitEmail',
@@ -292,30 +320,35 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     protected function respondAdminSubmitEmail()
     {
+        if ($this->is_admin) {
+            return array('success' => false);
+        }
+
         $submission = $this->get('submission');
 
         if (is_array($submission) && isset($submission['email'])) {
+
+            $cookie_duration = $this->getCookieDuration();
 
             $this->user_email = trim($submission['email']);
 
             if (($current_email = $this->getEmailFromSession()) && $current_email !== $this->user_email) {
                 $this->previous_email = $current_email;
                 $this->force_cart_post = true;
-                @setcookie('mailchimp_user_previous_email',$this->user_email, $this->getCookieDuration(), '/' );
+                @setcookie('mailchimp_user_previous_email',$this->user_email, $cookie_duration, '/' );
             }
 
-            @setcookie('mailchimp_user_email', $this->user_email, $this->getCookieDuration(), '/' );
+            @setcookie('mailchimp_user_email', $this->user_email, $cookie_duration, '/' );
 
-            $cart = $this->getCartItems();
-            $repost = count($cart) > 0 ? $this->handleCartUpdated() : false;
+            $this->getCartItems();
+
+            $this->handleCartUpdated();
 
             return array(
                 'success' => true,
-                'cart_item_count' => count($cart),
-                'email' => $this->getCurrentUserEmail(),
-                'previous' => $current_email,
-                're_submitting' => $repost,
-                'cart' => $cart,
+                'email' => $this->user_email,
+                'previous' => $this->previous_email,
+                'cart' => $this->cart,
             );
         }
         return array('success' => false);
@@ -326,6 +359,10 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     protected function respondAdminTrackCampaign()
     {
+        if ($this->is_admin) {
+            return array('success' => false);
+        }
+
         $submission = $this->get('submission');
 
         if (is_array($submission) && isset($submission['campaign_id'])) {

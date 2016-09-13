@@ -83,12 +83,14 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
 
                 foreach ($this->cart_data as $hash => $item) {
                     try {
+                        $product = new WC_Product($item['product_id']);
+
                         $line = new MailChimp_LineItem();
                         $line->setId($hash);
                         $line->setProductId($item['product_id']);
-                        $line->setProductVariantId($item['data']->post_parent > 0 ? $item['data']->post_parent : $item['product_id']);
+                        $line->setProductVariantId(($product->post->post_parent > 0 ? $product->post->post_parent : $item['product_id']));
                         $line->setQuantity($item['quantity']);
-                        $line->setPrice($item['data']['price']);
+                        $line->setPrice($product->get_price());
 
                         $cart->addItem($line);
 

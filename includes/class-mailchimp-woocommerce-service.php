@@ -295,10 +295,6 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
             $this->user_email = null;
         }
 
-        if (isset($_GET['print_cart'])) {
-            print_r($this->getCartItems());die();
-        }
-
         $methods = array(
             'plugin-version' => 'respondAdminGetPluginVersion',
             'submit-email' => 'respondAdminSubmitEmail',

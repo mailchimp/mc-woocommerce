@@ -239,7 +239,7 @@ class MailChimpApi
      * @param int $count
      * @return array|mixed
      */
-    public function getLists($as_list = false, $count = 50)
+    public function getLists($as_list = false, $count = 100)
     {
         $result = $this->get('lists', array('count' => $count));
 
@@ -298,7 +298,7 @@ class MailChimpApi
     {
         $lists = $this->getLists(true);
         foreach ($lists as $id => $name) {
-            $lists[$id] = $this->mergeFields($id, 50);
+            $lists[$id] = $this->mergeFields($id, 100);
         }
 
         return $lists;

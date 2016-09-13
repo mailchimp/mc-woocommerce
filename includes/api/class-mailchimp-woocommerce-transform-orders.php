@@ -234,16 +234,17 @@ class MailChimp_WooCommerce_Transform_Orders
                 }
             }
 
-            if ($item->getQuantity() > 1) {
-                $current_price = $item->getPrice();
-                $price = ($current_price/$item->getQuantity());
-                $item->setPrice($price);
-            }
-
             if ($item->getProductVariantId() <= 0) {
                 $item->setProductVariantId($item->getProductId());
             }
         }
+
+        if ($item->getQuantity() > 1) {
+            $current_price = $item->getPrice();
+            $price = ($current_price/$item->getQuantity());
+            $item->setPrice($price);
+        }
+
         return $item;
     }
 

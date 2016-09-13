@@ -167,12 +167,13 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     {
         $cookie_duration = $this->getCookieDuration();
 
-        if ( isset( $_REQUEST['mc_cid'] ) ) {
-            @setcookie( 'mailchimp_campaign_id', trim( $_REQUEST['mc_cid'] ), $cookie_duration, '/' );
+        if (isset($_REQUEST['mc_cid'])) {
+            slack()->notice('Tracking MailChimp Campaign :: '.trim($_REQUEST['mc_cid']));
+            @setcookie('mailchimp_campaign_id', trim($_REQUEST['mc_cid']), $cookie_duration, '/' );
         }
 
-        if ( isset( $_REQUEST['mc_eid'] ) ) {
-            @setcookie( 'mailchimp_email_id', trim( $_REQUEST['mc_eid'] ), $cookie_duration, '/' );
+        if (isset($_REQUEST['mc_eid'])) {
+            @setcookie('mailchimp_email_id', trim($_REQUEST['mc_eid']), $cookie_duration, '/' );
         }
     }
 
@@ -202,7 +203,29 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function getWooSession($key, $default = null)
     {
-        return (!empty(WC()->session) ? WC()->session->get($key, $default) : $default);
+        return WC()->session->get($key, $default);
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     * @return $this
+     */
+    public function setWooSession($key, $value)
+    {
+        WC()->session->set($key, $value);
+
+        return $this;
+    }
+
+    /**
+     * @param $key
+     * @return $this
+     */
+    public function removeWooSession($key)
+    {
+        WC()->session->__unset($key);
+        return $this;
     }
 
     /**

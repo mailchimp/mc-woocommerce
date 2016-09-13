@@ -171,9 +171,6 @@ class MailChimp_WooCommerce_Transform_Orders
         $item = new MailChimp_LineItem();
         $item->setId($key);
 
-        // wrap the order detail meta.
-        //$meta = new WC_Order_Item_Meta($order_detail);
-
         if (isset($order_detail['item_meta']) && is_array($order_detail['item_meta'])) {
 
             foreach ($order_detail['item_meta'] as $meta_key => $meta_data_array) {
@@ -234,8 +231,13 @@ class MailChimp_WooCommerce_Transform_Orders
                     case '_qty':
                         $item->setQuantity($object->value);
                         break;
-
                 }
+            }
+
+            if ($item->getQuantity() > 1) {
+                $current_price = $item->getPrice();
+                $price = ($current_price/$item->getQuantity());
+                $item->setPrice($price);
             }
 
             if ($item->getProductVariantId() <= 0) {

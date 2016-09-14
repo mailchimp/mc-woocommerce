@@ -212,7 +212,7 @@ var mailchimp_public_data;
 	function MailChimpCart() {
 
 		this.email_types = "input[type=email]";
-		this.regex_email = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+		this.regex_email = /^([A-Za-z0-9_+\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
 		this.current_email = null;
 		this.previous_email = null;
 

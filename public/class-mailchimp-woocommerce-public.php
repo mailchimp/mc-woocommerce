@@ -96,7 +96,14 @@ class MailChimp_Woocommerce_Public {
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-public.js', array( 'jquery' ), $this->version, false );
+		wp_register_script($this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-public.js', array( 'jquery' ), $this->version, false);
+
+		wp_localize_script($this->plugin_name, 'public_data', array(
+			'site_url' => site_url(),
+		));
+
+		// Enqueued script with localized data.
+		wp_enqueue_script($this->plugin_name);
 
 	}
 }

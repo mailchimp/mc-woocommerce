@@ -1,5 +1,6 @@
 var mailchimp;
 var mailchimp_cart;
+var mailchimp_public_data;
 
 (function( $ ) {
 	'use strict';
@@ -38,6 +39,8 @@ var mailchimp_cart;
 	var clientIP = null;
 	var saved_ip;
 	var script;
+
+	mailchimp_public_data = public_data || {site_url:document.location.origin};
 
 	function invokeJsonp(fullUrl, cacheOk)
 	{
@@ -265,7 +268,7 @@ var mailchimp_cart;
 				crossDomain: true,
 				dataType: "json",
 				type: 'POST',
-				url: document.location.origin+'?mailchimp-woocommerce[action]=submit-email&mailchimp-woocommerce[submission][email]='+user,
+				url: mailchimp_public_data.site_url+'?mailchimp-woocommerce[action]=submit-email&mailchimp-woocommerce[submission][email]='+user,
 				data: {},
 				success: function (responseData, textStatus, jqXHR) {
 					console.log('email saved', responseData);
@@ -294,7 +297,7 @@ var mailchimp_cart;
 			crossDomain: true,
 			dataType: "json",
 			type: 'POST',
-			url: document.location.origin+'?mailchimp-woocommerce[action]=track-campaign&mailchimp-woocommerce[submission][campaign_id]='+qsc.mc_cid[0]+'&mailchimp-woocommerce[submission][email_id]='+qsc.mc_eid[0],
+			url: mailchimp_public_data.site_url+'?mailchimp-woocommerce[action]=track-campaign&mailchimp-woocommerce[submission][campaign_id]='+qsc.mc_cid[0]+'&mailchimp-woocommerce[submission][email_id]='+qsc.mc_eid[0],
 			data: {},
 			success: function (responseData, textStatus, jqXHR) {
 				console.log('campaign data saved', responseData);

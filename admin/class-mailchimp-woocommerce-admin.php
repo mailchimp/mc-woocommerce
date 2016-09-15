@@ -249,6 +249,11 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 		);
 
 		if (!$this->hasValidStoreInfo($data)) {
+
+			if (empty($data['admin_email']) || empty($data['store_city']) || empty($data['store_state']) || empty($data['store_postal_code']) || empty($data['store_country']) || empty($data['store_street'])) {
+				add_settings_error('mailchimp_store_settings', '', 'As part of the MailChimp Terms of Use, we require that a contact email and a physical mailing address.');
+			}
+
 			$this->setData('validation.store_info', false);
 			return array();
 		}
@@ -376,6 +381,7 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 	public function hasValidMailChimpList()
 	{
 		if (!$this->hasValidApiKey()) {
+			add_settings_error('mailchimp_api_key', '', 'You must supply your MailChimp API key to pull the lists.');
 			return false;
 		}
 

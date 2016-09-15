@@ -74,7 +74,7 @@ class MailChimp_WooCommerce_Transform_Orders
 
         $order->setCurrencyCode($woo->get_order_currency());
         $order->setFinancialStatus($woo->is_paid() ? 'paid' : 'pending');
-        $order->setOrderTotal($woo->get_total());
+        $order->setOrderTotal($woo->get_subtotal());
         $order->setTaxTotal($woo->get_total_tax());
 
         // set the customer

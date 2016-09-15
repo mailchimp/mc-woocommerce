@@ -376,7 +376,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
 
             $cookie_duration = $this->getCookieDuration();
 
-            $this->user_email = trim($submission['email']);
+            $this->user_email = trim(str_replace(' ','+', $submission['email']));
 
             if (($current_email = $this->getEmailFromSession()) && $current_email !== $this->user_email) {
                 $this->previous_email = $current_email;

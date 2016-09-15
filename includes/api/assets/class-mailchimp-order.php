@@ -18,6 +18,7 @@ class MailChimp_Order
     protected $currency_code = null;
     protected $order_total = null;
     protected $tax_total = null;
+    protected $shipping_total = null;
     protected $updated_at_foreign = null;
     protected $processed_at_foreign = null;
     protected $cancelled_at_foreign = null;
@@ -220,6 +221,25 @@ class MailChimp_Order
     }
 
     /**
+     * @return mixed
+     */
+    public function getShippingTotal()
+    {
+        return $this->shipping_total;
+    }
+
+    /**
+     * @param mixed $shipping_total
+     * @return MailChimp_Order
+     */
+    public function setShippingTotal($shipping_total)
+    {
+        $this->shipping_total = $shipping_total;
+
+        return $this;
+    }
+
+    /**
      * @param \DateTime $time
      * @return $this
      */
@@ -332,8 +352,9 @@ class MailChimp_Order
             'financial_status' => (string) $this->getFinancialStatus(),
             'fulfillment_status' => (string) $this->getFulfillmentStatus(),
             'currency_code' => (string) $this->getCurrencyCode(),
-            'order_total' => (int) $this->getOrderTotal(),
-            'tax_total' => (int) $this->getTaxTotal(),
+            'order_total' => floatval($this->getOrderTotal()),
+            'tax_total' => floatval($this->getTaxTotal()),
+            'shipping_total' => floatval($this->getShippingTotal()),
             'processed_at_foreign' => (string) $this->getProcessedAt(),
             'cancelled_at_foreign' => (string) $this->getCancelledAt(),
             'updated_at_foreign' => (string) $this->getUpdatedAt(),

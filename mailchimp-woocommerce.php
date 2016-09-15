@@ -92,7 +92,8 @@ function mailchimp_get_data($key, $default) {
  * @return DateTime
  */
 function mailchimp_date_utc($date) {
-	$timezone = mailchimp_get_option('store_timezone', 'America/New_York');
+	$timezone = wc_timezone_string();
+	//$timezone = mailchimp_get_option('store_timezone', 'America/New_York');
 	$date = new \DateTime($date, new DateTimeZone($timezone));
 	$date->setTimezone(new DateTimeZone('UTC'));
 	return $date;
@@ -227,4 +228,3 @@ if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
 
 /** Add all the MailChimp hooks. */
 run_mailchimp_woocommerce();
-

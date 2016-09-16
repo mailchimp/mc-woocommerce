@@ -15,7 +15,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     protected $force_cart_post = false;
     protected $pushed_orders = array();
     protected $cart_was_submitted = false;
-    protected $cart = [];
+    protected $cart = array();
 
     /**
      * hook fired when we know everything is booted

@@ -35,8 +35,8 @@ if ( ! defined( 'WPINC' ) ) {
  */
 function mailchimp_environment_variables() {
 	return (object) array(
-		'repo' => 'staging',
-		'environment' => 'staging',
+		'repo' => 'master',
+		'environment' => 'production',
 		'version' => '1.0.0',
 		'slack_token' => false,
 		'slack_channel' => false,
@@ -181,6 +181,7 @@ function run_mailchimp_plugin_updater() {
 		require plugin_dir_path( __FILE__ ) . 'includes/plugin-update-checker/plugin-update-checker.php';
 	}
 
+	/** @var \PucGitHubChecker_3_1 $checker */
 	$updater = PucFactory::getLatestClassVersion('PucGitHubChecker');
 	$checker = new $updater('https://github.com/mailchimp/mc-woocommerce/', __FILE__, 'master', 1);
 	$checker->handleManualCheck();
@@ -224,7 +225,7 @@ if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
 }
 
 /** Add the plugin updater function ONLY when they are logged in as admin. */
-//add_action('admin_init', 'run_vextras_plugin_updater');
+add_action('admin_init', 'run_vextras_plugin_updater');
 
 /** Add all the MailChimp hooks. */
 run_mailchimp_woocommerce();

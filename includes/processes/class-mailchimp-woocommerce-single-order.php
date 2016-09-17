@@ -38,6 +38,13 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
      */
     public function handle()
     {
+        $this->process();
+
+        return false;
+    }
+
+    public function process()
+    {
         $options = get_option('mailchimp-woocommerce', array());
         $store_id = mailchimp_get_store_id();
 
@@ -68,7 +75,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
 
                 // update or create
-                $api->$call($store_id, $order);
+                $api_response = $api->$call($store_id, $order, false);
 
                 $message = 'MailChimp_WooCommerce_Single_Order :: order #'.$this->order_id.' :: '.$call.' COMPLETED';
 
@@ -76,13 +83,13 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                     $message .= ' :: campaign id '.$job->campaign_id;
                 }
 
-                slack()->notice($message);
+                slack()->notice($message."\n".print_r($api_response, true));
+
+                return $api_response;
 
             } catch (\Exception $e) {
 
                 $message = strtolower($e->getMessage());
-
-                slack()->notice('MailChimp_WooCommerce_Single_Order :: order #'.$this->order_id.' :: '.$call.' :: '.$message);
 
                 if (!isset($order)) {
                     // transform the order
@@ -99,10 +106,20 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                         $api->deleteCustomer($store_id, $order->getCustomer()->getId());
 
                         // update or create
-                        $api->$call($order);
+                        $api_response = $api->$call($store_id, $order, false);
+
+                        $message = 'MailChimp_WooCommerce_Single_Order :: order #'.$this->order_id.' :: '.$call.' COMPLETED';
+
+                        if (!empty($job->campaign_id)) {
+                            $message .= ' :: campaign id '.$job->campaign_id;
+                        }
+
+                        slack()->notice($message."\n".print_r($api_response, true));
+
+                        return $api_response;
 
                     } catch (\Exception $e) {
-                        slack()->notice('MailChimp_WooCommerce_Single_Order :: deleting-customer-re-add :: #'.$this->order_id.' :: '.$message);
+                        slack()->notice('MailChimp_WooCommerce_Single_Order ERROR :: deleting-customer-re-add :: #'.$this->order_id.' :: '.$message);
                     }
                 }
             }

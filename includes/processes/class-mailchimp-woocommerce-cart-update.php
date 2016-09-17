@@ -48,6 +48,18 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
      */
     public function handle()
     {
+        if (($result = $this->process())) {
+            slack()->notice("Added Items To Cart Endpoint \n" . print_r($result, true));
+        }
+
+        return false;
+    }
+
+    /**
+     * @return bool|MailChimp_Cart
+     */
+    public function process()
+    {
         try {
             $options = get_option('mailchimp-woocommerce', array());
             $store_id = mailchimp_get_store_id();
@@ -97,24 +109,27 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
 
                 $cart->setOrderTotal($order_total);
 
-                // update or create the cart.
-                if (($response = $api->addCart($store_id, $cart))) {
-                    slack()->notice('Cart Data Submitted :: '.$this->email.' :: '."\n".(print_r($response->toArray(), true)));
-                } else {
+                try {
+                    // if the post is successful we're all good.
+                    return $api->addCart($store_id, $cart, false);
+                } catch (\Exception $e) {
 
+                    // if we have an error it's most likely due to a product not being found.
+                    // let's loop through each item, verify that we have the product or not.
+                    // if not, we will add it.
                     foreach ($products as $item) {
                         /** @var MailChimp_LineItem $item */
                         $transformer = new MailChimp_WooCommerce_Single_Product($item->getProductID());
-                        $transformer->handle();
+                        if (!$transformer->api()->getStoreProduct($store_id, $item->getProductId())) {
+                            $transformer->handle();
+                        }
                     }
 
-                    if ($api->addCart($store_id, $cart)) {
-                        slack()->notice("Cart Data Successful Add after products have been synced!");
-                    }
+                    // retry the add cart call
+                    return $api->addCart($store_id, $cart);
                 }
-
-                return false;
             }
+
         } catch (\Exception $e) {
             update_option('mailchimp-woocommerce-cart-error', $e->getMessage());
             slack()->notice("Abandoned Cart Error :: {$e->getMessage()} on {$e->getLine()} in {$e->getFile()}");

@@ -135,11 +135,13 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     public function getCurrentUserEmail()
     {
         if (isset($this->user_email) && !empty($this->user_email)) {
-            return $this->user_email;
+            return $this->user_email = strtolower($this->user_email);
         }
 
         $user = wp_get_current_user();
-        return ($user->ID > 0 && isset($user->user_email)) ? $user->user_email : $this->getEmailFromSession();
+        $email = ($user->ID > 0 && isset($user->user_email)) ? $user->user_email : $this->getEmailFromSession();
+
+        return $this->user_email = strtolower($email);
     }
 
     /**
@@ -219,9 +221,10 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     protected function getPreviousEmailFromSession()
     {
         if ($this->previous_email) {
-            return $this->previous_email;
+            return $this->previous_email = strtolower($this->previous_email);
         }
-        return $this->cookie('mailchimp_user_previous_email', false);
+        $email = $this->cookie('mailchimp_user_previous_email', false);
+        return $email ? strtolower($email) : false;
     }
 
     /**

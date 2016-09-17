@@ -36,7 +36,10 @@ class MailChimp_WooCommerce_Single_Product extends WP_Job
             $job = new MailChimp_WooCommerce_Transform_Products();
             $api = new MailChimpApi($options['mailchimp_api_key']);
 
-            $api->deleteStoreProduct($store_id, $this->product_id);
+            if ($api->getStoreProduct($store_id, $this->product_id)) {
+                $api->deleteStoreProduct($store_id, $this->product_id);
+            }
+
             $api->addStoreProduct($store_id, ($product = $job->transform(get_post($this->product_id))));
 
             update_option('mailchimp-woocommerce-last_product_updated', $product->getId());

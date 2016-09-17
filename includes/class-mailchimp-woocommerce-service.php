@@ -23,6 +23,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     public function wooIsRunning()
     {
         $this->handleAdminFunctions();
+        $this->is_admin = current_user_can('administrator');
     }
 
     /**
@@ -43,7 +44,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     protected function cookie($key, $default = null)
     {
-        if (is_admin()) {
+        if ($this->is_admin) {
             return $default;
         }
 
@@ -74,7 +75,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function handleCartUpdated()
     {
-        if ($this->cart_was_submitted || is_admin() || $this->is_admin || !$this->hasOption('mailchimp_api_key')) {
+        if ($this->is_admin || $this->cart_was_submitted || !$this->hasOption('mailchimp_api_key')) {
             return false;
         }
 

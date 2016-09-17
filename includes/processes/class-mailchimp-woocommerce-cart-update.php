@@ -80,23 +80,19 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
                 $cart->setCustomer($customer);
 
                 $order_total = 0;
+                $products = array();
 
                 foreach ($this->cart_data as $hash => $item) {
                     try {
-                        $product = new WC_Product($item['product_id']);
-
-                        $line = new MailChimp_LineItem();
-                        $line->setId($hash);
-                        $line->setProductId($item['product_id']);
-                        $line->setProductVariantId(($product->post->post_parent > 0 ? $product->post->post_parent : $item['product_id']));
-                        $line->setQuantity($item['quantity']);
-                        $line->setPrice($product->get_price());
-
+                        $line = $this->transformLineItem($hash, $item);
                         $cart->addItem($line);
-
                         $order_total += ($item['quantity'] * $line->getPrice());
+                        $products[] = $line;
+                    } catch (\Exception $e) {}
+                }
 
-                    } catch (\Exception $e) { }
+                if (empty($products)) {
+                    return false;
                 }
 
                 $cart->setOrderTotal($order_total);
@@ -104,6 +100,17 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
                 // update or create the cart.
                 if (($response = $api->addCart($store_id, $cart))) {
                     slack()->notice('Cart Data Submitted :: '.$this->email.' :: '."\n".(print_r($response->toArray(), true)));
+                } else {
+
+                    foreach ($products as $item) {
+                        /** @var MailChimp_LineItem $item */
+                        $transformer = new MailChimp_WooCommerce_Single_Product($item->getProductID());
+                        $transformer->handle();
+                    }
+
+                    if ($api->addCart($store_id, $cart)) {
+                        slack()->notice("Cart Data Successful Add after products have been synced!");
+                    }
                 }
 
                 return false;
@@ -114,5 +121,30 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
         }
 
         return false;
+    }
+
+    /**
+     * @param string $hash
+     * @param $item
+     * @return MailChimp_LineItem
+     */
+    protected function transformLineItem($hash, $item)
+    {
+        $product = new WC_Product($item['product_id']);
+
+        $line = new MailChimp_LineItem();
+        $line->setId($hash);
+        $line->setProductId($item['product_id']);
+
+        if (isset($item['variation_id']) && $item['variation_id'] > 0) {
+            $line->setProductVariantId($item['variation_id']);
+        } else {
+            $line->setProductVariantId($item['product_id']);
+        }
+
+        $line->setQuantity($item['quantity']);
+        $line->setPrice($product->get_price());
+
+        return $line;
     }
 }

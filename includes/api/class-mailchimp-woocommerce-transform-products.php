@@ -47,6 +47,7 @@ class MailChimp_WooCommerce_Transform_Products
         $woo = new WC_Product($post);
 
         $variant_posts = $this->getProductVariantPosts($post->ID);
+
         $variants = $variant_posts ? array_merge(array($woo), $variant_posts) : array($woo);
 
         $is_variant = count($variants) > 1;
@@ -90,7 +91,13 @@ class MailChimp_WooCommerce_Transform_Products
      */
     public function variant($is_variant, $post)
     {
-        $woo = ($is_variant && $post->post_parent > 0) ? new WC_Product_Variation($post) : $post;
+        if ($post instanceof WC_Product_Variation) {
+            $woo = $post;
+        } elseif ($is_variant && isset($post->post) && $post->post->post_parent > 0) {
+            $woo = new WC_Product_Variation($post->post);
+        } else {
+            $woo = $post;
+        }
 
         $variant = new MailChimp_ProductVariation();
 

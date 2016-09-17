@@ -72,6 +72,7 @@ class MailChimp_WooCommerce_Transform_Orders
             $order->setCancelledAt(mailchimp_date_utc($woo->modified_date));
         }
 
+
         $order->setCurrencyCode($woo->get_order_currency());
         $order->setFinancialStatus($woo->is_paid() ? 'paid' : 'pending');
 
@@ -81,7 +82,7 @@ class MailChimp_WooCommerce_Transform_Orders
         $order->setTaxTotal($woo->get_total_tax());
 
         // if we have shipping.
-        $order->setShippingTotal( $woo->get_total_shipping());
+        $order->setShippingTotal($woo->get_total_shipping());
 
         // set the customer
         $order->setCustomer($this->buildCustomerFromOrder($woo));
@@ -331,7 +332,9 @@ class MailChimp_WooCommerce_Transform_Orders
         $shipping->setProvince($order->shipping_state);
         $shipping->setPostalCode($order->shipping_postcode);
         $shipping->setCountry($order->shipping_country);
-        $shipping->setPhone($order->shipping_phone);
+        if (isset($order->shipping_phone)) {
+            $shipping->setPhone($order->shipping_phone);
+        }
         $shipping->setName('shipping');
 
         return (object) array('billing' => $billing, 'shipping' => $shipping);

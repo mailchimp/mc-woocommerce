@@ -38,6 +38,7 @@ class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abtst
             // add the product.
             try {
                 $this->mailchimp()->addStoreProduct($this->store_id, $item);
+                slack()->notice('Added Product :: '."\n".print_r($item->toArray(), true));
             } catch (MailChimp_Error $e) {
                 slack()->notice('MailChimp_WooCommerce_Process_Products::iterate - '.$e->getMessage());
             } catch (MailChimp_ServerError $e) {

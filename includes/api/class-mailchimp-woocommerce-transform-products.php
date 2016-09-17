@@ -91,12 +91,14 @@ class MailChimp_WooCommerce_Transform_Products
      */
     public function variant($is_variant, $post)
     {
-        if ($post instanceof WC_Product_Variation) {
+        if ($post instanceof WC_Product || $post instanceof WC_Product_Variation) {
             $woo = $post;
-        } elseif ($is_variant && isset($post->post) && $post->post->post_parent > 0) {
-            $woo = new WC_Product_Variation($post->post);
         } else {
-            $woo = $post;
+            if (isset($post->post_type) && $post->post_type === 'product_variation') {
+                $woo = new WC_Product_Variation($post->ID);
+            } else {
+                $woo = new WC_Product($post);
+            }
         }
 
         $variant = new MailChimp_ProductVariation();

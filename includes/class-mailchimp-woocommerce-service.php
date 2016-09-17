@@ -328,23 +328,27 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     protected function sync()
     {
-        delete_option('mailchimp-woocommerce-errors.store_info');
-        delete_option('mailchimp-woocommerce-sync.orders.completed_at');
-        delete_option('mailchimp-woocommerce-sync.orders.current_page');
-        delete_option('mailchimp-woocommerce-sync.products.completed_at');
-        delete_option('mailchimp-woocommerce-sync.products.current_page');
-        delete_option('mailchimp-woocommerce-sync.syncing');
-        delete_option('mailchimp-woocommerce-sync.started_at');
-        delete_option('mailchimp-woocommerce-sync.completed_at');
-        delete_option('mailchimp-woocommerce-validation.api.ping');
-        delete_option('mailchimp-woocommerce-cached-api-lists');
-        delete_option('mailchimp-woocommerce-cached-api-ping-check');
+        // only do this if we're an admin user.
+        if ($this->isAdmin()) {
 
-        $job = new MailChimp_WooCommerce_Process_Products();
-        $job->flagStartSync();
-        wp_queue($job);
+            delete_option('mailchimp-woocommerce-errors.store_info');
+            delete_option('mailchimp-woocommerce-sync.orders.completed_at');
+            delete_option('mailchimp-woocommerce-sync.orders.current_page');
+            delete_option('mailchimp-woocommerce-sync.products.completed_at');
+            delete_option('mailchimp-woocommerce-sync.products.current_page');
+            delete_option('mailchimp-woocommerce-sync.syncing');
+            delete_option('mailchimp-woocommerce-sync.started_at');
+            delete_option('mailchimp-woocommerce-sync.completed_at');
+            delete_option('mailchimp-woocommerce-validation.api.ping');
+            delete_option('mailchimp-woocommerce-cached-api-lists');
+            delete_option('mailchimp-woocommerce-cached-api-ping-check');
 
-        wp_redirect('/options-general.php?page=mailchimp-woocommerce&tab=api_key&success_notice=re-sync-started');
+            $job = new MailChimp_WooCommerce_Process_Products();
+            $job->flagStartSync();
+            wp_queue($job);
+
+            wp_redirect('/options-general.php?page=mailchimp-woocommerce&tab=api_key&success_notice=re-sync-started');
+        }
 
         return;
     }

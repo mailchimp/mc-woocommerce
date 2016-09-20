@@ -36,6 +36,8 @@ WooCommerce customers who haven't signed up for marketing emails will appear in 
 
 3) Click **Upload Plugin**.
 
+![Upload] (https://cloud.githubusercontent.com/assets/6547700/18677997/a76dab82-7f28-11e6-98e4-4309739cd840.png)
+
 4) Click **Choose File** to select the ZIP file for the plugin, then click **Install Now**.
 
 ![Install Now](https://cloud.githubusercontent.com/assets/6547700/18677988/a760949c-7f28-11e6-9e13-13c23d044ad4.png)

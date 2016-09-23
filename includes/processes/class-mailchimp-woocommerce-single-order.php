@@ -85,6 +85,12 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
                 slack()->notice($message."\n".print_r($api_response, true));
 
+                // if we're adding a new order and the session id is here, we need to delete the AC cart record.
+                if (!empty($this->cart_session_id)) {
+                    $deleted = $api->deleteCartByID($store_id, $this->cart_session_id);
+                    slack()->notice("Delete AC record :: ".($deleted ? 'true' : 'false'));
+                }
+
                 return $api_response;
 
             } catch (\Exception $e) {
@@ -116,17 +122,18 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
                         slack()->notice($message."\n".print_r($api_response, true));
 
+                        // if we're adding a new order and the session id is here, we need to delete the AC cart record.
+                        if (!empty($this->cart_session_id)) {
+                            $deleted = $api->deleteCartByID($store_id, $this->cart_session_id);
+                            slack()->notice("Delete AC record :: ".($deleted ? 'true' : 'false'));
+                        }
+
                         return $api_response;
 
                     } catch (\Exception $e) {
                         slack()->notice('MailChimp_WooCommerce_Single_Order ERROR :: deleting-customer-re-add :: #'.$this->order_id.' :: '.$message);
                     }
                 }
-            }
-
-            // if we're adding a new order and the session id is here, we need to delete the AC cart record.
-            if ($call === 'addStoreOrder' && !empty($this->cart_session_id)) {
-                $api->deleteCartByID($store_id, $this->cart_session_id);
             }
         }
 

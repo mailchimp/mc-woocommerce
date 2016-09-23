@@ -71,8 +71,8 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                 // transform the order
                 $order = $job->transform(get_post($this->order_id));
 
+                // will be the same as the customer id. an md5'd hash of a lowercased email.
                 $this->cart_session_id = $order->getCustomer()->getId();
-
 
                 // update or create
                 $api_response = $api->$call($store_id, $order, false);

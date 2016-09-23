@@ -87,11 +87,11 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
 
             $previous = $this->getPreviousEmailFromSession();
 
-            $uid = md5(trim($user_email));
+            $uid = md5(trim(strtolower($user_email)));
 
             // delete the previous records.
             if (!empty($previous) && $previous !== $user_email) {
-                if ($this->api()->deleteCartByID($this->getUniqueStoreID(), $previous_email = md5(trim($previous)))) {
+                if ($this->api()->deleteCartByID($this->getUniqueStoreID(), $previous_email = md5(trim(strtolower($previous))))) {
                     slack()->notice("CART SWAP :: Deleted cart for $previous :: ID [$previous_email]");
                 }
             }

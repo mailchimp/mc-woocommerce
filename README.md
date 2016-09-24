@@ -1,6 +1,6 @@
-# mc-woocommerce
-MailChimp for Woocommerce Integration
+# MailChimp for Woocommerce Integration
 
+# Updated 9.23.16 with a fix to delete carts for completed orders.
 MailChimp for WooCommerce is a plugin that adds customers and their order information to your MailChimp list. Use WooCommerce data to create targeted campaigns, track sales, recommend products, send Abandoned Cart emails, and more.
 
 In this article, you’ll learn how to connect MailChimp for WooCommerce.

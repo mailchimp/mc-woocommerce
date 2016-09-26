@@ -48,7 +48,11 @@ class MailChimp_WooCommerce_Single_Product extends WP_Job
 
         $product = $this->transformer()->transform(get_post($this->product_id));
 
-        $this->api()->addStoreProduct($this->store_id, $product);
+        $response = $this->api()->addStoreProduct($this->store_id, $product);
+
+        if ($response) {
+            mailchimp_log('product_submit.success', 'Added', array('api_response' => $response->toArray()));
+        }
 
         update_option('mailchimp-woocommerce-last_product_updated', $product->getId());
 

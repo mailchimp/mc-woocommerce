@@ -619,6 +619,7 @@ class MailChimpApi
             return (new MailChimp_Order)->fromArray($data);
         } catch (\Exception $e) {
             if (!$silent) throw $e;
+            mailchimp_log('api.add_order.error', $e->getMessage(), array('submission' => $order->toArray()));
             return false;
         }
     }
@@ -639,6 +640,7 @@ class MailChimpApi
             return (new MailChimp_Order)->fromArray($data);
         } catch (\Exception $e) {
             if (!$silent) throw $e;
+            mailchimp_log('api.update_order.error', $e->getMessage(), array('submission' => $order->toArray()));
             return false;
         }
     }
@@ -720,6 +722,7 @@ class MailChimpApi
             return (new MailChimp_Product)->fromArray($data);
         } catch (\Exception $e) {
             if (!$silent) throw $e;
+            mailchimp_log('api.add_product.error', $e->getMessage(), array('submission' => $product->toArray()));
             return false;
         }
     }

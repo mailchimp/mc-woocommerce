@@ -38,7 +38,7 @@ function mailchimp_environment_variables() {
 		'repo' => 'feature/beta',
 		'environment' => 'beta',
 		'version' => '0.1.1',
-		'slack_token' => false,
+		'slack_token' => 'xoxp-2951297489-3735030724-3736784816-d135c4',
 		'slack_channel' => 'mc-woo',
 	);
 }
@@ -209,20 +209,30 @@ function mailchimp_log($action, $message, $data = array())
 		return false;
 	}
 
+	$data = array(
+		'account_id' => $options->account_id,
+		'username' => $options->username,
+		'store_domain' => site_url(),
+		'platform' => 'woocommerce',
+		'action' => $action,
+		'message' => $message,
+		'data' => $data,
+	);
+
+	$slack_message = "$action :: $message";
+
+	if (!empty($data['data'])) {
+		$slack_message .= "\n\n".(print_r($data['data'], true));
+	}
+
+	slack()->notice($slack_message);
+
 	return wp_remote_post($options->endpoint, array(
 		'headers' => array(
 			'Accept: application/json',
 			'Content-Type: application/json'
 		),
-		'body' => json_encode(array(
-			'account_id' => $options->account_id,
-			'username' => $options->username,
-			'store_domain' => site_url(),
-			'platform' => 'woocommerce',
-			'action' => $action,
-			'message' => $message,
-			'data' => $data,
-		)),
+		'body' => json_encode($data),
 	));
 }
 

@@ -122,11 +122,11 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      * @param bool $update Whether this is an existing post being updated or not.
      */
     public function handlePostSaved($post_id, $post, $update) {
-        if ('product' != $post->post_type) {
-            return;
+        if ('product' == $post->post_type) {
+            wp_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
+        } elseif ('shop_order' == $post->post_type) {
+            wp_queue(new MailChimp_WooCommerce_Single_Order($post_id, null, null));
         }
-
-        wp_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
     }
 
     /**

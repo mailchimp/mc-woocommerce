@@ -66,8 +66,10 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
         <select name="<?php echo $this->plugin_name; ?>[mailchimp_auto_subscribe]" style="width:30%" required <?php if($list_is_configured): ?> disabled <?php endif; ?>>
 
             <?php
-            foreach (['1' => 'Yes', '0' => 'No'] as $key => $value ) {
-                echo '<option value="' . esc_attr( $key ) . '" ' . selected($key == $options['mailchimp_auto_subscribe'], true, false ) . '>' . esc_html( $value ) . '</option>';
+            $enable_auto_subscribe = (array_key_exists('mailchimp_auto_subscribe', $options) && !is_null($options['mailchimp_auto_subscribe'])) ? $options['mailchimp_auto_subscribe'] : '1';
+
+            foreach (['0' => 'No', '1' => 'Yes'] as $key => $value ) {
+                echo '<option value="' . esc_attr( $key ) . '" ' . selected($key == $enable_auto_subscribe, true, false ) . '>' . esc_html( $value ) . '</option>';
             }
             ?>
 

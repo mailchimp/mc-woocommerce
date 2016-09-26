@@ -31,8 +31,11 @@ if (isset($options['mailchimp_api_key']) && !$handler->hasValidApiKey()) {
         <select name="<?php echo $this->plugin_name; ?>[mailchimp_debugging]" style="width:30%">
 
             <?php
+
+            $enable_mailchimp_debugging = (array_key_exists('mailchimp_debugging', $options) && !is_null($options['mailchimp_debugging'])) ? $options['mailchimp_debugging'] : '1';
+
             foreach (['0' => 'No', '1' => 'Yes'] as $key => $value ) {
-                echo '<option value="' . esc_attr( $key ) . '" ' . selected($key == $options['mailchimp_debugging'], true, false ) . '>' . esc_html( $value ) . '</option>';
+                echo '<option value="' . esc_attr( $key ) . '" ' . selected($key == $enable_mailchimp_debugging, true, false ) . '>' . esc_html( $value ) . '</option>';
             }
             ?>
 

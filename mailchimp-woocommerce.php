@@ -181,9 +181,11 @@ function run_mailchimp_plugin_updater() {
 		require plugin_dir_path( __FILE__ ) . 'includes/plugin-update-checker/plugin-update-checker.php';
 	}
 
+	$env = mailchimp_environment_variables();
+
 	/** @var \PucGitHubChecker_3_1 $checker */
 	$updater = PucFactory::getLatestClassVersion('PucGitHubChecker');
-	$checker = new $updater('https://github.com/mailchimp/mc-woocommerce/', __FILE__, 'master', 1);
+	$checker = new $updater('https://github.com/mailchimp/mc-woocommerce/', __FILE__, $env->repo, 1);
 	$checker->handleManualCheck();
 }
 
@@ -266,7 +268,7 @@ if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
 }
 
 /** Add the plugin updater function ONLY when they are logged in as admin. */
-add_action('admin_init', 'run_vextras_plugin_updater');
+add_action('admin_init', 'run_mailchimp_plugin_updater');
 
 /** Add all the MailChimp hooks. */
 run_mailchimp_woocommerce();

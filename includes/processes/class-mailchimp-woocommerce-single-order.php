@@ -84,7 +84,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                 }
 
                 mailchimp_log('order_submit.success', $message, array(
-                    'mc_response' => $api_response
+                    'api_response' => $api_response->toArray(),
                 ));
 
                 // if we're adding a new order and the session id is here, we need to delete the AC cart record.
@@ -124,7 +124,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
                         mailchimp_log('order_submit.success', $message, array(
                             'flag' => 'customer email needed to be changed!',
-                            'mc_response' => $api_response
+                            'api_response' => $api_response->toArray(),
                         ));
 
                         // if we're adding a new order and the session id is here, we need to delete the AC cart record.

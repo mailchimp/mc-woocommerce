@@ -23,3 +23,21 @@ if (isset($options['mailchimp_api_key']) && !$handler->hasValidApiKey()) {
     </label>
 </fieldset>
 
+<fieldset>
+    <legend class="screen-reader-text">
+        <span>Enable Debugging</span>
+    </legend>
+    <label for="<?php echo $this->plugin_name; ?>-mailchimp-debugging">
+        <select name="<?php echo $this->plugin_name; ?>[mailchimp_debugging]" style="width:30%">
+
+            <?php
+            foreach (['0' => 'No', '1' => 'Yes'] as $key => $value ) {
+                echo '<option value="' . esc_attr( $key ) . '" ' . selected($key == $options['mailchimp_debugging'], true, false ) . '>' . esc_html( $value ) . '</option>';
+            }
+            ?>
+
+        </select>
+        <span><?php esc_attr_e('Enable debugging logs to be sent to MailChimp.', $this->plugin_name); ?></span>
+    </label>
+</fieldset>
+

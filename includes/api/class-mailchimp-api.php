@@ -66,13 +66,14 @@ class MailChimpApi
     }
 
     /**
-     * @return bool
+     * @param bool $return_profile
+     * @return array|bool
      */
-    public function ping()
+    public function ping($return_profile = false)
     {
         try {
-            $this->get('/');
-            return true;
+            $profile = $this->get('/');
+            return $return_profile ? $profile : true;
         } catch (MailChimp_Error $e) {
             return false;
         }
@@ -515,7 +516,7 @@ class MailChimpApi
             return (new MailChimp_Cart)->setStoreID($store_id)->fromArray($data);
         } catch (MailChimp_Error $e) {
             if (!$silent) throw $e;
-            slack()->notice('MailChimpApi::addCart - '.$e->getMessage());
+            mailchimp_log('api.addCart', $e->getMessage());
             return false;
         }
     }
@@ -534,7 +535,7 @@ class MailChimpApi
             return (new MailChimp_Cart)->setStoreID($store_id)->fromArray($data);
         } catch (MailChimp_Error $e) {
             if (!$silent) throw $e;
-            slack()->notice('MailChimpApi::updateCart - '.$e->getMessage());
+            mailchimp_log('api.updateCart', $e->getMessage());
             return false;
         }
     }
@@ -903,12 +904,10 @@ class MailChimpApi
         }
 
         if ($info['http_code'] >= 400 && $info['http_code'] <= 500) {
-            //slack()->notice('MailChimpApi::processCurlResponse - '.$data['title'] .' :: '.$data['detail']);
             throw new MailChimp_Error($data['title'] .' :: '.$data['detail'], $data['status']);
         }
 
         if ($info['http_code'] >= 500) {
-            //slack()->notice('MailChimpApi::processCurlResponse - '.$data['detail']);
             throw new MailChimp_ServerError($data['detail'], $data['status']);
         }
 

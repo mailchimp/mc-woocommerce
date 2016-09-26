@@ -49,7 +49,7 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
     public function handle()
     {
         if (($result = $this->process())) {
-            slack()->notice("Added Items To Cart Endpoint \n" . print_r($result, true));
+            mailchimp_log('ac.success', 'Added', array('api_response' => $result));
         }
 
         return false;
@@ -132,7 +132,7 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
 
         } catch (\Exception $e) {
             update_option('mailchimp-woocommerce-cart-error', $e->getMessage());
-            slack()->notice("Abandoned Cart Error :: {$e->getMessage()} on {$e->getLine()} in {$e->getFile()}");
+            mailchimp_log('ac.error', "Abandoned Cart Error :: {$e->getMessage()} on {$e->getLine()} in {$e->getFile()}");
         }
 
         return false;

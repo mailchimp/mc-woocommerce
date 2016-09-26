@@ -110,6 +110,8 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
      */
     public function flagStartSync()
     {
+        mailchimp_log('sync.started', "Starting Sync :: ".date('D, M j, Y g:i A'));
+
         // this is the last thing we're doing so it's complete as of now.
         $this->setData('sync.syncing', true);
         $this->setData('sync.started_at', time());
@@ -125,6 +127,8 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
         // this is the last thing we're doing so it's complete as of now.
         $this->setData('sync.syncing', false);
         $this->setData('sync.completed_at', time());
+
+        mailchimp_log('sync.completed', "Finished Sync :: ".date('D, M j, Y g:i A'));
 
         return $this;
     }

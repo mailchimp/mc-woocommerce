@@ -203,18 +203,27 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 	{
 		$data = array(
 			'mailchimp_api_key' => isset($input['mailchimp_api_key']) ? $input['mailchimp_api_key'] : false,
+			'mailchimp_debugging' => isset($input['mailchimp_debugging']) ? $input['mailchimp_debugging'] : false,
+			'mailchimp_account_info_id' => null,
+			'mailchimp_account_info_username' => null,
 		);
 
 		$api = new MailChimpApi($data['mailchimp_api_key']);
 
 		$valid = true;
-		if (empty($data['mailchimp_api_key']) || !$api->ping()) {
+
+		if (empty($data['mailchimp_api_key']) || !($profile = $api->ping(true))) {
 			unset($data['mailchimp_api_key']);
 			$valid = false;
 		}
 
 		// tell our reporting system whether or not we had a valid ping.
 		$this->setData('validation.api.ping', $valid);
+
+		if ($valid && isset($profile) && is_array($profile) && array_key_exists('account_id', $profile)) {
+			$data['mailchimp_account_info_id'] = $profile['account_id'];
+			$data['mailchimp_account_info_username'] = $profile['username'];
+		}
 
 		return $data;
 	}
@@ -308,6 +317,7 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 		$data = array(
 			'mailchimp_list' => isset($input['mailchimp_list']) ? $input['mailchimp_list'] : $this->getOption('mailchimp_list', ''),
 			'newsletter_label' => isset($input['newsletter_label']) ? $input['newsletter_label'] : $this->getOption('newsletter_label', 'Subscribe to our newsletter'),
+			'mailchimp_auto_subscribe' => isset($input['mailchimp_auto_subscribe']) ? $input['mailchimp_auto_subscribe'] : $this->getOption('mailchimp_auto_subscribe', '0'),
 		);
 
 		if ($data['mailchimp_list'] === 'create_new') {

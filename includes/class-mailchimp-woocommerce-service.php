@@ -92,7 +92,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
             // delete the previous records.
             if (!empty($previous) && $previous !== $user_email) {
                 if ($this->api()->deleteCartByID($this->getUniqueStoreID(), $previous_email = md5(trim(strtolower($previous))))) {
-                    slack()->notice("CART SWAP :: Deleted cart for $previous :: ID [$previous_email]");
+                    mailchimp_log('ac.cart_swap', "Deleted cart [$previous] :: ID [$previous_email]");
                 }
             }
 
@@ -198,8 +198,6 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     public function setCampaignTrackingID($id, $cookie_duration)
     {
         $cid = trim($id);
-
-        slack()->notice('Tracking MailChimp Campaign :: '.$cid);
 
         @setcookie('mailchimp_campaign_id', $cid, $cookie_duration, '/' );
         $this->setWooSession('mailchimp_campaign_id', $cid);

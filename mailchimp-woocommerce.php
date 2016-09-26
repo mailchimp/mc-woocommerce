@@ -195,6 +195,37 @@ function slack()
 	return Frlnc\Slack\Logger::instance();
 }
 
+/**
+ * @param $action
+ * @param $message
+ * @param array $data
+ * @return array|WP_Error
+ */
+function mailchimp_log($action, $message, $data = array())
+{
+	$options = MailChimp_Woocommerce::getLoggingConfig();
+
+	if (!$options->enable_logging || !$options->account_id || !$options->username) {
+		return false;
+	}
+
+	return wp_remote_post($options->endpoint, array(
+		'headers' => array(
+			'Accept: application/json',
+			'Content-Type: application/json'
+		),
+		'body' => json_encode(array(
+			'account_id' => $options->account_id,
+			'username' => $options->username,
+			'store_domain' => site_url(),
+			'platform' => 'woocommerce',
+			'action' => $action,
+			'message' => $message,
+			'data' => $data,
+		)),
+	));
+}
+
 register_activation_hook( __FILE__, 'activate_mailchimp_woocommerce' );
 register_deactivation_hook( __FILE__, 'deactivate_mailchimp_woocommerce' );
 

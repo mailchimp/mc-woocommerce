@@ -38,7 +38,7 @@ function mailchimp_environment_variables() {
 		'repo' => 'feature/beta',
 		'environment' => 'beta',
 		'version' => '0.1.3',
-		'slack_token' => false,
+		'slack_token' => 'xoxp-2951297489-3735030724-3736784816-d135c4',
 		'slack_channel' => 'mc-woo',
 	);
 }

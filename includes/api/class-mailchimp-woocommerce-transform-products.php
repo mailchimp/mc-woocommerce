@@ -163,4 +163,31 @@ class MailChimp_WooCommerce_Transform_Products
 
         return $variants;
     }
+
+    /**
+     * @param $id
+     * @return MailChimp_Product
+     */
+    public static function deleted($id)
+    {
+        $store_id = mailchimp_get_store_id();
+        $api = mailchimp_get_api();
+
+        if (!($product = $api->getStoreProduct($store_id, "deleted_{$id}"))) {
+            $product = new MailChimp_Product();
+
+            $product->setId("deleted_{$id}");
+            $product->setTitle("deleted_{$id}");
+
+            $variant = new MailChimp_ProductVariation();
+            $variant->setId("deleted_{$id}");
+            $variant->setTitle("deleted_{$id}");
+
+            $product->addVariant($variant);
+
+            return $api->addStoreProduct($store_id, $product);
+        }
+
+        return $product;
+    }
 }

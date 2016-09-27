@@ -36,7 +36,7 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abtstra
             // since we're syncing the customer for the first time, this is where we need to add the override
             // for subscriber status. We don't get the checkbox until this plugin is actually installed and working!
 
-            if ((bool) $this->getOption('mailchimp_auto_subscribe')) {
+            if ((bool) $this->getOption('mailchimp_auto_subscribe', true)) {
                 $item->getCustomer()->setOptInStatus(true);
             }
 

@@ -93,7 +93,15 @@ class MailChimp_WooCommerce_Transform_Orders
 
         // loop through all the order items
         foreach ($woo->get_items() as $key => $order_detail) {
+
             // add it into the order item container.
+            $item = $this->buildLineItem($key, $order_detail);
+
+            if (!($product_post = get_post($item->getProductId()))) {
+                mailchimp_log('order.items.error', "Order #{$woo->id} :: Product {$item->getProductId()} does not exist!");
+                continue;
+            }
+
             $order->addItem($this->buildLineItem($key, $order_detail));
         }
 

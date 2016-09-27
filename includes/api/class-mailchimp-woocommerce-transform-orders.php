@@ -103,9 +103,11 @@ class MailChimp_WooCommerce_Transform_Orders
                 // check if it exists, otherwise create a new one.
                 if (($deleted_product = MailChimp_WooCommerce_Transform_Products::deleted($item->getProductId()))) {
 
+                    $deleted_product_id = "deleted_{$item->getProductId()}";
+
                     // swap out the old item id and product variant id with the deleted version.
-                    $item->setProductId("deleted_{$item->getProductId()}");
-                    $item->setProductVariantId("deleted_{$item->getProductId()}");
+                    $item->setProductId($deleted_product_id);
+                    $item->setProductVariantId($deleted_product_id);
 
                     // add the item and continue on the loop.
                     $order->addItem($item);

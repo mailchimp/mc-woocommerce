@@ -27,3 +27,4 @@ if (($sync_complete_at = $this->getData('sync.completed_at', false))) {
 
 <p>Sync Started At: <?php echo $sync_started_at; ?></p>
 <p>Sync Completed At: <?php echo $sync_complete_at; ?></p>
+

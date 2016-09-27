@@ -232,7 +232,10 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function getWooSession($key, $default = null)
     {
-        return WC()->session->get($key, $default);
+        if (!($woo = WC()) || empty($woo->session)) {
+            return $default;
+        }
+        return $woo->session->get($key, $default);
     }
 
     /**
@@ -242,7 +245,11 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function setWooSession($key, $value)
     {
-        WC()->session->set($key, $value);
+        if (!($woo = WC()) || empty($woo->session)) {
+            return $this;
+        }
+
+        $woo->session->set($key, $value);
 
         return $this;
     }
@@ -253,7 +260,11 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function removeWooSession($key)
     {
-        WC()->session->__unset($key);
+        if (!($woo = WC()) || empty($woo->session)) {
+            return $this;
+        }
+
+        $woo->session->__unset($key);
         return $this;
     }
 

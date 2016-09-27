@@ -72,7 +72,6 @@ class MailChimp_WooCommerce_Transform_Orders
             $order->setCancelledAt(mailchimp_date_utc($woo->modified_date));
         }
 
-
         $order->setCurrencyCode($woo->get_order_currency());
         $order->setFinancialStatus($woo->is_paid() ? 'paid' : 'pending');
 

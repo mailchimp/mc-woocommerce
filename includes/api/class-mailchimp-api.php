@@ -512,7 +512,7 @@ class MailChimpApi
     public function addCart($store_id, MailChimp_Cart $cart, $silent = true)
     {
         try {
-            $data = $this->post("/ecommerce/stores/$store_id/carts", $cart->toArray());
+            $data = $this->post("ecommerce/stores/$store_id/carts", $cart->toArray());
             return (new MailChimp_Cart)->setStoreID($store_id)->fromArray($data);
         } catch (MailChimp_Error $e) {
             if (!$silent) throw $e;
@@ -531,7 +531,7 @@ class MailChimpApi
     public function updateCart($store_id, MailChimp_Cart $cart, $silent = true)
     {
         try {
-            $data = $this->patch("/ecommerce/stores/$store_id/carts/{$cart->getId()}", $cart->toArrayForUpdate());
+            $data = $this->patch("ecommerce/stores/$store_id/carts/{$cart->getId()}", $cart->toArrayForUpdate());
             return (new MailChimp_Cart)->setStoreID($store_id)->fromArray($data);
         } catch (MailChimp_Error $e) {
             if (!$silent) throw $e;
@@ -548,7 +548,7 @@ class MailChimpApi
     public function getCart($store_id, $id)
     {
         try {
-            $data = $this->get("/ecommerce/stores/$store_id/carts/$id");
+            $data = $this->get("ecommerce/stores/$store_id/carts/$id");
             return (new MailChimp_Cart)->setStoreID($store_id)->fromArray($data);
         } catch (MailChimp_Error $e) {
             return false;
@@ -563,7 +563,7 @@ class MailChimpApi
     public function deleteCartByID($store_id, $id)
     {
         try {
-            $this->delete("/ecommerce/stores/$store_id/carts/$id");
+            $this->delete("ecommerce/stores/$store_id/carts/$id");
             return true;
         } catch (MailChimp_Error $e) {
             return false;
@@ -762,7 +762,9 @@ class MailChimpApi
     {
         $curl = curl_init();
 
-        curl_setopt_array($curl, $this->applyCurlOptions('DELETE', $url, $params));
+        $options = $this->applyCurlOptions('DELETE', $url, $params);
+
+        curl_setopt_array($curl, $options);
 
         return $this->processCurlResponse($curl);
     }
@@ -777,7 +779,9 @@ class MailChimpApi
     {
         $curl = curl_init();
 
-        curl_setopt_array($curl, $this->applyCurlOptions('GET', $url, $params));
+        $options = $this->applyCurlOptions('GET', $url, $params);
+
+        curl_setopt_array($curl, $options);
 
         return $this->processCurlResponse($curl);
     }
@@ -785,19 +789,53 @@ class MailChimpApi
     /**
      * @param $url
      * @param $body
-     * @return array|bool
+     * @return array|mixed|null|object
+     * @throws Exception
      * @throws MailChimp_Error
      */
     protected function patch($url, $body)
     {
-        $curl = curl_init();
+        try {
+            // process the patch request the normal way
+            $curl = curl_init();
 
-        $options = $this->applyCurlOptions('PATCH', $url, array());
-        $options[CURLOPT_POSTFIELDS] = json_encode($body);
+            $options = $this->applyCurlOptions('PATCH', $url, array());
+            $options[CURLOPT_POSTFIELDS] = json_encode($body);
 
-        curl_setopt_array($curl, $options);
+            curl_setopt_array($curl, $options);
 
-        return $this->processCurlResponse($curl);
+            return $this->processCurlResponse($curl);
+
+        } catch (\Exception $e) {
+
+            // if the error that we get is not the json parsing error, throw it.
+            if (strpos(strtolower($e->getMessage()), 'json parsing error') === false) {
+                throw $e;
+            }
+
+            // ah snap, gotta try the file get contents fallback.
+            mailchimp_log('api.patch.fallback', 'stream', array('curl_version' => curl_version()));
+
+            $context = stream_context_create([
+                'http' => [
+                    'method' => 'PATCH',
+                    'header' => [
+                        'Authorization: Basic '.base64_encode('mailchimp:'.$this->api_key),
+                        'Accept: application/json',
+                        'Content-Type: application/json'
+                    ],
+                    'content' => json_encode($body)
+                ]
+            ]);
+
+            $response = file_get_contents($this->url($url), FALSE, $context);
+
+            if ($response === false) {
+                throw new MailChimp_Error('Invalid patch request');
+            }
+
+            return json_decode($response, true);
+        }
     }
 
     /**
@@ -859,6 +897,24 @@ class MailChimpApi
     /**
      * @param $method
      * @param $url
+     * @param $body
+     * @return array|WP_Error
+     */
+    protected function sendWithHttpClient($method, $url, $body)
+    {
+        return _wp_http_get_object()->request($this->url($url), array(
+            'method' => strtoupper($method),
+            'headers' => array(
+                'Authorization' => 'Basic ' . base64_encode('mailchimp:'.$this->api_key),
+                'Content-Type' => 'application/json',
+            ),
+            'body' => json_encode($body),
+        ));
+    }
+
+    /**
+     * @param $method
+     * @param $url
      * @param array $params
      * @return array
      */
@@ -880,13 +936,15 @@ class MailChimpApi
 
     /**
      * @param $curl
-     * @return mixed
+     * @return array|mixed|null|object
+     * @throws Exception
      * @throws MailChimp_Error
      * @throws MailChimp_ServerError
      */
     protected function processCurlResponse($curl)
     {
         $response = curl_exec($curl);
+
         $err = curl_error($curl);
         $info = curl_getinfo($curl);
         curl_close($curl);
@@ -899,10 +957,16 @@ class MailChimpApi
 
         if (empty($info) || ($info['http_code'] >= 200 && $info['http_code'] <= 400)) {
             if (is_array($data)) {
-                $this->checkForErrors($data);
+                try {
+                    $this->checkForErrors($data);
+                } catch (\Exception $e) {
+                    throw $e;
+                }
             }
             return $data;
         }
+
+        mailchimp_log('api.error', 'invalid', array(print_r($info, true)));
 
         if ($info['http_code'] >= 400 && $info['http_code'] <= 500) {
             throw new MailChimp_Error($data['title'] .' :: '.$data['detail'], $data['status']);

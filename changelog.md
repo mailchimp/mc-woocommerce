@@ -1,3 +1,6 @@
+** 0.1.9 **
+* using fallback to stream context during failed patch requests
+
 ** 0.1.8 **
 * fixing headers on patch requests
 

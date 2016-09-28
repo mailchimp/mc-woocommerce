@@ -1,3 +1,6 @@
+** 0.1.8 **
+* fixing http request header for larger patch requests
+
 ** 0.1.7 **
 * fixing various bugs with the sync and product issues.
 

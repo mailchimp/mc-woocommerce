@@ -84,7 +84,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                 }
 
                 mailchimp_log('order_submit.success', $message, array(
-                    'api_response' => $api_response->toArray(),
+                    'api_response' => $api_response ? $api_response->toArray() : 'NOT SET',
                 ));
 
                 // if we're adding a new order and the session id is here, we need to delete the AC cart record.
@@ -98,6 +98,8 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
             } catch (\Exception $e) {
 
                 $message = strtolower($e->getMessage());
+
+                mailchimp_log('order_submit.tracing_error', $message);
 
                 if (!isset($order)) {
                     // transform the order
@@ -123,9 +125,14 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                         }
 
                         mailchimp_log('order_submit.success', $message, array(
+                            'api_response' => $api_response ? $api_response->toArray() : 'NOT SET',
+                        ));
+                        /*
+                        mailchimp_log('order_submit.success', $message, array(
                             'flag' => 'customer email needed to be changed!',
                             'api_response' => $api_response->toArray(),
                         ));
+                        */
 
                         // if we're adding a new order and the session id is here, we need to delete the AC cart record.
                         if (!empty($this->cart_session_id)) {

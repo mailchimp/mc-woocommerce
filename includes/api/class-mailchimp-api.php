@@ -873,8 +873,8 @@ class MailChimpApi
             CURLOPT_MAXREDIRS => 10,
             CURLOPT_TIMEOUT => 30,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_HEADER => false,
-            //CURLOPT_HEADER => ['content-type: application/json', 'allow: application/json',]
+            CURLINFO_HEADER_OUT => true,
+            CURLOPT_HTTPHEADER => ['content-type: application/json']
         );
     }
 
@@ -888,9 +888,7 @@ class MailChimpApi
     {
         $response = curl_exec($curl);
         $err = curl_error($curl);
-
         $info = curl_getinfo($curl);
-
         curl_close($curl);
 
         if ($err) {

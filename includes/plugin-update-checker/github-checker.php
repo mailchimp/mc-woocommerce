@@ -128,7 +128,6 @@ class PucGitHubChecker_3_1 extends PluginUpdateChecker_3_1 {
 				$info->last_updated = $latestCommit->commit->author->date;
 			}
 		}
-
 		$info = apply_filters('puc_request_info_result-' . $this->slug, $info, null);
 		return $info;
 	}

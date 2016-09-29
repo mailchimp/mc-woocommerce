@@ -966,8 +966,6 @@ class MailChimpApi
             return $data;
         }
 
-        mailchimp_log('api.error', 'invalid', array(print_r($info, true)));
-
         if ($info['http_code'] >= 400 && $info['http_code'] <= 500) {
             throw new MailChimp_Error($data['title'] .' :: '.$data['detail'], $data['status']);
         }

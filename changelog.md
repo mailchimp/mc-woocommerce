@@ -1,3 +1,6 @@
+** 0.1.10 **
+* altered debug logging and fixed store settings validation requirements
+
 ** 0.1.9 **
 * using fallback to stream context during failed patch requests
 

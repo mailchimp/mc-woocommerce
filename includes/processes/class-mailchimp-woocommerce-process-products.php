@@ -40,9 +40,11 @@ class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abtst
                 mailchimp_log('sync.products.submitting', "addStoreProduct :: #{$item->getId()}");
 
                 // make the call
-                $this->mailchimp()->addStoreProduct($this->store_id, $item);
+                $response = $this->mailchimp()->addStoreProduct($this->store_id, $item);
 
                 mailchimp_log('sync.products.success', "addStoreProduct :: #{$item->getId()}");
+
+                return $response;
 
             } catch (MailChimp_Error $e) {
                 mailchimp_log('sync.products.error', "addStoreProduct :: MailChimp_Error :: {$e->getMessage()}");

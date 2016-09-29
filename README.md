@@ -73,6 +73,8 @@ All set! When you click **Save all changes**, we’ll start syncing your WooComm
 
 If you have no lists in your MailChimp account, you will be given the option to create a new list on the **List Defaults** tab. To create a new list, set your list defaults, and click **Save all Changes** when you’re done. We’ll create a MailChimp list for you, and begin the data sync.
 
+![List Defaults tab](https://cloud.githubusercontent.com/assets/19805049/18956260/cffd3926-8628-11e6-9c68-9fe3c964c75c.png)
+
 #Next Steps#
 After you connect, you can do a lot with the the data you collect, like build segments, send Automation workflows, track purchases, and view results.
 

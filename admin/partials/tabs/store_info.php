@@ -94,7 +94,7 @@ if (!$handler->hasValidApiKey()) {
 
 <h2 style="padding-top: 1em;">Locale Settings</h2>
 
-<p>Please apply your locale settings. If you're unsure about these just leave the defaults.</p>
+<p>Please apply your locale settings. If you're unsure about these, use the defaults.</p>
 
 <fieldset>
     <legend class="screen-reader-text">

@@ -56,6 +56,8 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abtstra
 
                 $this->items[] = array('response' => $response, 'item' => $item);
 
+                return $response;
+
             } catch (MailChimp_Error $e) {
                 mailchimp_log('sync.orders.error', "$call :: MailChimp_Error :: {$e->getMessage()}");
             } catch (MailChimp_ServerError $e) {

@@ -1,3 +1,6 @@
+** 0.1.11 **
+* removed an extra debug log that was not needed
+
 ** 0.1.10 **
 * altered debug logging and fixed store settings validation requirements
 

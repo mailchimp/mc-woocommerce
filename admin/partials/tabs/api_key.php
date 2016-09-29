@@ -19,7 +19,7 @@ if (isset($options['mailchimp_api_key']) && !$handler->hasValidApiKey()) {
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-mailchimp-api-key">
         <input style="width: 30%;" type="password" id="<?php echo $this->plugin_name; ?>-mailchimp-api-key" name="<?php echo $this->plugin_name; ?>[mailchimp_api_key]" value="<?php echo isset($options['mailchimp_api_key']) ? $options['mailchimp_api_key'] : '' ?>" />
-        <span><?php esc_attr_e('Enter your MailChimp API key here.', $this->plugin_name); ?></span>
+        <span><?php esc_attr_e('Enter your MailChimp API key.', $this->plugin_name); ?></span>
     </label>
 </fieldset>
 

@@ -29,7 +29,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
 <?php endif; ?>
 
 <h2 style="padding-top: 1em;">List Settings</h2>
-<p>Please apply your settings for checkout.</p>
+<p>Please apply your list settings. If you don't have a list, you can choose to create one.</p>
 
 <fieldset>
     <legend class="screen-reader-text">
@@ -54,7 +54,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
             }
             ?>
         </select>
-        <span><?php esc_attr_e('Choose an existing list, or create a new one', $this->plugin_name); ?></span>
+        <span><?php esc_attr_e('Choose a list to sync with your store.', $this->plugin_name); ?></span>
     </label>
 </fieldset>
 
@@ -84,6 +84,6 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-newsletter-checkbox-label">
         <input style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-newsletter-checkbox-label" name="<?php echo $this->plugin_name; ?>[newsletter_label]" value="<?php echo isset($options['newsletter_label']) ? $options['newsletter_label'] : 'Subscribe to our newsletter' ?>" />
-        <span><?php esc_attr_e('Checkout subscribe text', $this->plugin_name); ?></span>
+        <span><?php esc_attr_e('Write a subscribe message for customers at checkout.', $this->plugin_name); ?></span>
     </label>
 </fieldset>

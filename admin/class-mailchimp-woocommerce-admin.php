@@ -351,6 +351,7 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 			'store_name', 'store_street', 'store_city', 'store_state',
 			'store_postal_code', 'store_country', 'store_phone',
 			'store_locale', 'store_timezone', 'store_currency_code',
+			'store_phone',
 		), $data);
 	}
 

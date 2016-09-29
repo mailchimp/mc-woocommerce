@@ -74,32 +74,29 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                 // will be the same as the customer id. an md5'd hash of a lowercased email.
                 $this->cart_session_id = $order->getCustomer()->getId();
 
+                $log = "$call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}";
+
+                mailchimp_log('order_submit.submitting', $log);
+
                 // update or create
                 $api_response = $api->$call($store_id, $order, false);
 
-                $message = 'Order #'.$this->order_id.' :: '.$call.' COMPLETED';
-
                 if (!empty($job->campaign_id)) {
-                    $message .= ' :: campaign id '.$job->campaign_id;
+                    $log .= ' :: campaign id '.$job->campaign_id;
                 }
 
-                mailchimp_log('order_submit.success', $message, array(
-                    'api_response' => $api_response ? $api_response->toArray() : 'NOT SET',
-                ));
+                mailchimp_log('order_submit.success', $log);
 
                 // if we're adding a new order and the session id is here, we need to delete the AC cart record.
                 if (!empty($this->cart_session_id)) {
-                    $deleted = $api->deleteCartByID($store_id, $this->cart_session_id);
-                    mailchimp_log('order_submit.delete_cart', ($deleted ? 'true' : 'false'));
+                    $api->deleteCartByID($store_id, $this->cart_session_id);
                 }
 
                 return $api_response;
 
             } catch (\Exception $e) {
 
-                $message = strtolower($e->getMessage());
-
-                mailchimp_log('order_submit.tracing_error', $message);
+                mailchimp_log('order_submit.tracing_error', $message = strtolower($e->getMessage()));
 
                 if (!isset($order)) {
                     // transform the order
@@ -112,32 +109,25 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
                     try {
 
+                        mailchimp_log('order_submit.deleting_customer', "#{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}");
+
                         // delete the customer before adding it again.
                         $api->deleteCustomer($store_id, $order->getCustomer()->getId());
 
                         // update or create
                         $api_response = $api->$call($store_id, $order, false);
 
-                        $message = 'MailChimp_WooCommerce_Single_Order :: order #'.$this->order_id.' :: '.$call.' COMPLETED';
+                        $log = "Deleted Customer :: $call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}";
 
                         if (!empty($job->campaign_id)) {
-                            $message .= ' :: campaign id '.$job->campaign_id;
+                            $log .= ' :: campaign id '.$job->campaign_id;
                         }
 
-                        mailchimp_log('order_submit.success', $message, array(
-                            'api_response' => $api_response ? $api_response->toArray() : 'NOT SET',
-                        ));
-                        /*
-                        mailchimp_log('order_submit.success', $message, array(
-                            'flag' => 'customer email needed to be changed!',
-                            'api_response' => $api_response->toArray(),
-                        ));
-                        */
+                        mailchimp_log('order_submit.success', $log);
 
                         // if we're adding a new order and the session id is here, we need to delete the AC cart record.
                         if (!empty($this->cart_session_id)) {
-                            $deleted = $api->deleteCartByID($store_id, $this->cart_session_id);
-                            mailchimp_log('order_submit.delete_cart', ($deleted ? 'true' : 'false'));
+                            $api->deleteCartByID($store_id, $this->cart_session_id);
                         }
 
                         return $api_response;

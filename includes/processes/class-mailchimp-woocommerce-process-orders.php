@@ -44,13 +44,27 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abtstra
             $call = $type === 'create' ? 'addStoreOrder' : 'updateStoreOrder';
 
             try {
+
+                $log = "$call :: #{$item->getId()} :: email: {$item->getCustomer()->getEmailAddress()}";
+
+                mailchimp_log('sync.orders.submitting', $log);
+
+                // make the call
                 $response = $this->mailchimp()->$call($this->store_id, $item, false);
-                mailchimp_log('sync.orders.success', 'Added', array('api_response' => $response->toArray()));
+
+                mailchimp_log('sync.orders.success', $log);
+
                 $this->items[] = array('response' => $response, 'item' => $item);
-            } catch (\Exception $e) {
-                mailchimp_log('sync.orders.error', $call.' :: '.$e->getMessage());
+
+            } catch (MailChimp_Error $e) {
+                mailchimp_log('sync.orders.error', "$call :: MailChimp_Error :: {$e->getMessage()}");
+            } catch (MailChimp_ServerError $e) {
+                mailchimp_log('sync.orders.error', "$call :: MailChimp_ServerError :: {$e->getMessage()}");
+            } catch (Exception $e) {
+                mailchimp_log('sync.orders.error', "$call :: Uncaught Exception :: {$e->getMessage()}");
             }
         }
+
         return false;
     }
 

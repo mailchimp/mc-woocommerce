@@ -1,3 +1,6 @@
+** 0.1.14 **
+* removing jquery dependencies
+
 ** 0.1.13 **
 * fixing a number format issue on total_spent
 

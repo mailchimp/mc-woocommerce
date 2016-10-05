@@ -37,7 +37,7 @@ function mailchimp_environment_variables() {
 	return (object) array(
 		'repo' => 'master',
 		'environment' => 'production',
-		'version' => '0.1.11',
+		'version' => '0.1.12',
 		'slack_token' => false,
 		'slack_channel' => 'mc-woo',
 	);
@@ -236,6 +236,24 @@ function mailchimp_log($action, $message, $data = array())
 		),
 		'body' => json_encode($data),
 	));
+}
+
+/**
+ * Determine if a given string contains a given substring.
+ *
+ * @param  string  $haystack
+ * @param  string|array  $needles
+ * @return bool
+ */
+function mailchimp_string_contains($haystack, $needles)
+{
+	foreach ((array) $needles as $needle) {
+		if ($needle != '' && mb_strpos($haystack, $needle) !== false) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 register_activation_hook( __FILE__, 'activate_mailchimp_woocommerce' );

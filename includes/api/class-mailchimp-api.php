@@ -614,7 +614,9 @@ class MailChimpApi
     public function addStoreOrder($store_id, MailChimp_Order $order, $silent = true)
     {
         try {
-            $this->validateStoreSubmission($order);
+            if (!$this->validateStoreSubmission($order)) {
+                return false;
+            }
             $data = $this->post("ecommerce/stores/$store_id/orders", $order->toArray());
             return (new MailChimp_Order)->fromArray($data);
         } catch (\Exception $e) {
@@ -634,7 +636,9 @@ class MailChimpApi
     public function updateStoreOrder($store_id, MailChimp_Order $order, $silent = true)
     {
         try {
-            $this->validateStoreSubmission($order);
+            if (!$this->validateStoreSubmission($order)) {
+                return false;
+            }
             $id = $order->getId();
             $data = $this->patch("ecommerce/stores/$store_id/orders/$id", $order->toArray());
             return (new MailChimp_Order)->fromArray($data);
@@ -749,6 +753,22 @@ class MailChimpApi
      */
     protected function validateStoreSubmission($target)
     {
+        if ($target instanceof MailChimp_Order) {
+            return $this->validateStoreOrder($target);
+        }
+        return true;
+    }
+
+    /**
+     * @param MailChimp_Order $order
+     * @return bool
+     */
+    protected function validateStoreOrder(MailChimp_Order $order)
+    {
+        if (mailchimp_string_contains($order->getCustomer()->getEmailAddress(), ['marketplace.amazon.com'])) {
+            mailchimp_log('validation.amazon', "Order #{$order->getId()} was placed through Amazon. Skipping!");
+            return false;
+        }
         return true;
     }
 

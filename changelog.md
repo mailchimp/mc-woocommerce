@@ -1,3 +1,6 @@
+** 0.1.12 **
+* skipping orders placed through amazon due to seller agreements
+
 ** 0.1.11 **
 * removed an extra debug log that was not needed
 

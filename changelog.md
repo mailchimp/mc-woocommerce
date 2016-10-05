@@ -1,3 +1,6 @@
+** 0.1.13 **
+* fixing a number format issue on total_spent
+
 ** 0.1.12 **
 * skipping orders placed through amazon due to seller agreements
 

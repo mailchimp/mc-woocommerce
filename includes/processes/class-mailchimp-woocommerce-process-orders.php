@@ -52,6 +52,10 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abtstra
                 // make the call
                 $response = $this->mailchimp()->$call($this->store_id, $item, false);
 
+                if (empty($response)) {
+                    return $response;
+                }
+
                 mailchimp_log('sync.orders.success', $log);
 
                 $this->items[] = array('response' => $response, 'item' => $item);

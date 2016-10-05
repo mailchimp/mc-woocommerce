@@ -81,6 +81,10 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                 // update or create
                 $api_response = $api->$call($store_id, $order, false);
 
+                if (empty($api_response)) {
+                    return $api_response;
+                }
+
                 if (!empty($job->campaign_id)) {
                     $log .= ' :: campaign id '.$job->campaign_id;
                 }

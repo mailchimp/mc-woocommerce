@@ -226,7 +226,7 @@ class MailChimp_Customer
             'first_name' => (string) $this->getFirstName(),
             'last_name' => (string) $this->getLastName(),
             'orders_count' => (int) $this->getOrdersCount(),
-            'total_spent' => number_format($this->getTotalSpent(), 2),
+            'total_spent' => floatval(number_format($this->getTotalSpent(), 2)),
             'address' => empty($address) ? null : $address,
         ));
     }

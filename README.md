@@ -1,22 +1,18 @@
 # MailChimp for Woocommerce Integration
 
-# Updated 9.23.16 with a fix to delete carts for completed orders.
-MailChimp for WooCommerce is a plugin that adds customers and their order information to your MailChimp list. Use WooCommerce data to create targeted campaigns, track sales, recommend products, send Abandoned Cart emails, and more.
-
 In this article, you’ll learn how to connect MailChimp for WooCommerce.
 
 #Before You Start#
 
 **Here are some things to know before you begin this process.**
 
-- This tutorial is intended for use with a beta version of MailChimp for WooCommerce. 
 - We recommend you use this plugin in a staging environment before installing on production servers.
 - This process requires an API Key from your MailChimp account. If you aren’t sure how to generate a MailChimp API Key, read [About API Keys.](http://kb.mailchimp.com/integrations/api-integrations/about-api-keys)
 - This plugin supports MailChimp’s [Abandoned Cart Automation](http://kb.mailchimp.com/automation/create-an-abandoned-cart-workflow) feature.
-WooCommerce customers who haven't signed up for marketing emails will appear in the Transactional portion of your list, and cannot be exported. See [View or Export a List.](http://kb.mailchimp.com/lists/managing-subscribers/view-or-export-a-list)
+- WooCommerce customers who haven't signed up for marketing emails will appear in the Transactional portion of your list, and cannot be exported. See [View or Export a List.](http://kb.mailchimp.com/lists/managing-subscribers/view-or-export-a-list)
 - To switch lists or accounts, you must deactivate and delete the plugin, then re-install it.
 - In e-commerce reports and on subscriber profile pages, product variants will display as the parent product. 
-- This beta version of MailChimp for WooCommerce may have issues displaying grouped orders. 
+
 
 #Task Roadmap#
 **Here’s a brief overview of this multi-step process.**

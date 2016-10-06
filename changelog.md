@@ -1,3 +1,6 @@
+** 0.1.15 **
+* adding special MailChimp header to requests
+
 ** 0.1.14 **
 * removing jquery dependencies
 

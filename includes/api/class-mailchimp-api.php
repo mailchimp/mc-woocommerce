@@ -950,7 +950,10 @@ class MailChimpApi
             CURLOPT_TIMEOUT => 30,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLINFO_HEADER_OUT => true,
-            CURLOPT_HTTPHEADER => ['content-type: application/json']
+            CURLOPT_HTTPHEADER => [
+                'content-type: application/json',
+                'user-agent: MailChimp for WooCommerce',
+            ]
         );
     }
 

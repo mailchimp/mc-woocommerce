@@ -76,6 +76,11 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
                 $log = "$call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}";
 
+                if (!empty($this->campaign_id) && $call === 'addStoreOrder') {
+                    $log .= ' :: campaign id '.$this->campaign_id;
+                    $order->setCampaignId($this->campaign_id);
+                }
+
                 mailchimp_log('order_submit.submitting', $log);
 
                 // update or create
@@ -83,10 +88,6 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
                 if (empty($api_response)) {
                     return $api_response;
-                }
-
-                if (!empty($job->campaign_id)) {
-                    $log .= ' :: campaign id '.$job->campaign_id;
                 }
 
                 mailchimp_log('order_submit.success', $log);

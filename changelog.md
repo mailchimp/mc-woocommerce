@@ -1,3 +1,6 @@
+** 0.1.19 **
+* fix campaign tracking on new orders
+
 ** 0.1.18 **
 * check woocommerce dependency before activating the plugin
 

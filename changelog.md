@@ -1,3 +1,8 @@
+** 0.1.16 **
+* fix namespace conflicts
+* fix free order 0.00 issue
+* fix product variant naming issue
+
 ** 0.1.15 **
 * adding special MailChimp header to requests
 

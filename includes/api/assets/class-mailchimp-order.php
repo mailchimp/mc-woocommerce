@@ -345,7 +345,7 @@ class MailChimp_WooCommerce_Order
      */
     public function toArray()
     {
-        return mailchimp_array_remove_empty(array_filter(array(
+        return mailchimp_array_remove_empty(array(
             'id' => (string) $this->getId(),
             'customer' => $this->getCustomer()->toArray(),
             'campaign_id' => (string) $this->getCampaignId(),
@@ -364,7 +364,7 @@ class MailChimp_WooCommerce_Order
                 /** @var MailChimp_WooCommerce_LineItem $item */
                 return $item->toArray();
             }, $this->items()),
-        )));
+        ));
     }
 
     /**

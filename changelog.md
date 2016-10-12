@@ -1,3 +1,6 @@
+** 0.1.18 **
+* check woocommerce dependency before activating the plugin
+
 ** 0.1.17 **
 * fix php version syntax errors for array's
 

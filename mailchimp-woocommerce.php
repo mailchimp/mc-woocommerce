@@ -16,7 +16,7 @@
  * Plugin Name:       MailChimp for WooCommerce
  * Plugin URI:        https://mailchimp.com/connect-your-store/
  * Description:       MailChimp - WooCommerce plugin
- * Version:           0.1.17
+ * Version:           0.1.18
  * Author:            MailChimp
  * Author URI:        https://mailchimp.com
  * License:           GPL-2.0+
@@ -37,7 +37,7 @@ function mailchimp_environment_variables() {
 	return (object) array(
 		'repo' => 'develop',
 		'environment' => 'production',
-		'version' => '0.1.17',
+		'version' => '0.1.18',
 		'slack_token' => false,
 		'slack_channel' => 'mc-woo',
 	);
@@ -149,7 +149,17 @@ function mailchimp_get_timezone_list() {
  * The code that runs during plugin activation.
  * This action is documented in includes/class-mailchimp-woocommerce-activator.php
  */
-function activate_mailchimp_woocommerce() {
+function activate_mailchimp_woocommerce()
+{
+	// if we don't have woocommerce we need to display a horrible error message before the plugin is installed.
+	if (!is_plugin_active('woocommerce/woocommerce.php')) {
+		// Deactivate the plugin
+		deactivate_plugins(__FILE__);
+		$error_message = __('The MailChimp For WooCommerce plugin requires the <a href="http://wordpress.org/extend/plugins/woocommerce/">WooCommerce</a> plugin to be active!', 'woocommerce');
+		wp_die($error_message);
+	}
+
+	// ok we can activate this thing.
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-mailchimp-woocommerce-activator.php';
 
 	MailChimp_Woocommerce_Activator::activate();

@@ -8,7 +8,7 @@
  * Date: 3/8/16
  * Time: 2:22 PM
  */
-class MailChimp_Address
+class MailChimp_WooCommerce_Address
 {
     protected $type;
     protected $name;
@@ -54,7 +54,7 @@ class MailChimp_Address
 
     /**
      * @param mixed $name
-     * @return MailChimp_Address
+     * @return MailChimp_WooCommerce_Address
      */
     public function setName($name)
     {
@@ -73,7 +73,7 @@ class MailChimp_Address
 
     /**
      * @param mixed $address1
-     * @return MailChimp_Address
+     * @return MailChimp_WooCommerce_Address
      */
     public function setAddress1($address1)
     {
@@ -92,7 +92,7 @@ class MailChimp_Address
 
     /**
      * @param mixed $address2
-     * @return MailChimp_Address
+     * @return MailChimp_WooCommerce_Address
      */
     public function setAddress2($address2)
     {
@@ -111,7 +111,7 @@ class MailChimp_Address
 
     /**
      * @param mixed $city
-     * @return MailChimp_Address
+     * @return MailChimp_WooCommerce_Address
      */
     public function setCity($city)
     {
@@ -130,7 +130,7 @@ class MailChimp_Address
 
     /**
      * @param mixed $province
-     * @return MailChimp_Address
+     * @return MailChimp_WooCommerce_Address
      */
     public function setProvince($province)
     {
@@ -149,7 +149,7 @@ class MailChimp_Address
 
     /**
      * @param mixed $province_code
-     * @return MailChimp_Address
+     * @return MailChimp_WooCommerce_Address
      */
     public function setProvinceCode($province_code)
     {
@@ -168,7 +168,7 @@ class MailChimp_Address
 
     /**
      * @param mixed $postal_code
-     * @return MailChimp_Address
+     * @return MailChimp_WooCommerce_Address
      */
     public function setPostalCode($postal_code)
     {
@@ -187,7 +187,7 @@ class MailChimp_Address
 
     /**
      * @param mixed $country
-     * @return MailChimp_Address
+     * @return MailChimp_WooCommerce_Address
      */
     public function setCountry($country)
     {
@@ -206,7 +206,7 @@ class MailChimp_Address
 
     /**
      * @param mixed $country_code
-     * @return MailChimp_Address
+     * @return MailChimp_WooCommerce_Address
      */
     public function setCountryCode($country_code)
     {
@@ -225,7 +225,7 @@ class MailChimp_Address
 
     /**
      * @param mixed $longitude
-     * @return MailChimp_Address
+     * @return MailChimp_WooCommerce_Address
      */
     public function setLongitude($longitude)
     {
@@ -244,7 +244,7 @@ class MailChimp_Address
 
     /**
      * @param mixed $latitude
-     * @return MailChimp_Address
+     * @return MailChimp_WooCommerce_Address
      */
     public function setLatitude($latitude)
     {
@@ -263,7 +263,7 @@ class MailChimp_Address
 
     /**
      * @param mixed $phone
-     * @return MailChimp_Address
+     * @return MailChimp_WooCommerce_Address
      */
     public function setPhone($phone)
     {
@@ -282,7 +282,7 @@ class MailChimp_Address
 
     /**
      * @param mixed $company
-     * @return MailChimp_Address
+     * @return MailChimp_WooCommerce_Address
      */
     public function setCompany($company)
     {
@@ -315,7 +315,7 @@ class MailChimp_Address
 
     /**
      * @param array $data
-     * @return MailChimp_Address
+     * @return MailChimp_WooCommerce_Address
      */
     public function fromArray(array $data)
     {

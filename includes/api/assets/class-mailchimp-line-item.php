@@ -8,7 +8,7 @@
  * Date: 3/8/16
  * Time: 2:16 PM
  */
-class MailChimp_LineItem
+class MailChimp_WooCommerce_LineItem
 {
     protected $id;
     protected $product_id;
@@ -36,11 +36,11 @@ class MailChimp_LineItem
      * @param $variant_id
      * @param $quantity
      * @param $price
-     * @return MailChimp_LineItem
+     * @return MailChimp_WooCommerce_LineItem
      */
     public static function make($id, $product_id, $variant_id, $quantity, $price)
     {
-        $item = new MailChimp_LineItem();
+        $item = new MailChimp_WooCommerce_LineItem();
         $item->id = $id;
         $item->product_id = $product_id;
         $item->product_variant_id = $variant_id;
@@ -60,7 +60,7 @@ class MailChimp_LineItem
 
     /**
      * @param mixed $id
-     * @return MailChimp_LineItem
+     * @return MailChimp_WooCommerce_LineItem
      */
     public function setId($id)
     {
@@ -79,7 +79,7 @@ class MailChimp_LineItem
 
     /**
      * @param mixed $product_id
-     * @return MailChimp_LineItem
+     * @return MailChimp_WooCommerce_LineItem
      */
     public function setProductId($product_id)
     {
@@ -98,7 +98,7 @@ class MailChimp_LineItem
 
     /**
      * @param mixed $product_variant_id
-     * @return MailChimp_LineItem
+     * @return MailChimp_WooCommerce_LineItem
      */
     public function setProductVariantId($product_variant_id)
     {
@@ -117,7 +117,7 @@ class MailChimp_LineItem
 
     /**
      * @param mixed $quantity
-     * @return MailChimp_LineItem
+     * @return MailChimp_WooCommerce_LineItem
      */
     public function setQuantity($quantity)
     {
@@ -136,7 +136,7 @@ class MailChimp_LineItem
 
     /**
      * @param mixed $price
-     * @return MailChimp_LineItem
+     * @return MailChimp_WooCommerce_LineItem
      */
     public function setPrice($price)
     {
@@ -161,7 +161,7 @@ class MailChimp_LineItem
 
     /**
      * @param array $data
-     * @return MailChimp_LineItem
+     * @return MailChimp_WooCommerce_LineItem
      */
     public function fromArray(array $data)
     {

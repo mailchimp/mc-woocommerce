@@ -40,7 +40,7 @@ class MailChimp_WooCommerce_Transform_Products
 
     /**
      * @param WP_Post $post
-     * @return MailChimp_Product
+     * @return MailChimp_WooCommerce_Product
      */
     public function transform(WP_Post $post)
     {
@@ -52,7 +52,7 @@ class MailChimp_WooCommerce_Transform_Products
 
         $is_variant = count($variants) > 1;
 
-        $product = new MailChimp_Product();
+        $product = new MailChimp_WooCommerce_Product();
 
         $product->setId($woo->get_id());
         $product->setHandle($post->post_name);
@@ -88,7 +88,7 @@ class MailChimp_WooCommerce_Transform_Products
      * @param $is_variant
      * @param WP_Post $post
      * @param string $fallback_title
-     * @return MailChimp_ProductVariation
+     * @return MailChimp_WooCommerce_ProductVariation
      */
     public function variant($is_variant, $post, $fallback_title = null)
     {
@@ -102,7 +102,7 @@ class MailChimp_WooCommerce_Transform_Products
             }
         }
 
-        $variant = new MailChimp_ProductVariation();
+        $variant = new MailChimp_WooCommerce_ProductVariation();
 
         $variant->setId($woo->get_id());
         $variant->setUrl($woo->get_permalink());
@@ -181,7 +181,7 @@ class MailChimp_WooCommerce_Transform_Products
 
     /**
      * @param $id
-     * @return MailChimp_Product
+     * @return MailChimp_WooCommerce_Product
      */
     public static function deleted($id)
     {
@@ -189,12 +189,12 @@ class MailChimp_WooCommerce_Transform_Products
         $api = mailchimp_get_api();
 
         if (!($product = $api->getStoreProduct($store_id, "deleted_{$id}"))) {
-            $product = new MailChimp_Product();
+            $product = new MailChimp_WooCommerce_Product();
 
             $product->setId("deleted_{$id}");
             $product->setTitle("deleted_{$id}");
 
-            $variant = new MailChimp_ProductVariation();
+            $variant = new MailChimp_WooCommerce_ProductVariation();
             $variant->setId("deleted_{$id}");
             $variant->setTitle("deleted_{$id}");
 

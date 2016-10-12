@@ -56,7 +56,7 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
     }
 
     /**
-     * @return bool|MailChimp_Cart
+     * @return bool|MailChimp_WooCommerce_Cart
      */
     public function process()
     {
@@ -68,7 +68,7 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
 
                 $this->cart_data = json_decode($this->cart_data, true);
 
-                $api = new MailChimpApi($options['mailchimp_api_key']);
+                $api = new MailChimp_WooCommerce_MailChimpApi($options['mailchimp_api_key']);
 
                 // delete it and the add it back.
                 $api->deleteCartByID($store_id, $this->unique_id);
@@ -78,12 +78,12 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
                     return false;
                 }
 
-                $customer = new MailChimp_Customer();
+                $customer = new MailChimp_WooCommerce_Customer();
                 $customer->setId($this->unique_id);
                 $customer->setEmailAddress($this->email);
                 $customer->setOptInStatus(false);
 
-                $cart = new MailChimp_Cart();
+                $cart = new MailChimp_WooCommerce_Cart();
                 $cart->setId($this->unique_id);
                 $cart->setCampaignID($this->campaign_id);
                 $cart->setCheckoutUrl(wc_get_checkout_url());
@@ -125,7 +125,7 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
                     // let's loop through each item, verify that we have the product or not.
                     // if not, we will add it.
                     foreach ($products as $item) {
-                        /** @var MailChimp_LineItem $item */
+                        /** @var MailChimp_WooCommerce_LineItem $item */
                         $transformer = new MailChimp_WooCommerce_Single_Product($item->getProductID());
                         if (!$transformer->api()->getStoreProduct($store_id, $item->getProductId())) {
                             $transformer->handle();
@@ -152,13 +152,13 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
     /**
      * @param string $hash
      * @param $item
-     * @return MailChimp_LineItem
+     * @return MailChimp_WooCommerce_LineItem
      */
     protected function transformLineItem($hash, $item)
     {
         $product = new WC_Product($item['product_id']);
 
-        $line = new MailChimp_LineItem();
+        $line = new MailChimp_WooCommerce_LineItem();
         $line->setId($hash);
         $line->setProductId($item['product_id']);
 

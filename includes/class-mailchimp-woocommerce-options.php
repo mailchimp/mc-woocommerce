@@ -11,7 +11,7 @@
 abstract class MailChimp_Woocommerce_Options
 {
     /**
-     * @var MailChimpApi
+     * @var MailChimp_WooCommerce_MailChimpApi
      */
     protected $api;
     protected $plugin_name = 'mailchimp-woocommerce';
@@ -210,12 +210,12 @@ abstract class MailChimp_Woocommerce_Options
     }
 
     /**
-     * @return MailChimpApi
+     * @return MailChimp_WooCommerce_MailChimpApi
      */
     public function api()
     {
         if (empty($this->api)) {
-            $this->api = new MailChimpApi($this->getOption('mailchimp_api_key', false));
+            $this->api = new MailChimp_WooCommerce_MailChimpApi($this->getOption('mailchimp_api_key', false));
         }
 
         return $this->api;

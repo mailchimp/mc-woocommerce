@@ -8,7 +8,7 @@
  * Date: 3/8/16
  * Time: 2:17 PM
  */
-class MailChimp_Product
+class MailChimp_WooCommerce_Product
 {
     protected $id;
     protected $title;
@@ -50,7 +50,7 @@ class MailChimp_Product
 
     /**
      * @param mixed $id
-     * @return MailChimp_Product
+     * @return MailChimp_WooCommerce_Product
      */
     public function setId($id)
     {
@@ -69,7 +69,7 @@ class MailChimp_Product
 
     /**
      * @param mixed $title
-     * @return MailChimp_Product
+     * @return MailChimp_WooCommerce_Product
      */
     public function setTitle($title)
     {
@@ -88,7 +88,7 @@ class MailChimp_Product
 
     /**
      * @param null $handle
-     * @return MailChimp_Product
+     * @return MailChimp_WooCommerce_Product
      */
     public function setHandle($handle)
     {
@@ -107,7 +107,7 @@ class MailChimp_Product
 
     /**
      * @param null $url
-     * @return MailChimp_Product
+     * @return MailChimp_WooCommerce_Product
      */
     public function setUrl($url)
     {
@@ -126,7 +126,7 @@ class MailChimp_Product
 
     /**
      * @param null $description
-     * @return MailChimp_Product
+     * @return MailChimp_WooCommerce_Product
      */
     public function setDescription($description)
     {
@@ -145,7 +145,7 @@ class MailChimp_Product
 
     /**
      * @param null $type
-     * @return MailChimp_Product
+     * @return MailChimp_WooCommerce_Product
      */
     public function setType($type)
     {
@@ -164,7 +164,7 @@ class MailChimp_Product
 
     /**
      * @param null $vendor
-     * @return MailChimp_Product
+     * @return MailChimp_WooCommerce_Product
      */
     public function setVendor($vendor)
     {
@@ -183,7 +183,7 @@ class MailChimp_Product
 
     /**
      * @param null $image_url
-     * @return MailChimp_Product
+     * @return MailChimp_WooCommerce_Product
      */
     public function setImageUrl($image_url)
     {
@@ -201,10 +201,10 @@ class MailChimp_Product
     }
 
     /**
-     * @param MailChimp_ProductVariation $variation
-     * @return MailChimp_Product
+     * @param MailChimp_WooCommerce_ProductVariation $variation
+     * @return MailChimp_WooCommerce_Product
      */
-    public function addVariant(MailChimp_ProductVariation $variation)
+    public function addVariant(MailChimp_WooCommerce_ProductVariation $variation)
     {
         $this->variants[] = $variation;
 
@@ -221,7 +221,7 @@ class MailChimp_Product
 
     /**
      * @param \DateTime $time
-     * @return MailChimp_Product
+     * @return MailChimp_WooCommerce_Product
      */
     public function setPublishedAtForeign(\DateTime $time)
     {
@@ -253,7 +253,7 @@ class MailChimp_Product
 
     /**
      * @param array $data
-     * @return MailChimp_Product
+     * @return MailChimp_WooCommerce_Product
      */
     public function fromArray(array $data)
     {
@@ -272,7 +272,7 @@ class MailChimp_Product
         if (array_key_exists('variants', $data) && is_array($data['variants'])) {
             $this->variants = array();
             foreach ($data['variants'] as $variant) {
-                $this->variants[] = (new MailChimp_ProductVariation())->fromArray($variant);
+                $this->variants[] = (new MailChimp_WooCommerce_ProductVariation())->fromArray($variant);
             }
         }
 

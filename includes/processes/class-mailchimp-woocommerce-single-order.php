@@ -52,7 +52,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
         if (!empty($store_id) && is_array($options) && isset($options['mailchimp_api_key'])) {
 
             $job = new MailChimp_WooCommerce_Transform_Orders();
-            $api = new MailChimpApi($options['mailchimp_api_key']);
+            $api = new MailChimp_WooCommerce_MailChimpApi($options['mailchimp_api_key']);
 
             // set the campaign ID
             $job->campaign_id = $this->campaign_id;

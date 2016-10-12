@@ -8,7 +8,7 @@
  * Date: 7/8/16
  * Time: 4:16 PM
  */
-class MailChimp_CreateListSubmission
+class MailChimp_WooCommerce_CreateListSubmission
 {
     /**
      * @var array
@@ -112,10 +112,10 @@ class MailChimp_CreateListSubmission
     }
 
     /**
-     * @param MailChimp_Address $address
+     * @param MailChimp_WooCommerce_Address $address
      * @return $this
      */
-    public function setContact(MailChimp_Address $address)
+    public function setContact(MailChimp_WooCommerce_Address $address)
     {
         $data = array();
 

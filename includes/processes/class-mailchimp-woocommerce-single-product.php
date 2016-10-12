@@ -37,7 +37,7 @@ class MailChimp_WooCommerce_Single_Product extends WP_Job
     }
 
     /**
-     * @return MailChimp_Product
+     * @return MailChimp_WooCommerce_Product
      * @throws Exception
      */
     public function process()
@@ -60,10 +60,10 @@ class MailChimp_WooCommerce_Single_Product extends WP_Job
 
             return $product;
 
-        } catch (MailChimp_Error $e) {
-            mailchimp_log('product_submit.error', "addStoreProduct :: MailChimp_Error :: {$e->getMessage()}");
-        } catch (MailChimp_ServerError $e) {
-            mailchimp_log('product_submit.error', "addStoreProduct :: MailChimp_ServerError :: {$e->getMessage()}");
+        } catch (MailChimp_WooCommerce_Error $e) {
+            mailchimp_log('product_submit.error', "addStoreProduct :: MailChimp_WooCommerce_Error :: {$e->getMessage()}");
+        } catch (MailChimp_WooCommerce_ServerError $e) {
+            mailchimp_log('product_submit.error', "addStoreProduct :: MailChimp_WooCommerce_ServerError :: {$e->getMessage()}");
         } catch (Exception $e) {
             mailchimp_log('product_submit.error', "addStoreProduct :: Uncaught Exception :: {$e->getMessage()}");
         }
@@ -72,7 +72,7 @@ class MailChimp_WooCommerce_Single_Product extends WP_Job
     }
 
     /**
-     * @return MailChimpApi
+     * @return MailChimp_WooCommerce_MailChimpApi
      */
     public function api()
     {
@@ -82,7 +82,7 @@ class MailChimp_WooCommerce_Single_Product extends WP_Job
             $options = get_option('mailchimp-woocommerce', array());
 
             if (!empty($this->store_id) && is_array($options) && isset($options['mailchimp_api_key'])) {
-                return $this->api = new MailChimpApi($options['mailchimp_api_key']);
+                return $this->api = new MailChimp_WooCommerce_MailChimpApi($options['mailchimp_api_key']);
             }
 
             throw new \RuntimeException('The MailChimp API is not currently configured!');

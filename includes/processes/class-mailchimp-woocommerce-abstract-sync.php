@@ -16,7 +16,7 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
     private $api;
 
     /**
-     * @var MailChimpApi
+     * @var MailChimp_WooCommerce_MailChimpApi
      */
     private $mc;
 
@@ -311,12 +311,12 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
     }
 
     /**
-     * @return MailChimpApi
+     * @return MailChimp_WooCommerce_MailChimpApi
      */
     protected function mailchimp()
     {
         if (empty($this->mc)) {
-            $this->mc = new MailChimpApi($this->getOption('mailchimp_api_key'));
+            $this->mc = new MailChimp_WooCommerce_MailChimpApi($this->getOption('mailchimp_api_key'));
         }
         return $this->mc;
     }

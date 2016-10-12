@@ -35,7 +35,7 @@ if ( ! defined( 'WPINC' ) ) {
  */
 function mailchimp_environment_variables() {
 	return (object) array(
-		'repo' => 'master',
+		'repo' => 'develop',
 		'environment' => 'production',
 		'version' => '0.1.15',
 		'slack_token' => false,
@@ -51,12 +51,12 @@ function mailchimp_get_store_id() {
 }
 
 /**
- * @return bool|MailChimpApi
+ * @return bool|MailChimp_WooCommerce_MailChimpApi
  */
 function mailchimp_get_api() {
 	if (($options = get_option('mailchimp-woocommerce', false)) && is_array($options)) {
 		if (isset($options['mailchimp_api_key'])) {
-			return new MailChimpApi($options['mailchimp_api_key']);
+			return new MailChimp_WooCommerce_MailChimpApi($options['mailchimp_api_key']);
 		}
 	}
 	return false;

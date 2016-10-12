@@ -24,13 +24,13 @@ class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abtst
     }
 
     /**
-     * @param MailChimp_Product $item
+     * @param MailChimp_WooCommerce_Product $item
      *
      * @return mixed
      */
     protected function iterate($item) {
 
-        if ($item instanceof MailChimp_Product) {
+        if ($item instanceof MailChimp_WooCommerce_Product) {
 
             // need to run the delete option on this before submitting because the API does not support PATCH yet.
             $this->mailchimp()->deleteStoreProduct($this->store_id, $item->getId());
@@ -46,10 +46,10 @@ class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abtst
 
                 return $response;
 
-            } catch (MailChimp_Error $e) {
-                mailchimp_log('sync.products.error', "addStoreProduct :: MailChimp_Error :: {$e->getMessage()}");
-            } catch (MailChimp_ServerError $e) {
-                mailchimp_log('sync.products.error', "addStoreProduct :: MailChimp_ServerError :: {$e->getMessage()}");
+            } catch (MailChimp_WooCommerce_Error $e) {
+                mailchimp_log('sync.products.error', "addStoreProduct :: MailChimp_WooCommerce_Error :: {$e->getMessage()}");
+            } catch (MailChimp_WooCommerce_ServerError $e) {
+                mailchimp_log('sync.products.error', "addStoreProduct :: MailChimp_WooCommerce_ServerError :: {$e->getMessage()}");
             } catch (Exception $e) {
                 mailchimp_log('sync.products.error', "addStoreProduct :: Uncaught Exception :: {$e->getMessage()}");
             }

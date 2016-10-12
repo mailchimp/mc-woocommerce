@@ -50,13 +50,13 @@ class MailChimp_WooCommerce_Transform_Orders
 
     /**
      * @param WP_Post $post
-     * @return MailChimp_Order
+     * @return MailChimp_WooCommerce_Order
      */
     public function transform(WP_Post $post)
     {
         $woo = new WC_Order($post);
 
-        $order = new MailChimp_Order();
+        $order = new MailChimp_WooCommerce_Order();
 
         $order->setId($woo->id);
 
@@ -126,11 +126,11 @@ class MailChimp_WooCommerce_Transform_Orders
 
     /**
      * @param WC_Order $order
-     * @return MailChimp_Customer
+     * @return MailChimp_WooCommerce_Customer
      */
     public function buildCustomerFromOrder(WC_Order $order)
     {
-        $customer = new MailChimp_Customer();
+        $customer = new MailChimp_WooCommerce_Customer();
 
         $customer->setId(md5(trim(strtolower($order->billing_email))));
         $customer->setCompany($order->billing_company);
@@ -147,7 +147,7 @@ class MailChimp_WooCommerce_Transform_Orders
         $customer->setOptInStatus($subscribed_on_order);
 
         // use the info from the order to compile an address.
-        $address = new MailChimp_Address();
+        $address = new MailChimp_WooCommerce_Address();
         $address->setAddress1($order->billing_address_1);
         $address->setAddress2($order->billing_address_2);
         $address->setCity($order->billing_city);
@@ -192,12 +192,12 @@ class MailChimp_WooCommerce_Transform_Orders
     /**
      * @param $key
      * @param $order_detail
-     * @return MailChimp_LineItem
+     * @return MailChimp_WooCommerce_LineItem
      */
     protected function buildLineItem($key, $order_detail)
     {
         // fire up a new MC line item
-        $item = new MailChimp_LineItem();
+        $item = new MailChimp_WooCommerce_LineItem();
         $item->setId($key);
 
         if (isset($order_detail['item_meta']) && is_array($order_detail['item_meta'])) {
@@ -337,7 +337,7 @@ class MailChimp_WooCommerce_Transform_Orders
     public function getOrderAddresses(WC_Order $order)
     {
         // use the info from the order to compile an address.
-        $billing = new MailChimp_Address();
+        $billing = new MailChimp_WooCommerce_Address();
         $billing->setAddress1($order->billing_address_1);
         $billing->setAddress2($order->billing_address_2);
         $billing->setCity($order->billing_city);
@@ -347,7 +347,7 @@ class MailChimp_WooCommerce_Transform_Orders
         $billing->setPhone($order->billing_phone);
         $billing->setName('billing');
 
-        $shipping = new MailChimp_Address();
+        $shipping = new MailChimp_WooCommerce_Address();
         $shipping->setAddress1($order->shipping_address_1);
         $shipping->setAddress2($order->shipping_address_2);
         $shipping->setCity($order->shipping_city);
@@ -365,11 +365,11 @@ class MailChimp_WooCommerce_Transform_Orders
     /**
      * @param $user_id
      * @param string $type
-     * @return MailChimp_Address
+     * @return MailChimp_WooCommerce_Address
      */
     public function getUserAddress($user_id, $type = 'billing')
     {
-        $address = new MailChimp_Address();
+        $address = new MailChimp_WooCommerce_Address();
 
         // pull all the meta for this user.
         $meta = get_user_meta($user_id);

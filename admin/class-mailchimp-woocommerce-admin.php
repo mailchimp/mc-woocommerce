@@ -263,6 +263,10 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 				add_settings_error('mailchimp_store_settings', '', 'As part of the MailChimp Terms of Use, we require a contact email and a physical mailing address.');
 			}
 
+			if (empty($data['store_phone']) || strlen($data['store_phone']) <= 6) {
+				add_settings_error('mailchimp_store_settings', '', 'As part of the MailChimp Terms of Use, we require a valid phone number for your store.');
+			}
+
 			$this->setData('validation.store_info', false);
 			return array();
 		}

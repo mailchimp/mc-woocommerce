@@ -32,15 +32,45 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abtstra
     protected function iterate($item)
     {
         if ($item instanceof MailChimp_Order) {
+
+            // since we're syncing the customer for the first time, this is where we need to add the override
+            // for subscriber status. We don't get the checkbox until this plugin is actually installed and working!
+
+            if ((bool) $this->getOption('mailchimp_auto_subscribe', true)) {
+                $item->getCustomer()->setOptInStatus(true);
+            }
+
             $type = $this->mailchimp()->getStoreOrder($this->store_id, $item->getId()) ? 'update' : 'create';
             $call = $type === 'create' ? 'addStoreOrder' : 'updateStoreOrder';
+
             try {
-                $response = $this->mailchimp()->$call($this->store_id, $item);
+
+                $log = "$call :: #{$item->getId()} :: email: {$item->getCustomer()->getEmailAddress()}";
+
+                mailchimp_log('sync.orders.submitting', $log);
+
+                // make the call
+                $response = $this->mailchimp()->$call($this->store_id, $item, false);
+
+                if (empty($response)) {
+                    return $response;
+                }
+
+                mailchimp_log('sync.orders.success', $log);
+
                 $this->items[] = array('response' => $response, 'item' => $item);
-            } catch (\Exception $e) {
-                slack()->notice('MailChimp@ProcessOrders :: '.$call.' :: '.$e->getMessage());
+
+                return $response;
+
+            } catch (MailChimp_Error $e) {
+                mailchimp_log('sync.orders.error', "$call :: MailChimp_Error :: {$e->getMessage()}");
+            } catch (MailChimp_ServerError $e) {
+                mailchimp_log('sync.orders.error', "$call :: MailChimp_ServerError :: {$e->getMessage()}");
+            } catch (Exception $e) {
+                mailchimp_log('sync.orders.error', "$call :: Uncaught Exception :: {$e->getMessage()}");
             }
         }
+
         return false;
     }
 
@@ -49,6 +79,8 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abtstra
      */
     protected function complete()
     {
+        mailchimp_log('sync.orders.completed', 'Done with the order sync.');
+
         // add a timestamp for the orders sync completion
         $this->setResourceCompleteTime();
 

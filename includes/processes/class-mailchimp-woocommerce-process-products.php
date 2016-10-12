@@ -37,11 +37,21 @@ class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abtst
 
             // add the product.
             try {
-                $this->mailchimp()->addStoreProduct($this->store_id, $item);
+                mailchimp_log('sync.products.submitting', "addStoreProduct :: #{$item->getId()}");
+
+                // make the call
+                $response = $this->mailchimp()->addStoreProduct($this->store_id, $item);
+
+                mailchimp_log('sync.products.success', "addStoreProduct :: #{$item->getId()}");
+
+                return $response;
+
             } catch (MailChimp_Error $e) {
-                slack()->notice('MailChimp_WooCommerce_Process_Products::iterate - '.$e->getMessage());
+                mailchimp_log('sync.products.error', "addStoreProduct :: MailChimp_Error :: {$e->getMessage()}");
             } catch (MailChimp_ServerError $e) {
-                slack()->notice('MailChimp_WooCommerce_Process_Products::iterate - '.$e->getMessage());
+                mailchimp_log('sync.products.error', "addStoreProduct :: MailChimp_ServerError :: {$e->getMessage()}");
+            } catch (Exception $e) {
+                mailchimp_log('sync.products.error', "addStoreProduct :: Uncaught Exception :: {$e->getMessage()}");
             }
         }
 
@@ -53,6 +63,8 @@ class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abtst
      */
     protected function complete()
     {
+        mailchimp_log('sync.products.completed', 'Done with the product sync :: queuing up the orders next!');
+
         // add a timestamp for the product sync completion
         $this->setResourceCompleteTime();
 

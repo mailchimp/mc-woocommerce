@@ -71,25 +71,36 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                 // transform the order
                 $order = $job->transform(get_post($this->order_id));
 
+                // will be the same as the customer id. an md5'd hash of a lowercased email.
                 $this->cart_session_id = $order->getCustomer()->getId();
 
+                $log = "$call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}";
+
+                mailchimp_log('order_submit.submitting', $log);
 
                 // update or create
                 $api_response = $api->$call($store_id, $order, false);
 
-                $message = 'MailChimp_WooCommerce_Single_Order :: order #'.$this->order_id.' :: '.$call.' COMPLETED';
-
-                if (!empty($job->campaign_id)) {
-                    $message .= ' :: campaign id '.$job->campaign_id;
+                if (empty($api_response)) {
+                    return $api_response;
                 }
 
-                slack()->notice($message."\n".print_r($api_response, true));
+                if (!empty($job->campaign_id)) {
+                    $log .= ' :: campaign id '.$job->campaign_id;
+                }
+
+                mailchimp_log('order_submit.success', $log);
+
+                // if we're adding a new order and the session id is here, we need to delete the AC cart record.
+                if (!empty($this->cart_session_id)) {
+                    $api->deleteCartByID($store_id, $this->cart_session_id);
+                }
 
                 return $api_response;
 
             } catch (\Exception $e) {
 
-                $message = strtolower($e->getMessage());
+                mailchimp_log('order_submit.tracing_error', $message = strtolower($e->getMessage()));
 
                 if (!isset($order)) {
                     // transform the order
@@ -102,31 +113,33 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
                     try {
 
+                        mailchimp_log('order_submit.deleting_customer', "#{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}");
+
                         // delete the customer before adding it again.
                         $api->deleteCustomer($store_id, $order->getCustomer()->getId());
 
                         // update or create
                         $api_response = $api->$call($store_id, $order, false);
 
-                        $message = 'MailChimp_WooCommerce_Single_Order :: order #'.$this->order_id.' :: '.$call.' COMPLETED';
+                        $log = "Deleted Customer :: $call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}";
 
                         if (!empty($job->campaign_id)) {
-                            $message .= ' :: campaign id '.$job->campaign_id;
+                            $log .= ' :: campaign id '.$job->campaign_id;
                         }
 
-                        slack()->notice($message."\n".print_r($api_response, true));
+                        mailchimp_log('order_submit.success', $log);
+
+                        // if we're adding a new order and the session id is here, we need to delete the AC cart record.
+                        if (!empty($this->cart_session_id)) {
+                            $api->deleteCartByID($store_id, $this->cart_session_id);
+                        }
 
                         return $api_response;
 
                     } catch (\Exception $e) {
-                        slack()->notice('MailChimp_WooCommerce_Single_Order ERROR :: deleting-customer-re-add :: #'.$this->order_id.' :: '.$message);
+                        mailchimp_log('order_submit.error', 'deleting-customer-re-add :: #'.$this->order_id.' :: '.$e->getMessage());
                     }
                 }
-            }
-
-            // if we're adding a new order and the session id is here, we need to delete the AC cart record.
-            if ($call === 'addStoreOrder' && !empty($this->cart_session_id)) {
-                $api->deleteCartByID($store_id, $this->cart_session_id);
             }
         }
 

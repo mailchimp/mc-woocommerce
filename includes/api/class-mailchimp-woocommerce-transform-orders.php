@@ -72,7 +72,6 @@ class MailChimp_WooCommerce_Transform_Orders
             $order->setCancelledAt(mailchimp_date_utc($woo->modified_date));
         }
 
-
         $order->setCurrencyCode($woo->get_order_currency());
         $order->setFinancialStatus($woo->is_paid() ? 'paid' : 'pending');
 
@@ -94,11 +93,34 @@ class MailChimp_WooCommerce_Transform_Orders
 
         // loop through all the order items
         foreach ($woo->get_items() as $key => $order_detail) {
+
             // add it into the order item container.
-            $order->addItem($this->buildLineItem($key, $order_detail));
+            $item = $this->buildLineItem($key, $order_detail);
+
+            // if we don't have a product post with this id, we need to add a deleted product to the MC side
+            if (!($product_post = get_post($item->getProductId()))) {
+
+                // check if it exists, otherwise create a new one.
+                if (($deleted_product = MailChimp_WooCommerce_Transform_Products::deleted($item->getProductId()))) {
+
+                    $deleted_product_id = "deleted_{$item->getProductId()}";
+
+                    // swap out the old item id and product variant id with the deleted version.
+                    $item->setProductId($deleted_product_id);
+                    $item->setProductVariantId($deleted_product_id);
+
+                    // add the item and continue on the loop.
+                    $order->addItem($item);
+                    continue;
+                }
+
+                mailchimp_log('order.items.error', "Order #{$woo->id} :: Product {$item->getProductId()} does not exist!");
+                continue;
+            }
+
+            $order->addItem($item);
         }
 
-        //print_r($order->toArray());die();
         return $order;
     }
 

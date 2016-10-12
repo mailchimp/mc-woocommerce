@@ -1,38 +1,52 @@
 var mailchimp;
 var mailchimp_cart;
 var mailchimp_public_data;
+var mailchimp_billing_email;
 
-(function( $ ) {
+var mailchimpReady = function(f){
+	/in/.test(document.readyState)?setTimeout('mailchimpReady('+f+')',9):f()
+};
+
+function mailchimpHandleBillingEmail() {
+
+	var billing_email = document.querySelector('#billing_email');
+	var user = undefined !== billing_email ? billing_email.value : '';
+
+	if (!mailchimp_cart.valueEmail(user)) {
+		return false;
+	}
+
+	mailchimp_cart.setEmail(user);
+
+	try {
+		var submit_email_url = mailchimp_public_data.site_url+
+			'?mailchimp-woocommerce[action]=submit-email&mailchimp-woocommerce[submission][email]='+user;
+
+		var submit_email_request = new XMLHttpRequest();
+
+		submit_email_request.open('POST', submit_email_url, true);
+
+		submit_email_request.onload = function() {
+			if (submit_email_request.status >= 200 && submit_email_request.status < 400) {
+				console.log('success', submit_email_request.responseText);
+			} else {
+				console.log('error', submit_email_request.responseText);
+			}
+		};
+
+		submit_email_request.onerror = function() {
+			console.log('submit email error', submit_email_request.responseText);
+		};
+
+		submit_email_request.setRequestHeader('Content-Type', 'application/json');
+		submit_email_request.setRequestHeader('Accept', 'application/json');
+		submit_email_request.send();
+
+	} catch (e) {console.log('mailchimp_campaign_tracking.error', e);}
+}
+
+(function() {
 	'use strict';
-
-	/**
-	 * All of the code for your public-facing JavaScript source
-	 * should reside in this file.
-	 *
-	 * Note: It has been assumed you will write jQuery code here, so the
-	 * $ function reference has been prepared for usage within the scope
-	 * of this function.
-	 *
-	 * This enables you to define handlers, for when the DOM is ready:
-	 *
-	 * $(function() {
-	 *
-	 * });
-	 *
-	 * When the window is loaded:
-	 *
-	 * $( window ).load(function() {
-	 *
-	 * });
-	 *
-	 * ...and/or other possibilities.
-	 *
-	 * Ideally, it is not considered best practise to attach more than a
-	 * single DOM-ready or window-load handler for a particular page.
-	 * Although scripts in the WordPress core, Plugins and Themes may be
-	 * practising this, we should strive to set a better example in our own work.
-	 */
-
 	var requestTransport = null;
 	var scriptTagCounter = 1, head;
 	var storageLife = "30";
@@ -253,60 +267,41 @@ var mailchimp_public_data;
 			return this.regex_email.test(email);
 		};
 
-		$(document).on("blur", "#billing_email",function() {
-			var user = $("#billing_email").val();
-			if (!mailchimp_cart.valueEmail(user)) {
-				return false;
-			}
-			mailchimp_cart.setEmail(user);
-
-			$.ajax({
-				beforeSend: function (xhrObj) {
-					xhrObj.setRequestHeader("Content-Type", "application/json");
-					xhrObj.setRequestHeader("Accept", "application/json");
-				},
-				crossDomain: true,
-				dataType: "json",
-				type: 'POST',
-				url: mailchimp_public_data.site_url+'?mailchimp-woocommerce[action]=submit-email&mailchimp-woocommerce[submission][email]='+user,
-				data: {},
-				success: function (responseData, textStatus, jqXHR) {
-					console.log('email saved', responseData);
-				},
-				error: function (responseData, textStatus, errorThrown) {
-					mailchimp_cart.post_error = errorThrown;
-					console.log('error while saving email', responseData);
-				}
-			});
-		});
-
 		return this;
 	}
 
 	mailchimp_cart = new MailChimpCart();
+})();
 
-	var qsc = mailchimpUtils.getQueryStringVars();
+mailchimpReady(function(){
+
+	var qsc = mailchimp.utils.getQueryStringVars();
 
 	// MailChimp Data //
 	if (qsc.mc_cid !== undefined && qsc.mc_eid !== undefined) {
-		$.ajax({
-			beforeSend: function (xhrObj) {
-				xhrObj.setRequestHeader("Content-Type", "application/json");
-				xhrObj.setRequestHeader("Accept", "application/json");
-			},
-			crossDomain: true,
-			dataType: "json",
-			type: 'POST',
-			url: mailchimp_public_data.site_url+'?mailchimp-woocommerce[action]=track-campaign&mailchimp-woocommerce[submission][campaign_id]='+qsc.mc_cid[0]+'&mailchimp-woocommerce[submission][email_id]='+qsc.mc_eid[0],
-			data: {},
-			success: function (responseData, textStatus, jqXHR) {
-				console.log('campaign data saved', responseData);
-			},
-			error: function (responseData, textStatus, errorThrown) {
-				mailchimp_cart.post_error = errorThrown;
-				console.log('error while saving campaign data', responseData);
-			}
-		});
+		var post_campaign_tracking_url = mailchimp_public_data.site_url+
+			'?mailchimp-woocommerce[action]=track-campaign&mailchimp-woocommerce[submission][campaign_id]='+
+			qsc.mc_cid[0]+
+			'&mailchimp-woocommerce[submission][email_id]='+
+			qsc.mc_eid[0];
+
+		try {
+			var post_campaign_request = new XMLHttpRequest();
+			post_campaign_request.open('POST', post_campaign_tracking_url, true);
+			post_campaign_request.setRequestHeader('Content-Type', 'application/json');
+			post_campaign_request.setRequestHeader('Accept', 'application/json');
+			post_campaign_request.send(data);
+		} catch (e) {console.log('mailchimp_campaign_tracking.error', e);}
 	}
 
-})( jQuery );
+	mailchimp_billing_email = document.querySelector('#billing_email');
+
+	if (mailchimp_billing_email) {
+		mailchimp_billing_email.onblur = function() {
+			mailchimpHandleBillingEmail();
+		};
+		mailchimp_billing_email.onfocus = function() {
+			mailchimpHandleBillingEmail();
+		};
+	}
+});

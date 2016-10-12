@@ -64,7 +64,7 @@ class MailChimp_WooCommerce_Transform_Products
 
         foreach ($variants as $variant) {
 
-            $product_variant = $this->variant($is_variant, $variant);
+            $product_variant = $this->variant($is_variant, $variant, $woo->get_title());
 
             $product_variant_title = $product_variant->getTitle();
 
@@ -87,23 +87,25 @@ class MailChimp_WooCommerce_Transform_Products
     /**
      * @param $is_variant
      * @param WP_Post $post
+     * @param string $fallback_title
      * @return MailChimp_ProductVariation
      */
-    public function variant($is_variant, $post)
+    public function variant($is_variant, $post, $fallback_title = null)
     {
-        if ($post instanceof WC_Product_Variation) {
+        if ($post instanceof WC_Product || $post instanceof WC_Product_Variation) {
             $woo = $post;
-        } elseif ($is_variant && isset($post->post) && $post->post->post_parent > 0) {
-            $woo = new WC_Product_Variation($post->post);
         } else {
-            $woo = $post;
+            if (isset($post->post_type) && $post->post_type === 'product_variation') {
+                $woo = new WC_Product_Variation($post->ID);
+            } else {
+                $woo = new WC_Product($post);
+            }
         }
 
         $variant = new MailChimp_ProductVariation();
 
         $variant->setId($woo->get_id());
         $variant->setUrl($woo->get_permalink());
-        $variant->setTitle($woo->get_title());
         $variant->setBackorders($woo->backorders_allowed());
         $variant->setImageUrl(get_the_post_thumbnail_url($post));
         $variant->setInventoryQuantity(($woo->managing_stock() ? $woo->get_stock_quantity() : 0));
@@ -111,9 +113,24 @@ class MailChimp_WooCommerce_Transform_Products
         $variant->setSku($woo->get_sku());
 
         if ($woo instanceof WC_Product_Variation) {
+
+            $variation_title = $woo->get_title();
+            if (empty($variation_title)) $variation_title = $fallback_title;
+
+            $title = array($variation_title);
+
+            foreach ($woo->get_variation_attributes() as $attribute => $value) {
+                if (is_string($value)) {
+                    $name = ucfirst(str_replace('attribute_pa_', '', $attribute));
+                    $title[] = "$name = $value";
+                }
+            }
+
+            $variant->setTitle(implode(' :: ', $title));
             $variant->setVisibility(($woo->variation_is_visible() ? 'visible' : ''));
         } else {
             $variant->setVisibility(($woo->is_visible() ? 'visible' : ''));
+            $variant->setTitle($woo->get_title());
         }
 
         return $variant;
@@ -160,5 +177,32 @@ class MailChimp_WooCommerce_Transform_Products
         }
 
         return $variants;
+    }
+
+    /**
+     * @param $id
+     * @return MailChimp_Product
+     */
+    public static function deleted($id)
+    {
+        $store_id = mailchimp_get_store_id();
+        $api = mailchimp_get_api();
+
+        if (!($product = $api->getStoreProduct($store_id, "deleted_{$id}"))) {
+            $product = new MailChimp_Product();
+
+            $product->setId("deleted_{$id}");
+            $product->setTitle("deleted_{$id}");
+
+            $variant = new MailChimp_ProductVariation();
+            $variant->setId("deleted_{$id}");
+            $variant->setTitle("deleted_{$id}");
+
+            $product->addVariant($variant);
+
+            return $api->addStoreProduct($store_id, $product);
+        }
+
+        return $product;
     }
 }

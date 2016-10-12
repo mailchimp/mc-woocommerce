@@ -25,5 +25,6 @@ if (($sync_complete_at = $this->getData('sync.completed_at', false))) {
 
 <h2 style="padding-top: 1em;">Sync Timeline</h2>
 
-<p>Sync Started At: <?php echo $sync_started_at; ?></p>
-<p>Sync Completed At: <?php echo $sync_complete_at; ?></p>
+<p>Sync Started: <?php echo $sync_started_at; ?></p>
+<p>Sync Completed: <?php echo $sync_complete_at; ?></p>
+

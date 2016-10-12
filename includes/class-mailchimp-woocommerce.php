@@ -62,6 +62,45 @@ class MailChimp_Woocommerce {
 	 */
 	protected $environment = 'production';
 
+	protected static $logging_config = null;
+
+	/**
+	 * @return object
+	 */
+	public static function getLoggingConfig()
+	{
+		if (is_object(static::$logging_config)) {
+			return static::$logging_config;
+		}
+
+		$plugin_options = get_option('mailchimp-woocommerce');
+		$is_options = is_array($plugin_options);
+
+		$api_key = $is_options && array_key_exists('mailchimp_api_key', $plugin_options) ?
+			$plugin_options['mailchimp_api_key'] : false;
+
+		$enable_logging = $is_options &&
+			array_key_exists('mailchimp_debugging', $plugin_options) &&
+			$plugin_options['mailchimp_debugging'];
+
+		$account_id = $is_options && array_key_exists('mailchimp_account_info_id', $plugin_options) ?
+			$plugin_options['mailchimp_account_info_id'] : false;
+
+		$username = $is_options && array_key_exists('mailchimp_account_info_username', $plugin_options) ?
+			$plugin_options['mailchimp_account_info_username'] : false;
+
+		$api_key_parts = str_getcsv($api_key, '-');
+		$data_center = isset($api_key_parts[1]) ? $api_key_parts[1] : 'us1';
+
+		return static::$logging_config = (object) array(
+			'enable_logging' => (bool) $enable_logging,
+			'account_id' => $account_id,
+			'username' => $username,
+			'endpoint' => 'https://ecommerce.'.$data_center.'.list-manage.com/ecommerce/log',
+		);
+	}
+
+
 	/**
 	 * Define the core functionality of the plugin.
 	 *

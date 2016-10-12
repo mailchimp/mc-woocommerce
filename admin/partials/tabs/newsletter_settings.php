@@ -28,15 +28,15 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
     </div>
 <?php endif; ?>
 
-<h2 style="padding-top: 1em;">Newsletter Settings</h2>
-<p>Please apply your settings for checkout.</p>
+<h2 style="padding-top: 1em;">List Settings</h2>
+<p>Please apply your list settings. If you don't have a list, you can choose to create one.</p>
 
 <fieldset>
     <legend class="screen-reader-text">
         <span>List Name</span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-mailchimp-list-label">
-        <select name="<?php echo $this->plugin_name; ?>[mailchimp_list]]" style="width:30%" required <?php if($list_is_configured): ?> disabled <?php endif; ?>>
+        <select name="<?php echo $this->plugin_name; ?>[mailchimp_list]" style="width:30%" required <?php if($list_is_configured): ?> disabled <?php endif; ?>>
 
             <?php if(!isset($allow_new_list) || $allow_new_list === true): ?>
             <option value="create_new">Create New List</option>
@@ -54,7 +54,27 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
             }
             ?>
         </select>
-        <span><?php esc_attr_e('Choose an existing list, or create a new one', $this->plugin_name); ?></span>
+        <span><?php esc_attr_e('Choose a list to sync with your store.', $this->plugin_name); ?></span>
+    </label>
+</fieldset>
+
+<fieldset>
+    <legend class="screen-reader-text">
+        <span>Auto Subscribe On Initial Sync</span>
+    </legend>
+    <label for="<?php echo $this->plugin_name; ?>-mailchimp-auto-subscribe">
+        <select name="<?php echo $this->plugin_name; ?>[mailchimp_auto_subscribe]" style="width:30%" required <?php if($list_is_configured): ?> disabled <?php endif; ?>>
+
+            <?php
+            $enable_auto_subscribe = (array_key_exists('mailchimp_auto_subscribe', $options) && !is_null($options['mailchimp_auto_subscribe'])) ? $options['mailchimp_auto_subscribe'] : '1';
+
+            foreach (['0' => 'No', '1' => 'Yes'] as $key => $value ) {
+                echo '<option value="' . esc_attr( $key ) . '" ' . selected($key == $enable_auto_subscribe, true, false ) . '>' . esc_html( $value ) . '</option>';
+            }
+            ?>
+
+        </select>
+        <span><?php esc_attr_e('During initial sync, auto subscribe the existing customers.', $this->plugin_name); ?></span>
     </label>
 </fieldset>
 
@@ -64,7 +84,6 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-newsletter-checkbox-label">
         <input style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-newsletter-checkbox-label" name="<?php echo $this->plugin_name; ?>[newsletter_label]" value="<?php echo isset($options['newsletter_label']) ? $options['newsletter_label'] : 'Subscribe to our newsletter' ?>" />
-        <span><?php esc_attr_e('Checkout subscribe text', $this->plugin_name); ?></span>
+        <span><?php esc_attr_e('Write a subscribe message for customers at checkout.', $this->plugin_name); ?></span>
     </label>
 </fieldset>
-

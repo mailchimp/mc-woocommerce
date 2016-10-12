@@ -87,12 +87,12 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
 
             $previous = $this->getPreviousEmailFromSession();
 
-            $uid = md5(trim($user_email));
+            $uid = md5(trim(strtolower($user_email)));
 
             // delete the previous records.
             if (!empty($previous) && $previous !== $user_email) {
-                if ($this->api()->deleteCartByID($this->getUniqueStoreID(), $previous_email = md5(trim($previous)))) {
-                    slack()->notice("CART SWAP :: Deleted cart for $previous :: ID [$previous_email]");
+                if ($this->api()->deleteCartByID($this->getUniqueStoreID(), $previous_email = md5(trim(strtolower($previous))))) {
+                    mailchimp_log('ac.cart_swap', "Deleted cart [$previous] :: ID [$previous_email]");
                 }
             }
 
@@ -122,11 +122,11 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      * @param bool $update Whether this is an existing post being updated or not.
      */
     public function handlePostSaved($post_id, $post, $update) {
-        if ('product' != $post->post_type) {
-            return;
+        if ('product' == $post->post_type) {
+            wp_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
+        } elseif ('shop_order' == $post->post_type) {
+            wp_queue(new MailChimp_WooCommerce_Single_Order($post_id, null, null));
         }
-
-        wp_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
     }
 
     /**
@@ -199,8 +199,6 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     {
         $cid = trim($id);
 
-        slack()->notice('Tracking MailChimp Campaign :: '.$cid);
-
         @setcookie('mailchimp_campaign_id', $cid, $cookie_duration, '/' );
         $this->setWooSession('mailchimp_campaign_id', $cid);
 
@@ -234,7 +232,10 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function getWooSession($key, $default = null)
     {
-        return WC()->session->get($key, $default);
+        if (!($woo = WC()) || empty($woo->session)) {
+            return $default;
+        }
+        return $woo->session->get($key, $default);
     }
 
     /**
@@ -244,7 +245,11 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function setWooSession($key, $value)
     {
-        WC()->session->set($key, $value);
+        if (!($woo = WC()) || empty($woo->session)) {
+            return $this;
+        }
+
+        $woo->session->set($key, $value);
 
         return $this;
     }
@@ -255,7 +260,11 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function removeWooSession($key)
     {
-        WC()->session->__unset($key);
+        if (!($woo = WC()) || empty($woo->session)) {
+            return $this;
+        }
+
+        $woo->session->__unset($key);
         return $this;
     }
 
@@ -328,23 +337,27 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     protected function sync()
     {
-        delete_option('mailchimp-woocommerce-errors.store_info');
-        delete_option('mailchimp-woocommerce-sync.orders.completed_at');
-        delete_option('mailchimp-woocommerce-sync.orders.current_page');
-        delete_option('mailchimp-woocommerce-sync.products.completed_at');
-        delete_option('mailchimp-woocommerce-sync.products.current_page');
-        delete_option('mailchimp-woocommerce-sync.syncing');
-        delete_option('mailchimp-woocommerce-sync.started_at');
-        delete_option('mailchimp-woocommerce-sync.completed_at');
-        delete_option('mailchimp-woocommerce-validation.api.ping');
-        delete_option('mailchimp-woocommerce-cached-api-lists');
-        delete_option('mailchimp-woocommerce-cached-api-ping-check');
+        // only do this if we're an admin user.
+        if ($this->isAdmin()) {
 
-        $job = new MailChimp_WooCommerce_Process_Products();
-        $job->flagStartSync();
-        wp_queue($job);
+            delete_option('mailchimp-woocommerce-errors.store_info');
+            delete_option('mailchimp-woocommerce-sync.orders.completed_at');
+            delete_option('mailchimp-woocommerce-sync.orders.current_page');
+            delete_option('mailchimp-woocommerce-sync.products.completed_at');
+            delete_option('mailchimp-woocommerce-sync.products.current_page');
+            delete_option('mailchimp-woocommerce-sync.syncing');
+            delete_option('mailchimp-woocommerce-sync.started_at');
+            delete_option('mailchimp-woocommerce-sync.completed_at');
+            delete_option('mailchimp-woocommerce-validation.api.ping');
+            delete_option('mailchimp-woocommerce-cached-api-lists');
+            delete_option('mailchimp-woocommerce-cached-api-ping-check');
 
-        wp_redirect('/options-general.php?page=mailchimp-woocommerce&tab=api_key&success_notice=re-sync-started');
+            $job = new MailChimp_WooCommerce_Process_Products();
+            $job->flagStartSync();
+            wp_queue($job);
+
+            wp_redirect('/options-general.php?page=mailchimp-woocommerce&tab=api_key&success_notice=re-sync-started');
+        }
 
         return;
     }

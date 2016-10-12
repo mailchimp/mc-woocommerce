@@ -19,7 +19,28 @@ if (isset($options['mailchimp_api_key']) && !$handler->hasValidApiKey()) {
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-mailchimp-api-key">
         <input style="width: 30%;" type="password" id="<?php echo $this->plugin_name; ?>-mailchimp-api-key" name="<?php echo $this->plugin_name; ?>[mailchimp_api_key]" value="<?php echo isset($options['mailchimp_api_key']) ? $options['mailchimp_api_key'] : '' ?>" />
-        <span><?php esc_attr_e('Enter your MailChimp API key here.', $this->plugin_name); ?></span>
+        <span><?php esc_attr_e('Enter your MailChimp API key.', $this->plugin_name); ?></span>
+    </label>
+</fieldset>
+
+<fieldset>
+    <legend class="screen-reader-text">
+        <span>Enable Debugging</span>
+    </legend>
+    <label for="<?php echo $this->plugin_name; ?>-mailchimp-debugging">
+        <select name="<?php echo $this->plugin_name; ?>[mailchimp_debugging]" style="width:30%">
+
+            <?php
+
+            $enable_mailchimp_debugging = (array_key_exists('mailchimp_debugging', $options) && !is_null($options['mailchimp_debugging'])) ? $options['mailchimp_debugging'] : '1';
+
+            foreach (['0' => 'No', '1' => 'Yes'] as $key => $value ) {
+                echo '<option value="' . esc_attr($key) . '" ' . selected($key == $enable_mailchimp_debugging, true, false ) . '>' . esc_html( $value ) . '</option>';
+            }
+            ?>
+
+        </select>
+        <span><?php esc_attr_e('Enable debugging logs to be sent to MailChimp.', $this->plugin_name); ?></span>
     </label>
 </fieldset>
 

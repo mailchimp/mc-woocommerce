@@ -13,12 +13,12 @@
  * @package           MailChimp_Woocommerce
  *
  * @wordpress-plugin
- * Plugin Name:       MailChimp WooCommerce
- * Plugin URI:        https://woocommerce.mailchimpapp.com
+ * Plugin Name:       MailChimp for WooCommerce
+ * Plugin URI:        https://mailchimp.com/connect-your-store/
  * Description:       MailChimp - WooCommerce plugin
- * Version:           1.0.0
+ * Version:           0.1.15
  * Author:            MailChimp
- * Author URI:        https://woocommerce.mailchimpapp.com
+ * Author URI:        https://mailchimp.com
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       mailchimp-woocommerce
@@ -37,7 +37,7 @@ function mailchimp_environment_variables() {
 	return (object) array(
 		'repo' => 'master',
 		'environment' => 'production',
-		'version' => '1.0.0',
+		'version' => '0.1.15',
 		'slack_token' => false,
 		'slack_channel' => 'mc-woo',
 	);
@@ -181,9 +181,11 @@ function run_mailchimp_plugin_updater() {
 		require plugin_dir_path( __FILE__ ) . 'includes/plugin-update-checker/plugin-update-checker.php';
 	}
 
+	$env = mailchimp_environment_variables();
+
 	/** @var \PucGitHubChecker_3_1 $checker */
 	$updater = PucFactory::getLatestClassVersion('PucGitHubChecker');
-	$checker = new $updater('https://github.com/mailchimp/mc-woocommerce/', __FILE__, 'master', 1);
+	$checker = new $updater('https://github.com/mailchimp/mc-woocommerce/', __FILE__, $env->repo, 1);
 	$checker->handleManualCheck();
 }
 
@@ -193,6 +195,65 @@ function run_mailchimp_plugin_updater() {
 function slack()
 {
 	return Frlnc\Slack\Logger::instance();
+}
+
+/**
+ * @param $action
+ * @param $message
+ * @param array $data
+ * @return array|WP_Error
+ */
+function mailchimp_log($action, $message, $data = array())
+{
+	$options = MailChimp_Woocommerce::getLoggingConfig();
+
+	if (!$options->enable_logging || !$options->account_id || !$options->username) {
+		return false;
+	}
+
+	$data = array(
+		'account_id' => $options->account_id,
+		'username' => $options->username,
+		'store_domain' => site_url(),
+		'platform' => 'woocommerce',
+		'action' => $action,
+		'message' => $message,
+		'data' => $data,
+	);
+
+	$slack_message = "$action :: $message";
+
+	if (!empty($data['data'])) {
+		$slack_message .= "\n\n".(print_r($data['data'], true));
+	}
+
+	slack()->notice($slack_message);
+
+	return wp_remote_post($options->endpoint, array(
+		'headers' => array(
+			'Accept: application/json',
+			'Content-Type: application/json'
+		),
+		'body' => json_encode($data),
+	));
+}
+
+/**
+ * Determine if a given string contains a given substring.
+ *
+ * @param  string  $haystack
+ * @param  string|array  $needles
+ * @return bool
+ */
+function mailchimp_string_contains($haystack, $needles)
+{
+	foreach ((array) $needles as $needle) {
+		if ($needle != '' && mb_strpos($haystack, $needle) !== false) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 register_activation_hook( __FILE__, 'activate_mailchimp_woocommerce' );
@@ -225,7 +286,7 @@ if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
 }
 
 /** Add the plugin updater function ONLY when they are logged in as admin. */
-add_action('admin_init', 'run_vextras_plugin_updater');
+add_action('admin_init', 'run_mailchimp_plugin_updater');
 
 /** Add all the MailChimp hooks. */
 run_mailchimp_woocommerce();

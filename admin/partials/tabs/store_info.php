@@ -94,7 +94,7 @@ if (!$handler->hasValidApiKey()) {
 
 <h2 style="padding-top: 1em;">Locale Settings</h2>
 
-<p>Please apply your locale settings. If you're unsure about these just leave the defaults.</p>
+<p>Please apply your locale settings. If you're unsure about these, use the defaults.</p>
 
 <fieldset>
     <legend class="screen-reader-text">
@@ -118,7 +118,7 @@ if (!$handler->hasValidApiKey()) {
         <span>Currency Code</span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-currency-code-label">
-        <select name="<?php echo $this->plugin_name; ?>[store_currency_code]]" style="width:30%" required>
+        <select name="<?php echo $this->plugin_name; ?>[store_currency_code]" style="width:30%" required>
             <?php
             $selected_currency_code = isset($options['store_currency_code']) && !empty($options['store_currency_code']) ? $options['store_currency_code'] : 'USD';
             foreach (MailChimp_Api_CurrencyCodes::lists() as $key => $value ) {

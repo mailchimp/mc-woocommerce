@@ -46,13 +46,29 @@ class MailChimp_WooCommerce_Single_Product extends WP_Job
             $this->api()->deleteStoreProduct($this->store_id, $this->product_id);
         }
 
-        $product = $this->transformer()->transform(get_post($this->product_id));
+        try {
 
-        $this->api()->addStoreProduct($this->store_id, $product);
+            $product = $this->transformer()->transform(get_post($this->product_id));
 
-        update_option('mailchimp-woocommerce-last_product_updated', $product->getId());
+            mailchimp_log('product_submit.submitting', "addStoreProduct :: #{$product->getId()}");
 
-        return $product;
+            $this->api()->addStoreProduct($this->store_id, $product, false);
+
+            mailchimp_log('product_submit.success', "addStoreProduct :: #{$product->getId()}");
+
+            update_option('mailchimp-woocommerce-last_product_updated', $product->getId());
+
+            return $product;
+
+        } catch (MailChimp_Error $e) {
+            mailchimp_log('product_submit.error', "addStoreProduct :: MailChimp_Error :: {$e->getMessage()}");
+        } catch (MailChimp_ServerError $e) {
+            mailchimp_log('product_submit.error', "addStoreProduct :: MailChimp_ServerError :: {$e->getMessage()}");
+        } catch (Exception $e) {
+            mailchimp_log('product_submit.error', "addStoreProduct :: Uncaught Exception :: {$e->getMessage()}");
+        }
+
+        return false;
     }
 
     /**

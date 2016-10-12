@@ -940,6 +940,8 @@ class MailChimpApi
      */
     protected function applyCurlOptions($method, $url, $params = array())
     {
+        //$env = mailchimp_environment_variables();
+
         return array(
             CURLOPT_USERPWD => "mailchimp:{$this->api_key}",
             CURLOPT_CUSTOMREQUEST => strtoupper($method),

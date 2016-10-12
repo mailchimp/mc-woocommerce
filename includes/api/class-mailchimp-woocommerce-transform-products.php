@@ -64,7 +64,7 @@ class MailChimp_WooCommerce_Transform_Products
 
         foreach ($variants as $variant) {
 
-            $product_variant = $this->variant($is_variant, $variant);
+            $product_variant = $this->variant($is_variant, $variant, $woo->get_title());
 
             $product_variant_title = $product_variant->getTitle();
 
@@ -87,9 +87,10 @@ class MailChimp_WooCommerce_Transform_Products
     /**
      * @param $is_variant
      * @param WP_Post $post
+     * @param string $fallback_title
      * @return MailChimp_ProductVariation
      */
-    public function variant($is_variant, $post)
+    public function variant($is_variant, $post, $fallback_title = null)
     {
         if ($post instanceof WC_Product || $post instanceof WC_Product_Variation) {
             $woo = $post;
@@ -105,7 +106,6 @@ class MailChimp_WooCommerce_Transform_Products
 
         $variant->setId($woo->get_id());
         $variant->setUrl($woo->get_permalink());
-        $variant->setTitle($woo->get_title());
         $variant->setBackorders($woo->backorders_allowed());
         $variant->setImageUrl(get_the_post_thumbnail_url($post));
         $variant->setInventoryQuantity(($woo->managing_stock() ? $woo->get_stock_quantity() : 0));
@@ -113,9 +113,24 @@ class MailChimp_WooCommerce_Transform_Products
         $variant->setSku($woo->get_sku());
 
         if ($woo instanceof WC_Product_Variation) {
+
+            $variation_title = $woo->get_title();
+            if (empty($variation_title)) $variation_title = $fallback_title;
+
+            $title = array($variation_title);
+
+            foreach ($woo->get_variation_attributes() as $attribute => $value) {
+                if (is_string($value)) {
+                    $name = ucfirst(str_replace('attribute_pa_', '', $attribute));
+                    $title[] = "$name = $value";
+                }
+            }
+
+            $variant->setTitle(implode(' :: ', $title));
             $variant->setVisibility(($woo->variation_is_visible() ? 'visible' : ''));
         } else {
             $variant->setVisibility(($woo->is_visible() ? 'visible' : ''));
+            $variant->setTitle($woo->get_title());
         }
 
         return $variant;

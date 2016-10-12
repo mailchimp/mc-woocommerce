@@ -24,7 +24,7 @@ class MailChimp_WooCommerce_Order
     protected $cancelled_at_foreign = null;
     protected $shipping_address = null;
     protected $billing_address = null;
-    protected $lines = [];
+    protected $lines = array();
 
     /**
      * @return array
@@ -394,7 +394,7 @@ class MailChimp_WooCommerce_Order
         }
 
         if (array_key_exists('lines', $data) && is_array($data['lines'])) {
-            $this->lines = [];
+            $this->lines = array();
             foreach ($data['lines'] as $line_item) {
                 $this->lines[] = (new MailChimp_WooCommerce_LineItem())->fromArray($line_item);
             }

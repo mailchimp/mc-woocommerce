@@ -15,7 +15,7 @@ class MailChimp_Api_Locales
      */
     public function all()
     {
-        return [
+        return array(
             "af_NA"=> "Afrikaans (Namibia)",
             "af_ZA"=> "Afrikaans (South Africa)",
             "af"=> "Afrikaans",
@@ -450,7 +450,7 @@ class MailChimp_Api_Locales
             "yo"=> "Yoruba",
             "zu_ZA"=> "Zulu (South Africa)",
             "zu"=> "Zulu"
-        ];
+        );
     }
 
     /**

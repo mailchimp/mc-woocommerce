@@ -765,7 +765,7 @@ class MailChimp_WooCommerce_MailChimpApi
      */
     protected function validateStoreOrder(MailChimp_WooCommerce_Order $order)
     {
-        if (mailchimp_string_contains($order->getCustomer()->getEmailAddress(), ['marketplace.amazon.com'])) {
+        if (mailchimp_string_contains($order->getCustomer()->getEmailAddress(), array('marketplace.amazon.com'))) {
             mailchimp_log('validation.amazon', "Order #{$order->getId()} was placed through Amazon. Skipping!");
             return false;
         }
@@ -836,17 +836,17 @@ class MailChimp_WooCommerce_MailChimpApi
             // ah snap, gotta try the file get contents fallback.
             mailchimp_log('api.patch.fallback', 'stream', array('curl_version' => curl_version()));
 
-            $context = stream_context_create([
-                'http' => [
+            $context = stream_context_create(array(
+                'http' => array(
                     'method' => 'PATCH',
-                    'header' => [
+                    'header' => array(
                         'Authorization: Basic '.base64_encode('mailchimp:'.$this->api_key),
                         'Accept: application/json',
                         'Content-Type: application/json'
-                    ],
+                    ),
                     'content' => json_encode($body)
-                ]
-            ]);
+                )
+            ));
 
             $response = file_get_contents($this->url($url), FALSE, $context);
 
@@ -952,10 +952,10 @@ class MailChimp_WooCommerce_MailChimpApi
             CURLOPT_TIMEOUT => 30,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLINFO_HEADER_OUT => true,
-            CURLOPT_HTTPHEADER => [
+            CURLOPT_HTTPHEADER => array(
                 'content-type: application/json',
                 'user-agent: MailChimp for WooCommerce',
-            ]
+            )
         );
     }
 

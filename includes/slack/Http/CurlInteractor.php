@@ -14,7 +14,7 @@ class CurlInteractor implements \Frlnc\Slack\Contracts\Http\Interactor {
     /**
      * {@inheritdoc}
      */
-    public function get($url, array $parameters = [], array $headers = [])
+    public function get($url, array $parameters = array(), array $headers = array())
     {
         $request = $this->prepareRequest($url, $parameters, $headers);
 
@@ -24,7 +24,7 @@ class CurlInteractor implements \Frlnc\Slack\Contracts\Http\Interactor {
     /**
      * {@inheritdoc}
      */
-    public function post($url, array $urlParameters = [], array $postParameters = [], array $headers = [])
+    public function post($url, array $urlParameters = array(), array $postParameters = array(), array $headers = array())
     {
         $request = $this->prepareRequest($url, $urlParameters, $headers);
 
@@ -42,7 +42,7 @@ class CurlInteractor implements \Frlnc\Slack\Contracts\Http\Interactor {
      * @param  array  $headers    [description]
      * @return resource
      */
-    protected static function prepareRequest($url, $parameters = [], $headers = [])
+    protected static function prepareRequest($url, $parameters = array(), $headers = array())
     {
         $request = curl_init();
 
@@ -79,7 +79,7 @@ class CurlInteractor implements \Frlnc\Slack\Contracts\Http\Interactor {
         else
         {
             $header_text = substr($headers, 0, strpos($headers, "\r\n\r\n"));
-            $headers = [];
+            $headers = array();
 
             foreach (explode("\r\n", $header_text) as $i => $line)
                 if ($i === 0)

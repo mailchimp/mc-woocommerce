@@ -237,10 +237,10 @@ class MailChimp_WooCommerce_Customer
      */
     public function fromArray(array $data)
     {
-        $singles = [
+        $singles = array(
             'id', 'email_address', 'opt_in_status', 'company',
             'first_name', 'last_name', 'orders_count', 'total_spent',
-        ];
+        );
 
         foreach ($singles as $key) {
             if (array_key_exists($key, $data)) {

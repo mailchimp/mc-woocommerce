@@ -249,10 +249,10 @@ class MailChimp_WooCommerce_Cart
      */
     public function fromArray(array $data)
     {
-        $singles = [
+        $singles = array(
             'store_id', 'id', 'campaign_id', 'checkout_url',
             'currency_code', 'order_total', 'tax_total',
-        ];
+        );
 
         foreach ($singles as $key) {
             if (array_key_exists($key, $data)) {

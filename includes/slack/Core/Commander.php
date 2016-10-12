@@ -10,410 +10,410 @@ class Commander {
      *
      * @var array
      */
-    protected static $defaultHeaders = [];
+    protected static $defaultHeaders = array();
 
     /**
      * The commands.
      *
      * @var array
      */
-    protected static $commands = [
-        'api.test' => [
+    protected static $commands = array(
+        'api.test' => array(
             'endpoint' => '/api.test',
             'token'    => false
-        ],
-        'auth.test' => [
+        ),
+        'auth.test' => array(
             'endpoint' => '/auth.test',
             'token'    => true
-        ],
-        'channels.archive' => [
+        ),
+        'channels.archive' => array(
             'token'    => true,
             'endpoint' => '/channels.archive'
-        ],
-        'channels.create' => [
+        ),
+        'channels.create' => array(
             'token'    => true,
             'endpoint' => '/channels.create'
-        ],
-        'channels.history' => [
+        ),
+        'channels.history' => array(
             'token'    => true,
             'endpoint' => '/channels.history'
-        ],
-        'channels.info' => [
+        ),
+        'channels.info' => array(
             'token'    => true,
             'endpoint' => '/channels.info'
-        ],
-        'channels.invite' => [
+        ),
+        'channels.invite' => array(
             'token'    => true,
             'endpoint' => '/channels.invite'
-        ],
-        'channels.join' => [
+        ),
+        'channels.join' => array(
             'token'    => true,
             'endpoint' => '/channels.join'
-        ],
-        'channels.kick' => [
+        ),
+        'channels.kick' => array(
             'token'    => true,
             'endpoint' => '/channels.kick'
-        ],
-        'channels.leave' => [
+        ),
+        'channels.leave' => array(
             'token'    => true,
             'endpoint' => '/channels.leave'
-        ],
-        'channels.list' => [
+        ),
+        'channels.list' => array(
             'token'    => true,
             'endpoint' => '/channels.list'
-        ],
-        'channels.mark' => [
+        ),
+        'channels.mark' => array(
             'token'    => true,
             'endpoint' => '/channels.mark'
-        ],
-        'channels.rename' => [
+        ),
+        'channels.rename' => array(
             'token'    => true,
             'endpoint' => '/channels.rename'
-        ],
-        'channels.setPurpose' => [
+        ),
+        'channels.setPurpose' => array(
             'token'    => true,
             'endpoint' => '/channels.setPurpose',
-            'format'   => [
+            'format'   => array(
                 'purpose'
-            ]
-        ],
-        'channels.setTopic' => [
+            ),
+        ),
+        'channels.setTopic' => array(
             'token'    => true,
             'endpoint' => '/channels.setTopic',
-            'format'   => [
+            'format'   => array(
                 'topic'
-            ]
-        ],
-        'channels.unarchive' => [
+            )
+        ),
+        'channels.unarchive' => array(
             'token'    => true,
             'endpoint' => '/channels.unarchive'
-        ],
-        'chat.delete' => [
+        ),
+        'chat.delete' => array(
             'token'    => true,
             'endpoint' => '/chat.delete'
-        ],
-        'chat.postMessage' => [
+        ),
+        'chat.postMessage' => array(
             'token'    => true,
             'endpoint' => '/chat.postMessage',
-            'format'   => [
+            'format'   => array(
                 'text',
                 'username'
-            ]
-        ],
-        'chat.update' => [
+            ),
+        ),
+        'chat.update' => array(
             'token'    => true,
             'endpoint' => '/chat.update',
-            'format'   => [
+            'format'   => array(
                 'text'
-            ]
-        ],
-        'dnd.endDnd' => [
+            )
+        ),
+        'dnd.endDnd' => array(
             'token'    => true,
             'endpoint' => '/dnd.endDnd'
-        ],
-        'dnd.endSnooze' => [
+        ),
+        'dnd.endSnooze' => array(
             'token'    => true,
             'endpoint' => '/dnd.endSnooze'
-        ],
-        'dnd.info' => [
+        ),
+        'dnd.info' => array(
             'token'    => true,
             'endpoint' => '/dnd.info'
-        ],
-        'dnd.setSnooze' => [
+        ),
+        'dnd.setSnooze' => array(
             'token'    => true,
             'endpoint' => '/dnd.setSnooze'
-        ],
-        'dnd.teamInfo' => [
+        ),
+        'dnd.teamInfo' => array(
             'token'    => true,
             'endpoint' => '/dnd.teamInfo'
-        ],
-        'emoji.list' => [
+        ),
+        'emoji.list' => array(
             'token'    => true,
             'endpoint' => '/emoji.list'
-        ],
-        'files.comments.add' => [
+        ),
+        'files.comments.add' => array(
             'token'    => true,
             'endpoint' => '/files.comments.add'
-        ],
-        'files.comments.delete' => [
+        ),
+        'files.comments.delete' => array(
             'token'    => true,
             'endpoint' => '/files.comments.delete'
-        ],
-        'files.comments.edit' => [
+        ),
+        'files.comments.edit' => array(
             'token'    => true,
             'endpoint' => '/files.comments.edit'
-        ],
-        'files.delete' => [
+        ),
+        'files.delete' => array(
             'token'    => true,
             'endpoint' => '/files.delete'
-        ],
-        'files.info' => [
+        ),
+        'files.info' => array(
             'token'    => true,
             'endpoint' => '/files.info'
-        ],
-        'files.list' => [
+        ),
+        'files.list' => array(
             'token'    => true,
             'endpoint' => '/files.list'
-        ],
-        'files.revokePublicURL' => [
+        ),
+        'files.revokePublicURL' => array(
             'token'    => true,
             'endpoint' => '/files.revokePublicURL'
-        ],
-        'files.sharedPublcURL' => [
+        ),
+        'files.sharedPublcURL' => array(
             'token'    => true,
             'endpoint' => '/files.sharedPublcURL'
-        ],
-        'files.upload' => [
+        ),
+        'files.upload' => array(
             'token'    => true,
             'endpoint' => '/files.upload',
             'post'     => true,
-            'headers'  => [
+            'headers'  => array(
                 'Content-Type' => 'multipart/form-data'
-            ],
-            'format'   => [
+            ),
+            'format'   => array(
                 'filename',
                 'title',
                 'initial_comment'
-            ]
-        ],
-        'groups.archive' => [
+            ),
+        ),
+        'groups.archive' => array(
             'token'    => true,
             'endpoint' => '/groups.archive'
-        ],
-        'groups.close' => [
+        ),
+        'groups.close' => array(
             'token'    => true,
             'endpoint' => '/groups.close'
-        ],
-        'groups.create' => [
+        ),
+        'groups.create' => array(
             'token'    => true,
             'endpoint' => '/groups.create',
-            'format'   => [
+            'format'   => array(
                 'name'
-            ]
-        ],
-        'groups.createChild' => [
+            ),
+        ),
+        'groups.createChild' => array(
             'token'    => true,
             'endpoint' => '/groups.createChild'
-        ],
-        'groups.history' => [
+        ),
+        'groups.history' => array(
             'token'    => true,
             'endpoint' => '/groups.history'
-        ],
-        'groups.info' => [
+        ),
+        'groups.info' => array(
             'token'    => true,
             'endpoint' => '/groups.info'
-        ],
-        'groups.invite' => [
+        ),
+        'groups.invite' => array(
             'token'    => true,
             'endpoint' => '/groups.invite'
-        ],
-        'groups.kick' => [
+        ),
+        'groups.kick' => array(
             'token'    => true,
             'endpoint' => '/groups.kick'
-        ],
-        'groups.leave' => [
+        ),
+        'groups.leave' => array(
             'token'    => true,
             'endpoint' => '/groups.leave'
-        ],
-        'groups.list' => [
+        ),
+        'groups.list' => array(
             'token'    => true,
             'endpoint' => '/groups.list'
-        ],
-        'groups.mark' => [
+        ),
+        'groups.mark' => array(
             'token'    => true,
             'endpoint' => '/groups.mark'
-        ],
-        'groups.open' => [
+        ),
+        'groups.open' => array(
             'token'    => true,
             'endpoint' => '/groups.open'
-        ],
-        'groups.rename' => [
+        ),
+        'groups.rename' => array(
             'token'    => true,
             'endpoint' => '/groups.rename'
-        ],
-        'groups.setPurpose' => [
+        ),
+        'groups.setPurpose' => array(
             'token'    => true,
             'endpoint' => '/groups.setPurpose',
-            'format'   => [
+            'format'   => array(
                 'purpose'
-            ]
-        ],
-        'groups.setTopic' => [
+            ),
+        ),
+        'groups.setTopic' => array(
             'token'    => true,
             'endpoint' => '/groups.setTopic',
-            'format'   => [
+            'format'   => array(
                 'topic'
-            ]
-        ],
-        'groups.unarchive' => [
+            ),
+        ),
+        'groups.unarchive' => array(
             'token'    => true,
             'endpoint' => '/groups.unarchive'
-        ],
-        'im.close' => [
+        ),
+        'im.close' => array(
             'token'    => true,
             'endpoint' => '/im.close'
-        ],
-        'im.history' => [
+        ),
+        'im.history' => array(
             'token'    => true,
             'endpoint' => '/im.history'
-        ],
-        'im.list' => [
+        ),
+        'im.list' => array(
             'token'    => true,
             'endpoint' => '/im.list'
-        ],
-        'im.mark' => [
+        ),
+        'im.mark' => array(
             'token'    => true,
             'endpoint' => '/im.mark'
-        ],
-        'im.open' => [
+        ),
+        'im.open' => array(
             'token'    => true,
             'endpoint' => '/im.open'
-        ],
-        'mpim.close' => [
+        ),
+        'mpim.close' => array(
             'token'    => true,
             'endpoint' => '/mpim.close'
-        ],
-        'mpmim.history' => [
+        ),
+        'mpmim.history' => array(
             'token'    => true,
             'endpoint' => '/mpmim.history'
-        ],
-        'mpim.list' => [
+        ),
+        'mpim.list' => array(
             'token'    => true,
             'endpoint' => '/mpim.list'
-        ],
-        'mpim.mark' => [
+        ),
+        'mpim.mark' => array(
             'token'    => true,
             'endpoint' => '/mpim.mark'
-        ],
-        'mpim.open' => [
+        ),
+        'mpim.open' => array(
             'token'    => true,
             'endpoint' => '/mpim.open'
-        ],
-        'oauth.access' => [
+        ),
+        'oauth.access' => array(
             'token'    => false,
             'endpoint' => '/oauth.access'
-        ],
-        'pins.add' => [
+        ),
+        'pins.add' => array(
             'token'    => true,
             'endpoint' => '/pins.add'
-        ],
-        'pins.list' => [
+        ),
+        'pins.list' => array(
             'token'    => true,
             'endpoint' => '/pins.list'
-        ],
-        'pins.remove' => [
+        ),
+        'pins.remove' => array(
             'token'    => true,
             'endpoint' => '/pins.remove'
-        ],
-        'reactions.add' => [
+        ),
+        'reactions.add' => array(
             'token'    => true,
             'endpoint' => '/reactions.add'
-        ],
-        'reactions.get' => [
+        ),
+        'reactions.get' => array(
             'token'    => true,
             'endpoint' => '/reactions.get'
-        ],
-        'reactions.list' => [
+        ),
+        'reactions.list' => array(
             'token'    => true,
             'endpoint' => '/reactions.list'
-        ],
-        'reactions.remove' => [
+        ),
+        'reactions.remove' => array(
             'token'    => true,
             'endpoint' => '/reactions.remove'
-        ],
-        'rtm.start' => [
+        ),
+        'rtm.start' => array(
             'token'    => true,
             'endpoint' => '/rtm.start'
-        ],
-        'search.all' => [
+        ),
+        'search.all' => array(
             'token'    => true,
             'endpoint' => '/search.all'
-        ],
-        'search.files' => [
+        ),
+        'search.files' => array(
             'token'    => true,
             'endpoint' => '/search.files'
-        ],
-        'search.messages' => [
+        ),
+        'search.messages' => array(
             'token'    => true,
             'endpoint' => '/search.messages'
-        ],
-        'stars.add' => [
+        ),
+        'stars.add' => array(
             'token'    => true,
             'endpoint' => '/stars.add'
-        ],
-        'stars.list' => [
+        ),
+        'stars.list' => array(
             'token'    => true,
             'endpoint' => '/stars.list'
-        ],
-        'stars.remove' => [
+        ),
+        'stars.remove' => array(
             'token'    => true,
             'endpoint' => '/stars.remove'
-        ],
-        'team.accessLogs' => [
+        ),
+        'team.accessLogs' => array(
             'token'    => true,
             'endpoint' => '/team.accessLogs'
-        ],
-        'team.info' => [
+        ),
+        'team.info' => array(
             'token'    => true,
             'endpoint' => '/team.info'
-        ],
-        'team.integrationLogs' => [
+        ),
+        'team.integrationLogs' => array(
             'token'    => true,
             'endpoint' => '/team.integrationLogs'
-        ],
-        'usergroups.create' => [
+        ),
+        'usergroups.create' => array(
             'token'    => true,
             'endpoint' => '/usergroups.create'
-        ],
-        'usergroups.disable' => [
+        ),
+        'usergroups.disable' => array(
             'token'    => true,
             'endpoint' => '/usergroups.disable'
-        ],
-        'usergroups.enable' => [
+        ),
+        'usergroups.enable' => array(
             'token'    => true,
             'endpoint' => '/usergroups.enable'
-        ],
-        'usergroups.list' => [
+        ),
+        'usergroups.list' => array(
             'token'    => true,
             'endpoint' => '/usergroups.list'
-        ],
-        'usergroups.update' => [
+        ),
+        'usergroups.update' => array(
             'token'    => true,
             'endpoint' => '/usergroups.update'
-        ],
-        'usergroups.users.list' => [
+        ),
+        'usergroups.users.list' => array(
             'token'    => true,
             'endpoint' => '/usergroups.users.list'
-        ],
-        'usergroups.users.update' => [
+        ),
+        'usergroups.users.update' => array(
             'token'    => true,
             'endpoint' => '/usergroups.users.update'
-        ],
-        'users.getPresence' => [
+        ),
+        'users.getPresence' => array(
             'token'    => true,
             'endpoint' => '/users.getPresence'
-        ],
-        'users.info' => [
+        ),
+        'users.info' => array(
             'token'    => true,
             'endpoint' => '/users.info'
-        ],
-        'users.list' => [
+        ),
+        'users.list' => array(
             'token'    => true,
             'endpoint' => '/users.list'
-        ],
-        'users.setActive' => [
+        ),
+        'users.setActive' => array(
             'token'    => true,
             'endpoint' => '/users.setActive'
-        ],
-        'users.setPresence' => [
+        ),
+        'users.setPresence' => array(
             'token'    => true,
             'endpoint' => '/users.setPresence'
-        ],
-        'users.admin.invite' => [
+        ),
+        'users.admin.invite' => array(
             'token'    => true,
             'endpoint' => '/users.admin.invite'
-        ]
-    ];
+        ),
+    );
 
     /**
      * The base URL.
@@ -453,7 +453,7 @@ class Commander {
      * @param  array $parameters
      * @return \Frlnc\Slack\Contracts\Http\Response
      */
-    public function execute($command, array $parameters = [])
+    public function execute($command, array $parameters = array())
     {
         if (!isset(self::$commands[$command]))
             throw new InvalidArgumentException("The command '{$command}' is not currently supported");
@@ -461,21 +461,21 @@ class Commander {
         $command = self::$commands[$command];
 
         if ($command['token'])
-            $parameters = array_merge($parameters, ['token' => $this->token]);
+            $parameters = array_merge($parameters, array('token' => $this->token));
 
         if (isset($command['format']))
             foreach ($command['format'] as $format)
                 if (isset($parameters[$format]))
                     $parameters[$format] = self::format($parameters[$format]);
 
-        $headers = [];
+        $headers = array();
         if (isset($command['headers']))
             $headers = $command['headers'];
 
         $url = self::$baseUrl . $command['endpoint'];
 
         if (isset($command['post']) && $command['post'])
-            return $this->interactor->post($url, [], $parameters, $headers);
+            return $this->interactor->post($url, array(), $parameters, $headers);
 
         return $this->interactor->get($url, $parameters, $headers);
     }

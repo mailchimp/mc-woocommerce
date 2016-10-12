@@ -1,3 +1,6 @@
+** 0.1.17 **
+* fix php version syntax errors for array's
+
 ** 0.1.16 **
 * fix namespace conflicts
 * fix free order 0.00 issue

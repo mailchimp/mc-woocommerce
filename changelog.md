@@ -1,5 +1,8 @@
+** 0.1.22 **
+* flag quantity as 1 if the product does not manage inventory
+
 ** 0.1.21 **
-* php version check to display warnings < 5.3
+* php version check to display warnings < 5.5
 
 ** 0.1.19 **
 * fix campaign tracking on new orders

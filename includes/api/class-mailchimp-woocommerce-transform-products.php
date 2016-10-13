@@ -108,7 +108,7 @@ class MailChimp_WooCommerce_Transform_Products
         $variant->setUrl($woo->get_permalink());
         $variant->setBackorders($woo->backorders_allowed());
         $variant->setImageUrl(get_the_post_thumbnail_url($post));
-        $variant->setInventoryQuantity(($woo->managing_stock() ? $woo->get_stock_quantity() : 0));
+        $variant->setInventoryQuantity(($woo->managing_stock() ? $woo->get_stock_quantity() : 1));
         $variant->setPrice($woo->get_price());
         $variant->setSku($woo->get_sku());
 

@@ -1,3 +1,6 @@
+** 0.1.21 **
+* php version check to display warnings < 5.3
+
 ** 0.1.19 **
 * fix campaign tracking on new orders
 

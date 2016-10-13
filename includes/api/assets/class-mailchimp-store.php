@@ -11,6 +11,7 @@
 class MailChimp_WooCommerce_Store
 {
     protected $id = null;
+    protected $is_syncing = false;
     protected $list_id = null;
     protected $name = null;
     protected $domain = null;
@@ -58,6 +59,25 @@ class MailChimp_WooCommerce_Store
         $this->id = $id;
 
         return $this;
+    }
+
+    /**
+     * @param $bool
+     * @return $this
+     */
+    public function flagSyncing($bool)
+    {
+        $this->is_syncing = $bool;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSyncing()
+    {
+        return $this->is_syncing;
     }
 
     /**
@@ -279,6 +299,7 @@ class MailChimp_WooCommerce_Store
     {
         return mailchimp_array_remove_empty(array(
             'id' => $this->getId(),
+            'is_syncing' => $this->isSyncing(),
             'platform' => $this->getPlatform(),
             'list_id' => $this->getListId(),
             'name' => $this->getName(),
@@ -300,7 +321,7 @@ class MailChimp_WooCommerce_Store
     public function fromArray(array $data)
     {
         $singles = array(
-            'id', 'list_id', 'name', 'domain',
+            'id', 'list_id', 'name', 'domain', 'is_syncing',
             'email_address', 'currency_code', 'money_format',
             'primary_locale', 'timezone', 'phone', 'platform',
         );

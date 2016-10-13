@@ -409,6 +409,31 @@ class MailChimp_WooCommerce_MailChimpApi
     }
 
     /**
+     * @param $store_id
+     * @param $is_syncing
+     * @return array|bool|mixed|null|object
+     */
+    public function flagStoreSync($store_id, $is_syncing)
+    {
+        try {
+            // pull the store to make sure we have one.
+            if (!($store = $this->getStore($store_id))) {
+                return false;
+            }
+
+            // flag it as ^^^ is_syncing ^^^
+            $store->flagSyncing($is_syncing);
+
+            // patch the store data
+            return $this->patch("ecommerce/stores/{$store_id}", $store->toArray());
+
+        } catch (\Exception $e) {
+            mailchimp_log('flag.store_sync', $e->getMessage(). ' :: in '.$e->getFile().' :: on '.$e->getLine());
+        }
+        return false;
+    }
+
+    /**
      * @param MailChimp_WooCommerce_Store $store
      * @param bool $silent
      * @return bool|MailChimp_WooCommerce_Store

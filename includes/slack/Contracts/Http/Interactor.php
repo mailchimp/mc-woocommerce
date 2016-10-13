@@ -10,7 +10,7 @@ interface Interactor {
      * @param  array  $headers
      * @return \Frlnc\Slack\Contracts\Http\Response
      */
-    public function get($url, array $parameters = [], array $headers = []);
+    public function get($url, array $parameters = array(), array $headers = array());
 
     /**
      * Send a post request to a URL.
@@ -21,7 +21,7 @@ interface Interactor {
      * @param  array  $headers
      * @return \Frlnc\Slack\Contracts\Http\Response
      */
-    public function post($url, array $urlParameters = [], array $postParameters = [], array $headers = []);
+    public function post($url, array $urlParameters = array(), array $postParameters = array(), array $headers = array());
 
     /**
      * Sets the response factory to use.

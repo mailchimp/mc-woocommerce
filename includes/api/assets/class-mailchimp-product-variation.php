@@ -8,7 +8,7 @@
  * Date: 3/8/16
  * Time: 2:17 PM
  */
-class MailChimp_ProductVariation
+class MailChimp_WooCommerce_ProductVariation
 {
     protected $id = null;
     protected $title = null;
@@ -48,7 +48,7 @@ class MailChimp_ProductVariation
 
     /**
      * @param null $id
-     * @return MailChimp_ProductVariation
+     * @return MailChimp_WooCommerce_ProductVariation
      */
     public function setId($id)
     {
@@ -67,7 +67,7 @@ class MailChimp_ProductVariation
 
     /**
      * @param null $title
-     * @return MailChimp_ProductVariation
+     * @return MailChimp_WooCommerce_ProductVariation
      */
     public function setTitle($title)
     {
@@ -86,7 +86,7 @@ class MailChimp_ProductVariation
 
     /**
      * @param null $url
-     * @return MailChimp_ProductVariation
+     * @return MailChimp_WooCommerce_ProductVariation
      */
     public function setUrl($url)
     {
@@ -105,7 +105,7 @@ class MailChimp_ProductVariation
 
     /**
      * @param null $sku
-     * @return MailChimp_ProductVariation
+     * @return MailChimp_WooCommerce_ProductVariation
      */
     public function setSku($sku)
     {
@@ -124,7 +124,7 @@ class MailChimp_ProductVariation
 
     /**
      * @param null $price
-     * @return MailChimp_ProductVariation
+     * @return MailChimp_WooCommerce_ProductVariation
      */
     public function setPrice($price)
     {
@@ -143,7 +143,7 @@ class MailChimp_ProductVariation
 
     /**
      * @param null $inventory_quantity
-     * @return MailChimp_ProductVariation
+     * @return MailChimp_WooCommerce_ProductVariation
      */
     public function setInventoryQuantity($inventory_quantity)
     {
@@ -162,7 +162,7 @@ class MailChimp_ProductVariation
 
     /**
      * @param null $image_url
-     * @return MailChimp_ProductVariation
+     * @return MailChimp_WooCommerce_ProductVariation
      */
     public function setImageUrl($image_url)
     {
@@ -181,7 +181,7 @@ class MailChimp_ProductVariation
 
     /**
      * @param null $backorders
-     * @return MailChimp_ProductVariation
+     * @return MailChimp_WooCommerce_ProductVariation
      */
     public function setBackorders($backorders)
     {
@@ -200,7 +200,7 @@ class MailChimp_ProductVariation
 
     /**
      * @param null $visibility
-     * @return MailChimp_ProductVariation
+     * @return MailChimp_WooCommerce_ProductVariation
      */
     public function setVisibility($visibility)
     {
@@ -229,7 +229,7 @@ class MailChimp_ProductVariation
 
     /**
      * @param array $data
-     * @return MailChimp_ProductVariation
+     * @return MailChimp_WooCommerce_ProductVariation
      */
     public function fromArray(array $data)
     {

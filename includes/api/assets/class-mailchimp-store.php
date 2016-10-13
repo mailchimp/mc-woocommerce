@@ -8,9 +8,10 @@
  * Date: 3/8/16
  * Time: 3:13 PM
  */
-class MailChimp_Store
+class MailChimp_WooCommerce_Store
 {
     protected $id = null;
+    protected $is_syncing = false;
     protected $list_id = null;
     protected $name = null;
     protected $domain = null;
@@ -51,13 +52,32 @@ class MailChimp_Store
 
     /**
      * @param null $id
-     * @return MailChimp_Store
+     * @return MailChimp_WooCommerce_Store
      */
     public function setId($id)
     {
         $this->id = $id;
 
         return $this;
+    }
+
+    /**
+     * @param $bool
+     * @return $this
+     */
+    public function flagSyncing($bool)
+    {
+        $this->is_syncing = $bool;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSyncing()
+    {
+        return $this->is_syncing;
     }
 
     /**
@@ -70,7 +90,7 @@ class MailChimp_Store
 
     /**
      * @param null $list_id
-     * @return MailChimp_Store
+     * @return MailChimp_WooCommerce_Store
      */
     public function setListId($list_id)
     {
@@ -89,7 +109,7 @@ class MailChimp_Store
 
     /**
      * @param null $name
-     * @return MailChimp_Store;
+     * @return MailChimp_WooCommerce_Store;
      */
     public function setName($name)
     {
@@ -108,7 +128,7 @@ class MailChimp_Store
 
     /**
      * @param null $domain
-     * @return MailChimp_Store;
+     * @return MailChimp_WooCommerce_Store;
      */
     public function setDomain($domain)
     {
@@ -127,7 +147,7 @@ class MailChimp_Store
 
     /**
      * @param null $email_address
-     * @return MailChimp_Store;
+     * @return MailChimp_WooCommerce_Store;
      */
     public function setEmailAddress($email_address)
     {
@@ -146,7 +166,7 @@ class MailChimp_Store
 
     /**
      * @param null $currency_code
-     * @return MailChimp_Store;
+     * @return MailChimp_WooCommerce_Store;
      */
     public function setCurrencyCode($currency_code)
     {
@@ -165,7 +185,7 @@ class MailChimp_Store
 
     /**
      * @param null $money_format
-     * @return MailChimp_Store;
+     * @return MailChimp_WooCommerce_Store;
      */
     public function setMoneyFormat($money_format)
     {
@@ -184,7 +204,7 @@ class MailChimp_Store
 
     /**
      * @param null $primary_locale
-     * @return MailChimp_Store;
+     * @return MailChimp_WooCommerce_Store;
      */
     public function setPrimaryLocale($primary_locale)
     {
@@ -203,7 +223,7 @@ class MailChimp_Store
 
     /**
      * @param null $timezone
-     * @return MailChimp_Store;
+     * @return MailChimp_WooCommerce_Store;
      */
     public function setTimezone($timezone)
     {
@@ -222,7 +242,7 @@ class MailChimp_Store
 
     /**
      * @param null $phone
-     * @return MailChimp_Store;
+     * @return MailChimp_WooCommerce_Store;
      */
     public function setPhone($phone)
     {
@@ -251,21 +271,21 @@ class MailChimp_Store
     }
 
     /**
-     * @return MailChimp_Address
+     * @return MailChimp_WooCommerce_Address
      */
     public function getAddress()
     {
         if (empty($this->address)) {
-            $this->address = new MailChimp_Address();
+            $this->address = new MailChimp_WooCommerce_Address();
         }
         return $this->address;
     }
 
     /**
-     * @param MailChimp_Address $address
+     * @param MailChimp_WooCommerce_Address $address
      * @return Store;
      */
-    public function setAddress(MailChimp_Address $address)
+    public function setAddress(MailChimp_WooCommerce_Address $address)
     {
         $this->address = $address;
 
@@ -279,6 +299,7 @@ class MailChimp_Store
     {
         return mailchimp_array_remove_empty(array(
             'id' => $this->getId(),
+            'is_syncing' => $this->isSyncing(),
             'platform' => $this->getPlatform(),
             'list_id' => $this->getListId(),
             'name' => $this->getName(),
@@ -295,12 +316,12 @@ class MailChimp_Store
 
     /**
      * @param array $data
-     * @return MailChimp_Store
+     * @return MailChimp_WooCommerce_Store
      */
     public function fromArray(array $data)
     {
         $singles = array(
-            'id', 'list_id', 'name', 'domain',
+            'id', 'list_id', 'name', 'domain', 'is_syncing',
             'email_address', 'currency_code', 'money_format',
             'primary_locale', 'timezone', 'phone', 'platform',
         );
@@ -312,7 +333,7 @@ class MailChimp_Store
         }
 
         if (array_key_exists('address', $data)) {
-            $this->address = (new MailChimp_Address())->fromArray($data['address']);
+            $this->address = (new MailChimp_WooCommerce_Address())->fromArray($data['address']);
         }
 
         return $this;

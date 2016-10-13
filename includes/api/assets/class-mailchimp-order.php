@@ -8,7 +8,7 @@
  * Date: 3/8/16
  * Time: 2:16 PM
  */
-class MailChimp_Order
+class MailChimp_WooCommerce_Order
 {
     protected $id = null;
     protected $customer = null;
@@ -24,7 +24,7 @@ class MailChimp_Order
     protected $cancelled_at_foreign = null;
     protected $shipping_address = null;
     protected $billing_address = null;
-    protected $lines = [];
+    protected $lines = array();
 
     /**
      * @return array
@@ -49,7 +49,7 @@ class MailChimp_Order
 
     /**
      * @param $id
-     * @return MailChimp_Order
+     * @return MailChimp_WooCommerce_Order
      */
     public function setId($id)
     {
@@ -67,10 +67,10 @@ class MailChimp_Order
     }
 
     /**
-     * @param MailChimp_Customer $customer
-     * @return MailChimp_Order
+     * @param MailChimp_WooCommerce_Customer $customer
+     * @return MailChimp_WooCommerce_Order
      */
-    public function setCustomer(MailChimp_Customer $customer)
+    public function setCustomer(MailChimp_WooCommerce_Customer $customer)
     {
         $this->customer = $customer;
 
@@ -78,21 +78,21 @@ class MailChimp_Order
     }
 
     /**
-     * @return null|MailChimp_Customer
+     * @return null|MailChimp_WooCommerce_Customer
      */
     public function getCustomer()
     {
         if (empty($this->customer)) {
-            $this->customer = new MailChimp_Customer();
+            $this->customer = new MailChimp_WooCommerce_Customer();
         }
         return $this->customer;
     }
 
     /**
-     * @param MailChimp_LineItem $item
+     * @param MailChimp_WooCommerce_LineItem $item
      * @return $this
      */
-    public function addItem(MailChimp_LineItem $item)
+    public function addItem(MailChimp_WooCommerce_LineItem $item)
     {
         $this->lines[] = $item;
         return $this;
@@ -116,7 +116,7 @@ class MailChimp_Order
 
     /**
      * @param null $campaign_id
-     * @return MailChimp_Order
+     * @return MailChimp_WooCommerce_Order
      */
     public function setCampaignId($campaign_id)
     {
@@ -154,7 +154,7 @@ class MailChimp_Order
 
     /**
      * @param null $fulfillment_status
-     * @return MailChimp_Order
+     * @return MailChimp_WooCommerce_Order
      */
     public function setFulfillmentStatus($fulfillment_status)
     {
@@ -173,7 +173,7 @@ class MailChimp_Order
 
     /**
      * @param null $currency_code
-     * @return MailChimp_Order
+     * @return MailChimp_WooCommerce_Order
      */
     public function setCurrencyCode($currency_code)
     {
@@ -192,7 +192,7 @@ class MailChimp_Order
 
     /**
      * @param mixed $order_total
-     * @return MailChimp_Order
+     * @return MailChimp_WooCommerce_Order
      */
     public function setOrderTotal($order_total)
     {
@@ -211,7 +211,7 @@ class MailChimp_Order
 
     /**
      * @param mixed $tax_total
-     * @return MailChimp_Order
+     * @return MailChimp_WooCommerce_Order
      */
     public function setTaxTotal($tax_total)
     {
@@ -230,7 +230,7 @@ class MailChimp_Order
 
     /**
      * @param mixed $shipping_total
-     * @return MailChimp_Order
+     * @return MailChimp_WooCommerce_Order
      */
     public function setShippingTotal($shipping_total)
     {
@@ -297,10 +297,10 @@ class MailChimp_Order
     }
 
     /**
-     * @param MailChimp_Address $address
+     * @param MailChimp_WooCommerce_Address $address
      * @return $this
      */
-    public function setShippingAddress(MailChimp_Address $address)
+    public function setShippingAddress(MailChimp_WooCommerce_Address $address)
     {
         $this->shipping_address = $address;
 
@@ -308,21 +308,21 @@ class MailChimp_Order
     }
 
     /**
-     * @return MailChimp_Address
+     * @return MailChimp_WooCommerce_Address
      */
     public function getShippingAddress()
     {
         if (empty($this->shipping_address)) {
-            $this->shipping_address = new MailChimp_Address('shipping');
+            $this->shipping_address = new MailChimp_WooCommerce_Address('shipping');
         }
         return $this->shipping_address;
     }
 
     /**
-     * @param MailChimp_Address $address
+     * @param MailChimp_WooCommerce_Address $address
      * @return $this
      */
-    public function setBillingAddress(MailChimp_Address $address)
+    public function setBillingAddress(MailChimp_WooCommerce_Address $address)
     {
         $this->billing_address = $address;
 
@@ -330,12 +330,12 @@ class MailChimp_Order
     }
 
     /**
-     * @return MailChimp_Address
+     * @return MailChimp_WooCommerce_Address
      */
     public function getBillingAddress()
     {
         if (empty($this->billing_address)) {
-            $this->billing_address = new MailChimp_Address('billing');
+            $this->billing_address = new MailChimp_WooCommerce_Address('billing');
         }
         return $this->billing_address;
     }
@@ -345,7 +345,7 @@ class MailChimp_Order
      */
     public function toArray()
     {
-        return mailchimp_array_remove_empty(array_filter(array(
+        return mailchimp_array_remove_empty(array(
             'id' => (string) $this->getId(),
             'customer' => $this->getCustomer()->toArray(),
             'campaign_id' => (string) $this->getCampaignId(),
@@ -361,15 +361,15 @@ class MailChimp_Order
             'shipping_address' => $this->getShippingAddress()->toArray(),
             'billing_address' => $this->getBillingAddress()->toArray(),
             'lines' => array_map(function ($item) {
-                /** @var MailChimp_LineItem $item */
+                /** @var MailChimp_WooCommerce_LineItem $item */
                 return $item->toArray();
             }, $this->items()),
-        )));
+        ));
     }
 
     /**
      * @param array $data
-     * @return MailChimp_Order
+     * @return MailChimp_WooCommerce_Order
      */
     public function fromArray(array $data)
     {
@@ -386,17 +386,17 @@ class MailChimp_Order
         }
 
         if (array_key_exists('shipping_address', $data) && is_array($data['shipping_address'])) {
-            $this->shipping_address = (new MailChimp_Address())->fromArray($data['shipping_address']);
+            $this->shipping_address = (new MailChimp_WooCommerce_Address())->fromArray($data['shipping_address']);
         }
 
         if (array_key_exists('billing_address', $data) && is_array($data['billing_address'])) {
-            $this->billing_address = (new MailChimp_Address())->fromArray($data['billing_address']);
+            $this->billing_address = (new MailChimp_WooCommerce_Address())->fromArray($data['billing_address']);
         }
 
         if (array_key_exists('lines', $data) && is_array($data['lines'])) {
-            $this->lines = [];
+            $this->lines = array();
             foreach ($data['lines'] as $line_item) {
-                $this->lines[] = (new MailChimp_LineItem())->fromArray($line_item);
+                $this->lines[] = (new MailChimp_WooCommerce_LineItem())->fromArray($line_item);
             }
         }
 

@@ -99,7 +99,6 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
             if ($this->cart && !empty($this->cart)) {
 
                 $this->cart_was_submitted = true;
-
                 // grab the cookie data that could play important roles in the submission
                 $campaign = $this->getCampaignTrackingID();
 
@@ -125,7 +124,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
         if ('product' == $post->post_type) {
             wp_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
         } elseif ('shop_order' == $post->post_type) {
-            wp_queue(new MailChimp_WooCommerce_Single_Order($post_id, null, null));
+            $this->handleOrderStatusChanged($post_id);
         }
     }
 
@@ -187,6 +186,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
         if (empty($cookie)) {
             $cookie = $this->getWooSession('mailchimp_tracking_id', false);
         }
+
         return $cookie;
     }
 

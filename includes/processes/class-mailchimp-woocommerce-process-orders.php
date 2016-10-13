@@ -25,13 +25,13 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abtstra
     }
 
     /**
-     * @param MailChimp_Order $item
+     * @param MailChimp_WooCommerce_Order $item
      *
      * @return mixed
      */
     protected function iterate($item)
     {
-        if ($item instanceof MailChimp_Order) {
+        if ($item instanceof MailChimp_WooCommerce_Order) {
 
             // since we're syncing the customer for the first time, this is where we need to add the override
             // for subscriber status. We don't get the checkbox until this plugin is actually installed and working!
@@ -62,10 +62,10 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abtstra
 
                 return $response;
 
-            } catch (MailChimp_Error $e) {
-                mailchimp_log('sync.orders.error', "$call :: MailChimp_Error :: {$e->getMessage()}");
-            } catch (MailChimp_ServerError $e) {
-                mailchimp_log('sync.orders.error', "$call :: MailChimp_ServerError :: {$e->getMessage()}");
+            } catch (MailChimp_WooCommerce_Error $e) {
+                mailchimp_log('sync.orders.error', "$call :: MailChimp_WooCommerce_Error :: {$e->getMessage()}");
+            } catch (MailChimp_WooCommerce_ServerError $e) {
+                mailchimp_log('sync.orders.error', "$call :: MailChimp_WooCommerce_ServerError :: {$e->getMessage()}");
             } catch (Exception $e) {
                 mailchimp_log('sync.orders.error', "$call :: Uncaught Exception :: {$e->getMessage()}");
             }

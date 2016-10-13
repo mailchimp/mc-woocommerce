@@ -8,7 +8,7 @@
  * Date: 3/8/16
  * Time: 2:16 PM
  */
-class MailChimp_Customer
+class MailChimp_WooCommerce_Customer
 {
     protected $id = null;
     protected $email_address = null;
@@ -47,7 +47,7 @@ class MailChimp_Customer
 
     /**
      * @param null $id
-     * @return MailChimp_Customer
+     * @return MailChimp_WooCommerce_Customer
      */
     public function setId($id)
     {
@@ -66,7 +66,7 @@ class MailChimp_Customer
 
     /**
      * @param null $email_address
-     * @return MailChimp_Customer
+     * @return MailChimp_WooCommerce_Customer
      */
     public function setEmailAddress($email_address)
     {
@@ -85,7 +85,7 @@ class MailChimp_Customer
 
     /**
      * @param null $opt_in_status
-     * @return MailChimp_Customer
+     * @return MailChimp_WooCommerce_Customer
      */
     public function setOptInStatus($opt_in_status)
     {
@@ -104,7 +104,7 @@ class MailChimp_Customer
 
     /**
      * @param null $company
-     * @return MailChimp_Customer
+     * @return MailChimp_WooCommerce_Customer
      */
     public function setCompany($company)
     {
@@ -123,7 +123,7 @@ class MailChimp_Customer
 
     /**
      * @param null $first_name
-     * @return MailChimp_Customer
+     * @return MailChimp_WooCommerce_Customer
      */
     public function setFirstName($first_name)
     {
@@ -142,7 +142,7 @@ class MailChimp_Customer
 
     /**
      * @param null $last_name
-     * @return MailChimp_Customer
+     * @return MailChimp_WooCommerce_Customer
      */
     public function setLastName($last_name)
     {
@@ -161,7 +161,7 @@ class MailChimp_Customer
 
     /**
      * @param null $orders_count
-     * @return MailChimp_Customer
+     * @return MailChimp_WooCommerce_Customer
      */
     public function setOrdersCount($orders_count)
     {
@@ -180,7 +180,7 @@ class MailChimp_Customer
 
     /**
      * @param null $total_spent
-     * @return MailChimp_Customer
+     * @return MailChimp_WooCommerce_Customer
      */
     public function setTotalSpent($total_spent)
     {
@@ -190,21 +190,21 @@ class MailChimp_Customer
     }
 
     /**
-     * @return MailChimp_Address
+     * @return MailChimp_WooCommerce_Address
      */
     public function getAddress()
     {
         if (empty($this->address)) {
-            $this->address = new MailChimp_Address();
+            $this->address = new MailChimp_WooCommerce_Address();
         }
         return $this->address;
     }
 
     /**
-     * @param MailChimp_Address $address
-     * @return MailChimp_Customer
+     * @param MailChimp_WooCommerce_Address $address
+     * @return MailChimp_WooCommerce_Customer
      */
-    public function setAddress(MailChimp_Address $address)
+    public function setAddress(MailChimp_WooCommerce_Address $address)
     {
         $this->address = $address;
 
@@ -233,14 +233,14 @@ class MailChimp_Customer
 
     /**
      * @param array $data
-     * @return MailChimp_Customer
+     * @return MailChimp_WooCommerce_Customer
      */
     public function fromArray(array $data)
     {
-        $singles = [
+        $singles = array(
             'id', 'email_address', 'opt_in_status', 'company',
             'first_name', 'last_name', 'orders_count', 'total_spent',
-        ];
+        );
 
         foreach ($singles as $key) {
             if (array_key_exists($key, $data)) {
@@ -249,7 +249,7 @@ class MailChimp_Customer
         }
 
         if (array_key_exists('address', $data) && is_array($data['address'])) {
-            $this->address = (new MailChimp_Address())->fromArray($data['address']);
+            $this->address = (new MailChimp_WooCommerce_Address())->fromArray($data['address']);
         }
 
         return $this;

@@ -80,10 +80,10 @@ class Logger
         }
 
         try {
-            $this->commander->execute('chat.postMessage', [
+            $this->commander->execute('chat.postMessage', array(
                 'channel' => '#'.$this->channel,
                 'text'    => $message
-            ]);
+            ));
         } catch (\Exception $e) {
 
         }

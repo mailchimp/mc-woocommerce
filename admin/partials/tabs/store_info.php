@@ -121,7 +121,7 @@ if (!$handler->hasValidApiKey()) {
         <select name="<?php echo $this->plugin_name; ?>[store_currency_code]" style="width:30%" required>
             <?php
             $selected_currency_code = isset($options['store_currency_code']) && !empty($options['store_currency_code']) ? $options['store_currency_code'] : 'USD';
-            foreach (MailChimp_Api_CurrencyCodes::lists() as $key => $value ) {
+            foreach (MailChimp_WooCommerce_CurrencyCodes::lists() as $key => $value ) {
                 echo '<option value="' . esc_attr( $key ) . '" ' . selected($key === $selected_currency_code, true, false ) . '>' . esc_html( $value ) . '</option>';
             }
             ?>

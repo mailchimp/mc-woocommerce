@@ -8,7 +8,7 @@
  * Date: 7/15/16
  * Time: 1:26 PM
  */
-class MailChimp_Cart
+class MailChimp_WooCommerce_Cart
 {
     protected $store_id;
     protected $id;
@@ -63,10 +63,10 @@ class MailChimp_Cart
     }
 
     /**
-     * @param MailChimp_Customer $customer
+     * @param MailChimp_WooCommerce_Customer $customer
      * @return $this
      */
-    public function setCustomer(MailChimp_Customer $customer)
+    public function setCustomer(MailChimp_WooCommerce_Customer $customer)
     {
         $this->customer = $customer;
 
@@ -74,12 +74,12 @@ class MailChimp_Cart
     }
 
     /**
-     * @return MailChimp_Customer
+     * @return MailChimp_WooCommerce_Customer
      */
     public function getCustomer()
     {
         if (empty($this->customer)) {
-            $this->customer = new MailChimp_Customer();
+            $this->customer = new MailChimp_WooCommerce_Customer();
         }
 
         return $this->customer;
@@ -190,10 +190,10 @@ class MailChimp_Cart
     }
 
     /**
-     * @param MailChimp_LineItem $item
+     * @param MailChimp_WooCommerce_LineItem $item
      * @return $this
      */
-    public function addItem(MailChimp_LineItem $item)
+    public function addItem(MailChimp_WooCommerce_LineItem $item)
     {
         $this->lines[] = $item;
         return $this;
@@ -245,14 +245,14 @@ class MailChimp_Cart
 
     /**
      * @param array $data
-     * @return MailChimp_Cart
+     * @return MailChimp_WooCommerce_Cart
      */
     public function fromArray(array $data)
     {
-        $singles = [
+        $singles = array(
             'store_id', 'id', 'campaign_id', 'checkout_url',
             'currency_code', 'order_total', 'tax_total',
-        ];
+        );
 
         foreach ($singles as $key) {
             if (array_key_exists($key, $data)) {
@@ -261,12 +261,12 @@ class MailChimp_Cart
         }
 
         if (array_key_exists('customer', $data) && is_array($data['customer'])) {
-            $this->customer = (new MailChimp_Customer())->fromArray($data['customer']);
+            $this->customer = (new MailChimp_WooCommerce_Customer())->fromArray($data['customer']);
         }
 
         if (array_key_exists('lines', $data) && is_array($data['lines'])) {
             foreach ($data['lines'] as $line_item) {
-                $this->lines[] = (new MailChimp_LineItem)->fromArray($line_item);
+                $this->lines[] = (new MailChimp_WooCommerce_LineItem)->fromArray($line_item);
             }
         }
 

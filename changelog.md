@@ -1,3 +1,23 @@
+** 0.1.22 **
+* flag quantity as 1 if the product does not manage inventory
+
+** 0.1.21 **
+* php version check to display warnings < 5.5
+
+** 0.1.19 **
+* fix campaign tracking on new orders
+
+** 0.1.18 **
+* check woocommerce dependency before activating the plugin
+
+** 0.1.17 **
+* fix php version syntax errors for array's
+
+** 0.1.16 **
+* fix namespace conflicts
+* fix free order 0.00 issue
+* fix product variant naming issue
+
 ** 0.1.15 **
 * adding special MailChimp header to requests
 

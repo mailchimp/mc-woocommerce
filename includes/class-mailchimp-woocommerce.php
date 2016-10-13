@@ -180,7 +180,7 @@ class MailChimp_Woocommerce {
 
 		/** Require all the mailchimp api asset classes */
 		require_once $path . 'includes/api/assets/class-mailchimp-address.php';
-        require_once $path . 'includes/api/assets/class-mailchimp-cart.php';
+		require_once $path . 'includes/api/assets/class-mailchimp-cart.php';
 		require_once $path . 'includes/api/assets/class-mailchimp-customer.php';
 		require_once $path . 'includes/api/assets/class-mailchimp-line-item.php';
 		require_once $path . 'includes/api/assets/class-mailchimp-order.php';

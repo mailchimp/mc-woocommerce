@@ -28,7 +28,7 @@ class SlackResponse implements \Frlnc\Slack\Contracts\Http\Response, \JsonSerial
      * @param array   $headers
      * @param integer $statusCode
      */
-    public function __construct($body, array $headers = [], $statusCode = 404)
+    public function __construct($body, array $headers = array(), $statusCode = 404)
     {
         $this->body = json_decode($body, true);
         $this->headers = $headers;
@@ -74,11 +74,11 @@ class SlackResponse implements \Frlnc\Slack\Contracts\Http\Response, \JsonSerial
      */
     public function toArray()
     {
-        return [
+        return array(
             'status_code' => $this->getStatusCode(),
             'headers'     => $this->getHeaders(),
             'body'        => $this->getBody()
-        ];
+        );
     }
 
 }

@@ -8,7 +8,7 @@
  * Date: 7/12/16
  * Time: 1:38 PM
  */
-class MailChimp_Api_CurrencyCodes
+class MailChimp_WooCommerce_CurrencyCodes
 {
     /**
      * @return array

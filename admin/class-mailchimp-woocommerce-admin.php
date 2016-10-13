@@ -208,7 +208,7 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 			'mailchimp_account_info_username' => null,
 		);
 
-		$api = new MailChimpApi($data['mailchimp_api_key']);
+		$api = new MailChimp_WooCommerce_MailChimpApi($data['mailchimp_api_key']);
 
 		$valid = true;
 
@@ -261,6 +261,10 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 
 			if (empty($data['admin_email']) || empty($data['store_city']) || empty($data['store_state']) || empty($data['store_postal_code']) || empty($data['store_country']) || empty($data['store_street'])) {
 				add_settings_error('mailchimp_store_settings', '', 'As part of the MailChimp Terms of Use, we require a contact email and a physical mailing address.');
+			}
+
+			if (empty($data['store_phone']) || strlen($data['store_phone']) <= 6) {
+				add_settings_error('mailchimp_store_settings', '', 'As part of the MailChimp Terms of Use, we require a valid phone number for your store.');
 			}
 
 			$this->setData('validation.store_info', false);
@@ -472,7 +476,7 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 			}
 		}
 
-		$submission = new MailChimp_CreateListSubmission();
+		$submission = new MailChimp_WooCommerce_CreateListSubmission();
 
 		// allow the subscribers to choose preferred email type (html or text).
 		$submission->setEmailTypeOption(true);
@@ -507,7 +511,7 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 
 			return $list_id;
 
-		} catch (MailChimp_Error $e) {
+		} catch (MailChimp_WooCommerce_Error $e) {
 			$this->setData('errors.mailchimp_list', $e->getMessage());
 			return false;
 		}
@@ -529,7 +533,7 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 
 		if (!($store = $this->api()->getStore($site_url))) {
 			$new = true;
-			$store = new MailChimp_Store();
+			$store = new MailChimp_WooCommerce_Store();
 		}
 
 		$list_id = $this->array_get($data, 'mailchimp_list', false);
@@ -571,11 +575,11 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 
 	/**
 	 * @param array $data
-	 * @return MailChimp_Address
+	 * @return MailChimp_WooCommerce_Address
 	 */
 	private function address(array $data)
 	{
-		$address = new MailChimp_Address();
+		$address = new MailChimp_WooCommerce_Address();
 
 		if (isset($data['store_street']) && $data['store_street']) {
 			$address->setAddress1($data['store_street']);

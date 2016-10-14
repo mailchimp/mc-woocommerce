@@ -1,3 +1,6 @@
+** 1.0.3 **
+* fixed cart posts on dollar amounts greater than 1000
+
 ** 0.1.22 **
 * flag quantity as 1 if the product does not manage inventory
 

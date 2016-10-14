@@ -157,7 +157,7 @@ class MailChimp_WooCommerce_Cart
      */
     public function setOrderTotal($total)
     {
-        $this->order_total = number_format($total, 2);
+        $this->order_total = $total;
 
         return $this;
     }
@@ -176,7 +176,7 @@ class MailChimp_WooCommerce_Cart
      */
     public function setTaxTotal($total)
     {
-        $this->tax_total = number_format($total, 2);
+        $this->tax_total = $total;
 
         return $this;
     }
@@ -218,8 +218,8 @@ class MailChimp_WooCommerce_Cart
             'campaign_id' => (string) $this->getCampaignID(),
             'checkout_url' => (string) $this->getCheckoutURL(),
             'currency_code' => (string) $this->getCurrencyCode(),
-            'order_total' => $this->getOrderTotal(),
-            'tax_total' => $this->getTaxTotal() > 0 ? $this->getTaxTotal() : null,
+            'order_total' => floatval($this->getOrderTotal()),
+            'tax_total' => $this->getTaxTotal() > 0 ? floatval($this->getTaxTotal()) : null,
             'lines' => array_map(function($item) {
                 return $item->toArray();
             }, $this->items()),

@@ -113,5 +113,18 @@ class MailChimp_Woocommerce_Activator {
 				) $charset_collate;";
 
 		dbDelta( $sql );
+
+		$sql = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}mailchimp_carts (
+				id VARCHAR (255) NOT NULL,
+				email VARCHAR (100) NOT NULL,
+				user_id INT (11) NULLABLE,
+                cart text NOT NULL,
+                created_at datetime NOT NULL
+				) $charset_collate;";
+
+		dbDelta( $sql );
+
+		// set the mailchimp woocommerce version at the time of install
+		update_site_option('mailchimp_woocommerce_version', mailchimp_environment_variables()->version);
 	}
 }

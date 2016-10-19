@@ -78,6 +78,14 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
                     return false;
                 }
 
+                $checkout_url = wc_get_checkout_url();
+
+                if (mailchimp_string_contains($checkout_url, '?')) {
+                    $checkout_url .= '&mc_cart_id='.$this->unique_id;
+                } else {
+                    $checkout_url .= '?mc_cart_id='.$this->unique_id;
+                }
+
                 $customer = new MailChimp_WooCommerce_Customer();
                 $customer->setId($this->unique_id);
                 $customer->setEmailAddress($this->email);
@@ -86,7 +94,7 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
                 $cart = new MailChimp_WooCommerce_Cart();
                 $cart->setId($this->unique_id);
                 $cart->setCampaignID($this->campaign_id);
-                $cart->setCheckoutUrl(wc_get_checkout_url());
+                $cart->setCheckoutUrl($checkout_url);
                 $cart->setCurrencyCode(isset($options['store_currency_code']) ? $options['store_currency_code'] : 'USD');
 
                 $cart->setCustomer($customer);
@@ -115,7 +123,7 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
                     // if the post is successful we're all good.
                     $api->addCart($store_id, $cart, false);
 
-                    mailchimp_log('abandoned_cart.success', "email: {$customer->getEmailAddress()}");
+                    mailchimp_log('abandoned_cart.success', "email: {$customer->getEmailAddress()} :: checkout_url: $checkout_url");
 
                 } catch (\Exception $e) {
 

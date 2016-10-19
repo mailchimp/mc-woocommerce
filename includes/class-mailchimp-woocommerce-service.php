@@ -16,12 +16,18 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     protected $pushed_orders = array();
     protected $cart_was_submitted = false;
     protected $cart = array();
+    protected $validated_cart_db = false;
 
     /**
      * hook fired when we know everything is booted
      */
     public function wooIsRunning()
     {
+        // grab the saved version or default to 1.0.3 since that's when we first did this.
+        $saved_version = get_site_option('mailchimp_woocommerce_version', '1.0.3');
+
+        $this->validated_cart_db = version_compare($saved_version, mailchimp_environment_variables()->version) > 0;
+
         $this->handleAdminFunctions();
         $this->is_admin = current_user_can('administrator');
     }
@@ -91,14 +97,22 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
 
             // delete the previous records.
             if (!empty($previous) && $previous !== $user_email) {
+
                 if ($this->api()->deleteCartByID($this->getUniqueStoreID(), $previous_email = md5(trim(strtolower($previous))))) {
                     mailchimp_log('ac.cart_swap', "Deleted cart [$previous] :: ID [$previous_email]");
                 }
+
+                // going to delete the cart because we are switching.
+                $this->deleteCart($previous_email);
             }
 
             if ($this->cart && !empty($this->cart)) {
 
+                // track the cart locally so we can repopulate things for cross device compatibility.
+                $this->trackCart($uid, $user_email);
+
                 $this->cart_was_submitted = true;
+
                 // grab the cookie data that could play important roles in the submission
                 $campaign = $this->getCampaignTrackingID();
 
@@ -147,6 +161,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      * @return bool|array
      */
     public function getCartItems() {
+
         if (!($this->cart = $this->getWooSession('cart', false))) {
             $this->cart = WC()->cart->get_cart();
         } else {
@@ -167,6 +182,33 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     public function handleCampaignTracking()
     {
         $cookie_duration = $this->getCookieDuration();
+
+        // if we have a query string of the mc_cart_id in the URL, that means we are sending a campaign from MC
+        if (isset($_GET['mc_cart_id']) && !isset($_GET['removed_item'])) {
+
+            // try to pull the cart from the database.
+            if (($cart = $this->getCart($_GET['mc_cart_id'])) && !empty($cart)) {
+
+                // set the current user if we have one
+                if (($user_id = $cart->user_id) && $user_id > 0) {
+                    wp_set_current_user($user_id);
+                }
+
+                // set the current user email
+                $this->user_email = trim(str_replace(' ','+', $cart->email));
+
+                if (($current_email = $this->getEmailFromSession()) && $current_email !== $this->user_email) {
+                    $this->previous_email = $current_email;
+                    @setcookie('mailchimp_user_previous_email',$this->user_email, $cookie_duration, '/' );
+                }
+
+                // cookie the current email
+                @setcookie('mailchimp_user_email', $this->user_email, $cookie_duration, '/' );
+
+                // set the cart data.
+                $this->setWooSession('cart', unserialize($cart->cart));
+            }
+        }
 
         if (isset($_REQUEST['mc_cid'])) {
             $this->setCampaignTrackingID($_REQUEST['mc_cid'], $cookie_duration);
@@ -311,6 +353,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
         $methods = array(
             'plugin-version' => 'respondAdminGetPluginVersion',
             'submit-email' => 'respondAdminSubmitEmail',
+            'parse-email' => 'respondAdminParseEmail',
             'track-campaign' => 'respondAdminTrackCampaign',
             'get-tracking-data' => 'respondAdminGetTrackingData',
             'verify' => 'respondAdminVerify',
@@ -323,7 +366,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
             }
 
             if (array_key_exists($action, $methods)) {
-                if (!in_array($action, array('submit-email', 'track-campaign', 'get-tracking-data'))) {
+                if (!in_array($action, array('submit-email', 'parse-email', 'track-campaign', 'get-tracking-data'))) {
                     $this->authenticate();
                 }
                 $this->respondJSON($this->{$methods[$action]}());
@@ -376,6 +419,27 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     protected function respondAdminVerify()
     {
         return array('success' => true);
+    }
+
+    /**
+     * @return array
+     */
+    protected function respondAdminParseEmail()
+    {
+        if ($this->is_admin) {
+            return array('success' => false);
+        }
+
+        $submission = $this->get('submission');
+
+        if (is_array($submission) && isset($submission['hash'])) {
+
+            if (($cart = $this->getCart($submission['hash']))) {
+                return array('success' => true, 'email' => $cart->email);
+            }
+        }
+
+        return array('success' => false);
     }
 
     /**
@@ -475,6 +539,78 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     {
         if (trim((string) $this->getUniqueStoreID()) !== trim((string) $this->get('store_id'))) {
             $this->respondJSON(array('success' => false, 'message' => 'Not Authorized'));
+        }
+
+        return true;
+    }
+
+    /**
+     * @param $uid
+     * @return array|bool|null|object|void
+     */
+    protected function getCart($uid)
+    {
+        if (!$this->validated_cart_db) return false;
+
+        global $wpdb;
+
+        $table = "{$wpdb->prefix}mailchimp_carts";
+        $statement = "SELECT * FROM $table WHERE id = %s";
+        $sql = $wpdb->prepare($statement, $uid);
+
+        if (($saved_cart = $wpdb->get_row($sql)) && !empty($saved_cart)) {
+            return $saved_cart;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param $uid
+     * @return true
+     */
+    protected function deleteCart($uid)
+    {
+        if (!$this->validated_cart_db) return false;
+
+        global $wpdb;
+        $table = "{$wpdb->prefix}mailchimp_carts";
+        $sql = $wpdb->prepare("DELETE FROM $table WHERE id = %s", $uid);
+        $wpdb->query($sql);
+
+        return true;
+    }
+
+    /**
+     * @param $uid
+     * @param $email
+     * @return bool
+     */
+    protected function trackCart($uid, $email)
+    {
+        if (!$this->validated_cart_db) return false;
+
+        global $wpdb;
+
+        $table = "{$wpdb->prefix}mailchimp_carts";
+
+        $statement = "SELECT * FROM $table WHERE id = %s";
+        $sql = $wpdb->prepare($statement, $uid);
+
+        $user_id = get_current_user_id();
+
+        if (($saved_cart = $wpdb->get_row($sql)) && is_object($saved_cart)) {
+            $statement = "UPDATE {$table} SET `cart` = '%s', `email` = '%s', `user_id` = %s WHERE `id` = '%s'";
+            $sql = $wpdb->prepare($statement, array(maybe_serialize($this->cart), $email, $user_id, $uid));
+            $wpdb->query($sql);
+        } else {
+            $wpdb->insert("{$wpdb->prefix}mailchimp_carts", array(
+                'id' => $uid,
+                'email' => $email,
+                'user_id' => (int) $user_id,
+                'cart'  => maybe_serialize($this->cart),
+                'created_at'   => gmdate('Y-m-d H:i:s', time()),
+            ));
         }
 
         return true;

@@ -154,7 +154,64 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 	 *
 	 */
 	public function options_update() {
+
+		global $wpdb;
+
+		// need to tidy up the mailchimp_cart table and make sure we don't have anything older than 30 days old.
+		$date = gmdate( 'Y-m-d H:i:s', strtotime(date ("Y-m-d") ."-30 days"));
+		$sql = $wpdb->prepare("DELETE FROM {$wpdb->prefix}mailchimp_cart WHERE created_at <= %s", $date);
+		$wpdb->query($sql);
+
 		register_setting($this->plugin_name, $this->plugin_name, array($this, 'validate'));
+	}
+
+	/**
+	 * Depending on the version we're on we may need to run some sort of migrations.
+	 */
+	public function update_db_check() {
+		// grab the current version set in the plugin variables
+		$version = mailchimp_environment_variables()->version;
+
+		// grab the saved version or default to 1.0.3 since that's when we first did this.
+		$saved_version = get_site_option('mailchimp_woocommerce_version', '1.0.3');
+
+		// if the saved version is less than the current version
+		if (version_compare($version, $saved_version) > 0) {
+
+			// resave the site option so this only fires once.
+			update_site_option('mailchimp_woocommerce_version', $version);
+
+			// do a version switch to do any types of upgrades.
+			switch ($version) {
+
+				case '1.0.4':
+					// we're adding the mailchimp carts database to keep track of abandoned carts
+					$this->create_mailchimp_carts_database();
+					break;
+
+			}
+		}
+	}
+
+	/**
+	 * creating the mailchimp_carts database table
+	 */
+	protected function create_mailchimp_carts_database()
+	{
+		global $wpdb;
+
+		$charset_collate = $wpdb->get_charset_collate();
+		$table = "{$wpdb->prefix}mailchimp_carts";
+
+		$sql = "CREATE TABLE IF NOT EXISTS $table (
+				id VARCHAR (255) NOT NULL,
+				email VARCHAR (100) NOT NULL,
+				user_id INT (11) DEFAULT NULL,
+                cart text NOT NULL,
+                created_at datetime NOT NULL
+				) $charset_collate;";
+
+		$wpdb->query($sql);
 	}
 
 	/**
@@ -631,5 +688,4 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 
 		return true;
 	}
-
 }

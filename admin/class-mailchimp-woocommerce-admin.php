@@ -157,10 +157,12 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 
 		global $wpdb;
 
-		// need to tidy up the mailchimp_cart table and make sure we don't have anything older than 30 days old.
-		$date = gmdate( 'Y-m-d H:i:s', strtotime(date ("Y-m-d") ."-30 days"));
-		$sql = $wpdb->prepare("DELETE FROM {$wpdb->prefix}mailchimp_cart WHERE created_at <= %s", $date);
-		$wpdb->query($sql);
+		if (get_site_option('mailchimp_woocommerce_db_mailchimp_carts', false)) {
+			// need to tidy up the mailchimp_cart table and make sure we don't have anything older than 30 days old.
+			$date = gmdate( 'Y-m-d H:i:s', strtotime(date ("Y-m-d") ."-30 days"));
+			$sql = $wpdb->prepare("DELETE FROM {$wpdb->prefix}mailchimp_carts WHERE created_at <= %s", $date);
+			$wpdb->query($sql);
+		}
 
 		register_setting($this->plugin_name, $this->plugin_name, array($this, 'validate'));
 	}
@@ -211,7 +213,9 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
                 created_at datetime NOT NULL
 				) $charset_collate;";
 
-		$wpdb->query($sql);
+		if (($result = $wpdb->query($sql)) > 0) {
+			update_site_option('mailchimp_woocommerce_db_mailchimp_carts', true);
+		}
 	}
 
 	/**
@@ -388,7 +392,7 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 		// as long as we have a list set, and it's currently in MC as a valid list, let's sync the store.
 		if (!empty($data['mailchimp_list']) && $this->api()->hasList($data['mailchimp_list'])) {
 
-            // sync the store with MC
+			// sync the store with MC
 			$this->syncStore(array_merge($this->getOptions(), $data));
 
 			// start the sync automatically if the sync is false

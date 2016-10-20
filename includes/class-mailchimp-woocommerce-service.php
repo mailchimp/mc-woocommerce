@@ -23,10 +23,8 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function wooIsRunning()
     {
-        // grab the saved version or default to 1.0.3 since that's when we first did this.
-        $saved_version = get_site_option('mailchimp_woocommerce_version', '1.0.3');
-
-        $this->validated_cart_db = version_compare($saved_version, mailchimp_environment_variables()->version) > 0;
+        // make sure the site option for setting the mailchimp_carts has been saved.
+        $this->validated_cart_db = get_site_option('mailchimp_woocommerce_db_mailchimp_carts', false);
 
         $this->handleAdminFunctions();
         $this->is_admin = current_user_can('administrator');
@@ -188,11 +186,6 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
 
             // try to pull the cart from the database.
             if (($cart = $this->getCart($_GET['mc_cart_id'])) && !empty($cart)) {
-
-                // set the current user if we have one
-                if (($user_id = $cart->user_id) && $user_id > 0) {
-                    wp_set_current_user($user_id);
-                }
 
                 // set the current user email
                 $this->user_email = trim(str_replace(' ','+', $cart->email));

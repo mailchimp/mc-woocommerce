@@ -155,14 +155,7 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 	 */
 	public function options_update() {
 
-		global $wpdb;
-
-		if (get_site_option('mailchimp_woocommerce_db_mailchimp_carts', false)) {
-			// need to tidy up the mailchimp_cart table and make sure we don't have anything older than 30 days old.
-			$date = gmdate( 'Y-m-d H:i:s', strtotime(date ("Y-m-d") ."-30 days"));
-			$sql = $wpdb->prepare("DELETE FROM {$wpdb->prefix}mailchimp_carts WHERE created_at <= %s", $date);
-			$wpdb->query($sql);
-		}
+		$this->handle_abandoned_cart_table();
 
 		register_setting($this->plugin_name, $this->plugin_name, array($this, 'validate'));
 	}
@@ -179,33 +172,33 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 
 		// if the saved version is less than the current version
 		if (version_compare($version, $saved_version) > 0) {
-
 			// resave the site option so this only fires once.
 			update_site_option('mailchimp_woocommerce_version', $version);
-
-			// do a version switch to do any types of upgrades.
-			switch ($version) {
-
-				case '1.0.4':
-					// we're adding the mailchimp carts database to keep track of abandoned carts
-					$this->create_mailchimp_carts_database();
-					break;
-
-			}
 		}
 	}
 
 	/**
-	 * creating the mailchimp_carts database table
+	 * We need to do a tidy up function on the mailchimp_carts table to
+	 * remove anything older than 30 days.
+	 *
+	 * Also if we don't have the configuration set, we need to create the table.
 	 */
-	protected function create_mailchimp_carts_database()
+	protected function handle_abandoned_cart_table()
 	{
 		global $wpdb;
 
-		$charset_collate = $wpdb->get_charset_collate();
-		$table = "{$wpdb->prefix}mailchimp_carts";
+		if (get_site_option('mailchimp_woocommerce_db_mailchimp_carts', false)) {
+			// need to tidy up the mailchimp_cart table and make sure we don't have anything older than 30 days old.
+			$date = gmdate( 'Y-m-d H:i:s', strtotime(date ("Y-m-d") ."-30 days"));
+			$sql = $wpdb->prepare("DELETE FROM {$wpdb->prefix}mailchimp_carts WHERE created_at <= %s", $date);
+			$wpdb->query($sql);
+		} else {
 
-		$sql = "CREATE TABLE IF NOT EXISTS $table (
+			// create the table for the first time now.
+			$charset_collate = $wpdb->get_charset_collate();
+			$table = "{$wpdb->prefix}mailchimp_carts";
+
+			$sql = "CREATE TABLE IF NOT EXISTS $table (
 				id VARCHAR (255) NOT NULL,
 				email VARCHAR (100) NOT NULL,
 				user_id INT (11) DEFAULT NULL,
@@ -213,8 +206,9 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
                 created_at datetime NOT NULL
 				) $charset_collate;";
 
-		if (($result = $wpdb->query($sql)) > 0) {
-			update_site_option('mailchimp_woocommerce_db_mailchimp_carts', true);
+			if (($result = $wpdb->query($sql)) > 0) {
+				update_site_option('mailchimp_woocommerce_db_mailchimp_carts', true);
+			}
 		}
 	}
 

@@ -154,7 +154,62 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 	 *
 	 */
 	public function options_update() {
+
+		$this->handle_abandoned_cart_table();
+
 		register_setting($this->plugin_name, $this->plugin_name, array($this, 'validate'));
+	}
+
+	/**
+	 * Depending on the version we're on we may need to run some sort of migrations.
+	 */
+	public function update_db_check() {
+		// grab the current version set in the plugin variables
+		$version = mailchimp_environment_variables()->version;
+
+		// grab the saved version or default to 1.0.3 since that's when we first did this.
+		$saved_version = get_site_option('mailchimp_woocommerce_version', '1.0.3');
+
+		// if the saved version is less than the current version
+		if (version_compare($version, $saved_version) > 0) {
+			// resave the site option so this only fires once.
+			update_site_option('mailchimp_woocommerce_version', $version);
+		}
+	}
+
+	/**
+	 * We need to do a tidy up function on the mailchimp_carts table to
+	 * remove anything older than 30 days.
+	 *
+	 * Also if we don't have the configuration set, we need to create the table.
+	 */
+	protected function handle_abandoned_cart_table()
+	{
+		global $wpdb;
+
+		if (get_site_option('mailchimp_woocommerce_db_mailchimp_carts', false)) {
+			// need to tidy up the mailchimp_cart table and make sure we don't have anything older than 30 days old.
+			$date = gmdate( 'Y-m-d H:i:s', strtotime(date ("Y-m-d") ."-30 days"));
+			$sql = $wpdb->prepare("DELETE FROM {$wpdb->prefix}mailchimp_carts WHERE created_at <= %s", $date);
+			$wpdb->query($sql);
+		} else {
+
+			// create the table for the first time now.
+			$charset_collate = $wpdb->get_charset_collate();
+			$table = "{$wpdb->prefix}mailchimp_carts";
+
+			$sql = "CREATE TABLE IF NOT EXISTS $table (
+				id VARCHAR (255) NOT NULL,
+				email VARCHAR (100) NOT NULL,
+				user_id INT (11) DEFAULT NULL,
+                cart text NOT NULL,
+                created_at datetime NOT NULL
+				) $charset_collate;";
+
+			if (($result = $wpdb->query($sql)) > 0) {
+				update_site_option('mailchimp_woocommerce_db_mailchimp_carts', true);
+			}
+		}
 	}
 
 	/**
@@ -331,7 +386,7 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 		// as long as we have a list set, and it's currently in MC as a valid list, let's sync the store.
 		if (!empty($data['mailchimp_list']) && $this->api()->hasList($data['mailchimp_list'])) {
 
-            // sync the store with MC
+			// sync the store with MC
 			$this->syncStore(array_merge($this->getOptions(), $data));
 
 			// start the sync automatically if the sync is false
@@ -631,5 +686,4 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 
 		return true;
 	}
-
 }

@@ -190,13 +190,13 @@ function run_mailchimp_plugin_updater() {
 	if (!class_exists('PucFactory')) {
 		require plugin_dir_path( __FILE__ ) . 'includes/plugin-update-checker/plugin-update-checker.php';
 	}
-
-	$env = mailchimp_environment_variables();
-
 	/** @var \PucGitHubChecker_3_1 $checker */
 	$updater = PucFactory::getLatestClassVersion('PucGitHubChecker');
-	$checker = new $updater('https://github.com/mailchimp/mc-woocommerce/', __FILE__, $env->repo, 1);
-	$checker->handleManualCheck();
+	if (class_exists($updater)) {
+		$env = mailchimp_environment_variables();
+		$checker = new $updater('https://github.com/mailchimp/mc-woocommerce/', __FILE__, $env->repo, 1);
+		$checker->handleManualCheck();
+	}
 }
 
 /**

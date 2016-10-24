@@ -322,6 +322,10 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 				add_settings_error('mailchimp_store_settings', '', 'As part of the MailChimp Terms of Use, we require a valid phone number for your store.');
 			}
 
+			if (empty($data['store_name'])) {
+				add_settings_error('mailchimp_store_settings', '', 'MailChimp for WooCommerce requires a Store Name to connect your store.');
+			}
+
 			$this->setData('validation.store_info', false);
 			return array();
 		}

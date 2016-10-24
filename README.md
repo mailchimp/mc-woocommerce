@@ -6,19 +6,30 @@ In this article, you’ll learn how to connect MailChimp for WooCommerce.
 
 **Here are some things to know before you begin this process.**
 
-- We recommend you use this plugin in a staging environment before installing on production servers.
-- This process requires an API Key from your MailChimp account. If you aren’t sure how to generate a MailChimp API Key, read [About API Keys.](http://kb.mailchimp.com/integrations/api-integrations/about-api-keys)
-- This plugin supports MailChimp’s [Abandoned Cart Automation](http://kb.mailchimp.com/automation/create-an-abandoned-cart-workflow) feature.
-- WooCommerce customers who haven't signed up for marketing emails will appear in the Transactional portion of your list, and cannot be exported. See [View or Export a List.](http://kb.mailchimp.com/lists/managing-subscribers/view-or-export-a-list)
-- To switch lists or accounts, you must deactivate and delete the plugin, then re-install it.
-- In e-commerce reports and on subscriber profile pages, product variants will display as the parent product. 
+- For the most up-to-date install instructions, read [Connect or Disconnect MailChimp for WooCommerce](http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce). 
 
+- This plugin requires you to have the [WooCommerce plugin](https://wordpress.org/plugins/woocommerce) already installed and activated in WordPress. 
+
+- Your host environment must meet [WooCommerce's minimum requirements](https://docs.woocommerce.com/document/server-requirements), including PHP 5.6 or greater.
+
+- We recommend you use this plugin in a staging environment before installing it on production servers. 
+
+- MailChimp for WooCommerce syncs the customer’s first name, last name, email address, and orders.
+
+- WooCommerce customers who haven't signed up for marketing emails will appear in the Transactional portion of your list, and cannot be exported.
+
+#A Note for Current WooCommerce Integration Users#
+
+This plugin supports our most powerful API 3.0 features, and is intended for users who have not yet integrated their WooCommerce stores with MailChimp. If your WooCommerce store is already integrated with MailChimp via an integration that runs on an older version of MailChimp’s API, consider your current sales volume before you make any changes that might disrupt business.
+
+You can run this new integration at the same time as your current WooCommerce integration for MailChimp. However, data from the older integration will display separately in subscriber profiles, and can’t be used with e-commerce features that require API 3.0.
 
 #Task Roadmap#
 **Here’s a brief overview of this multi-step process.**
 
 - Install the plugin on your WordPress Admin site.
-- Connect the plugin with your MailChimp API Key, and configure your list settings to complete the data sync process.
+- Connect the plugin with your MailChimp API Key.
+- Configure your list settings to complete the data sync process.
 
 #Install the Plugin#
 **To install the plugin, follow these steps.**
@@ -45,7 +56,7 @@ After you activate the plugin, you’ll be taken to the **Settings** page, where
 #Configure and Sync#
 **To configure your MailChimp settings for WooCommerce customers and sync them to MailChimp, follow these steps.**
 
-1) On the **Connect** tab, paste your MailChimp API key into the field, choose whether or not you want to send debugging logs to MailChimp, and click **Save all changes**. 
+1) On the **Connect** tab, paste your MailChimp API key into the field, choose whether or not you want to send debugging logs to MailChimp, and click **Save all changes**. To learn how to generate a MailChimp API Key, read [About API Keys](http://kb.mailchimp.com/integrations/api-integrations/about-api-keys).
 
  ![API key] (https://cloud.githubusercontent.com/assets/19805049/18877771/3fca90e8-849c-11e6-9e3a-161a7b3936dd.png)
 

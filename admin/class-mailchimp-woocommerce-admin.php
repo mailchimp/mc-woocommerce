@@ -296,7 +296,7 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 		$data = array(
 
 			// store basics
-			'store_name' => isset($input['store_name']) ? $input['store_name'] : get_option('blogname'),
+			'store_name' => trim((isset($input['store_name']) ? $input['store_name'] : get_option('blogname'))),
 			'store_street' => isset($input['store_street']) ? $input['store_street'] : false,
 			'store_city' => isset($input['store_city']) ? $input['store_city'] : false,
 			'store_state' => isset($input['store_state']) ? $input['store_state'] : false,

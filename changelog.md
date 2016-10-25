@@ -1,3 +1,8 @@
+** 1.0.6 **
+* fixed conflict with the plugin updater where the class could not be loaded correctly.
+* fixed error validation for store name.
+* fixed cross device abandoned cart url's
+
 ** 1.0.3 **
 * fixed cart posts on dollar amounts greater than 1000
 

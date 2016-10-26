@@ -965,7 +965,7 @@ class MailChimp_WooCommerce_MailChimpApi
      */
     protected function applyCurlOptions($method, $url, $params = array())
     {
-        //$env = mailchimp_environment_variables();
+        $env = mailchimp_environment_variables();
 
         return array(
             CURLOPT_USERPWD => "mailchimp:{$this->api_key}",
@@ -979,7 +979,7 @@ class MailChimp_WooCommerce_MailChimpApi
             CURLINFO_HEADER_OUT => true,
             CURLOPT_HTTPHEADER => array(
                 'content-type: application/json',
-                'user-agent: MailChimp for WooCommerce',
+                "user-agent: MailChimp for WooCommerce/{$env->version}; WordPress/{$env->wp_version}",
             )
         );
     }

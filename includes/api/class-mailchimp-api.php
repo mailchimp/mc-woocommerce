@@ -840,47 +840,15 @@ class MailChimp_WooCommerce_MailChimpApi
      */
     protected function patch($url, $body)
     {
-        try {
-            // process the patch request the normal way
-            $curl = curl_init();
+        // process the patch request the normal way
+        $curl = curl_init();
 
-            $options = $this->applyCurlOptions('PATCH', $url, array());
-            $options[CURLOPT_POSTFIELDS] = json_encode($body);
+        $options = $this->applyCurlOptions('PATCH', $url, array());
+        $options[CURLOPT_POSTFIELDS] = json_encode($body);
 
-            curl_setopt_array($curl, $options);
+        curl_setopt_array($curl, $options);
 
-            return $this->processCurlResponse($curl);
-
-        } catch (\Exception $e) {
-
-            // if the error that we get is not the json parsing error, throw it.
-            if (strpos(strtolower($e->getMessage()), 'json parsing error') === false) {
-                throw $e;
-            }
-
-            // ah snap, gotta try the file get contents fallback.
-            mailchimp_log('api.patch.fallback', 'stream', array('curl_version' => curl_version()));
-
-            $context = stream_context_create(array(
-                'http' => array(
-                    'method' => 'PATCH',
-                    'header' => array(
-                        'Authorization: Basic '.base64_encode('mailchimp:'.$this->api_key),
-                        'Accept: application/json',
-                        'Content-Type: application/json'
-                    ),
-                    'content' => json_encode($body)
-                )
-            ));
-
-            $response = file_get_contents($this->url($url), FALSE, $context);
-
-            if ($response === false) {
-                throw new MailChimp_WooCommerce_Error('Invalid patch request');
-            }
-
-            return json_decode($response, true);
-        }
+        return $this->processCurlResponse($curl);
     }
 
     /**

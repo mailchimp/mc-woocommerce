@@ -132,7 +132,8 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      * @param WP_Post $post The post object.
      * @param bool $update Whether this is an existing post being updated or not.
      */
-    public function handlePostSaved($post_id, $post, $update) {
+    public function handlePostSaved($post_id, $post, $update)
+    {
         if ($post->post_status !== 'auto-draft') {
             if ('product' == $post->post_type) {
                 wp_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
@@ -140,6 +141,61 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
                 $this->handleOrderStatusChanged($post_id);
             }
         }
+    }
+
+    /**
+     * @param $user_id
+     */
+    public function handleUserRegistration($user_id)
+    {
+        $subscribed = (bool) isset($_POST['mailchimp_woocommerce_newsletter']) ?
+            $_POST['mailchimp_woocommerce_newsletter'] : false;
+
+        // update the user meta with the 'is_subscribed' form element
+        update_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', $subscribed);
+
+        if ($subscribed) {
+            wp_queue(new MailChimp_WooCommerce_User_Submit($user_id, $subscribed), 10);
+        }
+    }
+
+    /**
+     * @param $user_id
+     * @param $old_user_data
+     */
+    function handleUserUpdated($user_id, $old_user_data)
+    {
+        // only update this person if they were marked as subscribed before
+        if ((bool) get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true)) {
+            wp_queue(new MailChimp_WooCommerce_User_Submit($user_id, true, $old_user_data), 10);
+        }
+    }
+
+    /**
+     * Delete all the options pointing to the pages, and re-start the sync process.
+     * @param bool $only_products
+     * @return bool
+     */
+    protected function syncProducts($only_products = false)
+    {
+        if (!$this->isAdmin()) return false;
+        $this->removePointers(true, ($only_products ? false : true));
+        update_option('mailchimp-woocommerce-sync.orders.prevent', $only_products);
+        MailChimp_WooCommerce_Process_Products::push();
+        return true;
+    }
+
+    /**
+     * Delete all the options pointing to the pages, and re-start the sync process.
+     * @return bool
+     */
+    protected function syncOrders()
+    {
+        if (!$this->isAdmin()) return false;
+        $this->removePointers(false, true);
+        // since the products are all good, let's sync up the orders now.
+        wp_queue(new MailChimp_WooCommerce_Process_Orders());
+        return true;
     }
 
     /**
@@ -160,8 +216,8 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     /**
      * @return bool|array
      */
-    public function getCartItems() {
-
+    public function getCartItems()
+    {
         if (!($this->cart = $this->getWooSession('cart', false))) {
             $this->cart = WC()->cart->get_cart();
         } else {
@@ -352,14 +408,12 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
             'track-campaign' => 'respondAdminTrackCampaign',
             'get-tracking-data' => 'respondAdminGetTrackingData',
             'verify' => 'respondAdminVerify',
+            'sync' => 'syncProducts',
+            'sync-products' => 'syncProducts',
+            'sync-orders' => 'syncOrders',
         );
 
         if (($action = $this->get('action'))) {
-
-            if ($action === 'sync') {
-                return $this->sync();
-            }
-
             if (array_key_exists($action, $methods)) {
                 if (!in_array($action, array('submit-email', 'parse-email', 'track-campaign', 'get-tracking-data'))) {
                     $this->authenticate();
@@ -367,37 +421,6 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
                 $this->respondJSON($this->{$methods[$action]}());
             }
         }
-    }
-
-    /**
-     * Delete all the options pointing to the pages, and re-start the sync process.
-     * @return void
-     */
-    protected function sync()
-    {
-        // only do this if we're an admin user.
-        if ($this->isAdmin()) {
-
-            delete_option('mailchimp-woocommerce-errors.store_info');
-            delete_option('mailchimp-woocommerce-sync.orders.completed_at');
-            delete_option('mailchimp-woocommerce-sync.orders.current_page');
-            delete_option('mailchimp-woocommerce-sync.products.completed_at');
-            delete_option('mailchimp-woocommerce-sync.products.current_page');
-            delete_option('mailchimp-woocommerce-sync.syncing');
-            delete_option('mailchimp-woocommerce-sync.started_at');
-            delete_option('mailchimp-woocommerce-sync.completed_at');
-            delete_option('mailchimp-woocommerce-validation.api.ping');
-            delete_option('mailchimp-woocommerce-cached-api-lists');
-            delete_option('mailchimp-woocommerce-cached-api-ping-check');
-
-            $job = new MailChimp_WooCommerce_Process_Products();
-            $job->flagStartSync();
-            wp_queue($job);
-
-            wp_redirect('/options-general.php?page=mailchimp-woocommerce&tab=api_key&success_notice=re-sync-started');
-        }
-
-        return;
     }
 
     /**

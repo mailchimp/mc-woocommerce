@@ -16,7 +16,7 @@
  * Plugin Name:       MailChimp for WooCommerce
  * Plugin URI:        https://mailchimp.com/connect-your-store/
  * Description:       MailChimp - WooCommerce plugin
- * Version:           1.0.61
+ * Version:           1.0.62
  * Author:            MailChimp
  * Author URI:        https://mailchimp.com
  * License:           GPL-2.0+
@@ -39,11 +39,23 @@ function mailchimp_environment_variables() {
 	return (object) array(
 		'repo' => 'develop',
 		'environment' => 'production',
-		'version' => '1.0.61',
+		'version' => '1.0.62',
 		'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
 		'slack_token' => false,
 		'slack_channel' => 'mc-woo',
 	);
+}
+
+/**
+ * @return bool|int
+ */
+function mailchimp_get_list_id() {
+	if (($options = get_option('mailchimp-woocommerce', false)) && is_array($options)) {
+		if (isset($options['mailchimp_list'])) {
+			return $options['mailchimp_list'];
+		}
+	}
+	return false;
 }
 
 /**
@@ -97,7 +109,14 @@ function mailchimp_get_data($key, $default) {
 function mailchimp_date_utc($date) {
 	$timezone = wc_timezone_string();
 	//$timezone = mailchimp_get_option('store_timezone', 'America/New_York');
-	$date = new \DateTime($date, new DateTimeZone($timezone));
+	if (is_numeric($date)) {
+		$stamp = $date;
+		$date = new \DateTime('now', new DateTimeZone($timezone));
+		$date->setTimestamp($stamp);
+	} else {
+		$date = new \DateTime($date, new DateTimeZone($timezone));
+	}
+
 	$date->setTimezone(new DateTimeZone('UTC'));
 	return $date;
 }
@@ -108,7 +127,14 @@ function mailchimp_date_utc($date) {
  */
 function mailchimp_date_local($date) {
     $timezone = mailchimp_get_option('store_timezone', 'America/New_York');
-    $date = new \DateTime($date, new DateTimeZone('UTC'));
+	if (is_numeric($date)) {
+		$stamp = $date;
+		$date = new \DateTime('now', new DateTimeZone('UTC'));
+		$date->setTimestamp($stamp);
+	} else {
+		$date = new \DateTime($date, new DateTimeZone('UTC'));
+	}
+
     $date->setTimezone(new DateTimeZone($timezone));
     return $date;
 }
@@ -269,6 +295,47 @@ function mailchimp_string_contains($haystack, $needles)
 	}
 
 	return false;
+}
+
+
+/**
+ * @return int
+ */
+function mailchimp_get_product_count() {
+	$posts = mailchimp_count_posts('product');
+	$total = 0;
+	foreach ($posts as $status => $count) {
+		$total += $count;
+	}
+	return $total;
+}
+
+/**
+ * @return int
+ */
+function mailchimp_get_order_count() {
+	$posts = mailchimp_count_posts('shop_order');
+	unset($posts['auto-draft']);
+	$total = 0;
+	foreach ($posts as $status => $count) {
+		$total += $count;
+	}
+	return $total;
+}
+
+/**
+ * @param $type
+ * @return array|null|object
+ */
+function mailchimp_count_posts($type) {
+	global $wpdb;
+	$query = "SELECT post_status, COUNT( * ) AS num_posts FROM {$wpdb->posts} WHERE post_type = %s GROUP BY post_status";
+	$posts = $wpdb->get_results( $wpdb->prepare($query, $type));
+	$response = array();
+	foreach ($posts as $post) {
+		$response[$post->post_status] = $post->num_posts;
+	}
+	return $response;
 }
 
 register_activation_hook( __FILE__, 'activate_mailchimp_woocommerce' );

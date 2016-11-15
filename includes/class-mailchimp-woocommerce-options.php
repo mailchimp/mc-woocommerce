@@ -235,4 +235,34 @@ abstract class MailChimp_Woocommerce_Options
 
         return $default;
     }
+
+    /**
+     * @param bool $products
+     * @param bool $orders
+     * @return $this
+     */
+    public function removePointers($products = true, $orders = true)
+    {
+        if ($products) {
+            delete_option('mailchimp-woocommerce-sync.products.completed_at');
+            delete_option('mailchimp-woocommerce-sync.products.current_page');
+        }
+
+        if ($orders) {
+            delete_option('mailchimp-woocommerce-sync.orders.prevent');
+            delete_option('mailchimp-woocommerce-sync.orders.completed_at');
+            delete_option('mailchimp-woocommerce-sync.orders.current_page');
+        }
+
+        delete_option('mailchimp-woocommerce-sync.orders.prevent');
+        delete_option('mailchimp-woocommerce-errors.store_info');
+        delete_option('mailchimp-woocommerce-sync.syncing');
+        delete_option('mailchimp-woocommerce-sync.started_at');
+        delete_option('mailchimp-woocommerce-sync.completed_at');
+        delete_option('mailchimp-woocommerce-validation.api.ping');
+        delete_option('mailchimp-woocommerce-cached-api-lists');
+        delete_option('mailchimp-woocommerce-cached-api-ping-check');
+
+        return $this;
+    }
 }

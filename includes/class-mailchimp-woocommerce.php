@@ -212,6 +212,7 @@ class MailChimp_Woocommerce {
 		require_once $path.'includes/processes/class-mailchimp-woocommerce-cart-update.php';
 		require_once $path.'includes/processes/class-mailchimp-woocommerce-single-order.php';
 		require_once $path.'includes/processes/class-mailchimp-woocommerce-single-product.php';
+		require_once $path.'includes/processes/class-mailchimp-woocommerce-user-submit.php';
 
 		// fire up the loader
 		$this->loader = new MailChimp_Woocommerce_Loader();
@@ -354,6 +355,14 @@ class MailChimp_Woocommerce {
 
 			// save post hook for products
 			$this->loader->add_action('save_post', $service, 'handlePostSaved', 10, 3);
+
+			// handle the user registration hook
+			$this->loader->add_action('user_register', $service, 'handleUserRegistration');
+			// handle the user updated profile hook
+			$this->loader->add_action('profile_update', $service, 'handleUserUpdated', 10, 2);
+
+			// when someone deletes a user??
+			//$this->loader->add_action('delete_user', $service, 'handleUserDeleting');
 		}
 	}
 

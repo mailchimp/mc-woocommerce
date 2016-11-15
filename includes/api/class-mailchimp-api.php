@@ -138,6 +138,17 @@ class MailChimp_WooCommerce_MailChimpApi
     /**
      * @param $list_id
      * @param $email
+     * @return array|bool
+     */
+    public function deleteMember($list_id, $email)
+    {
+        $hash = md5(strtolower($email));
+        return $this->delete("lists/$list_id/members/$hash", array());
+    }
+
+    /**
+     * @param $list_id
+     * @param $email
      * @param bool $subscribed
      * @param array $merge_fields
      * @param array $list_interests
@@ -643,6 +654,7 @@ class MailChimp_WooCommerce_MailChimpApi
                 return false;
             }
             $data = $this->post("ecommerce/stores/$store_id/orders", $order->toArray());
+            update_option('mailchimp-woocommerce-resource-last-updated', time());
             return (new MailChimp_WooCommerce_Order)->fromArray($data);
         } catch (\Exception $e) {
             if (!$silent) throw $e;
@@ -748,6 +760,7 @@ class MailChimp_WooCommerce_MailChimpApi
         try {
             $this->validateStoreSubmission($product);
             $data = $this->post("ecommerce/stores/$store_id/products", $product->toArray());
+            update_option('mailchimp-woocommerce-resource-last-updated', time());
             return (new MailChimp_WooCommerce_Product)->fromArray($data);
         } catch (\Exception $e) {
             if (!$silent) throw $e;

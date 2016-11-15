@@ -116,6 +116,9 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
         $this->setData('sync.syncing', true);
         $this->setData('sync.started_at', time());
 
+        $this->removeData('sync.products.current_page');
+        $this->removeData('sync.orders.current_page');
+
         // flag the store as syncing
         mailchimp_get_api()->flagStoreSync(mailchimp_get_store_id(), true);
 

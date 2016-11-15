@@ -241,6 +241,20 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 			case 'newsletter_settings':
 				$data = $this->validatePostNewsletterSettings($input);
 				break;
+
+			case 'sync':
+
+				$job = new MailChimp_WooCommerce_Process_Products();
+				$job->flagStartSync();
+				wp_queue($job);
+
+				$text = 'Starting the sync process…<br/>'.
+					'<p id="sync-status-message">Please hang tight while we work our mojo. Sometimes the sync can take a while, '.
+					'especially on sites with lots of orders and/or products. You may refresh this page at '.
+					'anytime to check on the progress.</p>';
+
+				add_settings_error('mailchimp-woocommerce_notice', $this->plugin_name, __($text), 'updated');
+				break;
 		}
 
 		return (isset($data) && is_array($data)) ? array_merge($this->getOptions(), $data) : $this->getOptions();

@@ -243,17 +243,8 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 				break;
 
 			case 'sync':
-
-				$job = new MailChimp_WooCommerce_Process_Products();
-				$job->flagStartSync();
-				wp_queue($job);
-
-				$text = 'Starting the sync process…<br/>'.
-					'<p id="sync-status-message">Please hang tight while we work our mojo. Sometimes the sync can take a while, '.
-					'especially on sites with lots of orders and/or products. You may refresh this page at '.
-					'anytime to check on the progress.</p>';
-
-				add_settings_error('mailchimp-woocommerce_notice', $this->plugin_name, __($text), 'updated');
+				$this->startSync();
+				$this->showSyncStartedMessage();
 				break;
 		}
 
@@ -409,9 +400,8 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 
 			// start the sync automatically if the sync is false
 			if ((bool) $this->getData('sync.started_at', false) === false) {
-				$job = new MailChimp_WooCommerce_Process_Products();
-				wp_queue($job);
-				$job->flagStartSync();
+				$this->startSync();
+				$this->showSyncStartedMessage();
 			}
 		}
 
@@ -703,5 +693,28 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Start the sync
+	 */
+	private function startSync()
+	{
+		$job = new MailChimp_WooCommerce_Process_Products();
+		$job->flagStartSync();
+		wp_queue($job);
+	}
+
+	/**
+	 * Show the sync started message right when they sync things.
+	 */
+	private function showSyncStartedMessage()
+	{
+		$text = 'Starting the sync process…<br/>'.
+			'<p id="sync-status-message">Please hang tight while we work our mojo. Sometimes the sync can take a while, '.
+			'especially on sites with lots of orders and/or products. You may refresh this page at '.
+			'anytime to check on the progress.</p>';
+
+		add_settings_error('mailchimp-woocommerce_notice', $this->plugin_name, __($text), 'updated');
 	}
 }

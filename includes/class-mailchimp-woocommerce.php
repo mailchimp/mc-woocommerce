@@ -311,7 +311,10 @@ class MailChimp_Woocommerce {
 			$service->setEnvironment($this->environment);
 			$service->setVersion($this->version);
 
-			$this->loader->add_action('woocommerce_after_checkout_billing_form', $service, 'applyNewsletterField', 5);
+			// adding the ability to render the checkbox on another screen of the checkout page.
+			$render_on = $service->getOption('mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form');
+			$this->loader->add_action($render_on, $service, 'applyNewsletterField', 5);
+
 			$this->loader->add_action('woocommerce_ppe_checkout_order_review', $service, 'applyNewsletterField', 5);
 			$this->loader->add_action('woocommerce_register_form', $service, 'applyNewsletterField', 5);
 

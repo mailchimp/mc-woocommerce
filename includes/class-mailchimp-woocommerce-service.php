@@ -155,7 +155,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
         update_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', $subscribed);
 
         if ($subscribed) {
-            wp_queue(new MailChimp_WooCommerce_User_Submit($user_id, $subscribed), 10);
+            wp_queue(new MailChimp_WooCommerce_User_Submit($user_id, $subscribed));
         }
     }
 
@@ -166,9 +166,8 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     function handleUserUpdated($user_id, $old_user_data)
     {
         // only update this person if they were marked as subscribed before
-        if ((bool) get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true)) {
-            wp_queue(new MailChimp_WooCommerce_User_Submit($user_id, true, $old_user_data), 10);
-        }
+        $is_subscribed = (bool) get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true);
+        wp_queue(new MailChimp_WooCommerce_User_Submit($user_id, $is_subscribed, $old_user_data));
     }
 
     /**

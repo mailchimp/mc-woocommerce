@@ -172,6 +172,8 @@ class MailChimp_WooCommerce_MailChimpApi
             unset($data['interests']);
         }
 
+        //mailchimp_log('mc.api.post_tracer', 'subscribe', $data);
+
         return $this->post("lists/$list_id/members", $data);
     }
 
@@ -203,6 +205,8 @@ class MailChimp_WooCommerce_MailChimpApi
             unset($data['interests']);
         }
 
+        //mailchimp_log('mc.api.post_tracer', 'update', $data);
+
         return $this->patch("lists/$list_id/members/$hash", $data);
     }
 
@@ -233,6 +237,8 @@ class MailChimp_WooCommerce_MailChimpApi
         if (empty($data['interests'])) {
             unset($data['interests']);
         }
+
+        //mailchimp_log('mc.api.post_tracer', 'update_or_create', $data);
 
         return $this->put("lists/$list_id/members/$hash", $data);
     }

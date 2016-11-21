@@ -100,7 +100,7 @@ if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
 
     </form>
 
-    <?php if ($active_tab == 'api_key'): ?>
+    <?php if ($active_tab == 'sync'): ?>
         <h2 style="padding-top: 1em;">More Information</h2>
         <p>
             Need help troubleshooting or connecting your store? Visit our MailChimp for WooCommerce

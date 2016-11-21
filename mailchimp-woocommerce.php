@@ -16,7 +16,7 @@
  * Plugin Name:       MailChimp for WooCommerce
  * Plugin URI:        https://mailchimp.com/connect-your-store/
  * Description:       MailChimp - WooCommerce plugin
- * Version:           1.0.63
+ * Version:           1.0.64
  * Author:            MailChimp
  * Author URI:        https://mailchimp.com
  * License:           GPL-2.0+
@@ -39,7 +39,7 @@ function mailchimp_environment_variables() {
 	return (object) array(
 		'repo' => 'develop',
 		'environment' => 'production',
-		'version' => '1.0.63',
+		'version' => '1.0.64',
 		'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
 		'slack_token' => false,
 		'slack_channel' => 'mc-woo',

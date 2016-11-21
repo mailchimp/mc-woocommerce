@@ -20,7 +20,10 @@ class MailChimp_Woocommerce_Activator {
 	 */
 	public static function activate() {
 
-		add_option('mailchimp_woocommerce_plugin_do_activation_redirect', true);
+		// only do this if the option has never been set before.
+		if (get_option('mailchimp_woocommerce_plugin_do_activation_redirect', null) === null) {
+			add_option('mailchimp_woocommerce_plugin_do_activation_redirect', true);
+		}
 
 		// create the queue tables because we need them for the sync jobs.
 		static::create_queue_tables();

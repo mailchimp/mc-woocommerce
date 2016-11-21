@@ -386,6 +386,8 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 			'mailchimp_list' => isset($input['mailchimp_list']) ? $input['mailchimp_list'] : $this->getOption('mailchimp_list', ''),
 			'newsletter_label' => isset($input['newsletter_label']) ? $input['newsletter_label'] : $this->getOption('newsletter_label', 'Subscribe to our newsletter'),
 			'mailchimp_auto_subscribe' => isset($input['mailchimp_auto_subscribe']) ? $input['mailchimp_auto_subscribe'] : $this->getOption('mailchimp_auto_subscribe', '0'),
+			'mailchimp_checkbox_defaults' => isset($input['mailchimp_checkbox_defaults']) ? $input['mailchimp_checkbox_defaults'] : $this->getOption('mailchimp_checkbox_defaults', 'check'),
+			'mailchimp_checkbox_action' => isset($input['mailchimp_checkbox_action']) ? $input['mailchimp_checkbox_action'] : $this->getOption('mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form'),
 		);
 
 		if ($data['mailchimp_list'] === 'create_new') {

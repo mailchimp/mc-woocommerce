@@ -30,13 +30,19 @@ class MailChimp_Newsletter extends MailChimp_Woocommerce_Options
 
             // if the user is logged in, we will pull the 'is_subscribed' property out of the meta for the value.
             // otherwise we use the default settings.
-            $status = is_user_logged_in() ?
-                get_user_meta(get_current_user_id(), 'mailchimp_woocommerce_is_subscribed', true) : $default_checked;
+            if (is_user_logged_in()) {
+                $status = get_user_meta(get_current_user_id(), 'mailchimp_woocommerce_is_subscribed', true);
+                if ($status === '' || $status === null) {
+                    $status = $default_checked;
+                }
+            } else {
+                $status = $default_checked;
+            }
 
             // echo out the checkbox.
             $checkbox = '<p class="form-row form-row-wide create-account">';
             $checkbox .= '<input class="input-checkbox" id="mailchimp_woocommerce_newsletter" type="checkbox" ';
-            $checkbox .= 'name="mailchimp_woocommerce_newsletter" value="1" checked="'.($status ? 'checked' : '').'">';
+            $checkbox .= 'name="mailchimp_woocommerce_newsletter" value="1"'.($status ? ' checked="checked"' : '').'>';
             $checkbox .= '<label for="mailchimp_woocommerce_newsletter" class="checkbox">'.$label.'</label></p>';
             $checkbox .= '<div class="clear"></div>';
 

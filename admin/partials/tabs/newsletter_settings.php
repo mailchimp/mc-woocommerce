@@ -94,7 +94,6 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-newsletter-checkbox-defaults">
         <select name="<?php echo $this->plugin_name; ?>[mailchimp_checkbox_defaults]" style="width:30%" required>
-
             <?php
             $checkbox_default_settings = (array_key_exists('mailchimp_checkbox_defaults', $options) && !is_null($options['mailchimp_checkbox_defaults'])) ? $options['mailchimp_checkbox_defaults'] : 'check';
             foreach (array('check' => 'Checked', 'uncheck' => 'Unchecked', 'hide' => 'Hidden') as $key => $value ) {

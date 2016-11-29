@@ -51,7 +51,6 @@ class MailChimp_Woocommerce_Public {
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
-
 	}
 
 	/**
@@ -98,8 +97,9 @@ class MailChimp_Woocommerce_Public {
 
 		wp_register_script($this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-public.min.js', array(), $this->version, false);
 
-		wp_localize_script($this->plugin_name, 'public_data', array(
+		wp_localize_script($this->plugin_name, 'mailchimp_public_data', array(
 			'site_url' => site_url(),
+			'ajax_url' => admin_url('admin-ajax.php'),
 		));
 
 		// Enqueued script with localized data.

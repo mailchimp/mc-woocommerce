@@ -6,6 +6,8 @@ $product_count = mailchimp_get_product_count();
 $order_count = mailchimp_get_order_count();
 $store_syncing = false;
 $last_updated_time = get_option('mailchimp-woocommerce-resource-last-updated');
+$account_name = 'n/a';
+$mailchimp_list_name = 'n/a';
 
 if (!empty($last_updated_time)) {
     $last_updated_time = mailchimp_date_local($last_updated_time);
@@ -14,6 +16,10 @@ if (!empty($last_updated_time)) {
 if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore($store_id))) {
 
     $store_syncing = $store->isSyncing();
+
+    if (($account_details = $handler->getAccountDetails())) {
+        $account_name = $account_details['account_name'];
+    }
 
     try {
         $products = $mailchimp_api->products($store_id, 1, 1);
@@ -26,6 +32,8 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
         $mailchimp_total_orders = $orders['total_items'];
         if ($mailchimp_total_orders > $order_count) $mailchimp_total_orders = $order_count;
     } catch (\Exception $e) { $mailchimp_total_orders = 0; }
+
+    $mailchimp_list_name = $handler->getListName();
 }
 ?>
 
@@ -38,6 +46,14 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
 <?php endif; ?>
 
 <p>
+    <strong>Account Connected:</strong> <?php echo $account_name; ?>
+</p>
+
+<p>
+    <strong>List Connected:</strong> <?php echo $mailchimp_list_name; ?>
+</p>
+
+<p>
     <strong>Products:</strong> <?php echo $mailchimp_total_products; ?>/<?php echo $product_count; ?>
 </p>
 
@@ -46,7 +62,7 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
 </p>
 
 <?php if ($last_updated_time): ?>
-<p><strong>Last Updated:</strong> <i><?php echo $last_updated_time->format('D, M j, Y g:i A'); ?></i></p>
+    <p><strong>Last Updated:</strong> <i><?php echo $last_updated_time->format('D, M j, Y g:i A'); ?></i></p>
 <?php endif; ?>
 
 <?php if($mailchimp_api && (!$store_syncing || isset($_GET['resync']) && $_GET['resync'] === '1')): ?>

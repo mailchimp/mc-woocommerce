@@ -472,6 +472,28 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 		return $this->api()->hasList($this->getOption('mailchimp_list'));
 	}
 
+
+	/**
+	 * @return array|bool|mixed|null
+	 */
+	public function getAccountDetails()
+	{
+		if (!$this->hasValidApiKey()) {
+			return false;
+		}
+
+		try {
+			if (($account = $this->getCached('api-account-name', null)) === null) {
+				if (($account = $this->api()->getProfile())) {
+					$this->setCached('api-account-name', $account, 120);
+				}
+			}
+			return $account;
+		} catch (\Exception $e) {
+			return false;
+		}
+	}
+
 	/**
 	 * @return array|bool
 	 */
@@ -490,6 +512,33 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 				return $pinged;
 			}
 			return $pinged;
+		} catch (\Exception $e) {
+			return array();
+		}
+	}
+
+	/**
+	 * @return array|bool
+	 */
+	public function getListName()
+	{
+		if (!$this->hasValidApiKey()) {
+			return false;
+		}
+
+		if (!($list_id = $this->getOption('mailchimp_list', false))) {
+			return false;
+		}
+
+		try {
+			if (($lists = $this->getCached('api-lists', null)) === null) {
+				$lists = $this->api()->getLists(true);
+				if ($lists) {
+					$this->setCached('api-lists', $lists, 120);
+				}
+			}
+
+			return array_key_exists($list_id, $lists) ? $lists[$list_id] : false;
 		} catch (\Exception $e) {
 			return array();
 		}

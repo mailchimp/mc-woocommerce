@@ -25,8 +25,6 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     {
         // make sure the site option for setting the mailchimp_carts has been saved.
         $this->validated_cart_db = get_site_option('mailchimp_woocommerce_db_mailchimp_carts', false);
-
-        $this->handleAdminFunctions();
         $this->is_admin = current_user_can('administrator');
     }
 
@@ -361,6 +359,59 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     }
 
     /**
+     *
+     */
+    public function get_user_by_hash()
+    {
+        if (defined('DOING_AJAX') && DOING_AJAX && isset($_GET['hash'])) {
+            if (($cart = $this->getCart($_GET['hash']))) {
+                $this->respondJSON(array('success' => true, 'email' => $cart->email));
+            }
+        }
+
+        $this->respondJSON(array('success' => false, 'email' => false));
+    }
+
+    /**
+     *
+     */
+    public function set_user_by_email()
+    {
+        if ($this->is_admin) {
+            $this->respondJSON(array('success' => false));
+        }
+
+        if (defined('DOING_AJAX') && DOING_AJAX && isset($_GET['email'])) {
+
+            $cookie_duration = $this->getCookieDuration();
+
+            $this->user_email = trim(str_replace(' ','+', $_GET['email']));
+
+            if (($current_email = $this->getEmailFromSession()) && $current_email !== $this->user_email) {
+                $this->previous_email = $current_email;
+                $this->force_cart_post = true;
+                @setcookie('mailchimp_user_previous_email',$this->user_email, $cookie_duration, '/' );
+            }
+
+            @setcookie('mailchimp_user_email', $this->user_email, $cookie_duration, '/' );
+
+            $this->getCartItems();
+
+            $this->handleCartUpdated();
+
+            $this->respondJSON(array(
+                'success' => true,
+                'email' => $this->user_email,
+                'previous' => $this->previous_email,
+                'cart' => $this->cart,
+            ));
+        }
+
+        $this->respondJSON(array('success' => false, 'email' => false));
+    }
+
+
+    /**
      * @param string $time
      * @return int
      */
@@ -375,165 +426,6 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
         }
 
         return time() + $durations[$time];
-    }
-
-    /**
-     * Just a wrapper to call various methods from MailChimp to the store.
-     * Authentication is based on the secret keys being correct or it will fail.
-     *
-     * The get requests need:
-     * 1. mailchimp-woocommerce[action]
-     * 2. mailchimp-woocommerce[submission]
-     * 3. various other parts based on the api call.
-     */
-    protected function handleAdminFunctions()
-    {
-        if (isset($_GET['reset_cookies'])) {
-            $buster = time()-300;
-
-            setcookie('mailchimp_user_previous_email', '', $buster);
-            setcookie('mailchimp_user_email', '', $buster);
-            setcookie('mailchimp_campaign_id', '', $buster);
-            setcookie('mailchimp_email_id', '', $buster);
-
-            $this->previous_email = null;
-            $this->user_email = null;
-        }
-
-        $methods = array(
-            'plugin-version' => 'respondAdminGetPluginVersion',
-            'submit-email' => 'respondAdminSubmitEmail',
-            'parse-email' => 'respondAdminParseEmail',
-            'track-campaign' => 'respondAdminTrackCampaign',
-            'get-tracking-data' => 'respondAdminGetTrackingData',
-            'verify' => 'respondAdminVerify',
-            'sync' => 'syncProducts',
-            'sync-products' => 'syncProducts',
-            'sync-orders' => 'syncOrders',
-        );
-
-        if (($action = $this->get('action'))) {
-            if (array_key_exists($action, $methods)) {
-                if (!in_array($action, array('submit-email', 'parse-email', 'track-campaign', 'get-tracking-data'))) {
-                    $this->authenticate();
-                }
-                $this->respondJSON($this->{$methods[$action]}());
-            }
-        }
-    }
-
-    /**
-     * @return array
-     */
-    protected function respondAdminGetPluginVersion()
-    {
-        return array('success' => true, 'version' => $this->getVersion());
-    }
-
-    /**
-     * @return array
-     */
-    protected function respondAdminVerify()
-    {
-        return array('success' => true);
-    }
-
-    /**
-     * @return array
-     */
-    protected function respondAdminParseEmail()
-    {
-        if ($this->is_admin) {
-            return array('success' => false);
-        }
-
-        $submission = $this->get('submission');
-
-        if (is_array($submission) && isset($submission['hash'])) {
-
-            if (($cart = $this->getCart($submission['hash']))) {
-                return array('success' => true, 'email' => $cart->email);
-            }
-        }
-
-        return array('success' => false);
-    }
-
-    /**
-     * @return array
-     */
-    protected function respondAdminSubmitEmail()
-    {
-        if ($this->is_admin) {
-            return array('success' => false);
-        }
-
-        $submission = $this->get('submission');
-
-        if (is_array($submission) && isset($submission['email'])) {
-
-            $cookie_duration = $this->getCookieDuration();
-
-            $this->user_email = trim(str_replace(' ','+', $submission['email']));
-
-            if (($current_email = $this->getEmailFromSession()) && $current_email !== $this->user_email) {
-                $this->previous_email = $current_email;
-                $this->force_cart_post = true;
-                @setcookie('mailchimp_user_previous_email',$this->user_email, $cookie_duration, '/' );
-            }
-
-            @setcookie('mailchimp_user_email', $this->user_email, $cookie_duration, '/' );
-
-            $this->getCartItems();
-
-            $this->handleCartUpdated();
-
-            return array(
-                'success' => true,
-                'email' => $this->user_email,
-                'previous' => $this->previous_email,
-                'cart' => $this->cart,
-            );
-        }
-        return array('success' => false);
-    }
-
-    /**
-     * @return array
-     */
-    protected function respondAdminTrackCampaign()
-    {
-        if ($this->is_admin) {
-            return array('success' => false);
-        }
-
-        $submission = $this->get('submission');
-
-        if (is_array($submission) && isset($submission['campaign_id'])) {
-
-            $duration = $this->getCookieDuration();
-
-            $campaign_id = trim($submission['campaign_id']);
-            $email_id = trim($submission['email_id']);
-
-            @setcookie('mailchimp_campaign_id', $campaign_id, $duration, '/');
-            @setcookie('mailchimp_email_id', $email_id, $duration, '/');
-
-            return $this->respondAdminGetTrackingData();
-        }
-        return array('success' => false);
-    }
-
-    /**
-     * @return array
-     */
-    protected function respondAdminGetTrackingData()
-    {
-        return array(
-            'success' => true,
-            'campaign_id' => $this->cookie('mailchimp_campaign_id', 'n/a'),
-            'email_id' => $this->cookie('mailchimp_email_id', 'n/a')
-        );
     }
 
     /**

@@ -159,7 +159,7 @@ class MailChimp_WooCommerce_MailChimpApi
         $data = array(
             'email_type' => 'html',
             'email_address' => $email,
-            'status' => $subscribed === true ? 'subscribed' : 'pending',
+            'status' => ($subscribed === true ? 'subscribed' : 'pending'),
             'merge_fields' => $merge_fields,
             'interests' => $list_interests,
         );
@@ -171,8 +171,6 @@ class MailChimp_WooCommerce_MailChimpApi
         if (empty($data['interests'])) {
             unset($data['interests']);
         }
-
-        //mailchimp_log('mc.api.post_tracer', 'subscribe', $data);
 
         return $this->post("lists/$list_id/members", $data);
     }
@@ -205,8 +203,6 @@ class MailChimp_WooCommerce_MailChimpApi
             unset($data['interests']);
         }
 
-        //mailchimp_log('mc.api.post_tracer', 'update', $data);
-
         return $this->patch("lists/$list_id/members/$hash", $data);
     }
 
@@ -225,7 +221,7 @@ class MailChimp_WooCommerce_MailChimpApi
         $data = array(
             'email_address' => $email,
             'status' => ($subscribed === null ? 'cleaned' : ($subscribed === true ? 'subscribed' : 'unsubscribed')),
-            'status_if_new' => $subscribed === true ? 'subscribed' : 'pending',
+            'status_if_new' => ($subscribed === true ? 'subscribed' : 'pending'),
             'merge_fields' => $merge_fields,
             'interests' => $list_interests,
         );
@@ -237,8 +233,6 @@ class MailChimp_WooCommerce_MailChimpApi
         if (empty($data['interests'])) {
             unset($data['interests']);
         }
-
-        //mailchimp_log('mc.api.post_tracer', 'update_or_create', $data);
 
         return $this->put("lists/$list_id/members/$hash", $data);
     }
@@ -377,7 +371,7 @@ class MailChimp_WooCommerce_MailChimpApi
             'start' => $page,
             'count' => $count,
             'offset' => ($page * $count),
-            'since' => $since ? $since->format('Y-m-d H:i:s') : null,
+            'since' => ($since ? $since->format('Y-m-d H:i:s') : null),
             'cid' => $campaign_id,
         ));
 

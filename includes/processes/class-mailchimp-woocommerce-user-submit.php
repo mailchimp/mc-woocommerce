@@ -83,8 +83,11 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
 
         $merge_vars = array();
 
-        if (!empty(trim($user->first_name))) $merge_vars['FNAME'] = trim($user->first_name);
-        if (!empty(trim($user->last_name))) $merge_vars['LNAME'] = trim($user->last_name);
+        $fn = trim($user->first_name);
+        $ln = trim($user->last_name);
+
+        if (!empty($fn)) $merge_vars['FNAME'] = $fn;
+        if (!empty($ln)) $merge_vars['LNAME'] = $ln;
 
         try {
 

@@ -12,6 +12,8 @@ if (!$handler->hasValidStoreInfo()) {
 
 ?>
 
+<input type="hidden" name="mailchimp_active_settings_tab" value="campaign_defaults"/>
+
 <h2 style="padding-top: 1em;">List Defaults</h2>
 <p>Please fill out the default campaign information.</p>
 

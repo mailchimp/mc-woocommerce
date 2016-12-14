@@ -37,6 +37,8 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
 }
 ?>
 
+<input type="hidden" name="mailchimp_active_settings_tab" value="store_sync"/>
+
 <?php if($store_syncing): ?>
     <h2 style="padding-top: 1em;">Sync Progress</h2>
 <?php endif; ?>

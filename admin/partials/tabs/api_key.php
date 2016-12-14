@@ -8,6 +8,7 @@ if (isset($options['mailchimp_api_key']) && !$handler->hasValidApiKey()) {
 }
 
 ?>
+<input type="hidden" name="mailchimp_active_settings_tab" value="api_key"/>
 
 <h2 style="padding-top: 1em;">API Information</h2>
 <p>To find your MailChimp API key, log into your account settings > Extras > API keys. From there, either grab an existing key or generate a new one for your WooCommerce store. </p>

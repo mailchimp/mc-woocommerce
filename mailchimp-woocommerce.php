@@ -41,8 +41,6 @@ function mailchimp_environment_variables() {
 		'environment' => 'production',
 		'version' => '1.0.69',
 		'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
-		'slack_token' => false,
-		'slack_channel' => 'mc-woo',
 	);
 }
 
@@ -231,14 +229,6 @@ function run_mailchimp_plugin_updater() {
 }
 
 /**
- * @return \Frlnc\Slack\Logger
- */
-function slack()
-{
-	return Frlnc\Slack\Logger::instance();
-}
-
-/**
  * @param $action
  * @param $message
  * @param array $data
@@ -261,14 +251,6 @@ function mailchimp_log($action, $message, $data = array())
 		'message' => $message,
 		'data' => $data,
 	);
-
-	$slack_message = "$action :: $message";
-
-	if (!empty($data['data'])) {
-		$slack_message .= "\n\n".(print_r($data['data'], true));
-	}
-
-	slack()->notice($slack_message);
 
 	return wp_remote_post($options->endpoint, array(
 		'headers' => array(

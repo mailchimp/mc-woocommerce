@@ -148,8 +148,6 @@ class MailChimp_Woocommerce {
 
 		$path = plugin_dir_path( dirname( __FILE__ ) );
 
-		$this->slack();
-
 		/** The abstract options class.*/
 		require_once $path . 'includes/class-mailchimp-woocommerce-options.php';
 
@@ -216,26 +214,6 @@ class MailChimp_Woocommerce {
 
 		// fire up the loader
 		$this->loader = new MailChimp_Woocommerce_Loader();
-	}
-
-	/**
-	 *
-	 */
-	private function slack()
-	{
-		$path = plugin_dir_path( dirname( __FILE__ ) );
-
-		require_once $path.'includes/slack/Contracts/Http/Interactor.php';
-		require_once $path.'includes/slack/Contracts/Http/Response.php';
-		require_once $path.'includes/slack/Contracts/Http/ResponseFactory.php';
-
-		require_once $path.'includes/slack/Core/Commander.php';
-
-		require_once $path.'includes/slack/Http/CurlInteractor.php';
-		require_once $path.'includes/slack/Http/SlackResponse.php';
-		require_once $path.'includes/slack/Http/SlackResponseFactory.php';
-
-		require_once $path.'includes/slack/Logger.php';
 	}
 
 	/**

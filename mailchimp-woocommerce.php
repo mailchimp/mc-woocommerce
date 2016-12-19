@@ -60,7 +60,7 @@ function mailchimp_get_list_id() {
  * @return string
  */
 function mailchimp_get_store_id() {
-	return md5(get_option('siteurl'));
+	return apply_filters('mailchimp-woocommerce-store-id', md5(get_option('siteurl')));
 }
 
 /**

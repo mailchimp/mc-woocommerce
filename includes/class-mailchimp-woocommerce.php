@@ -148,8 +148,6 @@ class MailChimp_Woocommerce {
 
 		$path = plugin_dir_path( dirname( __FILE__ ) );
 
-		$this->slack();
-
 		/** The abstract options class.*/
 		require_once $path . 'includes/class-mailchimp-woocommerce-options.php';
 
@@ -212,29 +210,10 @@ class MailChimp_Woocommerce {
 		require_once $path.'includes/processes/class-mailchimp-woocommerce-cart-update.php';
 		require_once $path.'includes/processes/class-mailchimp-woocommerce-single-order.php';
 		require_once $path.'includes/processes/class-mailchimp-woocommerce-single-product.php';
+		require_once $path.'includes/processes/class-mailchimp-woocommerce-user-submit.php';
 
 		// fire up the loader
 		$this->loader = new MailChimp_Woocommerce_Loader();
-	}
-
-	/**
-	 *
-	 */
-	private function slack()
-	{
-		$path = plugin_dir_path( dirname( __FILE__ ) );
-
-		require_once $path.'includes/slack/Contracts/Http/Interactor.php';
-		require_once $path.'includes/slack/Contracts/Http/Response.php';
-		require_once $path.'includes/slack/Contracts/Http/ResponseFactory.php';
-
-		require_once $path.'includes/slack/Core/Commander.php';
-
-		require_once $path.'includes/slack/Http/CurlInteractor.php';
-		require_once $path.'includes/slack/Http/SlackResponse.php';
-		require_once $path.'includes/slack/Http/SlackResponseFactory.php';
-
-		require_once $path.'includes/slack/Logger.php';
 	}
 
 	/**
@@ -310,7 +289,10 @@ class MailChimp_Woocommerce {
 			$service->setEnvironment($this->environment);
 			$service->setVersion($this->version);
 
-			$this->loader->add_action('woocommerce_after_checkout_billing_form', $service, 'applyNewsletterField', 5);
+			// adding the ability to render the checkbox on another screen of the checkout page.
+			$render_on = $service->getOption('mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form');
+			$this->loader->add_action($render_on, $service, 'applyNewsletterField', 5);
+
 			$this->loader->add_action('woocommerce_ppe_checkout_order_review', $service, 'applyNewsletterField', 5);
 			$this->loader->add_action('woocommerce_register_form', $service, 'applyNewsletterField', 5);
 
@@ -354,6 +336,17 @@ class MailChimp_Woocommerce {
 
 			// save post hook for products
 			$this->loader->add_action('save_post', $service, 'handlePostSaved', 10, 3);
+
+			// handle the user registration hook
+			$this->loader->add_action('user_register', $service, 'handleUserRegistration');
+			// handle the user updated profile hook
+			$this->loader->add_action('profile_update', $service, 'handleUserUpdated', 10, 2);
+
+			// when someone deletes a user??
+			//$this->loader->add_action('delete_user', $service, 'handleUserDeleting');
+
+			$this->loader->add_action('wp_ajax_nopriv_mailchimp_get_user_by_hash', $service, 'get_user_by_hash');
+			$this->loader->add_action('wp_ajax_nopriv_mailchimp_set_user_by_email', $service, 'set_user_by_email');
 		}
 	}
 

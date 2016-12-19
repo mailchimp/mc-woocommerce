@@ -1,30 +1,76 @@
 <?php
 
-$handler = MailChimp_Woocommerce_Admin::connect();
+$mailchimp_total_products = $mailchimp_total_orders = 0;
+$store_id = mailchimp_get_store_id();
+$product_count = mailchimp_get_product_count();
+$order_count = mailchimp_get_order_count();
+$store_syncing = false;
+$last_updated_time = get_option('mailchimp-woocommerce-resource-last-updated');
+$account_name = 'n/a';
+$mailchimp_list_name = 'n/a';
 
-// if we're not ready for a sync, we need to redirect out of this page like now.
-//if (!$handler->isReadyForSync()) {
-//    wp_redirect('options-general.php?page=mailchimp-woocommerce&tab=api_key&error_notice=not_ready_for_sync');
-//}
-
-if (($sync_started_at = $this->getData('sync.started_at', false))) {
-    $date = mailchimp_date_local(date("c", $sync_started_at));
-    $sync_started_at = $date->format('D, M j, Y g:i A');
-} else {
-    $sync_started_at = 'N/A';
+if (!empty($last_updated_time)) {
+    $last_updated_time = mailchimp_date_local($last_updated_time);
 }
 
-if (($sync_complete_at = $this->getData('sync.completed_at', false))) {
-    $date = mailchimp_date_local(date("c", $sync_complete_at));
-    $sync_complete_at = $date->format('D, M j, Y g:i A');
-} else {
-    $sync_complete_at = $sync_started_at !== 'N/A' ? 'In Progress' : 'N/A';
-}
+if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore($store_id))) {
 
+    $store_syncing = $store->isSyncing();
+
+    if (($account_details = $handler->getAccountDetails())) {
+        $account_name = $account_details['account_name'];
+    }
+
+    try {
+        $products = $mailchimp_api->products($store_id, 1, 1);
+        $mailchimp_total_products = $products['total_items'];
+        if ($mailchimp_total_products > $product_count) $mailchimp_total_products = $product_count;
+    } catch (\Exception $e) { $mailchimp_total_products = 0; }
+
+    try {
+        $orders = $mailchimp_api->orders($store_id, 1, 1);
+        $mailchimp_total_orders = $orders['total_items'];
+        if ($mailchimp_total_orders > $order_count) $mailchimp_total_orders = $order_count;
+    } catch (\Exception $e) { $mailchimp_total_orders = 0; }
+
+    $mailchimp_list_name = $handler->getListName();
+}
 ?>
 
-<h2 style="padding-top: 1em;">Sync Timeline</h2>
+<input type="hidden" name="mailchimp_active_settings_tab" value="store_sync"/>
 
-<p>Sync Started: <?php echo $sync_started_at; ?></p>
-<p>Sync Completed: <?php echo $sync_complete_at; ?></p>
+<?php if($store_syncing): ?>
+    <h2 style="padding-top: 1em;">Sync Progress</h2>
+<?php endif; ?>
 
+<?php if(!$store_syncing): ?>
+    <h2 style="padding-top: 1em;">Sync Status</h2>
+<?php endif; ?>
+
+<p>
+    <strong>Account Connected:</strong> <?php echo $account_name; ?>
+</p>
+
+<p>
+    <strong>List Connected:</strong> <?php echo $mailchimp_list_name; ?>
+</p>
+
+<p>
+    <strong>Products:</strong> <?php echo $mailchimp_total_products; ?>/<?php echo $product_count; ?>
+</p>
+
+<p>
+    <strong>Orders:</strong> <?php echo $mailchimp_total_orders; ?>/<?php echo $order_count; ?>
+</p>
+
+<?php if ($last_updated_time): ?>
+    <p><strong>Last Updated:</strong> <i><?php echo $last_updated_time->format('D, M j, Y g:i A'); ?></i></p>
+<?php endif; ?>
+
+<?php if($mailchimp_api && (!$store_syncing || isset($_GET['resync']) && $_GET['resync'] === '1')): ?>
+    <h2 style="padding-top: 1em;">Advanced</h2>
+    <p>
+        You may sync your list again if necessary. When this is done, all ecommerce data will be reset in your MailChimp list - including products and transaction data.
+    </p>
+    <?php submit_button('Resync', 'primary','submit', TRUE); ?>
+<?php endif; ?>

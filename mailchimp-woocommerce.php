@@ -16,7 +16,7 @@
  * Plugin Name:       MailChimp for WooCommerce
  * Plugin URI:        https://mailchimp.com/connect-your-store/
  * Description:       MailChimp - WooCommerce plugin
- * Version:           1.0.6
+ * Version:           1.0.70
  * Author:            MailChimp
  * Author URI:        https://mailchimp.com
  * License:           GPL-2.0+
@@ -34,13 +34,26 @@ if ( ! defined( 'WPINC' ) ) {
  * @return object
  */
 function mailchimp_environment_variables() {
+	global $wp_version;
+
 	return (object) array(
 		'repo' => 'master',
 		'environment' => 'production',
-		'version' => '1.0.6',
-		'slack_token' => false,
-		'slack_channel' => 'mc-woo',
+		'version' => '1.0.70',
+		'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
 	);
+}
+
+/**
+ * @return bool|int
+ */
+function mailchimp_get_list_id() {
+	if (($options = get_option('mailchimp-woocommerce', false)) && is_array($options)) {
+		if (isset($options['mailchimp_list'])) {
+			return $options['mailchimp_list'];
+		}
+	}
+	return false;
 }
 
 /**
@@ -94,7 +107,14 @@ function mailchimp_get_data($key, $default) {
 function mailchimp_date_utc($date) {
 	$timezone = wc_timezone_string();
 	//$timezone = mailchimp_get_option('store_timezone', 'America/New_York');
-	$date = new \DateTime($date, new DateTimeZone($timezone));
+	if (is_numeric($date)) {
+		$stamp = $date;
+		$date = new \DateTime('now', new DateTimeZone($timezone));
+		$date->setTimestamp($stamp);
+	} else {
+		$date = new \DateTime($date, new DateTimeZone($timezone));
+	}
+
 	$date->setTimezone(new DateTimeZone('UTC'));
 	return $date;
 }
@@ -105,7 +125,14 @@ function mailchimp_date_utc($date) {
  */
 function mailchimp_date_local($date) {
     $timezone = mailchimp_get_option('store_timezone', 'America/New_York');
-    $date = new \DateTime($date, new DateTimeZone('UTC'));
+	if (is_numeric($date)) {
+		$stamp = $date;
+		$date = new \DateTime('now', new DateTimeZone('UTC'));
+		$date->setTimestamp($stamp);
+	} else {
+		$date = new \DateTime($date, new DateTimeZone('UTC'));
+	}
+
     $date->setTimezone(new DateTimeZone($timezone));
     return $date;
 }
@@ -190,21 +217,15 @@ function run_mailchimp_plugin_updater() {
 	if (!class_exists('PucFactory')) {
 		require plugin_dir_path( __FILE__ ) . 'includes/plugin-update-checker/plugin-update-checker.php';
 	}
+
 	/** @var \PucGitHubChecker_3_1 $checker */
 	$updater = PucFactory::getLatestClassVersion('PucGitHubChecker');
+
 	if (class_exists($updater)) {
 		$env = mailchimp_environment_variables();
 		$checker = new $updater('https://github.com/mailchimp/mc-woocommerce/', __FILE__, $env->repo, 1);
 		$checker->handleManualCheck();
 	}
-}
-
-/**
- * @return \Frlnc\Slack\Logger
- */
-function slack()
-{
-	return Frlnc\Slack\Logger::instance();
 }
 
 /**
@@ -231,14 +252,6 @@ function mailchimp_log($action, $message, $data = array())
 		'data' => $data,
 	);
 
-	$slack_message = "$action :: $message";
-
-	if (!empty($data['data'])) {
-		$slack_message .= "\n\n".(print_r($data['data'], true));
-	}
-
-	slack()->notice($slack_message);
-
 	return wp_remote_post($options->endpoint, array(
 		'headers' => array(
 			'Accept: application/json',
@@ -264,6 +277,47 @@ function mailchimp_string_contains($haystack, $needles)
 	}
 
 	return false;
+}
+
+
+/**
+ * @return int
+ */
+function mailchimp_get_product_count() {
+	$posts = mailchimp_count_posts('product');
+	$total = 0;
+	foreach ($posts as $status => $count) {
+		$total += $count;
+	}
+	return $total;
+}
+
+/**
+ * @return int
+ */
+function mailchimp_get_order_count() {
+	$posts = mailchimp_count_posts('shop_order');
+	unset($posts['auto-draft']);
+	$total = 0;
+	foreach ($posts as $status => $count) {
+		$total += $count;
+	}
+	return $total;
+}
+
+/**
+ * @param $type
+ * @return array|null|object
+ */
+function mailchimp_count_posts($type) {
+	global $wpdb;
+	$query = "SELECT post_status, COUNT( * ) AS num_posts FROM {$wpdb->posts} WHERE post_type = %s GROUP BY post_status";
+	$posts = $wpdb->get_results( $wpdb->prepare($query, $type));
+	$response = array();
+	foreach ($posts as $post) {
+		$response[$post->post_status] = $post->num_posts;
+	}
+	return $response;
 }
 
 register_activation_hook( __FILE__, 'activate_mailchimp_woocommerce' );

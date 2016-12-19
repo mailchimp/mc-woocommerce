@@ -241,6 +241,11 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 			case 'newsletter_settings':
 				$data = $this->validatePostNewsletterSettings($input);
 				break;
+
+			case 'sync':
+				$this->startSync();
+				$this->showSyncStartedMessage();
+				break;
 		}
 
 		return (isset($data) && is_array($data)) ? array_merge($this->getOptions(), $data) : $this->getOptions();
@@ -377,10 +382,20 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 	 */
 	protected function validatePostNewsletterSettings($input)
 	{
+		// default value.
+		$checkbox = $this->getOption('mailchimp_checkbox_defaults', 'check');
+
+		// see if it's posted in the form.
+		if (isset($input['mailchimp_checkbox_defaults']) && !empty($input['mailchimp_checkbox_defaults'])) {
+			$checkbox = $input['mailchimp_checkbox_defaults'];
+		}
+
 		$data = array(
 			'mailchimp_list' => isset($input['mailchimp_list']) ? $input['mailchimp_list'] : $this->getOption('mailchimp_list', ''),
 			'newsletter_label' => isset($input['newsletter_label']) ? $input['newsletter_label'] : $this->getOption('newsletter_label', 'Subscribe to our newsletter'),
 			'mailchimp_auto_subscribe' => isset($input['mailchimp_auto_subscribe']) ? $input['mailchimp_auto_subscribe'] : $this->getOption('mailchimp_auto_subscribe', '0'),
+			'mailchimp_checkbox_defaults' => $checkbox,
+			'mailchimp_checkbox_action' => isset($input['mailchimp_checkbox_action']) ? $input['mailchimp_checkbox_action'] : $this->getOption('mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form'),
 		);
 
 		if ($data['mailchimp_list'] === 'create_new') {
@@ -395,9 +410,8 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 
 			// start the sync automatically if the sync is false
 			if ((bool) $this->getData('sync.started_at', false) === false) {
-				$job = new MailChimp_WooCommerce_Process_Products();
-				wp_queue($job);
-				$job->flagStartSync();
+				$this->startSync();
+				$this->showSyncStartedMessage();
 			}
 		}
 
@@ -466,6 +480,28 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 		return $this->api()->hasList($this->getOption('mailchimp_list'));
 	}
 
+
+	/**
+	 * @return array|bool|mixed|null
+	 */
+	public function getAccountDetails()
+	{
+		if (!$this->hasValidApiKey()) {
+			return false;
+		}
+
+		try {
+			if (($account = $this->getCached('api-account-name', null)) === null) {
+				if (($account = $this->api()->getProfile())) {
+					$this->setCached('api-account-name', $account, 120);
+				}
+			}
+			return $account;
+		} catch (\Exception $e) {
+			return false;
+		}
+	}
+
 	/**
 	 * @return array|bool
 	 */
@@ -484,6 +520,33 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 				return $pinged;
 			}
 			return $pinged;
+		} catch (\Exception $e) {
+			return array();
+		}
+	}
+
+	/**
+	 * @return array|bool
+	 */
+	public function getListName()
+	{
+		if (!$this->hasValidApiKey()) {
+			return false;
+		}
+
+		if (!($list_id = $this->getOption('mailchimp_list', false))) {
+			return false;
+		}
+
+		try {
+			if (($lists = $this->getCached('api-lists', null)) === null) {
+				$lists = $this->api()->getLists(true);
+				if ($lists) {
+					$this->setCached('api-lists', $lists, 120);
+				}
+			}
+
+			return array_key_exists($list_id, $lists) ? $lists[$list_id] : false;
 		} catch (\Exception $e) {
 			return array();
 		}
@@ -689,5 +752,28 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Start the sync
+	 */
+	private function startSync()
+	{
+		$job = new MailChimp_WooCommerce_Process_Products();
+		$job->flagStartSync();
+		wp_queue($job);
+	}
+
+	/**
+	 * Show the sync started message right when they sync things.
+	 */
+	private function showSyncStartedMessage()
+	{
+		$text = 'Starting the sync process…<br/>'.
+			'<p id="sync-status-message">Please hang tight while we work our mojo. Sometimes the sync can take a while, '.
+			'especially on sites with lots of orders and/or products. You may refresh this page at '.
+			'anytime to check on the progress.</p>';
+
+		add_settings_error('mailchimp-woocommerce_notice', $this->plugin_name, __($text), 'updated');
 	}
 }

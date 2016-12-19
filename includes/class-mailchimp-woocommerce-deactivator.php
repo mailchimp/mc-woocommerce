@@ -34,6 +34,9 @@ class MailChimp_Woocommerce_Deactivator {
 		if (($api = mailchimp_get_api())) {
 			$api->deleteStore(mailchimp_get_store_id());
 		}
+
+		delete_option('mailchimp-woocommerce-sync.started_at');
+		delete_option('mailchimp-woocommerce-sync.completed_at');
 	}
 
 }

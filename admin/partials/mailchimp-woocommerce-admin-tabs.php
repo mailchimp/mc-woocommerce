@@ -11,6 +11,8 @@ $show_campaign_defaults = true;
 $has_valid_api_key = false;
 $allow_new_list = true;
 
+$clicked_sync_button = isset($_POST['mailchimp_woocommerce_settings_hidden']) && $active_tab == 'sync';
+
 if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
     $has_valid_api_key = true;
     // if we don't have a valid api key we need to redirect back to the 'api_key' tab.
@@ -26,8 +28,14 @@ if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
 }
 ?>
 
+<style>
+    #sync-status-message strong {
+        font-weight:inherit;
+    }
+</style>
+
 <?php if (!defined('PHP_VERSION_ID') || (PHP_VERSION_ID < 50600)): ?>
-    <div class="error notice is-dismissable">
+    <div data-dismissible="notice-php-version" class="error notice notice-error is-dismissible">
         <p><?php _e('MailChimp says: Please upgrade your PHP version to a minimum of 5.6', 'mailchimp-woocommerce'); ?></p>
     </div>
 <?php endif; ?>
@@ -47,7 +55,7 @@ if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
         <?php endif; ?>
         <a href="?page=mailchimp-woocommerce&tab=newsletter_settings" class="nav-tab <?php echo $active_tab == 'newsletter_settings' ? 'nav-tab-active' : ''; ?>">List Settings</a>
         <?php if($show_sync_tab): ?>
-        <a href="?page=mailchimp-woocommerce&tab=sync" class="nav-tab <?php echo $active_tab == 'sync' ? 'nav-tab-active' : ''; ?>">Sync Status</a>
+        <a href="?page=mailchimp-woocommerce&tab=sync" class="nav-tab <?php echo $active_tab == 'sync' ? 'nav-tab-active' : ''; ?>">Sync</a>
         <?php endif; ?>
         <?php endif;?>
         <?php endif; ?>
@@ -55,11 +63,15 @@ if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
 
     <form method="post" name="cleanup_options" action="options.php">
 
+        <input type="hidden" name="mailchimp_woocommerce_settings_hidden" value="Y">
+
         <?php
-        settings_fields($this->plugin_name);
-        do_settings_sections($this->plugin_name);
-        //settings_errors();
-        include('tabs/notices.php');
+        if (!$clicked_sync_button) {
+            settings_fields($this->plugin_name);
+            do_settings_sections($this->plugin_name);
+            //settings_errors();
+            include('tabs/notices.php');
+        }
         ?>
 
         <input type="hidden" name="<?php echo $this->plugin_name; ?>[mailchimp_active_tab]" value="<?php echo $active_tab; ?>"/>
@@ -86,10 +98,15 @@ if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
 
         <?php if ($active_tab !== 'sync') submit_button('Save all changes', 'primary','submit', TRUE); ?>
 
-        <?php if($show_sync_tab && isset($_GET['show_sync']) && $_GET['show_sync'] === '1'): ?>
-            <p><a style="float:left;" class="btn" href="/?mailchimp_woocommerce[action]=sync">Re-Sync</a></p>
-        <?php endif; ?>
-
     </form>
+
+    <?php if ($active_tab == 'sync'): ?>
+        <h2 style="padding-top: 1em;">More Information</h2>
+        <p>
+            Need help troubleshooting or connecting your store? Visit our MailChimp for WooCommerce
+            <a href="http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce/" target="_blank">knowledge base</a> at anytime. Also, be sure to
+            <a href="https://wordpress.org/support/plugin/mailchimp-for-woocommerce/reviews/" target="_blank">leave a review</a> and let us know how we're doing.
+        </p>
+    <?php endif; ?>
 
 </div><!-- /.wrap -->

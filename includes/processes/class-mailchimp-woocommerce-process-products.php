@@ -15,6 +15,15 @@ class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abtst
      */
     protected $action = 'mailchimp_woocommerce_process_products';
 
+
+    public static function push()
+    {
+        $job = new MailChimp_WooCommerce_Process_Products();
+        $job->flagStartSync();
+        wp_queue($job);
+    }
+
+
     /**
      * @return string
      */
@@ -68,7 +77,15 @@ class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abtst
         // add a timestamp for the product sync completion
         $this->setResourceCompleteTime();
 
-        // since the products are all good, let's sync up the orders now.
-        wp_queue(new MailChimp_WooCommerce_Process_Orders());
+        $prevent_order_sync = get_option('mailchimp-woocommerce-sync.orders.prevent', false);
+
+        // only do this if we're not strictly syncing products ( which is the default ).
+        if (!$prevent_order_sync) {
+            // since the products are all good, let's sync up the orders now.
+            wp_queue(new MailChimp_WooCommerce_Process_Orders());
+        }
+
+        // since we skipped the orders feed we can delete this option.
+        delete_option('mailchimp-woocommerce-sync.orders.prevent');
     }
 }

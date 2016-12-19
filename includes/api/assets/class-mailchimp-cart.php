@@ -236,7 +236,7 @@ class MailChimp_WooCommerce_Cart
             'checkout_url' => (string) $this->getCheckoutURL(),
             'currency_code' => (string) $this->getCurrencyCode(),
             'order_total' => $this->getOrderTotal(),
-            'tax_total' => $this->getTaxTotal() > 0 ? $this->getTaxTotal() : null,
+            'tax_total' => ($this->getTaxTotal() > 0 ? $this->getTaxTotal() : null),
             'lines' => array_map(function($item) {
                 return $item->toArray();
             }, $this->items()),

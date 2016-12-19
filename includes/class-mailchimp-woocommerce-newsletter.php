@@ -16,13 +16,34 @@ class MailChimp_Newsletter extends MailChimp_Woocommerce_Options
     public function applyNewsletterField($checkout)
     {
         if (!is_admin()) {
-            $status = is_user_logged_in() ? get_user_meta(get_current_user_id(), 'mailchimp_woocommerce_is_subscribed',
-                true) : true;
 
+            // if the user has chosen to hide the checkbox, don't do anything.
+            if (($default_setting = $this->getOption('mailchimp_checkbox_defaults', 'check')) === 'hide') {
+                return;
+            }
+
+            // allow the user to specify the text in the newsletter label.
+            $label = $this->getOption('newsletter_label', 'Subscribe to our newsletter');
+
+            // if the user chose 'check' or nothing at all, we default to true.
+            $default_checked = $default_setting === 'check';
+
+            // if the user is logged in, we will pull the 'is_subscribed' property out of the meta for the value.
+            // otherwise we use the default settings.
+            if (is_user_logged_in()) {
+                $status = get_user_meta(get_current_user_id(), 'mailchimp_woocommerce_is_subscribed', true);
+                if ($status === '' || $status === null) {
+                    $status = $default_checked;
+                }
+            } else {
+                $status = $default_checked;
+            }
+
+            // echo out the checkbox.
             $checkbox = '<p class="form-row form-row-wide create-account">';
-            $checkbox .= '<input class="input-checkbox" id="mailchimp_woocommerce_newsletter" type="checkbox" name="mailchimp_woocommerce_newsletter" value="1" checked="' . ($status ? 'checked' : '') . '"> ';
-            $checkbox .= '<label for="mailchimp_woocommerce_newsletter" class="checkbox">' . $this->getOption('newsletter_label',
-                    'Subscribe to our newsletter') . '</label></p>';
+            $checkbox .= '<input class="input-checkbox" id="mailchimp_woocommerce_newsletter" type="checkbox" ';
+            $checkbox .= 'name="mailchimp_woocommerce_newsletter" value="1"'.($status ? ' checked="checked"' : '').'>';
+            $checkbox .= '<label for="mailchimp_woocommerce_newsletter" class="checkbox">'.$label.'</label></p>';
             $checkbox .= '<div class="clear"></div>';
 
             echo $checkbox;

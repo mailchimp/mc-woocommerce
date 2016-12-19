@@ -8,6 +8,7 @@ if (!$handler->hasValidApiKey()) {
 }
 
 ?>
+<input type="hidden" name="mailchimp_active_settings_tab" value="store_info"/>
 
 <h2 style="padding-top: 1em;">Store Settings</h2>
 <p>Please provide the following information about your WooCommerce store.</p>

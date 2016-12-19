@@ -306,8 +306,8 @@ class MailChimp_WooCommerce_Address
             'postal_code' => (string) $this->postal_code,
             'country' => (string) $this->country,
             'country_code' => (string) $this->country_code,
-            'longitude' => $this->longitude ? (int) $this->longitude : null,
-            'latitude' => $this->latitude ? (int) $this->latitude : null,
+            'longitude' => ($this->longitude ? (int) $this->longitude : null),
+            'latitude' => ($this->latitude ? (int) $this->latitude : null),
             'phone' => (string) $this->phone,
             'company' => (string) $this->company,
         ));

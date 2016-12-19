@@ -1,10 +1,31 @@
+** 1.0.7 **
+* add options to move, hide and change defaults for opt-in checkbox
+* add ability to re-sync and display connection details
+* support for subscriptions without orders
+* additional small fixes and some internal logging removal
+
 ** 1.0.6 **
 * fixed conflict with the plugin updater where the class could not be loaded correctly.
 * fixed error validation for store name.
 * fixed cross device abandoned cart url's
 
+** 1.0.4 **
+* fix for Abandoned Carts without cookies
+
 ** 1.0.3 **
 * fixed cart posts on dollar amounts greater than 1000
+
+** 1.0.2**
+* title correction for Product Variants
+* added installation checks for WooCommerce and phone contact info
+* support for free orders
+
+** 1.0 **
+* added is_synicng flag to prevent sends during backfill
+* fix for conflicts with Gravity Forms Pro and installation issues
+* skip all Amazon orders
+* allow users to set opt-in for pre-existing customers during first sync
+* add Plugin Updater
 
 ** 0.1.22 **
 * flag quantity as 1 if the product does not manage inventory

@@ -63,7 +63,7 @@ abstract class MailChimp_Woocommerce_Options
      */
     public function getUniqueStoreID()
     {
-        return md5(get_option('siteurl'));
+        return mailchimp_get_store_id();
     }
 
     /**

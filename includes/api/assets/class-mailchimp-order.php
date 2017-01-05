@@ -11,6 +11,7 @@
 class MailChimp_WooCommerce_Order
 {
     protected $id = null;
+    protected $landing_site = null;
     protected $customer = null;
     protected $campaign_id = null;
     protected $financial_status = null;
@@ -33,6 +34,7 @@ class MailChimp_WooCommerce_Order
     {
         return array(
             'id' => 'required|string',
+            'landing_site' => 'required|string',
             'customer' => 'required',
             'campaign_id' => 'string',
             'financial_status' => 'string',
@@ -64,6 +66,25 @@ class MailChimp_WooCommerce_Order
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @param $landing_site
+     * @return $this
+     */
+    public function setLandingSite($landing_site)
+    {
+        $this->landing_site = $landing_site;
+
+        return $this;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getLandingSite()
+    {
+        return $this->landing_site;
     }
 
     /**
@@ -347,6 +368,7 @@ class MailChimp_WooCommerce_Order
     {
         return mailchimp_array_remove_empty(array(
             'id' => (string) $this->getId(),
+            'landing_site' => (string) $this->getLandingSite(),
             'customer' => $this->getCustomer()->toArray(),
             'campaign_id' => (string) $this->getCampaignId(),
             'financial_status' => (string) $this->getFinancialStatus(),
@@ -374,7 +396,7 @@ class MailChimp_WooCommerce_Order
     public function fromArray(array $data)
     {
         $singles = array(
-            'id', 'campaign_id', 'financial_status', 'fulfillment_status',
+            'id', 'landing_site', 'campaign_id', 'financial_status', 'fulfillment_status',
             'currency_code', 'order_total', 'tax_total', 'processed_at_foreign',
             'cancelled_at_foreign', 'updated_at_foreign'
         );

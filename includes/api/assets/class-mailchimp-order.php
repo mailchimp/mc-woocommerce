@@ -408,17 +408,20 @@ class MailChimp_WooCommerce_Order
         }
 
         if (array_key_exists('shipping_address', $data) && is_array($data['shipping_address'])) {
-            $this->shipping_address = (new MailChimp_WooCommerce_Address())->fromArray($data['shipping_address']);
+            $shipping = new MailChimp_WooCommerce_Address();
+            $this->shipping_address = $shipping->fromArray($data['shipping_address']);
         }
 
         if (array_key_exists('billing_address', $data) && is_array($data['billing_address'])) {
-            $this->billing_address = (new MailChimp_WooCommerce_Address())->fromArray($data['billing_address']);
+            $billing = new MailChimp_WooCommerce_Address();
+            $this->billing_address = $billing->fromArray($data['billing_address']);
         }
 
         if (array_key_exists('lines', $data) && is_array($data['lines'])) {
             $this->lines = array();
             foreach ($data['lines'] as $line_item) {
-                $this->lines[] = (new MailChimp_WooCommerce_LineItem())->fromArray($line_item);
+                $item = new MailChimp_WooCommerce_LineItem();
+                $this->lines[] = $item->fromArray($line_item);
             }
         }
 

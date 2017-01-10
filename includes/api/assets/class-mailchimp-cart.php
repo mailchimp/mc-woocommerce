@@ -261,12 +261,14 @@ class MailChimp_WooCommerce_Cart
         }
 
         if (array_key_exists('customer', $data) && is_array($data['customer'])) {
-            $this->customer = (new MailChimp_WooCommerce_Customer())->fromArray($data['customer']);
+            $customer = new MailChimp_WooCommerce_Customer();
+            $this->customer = $customer->fromArray($data['customer']);
         }
 
         if (array_key_exists('lines', $data) && is_array($data['lines'])) {
             foreach ($data['lines'] as $line_item) {
-                $this->lines[] = (new MailChimp_WooCommerce_LineItem)->fromArray($line_item);
+                $item = new MailChimp_WooCommerce_LineItem();
+                $this->lines[] = $item->fromArray($line_item);
             }
         }
 

@@ -367,8 +367,6 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
             @setcookie('mailchimp_landing_site', $landing_site, $this->getCookieDuration(), '/' );
 
             $this->setWooSession('mailchimp_landing_site', $landing_site);
-
-            print_r(array('landing_site_cookie' => $landing_site));
         }
 
         return $this;

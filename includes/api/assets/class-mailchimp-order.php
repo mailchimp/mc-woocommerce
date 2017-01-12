@@ -19,6 +19,7 @@ class MailChimp_WooCommerce_Order
     protected $currency_code = null;
     protected $order_total = null;
     protected $tax_total = null;
+    protected $discount_total = null;
     protected $shipping_total = null;
     protected $updated_at_foreign = null;
     protected $processed_at_foreign = null;
@@ -42,6 +43,7 @@ class MailChimp_WooCommerce_Order
             'currency_code' => 'required|currency_code',
             'order_total' => 'required|numeric',
             'tax_total' => 'numeric',
+            'discount_total' => 'numeric',
             'processed_at_foreign' => 'date',
             'updated_at_foreign' => 'date',
             'cancelled_at_foreign' => 'date',
@@ -261,6 +263,25 @@ class MailChimp_WooCommerce_Order
     }
 
     /**
+     * @return mixed
+     */
+    public function getDiscountTotal()
+    {
+        return $this->discount_total;
+    }
+
+    /**
+     * @param mixed $discount_total
+     * @return MailChimp_WooCommerce_Order
+     */
+    public function setDiscountTotal($discount_total)
+    {
+        $this->discount_total = $discount_total;
+
+        return $this;
+    }
+
+    /**
      * @param \DateTime $time
      * @return $this
      */
@@ -376,6 +397,7 @@ class MailChimp_WooCommerce_Order
             'currency_code' => (string) $this->getCurrencyCode(),
             'order_total' => floatval($this->getOrderTotal()),
             'tax_total' => floatval($this->getTaxTotal()),
+            'discount_total' => floatval($this->getDiscountTotal()),
             'shipping_total' => floatval($this->getShippingTotal()),
             'processed_at_foreign' => (string) $this->getProcessedAt(),
             'cancelled_at_foreign' => (string) $this->getCancelledAt(),
@@ -397,7 +419,7 @@ class MailChimp_WooCommerce_Order
     {
         $singles = array(
             'id', 'landing_site', 'campaign_id', 'financial_status', 'fulfillment_status',
-            'currency_code', 'order_total', 'tax_total', 'processed_at_foreign',
+            'currency_code', 'order_total', 'tax_total', 'discount_total', 'processed_at_foreign',
             'cancelled_at_foreign', 'updated_at_foreign'
         );
 

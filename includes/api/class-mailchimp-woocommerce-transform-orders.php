@@ -97,6 +97,9 @@ class MailChimp_WooCommerce_Transform_Orders
         // if we have shipping.
         $order->setShippingTotal($woo->get_total_shipping());
 
+        // set the order discount
+        $order->setDiscountTotal($woo->get_total_discount());
+
         // set the customer
         $order->setCustomer($this->buildCustomerFromOrder($woo));
 

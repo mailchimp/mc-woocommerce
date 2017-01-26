@@ -48,6 +48,9 @@ You’ll need to do a few things to connect your WooCommerce store to MailChimp.
 For more information on settings and configuration, please visit our Knowledge Base: [http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce](http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce)
 
 == Changelog ==
+= 1.0.8 =
+* add landing_site, financial status and discount information for orders
+* fix to support php 5.3
 
 = 1.0.7 =
 * add options to move, hide and change defaults for opt-in checkbox

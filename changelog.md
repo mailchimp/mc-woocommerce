@@ -1,3 +1,7 @@
+** 1.0.8 **
+* add landing_site, financial status and discount information for orders
+* fix to support php 5.3
+
 ** 1.0.7 **
 * add options to move, hide and change defaults for opt-in checkbox
 * add ability to re-sync and display connection details
@@ -18,7 +22,7 @@
 ** 1.0.2**
 * title correction for Product Variants
 * added installation checks for WooCommerce and phone contact info
-* support for free orders
+support for free orders
 
 ** 1.0 **
 * added is_synicng flag to prevent sends during backfill

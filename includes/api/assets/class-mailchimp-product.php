@@ -272,7 +272,8 @@ class MailChimp_WooCommerce_Product
         if (array_key_exists('variants', $data) && is_array($data['variants'])) {
             $this->variants = array();
             foreach ($data['variants'] as $variant) {
-                $this->variants[] = (new MailChimp_WooCommerce_ProductVariation())->fromArray($variant);
+                $variation = new MailChimp_WooCommerce_ProductVariation();
+                $this->variants[] = $variation->fromArray($variant);
             }
         }
 

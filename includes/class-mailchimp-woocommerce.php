@@ -325,9 +325,9 @@ class MailChimp_Woocommerce {
 			$this->loader->add_action( 'init', $service, 'handleCampaignTracking' );
 
 			// order hooks
-			$this->loader->add_action('woocommerce_api_create_order', $service, 'handleOrderStatusChanged');
-			$this->loader->add_action('woocommerce_thankyou', $service, 'handleOrderStatusChanged');
-			$this->loader->add_action('woocommerce_order_status_changed', $service, 'handleOrderStatusChanged');
+            $this->loader->add_action('woocommerce_thankyou', $service, 'onNewOrder', 1);
+			$this->loader->add_action('woocommerce_api_create_order', $service, 'handleOrderStatusChanged', 10);
+			$this->loader->add_action('woocommerce_order_status_changed', $service, 'handleOrderStatusChanged', 2);
 
 			// cart hooks
 			$this->loader->add_action('woocommerce_cart_updated', $service, 'handleCartUpdated');
@@ -389,5 +389,4 @@ class MailChimp_Woocommerce {
 	public function get_version() {
 		return $this->version;
 	}
-
 }

@@ -11,6 +11,7 @@
 class MailChimp_WooCommerce_Order
 {
     protected $id = null;
+    protected $landing_site = null;
     protected $customer = null;
     protected $campaign_id = null;
     protected $financial_status = null;
@@ -18,6 +19,7 @@ class MailChimp_WooCommerce_Order
     protected $currency_code = null;
     protected $order_total = null;
     protected $tax_total = null;
+    protected $discount_total = null;
     protected $shipping_total = null;
     protected $updated_at_foreign = null;
     protected $processed_at_foreign = null;
@@ -33,6 +35,7 @@ class MailChimp_WooCommerce_Order
     {
         return array(
             'id' => 'required|string',
+            'landing_site' => 'required|string',
             'customer' => 'required',
             'campaign_id' => 'string',
             'financial_status' => 'string',
@@ -40,6 +43,7 @@ class MailChimp_WooCommerce_Order
             'currency_code' => 'required|currency_code',
             'order_total' => 'required|numeric',
             'tax_total' => 'numeric',
+            'discount_total' => 'numeric',
             'processed_at_foreign' => 'date',
             'updated_at_foreign' => 'date',
             'cancelled_at_foreign' => 'date',
@@ -64,6 +68,25 @@ class MailChimp_WooCommerce_Order
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @param $landing_site
+     * @return $this
+     */
+    public function setLandingSite($landing_site)
+    {
+        $this->landing_site = $landing_site;
+
+        return $this;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getLandingSite()
+    {
+        return $this->landing_site;
     }
 
     /**
@@ -240,6 +263,25 @@ class MailChimp_WooCommerce_Order
     }
 
     /**
+     * @return mixed
+     */
+    public function getDiscountTotal()
+    {
+        return $this->discount_total;
+    }
+
+    /**
+     * @param mixed $discount_total
+     * @return MailChimp_WooCommerce_Order
+     */
+    public function setDiscountTotal($discount_total)
+    {
+        $this->discount_total = $discount_total;
+
+        return $this;
+    }
+
+    /**
      * @param \DateTime $time
      * @return $this
      */
@@ -347,6 +389,7 @@ class MailChimp_WooCommerce_Order
     {
         return mailchimp_array_remove_empty(array(
             'id' => (string) $this->getId(),
+            'landing_site' => (string) $this->getLandingSite(),
             'customer' => $this->getCustomer()->toArray(),
             'campaign_id' => (string) $this->getCampaignId(),
             'financial_status' => (string) $this->getFinancialStatus(),
@@ -354,6 +397,7 @@ class MailChimp_WooCommerce_Order
             'currency_code' => (string) $this->getCurrencyCode(),
             'order_total' => floatval($this->getOrderTotal()),
             'tax_total' => floatval($this->getTaxTotal()),
+            'discount_total' => floatval($this->getDiscountTotal()),
             'shipping_total' => floatval($this->getShippingTotal()),
             'processed_at_foreign' => (string) $this->getProcessedAt(),
             'cancelled_at_foreign' => (string) $this->getCancelledAt(),
@@ -374,8 +418,8 @@ class MailChimp_WooCommerce_Order
     public function fromArray(array $data)
     {
         $singles = array(
-            'id', 'campaign_id', 'financial_status', 'fulfillment_status',
-            'currency_code', 'order_total', 'tax_total', 'processed_at_foreign',
+            'id', 'landing_site', 'campaign_id', 'financial_status', 'fulfillment_status',
+            'currency_code', 'order_total', 'tax_total', 'discount_total', 'processed_at_foreign',
             'cancelled_at_foreign', 'updated_at_foreign'
         );
 
@@ -386,17 +430,20 @@ class MailChimp_WooCommerce_Order
         }
 
         if (array_key_exists('shipping_address', $data) && is_array($data['shipping_address'])) {
-            $this->shipping_address = (new MailChimp_WooCommerce_Address())->fromArray($data['shipping_address']);
+            $shipping = new MailChimp_WooCommerce_Address();
+            $this->shipping_address = $shipping->fromArray($data['shipping_address']);
         }
 
         if (array_key_exists('billing_address', $data) && is_array($data['billing_address'])) {
-            $this->billing_address = (new MailChimp_WooCommerce_Address())->fromArray($data['billing_address']);
+            $billing = new MailChimp_WooCommerce_Address();
+            $this->billing_address = $billing->fromArray($data['billing_address']);
         }
 
         if (array_key_exists('lines', $data) && is_array($data['lines'])) {
             $this->lines = array();
             foreach ($data['lines'] as $line_item) {
-                $this->lines[] = (new MailChimp_WooCommerce_LineItem())->fromArray($line_item);
+                $item = new MailChimp_WooCommerce_LineItem();
+                $this->lines[] = $item->fromArray($line_item);
             }
         }
 

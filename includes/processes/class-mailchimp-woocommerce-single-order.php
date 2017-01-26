@@ -13,24 +13,22 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
     public $order_id;
     public $cart_session_id;
     public $campaign_id;
+    public $landing_site;
+    public $is_update = false;
 
     /**
      * MailChimp_WooCommerce_Single_Order constructor.
      * @param null $order_id
      * @param null $cart_session_id
      * @param null $campaign_id
+     * @param null $landing_site
      */
-    public function __construct($order_id = null, $cart_session_id = null, $campaign_id = null)
+    public function __construct($order_id = null, $cart_session_id = null, $campaign_id = null, $landing_site = null)
     {
-        if (!empty($order_id)) {
-            $this->order_id = $order_id;
-        }
-        if (!empty($cart_session_id)) {
-            $this->cart_session_id = $cart_session_id;
-        }
-        if (!empty($campaign_id)) {
-            $this->campaign_id = $campaign_id;
-        }
+        if (!empty($order_id)) $this->order_id = $order_id;
+        if (!empty($cart_session_id)) $this->cart_session_id = $cart_session_id;
+        if (!empty($campaign_id)) $this->campaign_id = $campaign_id;
+        if (!empty($landing_site)) $this->landing_site = $landing_site;
     }
 
     /**
@@ -39,7 +37,6 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
     public function handle()
     {
         $this->process();
-
         return false;
     }
 
@@ -57,12 +54,18 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
             // set the campaign ID
             $job->campaign_id = $this->campaign_id;
 
-            $call = $api->getStoreOrder($store_id, $this->order_id) ? 'updateStoreOrder' : 'addStoreOrder';
+            $call = ($api_response = $api->getStoreOrder($store_id, $this->order_id)) ? 'updateStoreOrder' : 'addStoreOrder';
+
+            if ($call === 'addStoreOrder' && $this->is_update === true) {
+                return false;
+            }
 
             // if we already pushed this order into the system, we need to unset it now just in case there
             // was another campaign that had been sent and this was only an order update.
             if ($call === 'updateStoreOrder') {
                 $job->campaign_id = null;
+                $this->campaign_id = null;
+                $this->landing_site = null;
             }
 
             // will either add or update the order
@@ -76,9 +79,21 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
                 $log = "$call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}";
 
-                if (!empty($this->campaign_id) && $call === 'addStoreOrder') {
-                    $log .= ' :: campaign id '.$this->campaign_id;
-                    $order->setCampaignId($this->campaign_id);
+                // only do this stuff on new orders
+                if ($call === 'addStoreOrder') {
+
+                    // apply a campaign id if we have one.
+                    if (!empty($this->campaign_id)) {
+                        $log .= ' :: campaign id ' . $this->campaign_id;
+                        $order->setCampaignId($this->campaign_id);
+                    }
+
+                    // apply the landing site if we have one.
+                    if (!empty($this->landing_site)) {
+                        $log .= ' :: landing site ' . $this->landing_site;
+                        $order->setLandingSite($this->landing_site);
+                    }
+
                 }
 
                 mailchimp_log('order_submit.submitting', $log);
@@ -147,3 +162,4 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
         return false;
     }
 }
+

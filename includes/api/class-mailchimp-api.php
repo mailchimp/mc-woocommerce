@@ -389,7 +389,8 @@ class MailChimp_WooCommerce_MailChimpApi
             if (!isset($data['id']) || !isset($data['name'])) {
                 return false;
             }
-            return (new MailChimp_WooCommerce_Store)->fromArray($data);
+            $store = new MailChimp_WooCommerce_Store();
+            return $store->fromArray($data);
         } catch (MailChimp_WooCommerce_Error $e) {
             return false;
         }
@@ -410,7 +411,8 @@ class MailChimp_WooCommerce_MailChimpApi
             $response = array();
 
             foreach ($data['stores'] as $store_data) {
-                $response[] = (new MailChimp_WooCommerce_Store)->fromArray($store_data);
+                $store = new MailChimp_WooCommerce_Store();
+                $response[] = $store->fromArray($store_data);
             }
 
             return $response;
@@ -455,7 +457,8 @@ class MailChimp_WooCommerce_MailChimpApi
         try {
             $this->validateStoreSubmission($store);
             $data = $this->post("ecommerce/stores", $store->toArray());
-            return (new MailChimp_WooCommerce_Store)->fromArray($data);
+            $store = new MailChimp_WooCommerce_Store();
+            return $store->fromArray($data);
         } catch (\Exception $e) {
             if (!$silent) throw $e;
             return false;
@@ -473,7 +476,8 @@ class MailChimp_WooCommerce_MailChimpApi
         try {
             $this->validateStoreSubmission($store);
             $data = $this->patch("ecommerce/stores/{$store->getId()}", $store->toArray());
-            return (new MailChimp_WooCommerce_Store)->fromArray($data);
+            $store = new MailChimp_WooCommerce_Store();
+            return $store->fromArray($data);
         } catch (\Exception $e) {
             if (!$silent) throw $e;
             return false;
@@ -503,7 +507,8 @@ class MailChimp_WooCommerce_MailChimpApi
     {
         try {
             $data = $this->get("ecommerce/stores/$store_id/customers/$customer_id");
-            return (new MailChimp_WooCommerce_Customer)->fromArray($data);
+            $customer = new MailChimp_WooCommerce_Customer();
+            return $customer->fromArray($data);
         } catch (MailChimp_WooCommerce_Error $e) {
             return false;
         }
@@ -518,7 +523,8 @@ class MailChimp_WooCommerce_MailChimpApi
     {
         $this->validateStoreSubmission($store);
         $data = $this->post("ecommerce/stores", $store->toArray());
-        return (new MailChimp_WooCommerce_Customer)->fromArray($data);
+        $customer = new MailChimp_WooCommerce_Customer();
+        return $customer->fromArray($data);
     }
 
     /**
@@ -549,7 +555,8 @@ class MailChimp_WooCommerce_MailChimpApi
     {
         try {
             $data = $this->post("ecommerce/stores/$store_id/carts", $cart->toArray());
-            return (new MailChimp_WooCommerce_Cart)->setStoreID($store_id)->fromArray($data);
+            $cart = new MailChimp_WooCommerce_Cart();
+            return $cart->setStoreID($store_id)->fromArray($data);
         } catch (MailChimp_WooCommerce_Error $e) {
             if (!$silent) throw $e;
             mailchimp_log('api.addCart', $e->getMessage());
@@ -568,7 +575,8 @@ class MailChimp_WooCommerce_MailChimpApi
     {
         try {
             $data = $this->patch("ecommerce/stores/$store_id/carts/{$cart->getId()}", $cart->toArrayForUpdate());
-            return (new MailChimp_WooCommerce_Cart)->setStoreID($store_id)->fromArray($data);
+            $cart = new MailChimp_WooCommerce_Cart();
+            return $cart->setStoreID($store_id)->fromArray($data);
         } catch (MailChimp_WooCommerce_Error $e) {
             if (!$silent) throw $e;
             mailchimp_log('api.updateCart', $e->getMessage());
@@ -585,7 +593,8 @@ class MailChimp_WooCommerce_MailChimpApi
     {
         try {
             $data = $this->get("ecommerce/stores/$store_id/carts/$id");
-            return (new MailChimp_WooCommerce_Cart)->setStoreID($store_id)->fromArray($data);
+            $cart = new MailChimp_WooCommerce_Cart();
+            return $cart->setStoreID($store_id)->fromArray($data);
         } catch (MailChimp_WooCommerce_Error $e) {
             return false;
         }
@@ -618,7 +627,8 @@ class MailChimp_WooCommerce_MailChimpApi
         try {
             $this->validateStoreSubmission($customer);
             $data = $this->patch("ecommerce/stores/$store_id/customers/{$customer->getId()}", $customer->toArray());
-            return (new MailChimp_WooCommerce_Customer)->fromArray($data);
+            $customer = new MailChimp_WooCommerce_Customer();
+            return $customer->fromArray($data);
         } catch (MailChimp_WooCommerce_Error $e) {
             if (!$silent) throw $e;
             return false;
@@ -655,7 +665,8 @@ class MailChimp_WooCommerce_MailChimpApi
             }
             $data = $this->post("ecommerce/stores/$store_id/orders", $order->toArray());
             update_option('mailchimp-woocommerce-resource-last-updated', time());
-            return (new MailChimp_WooCommerce_Order)->fromArray($data);
+            $order = new MailChimp_WooCommerce_Order();
+            return $order->fromArray($data);
         } catch (\Exception $e) {
             if (!$silent) throw $e;
             mailchimp_log('api.add_order.error', $e->getMessage(), array('submission' => $order->toArray()));
@@ -678,7 +689,8 @@ class MailChimp_WooCommerce_MailChimpApi
             }
             $id = $order->getId();
             $data = $this->patch("ecommerce/stores/$store_id/orders/$id", $order->toArray());
-            return (new MailChimp_WooCommerce_Order)->fromArray($data);
+            $order = new MailChimp_WooCommerce_Order();
+            return $order->fromArray($data);
         } catch (\Exception $e) {
             if (!$silent) throw $e;
             mailchimp_log('api.update_order.error', $e->getMessage(), array('submission' => $order->toArray()));
@@ -695,7 +707,8 @@ class MailChimp_WooCommerce_MailChimpApi
     {
         try {
             $data = $this->get("ecommerce/stores/$store_id/orders/$order_id");
-            return (new MailChimp_WooCommerce_Order)->fromArray($data);
+            $order = new MailChimp_WooCommerce_Order();
+            return $order->fromArray($data);
         } catch (MailChimp_WooCommerce_Error $e) {
             return false;
         }
@@ -725,7 +738,8 @@ class MailChimp_WooCommerce_MailChimpApi
     {
         try {
             $data = $this->get("ecommerce/stores/$store_id/products/$product_id");
-            return (new MailChimp_WooCommerce_Product)->fromArray($data);
+            $product = new MailChimp_WooCommerce_Product();
+            return $product->fromArray($data);
         } catch (MailChimp_WooCommerce_Error $e) {
             return false;
         }
@@ -761,7 +775,8 @@ class MailChimp_WooCommerce_MailChimpApi
             $this->validateStoreSubmission($product);
             $data = $this->post("ecommerce/stores/$store_id/products", $product->toArray());
             update_option('mailchimp-woocommerce-resource-last-updated', time());
-            return (new MailChimp_WooCommerce_Product)->fromArray($data);
+            $product = new MailChimp_WooCommerce_Product();
+            return $product->fromArray($data);
         } catch (\Exception $e) {
             if (!$silent) throw $e;
             mailchimp_log('api.add_product.error', $e->getMessage(), array('submission' => $product->toArray()));

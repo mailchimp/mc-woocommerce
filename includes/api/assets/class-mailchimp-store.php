@@ -333,7 +333,8 @@ class MailChimp_WooCommerce_Store
         }
 
         if (array_key_exists('address', $data)) {
-            $this->address = (new MailChimp_WooCommerce_Address())->fromArray($data['address']);
+            $address = new MailChimp_WooCommerce_Address();
+            $this->address = $address->fromArray($data['address']);
         }
 
         return $this;

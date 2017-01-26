@@ -10,10 +10,11 @@
  */
 class MailChimp_Service extends MailChimp_Woocommerce_Options
 {
+    protected static $pushed_orders = array();
+
     protected $user_email = null;
     protected $previous_email = null;
     protected $force_cart_post = false;
-    protected $pushed_orders = array();
     protected $cart_was_submitted = false;
     protected $cart = array();
     protected $validated_cart_db = false;
@@ -54,26 +55,56 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     }
 
     /**
+     * This should only fire on a web based order so we can do real campaign tracking here.
+     *
      * @param $order_id
      */
-    public function handleOrderStatusChanged($order_id)
+    public function onNewOrder($order_id)
     {
-        if ($this->hasOption('mailchimp_api_key') && !array_key_exists($order_id, $this->pushed_orders)) {
+        if ($this->hasOption('mailchimp_api_key')) {
 
             // register this order is already in process..
-            $this->pushed_orders[$order_id] = true;
+            static::$pushed_orders[$order_id] = true;
 
             // see if we have a session id and a campaign id, also only do this when this user is not the admin.
             $campaign_id = $this->getCampaignTrackingID();
 
+            // grab the landing site cookie if we have one here.
+            $landing_site = $this->getLandingSiteCookie();
+
+            // expire the landing site cookie so we can rinse and repeat tracking
+            $this->expireLandingSiteCookie();
+
+            mailchimp_log('new_order', "New order #$order_id", array(
+                'campaign_id' => $campaign_id,
+                'landing_site' => $landing_site,
+            ));
+
             // queue up the single order to be processed.
-            $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $campaign_id);
+            $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $campaign_id, $landing_site);
             wp_queue($handler);
         }
     }
 
     /**
-     * @return bool|void
+     * @param $order_id
+     */
+    public function handleOrderStatusChanged($order_id)
+    {
+        if ($this->hasOption('mailchimp_api_key')) {
+
+            // register this order is already in process..
+            static::$pushed_orders[$order_id] = true;
+
+            // queue up the single order to be processed.
+            $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, null, null);
+            $handler->is_update = true;
+            wp_queue($handler);
+        }
+    }
+
+    /**
+     * @return bool
      */
     public function handleCartUpdated()
     {
@@ -234,6 +265,9 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function handleCampaignTracking()
     {
+        // set the landing site cookie if we don't have one.
+        $this->setLandingSiteCookie();
+
         $cookie_duration = $this->getCookieDuration();
 
         // if we have a query string of the mc_cart_id in the URL, that means we are sending a campaign from MC
@@ -291,6 +325,60 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
 
         @setcookie('mailchimp_campaign_id', $cid, $cookie_duration, '/' );
         $this->setWooSession('mailchimp_campaign_id', $cid);
+
+        return $this;
+    }
+
+    /**
+     * @return mixed|null
+     */
+    public function getLandingSiteCookie()
+    {
+        $cookie = $this->cookie('mailchimp_landing_site', false);
+
+        if (empty($cookie)) {
+            $cookie = $this->getWooSession('mailchimp_landing_site', false);
+        }
+
+        return $cookie;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setLandingSiteCookie()
+    {
+        if (isset($_GET['expire_landing_site'])) $this->expireLandingSiteCookie();
+
+        // if we already have a cookie here, we need to skip it.
+        if ($this->getLandingSiteCookie() != false) return $this;
+
+        if (($http_referer = wp_get_raw_referer()) && !empty($http_referer)) {
+
+            // grab the current landing url since it's a referral.
+            $landing_site = home_url() . wp_unslash($_SERVER['REQUEST_URI']);
+
+            $compare_refer = str_replace(array('http://', 'https://'), '', $http_referer);
+            $compare_local = str_replace(array('http://', 'https://'), '', $landing_site);
+
+            if (strpos($compare_local, $compare_refer) === 0) return $this;
+
+            // set the cookie
+            @setcookie('mailchimp_landing_site', $landing_site, $this->getCookieDuration(), '/' );
+
+            $this->setWooSession('mailchimp_landing_site', $landing_site);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function expireLandingSiteCookie()
+    {
+        @setcookie('mailchimp_landing_site', false, $this->getCookieDuration(), '/' );
+        $this->setWooSession('mailchimp_landing_site', false);
 
         return $this;
     }
@@ -534,4 +622,5 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
         echo json_encode($data);
         exit;
     }
+
 }

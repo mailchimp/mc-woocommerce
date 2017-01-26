@@ -65,16 +65,30 @@ class MailChimp_WooCommerce_Transform_Orders
             $order->setCampaignId($this->campaign_id);
         }
 
-        $order->setFulfillmentStatus($woo->get_status());
         $order->setProcessedAt(mailchimp_date_utc($woo->order_date));
 
-        if ($woo->get_status() === 'cancelled') {
-            $order->setCancelledAt(mailchimp_date_utc($woo->modified_date));
-        }
-
         $order->setCurrencyCode($woo->get_order_currency());
-        $order->setFinancialStatus($woo->is_paid() ? 'paid' : 'pending');
 
+        // grab the current statuses - this will end up being custom at some point.
+        $statuses = $this->getOrderStatuses();
+
+        // grab the order status
+        $status = $woo->get_status();
+
+        // map the fulfillment and financial statuses based on the map above.
+        $fulfillment_status = array_key_exists($status, $statuses) ? $statuses[$status]->fulfillment : null;
+        $financial_status = array_key_exists($status, $statuses) ? $statuses[$status]->financial : $status;
+
+        // set the fulfillment_status
+        $order->setFulfillmentStatus($fulfillment_status);
+
+        // set the financial status
+        $order->setFinancialStatus($financial_status);
+
+        // only set this if the order is cancelled.
+        if ($status === 'cancelled') $order->setCancelledAt(mailchimp_date_utc($woo->modified_date));
+
+        // set the total
         $order->setOrderTotal($woo->get_total());
 
         // if we have any tax
@@ -82,6 +96,9 @@ class MailChimp_WooCommerce_Transform_Orders
 
         // if we have shipping.
         $order->setShippingTotal($woo->get_total_shipping());
+
+        // set the order discount
+        $order->setDiscountTotal($woo->get_total_discount());
 
         // set the customer
         $order->setCustomer($this->buildCustomerFromOrder($woo));
@@ -394,5 +411,51 @@ class MailChimp_WooCommerce_Transform_Orders
         }
 
         return $address;
+    }
+
+    /**
+     * @return array
+     */
+    public function getOrderStatuses()
+    {
+        return array(
+            // Order received (unpaid)
+            'pending'       => (object) array(
+                'financial' => 'pending',
+                'fulfillment' => null
+            ),
+            // Payment received and stock has been reduced – the order is awaiting fulfillment.
+            // All product orders require processing, except those for digital downloads
+            'processing'    => (object) array(
+                'financial' => 'processing',
+                'fulfillment' => null
+            ),
+            // Awaiting payment – stock is reduced, but you need to confirm payment
+            'on-hold'       => (object) array(
+                'financial' => 'on-hold',
+                'fulfillment' => null
+            ),
+            // Order fulfilled and complete – requires no further action
+            'completed'     => (object) array(
+                'financial' => 'fulfilled',
+                'fulfillment' => 'fulfilled'
+            ),
+            // Cancelled by an admin or the customer – no further action required
+            'cancelled'     => (object) array(
+                'financial' => 'cancelled',
+                'fulfillment' => null
+            ),
+            // Refunded by an admin – no further action required
+            'refunded'      => (object) array(
+                'financial' => 'refunded',
+                'fulfillment' => null
+            ),
+            // Payment failed or was declined (unpaid). Note that this status may not show immediately and
+            // instead show as Pending until verified (i.e., PayPal)
+            'failed'        => (object) array(
+                'financial' => 'failed',
+                'fulfillment' => null
+            ),
+        );
     }
 }

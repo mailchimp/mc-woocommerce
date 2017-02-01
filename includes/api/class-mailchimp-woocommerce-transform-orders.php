@@ -362,7 +362,7 @@ class MailChimp_WooCommerce_Transform_Orders
         $billing->setPostalCode($order->billing_postcode);
         $billing->setCountry($order->billing_country);
         $billing->setPhone($order->billing_phone);
-        $billing->setName('billing');
+        $billing->setName($order->billing_first_name.' '.$order->billing_last_name);
 
         $shipping = new MailChimp_WooCommerce_Address();
         $shipping->setAddress1($order->shipping_address_1);
@@ -374,7 +374,7 @@ class MailChimp_WooCommerce_Transform_Orders
         if (isset($order->shipping_phone)) {
             $shipping->setPhone($order->shipping_phone);
         }
-        $shipping->setName('shipping');
+        $shipping->setName($order->shipping_first_name.' '.$order->shipping_last_name);
 
         return (object) array('billing' => $billing, 'shipping' => $shipping);
     }

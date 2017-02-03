@@ -172,7 +172,11 @@ class MailChimp_WooCommerce_Transform_Orders
         $address->setPostalCode($order->billing_postcode);
         $address->setCountry($order->billing_country);
         $address->setPhone($order->billing_phone);
-        $address->setName('billing');
+
+        // if we have billing names set it here
+        if (!empty($order->billing_first_name) && !empty($order->billing_last_name)) {
+            $address->setName($order->billing_first_name.' '.$order->billing_last_name);
+        }
 
         $customer->setAddress($address);
 
@@ -362,7 +366,11 @@ class MailChimp_WooCommerce_Transform_Orders
         $billing->setPostalCode($order->billing_postcode);
         $billing->setCountry($order->billing_country);
         $billing->setPhone($order->billing_phone);
-        $billing->setName('billing');
+
+        // if we have billing names go ahead and apply them
+        if (!empty($order->billing_first_name) && !empty($order->billing_last_name)) {
+            $billing->setName($order->billing_first_name.' '.$order->billing_last_name);
+        }
 
         $shipping = new MailChimp_WooCommerce_Address();
         $shipping->setAddress1($order->shipping_address_1);
@@ -374,7 +382,11 @@ class MailChimp_WooCommerce_Transform_Orders
         if (isset($order->shipping_phone)) {
             $shipping->setPhone($order->shipping_phone);
         }
-        $shipping->setName('shipping');
+
+        // if we have shipping names go ahead and apply them
+        if (!empty($order->shipping_first_name) && !empty($order->shipping_last_name)) {
+            $shipping->setName($order->shipping_first_name.' '.$order->shipping_last_name);
+        }
 
         return (object) array('billing' => $billing, 'shipping' => $shipping);
     }

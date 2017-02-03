@@ -1,3 +1,6 @@
+** 1.0.9 **
+* billing and shipping address support for orders
+
 ** 1.0.8 **
 * add landing_site, financial status and discount information for orders
 * fix to support php 5.3

@@ -673,7 +673,11 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 		// set the basics
 		$store->setName($this->array_get($data, 'store_name'));
 		$store->setDomain(get_option('siteurl'));
-		$store->setEmailAddress($this->array_get($data, 'campaign_from_email'));
+
+        // don't know why we did this before
+        //$store->setEmailAddress($this->array_get($data, 'campaign_from_email'));
+        $store->setEmailAddress($this->array_get($data, 'admin_email'));
+
 		$store->setAddress($this->address($data));
 		$store->setPhone($this->array_get($data, 'store_phone'));
 		$store->setListId($list_id);

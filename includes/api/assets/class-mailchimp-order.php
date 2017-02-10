@@ -24,6 +24,7 @@ class MailChimp_WooCommerce_Order
     protected $updated_at_foreign = null;
     protected $processed_at_foreign = null;
     protected $cancelled_at_foreign = null;
+    protected $order_url = null;
     protected $shipping_address = null;
     protected $billing_address = null;
     protected $lines = array();
@@ -47,6 +48,7 @@ class MailChimp_WooCommerce_Order
             'processed_at_foreign' => 'date',
             'updated_at_foreign' => 'date',
             'cancelled_at_foreign' => 'date',
+            'order_url' => 'string',
             'lines' => 'required|array',
         );
     }
@@ -225,6 +227,25 @@ class MailChimp_WooCommerce_Order
     }
 
     /**
+     * @param $url
+     * @return $this
+     */
+    public function setOrderURL($url)
+    {
+        $this->order_url = $url;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOrderURL()
+    {
+        return $this->order_url;
+    }
+
+    /**
      * @return mixed
      */
     public function getTaxTotal()
@@ -396,6 +417,7 @@ class MailChimp_WooCommerce_Order
             'fulfillment_status' => (string) $this->getFulfillmentStatus(),
             'currency_code' => (string) $this->getCurrencyCode(),
             'order_total' => floatval($this->getOrderTotal()),
+            'order_url' => (string) $this->getOrderURL(),
             'tax_total' => floatval($this->getTaxTotal()),
             'discount_total' => floatval($this->getDiscountTotal()),
             'shipping_total' => floatval($this->getShippingTotal()),
@@ -419,7 +441,7 @@ class MailChimp_WooCommerce_Order
     {
         $singles = array(
             'id', 'landing_site', 'campaign_id', 'financial_status', 'fulfillment_status',
-            'currency_code', 'order_total', 'tax_total', 'discount_total', 'processed_at_foreign',
+            'currency_code', 'order_total', 'order_url', 'tax_total', 'discount_total', 'processed_at_foreign',
             'cancelled_at_foreign', 'updated_at_foreign'
         );
 

@@ -91,6 +91,9 @@ class MailChimp_WooCommerce_Transform_Orders
         // set the total
         $order->setOrderTotal($woo->get_total());
 
+        // set the order URL
+        $order->setOrderURL($woo->get_view_order_url());
+
         // if we have any tax
         $order->setTaxTotal($woo->get_total_tax());
 

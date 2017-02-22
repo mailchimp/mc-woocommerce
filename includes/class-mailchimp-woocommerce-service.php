@@ -104,6 +104,18 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     }
 
     /**
+     * @param $order_id
+     */
+    public function onPartiallyRefunded($order_id)
+    {
+        if ($this->hasOption('mailchimp_api_key')) {
+            $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, null, null);
+            $handler->partially_refunded = true;
+            wp_queue($handler);
+        }
+    }
+
+    /**
      * @return bool
      */
     public function handleCartUpdated()
@@ -195,8 +207,13 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     function handleUserUpdated($user_id, $old_user_data)
     {
         // only update this person if they were marked as subscribed before
-        $is_subscribed = (bool) get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true);
-        wp_queue(new MailChimp_WooCommerce_User_Submit($user_id, $is_subscribed, $old_user_data));
+        $is_subscribed = get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true);
+
+        // if they don't have a meta set for is_subscribed, we will get a blank string, so just ignore this.
+        if ($is_subscribed === '' || $is_subscribed === null) return;
+
+        // only send this update if the user actually has a boolean value.
+        wp_queue(new MailChimp_WooCommerce_User_Submit($user_id, (bool) $is_subscribed, $old_user_data));
     }
 
     /**

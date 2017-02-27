@@ -37,7 +37,7 @@ function mailchimp_environment_variables() {
 	global $wp_version;
 
 	return (object) array(
-		'repo' => 'develop',
+		'repo' => 'master',
 		'environment' => 'production',
 		'version' => '1.1.0',
 		'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),

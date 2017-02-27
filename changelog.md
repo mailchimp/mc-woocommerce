@@ -1,3 +1,8 @@
+** 1.1.0 ** 
+* Fix for persisting opt-in status
+* Pass order URLs to MailChimp
+* Pass partial refund status to MailChimp 
+
 ** 1.0.9 **
 * billing and shipping address support for orders
 

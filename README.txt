@@ -48,6 +48,11 @@ You’ll need to do a few things to connect your WooCommerce store to MailChimp.
 For more information on settings and configuration, please visit our Knowledge Base: [http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce](http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce)
 
 == Changelog ==
+= 1.1.0 =
+* Fix for persisting opt-in status
+* Pass order URLs to MailChimp
+* Pass partial refund status to MailChimp 
+
 = 1.0.9 =
 * billing and shipping address support for orders
 

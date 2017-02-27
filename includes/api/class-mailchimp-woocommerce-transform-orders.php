@@ -91,6 +91,9 @@ class MailChimp_WooCommerce_Transform_Orders
         // set the total
         $order->setOrderTotal($woo->get_total());
 
+        // set the order URL
+        $order->setOrderURL($woo->get_view_order_url());
+
         // if we have any tax
         $order->setTaxTotal($woo->get_total_tax());
 
@@ -137,6 +140,10 @@ class MailChimp_WooCommerce_Transform_Orders
 
             $order->addItem($item);
         }
+
+        //if (($refund = $woo->get_total_refunded()) && $refund > 0){
+            // this is where we would be altering the submission to tell us about the refund.
+        //}
 
         return $order;
     }

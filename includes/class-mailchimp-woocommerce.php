@@ -329,6 +329,9 @@ class MailChimp_Woocommerce {
 			$this->loader->add_action('woocommerce_api_create_order', $service, 'handleOrderStatusChanged', 10);
 			$this->loader->add_action('woocommerce_order_status_changed', $service, 'handleOrderStatusChanged', 2);
 
+			// partially refunded
+            $this->loader->add_action('woocommerce_order_partially_refunded', $service, 'onPartiallyRefunded', 10);
+
 			// cart hooks
 			$this->loader->add_action('woocommerce_cart_updated', $service, 'handleCartUpdated');
 			$this->loader->add_action('woocommerce_add_to_cart', $service, 'handleCartUpdated');

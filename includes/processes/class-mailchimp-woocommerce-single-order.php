@@ -15,6 +15,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
     public $campaign_id;
     public $landing_site;
     public $is_update = false;
+    public $partially_refunded = false;
 
     /**
      * MailChimp_WooCommerce_Single_Order constructor.
@@ -73,6 +74,11 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
                 // transform the order
                 $order = $job->transform(get_post($this->order_id));
+
+                // if we're overriding this we need to set it here.
+                if ($this->partially_refunded) {
+                    $order->setFinancialStatus('partially_refunded');
+                }
 
                 // will be the same as the customer id. an md5'd hash of a lowercased email.
                 $this->cart_session_id = $order->getCustomer()->getId();

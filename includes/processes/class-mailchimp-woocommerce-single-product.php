@@ -16,7 +16,7 @@ class MailChimp_WooCommerce_Single_Product extends WP_Job
     protected $service;
 
     /**
-     * MailChimp_WooCommerce_Single_Order constructor.
+     * MailChimp_WooCommerce_Single_Product constructor.
      * @param null|int $product_id
      */
     public function __construct($product_id = null)

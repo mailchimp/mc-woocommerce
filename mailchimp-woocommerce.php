@@ -39,7 +39,7 @@ function mailchimp_environment_variables() {
 	return (object) array(
 		'repo' => 'develop',
 		'environment' => 'production',
-		'version' => '1.1.1',
+		'version' => '1.1.10',
 		'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
 	);
 }

@@ -16,7 +16,7 @@
  * Plugin Name:       MailChimp for WooCommerce
  * Plugin URI:        https://mailchimp.com/connect-your-store/
  * Description:       MailChimp - WooCommerce plugin
- * Version:           1.1.1
+ * Version:           1.1.10
  * Author:            MailChimp
  * Author URI:        https://mailchimp.com
  * License:           GPL-2.0+
@@ -60,7 +60,14 @@ function mailchimp_get_list_id() {
  * @return string
  */
 function mailchimp_get_store_id() {
-	return get_option('mailchimp_store_id', md5(get_option('siteurl')));
+	$store_id = mailchimp_get_data('store_id', false);
+    if (empty($store_id)) {
+        // this is for the previous installs that had been applying the MC store id as the siteurl.
+        // patched to the random hash because people were changing this value for various reasons.
+        $store_id = md5(get_option('siteurl'));
+        mailchimp_set_data('store_id', $store_id, 'yes');
+    }
+    return $store_id;
 }
 
 /**
@@ -93,11 +100,21 @@ function mailchimp_get_option($key, $default = null) {
 
 /**
  * @param $key
- * @param $default
- * @return mixed|void
+ * @param null $default
+ * @return mixed
  */
-function mailchimp_get_data($key, $default) {
+function mailchimp_get_data($key, $default = null) {
 	return get_option('mailchimp-woocommerce-'.$key, $default);
+}
+
+/**
+ * @param $key
+ * @param $value
+ * @param string $autoload
+ * @return bool
+ */
+function mailchimp_set_data($key, $value, $autoload = 'yes') {
+    return update_option('mailchimp-woocommerce-'.$key, $value, $autoload);
 }
 
 /**

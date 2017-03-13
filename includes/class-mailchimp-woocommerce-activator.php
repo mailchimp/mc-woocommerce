@@ -29,9 +29,10 @@ class MailChimp_Woocommerce_Activator {
 		static::create_queue_tables();
 
 		// update the settings so we have them for use.
-		update_option('mailchimp-woocommerce', array(
-            'mailchimp_store_id' => 'mc_'.wc_rand_hash()
-		));
+		update_option('mailchimp-woocommerce', array());
+
+		// add a store id flag which will be a random hash
+		update_option('mailchimp-woocommerce-store_id', 'mc_'.wc_rand_hash(), 'yes');
 	}
 
 	/**

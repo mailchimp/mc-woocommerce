@@ -562,18 +562,6 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     }
 
     /**
-     * @return bool
-     */
-    protected function authenticate()
-    {
-        if (trim((string) $this->getUniqueStoreID()) !== trim((string) $this->get('store_id'))) {
-            $this->respondJSON(array('success' => false, 'message' => 'Not Authorized'));
-        }
-
-        return true;
-    }
-
-    /**
      * @param $uid
      * @return array|bool|null|object|void
      */

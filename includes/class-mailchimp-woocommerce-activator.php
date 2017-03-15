@@ -32,7 +32,7 @@ class MailChimp_Woocommerce_Activator {
 		update_option('mailchimp-woocommerce', array());
 
 		// add a store id flag which will be a random hash
-		update_option('mailchimp-woocommerce-store_id', 'mc_'.wc_rand_hash(), 'yes');
+		update_option('mailchimp-woocommerce-store_id', md5(get_option('siteurl')), 'yes');
 	}
 
 	/**

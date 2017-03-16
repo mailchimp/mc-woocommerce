@@ -370,7 +370,9 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
         // if we already have a cookie here, we need to skip it.
         if ($this->getLandingSiteCookie() != false) return $this;
 
-        if (($http_referer = wp_get_raw_referer()) && !empty($http_referer)) {
+        $http_referer = $this->getReferer();
+
+        if (!empty($http_referer)) {
 
             // grab the current landing url since it's a referral.
             $landing_site = home_url() . wp_unslash($_SERVER['REQUEST_URI']);
@@ -387,6 +389,19 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
         }
 
         return $this;
+    }
+
+    /**
+     * @return array|bool|string
+     */
+    public function getReferer()
+    {
+        if (!empty($_REQUEST['_wp_http_referer'])) {
+            return wp_unslash($_REQUEST['_wp_http_referer']);
+        } elseif (!empty($_SERVER['HTTP_REFERER'])) {
+            return wp_unslash( $_SERVER['HTTP_REFERER']);
+        }
+        return false;
     }
 
     /**
@@ -544,18 +559,6 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
             return $default;
         }
         return $_REQUEST['mailchimp-woocommerce'][$key];
-    }
-
-    /**
-     * @return bool
-     */
-    protected function authenticate()
-    {
-        if (trim((string) $this->getUniqueStoreID()) !== trim((string) $this->get('store_id'))) {
-            $this->respondJSON(array('success' => false, 'message' => 'Not Authorized'));
-        }
-
-        return true;
     }
 
     /**

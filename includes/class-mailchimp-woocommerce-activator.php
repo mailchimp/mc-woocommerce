@@ -28,58 +28,11 @@ class MailChimp_Woocommerce_Activator {
 		// create the queue tables because we need them for the sync jobs.
 		static::create_queue_tables();
 
-		// create the api keys for MC just in case.
-		$data = static::create_keys('MailChimp', 'USER_ID', 'read_write');
-
 		// update the settings so we have them for use.
-		update_option('mailchimp-woocommerce', array(
-			'woo_consumer_key' => $data['consumer_key'],
-			'woo_consumer_secret' => $data['consumer_secret']
-		));
-	}
+		update_option('mailchimp-woocommerce', array());
 
-	/**
-	 * Create keys.
-	 *
-	 * @since  2.4.0
-	 *
-	 * @param  string $app_name
-	 * @param  string $app_user_id
-	 * @param  string $scope
-	 *
-	 * @return array
-	 */
-	public static function create_keys( $app_name, $app_user_id, $scope ) {
-		global $wpdb;
-
-		$description = sprintf( __( '%s - API %s (created on %s at %s).', 'woocommerce' ), wc_clean( $app_name ), __( 'Read/Write', 'woocommerce' ), date_i18n( wc_date_format() ), date_i18n( wc_time_format() ) );
-		$user        = wp_get_current_user();
-
-		// Created API keys.
-		$permissions     = 'read_write';
-		$consumer_key    = 'ck_' . wc_rand_hash();
-		$consumer_secret = 'cs_' . wc_rand_hash();
-
-		$wpdb->insert(
-			$wpdb->prefix . 'woocommerce_api_keys',
-			array(
-				'user_id'         => $user->ID,
-				'description'     => $description,
-				'permissions'     => $permissions,
-				'consumer_key'    => wc_api_hash( $consumer_key ),
-				'consumer_secret' => $consumer_secret,
-				'truncated_key'   => substr( $consumer_key, -7 )
-			),
-			array('%d', '%s', '%s', '%s', '%s', '%s')
-		);
-
-		return array(
-			'key_id'          => $wpdb->insert_id,
-			'user_id'         => $app_user_id,
-			'consumer_key'    => $consumer_key,
-			'consumer_secret' => $consumer_secret,
-			'key_permissions' => $permissions
-		);
+		// add a store id flag which will be a random hash
+		update_option('mailchimp-woocommerce-store_id', md5(get_option('siteurl')), 'yes');
 	}
 
 	/**

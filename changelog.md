@@ -1,3 +1,7 @@
+** 1.1.1 ** 
+* Support for site url changes
+* Fix for WP Version 4.4 Compatibility issues
+
 ** 1.1.0 ** 
 * Fix for persisting opt-in status
 * Pass order URLs to MailChimp

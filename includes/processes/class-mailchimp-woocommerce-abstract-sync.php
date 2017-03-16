@@ -59,7 +59,7 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
      */
     public function getStoreID()
     {
-        return md5(get_option('siteurl'));
+        return mailchimp_get_store_id();
     }
 
     /**

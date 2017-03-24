@@ -37,18 +37,25 @@ class MailChimp_WooCommerce_Single_Product extends WP_Job
     }
 
     /**
-     * @return MailChimp_WooCommerce_Product
-     * @throws Exception
+     * @return bool|MailChimp_WooCommerce_Product
      */
     public function process()
     {
+        if (empty($this->product_id)) {
+            return false;
+        }
+
         if ($this->api()->getStoreProduct($this->store_id, $this->product_id)) {
             $this->api()->deleteStoreProduct($this->store_id, $this->product_id);
         }
 
         try {
 
-            $product = $this->transformer()->transform(get_post($this->product_id));
+            if (!($product_post = get_post($this->product_id))) {
+                return false;
+            }
+
+            $product = $this->transformer()->transform($product_post);
 
             mailchimp_log('product_submit.submitting', "addStoreProduct :: #{$product->getId()}");
 

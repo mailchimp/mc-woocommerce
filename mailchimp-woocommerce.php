@@ -259,6 +259,11 @@ function mailchimp_log($action, $message, $data = array())
 		return false;
 	}
 
+    if (defined('WP_CLI') && WP_CLI === true) {
+        WP_CLI::log(print_r(array('message' => $message, 'data' => $data), true));
+        return null;
+    }
+
 	$data = array(
 		'account_id' => $options->account_id,
 		'username' => $options->username,

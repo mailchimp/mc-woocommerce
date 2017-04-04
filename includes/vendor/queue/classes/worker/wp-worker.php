@@ -41,7 +41,12 @@ if ( ! class_exists( 'WP_Worker' ) ) {
 		 * @return bool
 		 */
 		public function process_next_job() {
-			$job           = $this->queue->get_next_job();
+			$job = $this->queue->get_next_job();
+
+			if (empty($job)) {
+			    return true;
+            }
+
 			$this->payload = unserialize( $job->job );
 
 			$this->queue->lock_job( $job );

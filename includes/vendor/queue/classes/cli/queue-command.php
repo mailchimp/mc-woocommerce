@@ -118,3 +118,4 @@ class Queue_Command extends WP_CLI_Command {
 	}
 
 }
+

@@ -72,8 +72,7 @@ class Queue_Command extends WP_CLI_Command {
 			if ( $worker->should_run() ) {
 				if ( $worker->process_next_job() ) {
 					WP_CLI::success( 'Processed: ' . $worker->get_job_name() );
-				} else {
-					WP_CLI::warning( 'Failed: ' . $worker->get_job_name() );
+					sleep(1);
 				}
 			} else {
 				sleep( 5 );

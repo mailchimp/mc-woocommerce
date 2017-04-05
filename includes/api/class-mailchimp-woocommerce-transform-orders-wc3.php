@@ -195,7 +195,9 @@ class MailChimp_WooCommerce_Transform_Orders
 
         $item->setPrice($order_detail->get_total());
         $item->setProductId($order_detail->get_product_id());
-        $item->setProductVariantId($order_detail->get_variation_id());
+        $variation_id = $order_detail->get_variation_id();
+        if (empty($variation_id)) $variation_id = $order_detail->get_product_id();
+        $item->setProductVariantId($variation_id);
         $item->setQuantity($order_detail->get_quantity());
 
         if ($item->getQuantity() > 1) {

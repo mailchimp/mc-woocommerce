@@ -81,7 +81,9 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
             return false;
         }
 
-        if (!($page = $this->getResources())) {
+        $page = $this->getResources();
+
+        if (empty($page)) {
             mailchimp_debug(get_called_class().'@handle', 'could not find any more '.$this->getResourceType().' records');
             // call the completed event to process further
             $this->complete();

@@ -84,11 +84,15 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
         $page = $this->getResources();
 
         if (empty($page)) {
-            mailchimp_debug(get_called_class().'@handle', 'could not find any more '.$this->getResourceType().' records');
-            // call the completed event to process further
-            $this->resourceComplete($this->getResourceType());
-            $this->complete();
-            return false;
+            sleep(2);
+            $page = $this->getResources();
+            if (empty($page)) {
+                mailchimp_debug(get_called_class().'@handle', 'could not find any more '.$this->getResourceType().' records');
+                // call the completed event to process further
+                $this->resourceComplete($this->getResourceType());
+                $this->complete();
+                return false;
+            }
         }
 
         $this->setResourcePagePointer(($page->page + 1), $this->getResourceType());
@@ -125,19 +129,24 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
      */
     public function flagStartSync()
     {
-        global $wpdb;
-        $wpdb->show_errors(false);
-        $wpdb->query("DELETE FROM {$wpdb->prefix}queue");
-        $wpdb->show_errors(true);
-
-        mailchimp_log('sync.started', "Starting Sync :: ".date('D, M j, Y g:i A'));
-
         $job = new MailChimp_Service();
 
-        $job->removePointers(true, true);
+        $job->removeSyncPointers();
 
+        $this->setData('sync.config.resync', false);
+        $this->setData('sync.orders.current_page', 1);
+        $this->setData('sync.products.current_page', 1);
         $this->setData('sync.syncing', true);
         $this->setData('sync.started_at', time());
+
+        global $wpdb;
+        try {
+            $wpdb->show_errors(false);
+            $wpdb->query("DELETE FROM {$wpdb->prefix}queue");
+            $wpdb->show_errors(true);
+        } catch (\Exception $e) {}
+
+        mailchimp_log('sync.started', "Starting Sync :: ".date('D, M j, Y g:i A'));
 
         // flag the store as syncing
         mailchimp_get_api()->flagStoreSync(mailchimp_get_store_id(), true);
@@ -170,7 +179,13 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
         $current_page = $this->getResourcePagePointer($this->getResourceType());
 
         if ($current_page === 'complete') {
-            return false;
+            if (!$this->getData('sync.config.resync', false)) {
+                return false;
+            }
+
+            $current_page = 1;
+            $this->setResourcePagePointer($current_page);
+            $this->setData('sync.config.resync', false);
         }
 
         return $this->api()->paginate($this->getResourceType(), $current_page, 5);
@@ -305,7 +320,7 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
      */
     public function setData($key, $value)
     {
-        update_option($this->plugin_name.'-'.$key, $value);
+        update_option($this->plugin_name.'-'.$key, $value, 'yes');
         return $this;
     }
 

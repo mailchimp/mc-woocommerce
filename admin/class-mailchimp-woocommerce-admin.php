@@ -245,6 +245,7 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 			case 'sync':
 				$this->startSync();
 				$this->showSyncStartedMessage();
+                $this->setData('sync.config.resync', true);
 				break;
 		}
 

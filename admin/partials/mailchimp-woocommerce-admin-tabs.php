@@ -6,7 +6,7 @@ $handler = MailChimp_Woocommerce_Admin::connect();
 //Grab all options for this particular tab we're viewing.
 $options = get_option($this->plugin_name, array());
 
-$show_sync_tab = false;
+$show_sync_tab = isset($_GET['resync']) ? $_GET['resync'] === '1' : false;;
 $show_campaign_defaults = true;
 $has_valid_api_key = false;
 $allow_new_list = true;

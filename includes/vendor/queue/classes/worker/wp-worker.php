@@ -76,6 +76,10 @@ if ( ! class_exists( 'WP_Worker' ) ) {
 				return false;
 			}
 
+			if (defined('WP_CLI') && WP_CLI && property_exists($this->payload, 'should_kill_queue_listener') && $this->payload->should_kill_queue_listener === true) {
+			    wp_die('killing queue listener');
+            }
+
 			return true;
 		}
 

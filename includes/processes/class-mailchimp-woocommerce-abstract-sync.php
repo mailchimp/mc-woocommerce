@@ -84,15 +84,11 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
         $page = $this->getResources();
 
         if (empty($page)) {
-            sleep(2);
-            $page = $this->getResources();
-            if (empty($page)) {
-                mailchimp_debug(get_called_class().'@handle', 'could not find any more '.$this->getResourceType().' records');
-                // call the completed event to process further
-                $this->resourceComplete($this->getResourceType());
-                $this->complete();
-                return false;
-            }
+            mailchimp_debug(get_called_class().'@handle', 'could not find any more '.$this->getResourceType().' records ending on page '.$this->getResourcePagePointer());
+            // call the completed event to process further
+            $this->resourceComplete($this->getResourceType());
+            $this->complete();
+            return false;
         }
 
         $this->setResourcePagePointer(($page->page + 1), $this->getResourceType());
@@ -164,6 +160,10 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
         // this is the last thing we're doing so it's complete as of now.
         $this->setData('sync.syncing', false);
         $this->setData('sync.completed_at', time());
+
+        // set the current sync pages back to 1 if the user hits resync.
+        $this->setData('sync.orders.current_page', 1);
+        $this->setData('sync.products.current_page', 1);
 
         // flag the store as sync_finished
         mailchimp_get_api()->flagStoreSync(mailchimp_get_store_id(), false);

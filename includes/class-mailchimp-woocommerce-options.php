@@ -244,25 +244,46 @@ abstract class MailChimp_Woocommerce_Options
     public function removePointers($products = true, $orders = true)
     {
         if ($products) {
-            delete_option('mailchimp-woocommerce-sync.products.completed_at');
-            delete_option('mailchimp-woocommerce-sync.products.current_page');
+            $this->removeProductPointers();
         }
 
         if ($orders) {
-            delete_option('mailchimp-woocommerce-sync.orders.prevent');
-            delete_option('mailchimp-woocommerce-sync.orders.completed_at');
-            delete_option('mailchimp-woocommerce-sync.orders.current_page');
+            $this->removeOrderPointers();
         }
 
+        $this->removeSyncPointers();
+
+        $this->removeMiscPointers();
+
+        return $this;
+    }
+
+    public function removeProductPointers()
+    {
+        delete_option('mailchimp-woocommerce-sync.products.completed_at');
+        delete_option('mailchimp-woocommerce-sync.products.current_page');
+    }
+
+    protected function removeOrderPointers()
+    {
         delete_option('mailchimp-woocommerce-sync.orders.prevent');
-        delete_option('mailchimp-woocommerce-errors.store_info');
+        delete_option('mailchimp-woocommerce-sync.orders.completed_at');
+        delete_option('mailchimp-woocommerce-sync.orders.current_page');
+    }
+
+    protected function removeSyncPointers()
+    {
+        delete_option('mailchimp-woocommerce-sync.orders.prevent');
         delete_option('mailchimp-woocommerce-sync.syncing');
         delete_option('mailchimp-woocommerce-sync.started_at');
         delete_option('mailchimp-woocommerce-sync.completed_at');
+    }
+
+    protected function removeMiscPointers()
+    {
+        delete_option('mailchimp-woocommerce-errors.store_info');
         delete_option('mailchimp-woocommerce-validation.api.ping');
         delete_option('mailchimp-woocommerce-cached-api-lists');
         delete_option('mailchimp-woocommerce-cached-api-ping-check');
-
-        return $this;
     }
 }

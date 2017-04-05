@@ -86,11 +86,12 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
         if (empty($page)) {
             mailchimp_debug(get_called_class().'@handle', 'could not find any more '.$this->getResourceType().' records');
             // call the completed event to process further
+            $this->resourceComplete($this->getResourceType());
             $this->complete();
             return false;
         }
 
-        $this->setResourcePagePointer($page->page + 1, $this->getResourceType());
+        $this->setResourcePagePointer(($page->page + 1), $this->getResourceType());
 
         // if we've got a 0 count, that means we're done.
         if ($page->count <= 0) {
@@ -130,6 +131,7 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
         mailchimp_log('sync.started', "Starting Sync :: ".date('D, M j, Y g:i A'));
 
         $job = new MailChimp_Service();
+
         $job->removePointers(true, true);
 
         $this->setData('sync.syncing', true);
@@ -169,14 +171,14 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
             return false;
         }
 
-        return $this->api()->paginate($this->getResourceType(), $current_page, 10);
+        return $this->api()->paginate($this->getResourceType(), $current_page, 5);
     }
 
     /**
      * @param null|string $resource
      * @return $this
      */
-    protected function resetResourcePagePointer($resource = null)
+    public function resetResourcePagePointer($resource = null)
     {
         if (empty($resource)) $resource = $this->getResourceType();
 
@@ -189,7 +191,7 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
      * @param null|string $resource
      * @return null
      */
-    protected function getResourcePagePointer($resource = null)
+    public function getResourcePagePointer($resource = null)
     {
         if (empty($resource)) $resource = $this->getResourceType();
 
@@ -201,7 +203,7 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
      * @param null $resource
      * @return MailChimp_WooCommerce_Abtstract_Sync
      */
-    protected function setResourcePagePointer($page, $resource = null)
+    public function setResourcePagePointer($page, $resource = null)
     {
         if (empty($resource)) $resource = $this->getResourceType();
 

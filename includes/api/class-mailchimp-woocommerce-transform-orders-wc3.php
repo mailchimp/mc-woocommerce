@@ -17,11 +17,11 @@ class MailChimp_WooCommerce_Transform_Orders
      * @param int $limit
      * @return \stdClass
      */
-    public function compile($page = 1, $limit = 10)
+    public function compile($page = 1, $limit = 5)
     {
         $response = (object) array(
             'endpoint' => 'orders',
-            'page' => $page,
+            'page' => $page ? $page : 1,
             'limit' => (int) $limit,
             'count' => 0,
             'valid' => 0,
@@ -112,20 +112,15 @@ class MailChimp_WooCommerce_Transform_Orders
 
         // loop through all the order items
         foreach ($woo->get_items() as $key => $order_detail) {
-
             /** @var WC_Order_Item_Product $order_detail */
 
             // add it into the order item container.
             $item = $this->transformLineItem($key, $order_detail);
 
             // if we don't have a product post with this id, we need to add a deleted product to the MC side
-            if (!($product = $order_detail->get_product())) {
+            if (!($product = $order_detail->get_product()) || 'trash' === $product->get_status()) {
 
                 $pid = $order_detail->get_product_id();
-
-                if (empty($pid)) {
-                    continue;
-                }
 
                 // check if it exists, otherwise create a new one.
                 if (($deleted_product = MailChimp_WooCommerce_Transform_Products::deleted($pid))) {
@@ -270,7 +265,7 @@ class MailChimp_WooCommerce_Transform_Orders
      * @param int $posts
      * @return array|bool
      */
-    public function getOrderPosts($page = 1, $posts = 10)
+    public function getOrderPosts($page = 1, $posts = 5)
     {
         $orders = get_posts(array(
             'post_type'   => wc_get_order_types(),

@@ -125,13 +125,13 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
         global $wpdb;
         $wpdb->query("DELETE FROM {$wpdb->prefix}queue");
 
-        $this->setData('sync.syncing', true);
-        $this->setData('sync.started_at', time());
-
         mailchimp_log('sync.started', "Starting Sync :: ".date('D, M j, Y g:i A'));
 
         $job = new MailChimp_Service();
         $job->removePointers(true, true);
+
+        $this->setData('sync.syncing', true);
+        $this->setData('sync.started_at', time());
 
         // flag the store as syncing
         mailchimp_get_api()->flagStoreSync(mailchimp_get_store_id(), true);

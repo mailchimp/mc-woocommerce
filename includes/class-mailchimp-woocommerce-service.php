@@ -24,6 +24,14 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function wooIsRunning()
     {
+        $path = plugin_dir_path( dirname( __FILE__ ) );
+
+        if (class_exists('WC') && (int) WC()->version >= 3) {
+            require_once $path . 'includes/api/class-mailchimp-woocommerce-transform-orders-wc3.php';
+        } else {
+            require_once $path . 'includes/api/class-mailchimp-woocommerce-transform-orders.php';
+        }
+
         // make sure the site option for setting the mailchimp_carts has been saved.
         $this->validated_cart_db = get_site_option('mailchimp_woocommerce_db_mailchimp_carts', false);
         $this->is_admin = current_user_can('administrator');

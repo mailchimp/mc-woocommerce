@@ -175,12 +175,6 @@ class MailChimp_Woocommerce {
 		require_once $path . 'includes/api/class-mailchimp-woocommerce-create-list-submission.php';
 		require_once $path . 'includes/api/class-mailchimp-woocommerce-transform-products.php';
 
-		if (class_exists('WC') && (int) WC()->version >= 3) {
-            require_once $path . 'includes/api/class-mailchimp-woocommerce-transform-orders-wc3.php';
-        } else {
-            require_once $path . 'includes/api/class-mailchimp-woocommerce-transform-orders.php';
-        }
-
 		/** Require all the mailchimp api asset classes */
 		require_once $path . 'includes/api/assets/class-mailchimp-address.php';
 		require_once $path . 'includes/api/assets/class-mailchimp-cart.php';

@@ -142,7 +142,7 @@ class MailChimp_WooCommerce_Transform_Orders
         }
 
         //if (($refund = $woo->get_total_refunded()) && $refund > 0){
-            // this is where we would be altering the submission to tell us about the refund.
+        // this is where we would be altering the submission to tell us about the refund.
         //}
 
         return $order;

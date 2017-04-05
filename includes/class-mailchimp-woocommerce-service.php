@@ -26,7 +26,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     {
         $path = plugin_dir_path( dirname( __FILE__ ) );
 
-        if (class_exists('WC') && (int) WC()->version >= 3) {
+        if (function_exists('WC') && (int) WC()->version >= 3) {
             require_once $path . 'includes/api/class-mailchimp-woocommerce-transform-orders-wc3.php';
         } else {
             require_once $path . 'includes/api/class-mailchimp-woocommerce-transform-orders.php';

@@ -44,6 +44,7 @@ if ( ! class_exists( 'WP_Worker' ) ) {
 			$job = $this->queue->get_next_job();
 
 			if (empty($job)) {
+			    mailchimp_debug('wp-worker@process_next_job', 'empty job data');
 			    return true;
             }
 

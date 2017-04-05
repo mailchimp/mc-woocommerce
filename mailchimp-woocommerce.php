@@ -245,6 +245,13 @@ function run_mailchimp_plugin_updater() {
 	}
 }
 
+function mailchimp_debug($action, $message, $data = null)
+{
+    if (defined('WP_CLI') && WP_CLI) {
+        WP_CLI::debug(print_r(array('message' => $message, 'data' => $data), true));
+    }
+}
+
 /**
  * @param $action
  * @param $message
@@ -253,17 +260,18 @@ function run_mailchimp_plugin_updater() {
  */
 function mailchimp_log($action, $message, $data = array())
 {
-	$options = MailChimp_Woocommerce::getLoggingConfig();
+    $options = MailChimp_Woocommerce::getLoggingConfig();
 
 	if (!$options->enable_logging || !$options->account_id || !$options->username) {
 		return false;
 	}
 
-    if (defined('WP_CLI') && WP_CLI === true) {
-        WP_CLI::log(print_r(array('message' => $message, 'data' => $data), true));
+    if (defined('WP_CLI') && WP_CLI) {
+        WP_CLI::debug(print_r(array('message' => $message, 'data' => $data), true));
         return null;
     }
 
+    /*
 	$data = array(
 		'account_id' => $options->account_id,
 		'username' => $options->username,
@@ -281,6 +289,7 @@ function mailchimp_log($action, $message, $data = array())
 		),
 		'body' => json_encode($data),
 	));
+    */
 }
 
 /**

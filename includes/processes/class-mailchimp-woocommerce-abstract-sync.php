@@ -76,7 +76,15 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
      */
     public function handle() {
 
-        if (!($page = $this->getResources()) || !($this->store_id = $this->getStoreID())) {
+        if (!($this->store_id = $this->getStoreID())) {
+            mailchimp_debug(get_called_class().'@handle', 'store id not loaded');
+            return false;
+        }
+
+        if (!($page = $this->getResources())) {
+            mailchimp_debug(get_called_class().'@handle', 'could not find any more '.$this->getResourceType().' records');
+            // call the completed event to process further
+            $this->complete();
             return false;
         }
 
@@ -84,6 +92,8 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
 
         // if we've got a 0 count, that means we're done.
         if ($page->count <= 0) {
+
+            mailchimp_debug(get_called_class().'@handle', $this->getResourceType().' :: count is 0 : completing now!');
 
             // reset the resource page back to 1
             $this->resourceComplete($this->getResourceType());
@@ -99,6 +109,8 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
             $this->iterate($resource);
         }
 
+        mailchimp_debug(get_called_class().'@handle', 'queuing up the next job');
+
         // this will paginate through all records for the resource type until they return no records.
         wp_queue(new static());
 
@@ -110,14 +122,13 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
      */
     public function flagStartSync()
     {
+        global $wpdb;
+        $wpdb->query("DELETE FROM {$wpdb->prefix}queue");
+
         mailchimp_log('sync.started', "Starting Sync :: ".date('D, M j, Y g:i A'));
 
-        // this is the last thing we're doing so it's complete as of now.
-        $this->setData('sync.syncing', true);
-        $this->setData('sync.started_at', time());
-
-        $this->removeData('sync.products.current_page');
-        $this->removeData('sync.orders.current_page');
+        $job = new MailChimp_Service();
+        $job->removePointers(true, true);
 
         // flag the store as syncing
         mailchimp_get_api()->flagStoreSync(mailchimp_get_store_id(), true);

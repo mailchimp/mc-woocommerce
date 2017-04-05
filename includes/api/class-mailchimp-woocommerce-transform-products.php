@@ -152,7 +152,20 @@ class MailChimp_WooCommerce_Transform_Products
         ));
 
         if (empty($products)) {
-            return false;
+
+            sleep(2);
+
+            $products = get_posts(array(
+                'post_type' => array_merge(array_keys(wc_get_product_types()), array('product')),
+                'posts_per_page' => $posts,
+                'paged' => $page,
+                'orderby' => 'ID',
+                'order' => 'ASC',
+            ));
+
+            if (empty($products)) {
+                return false;
+            }
         }
 
         return $products;

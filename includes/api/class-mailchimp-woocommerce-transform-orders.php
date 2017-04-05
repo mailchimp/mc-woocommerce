@@ -322,7 +322,21 @@ class MailChimp_WooCommerce_Transform_Orders
         ));
 
         if (empty($orders)) {
-            return false;
+
+            sleep(2);
+
+            $orders = get_posts(array(
+                'post_type' => 'shop_order',
+                //'post_status' => 'publish',
+                'posts_per_page' => $posts,
+                'paged' => $page,
+                'orderby' => 'id',
+                'order' => 'ASC'
+            ));
+
+            if (empty($orders)) {
+                return false;
+            }
         }
 
         return $orders;

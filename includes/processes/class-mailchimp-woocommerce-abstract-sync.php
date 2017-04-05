@@ -126,7 +126,9 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
     public function flagStartSync()
     {
         global $wpdb;
+        $wpdb->show_errors(false);
         $wpdb->query("DELETE FROM {$wpdb->prefix}queue");
+        $wpdb->show_errors(true);
 
         mailchimp_log('sync.started', "Starting Sync :: ".date('D, M j, Y g:i A'));
 

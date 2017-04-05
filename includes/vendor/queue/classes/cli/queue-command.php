@@ -16,7 +16,7 @@ class Queue_Command extends WP_CLI_Command {
     public function show()
     {
         global $wpdb;
-        print_r($wpdb->get_results("SELECT * FROM {$wpdb->prefix}queue}"));
+        print_r($wpdb->get_results("SELECT * FROM {$wpdb->prefix}queue"));
     }
 
 	/**

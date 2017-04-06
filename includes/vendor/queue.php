@@ -23,10 +23,10 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	require_once $queue_folder_path . 'queue/classes/cli/queue-command.php';
 
 	WP_CLI::add_command( 'queue', 'Queue_Command' );
-} else {
-    // Instantiate HTTP queue worker
-    new WP_Http_Worker($wp_queue);
 }
+
+// Instantiate HTTP queue worker
+new WP_Http_Worker($wp_queue);
 
 if ( ! function_exists( 'wp_queue' ) ) {
 	/**

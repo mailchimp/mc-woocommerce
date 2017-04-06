@@ -155,8 +155,6 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
      */
     public function flagStopSync()
     {
-        mailchimp_log('sync.completed', "Finished Sync :: ".date('D, M j, Y g:i A'));
-
         // this is the last thing we're doing so it's complete as of now.
         $this->setData('sync.syncing', false);
         $this->setData('sync.completed_at', time());
@@ -164,6 +162,8 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
         // set the current sync pages back to 1 if the user hits resync.
         $this->setData('sync.orders.current_page', 1);
         $this->setData('sync.products.current_page', 1);
+
+        mailchimp_log('sync.completed', "Finished Sync :: ".date('D, M j, Y g:i A'));
 
         // flag the store as sync_finished
         mailchimp_get_api()->flagStoreSync(mailchimp_get_store_id(), false);

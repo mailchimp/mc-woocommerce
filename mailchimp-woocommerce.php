@@ -23,6 +23,8 @@
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       mailchimp-woocommerce
  * Domain Path:       /languages
+ * Requires at least: 4.4
+ * Tested up to: 4.7
  */
 
 // If this file is called directly, abort.
@@ -198,10 +200,23 @@ function activate_mailchimp_woocommerce()
 {
 	// if we don't have woocommerce we need to display a horrible error message before the plugin is installed.
 	if (!is_plugin_active('woocommerce/woocommerce.php')) {
-		// Deactivate the plugin
-		deactivate_plugins(__FILE__);
-		$error_message = __('The MailChimp For WooCommerce plugin requires the <a href="http://wordpress.org/extend/plugins/woocommerce/">WooCommerce</a> plugin to be active!', 'woocommerce');
-		wp_die($error_message);
+
+	    $active = false;
+
+	    // some people may have uploaded a specific version of woo, so we need a fallback checker here.
+	    foreach (array_keys(get_plugins()) as $plugin) {
+	        if (mailchimp_string_contains($plugin, 'woocommerce.php')) {
+	            $active = true;
+	            break;
+            }
+        }
+
+        if (!$active) {
+            // Deactivate the plugin
+            deactivate_plugins(__FILE__);
+            $error_message = __('The MailChimp For WooCommerce plugin requires the <a href="http://wordpress.org/extend/plugins/woocommerce/">WooCommerce</a> plugin to be active!', 'woocommerce');
+            wp_die($error_message);
+        }
 	}
 
 	// ok we can activate this thing.

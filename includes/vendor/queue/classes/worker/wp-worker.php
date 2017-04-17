@@ -41,7 +41,13 @@ if ( ! class_exists( 'WP_Worker' ) ) {
 		 * @return bool
 		 */
 		public function process_next_job() {
-			$job           = $this->queue->get_next_job();
+			$job = $this->queue->get_next_job();
+
+			if (empty($job)) {
+			    mailchimp_debug('wp-worker@process_next_job', 'empty job data');
+			    return true;
+            }
+
 			$this->payload = unserialize( $job->job );
 
 			$this->queue->lock_job( $job );
@@ -69,6 +75,10 @@ if ( ! class_exists( 'WP_Worker' ) ) {
 
 				return false;
 			}
+
+			if (defined('WP_CLI') && WP_CLI && property_exists($this->payload, 'should_kill_queue_listener') && $this->payload->should_kill_queue_listener === true) {
+			    wp_die('killing queue listener');
+            }
 
 			return true;
 		}

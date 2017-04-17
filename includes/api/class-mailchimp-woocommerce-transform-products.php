@@ -15,11 +15,11 @@ class MailChimp_WooCommerce_Transform_Products
      * @param int $limit
      * @return \stdClass
      */
-    public function compile($page = 1, $limit = 10)
+    public function compile($page = 1, $limit = 5)
     {
         $response = (object) array(
             'endpoint' => 'products',
-            'page' => $page,
+            'page' => $page ? $page : 1,
             'limit' => (int) $limit,
             'count' => 0,
             'stuffed' => false,
@@ -141,10 +141,10 @@ class MailChimp_WooCommerce_Transform_Products
      * @param int $posts
      * @return array|bool
      */
-    public function getProductPosts($page = 1, $posts = 10)
+    public function getProductPosts($page = 1, $posts = 5)
     {
         $products = get_posts(array(
-            'post_type' => array('product'),
+            'post_type' => array_merge(array_keys(wc_get_product_types()), array('product')),
             'posts_per_page' => $posts,
             'paged' => $page,
             'orderby' => 'ID',
@@ -152,7 +152,20 @@ class MailChimp_WooCommerce_Transform_Products
         ));
 
         if (empty($products)) {
-            return false;
+
+            sleep(2);
+
+            $products = get_posts(array(
+                'post_type' => array_merge(array_keys(wc_get_product_types()), array('product')),
+                'posts_per_page' => $posts,
+                'paged' => $page,
+                'orderby' => 'ID',
+                'order' => 'ASC',
+            ));
+
+            if (empty($products)) {
+                return false;
+            }
         }
 
         return $products;

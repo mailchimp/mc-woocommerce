@@ -15,15 +15,15 @@ require_once $queue_folder_path . 'queue/classes/wp-queue.php';
 require_once $queue_folder_path . 'queue/classes/worker/wp-worker.php';
 require_once $queue_folder_path . 'queue/classes/worker/wp-http-worker.php';
 
+global $wp_queue;
+$wp_queue = new WP_Queue();
+
 // Add WP CLI commands
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	require_once $queue_folder_path . 'queue/classes/cli/queue-command.php';
 
 	WP_CLI::add_command( 'queue', 'Queue_Command' );
 }
-
-global $wp_queue;
-$wp_queue = new WP_Queue();
 
 // Instantiate HTTP queue worker
 new WP_Http_Worker($wp_queue);

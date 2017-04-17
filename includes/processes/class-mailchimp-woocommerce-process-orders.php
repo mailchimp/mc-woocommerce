@@ -64,12 +64,17 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abtstra
 
             } catch (MailChimp_WooCommerce_Error $e) {
                 mailchimp_log('sync.orders.error', "$call :: MailChimp_WooCommerce_Error :: {$e->getMessage()}");
+                return false;
             } catch (MailChimp_WooCommerce_ServerError $e) {
                 mailchimp_log('sync.orders.error', "$call :: MailChimp_WooCommerce_ServerError :: {$e->getMessage()}");
+                return false;
             } catch (Exception $e) {
                 mailchimp_log('sync.orders.error', "$call :: Uncaught Exception :: {$e->getMessage()}");
+                return false;
             }
         }
+
+        mailchimp_debug('iterate.order', 'no order found', $item);
 
         return false;
     }

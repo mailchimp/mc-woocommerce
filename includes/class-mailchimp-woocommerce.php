@@ -174,7 +174,6 @@ class MailChimp_Woocommerce {
 		require_once $path . 'includes/api/class-mailchimp-woocommerce-api.php';
 		require_once $path . 'includes/api/class-mailchimp-woocommerce-create-list-submission.php';
 		require_once $path . 'includes/api/class-mailchimp-woocommerce-transform-products.php';
-		require_once $path . 'includes/api/class-mailchimp-woocommerce-transform-orders.php';
 
 		/** Require all the mailchimp api asset classes */
 		require_once $path . 'includes/api/assets/class-mailchimp-address.php';

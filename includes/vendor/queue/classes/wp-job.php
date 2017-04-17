@@ -3,6 +3,8 @@
 if ( ! class_exists( 'WP_Job' ) ) {
 	abstract class WP_Job {
 
+	    public $should_kill_queue_listener = false;
+
 		/**
 		 * @var stdClass
 		 */

@@ -21,6 +21,7 @@ You’ll have the power to:
 - Send product recommendations
 - Segment based on purchase history
 - View your results and measure ROI
+- Grow your audience and sell more stuff with Facebook Ad Campaigns in MailChimp
 
 ###A note for current WooCommerce integration users
 This plugin supports our most powerful API 3.0 features, and is intended for users who have not yet integrated their WooCommerce stores with MailChimp.
@@ -48,6 +49,13 @@ You’ll need to do a few things to connect your WooCommerce store to MailChimp.
 For more information on settings and configuration, please visit our Knowledge Base: [http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce](http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce)
 
 == Changelog ==
+= 2.0 = 
+* Support WooComerce 3.0 
+* Support for manually uploaded WooCommerce
+* Fix for sync issues 
+* Fix for guest orders sync issue
+* Remove MailChimp debug logger
+
 = 1.1.1 = 
 * Support for site url changes 
 * Fix for WP Version 4.4 compatibility issues 

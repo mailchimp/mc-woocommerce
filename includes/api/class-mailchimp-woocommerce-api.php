@@ -33,7 +33,7 @@ class MailChimp_WooCommerce_Api
         }
 
         if (empty($page)) $page = 1;
-        if (empty($per)) $per = 10;
+        if (empty($per)) $per = 5;
 
         return array($page, $per);
     }
@@ -64,7 +64,7 @@ class MailChimp_WooCommerce_Api
      * @param int $per
      * @return object|stdClass
      */
-    public function paginate($resource, $page = 1, $per = 10)
+    public function paginate($resource, $page = 1, $per = 5)
     {
         if (($sync = $this->engine($resource))) {
             return $sync->compile($page, $per);

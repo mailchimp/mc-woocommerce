@@ -7,6 +7,18 @@
  */
 class Queue_Command extends WP_CLI_Command {
 
+    public function flush()
+    {
+        global $wpdb;
+        $wpdb->query("DELETE FROM {$wpdb->prefix}queue");
+    }
+
+    public function show()
+    {
+        global $wpdb;
+        print_r($wpdb->get_results("SELECT * FROM {$wpdb->prefix}queue"));
+    }
+
 	/**
 	 * Creates the queue tables.
 	 *
@@ -60,8 +72,7 @@ class Queue_Command extends WP_CLI_Command {
 			if ( $worker->should_run() ) {
 				if ( $worker->process_next_job() ) {
 					WP_CLI::success( 'Processed: ' . $worker->get_job_name() );
-				} else {
-					WP_CLI::warning( 'Failed: ' . $worker->get_job_name() );
+					sleep(1);
 				}
 			} else {
 				sleep( 5 );
@@ -118,3 +129,4 @@ class Queue_Command extends WP_CLI_Command {
 	}
 
 }
+

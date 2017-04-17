@@ -13,7 +13,7 @@ class MailChimp_Api_Locales
     /**
      * @return array
      */
-    public function all()
+    public static function all()
     {
         return array(
             "af_NA"=> "Afrikaans (Namibia)",

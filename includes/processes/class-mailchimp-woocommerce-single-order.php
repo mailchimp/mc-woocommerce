@@ -43,6 +43,10 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
     public function process()
     {
+        if (empty($this->order_id)) {
+            return false;
+        }
+
         $options = get_option('mailchimp-woocommerce', array());
         $store_id = mailchimp_get_store_id();
 
@@ -72,8 +76,12 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
             // will either add or update the order
             try {
 
+                if (!($order_post = get_post($this->order_id))) {
+                    return false;
+                }
+
                 // transform the order
-                $order = $job->transform(get_post($this->order_id));
+                $order = $job->transform($order_post);
 
                 // if we're overriding this we need to set it here.
                 if ($this->partially_refunded) {

@@ -76,14 +76,27 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
      */
     public function handle() {
 
-        if (!($page = $this->getResources()) || !($this->store_id = $this->getStoreID())) {
+        if (!($this->store_id = $this->getStoreID())) {
+            mailchimp_debug(get_called_class().'@handle', 'store id not loaded');
             return false;
         }
 
-        $this->setResourcePagePointer($page->page + 1, $this->getResourceType());
+        $page = $this->getResources();
+
+        if (empty($page)) {
+            mailchimp_debug(get_called_class().'@handle', 'could not find any more '.$this->getResourceType().' records ending on page '.$this->getResourcePagePointer());
+            // call the completed event to process further
+            $this->resourceComplete($this->getResourceType());
+            $this->complete();
+            return false;
+        }
+
+        $this->setResourcePagePointer(($page->page + 1), $this->getResourceType());
 
         // if we've got a 0 count, that means we're done.
         if ($page->count <= 0) {
+
+            mailchimp_debug(get_called_class().'@handle', $this->getResourceType().' :: count is 0 : completing now!');
 
             // reset the resource page back to 1
             $this->resourceComplete($this->getResourceType());
@@ -99,6 +112,8 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
             $this->iterate($resource);
         }
 
+        mailchimp_debug(get_called_class().'@handle', 'queuing up the next job');
+
         // this will paginate through all records for the resource type until they return no records.
         wp_queue(new static());
 
@@ -110,14 +125,24 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
      */
     public function flagStartSync()
     {
-        mailchimp_log('sync.started', "Starting Sync :: ".date('D, M j, Y g:i A'));
+        $job = new MailChimp_Service();
 
-        // this is the last thing we're doing so it's complete as of now.
+        $job->removeSyncPointers();
+
+        $this->setData('sync.config.resync', false);
+        $this->setData('sync.orders.current_page', 1);
+        $this->setData('sync.products.current_page', 1);
         $this->setData('sync.syncing', true);
         $this->setData('sync.started_at', time());
 
-        $this->removeData('sync.products.current_page');
-        $this->removeData('sync.orders.current_page');
+        global $wpdb;
+        try {
+            $wpdb->show_errors(false);
+            $wpdb->query("DELETE FROM {$wpdb->prefix}queue");
+            $wpdb->show_errors(true);
+        } catch (\Exception $e) {}
+
+        mailchimp_log('sync.started', "Starting Sync :: ".date('D, M j, Y g:i A'));
 
         // flag the store as syncing
         mailchimp_get_api()->flagStoreSync(mailchimp_get_store_id(), true);
@@ -130,11 +155,15 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
      */
     public function flagStopSync()
     {
-        mailchimp_log('sync.completed', "Finished Sync :: ".date('D, M j, Y g:i A'));
-
         // this is the last thing we're doing so it's complete as of now.
         $this->setData('sync.syncing', false);
         $this->setData('sync.completed_at', time());
+
+        // set the current sync pages back to 1 if the user hits resync.
+        $this->setData('sync.orders.current_page', 1);
+        $this->setData('sync.products.current_page', 1);
+
+        mailchimp_log('sync.completed', "Finished Sync :: ".date('D, M j, Y g:i A'));
 
         // flag the store as sync_finished
         mailchimp_get_api()->flagStoreSync(mailchimp_get_store_id(), false);
@@ -150,17 +179,23 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
         $current_page = $this->getResourcePagePointer($this->getResourceType());
 
         if ($current_page === 'complete') {
-            return false;
+            if (!$this->getData('sync.config.resync', false)) {
+                return false;
+            }
+
+            $current_page = 1;
+            $this->setResourcePagePointer($current_page);
+            $this->setData('sync.config.resync', false);
         }
 
-        return $this->api()->paginate($this->getResourceType(), $current_page, 10);
+        return $this->api()->paginate($this->getResourceType(), $current_page, 5);
     }
 
     /**
      * @param null|string $resource
      * @return $this
      */
-    protected function resetResourcePagePointer($resource = null)
+    public function resetResourcePagePointer($resource = null)
     {
         if (empty($resource)) $resource = $this->getResourceType();
 
@@ -173,7 +208,7 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
      * @param null|string $resource
      * @return null
      */
-    protected function getResourcePagePointer($resource = null)
+    public function getResourcePagePointer($resource = null)
     {
         if (empty($resource)) $resource = $this->getResourceType();
 
@@ -185,7 +220,7 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
      * @param null $resource
      * @return MailChimp_WooCommerce_Abtstract_Sync
      */
-    protected function setResourcePagePointer($page, $resource = null)
+    public function setResourcePagePointer($page, $resource = null)
     {
         if (empty($resource)) $resource = $this->getResourceType();
 
@@ -285,7 +320,7 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
      */
     public function setData($key, $value)
     {
-        update_option($this->plugin_name.'-'.$key, $value);
+        update_option($this->plugin_name.'-'.$key, $value, 'yes');
         return $this;
     }
 

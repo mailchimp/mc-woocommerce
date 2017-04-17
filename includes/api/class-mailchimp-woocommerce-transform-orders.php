@@ -17,11 +17,11 @@ class MailChimp_WooCommerce_Transform_Orders
      * @param int $limit
      * @return \stdClass
      */
-    public function compile($page = 1, $limit = 10)
+    public function compile($page = 1, $limit = 5)
     {
         $response = (object) array(
             'endpoint' => 'orders',
-            'page' => $page,
+            'page' => $page ? $page : 1,
             'limit' => (int) $limit,
             'count' => 0,
             'valid' => 0,
@@ -142,7 +142,7 @@ class MailChimp_WooCommerce_Transform_Orders
         }
 
         //if (($refund = $woo->get_total_refunded()) && $refund > 0){
-            // this is where we would be altering the submission to tell us about the refund.
+        // this is where we would be altering the submission to tell us about the refund.
         //}
 
         return $order;
@@ -310,7 +310,7 @@ class MailChimp_WooCommerce_Transform_Orders
      * @param int $posts
      * @return array|bool
      */
-    public function getOrderPosts($page = 1, $posts = 10)
+    public function getOrderPosts($page = 1, $posts = 5)
     {
         $orders = get_posts(array(
             'post_type' => 'shop_order',
@@ -322,7 +322,21 @@ class MailChimp_WooCommerce_Transform_Orders
         ));
 
         if (empty($orders)) {
-            return false;
+
+            sleep(2);
+
+            $orders = get_posts(array(
+                'post_type' => 'shop_order',
+                //'post_status' => 'publish',
+                'posts_per_page' => $posts,
+                'paged' => $page,
+                'orderby' => 'id',
+                'order' => 'ASC'
+            ));
+
+            if (empty($orders)) {
+                return false;
+            }
         }
 
         return $orders;

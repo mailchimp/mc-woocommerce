@@ -1,3 +1,10 @@
+** 2.0 ** 
+* Support WooComerce 3.0 
+* Support for manually uploaded WooCommerce plugin
+* Fix for sync issues 
+* Fix for guest orders sync issue 
+* Remove MailChimp debug logger
+
 ** 1.1.1 ** 
 * Support for site url changes
 * Fix for WP Version 4.4 Compatibility issues

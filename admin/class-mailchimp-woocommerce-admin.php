@@ -691,6 +691,11 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 			$this->setData('errors.store_info', false);
 			$this->setData($time_key, time());
 
+			// on a new store push, we need to make sure we save the site script into a local variable.
+			if ($new) {
+			    mailchimp_update_connected_site_script();
+            }
+
 			return true;
 
 		} catch (\Exception $e) {

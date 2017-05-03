@@ -73,7 +73,6 @@ class MailChimp_Woocommerce_Public {
 		 */
 
 		//wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-public.css', array(), $this->version, 'all' );
-
 	}
 
 	/**
@@ -105,5 +104,9 @@ class MailChimp_Woocommerce_Public {
 		// Enqueued script with localized data.
 		wp_enqueue_script($this->plugin_name);
 
+		// if we have the connected_site script url saved, we need to inject it
+        if (($site = mailchimp_get_connected_site_script_url()) && !empty($site)) {
+            wp_enqueue_script($this->plugin_name.'_connected_site', $site, array(), $this->version, true);
+        }
 	}
 }

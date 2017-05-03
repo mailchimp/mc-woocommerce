@@ -16,7 +16,7 @@
  * Plugin Name:       MailChimp for WooCommerce
  * Plugin URI:        https://mailchimp.com/connect-your-store/
  * Description:       MailChimp - WooCommerce plugin
- * Version:           2.0.09
+ * Version:           2.0.10
  * Author:            MailChimp
  * Author URI:        https://mailchimp.com
  * License:           GPL-2.0+
@@ -41,7 +41,7 @@ function mailchimp_environment_variables() {
 	return (object) array(
 		'repo' => 'develop',
 		'environment' => 'production',
-		'version' => '2.0.09',
+		'version' => '2.0.10',
 		'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => class_exists('WC') ? WC()->version : null,
 	);
@@ -348,6 +348,58 @@ function mailchimp_count_posts($type) {
 	return $response;
 }
 
+/**
+ * @return bool
+ */
+function mailchimp_update_connected_site_script() {
+    // pull the store ID
+    $store_id = mailchimp_get_store_id();
+
+    // if the api is configured
+    if ($store_id && ($api = mailchimp_get_api())) {
+
+        // if we have a store
+        if (($store = $api->getStore($store_id))) {
+
+            // see if we have a connected site script url/fragment
+            $url = $store->getConnectedSiteScriptUrl();
+            $fragment = $store->getConnectedSiteScriptFragment();
+
+            // if it's not empty we need to set the values
+            if ($url && $fragment) {
+
+                // update the options for script_url and script_fragment
+                update_option('mailchimp-woocommerce-script_url', $url);
+                update_option('mailchimp-woocommerce-script_fragment', $fragment);
+
+                // check to see if the site is connected
+                if (!$api->checkConnectedSite($store_id)) {
+
+                    // if it's not, connect it now.
+                    $api->connectSite($store_id);
+                }
+
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+/**
+ * @return string|false
+ */
+function mailchimp_get_connected_site_script_url() {
+    return get_option('mailchimp-woocommerce-script_url', false);
+}
+
+/**
+ * @return string|false
+ */
+function mailchimp_get_connected_site_script_fragment() {
+    return get_option('mailchimp-woocommerce-script_fragment', false);
+}
+
 register_activation_hook( __FILE__, 'activate_mailchimp_woocommerce' );
 register_deactivation_hook( __FILE__, 'deactivate_mailchimp_woocommerce' );
 
@@ -389,4 +441,5 @@ add_action('admin_init', 'run_mailchimp_plugin_updater');
 
 /** Add all the MailChimp hooks. */
 run_mailchimp_woocommerce();
+
 

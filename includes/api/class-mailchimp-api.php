@@ -397,6 +397,32 @@ class MailChimp_WooCommerce_MailChimpApi
     }
 
     /**
+     * @param $store_id
+     * @return array|bool
+     */
+    public function checkConnectedSite($store_id)
+    {
+        try {
+             return $this->get("connected-sites/{$store_id}");
+        } catch (MailChimp_WooCommerce_Error $e) {
+            return false;
+        }
+    }
+
+    /**
+     * @param $store_id
+     * @return array|bool
+     */
+    public function connectSite($store_id)
+    {
+        try {
+            return $this->post("connected-sites/{$store_id}/actions/verify-script-installation", []);
+        } catch (MailChimp_WooCommerce_Error $e) {
+            return false;
+        }
+    }
+
+    /**
      * @return array|bool
      */
     public function stores()

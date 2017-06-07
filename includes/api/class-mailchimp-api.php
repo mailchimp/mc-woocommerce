@@ -416,7 +416,7 @@ class MailChimp_WooCommerce_MailChimpApi
     public function connectSite($store_id)
     {
         try {
-            return $this->post("connected-sites/{$store_id}/actions/verify-script-installation", []);
+            return $this->post("connected-sites/{$store_id}/actions/verify-script-installation", array());
         } catch (MailChimp_WooCommerce_Error $e) {
             return false;
         }

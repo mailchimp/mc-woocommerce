@@ -11,6 +11,7 @@
 class MailChimp_WooCommerce_Transform_Orders
 {
     public $campaign_id = null;
+    protected $use_user_address = false;
 
     /**
      * @param int $page
@@ -58,7 +59,7 @@ class MailChimp_WooCommerce_Transform_Orders
 
         $order = new MailChimp_WooCommerce_Order();
 
-        $order->setId($woo->id);
+        $order->setId($woo->get_order_number());
 
         // if we have a campaign id let's set it now.
         if (!empty($this->campaign_id)) {
@@ -134,7 +135,7 @@ class MailChimp_WooCommerce_Transform_Orders
                     continue;
                 }
 
-                mailchimp_log('order.items.error', "Order #{$woo->id} :: Product {$item->getProductId()} does not exist!");
+                mailchimp_log('order.items.error', "Order #{$woo->get_order_number()} :: Product {$item->getProductId()} does not exist!");
                 continue;
             }
 
@@ -165,7 +166,7 @@ class MailChimp_WooCommerce_Transform_Orders
         $customer->setTotalSpent($order->get_total());
 
         // we are saving the post meta for subscribers on each order... so if they have subscribed on checkout
-        $subscriber_meta = get_post_meta($order->id, 'mailchimp_woocommerce_is_subscribed', true);
+        $subscriber_meta = get_post_meta($order->get_id(), 'mailchimp_woocommerce_is_subscribed', true);
         $subscribed_on_order = $subscriber_meta === '' ? false : (bool) $subscriber_meta;
 
         $customer->setOptInStatus($subscribed_on_order);
@@ -188,23 +189,22 @@ class MailChimp_WooCommerce_Transform_Orders
         $customer->setAddress($address);
 
         if (($user = get_userdata($order->customer_user))) {
-
-            /** IF we wanted to use the user data instead we would do it here.
+            /**
+             * IF we wanted to use the user data instead we would do it here.
              * but we discussed using the billing address instead.
              */
+            if ($this->use_user_address) {
+                $customer->setId($user->ID);
+                $customer->setEmailAddress($user->user_email);
+                $customer->setFirstName($user->first_name);
+                $customer->setLastName($user->last_name);
 
-            /*
-            $customer->setId($user->ID);
-            $customer->setEmailAddress($user->user_email);
-            $customer->setFirstName($user->first_name);
-            $customer->setLastName($user->last_name);
-
-            if (($address = $this->getUserAddress($user->ID))) {
-                if (count($address->toArray()) > 3) {
-                    $customer->setAddress($address);
+                if (($address = $this->getUserAddress($user->ID))) {
+                    if (count($address->toArray()) > 3) {
+                        $customer->setAddress($address);
+                    }
                 }
             }
-            */
 
             if (!($stats = $this->getCustomerOrderTotals($order->customer_user))) {
                 $stats = (object) array('count' => 0, 'total' => 0);
@@ -460,7 +460,7 @@ class MailChimp_WooCommerce_Transform_Orders
             // Payment received and stock has been reduced – the order is awaiting fulfillment.
             // All product orders require processing, except those for digital downloads
             'processing'    => (object) array(
-                'financial' => 'processing',
+                'financial' => 'pending',
                 'fulfillment' => null
             ),
             // Awaiting payment – stock is reduced, but you need to confirm payment

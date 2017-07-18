@@ -58,7 +58,7 @@ class MailChimp_WooCommerce_Transform_Orders
 
         $order = new MailChimp_WooCommerce_Order();
 
-        $order->setId($woo->get_id());
+        $order->setId($woo->get_order_number());
 
         // if we have a campaign id let's set it now.
         if (!empty($this->campaign_id)) {

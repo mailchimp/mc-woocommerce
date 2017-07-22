@@ -235,24 +235,6 @@ function deactivate_mailchimp_woocommerce() {
 	MailChimp_Woocommerce_Deactivator::deactivate();
 }
 
-/**
- * See if we need to run any updates.
- */
-function run_mailchimp_plugin_updater() {
-	if (!class_exists('PucFactory')) {
-		require plugin_dir_path( __FILE__ ) . 'includes/plugin-update-checker/plugin-update-checker.php';
-	}
-
-	/** @var \PucGitHubChecker_3_1 $checker */
-	$updater = PucFactory::getLatestClassVersion('PucGitHubChecker');
-
-	if (class_exists($updater)) {
-		$env = mailchimp_environment_variables();
-		$checker = new $updater('https://github.com/mailchimp/mc-woocommerce/', __FILE__, $env->repo, 1);
-		$checker->handleManualCheck();
-	}
-}
-
 function mailchimp_debug($action, $message, $data = null)
 {
     if (defined('WP_CLI') && WP_CLI) {
@@ -427,9 +409,6 @@ function mailchimp_woocommerce_add_meta_tags() {
 }
 
 add_action('wp_head', 'mailchimp_woocommerce_add_meta_tags');
-
-/** Add the plugin updater function ONLY when they are logged in as admin. */
-add_action('admin_init', 'run_mailchimp_plugin_updater');
 
 /** Add all the MailChimp hooks. */
 run_mailchimp_woocommerce();

@@ -299,38 +299,21 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 	 */
 	protected function validatePostStoreInfo($input)
 	{
-		$data = array(
-
-			// store basics
-			'store_name' => trim((isset($input['store_name']) ? $input['store_name'] : get_option('blogname'))),
-			'store_street' => isset($input['store_street']) ? $input['store_street'] : false,
-			'store_city' => isset($input['store_city']) ? $input['store_city'] : false,
-			'store_state' => isset($input['store_state']) ? $input['store_state'] : false,
-			'store_postal_code' => isset($input['store_postal_code']) ? $input['store_postal_code'] : false,
-			'store_country' => isset($input['store_country']) ? $input['store_country'] : false,
-			'store_phone' => isset($input['store_phone']) ? $input['store_phone'] : false,
-
-			// locale info
-			'store_locale' => isset($input['store_locale']) ? $input['store_locale'] : false,
-			'store_timezone' => isset($input['store_timezone']) ? $input['store_timezone'] : false,
-			'store_currency_code' => isset($input['store_currency_code']) ? $input['store_currency_code'] : false,
-
-			'admin_email' => isset($input['admin_email']) && is_email($input['admin_email']) ? $input['admin_email'] : $this->getOption('admin_email', false),
-		);
+		$data = $this->compileStoreInfoData($input);
 
 		if (!$this->hasValidStoreInfo($data)) {
 
-			if (empty($data['admin_email']) || empty($data['store_city']) || empty($data['store_state']) || empty($data['store_postal_code']) || empty($data['store_country']) || empty($data['store_street'])) {
-				add_settings_error('mailchimp_store_settings', '', 'As part of the MailChimp Terms of Use, we require a contact email and a physical mailing address.');
-			}
+		    if ($this->hasInvalidStoreAddress($data)) {
+		        $this->addInvalidAddressAlert();
+            }
 
-			if (empty($data['store_phone']) || strlen($data['store_phone']) <= 6) {
-				add_settings_error('mailchimp_store_settings', '', 'As part of the MailChimp Terms of Use, we require a valid phone number for your store.');
-			}
+            if ($this->hasInvalidStorePhone($data)) {
+		        $this->addInvalidPhoneAlert();
+            }
 
-			if (empty($data['store_name'])) {
-				add_settings_error('mailchimp_store_settings', '', 'MailChimp for WooCommerce requires a Store Name to connect your store.');
-			}
+            if ($this->hasInvalidStoreName($data)) {
+		        $this->addInvalidStoreNameAlert();
+            }
 
 			$this->setData('validation.store_info', false);
 			return array();
@@ -344,6 +327,102 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 
 		return $data;
 	}
+
+    /**
+     * @param $input
+     * @return array
+     */
+	protected function compileStoreInfoData($input)
+    {
+        return array(
+            // store basics
+            'store_name' => trim((isset($input['store_name']) ? $input['store_name'] : get_option('blogname'))),
+            'store_street' => isset($input['store_street']) ? $input['store_street'] : false,
+            'store_city' => isset($input['store_city']) ? $input['store_city'] : false,
+            'store_state' => isset($input['store_state']) ? $input['store_state'] : false,
+            'store_postal_code' => isset($input['store_postal_code']) ? $input['store_postal_code'] : false,
+            'store_country' => isset($input['store_country']) ? $input['store_country'] : false,
+            'store_phone' => isset($input['store_phone']) ? $input['store_phone'] : false,
+            // locale info
+            'store_locale' => isset($input['store_locale']) ? $input['store_locale'] : false,
+            'store_timezone' => isset($input['store_timezone']) ? $input['store_timezone'] : false,
+            'store_currency_code' => isset($input['store_currency_code']) ? $input['store_currency_code'] : false,
+            'admin_email' => isset($input['admin_email']) && is_email($input['admin_email']) ? $input['admin_email'] : $this->getOption('admin_email', false),
+        );
+    }
+
+    /**
+     * @param array $data
+     * @return array|bool
+     */
+	protected function hasInvalidStoreAddress($data)
+    {
+        $address_keys = array(
+            'admin_email',
+            'store_city',
+            'store_state',
+            'store_postal_code',
+            'store_country',
+            'store_street'
+        );
+
+        $invalid = array();
+        foreach ($address_keys as $address_key) {
+            if (empty($data[$address_key])) {
+                $invalid[] = $address_key;
+            }
+        }
+        return empty($invalid) ? false : $invalid;
+    }
+
+    /**
+     * @param $data
+     * @return bool
+     */
+    protected function hasInvalidStorePhone($data)
+    {
+        if (empty($data['store_phone']) || strlen($data['store_phone']) <= 6) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param $data
+     * @return bool
+     */
+    protected function hasInvalidStoreName($data)
+    {
+        if (empty($data['store_name'])) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     *
+     */
+	protected function addInvalidAddressAlert()
+    {
+        add_settings_error('mailchimp_store_settings', '', 'As part of the MailChimp Terms of Use, we require a contact email and a physical mailing address.');
+    }
+
+    /**
+     *
+     */
+    protected function addInvalidPhoneAlert()
+    {
+        add_settings_error('mailchimp_store_settings', '', 'As part of the MailChimp Terms of Use, we require a valid phone number for your store.');
+    }
+
+    /**
+     *
+     */
+    protected function addInvalidStoreNameAlert()
+    {
+        add_settings_error('mailchimp_store_settings', '', 'MailChimp for WooCommerce requires a Store Name to connect your store.');
+    }
 
 	/**
 	 * STEP 3.

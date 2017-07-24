@@ -66,9 +66,9 @@ class MailChimp_WooCommerce_Transform_Orders
             $order->setCampaignId($this->campaign_id);
         }
 
-        $order->setProcessedAt(mailchimp_date_utc($woo->order_date));
+        $order->setProcessedAt($woo->get_date_created());
 
-        $order->setCurrencyCode($woo->get_order_currency());
+        $order->setCurrencyCode($woo->get_currency());
 
         // grab the current statuses - this will end up being custom at some point.
         $statuses = $this->getOrderStatuses();
@@ -87,7 +87,7 @@ class MailChimp_WooCommerce_Transform_Orders
         $order->setFinancialStatus($financial_status);
 
         // only set this if the order is cancelled.
-        if ($status === 'cancelled') $order->setCancelledAt(mailchimp_date_utc($woo->modified_date));
+        if ($status === 'cancelled') $order->setCancelledAt($woo->get_date_modified());
 
         // set the total
         $order->setOrderTotal($woo->get_total());

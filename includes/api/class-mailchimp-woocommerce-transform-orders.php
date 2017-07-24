@@ -65,6 +65,7 @@ class MailChimp_WooCommerce_Transform_Orders
         if (!empty($this->campaign_id)) {
             $order->setCampaignId($this->campaign_id);
         }
+        $woo->payment_complete();
 
         $order->setProcessedAt($woo->get_date_created());
 
@@ -460,7 +461,7 @@ class MailChimp_WooCommerce_Transform_Orders
             // Payment received and stock has been reduced – the order is awaiting fulfillment.
             // All product orders require processing, except those for digital downloads
             'processing'    => (object) array(
-                'financial' => 'pending',
+                'financial' => 'paid',
                 'fulfillment' => null
             ),
             // Awaiting payment – stock is reduced, but you need to confirm payment

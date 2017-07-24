@@ -31,13 +31,6 @@ if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
         $show_sync_tab = true;
     }
 }
-
-if (isset($_GET['test_order_id'])) {
-    $order_post = get_post($_GET['test_order_id']);
-    //print_r($order_post);die();
-    $order_transformer = new MailChimp_WooCommerce_Transform_Orders();
-    print_r($order_transformer->transform($order_post)->toArray());die();
-}
 ?>
 
 <style>

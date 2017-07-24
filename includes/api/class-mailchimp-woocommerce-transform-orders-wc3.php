@@ -65,9 +65,7 @@ class MailChimp_WooCommerce_Transform_Orders
             $order->setCampaignId($this->campaign_id);
         }
 
-        $woo->is_paid();
-
-        $order->setProcessedAt($woo->get_date_created());
+        $order->setProcessedAt($woo->get_date_created()->setTimezone(new \DateTimeZone('UTC')));
 
         $order->setCurrencyCode($woo->get_currency());
 
@@ -88,7 +86,9 @@ class MailChimp_WooCommerce_Transform_Orders
         $order->setFinancialStatus($financial_status);
 
         // only set this if the order is cancelled.
-        if ($status === 'cancelled') $order->setCancelledAt($woo->get_date_modified());
+        if ($status === 'cancelled') {
+            $order->setCancelledAt($woo->get_date_modified()->setTimezone(new \DateTimeZone('UTC')));
+        }
 
         // set the total
         $order->setOrderTotal($woo->get_total());

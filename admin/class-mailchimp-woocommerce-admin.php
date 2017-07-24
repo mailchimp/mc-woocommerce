@@ -281,6 +281,8 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 		// tell our reporting system whether or not we had a valid ping.
 		$this->setData('validation.api.ping', $valid);
 
+		$data['active_tab'] = $valid ? 'store_info' : 'api_key';
+
 		if ($valid && isset($profile) && is_array($profile) && array_key_exists('account_id', $profile)) {
 			$data['mailchimp_account_info_id'] = $profile['account_id'];
 			$data['mailchimp_account_info_username'] = $profile['username'];
@@ -316,10 +318,15 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
             }
 
 			$this->setData('validation.store_info', false);
+
+            $data['active_tab'] = 'store_info';
+
 			return array();
 		}
 
 		$this->setData('validation.store_info', true);
+
+        $data['active_tab'] = 'campaign_defaults';
 
 		if ($this->hasValidMailChimpList()) {
 			$this->syncStore(array_merge($this->getOptions(), $data));
@@ -444,10 +451,13 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 
 		if (!$this->hasValidCampaignDefaults($data)) {
 			$this->setData('validation.campaign_defaults', false);
-			return array();
+
+			return array('active_tab' => 'campaign_defaults');
 		}
 
 		$this->setData('validation.campaign_defaults', true);
+
+        $data['active_tab'] = 'newsletter_settings';
 
 		return $data;
 	}
@@ -473,7 +483,7 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 		$data = array(
 			'mailchimp_list' => isset($input['mailchimp_list']) ? $input['mailchimp_list'] : $this->getOption('mailchimp_list', ''),
 			'newsletter_label' => isset($input['newsletter_label']) ? $input['newsletter_label'] : $this->getOption('newsletter_label', 'Subscribe to our newsletter'),
-			'mailchimp_auto_subscribe' => isset($input['mailchimp_auto_subscribe']) ? $input['mailchimp_auto_subscribe'] : $this->getOption('mailchimp_auto_subscribe', '0'),
+			'mailchimp_auto_subscribe' => isset($input['mailchimp_auto_subscribe']) ? (bool) $input['mailchimp_auto_subscribe'] : $this->getOption('mailchimp_auto_subscribe', '0'),
 			'mailchimp_checkbox_defaults' => $checkbox,
 			'mailchimp_checkbox_action' => isset($input['mailchimp_checkbox_action']) ? $input['mailchimp_checkbox_action'] : $this->getOption('mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form'),
 		);
@@ -485,6 +495,8 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 		// as long as we have a list set, and it's currently in MC as a valid list, let's sync the store.
 		if (!empty($data['mailchimp_list']) && $this->api()->hasList($data['mailchimp_list'])) {
 
+            $this->setData('validation.newsletter_settings', true);
+
 			// sync the store with MC
 			$this->syncStore(array_merge($this->getOptions(), $data));
 
@@ -493,9 +505,17 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 				$this->startSync();
 				$this->showSyncStartedMessage();
 			}
+
+            $data['active_tab'] = 'sync';
+
+            return $data;
 		}
 
-		return $data;
+        $this->setData('validation.newsletter_settings', false);
+
+        $data['active_tab'] = 'newsletter_settings';
+
+        return $data;
 	}
 
 	/**

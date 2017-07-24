@@ -412,5 +412,3 @@ add_action('wp_head', 'mailchimp_woocommerce_add_meta_tags');
 
 /** Add all the MailChimp hooks. */
 run_mailchimp_woocommerce();
-
-

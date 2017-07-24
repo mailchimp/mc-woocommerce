@@ -1,17 +1,22 @@
 <?php
 $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'api_key';
+$is_mailchimp_post = isset($_POST['mailchimp_woocommerce_settings_hidden']) && $_POST['mailchimp_woocommerce_settings_hidden'] === 'Y';
 
 $handler = MailChimp_Woocommerce_Admin::connect();
 
 //Grab all options for this particular tab we're viewing.
 $options = get_option($this->plugin_name, array());
 
+if (!isset($_GET['tab']) && isset($options['active_tab'])) {
+    $active_tab = $options['active_tab'];
+}
+
 $show_sync_tab = isset($_GET['resync']) ? $_GET['resync'] === '1' : false;;
 $show_campaign_defaults = true;
 $has_valid_api_key = false;
 $allow_new_list = true;
 
-$clicked_sync_button = isset($_POST['mailchimp_woocommerce_settings_hidden']) && $active_tab == 'sync';
+$clicked_sync_button = $is_mailchimp_post&& $active_tab == 'sync';
 
 if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
     $has_valid_api_key = true;
@@ -25,6 +30,13 @@ if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
     if ((bool) $this->getData('sync.started_at', false)) {
         $show_sync_tab = true;
     }
+}
+
+if (isset($_GET['test_order_id'])) {
+    $order_post = get_post($_GET['test_order_id']);
+    //print_r($order_post);die();
+    $order_transformer = new MailChimp_WooCommerce_Transform_Orders();
+    print_r($order_transformer->transform($order_post)->toArray());die();
 }
 ?>
 

@@ -24,7 +24,7 @@ if (!$handler->hasValidApiKey()) {
             if (!empty($options['store_name']) ) {
                 esc_attr_e('Name', $this->plugin_name);
             } else {
-                esc_attr_e('Name<span style="color:red;">*</span>', $this->plugin_name);
+                esc_attr_e('Name', $this->plugin_name); echo '<span style="color:red;">*</span>';
             }
             ?>
         </span>
@@ -42,7 +42,7 @@ if (!$handler->hasValidApiKey()) {
             if (!empty($options['admin_email']) ) {
                 esc_attr_e('Email', $this->plugin_name);
             } else {
-                esc_attr_e('Email<span style="color:red;">*</span>', $this->plugin_name);
+                esc_attr_e('Email', $this->plugin_name); echo '<span style="color:red;">*</span>';
             }
             ?>
         </span>
@@ -60,7 +60,7 @@ if (!$handler->hasValidApiKey()) {
             if (!empty($options['store_street']) ) {
                 esc_attr_e('Street address', $this->plugin_name);
             } else {
-                esc_attr_e('Street address<span style="color:red;">*</span>', $this->plugin_name);
+                esc_attr_e('Street address', $this->plugin_name); echo '<span style="color:red;">*</span>';
             }
             ?>
         </span>
@@ -78,7 +78,7 @@ if (!$handler->hasValidApiKey()) {
             if (!empty($options['store_city']) ) {
                 esc_attr_e('City', $this->plugin_name);
             } else {
-                esc_attr_e('City<span style="color:red;">*</span>', $this->plugin_name);
+                esc_attr_e('City', $this->plugin_name); echo '<span style="color:red;">*</span>';
             }
             ?>
         </span>
@@ -96,7 +96,7 @@ if (!$handler->hasValidApiKey()) {
             if (!empty($options['store_state']) ) {
                 esc_attr_e('State', $this->plugin_name);
             } else {
-                esc_attr_e('State<span style="color:red;">*</span>', $this->plugin_name);
+                esc_attr_e('State', $this->plugin_name); echo '<span style="color:red;">*</span>';
             }
             ?>
         </span>
@@ -114,7 +114,7 @@ if (!$handler->hasValidApiKey()) {
             if (!empty($options['store_postal_code']) ) {
                 esc_attr_e('Postal Code', $this->plugin_name);
             } else {
-                esc_attr_e('Postal Code<span style="color:red;">*</span>', $this->plugin_name);
+                esc_attr_e('Postal Code', $this->plugin_name); echo '<span style="color:red;">*</span>';
             }
             ?>
         </span>
@@ -132,7 +132,7 @@ if (!$handler->hasValidApiKey()) {
             if (!empty($options['store_country'])) {
                 esc_attr_e('Country', $this->plugin_name);
             } else {
-                esc_attr_e('Country<span style="color:red;">*</span>', $this->plugin_name);
+                esc_attr_e('Country', $this->plugin_name); echo '<span style="color:red;">*</span>';
             }
             ?>
         </span>
@@ -150,7 +150,7 @@ if (!$handler->hasValidApiKey()) {
             if (!empty($options['store_phone']) ) {
                 esc_attr_e('Phone Number', $this->plugin_name);
             } else {
-                esc_attr_e('Phone Number <span style="color:red;">*</span>', $this->plugin_name);
+                esc_attr_e('Phone Number', $this->plugin_name); echo '<span style="color:red;">*</span>';
             }
             ?>
         </span>

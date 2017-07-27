@@ -28,6 +28,7 @@ class MailChimp_WooCommerce_Order
     protected $shipping_address = null;
     protected $billing_address = null;
     protected $lines = array();
+    protected $confirm_and_paid = false;
 
     /**
      * @return array
@@ -360,6 +361,26 @@ class MailChimp_WooCommerce_Order
     }
 
     /**
+     * @param $bool
+     * @param $bool
+     * @return $this
+     */
+    public function confirmAndPay($bool)
+    {
+        $this->confirm_and_paid = (bool) $bool;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function shouldConfirmAndPay()
+    {
+        return $this->confirm_and_paid;
+    }
+
+    /**
      * @param MailChimp_WooCommerce_Address $address
      * @return $this
      */
@@ -376,7 +397,7 @@ class MailChimp_WooCommerce_Order
     public function getShippingAddress()
     {
         if (empty($this->shipping_address)) {
-            $this->shipping_address = new MailChimp_WooCommerce_Address('shipping');
+            $this->shipping_address = new MailChimp_WooCommerce_Address();
         }
         return $this->shipping_address;
     }
@@ -398,7 +419,7 @@ class MailChimp_WooCommerce_Order
     public function getBillingAddress()
     {
         if (empty($this->billing_address)) {
-            $this->billing_address = new MailChimp_WooCommerce_Address('billing');
+            $this->billing_address = new MailChimp_WooCommerce_Address();
         }
         return $this->billing_address;
     }

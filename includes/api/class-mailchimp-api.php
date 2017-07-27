@@ -689,7 +689,16 @@ class MailChimp_WooCommerce_MailChimpApi
             if (!$this->validateStoreSubmission($order)) {
                 return false;
             }
+
+            // submit the first one
             $data = $this->post("ecommerce/stores/$store_id/orders", $order->toArray());
+
+            // if the order is in pending status, we need to submit the order again with a paid status.
+            if ($order->shouldConfirmAndPay() && $order->getFinancialStatus() !== 'paid') {
+                $order->setFinancialStatus('paid');
+                $data = $this->patch("ecommerce/stores/{$store_id}/orders/{$order->getId()}", $order->toArray());
+            }
+
             update_option('mailchimp-woocommerce-resource-last-updated', time());
             $order = new MailChimp_WooCommerce_Order();
             return $order->fromArray($data);
@@ -714,7 +723,14 @@ class MailChimp_WooCommerce_MailChimpApi
                 return false;
             }
             $id = $order->getId();
-            $data = $this->patch("ecommerce/stores/$store_id/orders/$id", $order->toArray());
+            $data = $this->patch("ecommerce/stores/{$store_id}/orders/{$id}", $order->toArray());
+
+            // if the order is in pending status, we need to submit the order again with a paid status.
+            if ($order->shouldConfirmAndPay() && $order->getFinancialStatus() !== 'paid') {
+                $order->setFinancialStatus('paid');
+                $data = $this->patch("ecommerce/stores/{$store_id}/orders/{$id}", $order->toArray());
+            }
+
             $order = new MailChimp_WooCommerce_Order();
             return $order->fromArray($data);
         } catch (\Exception $e) {

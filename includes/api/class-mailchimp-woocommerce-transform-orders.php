@@ -461,7 +461,7 @@ class MailChimp_WooCommerce_Transform_Orders
         return array(
             // Order received (unpaid)
             'pending'       => (object) array(
-                'financial' => 'unpaid',
+                'financial' => 'pending',
                 'fulfillment' => null
             ),
             // Payment received and stock has been reduced – the order is awaiting fulfillment.

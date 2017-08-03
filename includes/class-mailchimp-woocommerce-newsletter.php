@@ -64,7 +64,7 @@ class MailChimp_Newsletter extends MailChimp_Woocommerce_Options
      */
     public function processPayPalNewsletterField($order)
     {
-        $this->handleStatus($order->id);
+        $this->handleStatus($order->get_id());
     }
 
     /**

@@ -67,10 +67,10 @@ class MailChimp_WooCommerce_Single_Product extends WP_Job
 
             return $product;
 
-        } catch (MailChimp_WooCommerce_Error $e) {
-            mailchimp_log('product_submit.error', "addStoreProduct :: MailChimp_WooCommerce_Error :: {$e->getMessage()}");
         } catch (MailChimp_WooCommerce_ServerError $e) {
             mailchimp_log('product_submit.error', "addStoreProduct :: MailChimp_WooCommerce_ServerError :: {$e->getMessage()}");
+        } catch (MailChimp_WooCommerce_Error $e) {
+            mailchimp_log('product_submit.error', "addStoreProduct :: MailChimp_WooCommerce_Error :: {$e->getMessage()}");
         } catch (Exception $e) {
             mailchimp_log('product_submit.error', "addStoreProduct :: Uncaught Exception :: {$e->getMessage()}");
         }

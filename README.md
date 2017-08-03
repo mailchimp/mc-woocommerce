@@ -37,11 +37,11 @@ You can run this new integration at the same time as your current WooCommerce in
 1) Log in to your WordPress admin panel. 
 2) In the left navigation panel, click **Plugins**, and choose **Add New**.
 
-![Add new] (https://cloud.githubusercontent.com/assets/6547700/18677991/a7622bcc-7f28-11e6-8e8c-9bbdfa9861c7.png)
+![Add new](https://cloud.githubusercontent.com/assets/6547700/18677991/a7622bcc-7f28-11e6-8e8c-9bbdfa9861c7.png)
 
 3) Click **Upload Plugin**.
 
-![Upload] (https://cloud.githubusercontent.com/assets/6547700/18677997/a76dab82-7f28-11e6-98e4-4309739cd840.png)
+![Upload](https://cloud.githubusercontent.com/assets/6547700/18677997/a76dab82-7f28-11e6-98e4-4309739cd840.png)
 
 4) Click **Choose File** to select the ZIP file for the plugin, then click **Install Now**.
 

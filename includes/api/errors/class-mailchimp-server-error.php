@@ -8,7 +8,7 @@
  * Date: 6/18/15
  * Time: 11:13 AM
  */
-class MailChimp_WooCommerce_ServerError extends \Exception
+class MailChimp_WooCommerce_ServerError extends MailChimp_WooCommerce_Error
 {
 
 }

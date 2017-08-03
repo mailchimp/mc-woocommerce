@@ -18,8 +18,16 @@ if (!$handler->hasValidApiKey()) {
         <span>Store Name</span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-name-label">
-        <input style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-name-label" name="<?php echo $this->plugin_name; ?>[store_name]" value="<?php echo isset($options['store_name']) ? $options['store_name'] : get_option('blogname') ?>" />
-        <span><?php esc_attr_e('Name', $this->plugin_name); ?></span>
+        <input required style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-name-label" name="<?php echo $this->plugin_name; ?>[store_name]" value="<?php echo isset($options['store_name']) ? $options['store_name'] : get_option('blogname') ?>" />
+        <span>
+            <?php
+            if (!empty($options['store_name']) ) {
+                esc_attr_e('Name', $this->plugin_name);
+            } else {
+                esc_attr_e('Name', $this->plugin_name); echo '<span style="color:red;">*</span>';
+            }
+            ?>
+        </span>
     </label>
 </fieldset>
 
@@ -28,8 +36,16 @@ if (!$handler->hasValidApiKey()) {
         <span>Email</span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-admin-email-label">
-        <input style="width: 30%;" type="email" id="<?php echo $this->plugin_name; ?>-admin-email-label" name="<?php echo $this->plugin_name; ?>[admin_email]" value="<?php echo isset($options['admin_email']) ? $options['admin_email'] : get_option('admin_email') ?>" />
-        <span><?php esc_attr_e('Email', $this->plugin_name); ?></span>
+        <input required style="width: 30%;" type="email" id="<?php echo $this->plugin_name; ?>-admin-email-label" name="<?php echo $this->plugin_name; ?>[admin_email]" value="<?php echo isset($options['admin_email']) ? $options['admin_email'] : get_option('admin_email') ?>" />
+        <span>
+            <?php
+            if (!empty($options['admin_email']) ) {
+                esc_attr_e('Email', $this->plugin_name);
+            } else {
+                esc_attr_e('Email', $this->plugin_name); echo '<span style="color:red;">*</span>';
+            }
+            ?>
+        </span>
     </label>
 </fieldset>
 
@@ -38,8 +54,16 @@ if (!$handler->hasValidApiKey()) {
         <span>Street Address</span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-address-label">
-        <input style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-address-label" name="<?php echo $this->plugin_name; ?>[store_street]" value="<?php echo isset($options['store_street']) ? $options['store_street'] : '' ?>" />
-        <span><?php esc_attr_e('Street address', $this->plugin_name); ?></span>
+        <input required style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-address-label" name="<?php echo $this->plugin_name; ?>[store_street]" value="<?php echo isset($options['store_street']) ? $options['store_street'] : '' ?>" />
+        <span>
+            <?php
+            if (!empty($options['store_street']) ) {
+                esc_attr_e('Street address', $this->plugin_name);
+            } else {
+                esc_attr_e('Street address', $this->plugin_name); echo '<span style="color:red;">*</span>';
+            }
+            ?>
+        </span>
     </label>
 </fieldset>
 
@@ -48,8 +72,16 @@ if (!$handler->hasValidApiKey()) {
         <span>City</span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-city-label">
-        <input style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-city-label" name="<?php echo $this->plugin_name; ?>[store_city]" value="<?php echo isset($options['store_city']) ? $options['store_city'] : '' ?>" />
-        <span><?php esc_attr_e('City', $this->plugin_name); ?></span>
+        <input required style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-city-label" name="<?php echo $this->plugin_name; ?>[store_city]" value="<?php echo isset($options['store_city']) ? $options['store_city'] : '' ?>" />
+        <span>
+            <?php
+            if (!empty($options['store_city']) ) {
+                esc_attr_e('City', $this->plugin_name);
+            } else {
+                esc_attr_e('City', $this->plugin_name); echo '<span style="color:red;">*</span>';
+            }
+            ?>
+        </span>
     </label>
 </fieldset>
 
@@ -58,8 +90,16 @@ if (!$handler->hasValidApiKey()) {
         <span>State</span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-state-label">
-        <input style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-state-label" name="<?php echo $this->plugin_name; ?>[store_state]" value="<?php echo isset($options['store_state']) ? $options['store_state'] : '' ?>" />
-        <span><?php esc_attr_e('State', $this->plugin_name); ?></span>
+        <input required style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-state-label" name="<?php echo $this->plugin_name; ?>[store_state]" value="<?php echo isset($options['store_state']) ? $options['store_state'] : '' ?>" />
+        <span>
+            <?php
+            if (!empty($options['store_state']) ) {
+                esc_attr_e('State', $this->plugin_name);
+            } else {
+                esc_attr_e('State', $this->plugin_name); echo '<span style="color:red;">*</span>';
+            }
+            ?>
+        </span>
     </label>
 </fieldset>
 
@@ -68,8 +108,16 @@ if (!$handler->hasValidApiKey()) {
         <span>Postal Code</span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-state-label">
-        <input style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-postal-code-label" name="<?php echo $this->plugin_name; ?>[store_postal_code]" value="<?php echo isset($options['store_postal_code']) ? $options['store_postal_code'] : '' ?>" />
-        <span><?php esc_attr_e('Postal Code', $this->plugin_name); ?></span>
+        <input required style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-postal-code-label" name="<?php echo $this->plugin_name; ?>[store_postal_code]" value="<?php echo isset($options['store_postal_code']) ? $options['store_postal_code'] : '' ?>" />
+        <span>
+            <?php
+            if (!empty($options['store_postal_code']) ) {
+                esc_attr_e('Postal Code', $this->plugin_name);
+            } else {
+                esc_attr_e('Postal Code', $this->plugin_name); echo '<span style="color:red;">*</span>';
+            }
+            ?>
+        </span>
     </label>
 </fieldset>
 
@@ -78,8 +126,16 @@ if (!$handler->hasValidApiKey()) {
         <span>Country</span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-country-label">
-        <input style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-country-label" name="<?php echo $this->plugin_name; ?>[store_country]" value="<?php echo isset($options['store_country']) ? $options['store_country'] : 'US' ?>" />
-        <span><?php esc_attr_e('Country', $this->plugin_name); ?></span>
+        <input required style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-country-label" name="<?php echo $this->plugin_name; ?>[store_country]" value="<?php echo isset($options['store_country']) ? $options['store_country'] : 'US' ?>" />
+        <span>
+            <?php
+            if (!empty($options['store_country'])) {
+                esc_attr_e('Country', $this->plugin_name);
+            } else {
+                esc_attr_e('Country', $this->plugin_name); echo '<span style="color:red;">*</span>';
+            }
+            ?>
+        </span>
     </label>
 </fieldset>
 
@@ -88,8 +144,16 @@ if (!$handler->hasValidApiKey()) {
         <span>Phone</span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-phone-label">
-        <input style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-phone-label" name="<?php echo $this->plugin_name; ?>[store_phone]" value="<?php echo isset($options['store_phone']) ? $options['store_phone'] : '' ?>" />
-        <span><?php esc_attr_e('Phone Number', $this->plugin_name); ?></span>
+        <input required style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-phone-label" name="<?php echo $this->plugin_name; ?>[store_phone]" value="<?php echo isset($options['store_phone']) ? $options['store_phone'] : '' ?>" />
+        <span>
+            <?php
+            if (!empty($options['store_phone']) ) {
+                esc_attr_e('Phone Number', $this->plugin_name);
+            } else {
+                esc_attr_e('Phone Number', $this->plugin_name); echo '<span style="color:red;">*</span>';
+            }
+            ?>
+        </span>
     </label>
 </fieldset>
 

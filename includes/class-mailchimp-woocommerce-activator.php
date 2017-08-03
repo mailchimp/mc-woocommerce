@@ -33,6 +33,9 @@ class MailChimp_Woocommerce_Activator {
 
 		// add a store id flag which will be a random hash
 		update_option('mailchimp-woocommerce-store_id', md5(get_option('siteurl')), 'yes');
+
+		// try this now for existing stores on an update.
+        mailchimp_update_connected_site_script();
 	}
 
 	/**

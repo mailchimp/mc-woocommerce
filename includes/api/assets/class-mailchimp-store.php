@@ -23,6 +23,7 @@ class MailChimp_WooCommerce_Store
     protected $phone = null;
     protected $address = null;
     protected $platform = null;
+    protected $connected_site = null;
 
     /**
      * @return array
@@ -293,6 +294,49 @@ class MailChimp_WooCommerce_Store
     }
 
     /**
+     * @return null|string
+     */
+    public function getConnectedSiteForeignID()
+    {
+        return $this->getConnectedSiteParam('site_foreign_id');
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getConnectedSiteScriptUrl()
+    {
+        if (($script = $this->getConnectedSiteParam('site_script'))) {
+            return $script['url'];
+        }
+        return false;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getConnectedSiteScriptFragment()
+    {
+        if (($script = $this->getConnectedSiteParam('site_script'))) {
+            return $script['fragment'];
+        }
+        return false;
+    }
+
+    /**
+     * @param $key
+     * @param null $default
+     * @return null
+     */
+    public function getConnectedSiteParam($key, $default = null)
+    {
+        if (empty($this->connected_site)) {
+            return $default;
+        }
+        return array_key_exists($key, $this->connected_site) ? $this->connected_site[$key] : null;
+    }
+
+    /**
      * @return array
      */
     public function toArray()
@@ -335,6 +379,10 @@ class MailChimp_WooCommerce_Store
         if (array_key_exists('address', $data)) {
             $address = new MailChimp_WooCommerce_Address();
             $this->address = $address->fromArray($data['address']);
+        }
+
+        if (array_key_exists('connected_site', $data)) {
+            $this->connected_site = $data['connected_site'];
         }
 
         return $this;

@@ -58,14 +58,14 @@ class MailChimp_WooCommerce_Transform_Orders
 
         $order = new MailChimp_WooCommerce_Order();
 
-        $order->setId($woo->get_id());
+        $order->setId($woo->get_order_number());
 
         // if we have a campaign id let's set it now.
         if (!empty($this->campaign_id)) {
             $order->setCampaignId($this->campaign_id);
         }
 
-        $order->setProcessedAt($woo->get_date_created());
+        $order->setProcessedAt($woo->get_date_created()->setTimezone(new \DateTimeZone('UTC')));
 
         $order->setCurrencyCode($woo->get_currency());
 
@@ -85,8 +85,15 @@ class MailChimp_WooCommerce_Transform_Orders
         // set the financial status
         $order->setFinancialStatus($financial_status);
 
+        // if the status is processing, we need to send this one first, then send a 'paid' status right after.
+        if ($status === 'processing') {
+            $order->confirmAndPay(true);
+        }
+
         // only set this if the order is cancelled.
-        if ($status === 'cancelled') $order->setCancelledAt($woo->get_date_modified());
+        if ($status === 'cancelled') {
+            $order->setCancelledAt($woo->get_date_modified()->setTimezone(new \DateTimeZone('UTC')));
+        }
 
         // set the total
         $order->setOrderTotal($woo->get_total());
@@ -328,7 +335,7 @@ class MailChimp_WooCommerce_Transform_Orders
             // Payment received and stock has been reduced – the order is awaiting fulfillment.
             // All product orders require processing, except those for digital downloads
             'processing'    => (object) array(
-                'financial' => 'processing',
+                'financial' => 'pending',
                 'fulfillment' => null
             ),
             // Awaiting payment – stock is reduced, but you need to confirm payment

@@ -1,3 +1,15 @@
+** 2.0.1 **
+
+##### New Features: #####
+* MC.js support added.
+* Added pop-up forms to the site details page with a warning to upgrade to 2.0.1 before using them.
+
+##### Fixes: #####
+* Adding physical address as a required field for store setup, since this is also a field required by MailChimp.
+* Order/carts timestamps now pass over as UTC.
+* Improved handling of Order Notification and sending Order Invoice and Order Confirmation simultaneously when order is moved to “Processing” in Woocommerce.
+* Tabs paginating on store set up, moving the user through each step automatically.
+
 ** 2.0 ** 
 * Support WooComerce 3.0 
 * Support for manually uploaded WooCommerce plugin

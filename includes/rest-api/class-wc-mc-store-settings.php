@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * @package WooCommerce/API
  */
-class WC_REST_MC_Store_Settings_Controllerr extends WC_REST_Payment_Gateways_Controller {
+class WC_REST_MC_Store_Settings_Controller extends WC_REST_Payment_Gateways_Controller {
 
 	/**
 	 * Endpoint namespace.

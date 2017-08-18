@@ -189,6 +189,9 @@ class MailChimp_Woocommerce {
 		require_once $path . 'includes/api/errors/class-mailchimp-error.php';
 		require_once $path . 'includes/api/errors/class-mailchimp-server-error.php';
 
+		/** Require all the rest-api mailchimp classes */
+		require_once $path . 'includes/rest-api/class-wc-mailchimp-rest-api.php';
+
 		/** Require the various helper scripts */
 		require_once $path . 'includes/api/helpers/class-mailchimp-woocommerce-api-currency-codes.php';
 		require_once $path . 'includes/api/helpers/class-mailchimp-woocommerce-api-locales.php';

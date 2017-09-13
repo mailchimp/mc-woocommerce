@@ -81,6 +81,12 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
             return false;
         }
 
+        // don't let recursion happen.
+        if ($this->getResourceType() === 'orders' && $this->getResourceCompleteTime()) {
+            mailchimp_log('sync.stop', "halting the sync for :: {$this->getResourceType()}");
+            return false;
+        }
+
         $page = $this->getResources();
 
         if (empty($page)) {
@@ -261,7 +267,13 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
         $time = $this->getData('sync.'.$resource.'.completed_at', false);
 
         if ($time > 0) {
-            return new \DateTime($time);
+            try {
+                $date = new \DateTime();
+                $date->setTimestamp($time);
+                return $date;
+            } catch (\Exception $e) {
+                return false;
+            }
         }
 
         return false;

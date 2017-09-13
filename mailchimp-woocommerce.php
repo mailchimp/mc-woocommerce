@@ -16,7 +16,7 @@
  * Plugin Name:       MailChimp for WooCommerce
  * Plugin URI:        https://mailchimp.com/connect-your-store/
  * Description:       MailChimp - WooCommerce plugin
- * Version:           2.0.1
+ * Version:           2.0.2
  * Author:            MailChimp
  * Author URI:        https://mailchimp.com
  * License:           GPL-2.0+
@@ -29,33 +29,44 @@
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
-	die;
+    die;
 }
 
 /**
  * @return object
  */
 function mailchimp_environment_variables() {
-	return require 'env.php';
+    global $wp_version;
+
+    $o = get_option('mailchimp-woocommerce', false);
+
+    return (object) array(
+        'repo' => 'master',
+        'environment' => 'production',
+        'version' => '2.0.2',
+        'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
+        'wc_version' => class_exists('WC') ? WC()->version : null,
+        'logging' => ($o && is_array($o) && isset($o['mailchimp_logging'])) ? $o['mailchimp_logging'] : 'none',
+    );
 }
 
 /**
  * @return bool|int
  */
 function mailchimp_get_list_id() {
-	if (($options = get_option('mailchimp-woocommerce', false)) && is_array($options)) {
-		if (isset($options['mailchimp_list'])) {
-			return $options['mailchimp_list'];
-		}
-	}
-	return false;
+    if (($options = get_option('mailchimp-woocommerce', false)) && is_array($options)) {
+        if (isset($options['mailchimp_list'])) {
+            return $options['mailchimp_list'];
+        }
+    }
+    return false;
 }
 
 /**
  * @return string
  */
 function mailchimp_get_store_id() {
-	$store_id = mailchimp_get_data('store_id', false);
+    $store_id = mailchimp_get_data('store_id', false);
     if (empty($store_id)) {
         // this is for the previous installs that had been applying the MC store id as the siteurl.
         // patched to the random hash because people were changing this value for various reasons.
@@ -69,12 +80,12 @@ function mailchimp_get_store_id() {
  * @return bool|MailChimp_WooCommerce_MailChimpApi
  */
 function mailchimp_get_api() {
-	if (($options = get_option('mailchimp-woocommerce', false)) && is_array($options)) {
-		if (isset($options['mailchimp_api_key'])) {
-			return new MailChimp_WooCommerce_MailChimpApi($options['mailchimp_api_key']);
-		}
-	}
-	return false;
+    if (($options = get_option('mailchimp-woocommerce', false)) && is_array($options)) {
+        if (isset($options['mailchimp_api_key'])) {
+            return new MailChimp_WooCommerce_MailChimpApi($options['mailchimp_api_key']);
+        }
+    }
+    return false;
 }
 
 /**
@@ -83,14 +94,14 @@ function mailchimp_get_api() {
  * @return null
  */
 function mailchimp_get_option($key, $default = null) {
-	$options = get_option('mailchimp-woocommerce');
-	if (!is_array($options)) {
-		return $default;
-	}
-	if (!array_key_exists($key, $options)) {
-		return $default;
-	}
-	return $options[$key];
+    $options = get_option('mailchimp-woocommerce');
+    if (!is_array($options)) {
+        return $default;
+    }
+    if (!array_key_exists($key, $options)) {
+        return $default;
+    }
+    return $options[$key];
 }
 
 /**
@@ -99,7 +110,7 @@ function mailchimp_get_option($key, $default = null) {
  * @return mixed
  */
 function mailchimp_get_data($key, $default = null) {
-	return get_option('mailchimp-woocommerce-'.$key, $default);
+    return get_option('mailchimp-woocommerce-'.$key, $default);
 }
 
 /**
@@ -117,18 +128,17 @@ function mailchimp_set_data($key, $value, $autoload = 'yes') {
  * @return DateTime
  */
 function mailchimp_date_utc($date) {
-	$timezone = wc_timezone_string();
-	//$timezone = mailchimp_get_option('store_timezone', 'America/New_York');
-	if (is_numeric($date)) {
-		$stamp = $date;
-		$date = new \DateTime('now', new DateTimeZone($timezone));
-		$date->setTimestamp($stamp);
-	} else {
-		$date = new \DateTime($date, new DateTimeZone($timezone));
-	}
+    $timezone = wc_timezone_string();
+    if (is_numeric($date)) {
+        $stamp = $date;
+        $date = new \DateTime('now', new DateTimeZone($timezone));
+        $date->setTimestamp($stamp);
+    } else {
+        $date = new \DateTime($date, new DateTimeZone($timezone));
+    }
 
-	$date->setTimezone(new DateTimeZone('UTC'));
-	return $date;
+    $date->setTimezone(new DateTimeZone('UTC'));
+    return $date;
 }
 
 /**
@@ -137,13 +147,13 @@ function mailchimp_date_utc($date) {
  */
 function mailchimp_date_local($date) {
     $timezone = mailchimp_get_option('store_timezone', 'America/New_York');
-	if (is_numeric($date)) {
-		$stamp = $date;
-		$date = new \DateTime('now', new DateTimeZone('UTC'));
-		$date->setTimestamp($stamp);
-	} else {
-		$date = new \DateTime($date, new DateTimeZone('UTC'));
-	}
+    if (is_numeric($date)) {
+        $stamp = $date;
+        $date = new \DateTime('now', new DateTimeZone('UTC'));
+        $date->setTimestamp($stamp);
+    } else {
+        $date = new \DateTime($date, new DateTimeZone('UTC'));
+    }
 
     $date->setTimezone(new DateTimeZone($timezone));
     return $date;
@@ -154,52 +164,51 @@ function mailchimp_date_local($date) {
  * @return mixed
  */
 function mailchimp_array_remove_empty($data) {
-	if (empty($data) || !is_array($data)) {
-		return array();
-	}
-	foreach ($data as $key => $value) {
-		if ($value === null || $value === '') {
-			unset($data[$key]);
-		}
-	}
-	return $data;
+    if (empty($data) || !is_array($data)) {
+        return array();
+    }
+    foreach ($data as $key => $value) {
+        if ($value === null || $value === '') {
+            unset($data[$key]);
+        }
+    }
+    return $data;
 }
 
 /**
  * @return array
  */
 function mailchimp_get_timezone_list() {
-	$zones_array = array();
-	$timestamp = time();
-	$current = date_default_timezone_get();
+    $zones_array = array();
+    $timestamp = time();
+    $current = date_default_timezone_get();
 
-	foreach(timezone_identifiers_list() as $key => $zone) {
-		date_default_timezone_set($zone);
-		$zones_array[$key]['zone'] = $zone;
-		$zones_array[$key]['diff_from_GMT'] = 'UTC/GMT ' . date('P', $timestamp);
-	}
+    foreach(timezone_identifiers_list() as $key => $zone) {
+        date_default_timezone_set($zone);
+        $zones_array[$key]['zone'] = $zone;
+        $zones_array[$key]['diff_from_GMT'] = 'UTC/GMT ' . date('P', $timestamp);
+    }
 
-	date_default_timezone_set($current);
+    date_default_timezone_set($current);
 
-	return $zones_array;
+    return $zones_array;
 }
 
 /**
  * The code that runs during plugin activation.
  * This action is documented in includes/class-mailchimp-woocommerce-activator.php
  */
-function activate_mailchimp_woocommerce()
-{
-	// if we don't have woocommerce we need to display a horrible error message before the plugin is installed.
-	if (!is_plugin_active('woocommerce/woocommerce.php')) {
+function activate_mailchimp_woocommerce() {
+    // if we don't have woocommerce we need to display a horrible error message before the plugin is installed.
+    if (!is_plugin_active('woocommerce/woocommerce.php')) {
 
-	    $active = false;
+        $active = false;
 
-	    // some people may have uploaded a specific version of woo, so we need a fallback checker here.
-	    foreach (array_keys(get_plugins()) as $plugin) {
-	        if (mailchimp_string_contains($plugin, 'woocommerce.php')) {
-	            $active = true;
-	            break;
+        // some people may have uploaded a specific version of woo, so we need a fallback checker here.
+        foreach (array_keys(get_plugins()) as $plugin) {
+            if (mailchimp_string_contains($plugin, 'woocommerce.php')) {
+                $active = true;
+                break;
             }
         }
 
@@ -209,21 +218,20 @@ function activate_mailchimp_woocommerce()
             $error_message = __('The MailChimp For WooCommerce plugin requires the <a href="http://wordpress.org/extend/plugins/woocommerce/">WooCommerce</a> plugin to be active!', 'woocommerce');
             wp_die($error_message);
         }
-	}
+    }
 
-	// ok we can activate this thing.
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-mailchimp-woocommerce-activator.php';
+    // ok we can activate this thing.
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-mailchimp-woocommerce-activator.php';
 
-	MailChimp_Woocommerce_Activator::activate();
+    MailChimp_Woocommerce_Activator::activate();
 }
 
 /**
  * Create the queue tables
  */
-function install_mailchimp_queue()
-{
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-mailchimp-woocommerce-activator.php';
-	MailChimp_Woocommerce_Activator::create_queue_tables();
+function install_mailchimp_queue() {
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-mailchimp-woocommerce-activator.php';
+    MailChimp_Woocommerce_Activator::create_queue_tables();
 }
 
 /**
@@ -231,14 +239,19 @@ function install_mailchimp_queue()
  * This action is documented in includes/class-mailchimp-woocommerce-deactivator.php
  */
 function deactivate_mailchimp_woocommerce() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-mailchimp-woocommerce-deactivator.php';
-	MailChimp_Woocommerce_Deactivator::deactivate();
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-mailchimp-woocommerce-deactivator.php';
+    MailChimp_Woocommerce_Deactivator::deactivate();
 }
 
-function mailchimp_debug($action, $message, $data = null)
-{
-    if (defined('WP_CLI') && WP_CLI) {
-        WP_CLI::debug(print_r(array('message' => $message, 'data' => $data), true));
+/**
+ * @param $action
+ * @param $message
+ * @param null $data
+ */
+function mailchimp_debug($action, $message, $data = null) {
+    if (mailchimp_environment_variables()->logging === 'debug') {
+        if (is_array($data) && !empty($data)) $message .= " :: ".wc_print_r($data, true);
+        wc_get_logger()->debug("{$action} :: {$message}", array('source' => 'mailchimp_woocommerce'));
     }
 }
 
@@ -248,17 +261,10 @@ function mailchimp_debug($action, $message, $data = null)
  * @param array $data
  * @return array|WP_Error
  */
-function mailchimp_log($action, $message, $data = array())
-{
-    $options = MailChimp_Woocommerce::getLoggingConfig();
-
-	if (!$options->enable_logging || !$options->account_id || !$options->username) {
-		return false;
-	}
-
-    if (defined('WP_CLI') && WP_CLI) {
-        WP_CLI::log(print_r(array('message' => $message, 'data' => $data), true));
-        return null;
+function mailchimp_log($action, $message, $data = array()) {
+    if (mailchimp_environment_variables()->logging !== 'none') {
+        if (is_array($data) && !empty($data)) $message .= " :: ".wc_print_r($data, true);
+        wc_get_logger()->notice("{$action} :: {$message}", array('source' => 'mailchimp_woocommerce'));
     }
 }
 
@@ -269,15 +275,14 @@ function mailchimp_log($action, $message, $data = array())
  * @param  string|array  $needles
  * @return bool
  */
-function mailchimp_string_contains($haystack, $needles)
-{
-	foreach ((array) $needles as $needle) {
-		if ($needle != '' && mb_strpos($haystack, $needle) !== false) {
-			return true;
-		}
-	}
+function mailchimp_string_contains($haystack, $needles) {
+    foreach ((array) $needles as $needle) {
+        if ($needle != '' && mb_strpos($haystack, $needle) !== false) {
+            return true;
+        }
+    }
 
-	return false;
+    return false;
 }
 
 
@@ -285,26 +290,26 @@ function mailchimp_string_contains($haystack, $needles)
  * @return int
  */
 function mailchimp_get_product_count() {
-	$posts = mailchimp_count_posts('product');
+    $posts = mailchimp_count_posts('product');
     unset($posts['auto-draft'], $posts['trash']);
-	$total = 0;
-	foreach ($posts as $status => $count) {
-		$total += $count;
-	}
-	return $total;
+    $total = 0;
+    foreach ($posts as $status => $count) {
+        $total += $count;
+    }
+    return $total;
 }
 
 /**
  * @return int
  */
 function mailchimp_get_order_count() {
-	$posts = mailchimp_count_posts('shop_order');
-	unset($posts['auto-draft'], $posts['trash']);
-	$total = 0;
-	foreach ($posts as $status => $count) {
-		$total += $count;
-	}
-	return $total;
+    $posts = mailchimp_count_posts('shop_order');
+    unset($posts['auto-draft'], $posts['trash']);
+    $total = 0;
+    foreach ($posts as $status => $count) {
+        $total += $count;
+    }
+    return $total;
 }
 
 /**
@@ -312,14 +317,14 @@ function mailchimp_get_order_count() {
  * @return array|null|object
  */
 function mailchimp_count_posts($type) {
-	global $wpdb;
-	$query = "SELECT post_status, COUNT( * ) AS num_posts FROM {$wpdb->posts} WHERE post_type = %s GROUP BY post_status";
-	$posts = $wpdb->get_results( $wpdb->prepare($query, $type));
-	$response = array();
-	foreach ($posts as $post) {
-		$response[$post->post_status] = $post->num_posts;
-	}
-	return $response;
+    global $wpdb;
+    $query = "SELECT post_status, COUNT( * ) AS num_posts FROM {$wpdb->posts} WHERE post_type = %s GROUP BY post_status";
+    $posts = $wpdb->get_results( $wpdb->prepare($query, $type));
+    $response = array();
+    foreach ($posts as $post) {
+        $response[$post->post_status] = $post->num_posts;
+    }
+    return $response;
 }
 
 /**
@@ -394,14 +399,14 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-mailchimp-woocommerce.php'
  * @since    1.0.0
  */
 function run_mailchimp_woocommerce() {
-	$env = mailchimp_environment_variables();
-	$plugin = new MailChimp_Woocommerce($env->environment, $env->version);
-	$plugin->run();
+    $env = mailchimp_environment_variables();
+    $plugin = new MailChimp_Woocommerce($env->environment, $env->version);
+    $plugin->run();
 }
 
 if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-	$forwarded_address = explode(',',$_SERVER['HTTP_X_FORWARDED_FOR']);
-	$_SERVER['REMOTE_ADDR'] = $forwarded_address[0];
+    $forwarded_address = explode(',',$_SERVER['HTTP_X_FORWARDED_FOR']);
+    $_SERVER['REMOTE_ADDR'] = $forwarded_address[0];
 }
 
 function mailchimp_woocommerce_add_meta_tags() {

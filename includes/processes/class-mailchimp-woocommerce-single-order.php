@@ -16,6 +16,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
     public $landing_site;
     public $is_update = false;
     public $partially_refunded = false;
+    protected $woo_order_number = false;
 
     /**
      * MailChimp_WooCommerce_Single_Order constructor.
@@ -43,15 +44,15 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
     public function process()
     {
-        if (empty($this->order_id)) {
-            return false;
-        }
-
         $options = get_option('mailchimp-woocommerce', array());
         $store_id = mailchimp_get_store_id();
 
         // only if we have the right parameters to do the work
         if (!empty($store_id) && is_array($options) && isset($options['mailchimp_api_key'])) {
+
+            if (!($woo_order_number = $this->getRealOrderNumber())) {
+                return false;
+            }
 
             $job = new MailChimp_WooCommerce_Transform_Orders();
             $api = new MailChimp_WooCommerce_MailChimpApi($options['mailchimp_api_key']);
@@ -59,7 +60,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
             // set the campaign ID
             $job->campaign_id = $this->campaign_id;
 
-            $call = ($api_response = $api->getStoreOrder($store_id, $this->order_id)) ? 'updateStoreOrder' : 'addStoreOrder';
+            $call = ($api_response = $api->getStoreOrder($store_id, $woo_order_number)) ? 'updateStoreOrder' : 'addStoreOrder';
 
             if ($call === 'addStoreOrder' && $this->is_update === true) {
                 return false;
@@ -82,6 +83,8 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
                 // transform the order
                 $order = $job->transform($order_post);
+
+                mailchimp_debug('order_submit', "#{$woo_order_number}", $order->toArray());
 
                 // if we're overriding this we need to set it here.
                 if ($this->partially_refunded) {
@@ -110,21 +113,21 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
                 }
 
-                mailchimp_log('order_submit.submitting', $log);
-
                 // update or create
                 $api_response = $api->$call($store_id, $order, false);
 
                 if (empty($api_response)) {
+                    mailchimp_log('order_submit.failure', "$call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()} produced a blank response from MailChimp");
                     return $api_response;
                 }
-
-                mailchimp_log('order_submit.success', $log);
 
                 // if we're adding a new order and the session id is here, we need to delete the AC cart record.
                 if (!empty($this->cart_session_id)) {
                     $api->deleteCartByID($store_id, $this->cart_session_id);
+                    $log .= " :: abandoned cart deleted [{$this->cart_session_id}]";
                 }
+
+                mailchimp_log('order_submit.success', $log);
 
                 return $api_response;
 
@@ -174,6 +177,24 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
         }
 
         return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getRealOrderNumber()
+    {
+        try {
+            if (empty($this->order_id) || !($order_post = get_post($this->order_id))) {
+                return false;
+            }
+            $woo = new WC_Order($order_post);
+            return $this->woo_order_number = $woo->get_order_number();
+        } catch (\Exception $e) {
+            $this->woo_order_number = false;
+            mailchimp_log('order_sync.failure', "{$this->order_id} could not be loaded {$e->getMessage()}");
+            return false;
+        }
     }
 }
 

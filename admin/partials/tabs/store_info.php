@@ -211,3 +211,5 @@ if (!$handler->hasValidApiKey()) {
         <span><?php esc_attr_e('Timezone', $this->plugin_name); ?></span>
     </label>
 </fieldset>
+
+

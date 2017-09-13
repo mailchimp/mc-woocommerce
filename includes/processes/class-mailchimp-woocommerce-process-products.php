@@ -41,6 +41,8 @@ class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abtst
 
         if ($item instanceof MailChimp_WooCommerce_Product) {
 
+            mailchimp_debug('product_sync', "#{$item->getId()}", $item->toArray());
+
             // need to run the delete option on this before submitting because the API does not support PATCH yet.
             $this->mailchimp()->deleteStoreProduct($this->store_id, $item->getId());
 
@@ -49,16 +51,16 @@ class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abtst
                 // make the call
                 $response = $this->mailchimp()->addStoreProduct($this->store_id, $item, false);
 
-                mailchimp_log('sync.products.success', "addStoreProduct :: #{$response->getId()}");
+                mailchimp_log('product_sync.success', "addStoreProduct :: #{$response->getId()}");
 
                 return $response;
 
             } catch (MailChimp_WooCommerce_ServerError $e) {
-                mailchimp_log('sync.products.error', "addStoreProduct :: MailChimp_WooCommerce_ServerError :: {$e->getMessage()}");
+                mailchimp_log('product_sync.error', "addStoreProduct :: {$item->getId()} :: MailChimp_WooCommerce_ServerError :: {$e->getMessage()}");
             } catch (MailChimp_WooCommerce_Error $e) {
-                mailchimp_log('sync.products.error', "addStoreProduct :: MailChimp_WooCommerce_Error :: {$e->getMessage()}");
+                mailchimp_log('product_sync.error', "addStoreProduct :: {$item->getId()} :: MailChimp_WooCommerce_Error :: {$e->getMessage()}");
             } catch (Exception $e) {
-                mailchimp_log('sync.products.error', "addStoreProduct :: Uncaught Exception :: {$e->getMessage()}");
+                mailchimp_log('product_sync.error', "addStoreProduct :: {$item->getId()} :: Uncaught Exception :: {$e->getMessage()}");
             }
         }
 
@@ -70,7 +72,7 @@ class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abtst
      */
     protected function complete()
     {
-        mailchimp_log('sync.products.completed', 'Done with the product sync :: queuing up the orders next!');
+        mailchimp_log('product_sync.completed', 'Done with the product sync :: queuing up the orders next!');
 
         // add a timestamp for the product sync completion
         $this->setResourceCompleteTime();

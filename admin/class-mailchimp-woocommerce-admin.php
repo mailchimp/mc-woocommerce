@@ -243,10 +243,26 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 				break;
 
 			case 'sync':
-				$this->startSync();
-				$this->showSyncStartedMessage();
+                // remove all the pointers to be sure
+                $service = new MailChimp_Service();
+                $service->removePointers(true, true);
+
+                $this->startSync();
+                $this->showSyncStartedMessage();
                 $this->setData('sync.config.resync', true);
 				break;
+
+            case 'logs':
+
+                if (isset($_POST['mc_action']) && in_array($_POST['mc_action'], array('view_log', 'remove_log'))) {
+                    wp_redirect('options-general.php?page=mailchimp-woocommerce&tab=logs');
+                    exit();
+                }
+
+                $data = array(
+                    'mailchimp_logging' => isset($input['mailchimp_logging']) ? $input['mailchimp_logging'] : 'none',
+                );
+                break;
 		}
 
 		return (isset($data) && is_array($data)) ? array_merge($this->getOptions(), $data) : $this->getOptions();
@@ -486,7 +502,7 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 			'mailchimp_auto_subscribe' => isset($input['mailchimp_auto_subscribe']) ? (bool) $input['mailchimp_auto_subscribe'] : $this->getOption('mailchimp_auto_subscribe', '0'),
 			'mailchimp_checkbox_defaults' => $checkbox,
 			'mailchimp_checkbox_action' => isset($input['mailchimp_checkbox_action']) ? $input['mailchimp_checkbox_action'] : $this->getOption('mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form'),
-		);
+        );
 
 		if ($data['mailchimp_list'] === 'create_new') {
 			$data['mailchimp_list'] = $this->createMailChimpList(array_merge($this->getOptions(), $data));
@@ -870,7 +886,7 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 	{
 		$job = new MailChimp_WooCommerce_Process_Products();
 		$job->flagStartSync();
-		wp_queue($job, 10);
+		wp_queue($job);
 	}
 
 	/**

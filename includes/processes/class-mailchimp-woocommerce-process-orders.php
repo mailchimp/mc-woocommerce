@@ -35,46 +35,50 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abtstra
 
             // since we're syncing the customer for the first time, this is where we need to add the override
             // for subscriber status. We don't get the checkbox until this plugin is actually installed and working!
-
-            if ((bool) $this->getOption('mailchimp_auto_subscribe', true)) {
-                $item->getCustomer()->setOptInStatus(true);
+            if (!($status = $item->getCustomer()->getOptInStatus())) {
+                try {
+                    $subscriber = $this->mailchimp()->member(mailchimp_get_list_id(), $item->getCustomer()->getEmailAddress());
+                    $status = $subscriber['status'] !== 'unsubscribed';
+                } catch (\Exception $e) {
+                    $status = (bool) $this->getOption('mailchimp_auto_subscribe', true);
+                }
+                $item->getCustomer()->setOptInStatus($status);
             }
+
+            mailchimp_debug('order_sync', "#{$item->getId()}", $item->toArray());
 
             $type = $this->mailchimp()->getStoreOrder($this->store_id, $item->getId()) ? 'update' : 'create';
             $call = $type === 'create' ? 'addStoreOrder' : 'updateStoreOrder';
 
             try {
 
-                $log = "$call :: #{$item->getId()} :: email: {$item->getCustomer()->getEmailAddress()}";
-
-                mailchimp_log('sync.orders.submitting', $log);
-
                 // make the call
                 $response = $this->mailchimp()->$call($this->store_id, $item, false);
 
                 if (empty($response)) {
+                    mailchimp_log('order_submit.failure', "$call :: #{$item->getId()} :: email: {$item->getCustomer()->getEmailAddress()} produced a blank response from MailChimp");
                     return $response;
                 }
 
-                mailchimp_log('sync.orders.success', $log);
+                mailchimp_log('order_submit.success', "$call :: #{$item->getId()} :: email: {$item->getCustomer()->getEmailAddress()}");
 
                 $this->items[] = array('response' => $response, 'item' => $item);
 
                 return $response;
 
             } catch (MailChimp_WooCommerce_ServerError $e) {
-                mailchimp_log('sync.orders.error', "$call :: MailChimp_WooCommerce_ServerError :: {$e->getMessage()}");
+                mailchimp_log('order_submit.error', "$call :: {$item->getId()} :: MailChimp_WooCommerce_ServerError :: {$e->getMessage()}");
                 return false;
             } catch (MailChimp_WooCommerce_Error $e) {
-                mailchimp_log('sync.orders.error', "$call :: MailChimp_WooCommerce_Error :: {$e->getMessage()}");
+                mailchimp_log('order_submit.error', "$call :: {$item->getId()} :: MailChimp_WooCommerce_Error :: {$e->getMessage()}");
                 return false;
             } catch (Exception $e) {
-                mailchimp_log('sync.orders.error', "$call :: Uncaught Exception :: {$e->getMessage()}");
+                mailchimp_log('order_submit.error', "$call :: {$item->getId()} :: Uncaught Exception :: {$e->getMessage()}");
                 return false;
             }
         }
 
-        mailchimp_debug('iterate.order', 'no order found', $item);
+        mailchimp_debug('order_submit', 'no order found', $item);
 
         return false;
     }
@@ -84,7 +88,7 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abtstra
      */
     protected function complete()
     {
-        mailchimp_log('sync.orders.completed', 'Done with the order sync.');
+        mailchimp_log('order_submit.completed', 'Done with the order sync.');
 
         // add a timestamp for the orders sync completion
         $this->setResourceCompleteTime();

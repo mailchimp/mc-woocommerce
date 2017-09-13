@@ -125,3 +125,4 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
         <span><?php esc_attr_e('WooCommerce Action', $this->plugin_name); ?></span>
     </label>
 </fieldset>
+

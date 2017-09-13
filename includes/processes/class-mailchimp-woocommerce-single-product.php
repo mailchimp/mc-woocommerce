@@ -57,7 +57,7 @@ class MailChimp_WooCommerce_Single_Product extends WP_Job
 
             $product = $this->transformer()->transform($product_post);
 
-            mailchimp_log('product_submit.submitting', "addStoreProduct :: #{$product->getId()}");
+            mailchimp_debug('product_submit.debug', "#{$this->product_id}", $product->toArray());
 
             $this->api()->addStoreProduct($this->store_id, $product, false);
 
@@ -68,11 +68,11 @@ class MailChimp_WooCommerce_Single_Product extends WP_Job
             return $product;
 
         } catch (MailChimp_WooCommerce_ServerError $e) {
-            mailchimp_log('product_submit.error', "addStoreProduct :: MailChimp_WooCommerce_ServerError :: {$e->getMessage()}");
+            mailchimp_log('product_submit.error', "addStoreProduct :: #{$this->product_id} :: MailChimp_WooCommerce_ServerError :: {$e->getMessage()}");
         } catch (MailChimp_WooCommerce_Error $e) {
-            mailchimp_log('product_submit.error', "addStoreProduct :: MailChimp_WooCommerce_Error :: {$e->getMessage()}");
+            mailchimp_log('product_submit.error', "addStoreProduct :: #{$this->product_id} :: MailChimp_WooCommerce_Error :: {$e->getMessage()}");
         } catch (Exception $e) {
-            mailchimp_log('product_submit.error', "addStoreProduct :: Uncaught Exception :: {$e->getMessage()}");
+            mailchimp_log('product_submit.error', "addStoreProduct :: #{$this->product_id} :: Uncaught Exception :: {$e->getMessage()}");
         }
 
         return false;

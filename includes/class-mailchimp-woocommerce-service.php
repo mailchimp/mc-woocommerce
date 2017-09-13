@@ -83,14 +83,9 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
             // expire the landing site cookie so we can rinse and repeat tracking
             $this->expireLandingSiteCookie();
 
-            mailchimp_log('new_order', "New order #$order_id", array(
-                'campaign_id' => $campaign_id,
-                'landing_site' => $landing_site,
-            ));
-
             // queue up the single order to be processed.
             $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $campaign_id, $landing_site);
-            wp_queue($handler);
+            wp_queue($handler, 60);
         }
     }
 
@@ -107,7 +102,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
             // queue up the single order to be processed.
             $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, null, null);
             $handler->is_update = true;
-            wp_queue($handler);
+            wp_queue($handler, 90);
         }
     }
 

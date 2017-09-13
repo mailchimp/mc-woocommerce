@@ -172,14 +172,23 @@ class MailChimp_WooCommerce_Transform_Orders
         if (!($stats = $this->getCustomerOrderTotals($order->get_user_id()))) {
             $stats = (object) array('count' => 0, 'total' => 0);
         }
+
         $customer->setOrdersCount($stats->count);
         $customer->setTotalSpent($stats->total);
 
         // we are saving the post meta for subscribers on each order... so if they have subscribed on checkout
         $subscriber_meta = get_post_meta($order->get_id(), 'mailchimp_woocommerce_is_subscribed', true);
         $subscribed_on_order = $subscriber_meta === '' ? false : (bool) $subscriber_meta;
-
         $customer->setOptInStatus($subscribed_on_order);
+
+        // if they didn't subscribe on the order, we need to check to make sure they're not already a subscriber
+        // if they are, we just need to make sure that we don't unsubscribe them just because they unchecked this box.
+        if (!$subscribed_on_order) {
+            try {
+                $subscriber = mailchimp_get_api()->member(mailchimp_get_list_id(), $customer->getEmailAddress());
+                $customer->setOptInStatus(($subscriber['status'] !== 'unsubscribed'));
+            } catch (\Exception $e) {}
+        }
 
         return $customer;
     }

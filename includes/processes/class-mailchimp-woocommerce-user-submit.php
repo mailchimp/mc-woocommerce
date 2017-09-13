@@ -60,14 +60,19 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
             $user = new WP_User($this->user_id);
 
             if ($user->ID <= 0 || empty($store_id) || !is_array($options)) {
-                mailchimp_log('member.sync', 'Invalid Data For Submission :: '.$user->user_email);
+                mailchimp_log('member.sync', "Invalid Data For Submission :: {$user->user_email}");
                 return false;
             }
         }
 
         // if we have a null value, we need to grab the correct user meta for is_subscribed
         if (is_null($this->subscribed)) {
-            $this->subscribed = (bool) get_user_meta($this->user_id, 'mailchimp_woocommerce_is_subscribed', true);
+            $user_subscribed = get_user_meta($this->user_id, 'mailchimp_woocommerce_is_subscribed', true);
+            if ($user_subscribed === '' || $user_subscribed === null) {
+                mailchimp_log('member.sync', "Skipping sync for {$user->user_email} because no subscriber status has been set");
+                return false;
+            }
+            $this->subscribed = (bool) $user_subscribed;
         }
 
         $api_key = isset($options['mailchimp_api_key']) ? $options['mailchimp_api_key'] : false;
@@ -75,7 +80,7 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
 
         // we need a valid api key and list id to continue
         if (empty($api_key) || empty($list_id)) {
-            mailchimp_log('member.sync', 'Invalid Api Key or ListID :: '.$user->user_email);
+            mailchimp_log('member.sync', "Invalid Api Key or ListID :: {$user->user_email}");
             return false;
         }
 
@@ -113,7 +118,8 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
 
             // ok let's update this member
             $api->update($list_id, $user->user_email, $this->subscribed, $merge_vars);
-            mailchimp_log('member.sync', 'Updated Member '.$user->user_email, $merge_vars);
+
+            mailchimp_log('member.sync', "Updated Member {$user->user_email}", $merge_vars);
         } catch (\Exception $e) {
 
             // if we have a 404 not found, we can create the member
@@ -121,7 +127,7 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
 
                 try {
                     $api->subscribe($list_id, $user->user_email, $this->subscribed, $merge_vars);
-                    mailchimp_log('member.sync', 'Subscribed Member '.$user->user_email, $merge_vars);
+                    mailchimp_log('member.sync', "Subscribed Member {$user->user_email}", $merge_vars);
                 } catch (\Exception $e) {
                     mailchimp_log('member.sync', $e->getMessage());
                 }

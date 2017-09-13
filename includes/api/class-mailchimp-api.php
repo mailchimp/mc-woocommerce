@@ -122,7 +122,7 @@ class MailChimp_WooCommerce_MailChimpApi
      */
     public function member($list_id, $email)
     {
-        $hash = md5(strtolower($email));
+        $hash = md5(strtolower(trim($email)));
         return $this->get("lists/$list_id/members/$hash", array());
     }
 
@@ -142,7 +142,7 @@ class MailChimp_WooCommerce_MailChimpApi
      */
     public function deleteMember($list_id, $email)
     {
-        $hash = md5(strtolower($email));
+        $hash = md5(strtolower(trim($email)));
         return $this->delete("lists/$list_id/members/$hash", array());
     }
 
@@ -185,7 +185,7 @@ class MailChimp_WooCommerce_MailChimpApi
      */
     public function update($list_id, $email, $subscribed = true, $merge_fields = array(), $list_interests = array())
     {
-        $hash = md5(strtolower($email));
+        $hash = md5(strtolower(trim($email)));
 
         $data = array(
             'email_address' => $email,
@@ -216,7 +216,7 @@ class MailChimp_WooCommerce_MailChimpApi
      */
     public function updateOrCreate($list_id, $email, $subscribed = true, $merge_fields = array(), $list_interests = array())
     {
-        $hash = md5(strtolower($email));
+        $hash = md5(strtolower(trim($email)));
 
         $data = array(
             'email_address' => $email,
@@ -913,8 +913,14 @@ class MailChimp_WooCommerce_MailChimpApi
         // process the patch request the normal way
         $curl = curl_init();
 
-        $options = $this->applyCurlOptions('PATCH', $url, array());
-        $options[CURLOPT_POSTFIELDS] = json_encode($body);
+        $json = json_encode($body);
+
+        $options = $this->applyCurlOptions('PATCH', $url, array(), array(
+            'Expect:',
+            'Content-Length: '.strlen($json),
+        ));
+
+        $options[CURLOPT_POSTFIELDS] = $json;
 
         curl_setopt_array($curl, $options);
 
@@ -931,8 +937,14 @@ class MailChimp_WooCommerce_MailChimpApi
     {
         $curl = curl_init();
 
-        $options = $this->applyCurlOptions('POST', $url, array());
-        $options[CURLOPT_POSTFIELDS] = json_encode($body);
+        $json = json_encode($body);
+
+        $options = $this->applyCurlOptions('POST', $url, array(), array(
+            'Expect:',
+            'Content-Length: '.strlen($json),
+        ));
+
+        $options[CURLOPT_POSTFIELDS] = $json;
 
         curl_setopt_array($curl, $options);
 
@@ -949,8 +961,14 @@ class MailChimp_WooCommerce_MailChimpApi
     {
         $curl = curl_init();
 
-        $options = $this->applyCurlOptions('PUT', $url, array());
-        $options[CURLOPT_POSTFIELDS] = json_encode($body);
+        $json = json_encode($body);
+
+        $options = $this->applyCurlOptions('PUT', $url, array(), array(
+            'Expect:',
+            'Content-Length: '.strlen($json),
+        ));
+
+        $options[CURLOPT_POSTFIELDS] = $json;
 
         curl_setopt_array($curl, $options);
 
@@ -999,9 +1017,10 @@ class MailChimp_WooCommerce_MailChimpApi
      * @param $method
      * @param $url
      * @param array $params
+     * @param array $headers
      * @return array
      */
-    protected function applyCurlOptions($method, $url, $params = array())
+    protected function applyCurlOptions($method, $url, $params = array(), $headers = array())
     {
         $env = mailchimp_environment_variables();
 
@@ -1015,10 +1034,10 @@ class MailChimp_WooCommerce_MailChimpApi
             CURLOPT_TIMEOUT => 30,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLINFO_HEADER_OUT => true,
-            CURLOPT_HTTPHEADER => array(
+            CURLOPT_HTTPHEADER => array_merge(array(
                 'content-type: application/json',
                 "user-agent: MailChimp for WooCommerce/{$env->version}; WordPress/{$env->wp_version}",
-            )
+            ), $headers)
         );
     }
 

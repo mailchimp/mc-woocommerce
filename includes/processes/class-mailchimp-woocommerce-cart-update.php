@@ -118,8 +118,6 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
                 $cart->setOrderTotal($order_total);
 
                 try {
-                    mailchimp_log('abandoned_cart.submitting', "email: {$customer->getEmailAddress()}");
-
                     // if the post is successful we're all good.
                     $api->addCart($store_id, $cart, false);
 

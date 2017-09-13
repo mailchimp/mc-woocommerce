@@ -71,6 +71,9 @@ if ( ! class_exists( 'WP_Worker' ) ) {
 					$this->queue->delete( $job );
 				}
 			} catch ( Exception $e ) {
+
+                mailchimp_log('queue.error', "{$e->getMessage()} on {$e->getLine()} in {$e->getFile()}", array('job' => get_class($this->payload)));
+
 				$this->queue->release( $job );
 
 				return false;

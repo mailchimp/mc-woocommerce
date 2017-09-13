@@ -37,6 +37,27 @@ if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
     #sync-status-message strong {
         font-weight:inherit;
     }
+    #log-viewer {
+        background: #fff;
+        border: 1px solid #e5e5e5;
+        box-shadow: 0 1px 1px rgba(0,0,0,.04);
+        padding: 5px 20px;
+    }
+    #log-viewer-select {
+        padding: 10px 0 8px;
+        line-height: 28px;
+    }
+    #log-viewer pre {
+        font-family: monospace;
+        white-space: pre-wrap;
+    }
+    user agent stylesheet
+    pre, xmp, plaintext, listing {
+        display: block;
+        font-family: monospace;
+        white-space: pre;
+        margin: 1em 0px;
+    }
 </style>
 
 <?php if (!defined('PHP_VERSION_ID') || (PHP_VERSION_ID < 50600)): ?>
@@ -61,6 +82,7 @@ if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
         <a href="?page=mailchimp-woocommerce&tab=newsletter_settings" class="nav-tab <?php echo $active_tab == 'newsletter_settings' ? 'nav-tab-active' : ''; ?>">List Settings</a>
         <?php if($show_sync_tab): ?>
         <a href="?page=mailchimp-woocommerce&tab=sync" class="nav-tab <?php echo $active_tab == 'sync' ? 'nav-tab-active' : ''; ?>">Sync</a>
+        <a href="?page=mailchimp-woocommerce&tab=logs" class="nav-tab <?php echo $active_tab == 'logs' ? 'nav-tab-active' : ''; ?>">Logs</a>
         <?php endif; ?>
         <?php endif;?>
         <?php endif; ?>
@@ -74,34 +96,37 @@ if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
         if (!$clicked_sync_button) {
             settings_fields($this->plugin_name);
             do_settings_sections($this->plugin_name);
-            //settings_errors();
             include('tabs/notices.php');
         }
         ?>
 
         <input type="hidden" name="<?php echo $this->plugin_name; ?>[mailchimp_active_tab]" value="<?php echo $active_tab; ?>"/>
 
-        <?php if( $active_tab == 'api_key' ): ?>
+        <?php if ($active_tab == 'api_key' ): ?>
             <?php include_once 'tabs/api_key.php'; ?>
         <?php endif; ?>
 
-        <?php if( $active_tab == 'store_info' && $has_valid_api_key): ?>
+        <?php if ($active_tab == 'store_info' && $has_valid_api_key): ?>
             <?php include_once 'tabs/store_info.php'; ?>
         <?php endif; ?>
 
-        <?php if( $active_tab == 'campaign_defaults' ): ?>
+        <?php if ($active_tab == 'campaign_defaults' ): ?>
             <?php include_once 'tabs/campaign_defaults.php'; ?>
         <?php endif; ?>
 
-        <?php if( $active_tab == 'newsletter_settings' ): ?>
+        <?php if ($active_tab == 'newsletter_settings' ): ?>
             <?php include_once 'tabs/newsletter_settings.php'; ?>
         <?php endif; ?>
 
-        <?php if( $active_tab == 'sync' && $show_sync_tab): ?>
+        <?php if ($active_tab == 'sync' && $show_sync_tab): ?>
             <?php include_once 'tabs/store_sync.php'; ?>
         <?php endif; ?>
 
-        <?php if ($active_tab !== 'sync') submit_button('Save all changes', 'primary','submit', TRUE); ?>
+        <?php if ($active_tab == 'logs' && $show_sync_tab): ?>
+            <?php include_once 'tabs/logs.php'; ?>
+        <?php endif; ?>
+
+        <?php if ($active_tab !== 'sync' || $active_tab !== 'logs') submit_button('Save all changes', 'primary','submit', TRUE); ?>
 
     </form>
 

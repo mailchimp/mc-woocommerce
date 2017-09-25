@@ -49,9 +49,6 @@ You’ll need to do a few things to connect your WooCommerce store to MailChimp.
 For more information on settings and configuration, please visit our Knowledge Base: [http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce](http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce)
 
 == Changelog ==
-= 2.0.2 =
-* bugfix on curl headers adding an 'expect: 100-continue' on posts above a certain threshold
-* forced the 'resync' button to delete pointer data that was causing some syncing issues.
 
 = 2.0.2 =
 

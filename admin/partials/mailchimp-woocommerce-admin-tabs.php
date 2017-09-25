@@ -126,7 +126,7 @@ if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
             <?php include_once 'tabs/logs.php'; ?>
         <?php endif; ?>
 
-        <?php if ($active_tab !== 'sync' || $active_tab !== 'logs') submit_button('Save all changes', 'primary','submit', TRUE); ?>
+        <?php if ($active_tab !== 'sync' && $active_tab !== 'logs') submit_button('Save all changes', 'primary','submit', TRUE); ?>
 
     </form>
 

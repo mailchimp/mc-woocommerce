@@ -50,6 +50,25 @@ class MailChimp_WooCommerce_Transform_Orders
     }
 
     /**
+     * @param WC_Order $woo
+     * @return array
+     */
+    protected function dates(WC_Order $woo)
+    {
+        if (method_exists($woo, 'get_date_modified')) {
+            $created_at = $woo->get_date_modified();
+            $updated_at = $woo->get_date_modified();
+        } elseif (property_exists($woo, 'order_date') && property_exists($woo, 'modified_date')) {
+            $created_at = $woo->order_date ? new \DateTime($woo->order_date) : null;
+            $updated_at = $woo->modified_date ? new \DateTime($woo->modified_date) : null;
+        } else {
+            $created_at = $updated_at = new \DateTime();
+        }
+
+        return array($created_at, $updated_at);
+    }
+
+    /**
      * @param WP_Post $post
      * @return MailChimp_WooCommerce_Order
      */

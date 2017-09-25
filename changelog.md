@@ -1,3 +1,9 @@
+** 2.0.2 **
+
+* Added new logs feature to help troubleshoot isolated sync and data feed issues.
+* Fixed bug with setting customers as Transactional during checkout if they had already opted in previously.
+* Fixed bug where abandoned cart automation still fired after a customer completed an order.
+
 ** 2.0.1 **
 
 ##### New Features: #####

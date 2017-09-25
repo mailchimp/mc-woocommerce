@@ -88,7 +88,7 @@ After you connect, you can do a lot with the the data you collect, like build se
 
 Find out everything MailChimp has to offer in our article, [How to Use MailChimp for E-Commerce](http://kb.mailchimp.com/integrations/e-commerce/how-to-use-mailchimp-for-e-commerce).
 
-# Deactivate or Delete the Plugin#
+# Deactivate or Delete the Plugin
 When you deactivate MailChimp for WooCommerce, it stops the sync but doesn’t remove the plugin. You can always re-activate the sync, which will backfill data at a later point in time.
 To deactivate MailChimp for WooCommerce, follow these steps.
 

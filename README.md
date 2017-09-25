@@ -2,7 +2,7 @@
 
 In this article, you’ll learn how to connect MailChimp for WooCommerce.
 
-##Before You Start
+## Before You Start
 
 **Here are some things to know before you begin this process.**
 
@@ -18,13 +18,13 @@ In this article, you’ll learn how to connect MailChimp for WooCommerce.
 
 - WooCommerce customers who haven't signed up for marketing emails will appear in the Transactional portion of your list, and cannot be exported.
 
-##A Note for Current WooCommerce Integration Users
+## A Note for Current WooCommerce Integration Users
 
 This plugin supports our most powerful API 3.0 features, and is intended for users who have not yet integrated their WooCommerce stores with MailChimp. If your WooCommerce store is already integrated with MailChimp via an integration that runs on an older version of MailChimp’s API, consider your current sales volume before you make any changes that might disrupt business.
 
 You can run this new integration at the same time as your current WooCommerce integration for MailChimp. However, data from the older integration will display separately in subscriber profiles, and can’t be used with e-commerce features that require API 3.0.
 
-##Task Roadmap
+## Task Roadmap
 **Here’s a brief overview of this multi-step process.**
 
 - Install the plugin on your WordPress Admin site.
@@ -32,7 +32,7 @@ You can run this new integration at the same time as your current WooCommerce in
 - Configure your list settings to complete the data sync process.
 - Troubleshoot any sync or data feed issues by sharing logs with MailChimp support.
 
-##Install the Plugin
+## Install the Plugin
 **To install the plugin, follow these steps.**
 
 1) Log in to your WordPress admin panel. 
@@ -54,7 +54,7 @@ You can run this new integration at the same time as your current WooCommerce in
 
 After you activate the plugin, you’ll be taken to the **Settings** page, where you will add your API key and configure your list settings.
 
-##Configure and Sync
+## Configure and Sync
 **To configure your MailChimp settings for WooCommerce customers and sync them to MailChimp, follow these steps.**
 
 1) On the **Connect** tab, paste your MailChimp API key into the field, choose whether or not you want to send debugging logs to MailChimp, and click **Save all changes**. To learn how to generate a MailChimp API Key, read [About API Keys](http://kb.mailchimp.com/integrations/api-integrations/about-api-keys).
@@ -83,12 +83,12 @@ If you have no lists in your MailChimp account, you will be given the option to 
 
 ![List Defaults tab](https://cloud.githubusercontent.com/assets/19805049/18956260/cffd3926-8628-11e6-9c68-9fe3c964c75c.png)
 
-##Next Steps
+## Next Steps
 After you connect, you can do a lot with the the data you collect, like build segments, send Automation workflows, track purchases, and view results.
 
 Find out everything MailChimp has to offer in our article, [How to Use MailChimp for E-Commerce](http://kb.mailchimp.com/integrations/e-commerce/how-to-use-mailchimp-for-e-commerce).
 
-#Deactivate or Delete the Plugin#
+# Deactivate or Delete the Plugin#
 When you deactivate MailChimp for WooCommerce, it stops the sync but doesn’t remove the plugin. You can always re-activate the sync, which will backfill data at a later point in time.
 To deactivate MailChimp for WooCommerce, follow these steps.
 

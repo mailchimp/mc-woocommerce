@@ -147,6 +147,8 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 	 * @since    1.0.0
 	 */
 	public function display_plugin_setup_page() {
+		$this->enqueue_scripts();
+		$this->enqueue_styles();
 		include_once( 'partials/mailchimp-woocommerce-admin-tabs.php' );
 	}
 

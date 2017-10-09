@@ -135,7 +135,7 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
                 return false;
             }
 
-            mailchimp_log('member.sync', $e->getMessage());
+            mailchimp_error('member.sync', mailchimp_error_trace($e, $user->user_email));
         }
 
         return false;

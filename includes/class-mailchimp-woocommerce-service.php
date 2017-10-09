@@ -91,8 +91,9 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
 
     /**
      * @param $order_id
+     * @param bool $is_update
      */
-    public function handleOrderStatusChanged($order_id)
+    public function handleOrderStatusChanged($order_id, $is_update = true)
     {
         if ($this->hasOption('mailchimp_api_key')) {
 
@@ -101,7 +102,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
 
             // queue up the single order to be processed.
             $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, null, null);
-            $handler->is_update = true;
+            $handler->is_update = $is_update;
             wp_queue($handler, 90);
         }
     }
@@ -170,6 +171,33 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     }
 
     /**
+     * @param $post_id
+     */
+    public function handleNewCoupon($post_id)
+    {
+        $this->handleCouponSaved($post_id, new WC_Coupon($post_id));
+    }
+
+    /**
+     * @param $post_id
+     * @param null $coupon
+     */
+    public function handleCouponSaved($post_id, $coupon = null)
+    {
+        if ($coupon instanceof WC_Coupon) {
+            wp_queue(new MailChimp_WooCommerce_SingleCoupon($post_id));
+        }
+    }
+
+    /**
+     * @param $post_id
+     */
+    public function handleCouponRestored($post_id)
+    {
+        $this->handleCouponSaved($post_id, new WC_Coupon($post_id));
+    }
+
+    /**
      * Save post metadata when a post is saved.
      *
      * @param int $post_id The post ID.
@@ -182,8 +210,38 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
             if ('product' == $post->post_type) {
                 wp_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
             } elseif ('shop_order' == $post->post_type) {
-                $this->handleOrderStatusChanged($post_id);
+                $this->handleOrderStatusChanged($post_id, ($post->post_modified_gmt != $post->post_date_gmt));
             }
+        }
+    }
+
+    /**
+     * @param $post_id
+     * @return bool
+     */
+    public function handlePostTrashed($post_id)
+    {
+        if (!$this->hasOption('mailchimp_api_key')) {
+            return false;
+        }
+
+        switch (get_post_type($post_id)) {
+            case 'shop_coupon':
+                mailchimp_get_api()->deletePromoRule(mailchimp_get_store_id(), $post_id);
+                mailchimp_log('promo_code.deleted', "deleted promo code {$post_id}");
+                break;
+        }
+    }
+
+    /**
+     * @param $post_id
+     */
+    public function handlePostRestored($post_id)
+    {
+        switch(get_post_type($post_id)) {
+            case 'shop_coupon':
+                return $this->handleCouponRestored($post_id);
+                break;
         }
     }
 

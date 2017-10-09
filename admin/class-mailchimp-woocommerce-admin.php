@@ -884,6 +884,9 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 	 */
 	private function startSync()
 	{
+	    $coupon_sync = new MailChimp_WooCommerce_Process_Coupons();
+	    wp_queue($coupon_sync);
+
 		$job = new MailChimp_WooCommerce_Process_Products();
 		$job->flagStartSync();
 		wp_queue($job);

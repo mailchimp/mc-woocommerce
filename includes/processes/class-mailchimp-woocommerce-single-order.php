@@ -51,6 +51,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
         if (!empty($store_id) && is_array($options) && isset($options['mailchimp_api_key'])) {
 
             if (!($woo_order_number = $this->getRealOrderNumber())) {
+                mailchimp_log('order_submit.failure', "There is no real order number to use.");
                 return false;
             }
 
@@ -117,7 +118,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                 $api_response = $api->$call($store_id, $order, false);
 
                 if (empty($api_response)) {
-                    mailchimp_log('order_submit.failure', "$call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()} produced a blank response from MailChimp");
+                    mailchimp_error('order_submit.failure', "$call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()} produced a blank response from MailChimp");
                     return $api_response;
                 }
 
@@ -133,7 +134,9 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
             } catch (\Exception $e) {
 
-                mailchimp_log('order_submit.tracing_error', $message = strtolower($e->getMessage()));
+                $message = strtolower($e->getMessage());
+
+                mailchimp_error('order_submit.tracing_error', $e);
 
                 if (!isset($order)) {
                     // transform the order
@@ -170,7 +173,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                         return $api_response;
 
                     } catch (\Exception $e) {
-                        mailchimp_log('order_submit.error', 'deleting-customer-re-add :: #'.$this->order_id.' :: '.$e->getMessage());
+                        mailchimp_error('order_submit.error', mailchimp_error_trace($e, 'deleting-customer-re-add :: #'.$this->order_id));
                     }
                 }
             }
@@ -192,7 +195,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
             return $this->woo_order_number = $woo->get_order_number();
         } catch (\Exception $e) {
             $this->woo_order_number = false;
-            mailchimp_log('order_sync.failure', "{$this->order_id} could not be loaded {$e->getMessage()}");
+            mailchimp_error('order_sync.failure', mailchimp_error_trace($e, "{$this->order_id} could not be loaded"));
             return false;
         }
     }

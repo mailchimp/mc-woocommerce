@@ -168,6 +168,17 @@ class MailChimp_WooCommerce_Transform_Orders
             $order->addItem($item);
         }
 
+        // apply the coupon discounts
+        if (($used_coupons = $woo->get_used_coupons()) && is_array($used_coupons)) {
+            foreach ($used_coupons as $coupon_code) {
+                if (($coupon_id = wc_get_coupon_id_by_code($coupon_code))) {
+                    $coupon = new WC_Coupon($coupon_id);
+                    $is_percentage = $coupon->get_discount_type() === 'percent';
+                    $order->addDiscount($coupon_code, $coupon->get_amount('edit'), $is_percentage);
+                }
+            }
+        }
+
         //if (($refund = $woo->get_total_refunded()) && $refund > 0){
         // this is where we would be altering the submission to tell us about the refund.
         //}

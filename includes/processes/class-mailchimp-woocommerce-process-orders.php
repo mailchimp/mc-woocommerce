@@ -56,7 +56,7 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abtstra
                 $response = $this->mailchimp()->$call($this->store_id, $item, false);
 
                 if (empty($response)) {
-                    mailchimp_log('order_submit.failure', "$call :: #{$item->getId()} :: email: {$item->getCustomer()->getEmailAddress()} produced a blank response from MailChimp");
+                    mailchimp_error('order_submit.failure', "$call :: #{$item->getId()} :: email: {$item->getCustomer()->getEmailAddress()} produced a blank response from MailChimp");
                     return $response;
                 }
 
@@ -67,13 +67,13 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abtstra
                 return $response;
 
             } catch (MailChimp_WooCommerce_ServerError $e) {
-                mailchimp_log('order_submit.error', "$call :: {$item->getId()} :: MailChimp_WooCommerce_ServerError :: {$e->getMessage()}");
+                mailchimp_error('order_submit.error', mailchimp_error_trace($e, "$call :: {$item->getId()}"));
                 return false;
             } catch (MailChimp_WooCommerce_Error $e) {
-                mailchimp_log('order_submit.error', "$call :: {$item->getId()} :: MailChimp_WooCommerce_Error :: {$e->getMessage()}");
+                mailchimp_error('order_submit.error', mailchimp_error_trace($e, "$call :: {$item->getId()}"));
                 return false;
             } catch (Exception $e) {
-                mailchimp_log('order_submit.error', "$call :: {$item->getId()} :: Uncaught Exception :: {$e->getMessage()}");
+                mailchimp_error('order_submit.error', mailchimp_error_trace($e, "$call :: {$item->getId()}"));
                 return false;
             }
         }

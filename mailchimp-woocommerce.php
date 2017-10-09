@@ -269,6 +269,31 @@ function mailchimp_log($action, $message, $data = array()) {
 }
 
 /**
+ * @param $action
+ * @param $message
+ * @param array $data
+ * @return array|WP_Error
+ */
+function mailchimp_error($action, $message, $data = array()) {
+    if (mailchimp_environment_variables()->logging !== 'none') {
+        if ($message instanceof \Exception) $message = mailchimp_error_trace($message);
+        if (is_array($data) && !empty($data)) $message .= " :: ".wc_print_r($data, true);
+        wc_get_logger()->error("{$action} :: {$message}", array('source' => 'mailchimp_woocommerce'));
+    }
+}
+
+/**
+ * @param Exception $e
+ * @param string $wrap
+ * @return string
+ */
+function mailchimp_error_trace(\Exception $e, $wrap = "") {
+    $error = "{$e->getMessage()} on {$e->getLine()} in {$e->getFile()}";
+    if (empty($wrap)) return $error;
+    return "{$wrap} :: {$error}";
+}
+
+/**
  * Determine if a given string contains a given substring.
  *
  * @param  string  $haystack
@@ -339,6 +364,12 @@ function mailchimp_update_connected_site_script() {
 
         // if we have a store
         if (($store = $api->getStore($store_id))) {
+
+            // handle the coupon sync if we don't have a flag that says otherwise.
+            $job = new MailChimp_WooCommerce_Process_Coupons();
+            if ($job->getData('sync.coupons.completed_at', false) === false) {
+                wp_queue($job);
+            }
 
             // see if we have a connected site script url/fragment
             $url = $store->getConnectedSiteScriptUrl();

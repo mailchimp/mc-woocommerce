@@ -56,11 +56,11 @@ class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abtst
                 return $response;
 
             } catch (MailChimp_WooCommerce_ServerError $e) {
-                mailchimp_log('product_sync.error', "addStoreProduct :: {$item->getId()} :: MailChimp_WooCommerce_ServerError :: {$e->getMessage()}");
+                mailchimp_error('product_sync.error', mailchimp_error_trace($e, "addStoreProduct :: {$item->getId()}"));
             } catch (MailChimp_WooCommerce_Error $e) {
-                mailchimp_log('product_sync.error', "addStoreProduct :: {$item->getId()} :: MailChimp_WooCommerce_Error :: {$e->getMessage()}");
+                mailchimp_error('product_sync.error', mailchimp_error_trace($e, "addStoreProduct :: {$item->getId()}"));
             } catch (Exception $e) {
-                mailchimp_log('product_sync.error', "addStoreProduct :: {$item->getId()} :: Uncaught Exception :: {$e->getMessage()}");
+                mailchimp_error('product_sync.error', mailchimp_error_trace($e, "addStoreProduct :: {$item->getId()}"));
             }
         }
 

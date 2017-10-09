@@ -102,7 +102,7 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
         // if we've got a 0 count, that means we're done.
         if ($page->count <= 0) {
 
-            mailchimp_debug(get_called_class().'@handle', $this->getResourceType().' :: count is 0 : completing now!');
+            mailchimp_debug(get_called_class().'@handle', $this->getResourceType().' :: completing now!');
 
             // reset the resource page back to 1
             $this->resourceComplete($this->getResourceType());

@@ -841,6 +841,216 @@ class MailChimp_WooCommerce_MailChimpApi
         }
     }
 
+
+    /**
+     * @param $store_id
+     * @param MailChimp_WooCommerce_PromoRule $rule
+     * @param bool $throw
+     * @return MailChimp_WooCommerce_PromoRule|bool
+     * @throws MailChimp_WooCommerce_Error
+     */
+    public function addPromoRule($store_id, MailChimp_WooCommerce_PromoRule $rule, $throw = true)
+    {
+        try {
+            if (($response = $this->updatePromoRule($store_id, $rule, false))) {
+                return $response;
+            }
+            $data = $this->post("ecommerce/stores/{$store_id}/promo-rules", $rule->toArray());
+            return (new MailChimp_WooCommerce_PromoRule)->fromArray($data);
+        } catch (MailChimp_WooCommerce_Error $e) {
+            if ($throw) throw $e;
+            return false;
+        }
+    }
+
+    /**
+     * @param $store_id
+     * @param MailChimp_WooCommerce_PromoRule $rule
+     * @param bool $throw
+     * @return MailChimp_WooCommerce_PromoRule|bool
+     * @throws MailChimp_WooCommerce_Error
+     */
+    public function updatePromoRule($store_id, MailChimp_WooCommerce_PromoRule $rule, $throw = true)
+    {
+        try {
+            $data = $this->patch("ecommerce/stores/{$store_id}/promo-rules/{$rule->getId()}", $rule->toArray());
+            return (new MailChimp_WooCommerce_PromoRule)->fromArray($data);
+        } catch (MailChimp_WooCommerce_Error $e) {
+            if ($throw) throw $e;
+            return false;
+        }
+    }
+
+    /**
+     * @param $store_id
+     * @param MailChimp_WooCommerce_PromoRule|int $rule
+     * @return bool
+     */
+    public function deletePromoRule($store_id, $rule)
+    {
+        try {
+            $id = $rule instanceof MailChimp_WooCommerce_PromoRule ? $rule->getId() : $rule;
+            //print_r(array('id' => $id, 'store' => $store_id));die();
+            return (bool) $this->delete("ecommerce/stores/{$store_id}/promo-rules/{$id}");
+        } catch (MailChimp_WooCommerce_Error $e) {
+            //\Log::error("MC::deletePromoRule :: {$rule->getId()} :: {$e->getMessage()} on {$e->getLine()} in {$e->getFile()}");
+            return false;
+        }
+    }
+
+    /**
+     * @param $store_id
+     * @param int $page
+     * @param int $count
+     * @return array
+     */
+    public function getPromoRuleIds($store_id, $page = 1, $count = 10)
+    {
+        $result = $this->get("ecommerce/stores/{$store_id}/promo-rules", [
+            'start' => $page,
+            'count' => $count,
+            'offset' => $page > 1 ? (($page-1) * $count) : 0,
+            'include' => 'id',
+        ]);
+
+        $ids = array();
+        foreach ($result['promo_rules'] as $rule) {
+            $id = (string) $rule['id'];
+            $ids[$id] = $id;
+        }
+        return $ids;
+    }
+
+    /**
+     * @param $store_id
+     * @param int $page
+     * @param int $count
+     * @param bool $return_original
+     * @return array
+     */
+    public function getPromoRules($store_id, $page = 1, $count = 10, $return_original = false)
+    {
+        $result = $this->get("ecommerce/stores/{$store_id}/promo-rules", [
+            'start' => $page,
+            'count' => $count,
+            'offset' => $page > 1 ? (($page-1) * $count) : 0,
+        ]);
+
+        if ($return_original) {
+            return $result;
+        }
+
+        $rules = array();
+        foreach ($result['promo_rules'] as $rule_data) {
+            $rule = new MailChimp_WooCommerce_PromoRule();
+            $rule->fromArray($rule_data);
+            $rules[] = $rule;
+        }
+        return $rules;
+    }
+
+    /**
+     * @param $store_id
+     * @param $rule_id
+     * @param int $page
+     * @param int $count
+     * @param bool $return_original
+     * @return array
+     */
+    public function getPromoCodesForRule($store_id, $rule_id, $page = 1, $count = 10, $return_original = false)
+    {
+        $result = $this->get("ecommerce/stores/{$store_id}/promo-rules/{$rule_id}/promo_codes", [
+            'start' => $page,
+            'count' => $count,
+            'offset' => $page > 1 ? (($page-1) * $count) : 0,
+        ]);
+
+        if ($return_original) {
+            return $result;
+        }
+
+        $rules = array();
+        foreach ($result as $rule_data) {
+            $rule = new MailChimp_WooCommerce_PromoCode();
+            $rule->fromArray($rule_data);
+            $rules[] = $rule;
+        }
+        return $rules;
+    }
+
+    /**
+     * @param $store_id
+     * @param $rule_id
+     * @param $code_id
+     *
+     * @return MailChimp_WooCommerce_PromoCode|bool
+     */
+    public function getPromoCodeForRule($store_id, $rule_id, $code_id)
+    {
+        try {
+            $data = $this->get("ecommerce/stores/{$store_id}/promo-rules/{$rule_id}/promo-codes/{$code_id}");
+            return (new MailChimp_WooCommerce_PromoCode)->fromArray($data);
+        } catch (MailChimp_WooCommerce_Error $e) {
+            return false;
+        }
+    }
+
+    /**
+     * @param $store_id
+     * @param MailChimp_WooCommerce_PromoRule $rule
+     * @param MailChimp_WooCommerce_PromoCode $code
+     * @param bool $throw
+     * @return MailChimp_WooCommerce_PromoCode|bool
+     * @throws MailChimp_WooCommerce_Error
+     */
+    public function addPromoCodeForRule($store_id, MailChimp_WooCommerce_PromoRule $rule, MailChimp_WooCommerce_PromoCode $code, $throw = true)
+    {
+        try {
+            if (($result = $this->updatePromoCodeForRule($store_id, $rule, $code, false))) {
+                return $result;
+            }
+            $data = $this->post("ecommerce/stores/{$store_id}/promo-rules/{$rule->getId()}/promo-codes", $code->toArray());
+            return (new MailChimp_WooCommerce_PromoCode)->fromArray($data);
+        } catch (MailChimp_WooCommerce_Error $e) {
+            if ($throw) throw $e;
+            return false;
+        }
+    }
+
+    /**
+     * @param $store_id
+     * @param MailChimp_WooCommerce_PromoRule $rule
+     * @param MailChimp_WooCommerce_PromoCode $code
+     * @param bool $throw
+     * @return MailChimp_WooCommerce_PromoCode|bool
+     * @throws MailChimp_WooCommerce_Error
+     */
+    public function updatePromoCodeForRule($store_id, MailChimp_WooCommerce_PromoRule $rule, MailChimp_WooCommerce_PromoCode $code, $throw = true)
+    {
+        try {
+            $data = $this->patch("ecommerce/stores/{$store_id}/promo-rules/{$rule->getId()}/promo-codes/{$code->getId()}", $code->toArray());
+            return (new MailChimp_WooCommerce_PromoCode)->fromArray($data);
+        } catch (MailChimp_WooCommerce_Error $e) {
+            if ($throw) throw $e;
+            return false;
+        }
+    }
+
+    /**
+     * @param $store_id
+     * @param $rule_id
+     * @param $code_id
+     * @return bool
+     */
+    public function deletePromoCodeForRule($store_id, $rule_id, $code_id)
+    {
+        try {
+            return (bool) $this->delete("ecommerce/stores/{$store_id}/promo-rules/{$rule_id}/promo-codes/{$code_id}");
+        } catch (MailChimp_WooCommerce_Error $e) {
+            return false;
+        }
+    }
+
     /**
      * @param MailChimp_WooCommerce_Store|MailChimp_WooCommerce_Order|MailChimp_WooCommerce_Product|MailChimp_WooCommerce_Customer $target
      * @return bool

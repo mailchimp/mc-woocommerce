@@ -125,7 +125,7 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
 
                 } catch (\Exception $e) {
 
-                    mailchimp_log('abandoned_cart.error', "email: {$customer->getEmailAddress()}");
+                    mailchimp_error('abandoned_cart.error', "email: {$customer->getEmailAddress()} :: attempting product update :: {$e->getMessage()}");
 
                     // if we have an error it's most likely due to a product not being found.
                     // let's loop through each item, verify that we have the product or not.
@@ -138,8 +138,6 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
                         }
                     }
 
-                    mailchimp_log('abandoned_cart.submitting', "email: {$customer->getEmailAddress()}");
-
                     // if the post is successful we're all good.
                     $api->addCart($store_id, $cart, false);
 
@@ -149,7 +147,7 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
 
         } catch (\Exception $e) {
             update_option('mailchimp-woocommerce-cart-error', $e->getMessage());
-            mailchimp_log('abandoned_cart.error', "{$e->getMessage()} on {$e->getLine()} in {$e->getFile()}");
+            mailchimp_error('abandoned_cart.error', $e);
         }
 
         return false;

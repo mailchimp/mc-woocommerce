@@ -174,6 +174,7 @@ class MailChimp_Woocommerce {
 		require_once $path . 'includes/api/class-mailchimp-woocommerce-api.php';
 		require_once $path . 'includes/api/class-mailchimp-woocommerce-create-list-submission.php';
 		require_once $path . 'includes/api/class-mailchimp-woocommerce-transform-products.php';
+        require_once $path . 'includes/api/class-mailchimp-woocommerce-transform-coupons.php';
 
 		/** Require all the mailchimp api asset classes */
 		require_once $path . 'includes/api/assets/class-mailchimp-address.php';
@@ -184,6 +185,8 @@ class MailChimp_Woocommerce {
 		require_once $path . 'includes/api/assets/class-mailchimp-product.php';
 		require_once $path . 'includes/api/assets/class-mailchimp-product-variation.php';
 		require_once $path . 'includes/api/assets/class-mailchimp-store.php';
+        require_once $path . 'includes/api/assets/class-mailchimp-promo-code.php';
+        require_once $path . 'includes/api/assets/class-mailchimp-promo-rule.php';
 
 		/** Require all the api error helpers */
 		require_once $path . 'includes/api/errors/class-mailchimp-error.php';
@@ -204,12 +207,14 @@ class MailChimp_Woocommerce {
 		// bulk data sync
 		require_once $path.'includes/processes/class-mailchimp-woocommerce-process-orders.php';
 		require_once $path.'includes/processes/class-mailchimp-woocommerce-process-products.php';
+        require_once $path.'includes/processes/class-mailchimp-woocommerce-process-coupons.php';
 
 		// individual item sync
 		require_once $path.'includes/processes/class-mailchimp-woocommerce-cart-update.php';
 		require_once $path.'includes/processes/class-mailchimp-woocommerce-single-order.php';
 		require_once $path.'includes/processes/class-mailchimp-woocommerce-single-product.php';
-		require_once $path.'includes/processes/class-mailchimp-woocommerce-user-submit.php';
+        require_once $path.'includes/processes/class-mailchimp-woocommerce-single-coupon.php';
+        require_once $path.'includes/processes/class-mailchimp-woocommerce-user-submit.php';
 
 		// fire up the loader
 		$this->loader = new MailChimp_Woocommerce_Loader();
@@ -336,8 +341,19 @@ class MailChimp_Woocommerce {
 			$this->loader->add_action('woocommerce_add_to_cart', $service, 'handleCartUpdated');
 			$this->loader->add_action('woocommerce_cart_item_removed', $service, 'handleCartUpdated');
 
-			// save post hook for products
+			// save post hooks
 			$this->loader->add_action('save_post', $service, 'handlePostSaved', 10, 3);
+            $this->loader->add_action('wp_trash_post', $service, 'handlePostTrashed', 10);
+            $this->loader->add_action('untrashed_post', $service, 'handlePostRestored', 10);
+
+			//coupons
+            $this->loader->add_action('woocommerce_new_coupon', $service, 'handleNewCoupon', 10);
+            $this->loader->add_action('woocommerce_coupon_options_save', $service, 'handleCouponSaved', 10, 2);
+            $this->loader->add_action('woocommerce_api_create_coupon', $service, 'handleCouponSaved', 9, 2);
+
+            $this->loader->add_action('woocommerce_delete_coupon', $service, 'handleCouponTrashed', 10);
+            $this->loader->add_action('woocommerce_trash_coupon', $service, 'handleCouponTrashed', 10);
+            $this->loader->add_action('woocommerce_api_delete_coupon', $service, 'handleCouponTrashed', 9);
 
 			// handle the user registration hook
 			$this->loader->add_action('user_register', $service, 'handleUserRegistration');

@@ -29,6 +29,7 @@ class MailChimp_WooCommerce_Order
     protected $billing_address = null;
     protected $lines = array();
     protected $confirm_and_paid = false;
+    protected $promos = [];
 
     /**
      * @return array
@@ -125,6 +126,31 @@ class MailChimp_WooCommerce_Order
     }
 
     /**
+     * @param $code
+     * @param $amount
+     * @param bool $is_percentage
+     * @return $this
+     */
+    public function addDiscount($code, $amount, $is_percentage = false)
+    {
+        $this->promos[] = [
+            'code' => $code,
+            'amount_discounted' => $amount,
+            'type' => $is_percentage ? 'percent' : 'fixed'
+        ];
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function discounts()
+    {
+        return $this->promos;
+    }
+
+    /**
      * @return array
      */
     public function items()
@@ -161,7 +187,7 @@ class MailChimp_WooCommerce_Order
 
     /**
      * @param null $financial_status
-     * @return Order
+     * @return MailChimp_WooCommerce_Order
      */
     public function setFinancialStatus($financial_status)
     {
@@ -447,6 +473,7 @@ class MailChimp_WooCommerce_Order
             'updated_at_foreign' => (string) $this->getUpdatedAt(),
             'shipping_address' => $this->getShippingAddress()->toArray(),
             'billing_address' => $this->getBillingAddress()->toArray(),
+            'promos' => !empty($this->promos) ? $this->promos : null,
             'lines' => array_map(function ($item) {
                 /** @var MailChimp_WooCommerce_LineItem $item */
                 return $item->toArray();
@@ -480,6 +507,10 @@ class MailChimp_WooCommerce_Order
         if (array_key_exists('billing_address', $data) && is_array($data['billing_address'])) {
             $billing = new MailChimp_WooCommerce_Address();
             $this->billing_address = $billing->fromArray($data['billing_address']);
+        }
+
+        if (array_key_exists('promos', $data)) {
+            $this->promos = $data['promos'];
         }
 
         if (array_key_exists('lines', $data) && is_array($data['lines'])) {

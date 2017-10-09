@@ -54,7 +54,7 @@ if ( ! class_exists( 'WP_Worker' ) ) {
 			$this->payload->set_job( $job );
 
 			try {
-				$this->payload->handle();
+                $this->payload->handle();
 
 				if ( $this->payload->is_released() ) {
 					// Job manually released, release back onto queue

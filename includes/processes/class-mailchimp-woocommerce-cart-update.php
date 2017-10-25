@@ -160,7 +160,8 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
      */
     protected function transformLineItem($hash, $item)
     {
-        $product = new WC_Product($item['product_id']);
+        $product = wc_get_product($item['product_id']);
+        $price = $product ? $product->get_price() : 0;
 
         $line = new MailChimp_WooCommerce_LineItem();
         $line->setId($hash);
@@ -173,7 +174,7 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
         }
 
         $line->setQuantity($item['quantity']);
-        $line->setPrice($product->get_price());
+        $line->setPrice($price);
 
         return $line;
     }

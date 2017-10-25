@@ -44,7 +44,7 @@ class MailChimp_WooCommerce_Transform_Products
      */
     public function transform(WP_Post $post)
     {
-        $woo = new WC_Product($post);
+        $woo = wc_get_product($post);
 
         $variant_posts = $this->getProductVariantPosts($post->ID);
 
@@ -98,7 +98,7 @@ class MailChimp_WooCommerce_Transform_Products
             if (isset($post->post_type) && $post->post_type === 'product_variation') {
                 $woo = new WC_Product_Variation($post->ID);
             } else {
-                $woo = new WC_Product($post);
+                $woo = wc_get_product($post);
             }
         }
 

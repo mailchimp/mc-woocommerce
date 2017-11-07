@@ -11,17 +11,18 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your MailChimp list to track sales, create targeted emails, send abandoned cart emails, and more.
 
 == Description ==
-- MailChimp for WooCommerce is a free plugin that connects your WooCommerce store with your MailChimp account.
-- Your customers and their purchase data are automatically synced with MailChimp, so you can create targeted email campaigns based on buying behavior.
+Join the 16 million customers who use MailChimp, the world's largest marketing automation platform, to develop their e-commerce marketing strategy. With the official MailChimp for WooCommerce integration, your customers and their purchase data are automatically synced with your MailChimp account, making it easy to send targeted campaigns, automatically follow up with customers post-purchase, recommend products, recover abandoned carts, and measure the ROI of your marketing efforts. And it's completely free.
 
-You’ll have the power to:
+With MailChimp for WooCommerce, you’ll have the power to:
 
-- Sync list and purchase data
-- Create abandoned cart Automation workflows
-- Send product recommendations
-- Segment based on purchase history
-- View your results and measure ROI
-- Grow your audience and sell more stuff with Facebook Ad Campaigns in MailChimp
+- Sync list and purchase data.
+- Set up marketing automations to remind customers about items they left in their cart or viewed on your site, win back lapsed customers, and follow up post-purchase. (Now available for free accounts!)
+- Showcase product recommendations.
+- Track and segment customers based on purchase history and purchase frequency.
+- View detailed data on your marketing performance in your MailChimp Dashboard.
+- Grow your audience and sell more stuff with Facebook and Instagram Ad Campaigns in MailChimp.
+- Automatically embed a pop-up form that converts your website visitors to subscribers.
+- Add discount codes created in WooCommerce to your emails and automations with a Promo Code content block
 
 ###A note for current WooCommerce integration users
 This plugin supports our most powerful API 3.0 features, and is intended for users who have not yet integrated their WooCommerce stores with MailChimp.
@@ -33,10 +34,10 @@ You can run this new integration at the same time as your current WooCommerce in
 Here are some things to know before you begin this process.
 
 - This plugin requires you to have the [WooCommerce plugin](https://woocommerce.com/) already installed and activated in WordPress.
-- Your hosting environment must meet [WooCommerce's minimum requirements](https://docs.woocommerce.com/document/server-requirements), including PHP 5.6 or greater.
+- Your hosting environment must meet [WooCommerce's minimum requirements](https://docs.woocommerce.com/document/server-requirements), including PHP 7.0 or greater.
 - We recommend you use this plugin in a staging environment before installing it on production servers. To learn more about staging environments, [check out these related Wordpress plugins](https://wordpress.org/plugins/search.php?q=staging).
 - MailChimp for WooCommerce syncs the customer’s first name, last name, email address, and orders.
-- WooCommerce customers who haven't signed up for marketing emails will appear in the **Transactional** portion of your list, and cannot be exported. 
+- WooCommerce customers who haven't signed up for marketing emails will appear in the **Transactional** portion of your list, and cannot be exported.
 
 ###Task Roadmap
 You’ll need to do a few things to connect your WooCommerce store to MailChimp. 
@@ -51,10 +52,14 @@ For more information on settings and configuration, please visit our Knowledge B
 == Changelog ==
 
 = 2.0.2 =
-
 * Added new logs feature to help troubleshoot isolated sync and data feed issues.
 * Fixed bug with setting customers as Transactional during checkout if they had already opted in previously.
 * Fixed bug where abandoned cart automation still fired after a customer completed an order.
+
+= 2.0.1 =
+* Added support for "Connected Site" scripts.
+* Made physical address a required field for store setup.
+* Fixed order, cart timestamps to begin using UTC.
 
 = 2.0 = 
 * Support WooComerce 3.0 

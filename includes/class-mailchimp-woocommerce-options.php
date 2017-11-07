@@ -28,6 +28,12 @@ abstract class MailChimp_Woocommerce_Options
         $this->is_admin = current_user_can('administrator');
         if (get_option('mailchimp_woocommerce_plugin_do_activation_redirect', false)) {
             delete_option('mailchimp_woocommerce_plugin_do_activation_redirect');
+
+            // don't do the redirect while activating the plugin through the rest API. ( Bartosz from Woo asked for this )
+            if ((defined( 'REST_REQUEST' ) && REST_REQUEST)) {
+                return;
+            }
+
             if (!isset($_GET['activate-multi'])) {
                 wp_redirect("options-general.php?page=mailchimp-woocommerce");
             }

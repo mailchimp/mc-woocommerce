@@ -60,9 +60,9 @@ if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
     }
 </style>
 
-<?php if (!defined('PHP_VERSION_ID') || (PHP_VERSION_ID < 50600)): ?>
+<?php if (!defined('PHP_VERSION_ID') || (PHP_VERSION_ID < 70000)): ?>
     <div data-dismissible="notice-php-version" class="error notice notice-error is-dismissible">
-        <p><?php _e('MailChimp says: Please upgrade your PHP version to a minimum of 5.6', 'mailchimp-woocommerce'); ?></p>
+        <p><?php _e('MailChimp says: Please upgrade your PHP version to a minimum of 7.0', 'mailchimp-woocommerce'); ?></p>
     </div>
 <?php endif; ?>
 

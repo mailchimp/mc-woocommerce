@@ -91,18 +91,15 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
 
     /**
      * @param $order_id
-     * @param bool $is_update
      */
-    public function handleOrderStatusChanged($order_id, $is_update = true)
+    public function handleOrderStatusChanged($order_id)
     {
         if ($this->hasOption('mailchimp_api_key')) {
-
             // register this order is already in process..
             static::$pushed_orders[$order_id] = true;
-
             // queue up the single order to be processed.
             $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, null, null);
-            $handler->is_update = $is_update;
+            $handler->is_update = true;
             wp_queue($handler, 90);
         }
     }
@@ -210,7 +207,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
             if ('product' == $post->post_type) {
                 wp_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
             } elseif ('shop_order' == $post->post_type) {
-                $this->handleOrderStatusChanged($post_id, ($post->post_modified_gmt != $post->post_date_gmt));
+                $this->handleOrderStatusChanged($post_id);
             }
         }
     }

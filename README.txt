@@ -33,7 +33,7 @@ You can run this new integration at the same time as your current WooCommerce in
 Here are some things to know before you begin this process.
 
 - This plugin requires you to have the [WooCommerce plugin](https://woocommerce.com/) already installed and activated in WordPress.
-- Your hosting environment must meet [WooCommerce's minimum requirements](https://docs.woocommerce.com/document/server-requirements), including PHP 5.6 or greater.
+- Your hosting environment must meet [WooCommerce's minimum requirements](https://docs.woocommerce.com/document/server-requirements), including PHP 7.0 or greater.
 - We recommend you use this plugin in a staging environment before installing it on production servers. To learn more about staging environments, [check out these related Wordpress plugins](https://wordpress.org/plugins/search.php?q=staging).
 - MailChimp for WooCommerce syncs the customer’s first name, last name, email address, and orders.
 - WooCommerce customers who haven't signed up for marketing emails will appear in the **Transactional** portion of your list, and cannot be exported.

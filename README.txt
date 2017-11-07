@@ -22,6 +22,7 @@ With MailChimp for WooCommerce, you’ll have the power to:
 - View detailed data on your marketing performance in your MailChimp Dashboard.
 - Grow your audience and sell more stuff with Facebook and Instagram Ad Campaigns in MailChimp.
 - Automatically embed a pop-up form that converts your website visitors to subscribers.
+- Add discount codes created in WooCommerce to your emails and automations with a Promo Code content block
 
 ###A note for current WooCommerce integration users
 This plugin supports our most powerful API 3.0 features, and is intended for users who have not yet integrated their WooCommerce stores with MailChimp.

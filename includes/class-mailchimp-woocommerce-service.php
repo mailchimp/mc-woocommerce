@@ -117,12 +117,13 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     }
 
     /**
-     * @return bool
+     * @param null $updated
+     * @return bool|null
      */
-    public function handleCartUpdated()
+    public function handleCartUpdated($updated = null)
     {
-        if ($this->is_admin || $this->cart_was_submitted || !$this->hasOption('mailchimp_api_key')) {
-            return false;
+        if ($updated === false || $this->is_admin || $this->cart_was_submitted || !$this->hasOption('mailchimp_api_key')) {
+            return !is_null($updated) ? $updated : false;
         }
 
         if (empty($this->cart)) {
@@ -161,10 +162,10 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
                 wp_queue($handler);
             }
 
-            return true;
+            return !is_null($updated) ? $updated : true;
         }
 
-        return false;
+        return !is_null($updated) ? $updated : false;
     }
 
     /**

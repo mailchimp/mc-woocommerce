@@ -50,6 +50,11 @@ You’ll need to do a few things to connect your WooCommerce store to MailChimp.
 For more information on settings and configuration, please visit our Knowledge Base: [http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce](http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce)
 
 == Changelog ==
+= 2.1.1 =
+* To address performance issues previously reported, we've changed the action hook of "woocommerce_cart_updated" to use a filter "woocommerce_update_cart_action_cart_updated"
+
+= 2.1.0 =
+* Added Promo Code support.
 
 = 2.0.2 =
 * Added new logs feature to help troubleshoot isolated sync and data feed issues.

@@ -265,13 +265,7 @@ class MailChimp_WooCommerce_Transform_Orders
         // shipping does not have a phone number, so maybe use this?
         $address->setPhone($order->get_billing_phone());
 
-        $sfn = $order->get_billing_first_name();
-        $sln = $order->get_billing_last_name();
-
-        // if we have billing names set it here
-        if (!empty($sfn) && !empty($sln)) {
-            $address->setName("{$sfn} {$sln}");
-        }
+        $address->setName($order->get_shipping_first_name().' '.$order->get_shipping_last_name());
 
         return $address;
     }

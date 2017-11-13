@@ -106,11 +106,18 @@ class MailChimp_WooCommerce_Transform_Products
 
         $variant->setId($woo->get_id());
         $variant->setUrl($woo->get_permalink());
-        $variant->setBackorders($woo->backorders_allowed());
         $variant->setImageUrl(get_the_post_thumbnail_url($post));
-        $variant->setInventoryQuantity(($woo->managing_stock() ? $woo->get_stock_quantity() : 1));
         $variant->setPrice($woo->get_price());
         $variant->setSku($woo->get_sku());
+
+        // only set these properties if the product is currently visible or purchasable.
+        if ($woo->is_purchasable() && $woo->is_visible()) {
+            $variant->setBackorders($woo->backorders_allowed());
+            $variant->setInventoryQuantity(($woo->managing_stock() ? $woo->get_stock_quantity() : 1000000));
+        } else {
+            $variant->setBackorders(false);
+            $variant->setInventoryQuantity(0);
+        }
 
         if ($woo instanceof WC_Product_Variation) {
 

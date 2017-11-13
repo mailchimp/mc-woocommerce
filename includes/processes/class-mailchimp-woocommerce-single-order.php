@@ -15,6 +15,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
     public $campaign_id;
     public $landing_site;
     public $is_update = false;
+    public $is_admin_save = false;
     public $partially_refunded = false;
     protected $woo_order_number = false;
 
@@ -63,7 +64,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
             $call = ($api_response = $api->getStoreOrder($store_id, $woo_order_number)) ? 'updateStoreOrder' : 'addStoreOrder';
 
-            if ($call === 'addStoreOrder' && $this->is_update === true) {
+            if (!$this->is_admin_save && $call === 'addStoreOrder' && $this->is_update === true) {
                 return false;
             }
 
@@ -84,6 +85,11 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
                 // transform the order
                 $order = $job->transform($order_post);
+
+                // if the order is in failed or cancelled status - and it's brand new, we shouldn't submit it.
+                if ($call === 'addStoreOrder' && in_array($order->getFinancialStatus(), array('failed', 'cancelled'))) {
+                    return false;
+                }
 
                 mailchimp_debug('order_submit', "#{$woo_order_number}", $order->toArray());
 

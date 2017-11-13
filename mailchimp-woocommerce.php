@@ -16,7 +16,7 @@
  * Plugin Name:       MailChimp for WooCommerce
  * Plugin URI:        https://mailchimp.com/connect-your-store/
  * Description:       MailChimp - WooCommerce plugin
- * Version:           2.1.1
+ * Version:           2.1.2
  * Author:            MailChimp
  * Author URI:        https://mailchimp.com
  * License:           GPL-2.0+
@@ -24,7 +24,7 @@
  * Text Domain:       mailchimp-woocommerce
  * Domain Path:       /languages
  * Requires at least: 4.4
- * Tested up to: 4.8
+ * Tested up to: 4.9
  */
 
 // If this file is called directly, abort.
@@ -43,7 +43,7 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production',
-        'version' => '2.1.1',
+        'version' => '2.1.2',
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => class_exists('WC') ? WC()->version : null,
         'logging' => ($o && is_array($o) && isset($o['mailchimp_logging'])) ? $o['mailchimp_logging'] : 'none',
@@ -411,7 +411,9 @@ function mailchimp_get_connected_site_script_fragment() {
 }
 
 register_activation_hook( __FILE__, 'activate_mailchimp_woocommerce' );
-register_deactivation_hook( __FILE__, 'deactivate_mailchimp_woocommerce' );
+
+// cancelling out the deactivation hook code for now.
+//register_deactivation_hook( __FILE__, 'deactivate_mailchimp_woocommerce' );
 
 /**
  * The core plugin class that is used to define internationalization,

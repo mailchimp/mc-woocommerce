@@ -52,6 +52,11 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abtstra
 
             try {
 
+                // if the order is in failed or cancelled status - and it's brand new, we shouldn't submit it.
+                if ($call === 'addStoreOrder' && in_array($item->getFinancialStatus(), array('failed', 'cancelled'))) {
+                    return false;
+                }
+
                 // make the call
                 $response = $this->mailchimp()->$call($this->store_id, $item, false);
 

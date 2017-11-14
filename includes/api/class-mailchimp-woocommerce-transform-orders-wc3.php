@@ -331,6 +331,10 @@ class MailChimp_WooCommerce_Transform_Orders
     }
 
     /**
+     * "Pending payment" in the UI fires the order confirmation email MailChimp
+     * "Completed” in the UI fires the MailChimp Order Invoice
+     * "Cancelled" does what we think it does
+     *
      * @return array
      */
     public function getOrderStatuses()

@@ -33,14 +33,19 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 try {
     if (($options = get_option('mailchimp-woocommerce', false)) && is_array($options)) {
         if (isset($options['mailchimp_api_key'])) {
-            if (!class_exists('MailChimp_WooCommerce_MailChimpApi')) {
-                require_once 'includes/api/class-mailchimp-api.php';
+            $store_id = get_option('mailchimp-woocommerce-store_id', false);
+            if (!empty($store_id)) {
+                if (!class_exists('MailChimp_WooCommerce_MailChimpApi')) {
+                    require_once 'includes/api/class-mailchimp-api.php';
+                    require_once 'includes/api/errors/class-mailchimp-error.php';
+                    require_once 'includes/api/errors/class-mailchimp-server-error.php';
+                }
+                $api = new MailChimp_WooCommerce_MailChimpApi($options['mailchimp_api_key']);
+                $api->deleteStore($store_id);
             }
-            $api = new MailChimp_WooCommerce_MailChimpApi($options['mailchimp_api_key']);
-            $api->deleteStore(mailchimp_get_store_id());
         }
     }
-} catch (\Exception $e) {}
+} catch (\Throwable $e) {}
 
 delete_option('mailchimp-woocommerce');
 delete_option('mailchimp-woocommerce-errors.store_info');

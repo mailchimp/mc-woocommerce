@@ -1,3 +1,5 @@
+<?php if (!defined( 'WPINC' )) {die;} ?>
+
 <?php if(isset($_GET['error_notice']) && file_exists(__DIR__.'/errors/'.$_GET['error_notice'].'.php')): ?>
     <?php include(__DIR__.'/errors/'.$_GET['error_notice'].'.php'); ?>
 <?php endif; ?>

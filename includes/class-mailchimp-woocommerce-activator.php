@@ -40,7 +40,7 @@ class MailChimp_Woocommerce_Activator {
         $saved_store_id = get_option('mailchimp-woocommerce-store_id', false);
         if (empty($saved_store_id)) {
             // add a store id flag which will be a random hash
-            update_option('mailchimp-woocommerce-store_id', md5(get_option('siteurl')), 'yes');
+            update_option('mailchimp-woocommerce-store_id', uniqid(), 'yes');
         }
 
         // try this now for existing stores on an update.

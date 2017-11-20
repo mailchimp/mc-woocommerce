@@ -68,10 +68,7 @@ function mailchimp_get_list_id() {
 function mailchimp_get_store_id() {
     $store_id = mailchimp_get_data('store_id', false);
     if (empty($store_id)) {
-        // this is for the previous installs that had been applying the MC store id as the siteurl.
-        // patched to the random hash because people were changing this value for various reasons.
-        $store_id = md5(get_option('siteurl'));
-        mailchimp_set_data('store_id', $store_id, 'yes');
+        mailchimp_set_data('store_id', $store_id = uniqid(), 'yes');
     }
     return $store_id;
 }

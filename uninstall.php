@@ -30,10 +30,15 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
+error_log("uninstalling the mailchimp for woocommerce plugin");
+
 try {
     if (($options = get_option('mailchimp-woocommerce', false)) && is_array($options)) {
         if (isset($options['mailchimp_api_key'])) {
             $store_id = get_option('mailchimp-woocommerce-store_id', false);
+
+            error_log("store id {$store_id} is going to be removed from MailChimp");
+
             if (!empty($store_id)) {
                 if (!class_exists('MailChimp_WooCommerce_MailChimpApi')) {
                     require_once 'includes/api/class-mailchimp-api.php';
@@ -41,12 +46,16 @@ try {
                     require_once 'includes/api/errors/class-mailchimp-server-error.php';
                 }
                 $api = new MailChimp_WooCommerce_MailChimpApi($options['mailchimp_api_key']);
-                $api->deleteStore($store_id);
+                $result = $api->deleteStore($store_id) ? 'has been deleted' : 'did not delete';
+                error_log("store id {$store_id} {$result} MailChimp");
             }
         }
     }
-} catch (\Throwable $e) {}
+} catch (\Excption $e) {
+    error_log($e->getMessage().' on '.$e->getLine().' in '.$e->getFile());
+}
 
+delete_option('mailchimp-woocommerce-store_id');
 delete_option('mailchimp-woocommerce');
 delete_option('mailchimp-woocommerce-errors.store_info');
 delete_option('mailchimp-woocommerce-sync.orders.completed_at');

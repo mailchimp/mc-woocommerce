@@ -30,14 +30,30 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-error_log("uninstalling the mailchimp for woocommerce plugin");
+if (!function_exists('mailchimp_environment_variables')) {
+    /**
+     * @return object
+     */
+    function mailchimp_environment_variables() {
+        global $wp_version;
+
+        $o = get_option('mailchimp-woocommerce', false);
+
+        return (object) array(
+            'repo' => 'master',
+            'environment' => 'production',
+            'version' => '2.1.2',
+            'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
+            'wc_version' => class_exists('WC') ? WC()->version : null,
+            'logging' => ($o && is_array($o) && isset($o['mailchimp_logging'])) ? $o['mailchimp_logging'] : 'none',
+        );
+    }
+}
 
 try {
     if (($options = get_option('mailchimp-woocommerce', false)) && is_array($options)) {
         if (isset($options['mailchimp_api_key'])) {
             $store_id = get_option('mailchimp-woocommerce-store_id', false);
-
-            error_log("store id {$store_id} is going to be removed from MailChimp");
 
             if (!empty($store_id)) {
                 if (!class_exists('MailChimp_WooCommerce_MailChimpApi')) {

@@ -29,12 +29,21 @@ class MailChimp_Woocommerce_Activator {
 		static::create_queue_tables();
 
 		// update the settings so we have them for use.
-		update_option('mailchimp-woocommerce', array());
+        $saved_options = get_option('mailchimp-woocommerce', false);
 
-		// add a store id flag which will be a random hash
-		update_option('mailchimp-woocommerce-store_id', md5(get_option('siteurl')), 'yes');
+        // if we haven't saved options previously, we will need to create the site id and update base options
+        if (empty($saved_options)) {
+            update_option('mailchimp-woocommerce', array());
+        }
 
-		// try this now for existing stores on an update.
+        // if we haven't saved the store id yet.
+        $saved_store_id = get_option('mailchimp-woocommerce-store_id', false);
+        if (empty($saved_store_id)) {
+            // add a store id flag which will be a random hash
+            update_option('mailchimp-woocommerce-store_id', uniqid(), 'yes');
+        }
+
+        // try this now for existing stores on an update.
         mailchimp_update_connected_site_script();
 	}
 

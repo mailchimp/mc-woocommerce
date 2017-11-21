@@ -30,6 +30,48 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
+if (!function_exists('mailchimp_environment_variables')) {
+    /**
+     * @return object
+     */
+    function mailchimp_environment_variables() {
+        global $wp_version;
+
+        $o = get_option('mailchimp-woocommerce', false);
+
+        return (object) array(
+            'repo' => 'master',
+            'environment' => 'production',
+            'version' => '2.1.2',
+            'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
+            'wc_version' => class_exists('WC') ? WC()->version : null,
+            'logging' => ($o && is_array($o) && isset($o['mailchimp_logging'])) ? $o['mailchimp_logging'] : 'none',
+        );
+    }
+}
+
+try {
+    if (($options = get_option('mailchimp-woocommerce', false)) && is_array($options)) {
+        if (isset($options['mailchimp_api_key'])) {
+            $store_id = get_option('mailchimp-woocommerce-store_id', false);
+
+            if (!empty($store_id)) {
+                if (!class_exists('MailChimp_WooCommerce_MailChimpApi')) {
+                    require_once 'includes/api/class-mailchimp-api.php';
+                    require_once 'includes/api/errors/class-mailchimp-error.php';
+                    require_once 'includes/api/errors/class-mailchimp-server-error.php';
+                }
+                $api = new MailChimp_WooCommerce_MailChimpApi($options['mailchimp_api_key']);
+                $result = $api->deleteStore($store_id) ? 'has been deleted' : 'did not delete';
+                error_log("store id {$store_id} {$result} MailChimp");
+            }
+        }
+    }
+} catch (\Exception $e) {
+    error_log($e->getMessage().' on '.$e->getLine().' in '.$e->getFile());
+}
+
+delete_option('mailchimp-woocommerce-store_id');
 delete_option('mailchimp-woocommerce');
 delete_option('mailchimp-woocommerce-errors.store_info');
 delete_option('mailchimp-woocommerce-sync.orders.completed_at');

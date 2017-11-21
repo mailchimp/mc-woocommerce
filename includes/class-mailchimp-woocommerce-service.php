@@ -91,8 +91,9 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
 
     /**
      * @param $order_id
+     * @param bool $is_admin
      */
-    public function handleOrderStatusChanged($order_id)
+    public function handleOrderStatusChanged($order_id, $is_admin = false)
     {
         if ($this->hasOption('mailchimp_api_key')) {
             // register this order is already in process..
@@ -100,6 +101,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
             // queue up the single order to be processed.
             $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, null, null);
             $handler->is_update = true;
+            $handler->is_admin_save = $is_admin;
             wp_queue($handler, 90);
         }
     }
@@ -208,7 +210,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
             if ('product' == $post->post_type) {
                 wp_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
             } elseif ('shop_order' == $post->post_type) {
-                $this->handleOrderStatusChanged($post_id);
+                $this->handleOrderStatusChanged($post_id, is_admin());
             }
         }
     }

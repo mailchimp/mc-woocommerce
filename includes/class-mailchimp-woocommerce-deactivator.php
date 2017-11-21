@@ -30,13 +30,7 @@ class MailChimp_Woocommerce_Deactivator {
 	 * @since    1.0.0
 	 */
 	public static function deactivate() {
-		// if the api is valid, we need to try to delete the store
-		if (($api = mailchimp_get_api())) {
-			$api->deleteStore(mailchimp_get_store_id());
-		}
 
-		delete_option('mailchimp-woocommerce-sync.started_at');
-		delete_option('mailchimp-woocommerce-sync.completed_at');
 	}
 
 }

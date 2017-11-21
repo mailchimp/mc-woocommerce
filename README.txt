@@ -56,6 +56,19 @@ For more information on settings and configuration, please visit our Knowledge B
 = 2.1.0 =
 * Added Promo Code support.
 
+= 2.1.2 =
+* Fix store deletion on plugin deactivation
+* Correct shipping name is now used on order notifications.
+* Admin orders are now handled appropriately.
+* Skip incomplete or cancelled orders from being submitted when new.
+* fix hidden or inactive products from being recommended.
+
+= 2.1.1 =
+* To address performance issues previously reported, we've changed the action hook of "woocommerce_cart_updated" to use a filter "woocommerce_update_cart_action_cart_updated"
+
+= 2.1.0 =
+* Added Promo Code support.
+
 = 2.0.2 =
 * Added new logs feature to help troubleshoot isolated sync and data feed issues.
 * Fixed bug with setting customers as Transactional during checkout if they had already opted in previously.

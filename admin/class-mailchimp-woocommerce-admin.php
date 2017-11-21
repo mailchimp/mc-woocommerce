@@ -765,7 +765,12 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 			$data = $this->getOptions();
 		}
 
-		$site_url = $this->getUniqueStoreID();
+        $list_id = $this->array_get($data, 'mailchimp_list', false);
+        $site_url = $this->getUniqueStoreID();
+
+		if (empty($list_id) || empty($site_url)) {
+		    return false;
+        }
 
 		$new = false;
 
@@ -774,7 +779,6 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 			$store = new MailChimp_WooCommerce_Store();
 		}
 
-		$list_id = $this->array_get($data, 'mailchimp_list', false);
 		$call = $new ? 'addStore' : 'updateStore';
 		$time_key = $new ? 'store_created_at' : 'store_updated_at';
 
@@ -808,7 +812,7 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 
 			// on a new store push, we need to make sure we save the site script into a local variable.
 			if ($new) {
-			    mailchimp_update_connected_site_script();
+                mailchimp_update_connected_site_script();
             }
 
 			return true;

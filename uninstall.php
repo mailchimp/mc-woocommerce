@@ -51,7 +51,7 @@ try {
             }
         }
     }
-} catch (\Excption $e) {
+} catch (\Exception $e) {
     error_log($e->getMessage().' on '.$e->getLine().' in '.$e->getFile());
 }
 

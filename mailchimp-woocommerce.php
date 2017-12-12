@@ -192,29 +192,35 @@ function mailchimp_get_timezone_list() {
 }
 
 /**
+ * @return bool
+ */
+function mailchimp_check_woocommerce_plugin_status()
+{
+    if (is_plugin_active('woocommerce/woocommerce.php')) {
+        return true;
+    }
+    $active = false;
+    // some people may have uploaded a specific version of woo, so we need a fallback checker here.
+    foreach (array_keys(get_plugins()) as $plugin) {
+        if (mailchimp_string_contains($plugin, 'woocommerce.php')) {
+            $active = true;
+            break;
+        }
+    }
+    return $active;
+}
+
+/**
  * The code that runs during plugin activation.
  * This action is documented in includes/class-mailchimp-woocommerce-activator.php
  */
 function activate_mailchimp_woocommerce() {
     // if we don't have woocommerce we need to display a horrible error message before the plugin is installed.
-    if (!is_plugin_active('woocommerce/woocommerce.php')) {
-
-        $active = false;
-
-        // some people may have uploaded a specific version of woo, so we need a fallback checker here.
-        foreach (array_keys(get_plugins()) as $plugin) {
-            if (mailchimp_string_contains($plugin, 'woocommerce.php')) {
-                $active = true;
-                break;
-            }
-        }
-
-        if (!$active) {
-            // Deactivate the plugin
-            deactivate_plugins(__FILE__);
-            $error_message = __('The MailChimp For WooCommerce plugin requires the <a href="http://wordpress.org/extend/plugins/woocommerce/">WooCommerce</a> plugin to be active!', 'woocommerce');
-            wp_die($error_message);
-        }
+    if (!mailchimp_check_woocommerce_plugin_status()) {
+        // Deactivate the plugin
+        deactivate_plugins(__FILE__);
+        $error_message = __('The MailChimp For WooCommerce plugin requires the <a href="http://wordpress.org/extend/plugins/woocommerce/">WooCommerce</a> plugin to be active!', 'woocommerce');
+        wp_die($error_message);
     }
 
     // ok we can activate this thing.
@@ -443,7 +449,8 @@ function mailchimp_woocommerce_add_meta_tags() {
     echo '<meta name="referrer" content="always"/>';
 }
 
-add_action('wp_head', 'mailchimp_woocommerce_add_meta_tags');
-
-/** Add all the MailChimp hooks. */
-run_mailchimp_woocommerce();
+if (mailchimp_check_woocommerce_plugin_status()) {
+    add_action('wp_head', 'mailchimp_woocommerce_add_meta_tags');
+    /** Add all the MailChimp hooks. */
+    run_mailchimp_woocommerce();
+}

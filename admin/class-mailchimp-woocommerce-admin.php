@@ -292,6 +292,9 @@ class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 		if (empty($data['mailchimp_api_key']) || !($profile = $api->ping(true))) {
 			unset($data['mailchimp_api_key']);
 			$valid = false;
+			if (!$profile) {
+			    add_settings_error('mailchimp_store_settings', '', 'API Key Invalid');
+            }
 		}
 
 		// tell our reporting system whether or not we had a valid ping.

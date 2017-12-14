@@ -82,7 +82,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
 </fieldset>
 
 <h2 style="padding-top: 1em;">Opt-in Settings</h2>
-<p>Add text to go along with the opt-in checkbox, and choose a default display option.</p>
+<p>Add text to go along with the opt-in checkbox, and choose a default display option. Customers can click a box at checkout to opt in to your newsletter. Write a signup message and choose how you want this checkbox to appear. </p>
 
 <fieldset>
     <legend class="screen-reader-text">

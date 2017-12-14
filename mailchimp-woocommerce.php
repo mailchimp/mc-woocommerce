@@ -196,9 +196,14 @@ function mailchimp_get_timezone_list() {
  */
 function mailchimp_check_woocommerce_plugin_status()
 {
-    if (is_plugin_active('woocommerce/woocommerce.php')) {
+    if (function_exists('is_plugin_active') && is_plugin_active('woocommerce/woocommerce.php')) {
         return true;
     }
+
+    if (!function_exists('get_plugins')) {
+        return true;
+    }
+
     $active = false;
     // some people may have uploaded a specific version of woo, so we need a fallback checker here.
     foreach (array_keys(get_plugins()) as $plugin) {

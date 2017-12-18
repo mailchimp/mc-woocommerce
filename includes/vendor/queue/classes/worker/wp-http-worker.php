@@ -253,27 +253,21 @@ if ( ! class_exists( 'WP_Http_Worker' ) ) {
 			return wp_remote_post( esc_url_raw( $url ), $post_args );
 		}
 
-		/**
-		 * Handle cron
-		 *
-		 * Restart the HTTP worker if not already running
-		 * and data exists in the queue.
-		 */
-		public function handle_cron() {
-			if ( $this->is_worker_running() ) {
-				// Worker already running, die
-				wp_die();
-			}
+        /**
+         * @return bool
+         */
+        public function handle_cron() {
+            if ($this->is_worker_running()) {
+                wp_die();
+            }
 
-			if ( ! $this->queue->available_jobs() ) {
-				// No jobs on the queue to process, die
-				wp_die();
-			}
+            if ($this->queue->available_jobs()) {
+                $this->dispatch();
+                return true;
+            }
 
-			$this->dispatch();
-
-			exit;
-		}
+            return false;
+        }
 
 		/**
 		 * Cron schedules

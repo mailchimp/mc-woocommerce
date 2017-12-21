@@ -169,7 +169,7 @@ class MailChimp_WooCommerce_Transform_Orders
         }
 
         // apply the coupon discounts
-        if (($used_coupons = $woo->get_used_coupons()) && is_array($used_coupons)) {
+        if (function_exists('wc_get_coupon_id_by_code') && ($used_coupons = $woo->get_used_coupons()) && is_array($used_coupons)) {
             foreach ($used_coupons as $coupon_code) {
                 if (($coupon_id = wc_get_coupon_id_by_code($coupon_code))) {
                     $coupon = new WC_Coupon($coupon_id);

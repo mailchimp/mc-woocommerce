@@ -84,6 +84,12 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
             return false;
         }
 
+        // don't let anyone be unsubscribed from the list - that should only happen on email campaigns
+        // and someone clicking the unsubscribe linkage.
+        if (!$this->subscribed) {
+            return false;
+        }
+
         $api = new MailChimp_WooCommerce_MailChimpApi($api_key);
 
         $merge_vars = array();

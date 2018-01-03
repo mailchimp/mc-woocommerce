@@ -201,18 +201,16 @@ function mailchimp_check_woocommerce_plugin_status()
     }
 
     if (!function_exists('get_plugins')) {
-        return true;
+        return class_exists('WC');
     }
 
-    $active = false;
     // some people may have uploaded a specific version of woo, so we need a fallback checker here.
     foreach (array_keys(get_plugins()) as $plugin) {
         if (mailchimp_string_contains($plugin, 'woocommerce.php')) {
-            $active = true;
-            break;
+            return true;
         }
     }
-    return $active;
+    return false;
 }
 
 /**

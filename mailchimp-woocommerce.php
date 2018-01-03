@@ -165,7 +165,7 @@ function mailchimp_array_remove_empty($data) {
         return array();
     }
     foreach ($data as $key => $value) {
-        if ($value === null || $value === '') {
+        if ($value === null || $value === '' || (is_array($value) && empty($value))) {
             unset($data[$key]);
         }
     }

@@ -133,9 +133,10 @@ if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
     <?php if ($active_tab == 'sync'): ?>
         <h2 style="padding-top: 1em;">More Information</h2>
         <p>
-            Need help troubleshooting or connecting your store? Visit our MailChimp for WooCommerce
-            <a href="http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce/" target="_blank">knowledge base</a> at anytime. Also, be sure to
-            <a href="https://wordpress.org/support/plugin/mailchimp-for-woocommerce/reviews/" target="_blank">leave a review</a> and let us know how we're doing.
+            Need help to connect your store? Visit the MailChimp
+            <a href="http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce/" target="_blank">Knowledge Base</a>.<br/>
+            Want to tell us how we're doing?
+            <a href="https://wordpress.org/support/plugin/mailchimp-for-woocommerce/reviews/" target="_blank">Leave a review on Wordpress.org</a>.
         </p>
     <?php endif; ?>
 

@@ -38,7 +38,7 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abtstra
             if (!($status = $item->getCustomer()->getOptInStatus())) {
                 try {
                     $subscriber = $this->mailchimp()->member(mailchimp_get_list_id(), $item->getCustomer()->getEmailAddress());
-                    $status = $subscriber['status'] !== 'unsubscribed';
+                    $status = !in_array($subscriber['status'], array('unsubscribed', 'transactional'));
                 } catch (\Exception $e) {
                     $status = (bool) $this->getOption('mailchimp_auto_subscribe', true);
                 }

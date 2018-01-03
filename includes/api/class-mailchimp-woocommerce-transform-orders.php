@@ -212,7 +212,8 @@ class MailChimp_WooCommerce_Transform_Orders
         if (!$subscribed_on_order) {
             try {
                 $subscriber = mailchimp_get_api()->member(mailchimp_get_list_id(), $customer->getEmailAddress());
-                $customer->setOptInStatus(($subscriber['status'] !== 'unsubscribed'));
+                $status = !in_array($subscriber['status'], array('unsubscribed', 'transactional'));
+                $customer->setOptInStatus($status);
             } catch (\Exception $e) {}
         }
 

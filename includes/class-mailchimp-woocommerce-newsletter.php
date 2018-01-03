@@ -74,7 +74,6 @@ class MailChimp_Newsletter extends MailChimp_Woocommerce_Options
      */
     public function processRegistrationForm($sanitized_user_login, $user_email, $reg_errors)
     {
-
         if (defined('WOOCOMMERCE_CHECKOUT')) {
             return; // Ship checkout
         }

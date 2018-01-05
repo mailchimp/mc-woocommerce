@@ -196,21 +196,8 @@ function mailchimp_get_timezone_list() {
  */
 function mailchimp_check_woocommerce_plugin_status()
 {
-    if (function_exists('is_plugin_active') && is_plugin_active('woocommerce/woocommerce.php')) {
-        return true;
-    }
-
-    if (!function_exists('get_plugins')) {
-        return class_exists('WC');
-    }
-
-    // some people may have uploaded a specific version of woo, so we need a fallback checker here.
-    foreach (array_keys(get_plugins()) as $plugin) {
-        if (mailchimp_string_contains($plugin, 'woocommerce.php')) {
-            return true;
-        }
-    }
-    return false;
+    if (defined("RUNNING_CUSTOM_WOOCOMMERCE") && RUNNING_CUSTOM_WOOCOMMERCE === true) return true;
+    return in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option('active_plugins')));
 }
 
 /**

@@ -325,7 +325,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
     public function getCartItems()
     {
         if (!($this->cart = $this->getWooSession('cart', false))) {
-            $this->cart = WC()->cart->get_cart();
+            $this->cart = function_exists('WC') ? false : WC()->cart->get_cart();
         } else {
             $cart_session = array();
             foreach ( $this->cart as $key => $values ) {
@@ -503,6 +503,8 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function getWooSession($key, $default = null)
     {
+        if (!function_exists('WC')) return $default;
+
         if (!($woo = WC()) || empty($woo->session)) {
             return $default;
         }
@@ -516,6 +518,8 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function setWooSession($key, $value)
     {
+        if (!function_exists('WC')) return $this;
+
         if (!($woo = WC()) || empty($woo->session)) {
             return $this;
         }
@@ -531,6 +535,8 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function removeWooSession($key)
     {
+        if (!function_exists('WC')) return $this;
+
         if (!($woo = WC()) || empty($woo->session)) {
             return $this;
         }

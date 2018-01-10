@@ -82,7 +82,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
 </fieldset>
 
 <h2 style="padding-top: 1em;">Opt-in Settings</h2>
-<p>Add text to go along with the opt-in checkbox, and choose a default display option.</p>
+<p>Add text to go along with the opt-in checkbox, and choose a default display option. Customers can click a box at checkout to opt in to your newsletter. Write a signup message and choose how you want this checkbox to appear. </p>
 
 <fieldset>
     <legend class="screen-reader-text">
@@ -90,11 +90,11 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-newsletter-checkbox-label">
         <input style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-newsletter-checkbox-label" name="<?php echo $this->plugin_name; ?>[newsletter_label]" value="<?php echo isset($options['newsletter_label']) ? $options['newsletter_label'] : 'Subscribe to our newsletter' ?>" />
-        <span><?php esc_attr_e('Write a subscribe message for customers at checkout.', $this->plugin_name); ?></span>
+        <span><?php esc_attr_e('Enter text for the opt-in checkbox', $this->plugin_name); ?></span>
     </label>
 </fieldset>
 
-<h2 style="padding-top: 1em;">Checkbox Display Options</h2>
+<h4 style="padding-top: 1em;font-weight:normal;">Checkbox Display Options</h4>
 
 <fieldset>
     <legend class="screen-reader-text">
@@ -104,11 +104,11 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
         <?php $checkbox_default_settings = (array_key_exists('mailchimp_checkbox_defaults', $options) && !is_null($options['mailchimp_checkbox_defaults'])) ? $options['mailchimp_checkbox_defaults'] : 'check'; ?>
         <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_checkbox_defaults]" value="check"<?php if($checkbox_default_settings === 'check') echo ' checked="checked" '; ?>>Visible, checked by default<br>
         <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_checkbox_defaults]" value="uncheck"<?php if($checkbox_default_settings === 'uncheck') echo ' checked="checked" '; ?>>Visible, unchecked by default<br/>
-        <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_checkbox_defaults]" value="hide"<?php if($checkbox_default_settings === 'hide') echo ' checked="checked" '; ?>>Hidden, not opted by default<br/>
+        <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_checkbox_defaults]" value="hide"<?php if($checkbox_default_settings === 'hide') echo ' checked="checked" '; ?>>Hidden, unchecked by default<br/>
     </label>
 </fieldset>
 
-<h2 style="padding-top: 1em;">Advanced Checkbox Settings</h2>
+<h4 style="padding-top: 1em;font-weight:normal;">Advanced Checkbox Settings</h4>
 <p>
     To change the location of the opt-in checkbox at checkout, input one of the
     <a href="https://docs.woocommerce.com/wc-apidocs/hook-docs.html" target="_blank">
@@ -122,7 +122,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-newsletter-checkbox-action">
         <input style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-newsletter-checkbox-action" name="<?php echo $this->plugin_name; ?>[mailchimp_checkbox_action]" value="<?php echo isset($options['mailchimp_checkbox_action']) ? $options['mailchimp_checkbox_action'] : 'woocommerce_after_checkout_billing_form' ?>" />
-        <span><?php esc_attr_e('WooCommerce Action', $this->plugin_name); ?></span>
+        <span><?php esc_attr_e('Enter a WooCommerce form action', $this->plugin_name); ?></span>
     </label>
 </fieldset>
 

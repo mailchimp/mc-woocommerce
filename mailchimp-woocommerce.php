@@ -16,7 +16,7 @@
  * Plugin Name:       MailChimp for WooCommerce
  * Plugin URI:        https://mailchimp.com/connect-your-store/
  * Description:       MailChimp - WooCommerce plugin
- * Version:           2.1.2
+ * Version:           2.1.3
  * Author:            MailChimp
  * Author URI:        https://mailchimp.com
  * License:           GPL-2.0+
@@ -43,7 +43,7 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production',
-        'version' => '2.1.2',
+        'version' => '2.1.3',
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => class_exists('WC') ? WC()->version : null,
         'logging' => ($o && is_array($o) && isset($o['mailchimp_logging'])) ? $o['mailchimp_logging'] : 'none',
@@ -165,7 +165,7 @@ function mailchimp_array_remove_empty($data) {
         return array();
     }
     foreach ($data as $key => $value) {
-        if ($value === null || $value === '') {
+        if ($value === null || $value === '' || (is_array($value) && empty($value))) {
             unset($data[$key]);
         }
     }
@@ -192,29 +192,25 @@ function mailchimp_get_timezone_list() {
 }
 
 /**
+ * @return bool
+ */
+function mailchimp_check_woocommerce_plugin_status()
+{
+    if (defined("RUNNING_CUSTOM_WOOCOMMERCE") && RUNNING_CUSTOM_WOOCOMMERCE === true) return true;
+    return in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option('active_plugins')));
+}
+
+/**
  * The code that runs during plugin activation.
  * This action is documented in includes/class-mailchimp-woocommerce-activator.php
  */
 function activate_mailchimp_woocommerce() {
     // if we don't have woocommerce we need to display a horrible error message before the plugin is installed.
-    if (!is_plugin_active('woocommerce/woocommerce.php')) {
-
-        $active = false;
-
-        // some people may have uploaded a specific version of woo, so we need a fallback checker here.
-        foreach (array_keys(get_plugins()) as $plugin) {
-            if (mailchimp_string_contains($plugin, 'woocommerce.php')) {
-                $active = true;
-                break;
-            }
-        }
-
-        if (!$active) {
-            // Deactivate the plugin
-            deactivate_plugins(__FILE__);
-            $error_message = __('The MailChimp For WooCommerce plugin requires the <a href="http://wordpress.org/extend/plugins/woocommerce/">WooCommerce</a> plugin to be active!', 'woocommerce');
-            wp_die($error_message);
-        }
+    if (!mailchimp_check_woocommerce_plugin_status()) {
+        // Deactivate the plugin
+        deactivate_plugins(__FILE__);
+        $error_message = __('The MailChimp For WooCommerce plugin requires the <a href="http://wordpress.org/extend/plugins/woocommerce/">WooCommerce</a> plugin to be active!', 'woocommerce');
+        wp_die($error_message);
     }
 
     // ok we can activate this thing.
@@ -443,7 +439,8 @@ function mailchimp_woocommerce_add_meta_tags() {
     echo '<meta name="referrer" content="always"/>';
 }
 
-add_action('wp_head', 'mailchimp_woocommerce_add_meta_tags');
-
-/** Add all the MailChimp hooks. */
-run_mailchimp_woocommerce();
+if (mailchimp_check_woocommerce_plugin_status()) {
+    add_action('wp_head', 'mailchimp_woocommerce_add_meta_tags');
+    /** Add all the MailChimp hooks. */
+    run_mailchimp_woocommerce();
+}

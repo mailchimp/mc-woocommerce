@@ -24,10 +24,12 @@ With MailChimp for WooCommerce, you’ll have the power to:
 - Automatically embed a pop-up form that converts your website visitors to subscribers.
 - Add discount codes created in WooCommerce to your emails and automations with a Promo Code content block
 
-###A note for current WooCommerce integration users
+###Important Notes
 This plugin supports our most powerful API 3.0 features, and is intended for users who have not yet integrated their WooCommerce stores with MailChimp.
 
 You can run this new integration at the same time as your current WooCommerce integration for MailChimp. However, data from the older integration will display separately in subscriber profiles, and can’t be used with e-commerce features that require API 3.0.
+
+This plugin is not compatible for WordPress.com users at this time.
 
 == Installation ==
 ###Before You Start

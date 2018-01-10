@@ -51,6 +51,14 @@ For more information on settings and configuration, please visit our Knowledge B
 
 == Changelog ==
 
+= 2.1.3 =
+* Fix subscriber status for repeat transactional customers to stay transactional.
+* Remove shipping and billing address requirements for order submission.
+* Do not unsubscribe someone who has previously subscribed when unchecking the newsletter sign up box.
+* Update newsletter checkbox style to be consistent with WooCommerce styles.
+* Make sure WooCommerce plugin is running before running any plugin code.
+* Fix compatibility issue with WP-Cron
+
 = 2.1.2 =
 * Fix store deletion on plugin deactivation
 * Correct shipping name is now used on order notifications.

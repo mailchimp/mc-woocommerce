@@ -73,6 +73,7 @@ class MailChimp_WooCommerce_CurrencyCodes
             'BAM' => array('Marka', '977'),
             'MUR' => array('Mauritius Rupee', '480'),
             'MXN' => array('Mexican Pesos', '484'),
+            'MDL' => array('Moldovan Leu', '498'),
             'MZM' => array('Mozambique Metical', '508'),
             'NPR' => array('Nepalese Rupee', '524'),
             'ANG' => array('Netherlands Antilles Guilder', '532'),

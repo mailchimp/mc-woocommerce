@@ -99,6 +99,8 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
 
         if (!empty($fn)) $merge_vars['FNAME'] = $fn;
         if (!empty($ln)) $merge_vars['LNAME'] = $ln;
+        
+        $merge_vars = apply_filters( 'mailchimp_sync_user_mergetags', $user, $merge_vars );
 
         try {
 

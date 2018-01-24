@@ -30,6 +30,25 @@ class MailChimp_WooCommerce_Order
     protected $lines = array();
     protected $confirm_and_paid = false;
     protected $promos = [];
+    protected $is_amazon_order = false;
+
+    /**
+     * @param $bool
+     * @return $this
+     */
+    public function flagAsAmazonOrder($bool)
+    {
+        $this->is_amazon_order = (bool) $bool;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFlaggedAsAmazonOrder()
+    {
+        return (bool) $this->is_amazon_order;
+    }
 
     /**
      * @return array

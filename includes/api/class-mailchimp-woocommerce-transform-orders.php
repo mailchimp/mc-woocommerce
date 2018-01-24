@@ -39,8 +39,11 @@ class MailChimp_WooCommerce_Transform_Orders
                     continue;
                 }
 
-                $response->valid++;
-                $response->items[] = $this->transform($post);
+                $order = $this->transform($post);
+                if (!$order->isFlaggedAsAmazonOrder()) {
+                    $response->valid++;
+                    $response->items[] = $order;
+                }
             }
         }
 
@@ -77,6 +80,11 @@ class MailChimp_WooCommerce_Transform_Orders
         $woo = new WC_Order($post);
 
         $order = new MailChimp_WooCommerce_Order();
+
+        // just skip these altogether because we can't submit any amazon orders anyway.
+        if (mailchimp_string_contains($woo->billing_email, '@marketplace.amazon.com')) {
+            return $order->flagAsAmazonOrder(true);
+        }
 
         $order->setId($woo->get_order_number());
 

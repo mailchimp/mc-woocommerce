@@ -33,13 +33,17 @@ class MailChimp_WooCommerce_Transform_Orders
         if ((($orders = $this->getOrderPosts($page, $limit)) && !empty($orders))) {
             foreach ($orders as $post) {
                 $response->count++;
+
                 if ($post->post_status === 'auto-draft') {
                     $response->drafts++;
                     continue;
                 }
 
-                $response->valid++;
-                $response->items[] = $this->transform($post);
+                $order = $this->transform($post);
+                if (!$order->isFlaggedAsAmazonOrder()) {
+                    $response->valid++;
+                    $response->items[] = $order;
+                }
             }
         }
 
@@ -57,6 +61,11 @@ class MailChimp_WooCommerce_Transform_Orders
         $woo = new WC_Order($post);
 
         $order = new MailChimp_WooCommerce_Order();
+
+        // just skip these altogether because we can't submit any amazon orders anyway.
+        if (mailchimp_string_contains($woo->billing_email, '@marketplace.amazon.com')) {
+            return $order->flagAsAmazonOrder(true);
+        }
 
         $order->setId($woo->get_order_number());
 

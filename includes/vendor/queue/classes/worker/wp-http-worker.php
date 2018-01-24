@@ -295,21 +295,9 @@ if ( ! class_exists( 'WP_Http_Worker' ) ) {
 		 * disabled and already scheduled.
 		 */
 		public function maybe_schedule_cron() {
-			if ( $this->is_http_worker_disabled() ) {
-				die('http worker is disabled');
-				// Remove health check cron event, if scheduled
-				$timestamp = wp_next_scheduled( 'http_worker_cron' );
-
-				if ( wp_next_scheduled( 'http_worker_cron' ) ) {
-					wp_unschedule_event( $timestamp, 'http_worker_cron' );
-				}
-
-				return;
-			}
-
-			if ( ! wp_next_scheduled( 'http_worker_cron' ) ) {
-				// Schedule health check
-				wp_schedule_event( time(), 'http_worker_cron_interval', 'http_worker_cron' );
+			if ( !$this->is_http_worker_disabled() && ! wp_next_scheduled( 'http_worker_cron' )) {
+                // Schedule health check
+                wp_schedule_event( time(), 'http_worker_cron_interval', 'http_worker_cron' );
 			}
 		}
 

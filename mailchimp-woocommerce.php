@@ -46,7 +46,7 @@ function mailchimp_environment_variables() {
         'version' => '2.1.3',
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => class_exists('WC') ? WC()->version : null,
-        'logging' => ($o && is_array($o) && isset($o['mailchimp_logging'])) ? $o['mailchimp_logging'] : 'none',
+        'logging' => ($o && is_array($o) && isset($o['mailchimp_logging'])) ? $o['mailchimp_logging'] : 'standard',
     );
 }
 
@@ -423,12 +423,6 @@ register_activation_hook( __FILE__, 'activate_mailchimp_woocommerce' );
 //register_deactivation_hook( __FILE__, 'deactivate_mailchimp_woocommerce' );
 
 /**
- * The core plugin class that is used to define internationalization,
- * admin-specific hooks, and public-facing site hooks.
- */
-require plugin_dir_path( __FILE__ ) . 'includes/class-mailchimp-woocommerce.php';
-
-/**
  *
  * Begins execution of the plugin.
  *
@@ -455,10 +449,17 @@ function mailchimp_woocommerce_add_meta_tags() {
 
 function mailchimp_on_all_plugins_loaded() {
     if (mailchimp_check_woocommerce_plugin_status()) {
+
+        /**
+         * The core plugin class that is used to define internationalization,
+         * admin-specific hooks, and public-facing site hooks.
+         */
+        require plugin_dir_path( __FILE__ ) . 'includes/class-mailchimp-woocommerce.php';
+
         add_action('wp_head', 'mailchimp_woocommerce_add_meta_tags');
         /** Add all the MailChimp hooks. */
         run_mailchimp_woocommerce();
     }
 }
 
-add_action( 'wp_loaded', 'mailchimp_on_all_plugins_loaded' );
+add_action( 'plugins_loaded', 'mailchimp_on_all_plugins_loaded' );

@@ -25,7 +25,8 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 }
 
 // only activate this if the hooks have not been registered previously in another plugin.
-if (!mailchimp_running_in_console() && !mailchimp_http_worker_is_running() && $wp_queue->available_jobs()) {
+if (!mailchimp_running_in_console() && !mailchimp_http_worker_is_running() && ($available_mc_jobs = $wp_queue->available_jobs())) {
+    //mailchimp_log('mc_events', 'http_worker_init');
     new WP_Http_Worker($wp_queue);
 }
 

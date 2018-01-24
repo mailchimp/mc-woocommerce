@@ -44,7 +44,6 @@ if ( ! class_exists( 'WP_Worker' ) ) {
 			$job = $this->queue->get_next_job();
 
 			if (empty($job)) {
-			    mailchimp_debug('wp-worker@process_next_job', 'empty job data');
 			    return true;
             }
 
@@ -54,7 +53,9 @@ if ( ! class_exists( 'WP_Worker' ) ) {
 			$this->payload->set_job( $job );
 
 			try {
+			    //mailchimp_debug('mc_events', 'wp_worker.process_next_job.start', array('payload' => $this->payload));
                 $this->payload->handle();
+                //mailchimp_debug('mc_events', 'wp_worker.process_next_job.complete', array('payload' => $this->payload));
 
 				if ( $this->payload->is_released() ) {
 					// Job manually released, release back onto queue
@@ -71,11 +72,8 @@ if ( ! class_exists( 'WP_Worker' ) ) {
 					$this->queue->delete( $job );
 				}
 			} catch ( Exception $e ) {
-
                 mailchimp_log('queue.error', "{$e->getMessage()} on {$e->getLine()} in {$e->getFile()}", array('job' => get_class($this->payload)));
-
 				$this->queue->release( $job );
-
 				return false;
 			}
 

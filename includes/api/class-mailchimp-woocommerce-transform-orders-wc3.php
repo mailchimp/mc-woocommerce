@@ -63,7 +63,7 @@ class MailChimp_WooCommerce_Transform_Orders
         $order = new MailChimp_WooCommerce_Order();
 
         // just skip these altogether because we can't submit any amazon orders anyway.
-        if (mailchimp_string_contains($woo->billing_email, '@marketplace.amazon.com')) {
+        if (mailchimp_string_contains($woo->get_billing_email(), '@marketplace.amazon.com')) {
             return $order->flagAsAmazonOrder(true);
         }
 

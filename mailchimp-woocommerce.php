@@ -403,6 +403,20 @@ function mailchimp_get_connected_site_script_fragment() {
     return get_option('mailchimp-woocommerce-script_fragment', false);
 }
 
+/**
+ * @return bool
+ */
+function mailchimp_running_in_console() {
+    return (bool) get_option('mailchimp-woocommerce-cli_enabled', false) === true;
+}
+
+/**
+ * @return bool
+ */
+function mailchimp_http_worker_is_running() {
+    return (bool) get_site_transient('http_worker_lock');
+}
+
 register_activation_hook( __FILE__, 'activate_mailchimp_woocommerce' );
 
 // cancelling out the deactivation hook code for now.
@@ -439,8 +453,12 @@ function mailchimp_woocommerce_add_meta_tags() {
     echo '<meta name="referrer" content="always"/>';
 }
 
-if (mailchimp_check_woocommerce_plugin_status()) {
-    add_action('wp_head', 'mailchimp_woocommerce_add_meta_tags');
-    /** Add all the MailChimp hooks. */
-    run_mailchimp_woocommerce();
+function mailchimp_on_all_plugins_loaded() {
+    if (mailchimp_check_woocommerce_plugin_status()) {
+        add_action('wp_head', 'mailchimp_woocommerce_add_meta_tags');
+        /** Add all the MailChimp hooks. */
+        run_mailchimp_woocommerce();
+    }
 }
+
+add_action( 'wp_loaded', 'mailchimp_on_all_plugins_loaded' );

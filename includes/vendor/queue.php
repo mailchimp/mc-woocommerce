@@ -24,8 +24,10 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	WP_CLI::add_command( 'queue', 'Queue_Command' );
 }
 
-// Instantiate HTTP queue worker
-new WP_Http_Worker($wp_queue);
+// only activate this if the hooks have not been registered previously in another plugin.
+if (!mailchimp_running_in_console() && !mailchimp_http_worker_is_running() && $wp_queue->available_jobs()) {
+    new WP_Http_Worker($wp_queue);
+}
 
 if ( ! function_exists( 'wp_queue' ) ) {
 	/**

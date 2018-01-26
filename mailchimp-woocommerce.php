@@ -407,7 +407,7 @@ function mailchimp_get_connected_site_script_fragment() {
  * @return bool
  */
 function mailchimp_running_in_console() {
-    return (bool) get_option('mailchimp-woocommerce-cli_enabled', false) === true;
+    return (bool) (defined( 'DISABLE_WP_HTTP_WORKER' ) && true === DISABLE_WP_HTTP_WORKER);
 }
 
 /**

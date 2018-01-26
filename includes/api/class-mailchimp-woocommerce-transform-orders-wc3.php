@@ -293,33 +293,22 @@ class MailChimp_WooCommerce_Transform_Orders
      */
     public function getOrderPosts($page = 1, $posts = 5)
     {
-        $orders = get_posts(array(
-            'post_type'   => wc_get_order_types(),
+        $params = array(
+            'post_type' => wc_get_order_types(),
             'post_status' => array_keys(wc_get_order_statuses()),
             'posts_per_page' => $posts,
             'paged' => $page,
             'orderby' => 'id',
-            'order' => 'ASC'
-        ));
+            'order' => 'ASC',
+        );
 
+        $orders = get_posts($params);
         if (empty($orders)) {
             sleep(2);
-
-            $orders = get_posts(array(
-                'post_type'   => wc_get_order_types(),
-                'post_status' => array_keys(wc_get_order_statuses()),
-                'posts_per_page' => $posts,
-                'paged' => $page,
-                'orderby' => 'id',
-                'order' => 'ASC'
-            ));
-
-            if (empty($orders)) {
-                return false;
-            }
+            $orders = get_posts($params);
         }
 
-        return $orders;
+        return empty($orders) ? false : $orders;
     }
 
     /**

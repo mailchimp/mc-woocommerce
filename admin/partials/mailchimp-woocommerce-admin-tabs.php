@@ -132,12 +132,12 @@ if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
 
     <?php if ($active_tab == 'sync'): ?>
         <h2 style="padding-top: 1em;">More Information</h2>
-        <p>
-            Need help to connect your store? Visit the MailChimp
-            <a href="http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce/" target="_blank">Knowledge Base</a>.<br/>
-            Want to tell us how we're doing?
-            <a href="https://wordpress.org/support/plugin/mailchimp-for-woocommerce/reviews/" target="_blank">Leave a review on Wordpress.org</a>.
-        </p>
+        <ul>
+            <li>Have a larger store or having issues syncing? Consider using <a href="https://github.com/mailchimp/mc-woocommerce/issues/158" target="_blank">WP-CLI</a>.</li>
+            <li>Order and customer information will not sync if they contain an Amazon or generic email address.</li>
+            <li>Need help to connect your store? Visit the MailChimp <a href="http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce/" target="_blank">Knowledge Base</a>.</li>
+            <li>Want to tell us how we're doing? <a href="https://wordpress.org/support/plugin/mailchimp-for-woocommerce/reviews/" target="_blank">Leave a review on Wordpress.org</a>.</li>
+        </ul>
     <?php endif; ?>
 
 </div><!-- /.wrap -->

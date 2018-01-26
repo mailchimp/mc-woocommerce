@@ -56,6 +56,12 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                 return false;
             }
 
+            // skip amazon orders
+            if ($this->isAmazonOrder()) {
+                mailchimp_log('validation.amazon', "Order #{$woo_order_number} was placed through Amazon. Skipping!");
+                return false;
+            }
+
             $job = new MailChimp_WooCommerce_Transform_Orders();
             $api = new MailChimp_WooCommerce_MailChimpApi($options['mailchimp_api_key']);
 
@@ -85,6 +91,12 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
                 // transform the order
                 $order = $job->transform($order_post);
+
+                // skip amazon orders
+                if ($order->isFlaggedAsAmazonOrder()) {
+                    mailchimp_log('validation.amazon', "Order #{$woo_order_number} was placed through Amazon. Skipping!");
+                    return false;
+                }
 
                 // if the order is in failed or cancelled status - and it's brand new, we shouldn't submit it.
                 if ($call === 'addStoreOrder' && in_array($order->getFinancialStatus(), array('failed', 'cancelled'))) {
@@ -202,6 +214,23 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
         } catch (\Exception $e) {
             $this->woo_order_number = false;
             mailchimp_error('order_sync.failure', mailchimp_error_trace($e, "{$this->order_id} could not be loaded"));
+            return false;
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAmazonOrder()
+    {
+        try {
+            if (empty($this->order_id) || !($order_post = get_post($this->order_id))) {
+                return false;
+            }
+            $woo = new WC_Order($order_post);
+            // just skip these altogether because we can't submit any amazon orders anyway.
+            return mailchimp_string_contains($woo->get_billing_email(), '@marketplace.amazon.com');
+        } catch (\Exception $e) {
             return false;
         }
     }

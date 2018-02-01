@@ -417,6 +417,26 @@ function mailchimp_http_worker_is_running() {
     return (bool) get_site_transient('http_worker_lock');
 }
 
+/**
+ * @return array|WP_Error
+ */
+function mailchimp_call_http_worker_manually() {
+    $action = 'http_worker';
+    $query_args = apply_filters('http_worker_query_args', array(
+        'action' => $action,
+        'nonce'  => wp_create_nonce($action),
+    ));
+    $query_url = apply_filters('http_worker_query_url', admin_url('admin-ajax.php'));
+    $post_args = apply_filters('http_worker_post_args', array(
+        'timeout'   => 0.01,
+        'blocking'  => false,
+        'cookies'   => $_COOKIE,
+        'sslverify' => apply_filters('https_local_ssl_verify', false),
+    ));
+    $url = add_query_arg($query_args, $query_url);
+    return wp_remote_post(esc_url_raw($url), $post_args);
+}
+
 register_activation_hook( __FILE__, 'activate_mailchimp_woocommerce' );
 
 // cancelling out the deactivation hook code for now.

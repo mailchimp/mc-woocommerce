@@ -44,9 +44,10 @@ function mailchimp_environment_variables() {
         'repo' => 'master',
         'environment' => 'production',
         'version' => '2.1.4',
+        'php_version' => phpinfo(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => class_exists('WC') ? WC()->version : null,
-        'logging' => ($o && is_array($o) && isset($o['mailchimp_logging'])) ? $o['mailchimp_logging'] : 'standard',
+        'logging' => ($o && is_array($o) && isset($o['mailchimp_logging'])) ? $o['mailchimp_logging'] : 'none',
     );
 }
 

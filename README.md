@@ -59,7 +59,7 @@ After you activate the plugin, you’ll be taken to the **Settings** page, where
 
 1) On the **Connect** tab, paste your MailChimp API key into the field, choose whether or not you want to send debugging logs to MailChimp, and click **Save all changes**. To learn how to generate a MailChimp API Key, read [About API Keys](http://kb.mailchimp.com/integrations/api-integrations/about-api-keys).
 
- ![API key] (https://cloud.githubusercontent.com/assets/19805049/18877771/3fca90e8-849c-11e6-9e3a-161a7b3936dd.png)
+![API key](https://cloud.githubusercontent.com/assets/19805049/18877771/3fca90e8-849c-11e6-9e3a-161a7b3936dd.png)
 
 2) Navigate to the **Store Settings** tab.
 
@@ -67,11 +67,11 @@ After you activate the plugin, you’ll be taken to the **Settings** page, where
 
 3) Enter the contact and location details for your WooCommerce Store, and click **Save all changes**.
 
-![Save all changes] (https://cloud.githubusercontent.com/assets/6547700/18677996/a76d126c-7f28-11e6-9150-4b289d20f057.png)
+![Save all changes](https://cloud.githubusercontent.com/assets/6547700/18677996/a76d126c-7f28-11e6-9150-4b289d20f057.png)
 
 4) Navigate to the **List Settings** tab. 
 
-![List Settings tab] (https://cloud.githubusercontent.com/assets/19805049/18878446/961221d0-849e-11e6-99bb-175c22bf921e.png)
+![List Settings tab](https://cloud.githubusercontent.com/assets/19805049/18878446/961221d0-849e-11e6-99bb-175c22bf921e.png)
 
 5) Choose the list you want to sync, decide whether or not you want to auto-subscribe existing customers, set the subscribe message you want customers to see at checkout, and click **Save all changes**.
 

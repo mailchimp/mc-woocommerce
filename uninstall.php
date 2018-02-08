@@ -42,7 +42,8 @@ if (!function_exists('mailchimp_environment_variables')) {
         return (object) array(
             'repo' => 'master',
             'environment' => 'production',
-            'version' => '2.1.2',
+            'version' => '2.1.4',
+            'php_version' => phpversion(),
             'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
             'wc_version' => class_exists('WC') ? WC()->version : null,
             'logging' => ($o && is_array($o) && isset($o['mailchimp_logging'])) ? $o['mailchimp_logging'] : 'none',

@@ -1246,7 +1246,7 @@ class MailChimp_WooCommerce_MailChimpApi
             CURLINFO_HEADER_OUT => true,
             CURLOPT_HTTPHEADER => array_merge(array(
                 'content-type: application/json',
-                "user-agent: MailChimp for WooCommerce/{$env->version}; WordPress/{$env->wp_version}",
+                "user-agent: MailChimp for WooCommerce/{$env->version}; PHP/{$env->php_version}; WordPress/{$env->wp_version}; Woo/{$env->wc_version};",
             ), $headers)
         );
     }

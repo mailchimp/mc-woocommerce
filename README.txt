@@ -3,8 +3,8 @@ Contributors: ryanhungate, MailChimp
 Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.3
-Tested up to: 4.8
-Stable tag: 4.6.1
+Tested up to: 4.9
+Stable tag: 2.1.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -29,7 +29,7 @@ This plugin supports our most powerful API 3.0 features, and is intended for use
 
 You can run this new integration at the same time as your current WooCommerce integration for MailChimp. However, data from the older integration will display separately in subscriber profiles, and can’t be used with e-commerce features that require API 3.0.
 
-This plugin is not compatible for WordPress.com users at this time.
+WordPress.com compatibility is limited to Business tier users only.
 
 == Installation ==
 ###Before You Start
@@ -52,6 +52,11 @@ You’ll need to do a few things to connect your WooCommerce store to MailChimp.
 For more information on settings and configuration, please visit our Knowledge Base: [http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce](http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce)
 
 == Changelog ==
+= 2.1.4 =
+* updated wordpress compatibility
+* updated sync details tab to show more informative stats
+* queue job processing performance enhancement
+* added an integrity check for queued jobs that were not getting processed
 
 = 2.1.3 =
 * Fix subscriber status for repeat transactional customers to stay transactional.

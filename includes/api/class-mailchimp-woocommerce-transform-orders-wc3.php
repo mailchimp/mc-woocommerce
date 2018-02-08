@@ -33,13 +33,17 @@ class MailChimp_WooCommerce_Transform_Orders
         if ((($orders = $this->getOrderPosts($page, $limit)) && !empty($orders))) {
             foreach ($orders as $post) {
                 $response->count++;
+
                 if ($post->post_status === 'auto-draft') {
                     $response->drafts++;
                     continue;
                 }
 
-                $response->valid++;
-                $response->items[] = $this->transform($post);
+                $order = $this->transform($post);
+                if (!$order->isFlaggedAsAmazonOrder()) {
+                    $response->valid++;
+                    $response->items[] = $order;
+                }
             }
         }
 
@@ -57,6 +61,11 @@ class MailChimp_WooCommerce_Transform_Orders
         $woo = new WC_Order($post);
 
         $order = new MailChimp_WooCommerce_Order();
+
+        // just skip these altogether because we can't submit any amazon orders anyway.
+        if (mailchimp_string_contains($woo->get_billing_email(), '@marketplace.amazon.com')) {
+            return $order->flagAsAmazonOrder(true);
+        }
 
         $order->setId($woo->get_order_number());
 
@@ -284,33 +293,22 @@ class MailChimp_WooCommerce_Transform_Orders
      */
     public function getOrderPosts($page = 1, $posts = 5)
     {
-        $orders = get_posts(array(
-            'post_type'   => wc_get_order_types(),
+        $params = array(
+            'post_type' => wc_get_order_types(),
             'post_status' => array_keys(wc_get_order_statuses()),
             'posts_per_page' => $posts,
             'paged' => $page,
             'orderby' => 'id',
-            'order' => 'ASC'
-        ));
+            'order' => 'ASC',
+        );
 
+        $orders = get_posts($params);
         if (empty($orders)) {
             sleep(2);
-
-            $orders = get_posts(array(
-                'post_type'   => wc_get_order_types(),
-                'post_status' => array_keys(wc_get_order_statuses()),
-                'posts_per_page' => $posts,
-                'paged' => $page,
-                'orderby' => 'id',
-                'order' => 'ASC'
-            ));
-
-            if (empty($orders)) {
-                return false;
-            }
+            $orders = get_posts($params);
         }
 
-        return $orders;
+        return empty($orders) ? false : $orders;
     }
 
     /**

@@ -16,7 +16,7 @@
  * Plugin Name:       MailChimp for WooCommerce
  * Plugin URI:        https://mailchimp.com/connect-your-store/
  * Description:       MailChimp - WooCommerce plugin
- * Version:           2.1.3
+ * Version:           2.1.4
  * Author:            MailChimp
  * Author URI:        https://mailchimp.com
  * License:           GPL-2.0+
@@ -24,7 +24,7 @@
  * Text Domain:       mailchimp-woocommerce
  * Domain Path:       /languages
  * Requires at least: 4.4
- * Tested up to: 4.9
+ * Tested up to: 4.9.2
  */
 
 // If this file is called directly, abort.
@@ -43,7 +43,8 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production',
-        'version' => '2.1.3',
+        'version' => '2.1.4',
+        'php_version' => phpinfo(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => class_exists('WC') ? WC()->version : null,
         'logging' => ($o && is_array($o) && isset($o['mailchimp_logging'])) ? $o['mailchimp_logging'] : 'none',
@@ -403,16 +404,44 @@ function mailchimp_get_connected_site_script_fragment() {
     return get_option('mailchimp-woocommerce-script_fragment', false);
 }
 
+/**
+ * @return bool
+ */
+function mailchimp_running_in_console() {
+    return (bool) (defined( 'DISABLE_WP_HTTP_WORKER' ) && true === DISABLE_WP_HTTP_WORKER);
+}
+
+/**
+ * @return bool
+ */
+function mailchimp_http_worker_is_running() {
+    return (bool) get_site_transient('http_worker_lock');
+}
+
+/**
+ * @return array|WP_Error
+ */
+function mailchimp_call_http_worker_manually() {
+    $action = 'http_worker';
+    $query_args = apply_filters('http_worker_query_args', array(
+        'action' => $action,
+        'nonce'  => wp_create_nonce($action),
+    ));
+    $query_url = apply_filters('http_worker_query_url', admin_url('admin-ajax.php'));
+    $post_args = apply_filters('http_worker_post_args', array(
+        'timeout'   => 0.01,
+        'blocking'  => false,
+        'cookies'   => $_COOKIE,
+        'sslverify' => apply_filters('https_local_ssl_verify', false),
+    ));
+    $url = add_query_arg($query_args, $query_url);
+    return wp_remote_post(esc_url_raw($url), $post_args);
+}
+
 register_activation_hook( __FILE__, 'activate_mailchimp_woocommerce' );
 
 // cancelling out the deactivation hook code for now.
 //register_deactivation_hook( __FILE__, 'deactivate_mailchimp_woocommerce' );
-
-/**
- * The core plugin class that is used to define internationalization,
- * admin-specific hooks, and public-facing site hooks.
- */
-require plugin_dir_path( __FILE__ ) . 'includes/class-mailchimp-woocommerce.php';
 
 /**
  *
@@ -439,8 +468,19 @@ function mailchimp_woocommerce_add_meta_tags() {
     echo '<meta name="referrer" content="always"/>';
 }
 
-if (mailchimp_check_woocommerce_plugin_status()) {
-    add_action('wp_head', 'mailchimp_woocommerce_add_meta_tags');
-    /** Add all the MailChimp hooks. */
-    run_mailchimp_woocommerce();
+function mailchimp_on_all_plugins_loaded() {
+    if (mailchimp_check_woocommerce_plugin_status()) {
+
+        /**
+         * The core plugin class that is used to define internationalization,
+         * admin-specific hooks, and public-facing site hooks.
+         */
+        require plugin_dir_path( __FILE__ ) . 'includes/class-mailchimp-woocommerce.php';
+
+        add_action('wp_head', 'mailchimp_woocommerce_add_meta_tags');
+        /** Add all the MailChimp hooks. */
+        run_mailchimp_woocommerce();
+    }
 }
+
+add_action( 'plugins_loaded', 'mailchimp_on_all_plugins_loaded' );

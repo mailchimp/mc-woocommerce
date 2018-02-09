@@ -43,8 +43,10 @@ class MailChimp_Woocommerce_Activator {
             update_option('mailchimp-woocommerce-store_id', uniqid(), 'yes');
         }
 
-        // try this now for existing stores on an update.
-        mailchimp_update_connected_site_script();
+        if (class_exists('MailChimp_WooCommerce_MailChimpApi')) {
+            // try this now for existing stores on an update.
+            mailchimp_update_connected_site_script();
+        }
 	}
 
 	/**

@@ -24,7 +24,7 @@ class MailChimp_WooCommerce_CurrencyCodes
             'BSD' => array('Bahamian Dollar', '044'),
             'BDT' => array('Bangladeshi Taka', '050'),
             'BBD' => array('Barbados Dollar', '052'),
-            'BYR' => array('Belarussian Rouble', '974'),
+            'BYN' => array('Belarussian Rouble', '974'),
             'BOB' => array('Bolivian Boliviano', '068'),
             'BRL' => array('Brazilian Real', '986'),
             'GBP' => array('British Pounds Sterling', '826'),

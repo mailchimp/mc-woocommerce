@@ -88,6 +88,7 @@ class MailChimp_WooCommerce_CurrencyCodes
             'PYG' => array('Paraguay Guarani', '600'),
             'PEN' => array('Peru New Sol', '604'),
             'PHP' => array('Philippine Pesos', '608'),
+            'PLN' => array('Polish Zloty', '985'),
             'QAR' => array('Qatari Riyal', '634'),
             'RON' => array('Romanian New Leu', '946'),
             'RUB' => array('Russian Federation Ruble', '643'),

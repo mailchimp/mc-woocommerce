@@ -295,14 +295,15 @@ class MailChimp_Woocommerce {
 
 			// adding the ability to render the checkbox on another screen of the checkout page.
 			$render_on = $service->getOption('mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form');
-			$this->loader->add_action($render_on, $service, 'applyNewsletterField', 5);
 
-			$this->loader->add_action('woocommerce_ppe_checkout_order_review', $service, 'applyNewsletterField', 5);
-			$this->loader->add_action('woocommerce_register_form', $service, 'applyNewsletterField', 5);
+			$this->loader->add_action($render_on, $service, 'applyNewsletterField', 10);
 
-			$this->loader->add_action('woocommerce_checkout_order_processed', $service, 'processNewsletterField', 5, 2);
-			$this->loader->add_action('woocommerce_ppe_do_payaction', $service, 'processPayPalNewsletterField', 5, 1);
-			$this->loader->add_action('woocommerce_register_post', $service, 'processRegistrationForm', 5, 3);
+			$this->loader->add_action('woocommerce_ppe_checkout_order_review', $service, 'applyNewsletterField', 10);
+			$this->loader->add_action('woocommerce_register_form', $service, 'applyNewsletterField', 10);
+
+			$this->loader->add_action('woocommerce_checkout_order_processed', $service, 'processNewsletterField', 10, 2);
+			$this->loader->add_action('woocommerce_ppe_do_payaction', $service, 'processPayPalNewsletterField', 10, 1);
+			$this->loader->add_action('woocommerce_register_post', $service, 'processRegistrationForm', 10, 3);
 		}
 	}
 
@@ -329,9 +330,9 @@ class MailChimp_Woocommerce {
 			$this->loader->add_action( 'init', $service, 'handleCampaignTracking' );
 
 			// order hooks
-            $this->loader->add_action('woocommerce_thankyou', $service, 'onNewOrder', 1);
+            $this->loader->add_action('woocommerce_thankyou', $service, 'onNewOrder', 10);
 			$this->loader->add_action('woocommerce_api_create_order', $service, 'onNewOrder', 10);
-			$this->loader->add_action('woocommerce_order_status_changed', $service, 'handleOrderStatusChanged', 2);
+			$this->loader->add_action('woocommerce_order_status_changed', $service, 'handleOrderStatusChanged', 10);
 
 			// partially refunded
             $this->loader->add_action('woocommerce_order_partially_refunded', $service, 'onPartiallyRefunded', 10);

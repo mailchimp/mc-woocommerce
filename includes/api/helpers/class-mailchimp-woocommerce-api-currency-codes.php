@@ -65,6 +65,7 @@ class MailChimp_WooCommerce_CurrencyCodes
             'LVL' => array('Latvia Lat', '428'),
             'LBP' => array('Lebanese Pound', '422'),
             'LTL' => array('Lithuania Litas', '440'),
+            'MDL' => array('Moldovan Leu', '498'),
             'MOP' => array('Macau Pataca', '446'),
             'MKD' => array('Macedonian Denar', '807'),
             'MGA' => array('Malagascy Ariary', '969'),

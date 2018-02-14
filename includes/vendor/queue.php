@@ -31,12 +31,14 @@ if (!mailchimp_running_in_console() && !mailchimp_http_worker_is_running()) {
     try {
         // fire up the http worker container
         new WP_Http_Worker($wp_queue);
-        // if we do not have a site transient for the queue listener and we have available jobs
-        if (!get_site_transient('http_worker_queue_listen') && $wp_queue->available_jobs()) {
+        // if we do not have a site transient for the queue listener
+        if (!get_site_transient('http_worker_queue_listen')) {
             // set the site transient to expire in 60 seconds so this will not happen too many times.
             set_site_transient( 'http_worker_queue_listen', microtime(), 60);
-            // call the http worker manually
-            mailchimp_call_http_worker_manually();
+            // if we have available jobs, call the http worker manually
+            if ($wp_queue->available_jobs()) {
+                mailchimp_call_http_worker_manually();
+            }
         }
     } catch (\Exception $e) {}
 }

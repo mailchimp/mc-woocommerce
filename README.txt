@@ -52,6 +52,11 @@ You’ll need to do a few things to connect your WooCommerce store to MailChimp.
 For more information on settings and configuration, please visit our Knowledge Base: [http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce](http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce)
 
 == Changelog ==
+= 2.1.5 =
+* added support for Polish (zloty - zł) and Moldovan Leu currencies
+* update currency code for Belarusian Rouble
+* queue performance enhancement
+
 = 2.1.4 =
 * updated wordpress compatibility
 * updated sync details tab to show more informative stats

@@ -55,7 +55,7 @@ function mailchimp_environment_variables() {
  * @return bool
  */
 function mailchimp_should_init_queue() {
-    if (isset($_GET['action']) && in_array($_GET['action'], array('mailchimp_get_user_by_hash', 'mailchimp_set_user_by_email'))) {
+    if (isset($_GET['action']) && in_array($_GET['action'], array('mailchimp_get_user_by_hash'))) {
         return false;
     }
     return mailchimp_is_configured() && !mailchimp_running_in_console() && !mailchimp_http_worker_is_running();

@@ -44,7 +44,7 @@ if ( ! class_exists( 'WP_Worker' ) ) {
 			$job = $this->queue->get_next_job();
 
 			if (empty($job)) {
-			    return true;
+			    return false;
             }
 
 			$this->payload = unserialize( $job->job );

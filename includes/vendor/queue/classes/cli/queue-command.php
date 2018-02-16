@@ -13,6 +13,45 @@ class Queue_Command extends WP_CLI_Command {
      * @var int
      */
     protected $start_time;
+    protected $pid;
+    protected $command_called;
+
+    /**
+     * Queue_Command constructor.
+     */
+    public function __construct()
+    {
+        $this->pid = getmypid();
+        register_shutdown_function(array($this, 'on_shutdown'));
+    }
+
+    /**
+     * make sure we remove the site transient
+     */
+    public function on_shutdown()
+    {
+        switch ($this->command_called) {
+            case 'listen':
+                $this->deleteQueueTimer();
+                break;
+        }
+    }
+
+    /**
+     * Get the expiration for the single cron job
+     *
+     * @throws \WP_CLI\ExitException
+     */
+    public function expired_at()
+    {
+        $time = $this->getQueueTimer();
+        if (empty($time)) {
+            WP_CLI::error('no timer running');
+            wp_die();
+        }
+        WP_CLI::success("Next iteration will happen no later than ".(string) mailchimp_date_utc($time));
+        wp_die();
+    }
 
     /**
      * Flush all of the records in the queue.
@@ -20,6 +59,7 @@ class Queue_Command extends WP_CLI_Command {
     public function flush()
     {
         global $wpdb;
+        $this->command_called = 'flush';
         $wpdb->query("DELETE FROM {$wpdb->prefix}queue");
     }
 
@@ -29,6 +69,7 @@ class Queue_Command extends WP_CLI_Command {
     public function show()
     {
         global $wpdb;
+        $this->command_called = 'show';
         print_r($wpdb->get_results("SELECT * FROM {$wpdb->prefix}queue"));
     }
 
@@ -38,6 +79,8 @@ class Queue_Command extends WP_CLI_Command {
 	 * @subcommand create-tables
 	 */
 	public function create_tables( $args, $assoc_args = array() ) {
+        $this->command_called = 'create_tables';
+
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 
 		global $wpdb;
@@ -76,21 +119,21 @@ class Queue_Command extends WP_CLI_Command {
      *
      * ## OPTIONS
      *
-     * [--force=<1>]
+     * [--force=<0>]
      * : Force the listener to ignore the transient and run
      *
-     * [--daemon=<1>]
+     * [--daemon=<0>]
      * : Running the command as a true process using a manager to keep alive.
      *   If using WP CRON use --daemon=0
      *   If using a process manager, do nothing or pass in 1
      *
-     * [--multiple=<1>]
+     * [--multiple=<0>]
      * : Allow multiple processes to run at the same time. ( default is 0 )
      *
      * [--sleep_processing=<1>]
      * : How long to sleep between jobs. ( default is 1 second )
      *
-     * [--sleep_empty=<1>]
+     * [--sleep_empty=<5>]
      * : How long to sleep between jobs when nothing is in the queue. ( default is 5 seconds )
      * ---
      *
@@ -108,7 +151,8 @@ class Queue_Command extends WP_CLI_Command {
 	public function listen( $args, $assoc_args = array() ) {
 		global $wp_queue;
 
-        $process_id = getmypid();
+		$this->command_called = 'listen';
+
         $this->start_time = time(); // Set start time of current command
 
         $allow_multiple = (isset($assoc_args['multiple']) ? (bool) $assoc_args['multiple'] : null) === true;
@@ -118,14 +162,19 @@ class Queue_Command extends WP_CLI_Command {
 		$sleep_between_jobs = isset($assoc_args['sleep_processing']) ? (int) $assoc_args['sleep_processing'] : 1;
         $sleep_when_empty = isset($assoc_args['sleep_empty']) ? (int) $assoc_args['sleep_empty'] : 5;
 
-        $transient = 'mailchimp_woocommerce_queue_listen';
+        $expire_time = $this->getQueueTimer();
 
-        if (!$force && (!$allow_multiple && get_site_transient($transient))) {
-            WP_CLI::log('Currently running in another process');
-            return;
+        if (!$force && !$allow_multiple) {
+            if (!empty($expire_time) && ($expire_time+100) > $this->start_time) {
+                WP_CLI::log('Currently running in another process');
+                //mailchimp_debug("queue", $message = "wp queue listen is running in another process or waiting to restart at [{$expire_time}] but clock says [{$this->start_time}].");
+                wp_die();
+            }
         }
 
-        mailchimp_debug("queue", $message = '[start] queue listen process_id = '.$process_id);
+        $this->updateQueueTimer();
+
+        mailchimp_debug("queue", $message = "[start] queue listen process_id [{$this->pid}] :: max_time [{$this->getServerMaxExecutionTime()}] :: memory limit [{$this->getServerMemoryLimit()}]");
 
         WP_CLI::log($message);
 
@@ -134,23 +183,26 @@ class Queue_Command extends WP_CLI_Command {
 		$loop_counter = 0;
 
 		// if the user specifies that they want to run as a daemon we need to allow that.
-		while ($running_as_daemon || (!$this->time_exceeded() && !$this->memory_exceeded())) {
+		while ($running_as_daemon || $this->all_good_under_the_hood()) {
 
             $loop_counter++;
+
+            // if we're doing single processing only, set the transient
+            if (!$allow_multiple) {
+                if ($loop_counter % 5 === 0) {
+                    $this->updateQueueTimer(time() + 300);
+                }
+            }
 
 		    // allow queue to break out of the forever loop if something is going wrong by adding a transient
 		    if ((bool) get_site_transient('kill_wp_queue_listener')) {
 		        break;
             }
 
-            // if we're doing single processing only, set the transient
-            if (!$allow_multiple) {
-                set_site_transient($transient, microtime(), 50);
-            }
-
             // log it in increments of 20 to be lighter on the log file
             if ($loop_counter % 20 === 0) {
-                mailchimp_debug("queue listen", "process id {$process_id} :: loop #{$loop_counter}");
+                mailchimp_debug("queue listen", $message = "process id {$this->pid} :: loop #{$loop_counter}");
+                WP_CLI::log($message);
             }
 
             $sleep = $sleep_when_empty;
@@ -167,11 +219,12 @@ class Queue_Command extends WP_CLI_Command {
 		}
 
 		if (!$allow_multiple) {
-            delete_site_transient($transient);
+            $this->deleteQueueTimer();
         }
 
-        mailchimp_debug("queue", $message = '[end] queue listen process_id = '.$process_id);
+        mailchimp_debug("queue", $message = '[end] queue listen process_id = '.$this->pid);
         WP_CLI::log($message);
+        exit;
 	}
 
 	/**
@@ -180,6 +233,8 @@ class Queue_Command extends WP_CLI_Command {
 	 */
 	public function work( $args, $assoc_args = array() ) {
 		global $wp_queue;
+
+        $this->command_called = 'work';
 
 		$worker = new WP_Worker( $wp_queue );
 
@@ -199,6 +254,7 @@ class Queue_Command extends WP_CLI_Command {
 	 */
 	public function status( $args, $assoc_args = array() ) {
 		global $wp_queue;
+        $this->command_called = 'status';
 		WP_CLI::log( $wp_queue->available_jobs() . ' jobs in the queue' );
 		WP_CLI::log( $wp_queue->failed_jobs() . ' failed jobs' );
 	}
@@ -210,6 +266,7 @@ class Queue_Command extends WP_CLI_Command {
 	 */
 	public function restart_failed( $args, $assoc_args = array() ) {
 		global $wp_queue;
+        $this->command_called = 'restart_failed';
 		if ( ! $wp_queue->failed_jobs() ) {
 			WP_CLI::log( 'No failed jobs to restart...' );
 			return;
@@ -217,6 +274,60 @@ class Queue_Command extends WP_CLI_Command {
 		$count = $wp_queue->restart_failed_jobs();
 		WP_CLI::success( $count . ' failed jobs pushed to the queue' );
 	}
+
+    /**
+     * @return mixed
+     */
+    protected function deleteQueueTimer()
+    {
+        global $wpdb;
+        $key = 'mailchimp_woocommerce_queue_listen';
+        $sql = $wpdb->prepare("DELETE FROM {$wpdb->options} WHERE option_name = %s", $key);
+        return $wpdb->query($sql);
+    }
+
+    /**
+     * @return null
+     */
+	protected function getQueueTimer()
+    {
+        global $wpdb;
+        $key = 'mailchimp_woocommerce_queue_listen';
+        $row = $wpdb->get_row($wpdb->prepare("SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1", $key));
+        return is_object($row) ? (int) unserialize($row->option_value) : null;
+    }
+
+    /**
+     * @param null $time
+     * @return mixed
+     */
+    protected function updateQueueTimer($time = null)
+    {
+        global $wpdb;
+        if (empty($this->start_time)) {
+            $this->start_time = time();
+        }
+        $value = $time ?: $this->start_time+600;
+        $values = array(
+            'option_value' => serialize($value),
+            'autoload' => 'no',
+        );
+        $key = 'mailchimp_woocommerce_queue_listen';
+        $updated = $wpdb->update($wpdb->options, $values, array('option_name' => $key));
+        if ($updated) {
+            return $updated;
+        }
+        $values['option_name'] = $key;
+        return $wpdb->insert($wpdb->options, $values);
+    }
+
+    /**
+     * @return bool
+     */
+    protected function all_good_under_the_hood()
+    {
+        return !$this->time_exceeded() && !$this->memory_exceeded();
+    }
 
     /**
      * Memory exceeded
@@ -248,13 +359,7 @@ class Queue_Command extends WP_CLI_Command {
      * @return bool
      */
     protected function time_exceeded() {
-        return time() >= $this->start_time + 50;
-
-        $time_limit = $this->getServerMaxExecutionTime();
-        if (!$time_limit || -1 == $time_limit) {
-            $time_limit = 1000000;
-        }
-        return time() >= $this->start_time + apply_filters( 'cli_worker_default_time_limit', ($time_limit - 10));
+        return time() >= $this->start_time + apply_filters( 'cli_worker_default_time_limit', ($this->getServerMaxExecutionTime() - 10));
     }
 
     /**
@@ -262,7 +367,11 @@ class Queue_Command extends WP_CLI_Command {
      */
     protected function getServerMaxExecutionTime()
     {
-        return (int) function_exists( 'ini_get' ) ? ini_get( 'max_execution_time' ) : 30;
+        $time_limit = (int) function_exists( 'ini_get' ) ? ini_get( 'max_execution_time' ) : 30;
+        if (!$time_limit || -1 == $time_limit) {
+            $time_limit = 1800;
+        }
+        return $time_limit;
     }
 
     /**

@@ -90,6 +90,7 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
         if (!($this->store_id = $this->getStoreID())) {
             delete_site_transient($transient);
             mailchimp_debug(get_called_class().'@handle', 'store id not loaded');
+            $this->delete();
             return false;
         }
 
@@ -97,6 +98,7 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
         if ($this->getResourceType() === 'orders' && $this->getResourceCompleteTime()) {
             delete_site_transient($transient);
             mailchimp_log('sync.stop', "halting the sync for :: {$this->getResourceType()}");
+            $this->delete();
             return false;
         }
 
@@ -108,6 +110,8 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
             // call the completed event to process further
             $this->resourceComplete($this->getResourceType());
             $this->complete();
+            $this->delete();
+
             return false;
         }
 
@@ -123,6 +127,8 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
 
             // call the completed event to process further
             $this->complete();
+
+            $this->delete();
 
             delete_site_transient($transient);
 

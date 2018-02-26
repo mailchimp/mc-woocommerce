@@ -31,7 +31,7 @@ You can run this new integration at the same time as your current WooCommerce in
 
 WordPress.com compatibility is limited to Business tier users only.
 
-== Installation ==
+=== Installation ===
 ###Before You Start
 Here are some things to know before you begin this process.
 
@@ -49,7 +49,23 @@ You’ll need to do a few things to connect your WooCommerce store to MailChimp.
 - Connect the plugin with your MailChimp API Key.
 - Configure your list settings to complete the data sync process.
 
-For more information on settings and configuration, please visit our Knowledge Base: [http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce](http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce)
+###Advanced Queue Setup In CLI mode
+To optimize the performance of your MailChimp integration - it is recommended that you run the queue in CLI mode.
+
+First define a constant in your config file
+
+    `define('DISABLE_WP_HTTP_WORKER', true);`
+
+You have 2 options to run this process:
+
+1. On a cron schedule every minute:
+
+    `* * * * * /usr/bin/wp --url=http://yourdomain.com --path=/full/path/to/install/ queue listen`
+
+2. Using a process manager like Monit or Supervisord:
+
+    `/usr/bin/wp --url=http://yourdomain.com --path=/full/path/to/install/ queue listen`
+
 
 == Changelog ==
 = 2.1.5 =

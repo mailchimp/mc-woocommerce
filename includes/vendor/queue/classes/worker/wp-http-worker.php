@@ -28,6 +28,7 @@ if ( ! class_exists( 'WP_Http_Worker' ) ) {
 			// Cron health check
 			add_action( 'http_worker_cron', array( $this, 'handle_cron' ) );
 			add_filter( 'cron_schedules', array( $this, 'schedule_cron' ) );
+
 			$this->maybe_schedule_cron();
 
 			// Dispatch handlers

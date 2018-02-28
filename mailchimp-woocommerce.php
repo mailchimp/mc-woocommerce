@@ -55,10 +55,7 @@ function mailchimp_environment_variables() {
  * @return bool
  */
 function mailchimp_should_init_queue() {
-    if (isset($_GET['action']) && in_array($_GET['action'], array('mailchimp_get_user_by_hash'))) {
-        return false;
-    }
-    return mailchimp_is_configured() && !mailchimp_running_in_console() && !mailchimp_http_worker_is_running();
+    return mailchimp_detect_admin_ajax() && mailchimp_is_configured() && !mailchimp_running_in_console() && !mailchimp_http_worker_is_running();
 }
 
 /**
@@ -406,6 +403,12 @@ function mailchimp_update_connected_site_script() {
         }
     }
     return false;
+}
+
+function mailchimp_detect_admin_ajax() {
+    if (!is_admin()) return false;
+    if (!defined('DOING_AJAX')) return false;
+    if (!DOING_AJAX) return false;
 }
 
 /**

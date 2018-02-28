@@ -76,19 +76,9 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
      */
     public function handle()
     {
-        $transient = "mc_sync_{$this->getResourceType()}";
-
-        if (get_site_transient($transient)) {
-            mailchimp_log("prevention", "{$this->getResourceType()} sync is already in motion - skipping");
-            $this->delete();
-            return false;
-        }
-
-        // tell the system we're currently doing something.
-        set_site_transient($transient, microtime(), 30);
+        global $wpdb;
 
         if (!($this->store_id = $this->getStoreID())) {
-            delete_site_transient($transient);
             mailchimp_debug(get_called_class().'@handle', 'store id not loaded');
             $this->delete();
             return false;
@@ -96,7 +86,6 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
 
         // don't let recursion happen.
         if ($this->getResourceType() === 'orders' && $this->getResourceCompleteTime()) {
-            delete_site_transient($transient);
             mailchimp_log('sync.stop', "halting the sync for :: {$this->getResourceType()}");
             $this->delete();
             return false;
@@ -105,7 +94,6 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
         $page = $this->getResources();
 
         if (empty($page)) {
-            delete_site_transient($transient);
             mailchimp_debug(get_called_class().'@handle', 'could not find any more '.$this->getResourceType().' records ending on page '.$this->getResourcePagePointer());
             // call the completed event to process further
             $this->resourceComplete($this->getResourceType());
@@ -130,8 +118,6 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
 
             $this->delete();
 
-            delete_site_transient($transient);
-
             return false;
         }
 
@@ -142,7 +128,8 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
 
         $this->delete();
 
-        delete_site_transient($transient);
+        $class_name = get_called_class();
+        $wpdb->query("DELETE FROM {$wpdb->prefix}queue WHERE job LIKE '%{$class_name}%'");
 
         // this will paginate through all records for the resource type until they return no records.
         wp_queue(new static());

@@ -409,6 +409,7 @@ function mailchimp_update_connected_site_script() {
  * @return bool
  */
 function mailchimp_detect_admin_ajax() {
+    if (defined('DOING_CRON') && DOING_CRON) return true;
     if (!is_admin()) return false;
     if (!defined('DOING_AJAX')) return false;
     return DOING_AJAX;

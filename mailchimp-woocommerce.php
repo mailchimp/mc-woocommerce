@@ -405,10 +405,13 @@ function mailchimp_update_connected_site_script() {
     return false;
 }
 
+/**
+ * @return bool
+ */
 function mailchimp_detect_admin_ajax() {
     if (!is_admin()) return false;
     if (!defined('DOING_AJAX')) return false;
-    if (!DOING_AJAX) return false;
+    return DOING_AJAX;
 }
 
 /**

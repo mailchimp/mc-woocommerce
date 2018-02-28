@@ -67,12 +67,14 @@ if (defined( 'WP_CLI' ) && WP_CLI) {
     } catch (\Exception $e) {}
 }
 
+if (!mailchimp_running_in_console() && mailchimp_is_configured()) {
+    // fire up the http worker container
+    new WP_Http_Worker($wp_queue);
+}
+
 // if we're not running in the console, and the http_worker is not running
 if (mailchimp_should_init_queue()) {
     try {
-        // fire up the http worker container
-        new WP_Http_Worker($wp_queue);
-
         // if we do not have a site transient for the queue listener
         if (!get_site_transient('http_worker_queue_listen')) {
             // set the site transient to expire in 50 seconds so this will not happen too many times

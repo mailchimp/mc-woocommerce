@@ -37,6 +37,10 @@ if ( ! class_exists( 'WP_Http_Worker' ) ) {
 
 			// Dispatch listener
 			add_action( 'wp_queue_job_pushed', array( $this, 'maybe_dispatch_worker' ) );
+
+			if (isset($_REQUEST['action']) && $_REQUEST['action'] === 'http_worker' && check_ajax_referer( 'http_worker', 'nonce', false)) {
+                add_action('init', array($this, 'handle'));
+            }
 		}
 
 		/**
@@ -48,35 +52,44 @@ if ( ! class_exists( 'WP_Http_Worker' ) ) {
 		 * jobs remain in the queue and server limits reached.
 		 */
 		public function maybe_handle() {
+
 			check_ajax_referer( 'http_worker', 'nonce' );
 
-			if ( $this->is_worker_running() ) {
-				// Worker already running, die
-				wp_die();
-			}
-
-			// Lock worker to prevent multiple instances spawning
-			$this->lock_worker();
-
-			// Loop over jobs while within server limits
-			while ( ! $this->time_exceeded() && ! $this->memory_exceeded() ) {
-				if ( $this->should_run() ) {
-					$this->process_next_job();
-				} else {
-					break;
-				}
-			}
-
-			// Unlock worker to allow another instance to be spawned
-			$this->unlock_worker();
-
-			if ( $this->queue->available_jobs() ) {
-				// Job queue not empty, dispatch async worker request
-				$this->dispatch();
-			}
-
-			wp_die();
+			$this->handle();
 		}
+
+        /**
+         *
+         */
+		public function handle()
+        {
+            if ( $this->is_worker_running() ) {
+                // Worker already running, die
+                wp_die();
+            }
+
+            // Lock worker to prevent multiple instances spawning
+            $this->lock_worker();
+
+            // Loop over jobs while within server limits
+            while ( ! $this->time_exceeded() && ! $this->memory_exceeded() ) {
+                if ( $this->should_run() ) {
+                    $this->process_next_job();
+                } else {
+                    break;
+                }
+            }
+
+            // Unlock worker to allow another instance to be spawned
+            $this->unlock_worker();
+
+            if ( $this->queue->available_jobs() ) {
+                // Job queue not empty, dispatch async worker request
+                $this->dispatch();
+            }
+
+            wp_die();
+        }
 
 		/**
 		 * Memory exceeded
@@ -258,6 +271,7 @@ if ( ! class_exists( 'WP_Http_Worker' ) ) {
          * @return bool
          */
         public function handle_cron() {
+
             if ($this->is_worker_running()) {
                 wp_die();
             }

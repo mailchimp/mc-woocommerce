@@ -11,7 +11,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your MailChimp list to track sales, create targeted emails, send abandoned cart emails, and more.
 
 == Description ==
-Join the 16 million customers who use MailChimp, the world's largest marketing automation platform, to develop their e-commerce marketing strategy. With the official MailChimp for WooCommerce integration, your customers and their purchase data are automatically synced with your MailChimp account, making it easy to send targeted campaigns, automatically follow up with customers post-purchase, recommend products, recover abandoned carts, and measure the ROI of your marketing efforts. And it's completely free.
+Join the 17 million customers who use MailChimp, the world's largest marketing automation platform, to develop their e-commerce marketing strategy. With the official MailChimp for WooCommerce integration, your customers and their purchase data are automatically synced with your MailChimp account, making it easy to send targeted campaigns, automatically follow up with customers post-purchase, recommend products, recover abandoned carts, and measure the ROI of your marketing efforts. And it's completely free.
 
 With MailChimp for WooCommerce, you’ll have the power to:
 
@@ -20,9 +20,10 @@ With MailChimp for WooCommerce, you’ll have the power to:
 - Showcase product recommendations.
 - Track and segment customers based on purchase history and purchase frequency.
 - View detailed data on your marketing performance in your MailChimp Dashboard.
-- Grow your audience and sell more stuff with Facebook and Instagram Ad Campaigns in MailChimp.
+- Find new customers, connect with current ones, and drive them all to your website with [Facebook](https://mailchimp.com/features/facebook-ads/) and [Instagram](https://mailchimp.com/features/instagram-ads/) ads. Then, set up [Google remarketing](https://mailchimp.com/features/google-remarketing-ads/) ads to turn your site visitors into shoppers.
 - Automatically embed a pop-up form that converts your website visitors to subscribers.
 - Add discount codes created in WooCommerce to your emails and automations with a Promo Code content block
+- Create beautiful landing pages that make it easy to highlight your products, promote a sale or giveaway, and grow your list.
 
 ###Important Notes
 This plugin supports our most powerful API 3.0 features, and is intended for users who have not yet integrated their WooCommerce stores with MailChimp.

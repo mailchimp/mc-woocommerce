@@ -71,10 +71,13 @@ if ( ! class_exists( 'WP_Http_Worker' ) ) {
             // Lock worker to prevent multiple instances spawning
             $this->lock_worker();
 
+            $processed_something = false;
+
             // Loop over jobs while within server limits
             while ( ! $this->time_exceeded() && ! $this->memory_exceeded() ) {
                 if ( $this->should_run() ) {
                     $this->process_next_job();
+                    $processed_something = true;
                 } else {
                     break;
                 }
@@ -83,7 +86,22 @@ if ( ! class_exists( 'WP_Http_Worker' ) ) {
             // Unlock worker to allow another instance to be spawned
             $this->unlock_worker();
 
-            if ( $this->queue->available_jobs() ) {
+            $available_jobs = $this->queue->available_jobs();
+
+            if (!$processed_something && $available_jobs) {
+                mailchimp_debug('queue_tracer', "HTTPWorker@handle", array(
+                    'jobs' => $available_jobs,
+                    'time_exceeded' => $this->time_exceeded(),
+                    'memory_exceeded' => $this->memory_exceeded(),
+                    'memory_limit' => $this->get_memory_limit(),
+                    'memory_usage' => memory_get_usage(true),
+                    'ini_memory' => ini_get('memory_limit'),
+                    'php_version' => phpversion(),
+                ));
+                wp_die();
+            }
+
+            if ($available_jobs) {
                 // Job queue not empty, dispatch async worker request
                 $this->dispatch();
             }
@@ -129,7 +147,9 @@ if ( ! class_exists( 'WP_Http_Worker' ) ) {
 				$memory_limit = '32000M';
 			}
 
-			return intval( $memory_limit ) * 1024 * 1024;
+            return (int) preg_replace_callback('/(\-?\d+)(.?)/', function ($m) {
+                return $m[1] * pow(1024, strpos('BKMG', $m[2]));
+            }, strtoupper($memory_limit));
 		}
 
 		/**

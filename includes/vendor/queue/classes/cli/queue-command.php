@@ -383,8 +383,9 @@ class Queue_Command extends WP_CLI_Command {
         if (!$memory_limit || -1 == $memory_limit) {
             $memory_limit = '32000M';
         }
-        return $memory_limit;
+        return (int) preg_replace_callback('/(\-?\d+)(.?)/', function ($m) {
+            return $m[1] * pow(1024, strpos('BKMG', $m[2]));
+        }, strtoupper($memory_limit));
     }
-
 }
 

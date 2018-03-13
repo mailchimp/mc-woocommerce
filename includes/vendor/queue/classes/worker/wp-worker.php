@@ -44,7 +44,7 @@ if ( ! class_exists( 'WP_Worker' ) ) {
 			$job = $this->queue->get_next_job();
 
 			if (empty($job)) {
-			    return true;
+			    return false;
             }
 
 			$this->payload = unserialize( $job->job );
@@ -53,18 +53,17 @@ if ( ! class_exists( 'WP_Worker' ) ) {
 			$this->payload->set_job( $job );
 
 			try {
-			    //mailchimp_debug('mc_events', 'wp_worker.process_next_job.start', array('payload' => $this->payload));
                 $this->payload->handle();
-                //mailchimp_debug('mc_events', 'wp_worker.process_next_job.complete', array('payload' => $this->payload));
+
+                if ( $this->payload->is_deleted() ) {
+                    // Job manually deleted, delete from queue
+                    $this->queue->delete( $job );
+                    return true;
+                }
 
 				if ( $this->payload->is_released() ) {
 					// Job manually released, release back onto queue
 					$this->queue->release( $job, $this->payload->get_delay() );
-				}
-
-				if ( $this->payload->is_deleted() ) {
-					// Job manually deleted, delete from queue
-					$this->queue->delete( $job );
 				}
 
 				if ( ! $this->payload->is_deleted_or_released() ) {

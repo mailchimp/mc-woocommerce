@@ -74,16 +74,20 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
      *
      * @return mixed
      */
-    public function handle() {
+    public function handle()
+    {
+        global $wpdb;
 
         if (!($this->store_id = $this->getStoreID())) {
             mailchimp_debug(get_called_class().'@handle', 'store id not loaded');
+            $this->delete();
             return false;
         }
 
         // don't let recursion happen.
         if ($this->getResourceType() === 'orders' && $this->getResourceCompleteTime()) {
             mailchimp_log('sync.stop', "halting the sync for :: {$this->getResourceType()}");
+            $this->delete();
             return false;
         }
 
@@ -94,6 +98,8 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
             // call the completed event to process further
             $this->resourceComplete($this->getResourceType());
             $this->complete();
+            $this->delete();
+
             return false;
         }
 
@@ -110,6 +116,8 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
             // call the completed event to process further
             $this->complete();
 
+            $this->delete();
+
             return false;
         }
 
@@ -118,11 +126,14 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
             $this->iterate($resource);
         }
 
-        mailchimp_debug(get_called_class().'@handle', 'queuing up the next job');
+        $this->delete();
+
+        $class_name = get_called_class();
+        $wpdb->query("DELETE FROM {$wpdb->prefix}queue WHERE job LIKE '%{$class_name}%'");
 
         // this will paginate through all records for the resource type until they return no records.
         wp_queue(new static());
-
+        mailchimp_debug(get_called_class().'@handle', 'queuing up the next job');
         return false;
     }
 

@@ -11,7 +11,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your MailChimp list to track sales, create targeted emails, send abandoned cart emails, and more.
 
 == Description ==
-Join the 16 million customers who use MailChimp, the world's largest marketing automation platform, to develop their e-commerce marketing strategy. With the official MailChimp for WooCommerce integration, your customers and their purchase data are automatically synced with your MailChimp account, making it easy to send targeted campaigns, automatically follow up with customers post-purchase, recommend products, recover abandoned carts, and measure the ROI of your marketing efforts. And it's completely free.
+Join the 17 million customers who use MailChimp, the world's largest marketing automation platform, to develop their e-commerce marketing strategy. With the official MailChimp for WooCommerce integration, your customers and their purchase data are automatically synced with your MailChimp account, making it easy to send targeted campaigns, automatically follow up with customers post-purchase, recommend products, recover abandoned carts, and measure the ROI of your marketing efforts. And it's completely free.
 
 With MailChimp for WooCommerce, you’ll have the power to:
 
@@ -20,9 +20,10 @@ With MailChimp for WooCommerce, you’ll have the power to:
 - Showcase product recommendations.
 - Track and segment customers based on purchase history and purchase frequency.
 - View detailed data on your marketing performance in your MailChimp Dashboard.
-- Grow your audience and sell more stuff with Facebook and Instagram Ad Campaigns in MailChimp.
+- Find new customers, connect with current ones, and drive them all to your website with [Facebook](https://mailchimp.com/features/facebook-ads/) and [Instagram](https://mailchimp.com/features/instagram-ads/) ads. Then, set up [Google remarketing](https://mailchimp.com/features/google-remarketing-ads/) ads to turn your site visitors into shoppers.
 - Automatically embed a pop-up form that converts your website visitors to subscribers.
 - Add discount codes created in WooCommerce to your emails and automations with a Promo Code content block
+- Create beautiful landing pages that make it easy to highlight your products, promote a sale or giveaway, and grow your list.
 
 ###Important Notes
 This plugin supports our most powerful API 3.0 features, and is intended for users who have not yet integrated their WooCommerce stores with MailChimp.
@@ -31,7 +32,7 @@ You can run this new integration at the same time as your current WooCommerce in
 
 WordPress.com compatibility is limited to Business tier users only.
 
-== Installation ==
+=== Installation ===
 ###Before You Start
 Here are some things to know before you begin this process.
 
@@ -49,9 +50,30 @@ You’ll need to do a few things to connect your WooCommerce store to MailChimp.
 - Connect the plugin with your MailChimp API Key.
 - Configure your list settings to complete the data sync process.
 
-For more information on settings and configuration, please visit our Knowledge Base: [http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce](http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce)
+###Advanced Queue Setup In CLI mode
+To optimize the performance of your MailChimp integration - it is recommended that you run the queue in CLI mode.
+
+First define a constant in your config file
+
+    `define('DISABLE_WP_HTTP_WORKER', true);`
+
+You have 2 options to run this process:
+
+1. On a cron schedule every minute:
+
+    `* * * * * /usr/bin/wp --url=http://yourdomain.com --path=/full/path/to/install/ queue listen`
+
+2. Using a process manager like Monit or Supervisord:
+
+    `/usr/bin/wp --url=http://yourdomain.com --path=/full/path/to/install/ queue listen`
+
 
 == Changelog ==
+= 2.1.5 =
+* added support for Polish (zloty - zł) and Moldovan Leu currencies
+* update currency code for Belarusian Rouble
+* queue performance enhancement
+
 = 2.1.4 =
 * updated wordpress compatibility
 * updated sync details tab to show more informative stats

@@ -107,12 +107,7 @@ if ( ! class_exists( 'WP_Queue' ) ) {
 		 */
 		public function delete( $job ) {
 			global $wpdb;
-
-			$where = array(
-				'id' => $job->id,
-			);
-
-			$wpdb->delete( $this->table, $where );
+			$wpdb->delete($this->table, array('id' => $job->id));
 		}
 
 		/**

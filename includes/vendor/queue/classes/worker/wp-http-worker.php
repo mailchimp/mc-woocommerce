@@ -28,6 +28,7 @@ if ( ! class_exists( 'WP_Http_Worker' ) ) {
 			// Cron health check
 			add_action( 'http_worker_cron', array( $this, 'handle_cron' ) );
 			add_filter( 'cron_schedules', array( $this, 'schedule_cron' ) );
+
 			$this->maybe_schedule_cron();
 
 			// Dispatch handlers
@@ -36,6 +37,10 @@ if ( ! class_exists( 'WP_Http_Worker' ) ) {
 
 			// Dispatch listener
 			add_action( 'wp_queue_job_pushed', array( $this, 'maybe_dispatch_worker' ) );
+
+			if (isset($_REQUEST['action']) && $_REQUEST['action'] === 'http_worker' && check_ajax_referer( 'http_worker', 'nonce', false)) {
+                add_action('init', array($this, 'handle'));
+            }
 		}
 
 		/**
@@ -47,35 +52,62 @@ if ( ! class_exists( 'WP_Http_Worker' ) ) {
 		 * jobs remain in the queue and server limits reached.
 		 */
 		public function maybe_handle() {
+
 			check_ajax_referer( 'http_worker', 'nonce' );
 
-			if ( $this->is_worker_running() ) {
-				// Worker already running, die
-				wp_die();
-			}
-
-			// Lock worker to prevent multiple instances spawning
-			$this->lock_worker();
-
-			// Loop over jobs while within server limits
-			while ( ! $this->time_exceeded() && ! $this->memory_exceeded() ) {
-				if ( $this->should_run() ) {
-					$this->process_next_job();
-				} else {
-					break;
-				}
-			}
-
-			// Unlock worker to allow another instance to be spawned
-			$this->unlock_worker();
-
-			if ( $this->queue->available_jobs() ) {
-				// Job queue not empty, dispatch async worker request
-				$this->dispatch();
-			}
-
-			wp_die();
+			$this->handle();
 		}
+
+        /**
+         *
+         */
+		public function handle()
+        {
+            if ( $this->is_worker_running() ) {
+                // Worker already running, die
+                wp_die();
+            }
+
+            // Lock worker to prevent multiple instances spawning
+            $this->lock_worker();
+
+            $processed_something = false;
+
+            // Loop over jobs while within server limits
+            while ( ! $this->time_exceeded() && ! $this->memory_exceeded() ) {
+                if ( $this->should_run() ) {
+                    $this->process_next_job();
+                    $processed_something = true;
+                } else {
+                    break;
+                }
+            }
+
+            // Unlock worker to allow another instance to be spawned
+            $this->unlock_worker();
+
+            $available_jobs = $this->queue->available_jobs();
+
+            if (!$processed_something && $available_jobs) {
+                mailchimp_debug('queue_tracer', "HTTPWorker@handle", array(
+                    'jobs' => $available_jobs,
+                    'time_exceeded' => $this->time_exceeded(),
+                    'memory_exceeded' => $this->memory_exceeded(),
+                    'memory_limit' => $this->get_memory_limit(),
+                    'memory_usage' => memory_get_usage(true),
+                    'ini_memory' => ini_get('memory_limit'),
+                    'php_version' => phpversion(),
+                ));
+                wp_die();
+            }
+
+            if ($available_jobs) {
+                // Job queue not empty, dispatch async worker request
+                $this->dispatch();
+            }
+
+            wp_die();
+        }
 
 		/**
 		 * Memory exceeded
@@ -115,7 +147,9 @@ if ( ! class_exists( 'WP_Http_Worker' ) ) {
 				$memory_limit = '32000M';
 			}
 
-			return intval( $memory_limit ) * 1024 * 1024;
+            return (int) preg_replace_callback('/(\-?\d+)(.?)/', function ($m) {
+                return $m[1] * pow(1024, strpos('BKMG', $m[2]));
+            }, strtoupper($memory_limit));
 		}
 
 		/**
@@ -257,6 +291,7 @@ if ( ! class_exists( 'WP_Http_Worker' ) ) {
          * @return bool
          */
         public function handle_cron() {
+
             if ($this->is_worker_running()) {
                 wp_die();
             }

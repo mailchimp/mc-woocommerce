@@ -56,7 +56,7 @@ class MailChimp_WooCommerce_Transform_Products
 
         $product->setId($woo->get_id());
         $product->setHandle($post->post_name);
-        $product->setImageUrl(get_the_post_thumbnail_url($post));
+        $product->setImageUrl($this->getProductImage($post));
         $product->setDescription($post->post_content);
         $product->setPublishedAtForeign(mailchimp_date_utc($post->post_date));
         $product->setTitle($woo->get_title());
@@ -106,7 +106,7 @@ class MailChimp_WooCommerce_Transform_Products
 
         $variant->setId($woo->get_id());
         $variant->setUrl($woo->get_permalink());
-        $variant->setImageUrl(get_the_post_thumbnail_url($post));
+        $variant->setImageUrl($this->getProductImage($post));
         $variant->setPrice($woo->get_price());
         $variant->setSku($woo->get_sku());
         $variant->setBackorders($woo->backorders_allowed());
@@ -203,8 +203,36 @@ class MailChimp_WooCommerce_Transform_Products
     }
 
     /**
+     * @param $post_id
+     * @return false|string
+     */
+    public function getProductImage($post_id)
+    {
+        $meta = get_post_meta($post_id);
+        $key = '_thumbnail_id';
+        $image_key = $this->getProductImageKey();
+
+        if ($meta && is_array($meta) && array_key_exists($key, $meta) && isset($meta[$key][0])) {
+            $img = wp_get_attachment_image($meta[$key][0], $image_key);
+            if (!empty($img)) return $img;
+        }
+
+        return get_the_post_thumbnail_url($post_id, $image_key);
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getProductImageKey()
+    {
+        // going to add a setting for this.
+        return 'post-thumbnail';
+    }
+
+    /**
      * @param $id
-     * @return MailChimp_WooCommerce_Product
+     * @return bool|MailChimp_WooCommerce_Product
+     * @throws Exception
      */
     public static function deleted($id)
     {

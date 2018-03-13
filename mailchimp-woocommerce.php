@@ -16,7 +16,7 @@
  * Plugin Name:       MailChimp for WooCommerce
  * Plugin URI:        https://mailchimp.com/connect-your-store/
  * Description:       MailChimp - WooCommerce plugin
- * Version:           2.1.4
+ * Version:           2.1.5
  * Author:            MailChimp
  * Author URI:        https://mailchimp.com
  * License:           GPL-2.0+
@@ -43,7 +43,7 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production',
-        'version' => '2.1.4',
+        'version' => '2.1.5',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => class_exists('WC') ? WC()->version : null,
@@ -52,15 +52,31 @@ function mailchimp_environment_variables() {
 }
 
 /**
+ * @return bool
+ */
+function mailchimp_should_init_queue() {
+    return mailchimp_detect_admin_ajax() && mailchimp_is_configured() && !mailchimp_running_in_console() && !mailchimp_http_worker_is_running();
+}
+
+/**
+ * @return bool
+ */
+function mailchimp_is_configured() {
+    return (bool) (mailchimp_get_api_key() && mailchimp_get_list_id());
+}
+
+/**
+ * @return bool|int
+ */
+function mailchimp_get_api_key() {
+    return mailchimp_get_option('mailchimp_api_key', false);
+}
+
+/**
  * @return bool|int
  */
 function mailchimp_get_list_id() {
-    if (($options = get_option('mailchimp-woocommerce', false)) && is_array($options)) {
-        if (isset($options['mailchimp_list'])) {
-            return $options['mailchimp_list'];
-        }
-    }
-    return false;
+    return mailchimp_get_option('mailchimp_list', false);
 }
 
 /**
@@ -74,14 +90,13 @@ function mailchimp_get_store_id() {
     return $store_id;
 }
 
+
 /**
  * @return bool|MailChimp_WooCommerce_MailChimpApi
  */
 function mailchimp_get_api() {
-    if (($options = get_option('mailchimp-woocommerce', false)) && is_array($options)) {
-        if (isset($options['mailchimp_api_key'])) {
-            return new MailChimp_WooCommerce_MailChimpApi($options['mailchimp_api_key']);
-        }
+    if (($key = mailchimp_get_api_key())) {
+        return new MailChimp_WooCommerce_MailChimpApi($key);
     }
     return false;
 }
@@ -388,6 +403,16 @@ function mailchimp_update_connected_site_script() {
         }
     }
     return false;
+}
+
+/**
+ * @return bool
+ */
+function mailchimp_detect_admin_ajax() {
+    if (defined('DOING_CRON') && DOING_CRON) return true;
+    if (!is_admin()) return false;
+    if (!defined('DOING_AJAX')) return false;
+    return DOING_AJAX;
 }
 
 /**

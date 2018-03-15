@@ -69,24 +69,23 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function onNewOrder($order_id)
     {
-        if ($this->hasOption('mailchimp_api_key')) {
+        if (!mailchimp_is_configured()) return;
 
-            // register this order is already in process..
-            static::$pushed_orders[$order_id] = true;
+        // register this order is already in process..
+        static::$pushed_orders[$order_id] = true;
 
-            // see if we have a session id and a campaign id, also only do this when this user is not the admin.
-            $campaign_id = $this->getCampaignTrackingID();
+        // see if we have a session id and a campaign id, also only do this when this user is not the admin.
+        $campaign_id = $this->getCampaignTrackingID();
 
-            // grab the landing site cookie if we have one here.
-            $landing_site = $this->getLandingSiteCookie();
+        // grab the landing site cookie if we have one here.
+        $landing_site = $this->getLandingSiteCookie();
 
-            // expire the landing site cookie so we can rinse and repeat tracking
-            $this->expireLandingSiteCookie();
+        // expire the landing site cookie so we can rinse and repeat tracking
+        $this->expireLandingSiteCookie();
 
-            // queue up the single order to be processed.
-            $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $campaign_id, $landing_site);
-            wp_queue($handler, 60);
-        }
+        // queue up the single order to be processed.
+        $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $campaign_id, $landing_site);
+        wp_queue($handler, 60);
     }
 
     /**
@@ -95,15 +94,15 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function handleOrderStatusChanged($order_id, $is_admin = false)
     {
-        if ($this->hasOption('mailchimp_api_key')) {
-            // register this order is already in process..
-            static::$pushed_orders[$order_id] = true;
-            // queue up the single order to be processed.
-            $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, null, null);
-            $handler->is_update = true;
-            $handler->is_admin_save = $is_admin;
-            wp_queue($handler, 90);
-        }
+        if (!mailchimp_is_configured()) return;
+
+        // register this order is already in process..
+        static::$pushed_orders[$order_id] = true;
+        // queue up the single order to be processed.
+        $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, null, null);
+        $handler->is_update = true;
+        $handler->is_admin_save = $is_admin;
+        wp_queue($handler, 90);
     }
 
     /**
@@ -111,11 +110,11 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function onPartiallyRefunded($order_id)
     {
-        if ($this->hasOption('mailchimp_api_key')) {
-            $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, null, null);
-            $handler->partially_refunded = true;
-            wp_queue($handler);
-        }
+        if (!mailchimp_is_configured()) return;
+
+        $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, null, null);
+        $handler->partially_refunded = true;
+        wp_queue($handler);
     }
 
     /**
@@ -124,7 +123,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function handleCartUpdated($updated = null)
     {
-        if ($updated === false || $this->is_admin || $this->cart_was_submitted || !$this->hasOption('mailchimp_api_key')) {
+        if ($updated === false || $this->is_admin || $this->cart_was_submitted || !mailchimp_is_configured()) {
             return !is_null($updated) ? $updated : false;
         }
 
@@ -184,6 +183,8 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function handleCouponSaved($post_id, $coupon = null)
     {
+        if (!mailchimp_is_configured()) return;
+
         if ($coupon instanceof WC_Coupon) {
             wp_queue(new MailChimp_WooCommerce_SingleCoupon($post_id));
         }
@@ -206,6 +207,8 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function handlePostSaved($post_id, $post, $update)
     {
+        if (!mailchimp_is_configured()) return;
+
         if ($post->post_status !== 'auto-draft') {
             if ('product' == $post->post_type) {
                 wp_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
@@ -217,13 +220,10 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
 
     /**
      * @param $post_id
-     * @return bool
      */
     public function handlePostTrashed($post_id)
     {
-        if (!$this->hasOption('mailchimp_api_key')) {
-            return false;
-        }
+        if (!mailchimp_is_configured()) return;
 
         switch (get_post_type($post_id)) {
             case 'shop_coupon':
@@ -238,6 +238,8 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function handlePostRestored($post_id)
     {
+        if (!mailchimp_is_configured()) return;
+
         switch(get_post_type($post_id)) {
             case 'shop_coupon':
                 return $this->handleCouponRestored($post_id);
@@ -250,6 +252,8 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function handleUserRegistration($user_id)
     {
+        if (!mailchimp_is_configured()) return;
+
         $subscribed = (bool) isset($_POST['mailchimp_woocommerce_newsletter']) ?
             $_POST['mailchimp_woocommerce_newsletter'] : false;
 
@@ -267,6 +271,8 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     function handleUserUpdated($user_id, $old_user_data)
     {
+        if (!mailchimp_is_configured()) return;
+
         // only update this person if they were marked as subscribed before
         $is_subscribed = get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true);
 

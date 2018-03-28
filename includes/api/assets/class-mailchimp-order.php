@@ -278,7 +278,9 @@ class MailChimp_WooCommerce_Order
      */
     public function setOrderURL($url)
     {
-        $this->order_url = $url;
+        if (($url = wp_http_validate_url($url))) {
+            $this->order_url = $url;
+        }
 
         return $this;
     }

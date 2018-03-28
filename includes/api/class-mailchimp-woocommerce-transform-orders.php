@@ -93,9 +93,25 @@ class MailChimp_WooCommerce_Transform_Orders
             $order->setCampaignId($this->campaign_id);
         }
 
-        $order->setProcessedAt($woo->get_date_created()->setTimezone(new \DateTimeZone('UTC')));
+        if (method_exists($woo, 'get_date_created')) {
+            $order->setProcessedAt($woo->get_date_created()->setTimezone(new \DateTimeZone('UTC')));
+        } elseif (property_exists($woo, 'order_date')) {
+            $date = new \DateTime($woo->order_date);
+            $date->setTimezone(new \DateTimeZone('UTC'));
+            $order->setProcessedAt($date);
+        } else {
+            $date = new \DateTime();
+            $date->setTimezone(new \DateTimeZone('UTC'));
+            $order->setProcessedAt($date);
+        }
 
-        $order->setCurrencyCode($woo->get_currency());
+        if (method_exists($woo, 'get_currency')) {
+            $order->setCurrencyCode($woo->get_currency());
+        } elseif (method_exists($woo, 'get_order_currency')) {
+            $order->setCurrencyCode($woo->get_order_currency());
+        } else {
+            $order->setCurrencyCode($woo->order_currency);
+        }
 
         // grab the current statuses - this will end up being custom at some point.
         $statuses = $this->getOrderStatuses();
@@ -120,7 +136,17 @@ class MailChimp_WooCommerce_Transform_Orders
 
         // only set this if the order is cancelled.
         if ($status === 'cancelled') {
-            $order->setCancelledAt($woo->get_date_modified()->setTimezone(new \DateTimeZone('UTC')));
+            if (method_exists($woo, 'get_date_modified')) {
+                $order->setCancelledAt($woo->get_date_modified()->setTimezone(new \DateTimeZone('UTC')));
+            } elseif (property_exists($woo, 'modified_date')) {
+                $date = new \DateTime($woo->modified_date);
+                $date->setTimezone(new \DateTimeZone('UTC'));
+                $order->setCancelledAt($date);
+            } else {
+                $date = new \DateTime();
+                $date->setTimezone(new \DateTimeZone('UTC'));
+                $order->setCancelledAt($date);
+            }
         }
 
         // set the total
@@ -211,7 +237,8 @@ class MailChimp_WooCommerce_Transform_Orders
         $customer->setTotalSpent($order->get_total());
 
         // we are saving the post meta for subscribers on each order... so if they have subscribed on checkout
-        $subscriber_meta = get_post_meta($order->get_id(), 'mailchimp_woocommerce_is_subscribed', true);
+        $order_id = method_exists($order, 'get_id') ? $order->get_id() : $order->id;
+        $subscriber_meta = get_post_meta($order_id, 'mailchimp_woocommerce_is_subscribed', true);
         $subscribed_on_order = $subscriber_meta === '' ? false : (bool) $subscriber_meta;
 
         $customer->setOptInStatus($subscribed_on_order);

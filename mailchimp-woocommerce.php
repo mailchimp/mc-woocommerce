@@ -212,8 +212,19 @@ function mailchimp_get_timezone_list() {
  */
 function mailchimp_check_woocommerce_plugin_status()
 {
-    if (defined("RUNNING_CUSTOM_WOOCOMMERCE") && RUNNING_CUSTOM_WOOCOMMERCE === true) return true;
-    return in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option('active_plugins')));
+    // if you are using a custom folder name other than woocommerce just define the constant to TRUE
+    if (defined("RUNNING_CUSTOM_WOOCOMMERCE") && RUNNING_CUSTOM_WOOCOMMERCE === true) {
+        return true;
+    }
+    // it the plugin is active, we're good.
+    if (in_array('woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option('active_plugins')))) {
+        return true;
+    }
+    // lets check for network activation woo installs now too.
+    if (function_exists('is_plugin_active_for_network')) {
+        return is_plugin_active_for_network( 'woocommerce/woocommerce.php');
+    }
+    return false;
 }
 
 /**

@@ -55,11 +55,18 @@ spl_autoload_register(function($class) {
 
         'MailChimp_WooCommerce_Public' => 'public/class-mailchimp-woocommerce-public.php',
         'MailChimp_WooCommerce_Admin' => 'admin/class-mailchimp-woocommerce-admin.php',
+
+        'WP_Job' => 'includes/vendor/queue/classes/wp-job.php',
+        'WP_Queue' => 'includes/vendor/queue/classes/wp-queue.php',
+        'WP_Http_Worker' => 'includes/vendor/queue/classes/worker/wp-http-worker.php',
+        'WP_Worker' => 'includes/vendor/queue/classes/worker/wp-worker.php',
+        'Queue_Command' => 'includes/vendor/queue/classes/cli-queue-command.php',
     );
 
     // if the file exists, require it
-    if (array_key_exists($class, $classes) && file_exists($classes[$class])) {
-        require $classes[$class];
+    $path = plugin_dir_path( __FILE__ );
+    if (($is_mc = array_key_exists($class, $classes)) && file_exists($path.$classes[$class])) {
+        require $path.$classes[$class];
     }
 });
 
@@ -74,12 +81,72 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production',
-        'version' => '2.1.4',
+        'version' => '2.1.6',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => class_exists('WC') ? WC()->version : null,
         'logging' => ($o && is_array($o) && isset($o['mailchimp_logging'])) ? $o['mailchimp_logging'] : 'none',
     );
+}
+
+// Add WP CLI commands
+if (defined( 'WP_CLI' ) && WP_CLI) {
+    try {
+        /**
+         * Service push to MailChimp
+         *
+         * <type>
+         * : product_sync order_sync order product
+         */
+        function mailchimp_cli_push_command( $args, $assoc_args ) {
+            if (is_array($args) && isset($args[0])) {
+                switch($args[0]) {
+
+                    case 'product_sync':
+                        wp_queue(new MailChimp_WooCommerce_Process_Products());
+                        WP_CLI::success("queued up the product sync!");
+                        break;
+
+                    case 'order_sync':
+                        wp_queue(new MailChimp_WooCommerce_Process_Orders());
+                        WP_CLI::success("queued up the order sync!");
+                        break;
+
+                    case 'order':
+                        if (!isset($args[1])) {
+                            wp_die('You must specify an order id as the 2nd parameter.');
+                        }
+                        wp_queue(new MailChimp_WooCommerce_Single_Order($args[1]));
+                        WP_CLI::success("queued up the order {$args[1]}!");
+                        break;
+
+                    case 'product':
+                        if (!isset($args[1])) {
+                            wp_die('You must specify a product id as the 2nd parameter.');
+                        }
+                        wp_queue(new MailChimp_WooCommerce_Single_Product($args[1]));
+                        WP_CLI::success("queued up the product {$args[1]}!");
+                        break;
+                }
+            }
+        };
+        WP_CLI::add_command( 'mailchimp_push', 'mailchimp_cli_push_command');
+        WP_CLI::add_command( 'queue', 'Queue_Command' );
+    } catch (\Exception $e) {}
+}
+
+if (!function_exists( 'wp_queue')) {
+    /**
+     * WP queue.
+     *
+     * @param WP_Job $job
+     * @param int    $delay
+     */
+    function wp_queue( WP_Job $job, $delay = 0 ) {
+        global $wp_queue;
+        $wp_queue->push( $job, $delay );
+        do_action( 'wp_queue_job_pushed', $job );
+    }
 }
 
 
@@ -506,6 +573,8 @@ function run_mailchimp_woocommerce() {
     $plugin->run();
 }
 
+
+
 function mailchimp_woocommerce_add_meta_tags() {
     echo '<meta name="referrer" content="always"/>';
 }
@@ -516,6 +585,3 @@ function mailchimp_on_all_plugins_loaded() {
         run_mailchimp_woocommerce();
     }
 }
-
-// make sure the queue exists first since the other files depend on it.
-require_once plugin_dir_path(dirname( __FILE__ )).'includes/vendor/queue.php';

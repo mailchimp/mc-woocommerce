@@ -1,5 +1,10 @@
 <?php
 
+// If this file is called directly, abort.
+if (!defined( 'WPINC')) {
+    die;
+}
+
 $mailchimp_woocommerce_spl_autoloader = true;
 
 spl_autoload_register(function($class) {

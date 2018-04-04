@@ -1,6 +1,6 @@
 <?php
 
-$handler = MailChimp_Woocommerce_Admin::connect();
+$handler = MailChimp_WooCommerce_Admin::connect();
 
 // if we don't have valid campaign defaults we need to redirect back to the 'campaign_defaults' tab.
 if (!$handler->hasValidApiKey()) {

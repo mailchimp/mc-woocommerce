@@ -45,6 +45,11 @@ class MailChimp_WooCommerce_Single_Product extends WP_Job
             return false;
         }
 
+        if (!mailchimp_is_configured()) {
+            mailchimp_debug(get_called_class(), 'mailchimp is not configured properly');
+            return false;
+        }
+
         if ($this->api()->getStoreProduct($this->store_id, $this->product_id)) {
             $this->api()->deleteStoreProduct($this->store_id, $this->product_id);
         }

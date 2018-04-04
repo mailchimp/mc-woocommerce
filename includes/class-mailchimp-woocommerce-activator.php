@@ -5,11 +5,11 @@
  * This class defines all code necessary to run during the plugin's activation.
  *
  * @since      1.0.1
- * @package    MailChimp_Woocommerce
- * @subpackage MailChimp_Woocommerce/includes
+ * @package    MailChimp_WooCommerce
+ * @subpackage MailChimp_WooCommerce/includes
  * @author     Ryan Hungate <ryan@vextras.com>
  */
-class MailChimp_Woocommerce_Activator {
+class MailChimp_WooCommerce_Activator {
 
 	/**
 	 * Short Description. (use period)

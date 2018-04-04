@@ -2,7 +2,7 @@
 $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'api_key';
 $is_mailchimp_post = isset($_POST['mailchimp_woocommerce_settings_hidden']) && $_POST['mailchimp_woocommerce_settings_hidden'] === 'Y';
 
-$handler = MailChimp_Woocommerce_Admin::connect();
+$handler = MailChimp_WooCommerce_Admin::connect();
 
 //Grab all options for this particular tab we're viewing.
 $options = get_option($this->plugin_name, array());

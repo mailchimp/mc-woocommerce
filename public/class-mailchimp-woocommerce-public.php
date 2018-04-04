@@ -6,8 +6,8 @@
  * @link       https://mailchimp.com
  * @since      1.0.1
  *
- * @package    MailChimp_Woocommerce
- * @subpackage MailChimp_Woocommerce/public
+ * @package    MailChimp_WooCommerce
+ * @subpackage MailChimp_WooCommerce/public
  */
 
 /**
@@ -16,11 +16,11 @@
  * Defines the plugin name, version, and two examples hooks for how to
  * enqueue the admin-specific stylesheet and JavaScript.
  *
- * @package    MailChimp_Woocommerce
- * @subpackage MailChimp_Woocommerce/public
+ * @package    MailChimp_WooCommerce
+ * @subpackage MailChimp_WooCommerce/public
  * @author     Ryan Hungate <ryan@vextras.com>
  */
-class MailChimp_Woocommerce_Public {
+class MailChimp_WooCommerce_Public {
 
 	/**
 	 * The ID of this plugin.

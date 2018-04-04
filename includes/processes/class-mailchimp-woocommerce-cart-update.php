@@ -61,88 +61,89 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
     public function process()
     {
         try {
+
+            if (!mailchimp_is_configured() || !($api = mailchimp_get_api())) {
+                mailchimp_debug(get_called_class(), 'mailchimp is not configured properly');
+                return false;
+            }
+
             $options = get_option('mailchimp-woocommerce', array());
             $store_id = mailchimp_get_store_id();
 
-            if (!empty($store_id) && is_array($options) && isset($options['mailchimp_api_key'])) {
+            $this->cart_data = json_decode($this->cart_data, true);
 
-                $this->cart_data = json_decode($this->cart_data, true);
+            // delete it and the add it back.
+            $api->deleteCartByID($store_id, $this->unique_id);
 
-                $api = new MailChimp_WooCommerce_MailChimpApi($options['mailchimp_api_key']);
+            // if they emptied the cart ignore it.
+            if (!is_array($this->cart_data) || empty($this->cart_data)) {
+                return false;
+            }
 
-                // delete it and the add it back.
-                $api->deleteCartByID($store_id, $this->unique_id);
+            $checkout_url = wc_get_checkout_url();
 
-                // if they emptied the cart ignore it.
-                if (!is_array($this->cart_data) || empty($this->cart_data)) {
-                    return false;
-                }
+            if (mailchimp_string_contains($checkout_url, '?')) {
+                $checkout_url .= '&mc_cart_id='.$this->unique_id;
+            } else {
+                $checkout_url .= '?mc_cart_id='.$this->unique_id;
+            }
 
-                $checkout_url = wc_get_checkout_url();
+            $customer = new MailChimp_WooCommerce_Customer();
+            $customer->setId($this->unique_id);
+            $customer->setEmailAddress($this->email);
+            $customer->setOptInStatus(false);
 
-                if (mailchimp_string_contains($checkout_url, '?')) {
-                    $checkout_url .= '&mc_cart_id='.$this->unique_id;
-                } else {
-                    $checkout_url .= '?mc_cart_id='.$this->unique_id;
-                }
+            $cart = new MailChimp_WooCommerce_Cart();
+            $cart->setId($this->unique_id);
+            $cart->setCampaignID($this->campaign_id);
+            $cart->setCheckoutUrl($checkout_url);
+            $cart->setCurrencyCode(isset($options['store_currency_code']) ? $options['store_currency_code'] : 'USD');
 
-                $customer = new MailChimp_WooCommerce_Customer();
-                $customer->setId($this->unique_id);
-                $customer->setEmailAddress($this->email);
-                $customer->setOptInStatus(false);
+            $cart->setCustomer($customer);
 
-                $cart = new MailChimp_WooCommerce_Cart();
-                $cart->setId($this->unique_id);
-                $cart->setCampaignID($this->campaign_id);
-                $cart->setCheckoutUrl($checkout_url);
-                $cart->setCurrencyCode(isset($options['store_currency_code']) ? $options['store_currency_code'] : 'USD');
+            $order_total = 0;
+            $products = array();
 
-                $cart->setCustomer($customer);
-
-                $order_total = 0;
-                $products = array();
-
-                foreach ($this->cart_data as $hash => $item) {
-                    try {
-                        $line = $this->transformLineItem($hash, $item);
-                        $cart->addItem($line);
-                        $order_total += ($item['quantity'] * $line->getPrice());
-                        $products[] = $line;
-                    } catch (\Exception $e) {}
-                }
-
-                if (empty($products)) {
-                    return false;
-                }
-
-                $cart->setOrderTotal($order_total);
-
+            foreach ($this->cart_data as $hash => $item) {
                 try {
-                    // if the post is successful we're all good.
-                    $api->addCart($store_id, $cart, false);
+                    $line = $this->transformLineItem($hash, $item);
+                    $cart->addItem($line);
+                    $order_total += ($item['quantity'] * $line->getPrice());
+                    $products[] = $line;
+                } catch (\Exception $e) {}
+            }
 
-                    mailchimp_log('abandoned_cart.success', "email: {$customer->getEmailAddress()} :: checkout_url: $checkout_url");
+            if (empty($products)) {
+                return false;
+            }
 
-                } catch (\Exception $e) {
+            $cart->setOrderTotal($order_total);
 
-                    mailchimp_error('abandoned_cart.error', "email: {$customer->getEmailAddress()} :: attempting product update :: {$e->getMessage()}");
+            try {
+                // if the post is successful we're all good.
+                $api->addCart($store_id, $cart, false);
 
-                    // if we have an error it's most likely due to a product not being found.
-                    // let's loop through each item, verify that we have the product or not.
-                    // if not, we will add it.
-                    foreach ($products as $item) {
-                        /** @var MailChimp_WooCommerce_LineItem $item */
-                        $transformer = new MailChimp_WooCommerce_Single_Product($item->getProductID());
-                        if (!$transformer->api()->getStoreProduct($store_id, $item->getProductId())) {
-                            $transformer->handle();
-                        }
+                mailchimp_log('abandoned_cart.success', "email: {$customer->getEmailAddress()} :: checkout_url: $checkout_url");
+
+            } catch (\Exception $e) {
+
+                mailchimp_error('abandoned_cart.error', "email: {$customer->getEmailAddress()} :: attempting product update :: {$e->getMessage()}");
+
+                // if we have an error it's most likely due to a product not being found.
+                // let's loop through each item, verify that we have the product or not.
+                // if not, we will add it.
+                foreach ($products as $item) {
+                    /** @var MailChimp_WooCommerce_LineItem $item */
+                    $transformer = new MailChimp_WooCommerce_Single_Product($item->getProductID());
+                    if (!$transformer->api()->getStoreProduct($store_id, $item->getProductId())) {
+                        $transformer->handle();
                     }
-
-                    // if the post is successful we're all good.
-                    $api->addCart($store_id, $cart, false);
-
-                    mailchimp_log('abandoned_cart.success', "email: {$customer->getEmailAddress()}");
                 }
+
+                // if the post is successful we're all good.
+                $api->addCart($store_id, $cart, false);
+
+                mailchimp_log('abandoned_cart.success', "email: {$customer->getEmailAddress()}");
             }
 
         } catch (\Exception $e) {

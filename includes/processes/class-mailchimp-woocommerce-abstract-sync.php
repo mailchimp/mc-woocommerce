@@ -8,7 +8,7 @@
  * Date: 7/14/16
  * Time: 11:54 AM
  */
-abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
+abstract class MailChimp_WooCommerce_Abstract_Sync extends WP_Job
 {
     /**
      * @var MailChimp_WooCommerce_Api
@@ -77,6 +77,11 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
     public function handle()
     {
         global $wpdb;
+
+        if (!mailchimp_is_configured()) {
+            mailchimp_debug(get_called_class(), 'mailchimp is not configured properly');
+            return false;
+        }
 
         if (!($this->store_id = $this->getStoreID())) {
             mailchimp_debug(get_called_class().'@handle', 'store id not loaded');
@@ -235,7 +240,7 @@ abstract class MailChimp_WooCommerce_Abtstract_Sync extends WP_Job
     /**
      * @param $page
      * @param null $resource
-     * @return MailChimp_WooCommerce_Abtstract_Sync
+     * @return MailChimp_WooCommerce_Abstract_Sync
      */
     public function setResourcePagePointer($page, $resource = null)
     {

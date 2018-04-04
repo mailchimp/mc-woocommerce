@@ -8,8 +8,8 @@
  * @link       https://mailchimp.com
  * @since      1.0.1
  *
- * @package    MailChimp_Woocommerce
- * @subpackage MailChimp_Woocommerce/public/partials
+ * @package    MailChimp_WooCommerce
+ * @subpackage MailChimp_WooCommerce/public/partials
  */
 ?>
 

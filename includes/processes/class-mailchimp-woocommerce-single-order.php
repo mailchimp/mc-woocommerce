@@ -45,154 +45,153 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
     public function process()
     {
-        $options = get_option('mailchimp-woocommerce', array());
+        if (!mailchimp_is_configured() || !($api = mailchimp_get_api())) {
+            mailchimp_debug(get_called_class(), 'mailchimp is not configured properly');
+            return false;
+        }
+
         $store_id = mailchimp_get_store_id();
 
-        // only if we have the right parameters to do the work
-        if (!empty($store_id) && is_array($options) && isset($options['mailchimp_api_key'])) {
+        if (!($woo_order_number = $this->getRealOrderNumber())) {
+            mailchimp_log('order_submit.failure', "There is no real order number to use.");
+            return false;
+        }
 
-            if (!($woo_order_number = $this->getRealOrderNumber())) {
-                mailchimp_log('order_submit.failure', "There is no real order number to use.");
+        // skip amazon orders
+        if ($this->isAmazonOrder()) {
+            mailchimp_log('validation.amazon', "Order #{$woo_order_number} was placed through Amazon. Skipping!");
+            return false;
+        }
+
+        $job = new MailChimp_WooCommerce_Transform_Orders();
+
+        // set the campaign ID
+        $job->campaign_id = $this->campaign_id;
+
+        $call = ($api_response = $api->getStoreOrder($store_id, $woo_order_number)) ? 'updateStoreOrder' : 'addStoreOrder';
+
+        if (!$this->is_admin_save && $call === 'addStoreOrder' && $this->is_update === true) {
+            return false;
+        }
+
+        // if we already pushed this order into the system, we need to unset it now just in case there
+        // was another campaign that had been sent and this was only an order update.
+        if ($call === 'updateStoreOrder') {
+            $job->campaign_id = null;
+            $this->campaign_id = null;
+            $this->landing_site = null;
+        }
+
+        // will either add or update the order
+        try {
+
+            if (!($order_post = get_post($this->order_id))) {
                 return false;
             }
 
+            // transform the order
+            $order = $job->transform($order_post);
+
             // skip amazon orders
-            if ($this->isAmazonOrder()) {
+            if ($order->isFlaggedAsAmazonOrder()) {
                 mailchimp_log('validation.amazon', "Order #{$woo_order_number} was placed through Amazon. Skipping!");
                 return false;
             }
 
-            $job = new MailChimp_WooCommerce_Transform_Orders();
-            $api = new MailChimp_WooCommerce_MailChimpApi($options['mailchimp_api_key']);
-
-            // set the campaign ID
-            $job->campaign_id = $this->campaign_id;
-
-            $call = ($api_response = $api->getStoreOrder($store_id, $woo_order_number)) ? 'updateStoreOrder' : 'addStoreOrder';
-
-            if (!$this->is_admin_save && $call === 'addStoreOrder' && $this->is_update === true) {
+            // if the order is in failed or cancelled status - and it's brand new, we shouldn't submit it.
+            if ($call === 'addStoreOrder' && in_array($order->getFinancialStatus(), array('failed', 'cancelled'))) {
                 return false;
             }
 
-            // if we already pushed this order into the system, we need to unset it now just in case there
-            // was another campaign that had been sent and this was only an order update.
-            if ($call === 'updateStoreOrder') {
-                $job->campaign_id = null;
-                $this->campaign_id = null;
-                $this->landing_site = null;
+            mailchimp_debug('order_submit', "#{$woo_order_number}", $order->toArray());
+
+            // if we're overriding this we need to set it here.
+            if ($this->partially_refunded) {
+                $order->setFinancialStatus('partially_refunded');
             }
 
-            // will either add or update the order
-            try {
+            // will be the same as the customer id. an md5'd hash of a lowercased email.
+            $this->cart_session_id = $order->getCustomer()->getId();
 
-                if (!($order_post = get_post($this->order_id))) {
-                    return false;
+            $log = "$call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}";
+
+            // only do this stuff on new orders
+            if ($call === 'addStoreOrder') {
+
+                // apply a campaign id if we have one.
+                if (!empty($this->campaign_id)) {
+                    $log .= ' :: campaign id ' . $this->campaign_id;
+                    $order->setCampaignId($this->campaign_id);
                 }
 
-                // transform the order
-                $order = $job->transform($order_post);
-
-                // skip amazon orders
-                if ($order->isFlaggedAsAmazonOrder()) {
-                    mailchimp_log('validation.amazon', "Order #{$woo_order_number} was placed through Amazon. Skipping!");
-                    return false;
+                // apply the landing site if we have one.
+                if (!empty($this->landing_site)) {
+                    $log .= ' :: landing site ' . $this->landing_site;
+                    $order->setLandingSite($this->landing_site);
                 }
 
-                // if the order is in failed or cancelled status - and it's brand new, we shouldn't submit it.
-                if ($call === 'addStoreOrder' && in_array($order->getFinancialStatus(), array('failed', 'cancelled'))) {
-                    return false;
-                }
+            }
 
-                mailchimp_debug('order_submit', "#{$woo_order_number}", $order->toArray());
+            // update or create
+            $api_response = $api->$call($store_id, $order, false);
 
-                // if we're overriding this we need to set it here.
-                if ($this->partially_refunded) {
-                    $order->setFinancialStatus('partially_refunded');
-                }
-
-                // will be the same as the customer id. an md5'd hash of a lowercased email.
-                $this->cart_session_id = $order->getCustomer()->getId();
-
-                $log = "$call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}";
-
-                // only do this stuff on new orders
-                if ($call === 'addStoreOrder') {
-
-                    // apply a campaign id if we have one.
-                    if (!empty($this->campaign_id)) {
-                        $log .= ' :: campaign id ' . $this->campaign_id;
-                        $order->setCampaignId($this->campaign_id);
-                    }
-
-                    // apply the landing site if we have one.
-                    if (!empty($this->landing_site)) {
-                        $log .= ' :: landing site ' . $this->landing_site;
-                        $order->setLandingSite($this->landing_site);
-                    }
-
-                }
-
-                // update or create
-                $api_response = $api->$call($store_id, $order, false);
-
-                if (empty($api_response)) {
-                    mailchimp_error('order_submit.failure', "$call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()} produced a blank response from MailChimp");
-                    return $api_response;
-                }
-
-                // if we're adding a new order and the session id is here, we need to delete the AC cart record.
-                if (!empty($this->cart_session_id)) {
-                    $api->deleteCartByID($store_id, $this->cart_session_id);
-                    $log .= " :: abandoned cart deleted [{$this->cart_session_id}]";
-                }
-
-                mailchimp_log('order_submit.success', $log);
-
+            if (empty($api_response)) {
+                mailchimp_error('order_submit.failure', "$call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()} produced a blank response from MailChimp");
                 return $api_response;
+            }
 
-            } catch (\Exception $e) {
+            // if we're adding a new order and the session id is here, we need to delete the AC cart record.
+            if (!empty($this->cart_session_id)) {
+                $api->deleteCartByID($store_id, $this->cart_session_id);
+                $log .= " :: abandoned cart deleted [{$this->cart_session_id}]";
+            }
 
-                $message = strtolower($e->getMessage());
+            mailchimp_log('order_submit.success', $log);
 
-                mailchimp_error('order_submit.tracing_error', $e);
+            return $api_response;
 
-                if (!isset($order)) {
-                    // transform the order
-                    $order = $job->transform(get_post($this->order_id));
-                    $this->cart_session_id = $order->getCustomer()->getId();
-                }
+        } catch (\Exception $e) {
 
-                // this can happen when a customer changes their email.
-                if (isset($order) && strpos($message, 'not be changed')) {
+            $message = strtolower($e->getMessage());
 
-                    try {
+            mailchimp_error('order_submit.tracing_error', $e);
 
-                        mailchimp_log('order_submit.deleting_customer', "#{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}");
+            if (!isset($order)) {
+                // transform the order
+                $order = $job->transform(get_post($this->order_id));
+                $this->cart_session_id = $order->getCustomer()->getId();
+            }
 
-                        // delete the customer before adding it again.
-                        $api->deleteCustomer($store_id, $order->getCustomer()->getId());
+            // this can happen when a customer changes their email.
+            if (isset($order) && strpos($message, 'not be changed')) {
 
-                        // update or create
-                        $api_response = $api->$call($store_id, $order, false);
+                try {
 
-                        $log = "Deleted Customer :: $call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}";
+                    mailchimp_log('order_submit.deleting_customer', "#{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}");
 
-                        if (!empty($job->campaign_id)) {
-                            $log .= ' :: campaign id '.$job->campaign_id;
-                        }
+                    // delete the customer before adding it again.
+                    $api->deleteCustomer($store_id, $order->getCustomer()->getId());
 
-                        mailchimp_log('order_submit.success', $log);
+                    // update or create
+                    $api_response = $api->$call($store_id, $order, false);
 
-                        // if we're adding a new order and the session id is here, we need to delete the AC cart record.
-                        if (!empty($this->cart_session_id)) {
-                            $api->deleteCartByID($store_id, $this->cart_session_id);
-                        }
+                    $log = "Deleted Customer :: $call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}";
 
-                        return $api_response;
-
-                    } catch (\Exception $e) {
-                        mailchimp_error('order_submit.error', mailchimp_error_trace($e, 'deleting-customer-re-add :: #'.$this->order_id));
+                    if (!empty($job->campaign_id)) {
+                        $log .= ' :: campaign id '.$job->campaign_id;
                     }
+
+                    mailchimp_log('order_submit.success', $log);
+
+                    // if we're adding a new order and the session id is here, we need to delete the AC cart record.
+                    if (!empty($this->cart_session_id)) {
+                        $api->deleteCartByID($store_id, $this->cart_session_id);
+                    }
+
+                    return $api_response;
+
+                } catch (\Exception $e) {
+                    mailchimp_error('order_submit.error', mailchimp_error_trace($e, 'deleting-customer-re-add :: #'.$this->order_id));
                 }
             }
         }

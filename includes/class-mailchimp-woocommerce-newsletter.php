@@ -8,7 +8,7 @@
  * Date: 2/22/16
  * Time: 9:09 AM
  */
-class MailChimp_Newsletter extends MailChimp_Woocommerce_Options
+class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
 {
     /**
      * @param WC_Checkout $checkout

@@ -6,8 +6,8 @@
  * @link       https://mailchimp.com
  * @since      1.0.1
  *
- * @package    MailChimp_Woocommerce
- * @subpackage MailChimp_Woocommerce/admin
+ * @package    MailChimp_WooCommerce
+ * @subpackage MailChimp_WooCommerce/admin
  */
 
 /**
@@ -16,14 +16,14 @@
  * Defines the plugin name, version, and two examples hooks for how to
  * enqueue the admin-specific stylesheet and JavaScript.
  *
- * @package    MailChimp_Woocommerce
- * @subpackage MailChimp_Woocommerce/admin
+ * @package    MailChimp_WooCommerce
+ * @subpackage MailChimp_WooCommerce/admin
  * @author     Ryan Hungate <ryan@vextras.com>
  */
-class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
+class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 	/**
-	 * @return MailChimp_Woocommerce_Admin
+	 * @return MailChimp_WooCommerce_Admin
 	 */
 	public static function connect()
 	{

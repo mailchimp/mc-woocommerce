@@ -8,7 +8,7 @@
  * Date: 10/06/17
  * Time: 10:57 AM
  */
-class MailChimp_WooCommerce_Process_Coupons extends MailChimp_WooCommerce_Abtstract_Sync
+class MailChimp_WooCommerce_Process_Coupons extends MailChimp_WooCommerce_Abstract_Sync
 {
     /**
      * @var string

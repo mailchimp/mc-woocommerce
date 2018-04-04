@@ -8,7 +8,7 @@
  * Date: 2/22/16
  * Time: 3:45 PM
  */
-abstract class MailChimp_Woocommerce_Options
+abstract class MailChimp_WooCommerce_Options
 {
     /**
      * @var MailChimp_WooCommerce_MailChimpApi

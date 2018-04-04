@@ -8,7 +8,7 @@
  * Date: 2/17/16
  * Time: 12:03 PM
  */
-class MailChimp_Service extends MailChimp_Woocommerce_Options
+class MailChimp_Service extends MailChimp_WooCommerce_Options
 {
     protected static $pushed_orders = array();
 

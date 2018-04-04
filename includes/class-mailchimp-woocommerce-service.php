@@ -4,7 +4,7 @@
  * Created by MailChimp.
  *
  * Name: Ryan Hungate
- * Email: ryan@mailchimp.com
+ * Email: ryan@vextras.com
  * Date: 2/17/16
  * Time: 12:03 PM
  */
@@ -24,14 +24,6 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function wooIsRunning()
     {
-        $path = plugin_dir_path( dirname( __FILE__ ) );
-
-        if (function_exists('WC') && (int) WC()->version >= 3) {
-            require_once $path . 'includes/api/class-mailchimp-woocommerce-transform-orders-wc3.php';
-        } else {
-            require_once $path . 'includes/api/class-mailchimp-woocommerce-transform-orders.php';
-        }
-
         // make sure the site option for setting the mailchimp_carts has been saved.
         $this->validated_cart_db = get_site_option('mailchimp_woocommerce_db_mailchimp_carts', false);
         $this->is_admin = current_user_can('administrator');
@@ -83,6 +75,9 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
         // expire the landing site cookie so we can rinse and repeat tracking
         $this->expireLandingSiteCookie();
 
+        // remove this record from the db.
+        $this->clearCartData();
+
         // queue up the single order to be processed.
         $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $campaign_id, $landing_site);
         wp_queue($handler, 60);
@@ -115,6 +110,16 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
         $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, null, null);
         $handler->partially_refunded = true;
         wp_queue($handler);
+    }
+
+    /**
+     * Clear the card data for a user.
+     */
+    public function clearCartData()
+    {
+        if ($user_email = $this->getCurrentUserEmail()) {
+            $this->deleteCart($user_email);
+        }
     }
 
     /**
@@ -556,12 +561,11 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
      */
     public function get_user_by_hash()
     {
-        if (defined('DOING_AJAX') && DOING_AJAX && isset($_GET['hash'])) {
+        if ($this->doingAjax() && isset($_GET['hash'])) {
             if (($cart = $this->getCart($_GET['hash']))) {
                 $this->respondJSON(array('success' => true, 'email' => $cart->email));
             }
         }
-
         $this->respondJSON(array('success' => false, 'email' => false));
     }
 
@@ -574,7 +578,7 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
             $this->respondJSON(array('success' => false));
         }
 
-        if (defined('DOING_AJAX') && DOING_AJAX && isset($_GET['email'])) {
+        if ($this->doingAjax() && isset($_GET['email'])) {
 
             $cookie_duration = $this->getCookieDuration();
 
@@ -602,7 +606,6 @@ class MailChimp_Service extends MailChimp_Woocommerce_Options
 
         $this->respondJSON(array('success' => false, 'email' => false));
     }
-
 
     /**
      * @param string $time

@@ -18,7 +18,7 @@
  *
  * @package    MailChimp_Woocommerce
  * @subpackage MailChimp_Woocommerce/admin
- * @author     Ryan Hungate <ryan@mailchimp.com>
+ * @author     Ryan Hungate <ryan@vextras.com>
  */
 class MailChimp_Woocommerce_Admin extends MailChimp_Woocommerce_Options {
 

@@ -22,7 +22,7 @@
  * @since      1.0.1
  * @package    MailChimp_Woocommerce
  * @subpackage MailChimp_Woocommerce/includes
- * @author     Ryan Hungate <ryan@mailchimp.com>
+ * @author     Ryan Hungate <ryan@vextras.com>
  */
 class MailChimp_Woocommerce_i18n {
 

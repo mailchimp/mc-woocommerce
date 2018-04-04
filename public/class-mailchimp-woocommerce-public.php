@@ -18,7 +18,7 @@
  *
  * @package    MailChimp_Woocommerce
  * @subpackage MailChimp_Woocommerce/public
- * @author     Ryan Hungate <ryan@mailchimp.com>
+ * @author     Ryan Hungate <ryan@vextras.com>
  */
 class MailChimp_Woocommerce_Public {
 
@@ -59,19 +59,6 @@ class MailChimp_Woocommerce_Public {
 	 * @since    1.0.0
 	 */
 	public function enqueue_styles() {
-
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in MailChimp_Woocommerce_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The MailChimp_Woocommerce_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
-
 		//wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-public.css', array(), $this->version, 'all' );
 	}
 
@@ -81,30 +68,14 @@ class MailChimp_Woocommerce_Public {
 	 * @since    1.0.0
 	 */
 	public function enqueue_scripts() {
-
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in MailChimp_Woocommerce_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The MailChimp_Woocommerce_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
-
 		wp_register_script($this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-public.min.js', array(), $this->version, false);
-
 		wp_localize_script($this->plugin_name, 'mailchimp_public_data', array(
 			'site_url' => site_url(),
 			'ajax_url' => admin_url('admin-ajax.php'),
 		));
-
 		// Enqueued script with localized data.
 		wp_enqueue_script($this->plugin_name);
-
-		// if we have the connected_site script url saved, we need to inject it
+		//if we have the connected_site script url saved, we need to inject it
         if (($site = mailchimp_get_connected_site_script_url()) && !empty($site)) {
             wp_enqueue_script($this->plugin_name.'_connected_site', $site, array(), $this->version, true);
         }

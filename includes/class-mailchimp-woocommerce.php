@@ -25,7 +25,7 @@
  * @since      1.0.0
  * @package    MailChimp_Woocommerce
  * @subpackage MailChimp_Woocommerce/includes
- * @author     Ryan Hungate <ryan@mailchimp.com>
+ * @author     Ryan Hungate <ryan@vextras.com>
  */
 class MailChimp_Woocommerce {
 
@@ -173,6 +173,7 @@ class MailChimp_Woocommerce {
 		require_once $path . 'includes/api/class-mailchimp-api.php';
 		require_once $path . 'includes/api/class-mailchimp-woocommerce-api.php';
 		require_once $path . 'includes/api/class-mailchimp-woocommerce-create-list-submission.php';
+        require_once $path . 'includes/api/class-mailchimp-woocommerce-transform-orders-wc3.php';
 		require_once $path . 'includes/api/class-mailchimp-woocommerce-transform-products.php';
         require_once $path . 'includes/api/class-mailchimp-woocommerce-transform-coupons.php';
 

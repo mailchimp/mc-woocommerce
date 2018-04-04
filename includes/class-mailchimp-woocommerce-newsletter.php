@@ -4,7 +4,7 @@
  * Created by MailChimp.
  *
  * Name: Ryan Hungate
- * Email: ryan@mailchimp.com
+ * Email: ryan@vextras.com
  * Date: 2/22/16
  * Time: 9:09 AM
  */

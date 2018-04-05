@@ -9,7 +9,6 @@ if (!$handler->hasValidApiKey()) {
 if (!$handler->hasValidStoreInfo()) {
     wp_redirect('options-general.php?page=mailchimp-woocommerce&tab=store_info&error_notice=missing_store');
 }
-
 ?>
 
 <input type="hidden" name="mailchimp_active_settings_tab" value="campaign_defaults"/>

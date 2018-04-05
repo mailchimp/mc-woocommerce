@@ -1,4 +1,5 @@
 <?php
+
 // if we don't have valid campaign defaults we need to redirect back to the 'campaign_defaults' tab.
 if (!$handler->hasValidApiKey()) {
     wp_redirect('options-general.php?page=mailchimp-woocommerce&tab=api_key&error_notice=missing_api_key');
@@ -20,6 +21,7 @@ if (empty($mailchimp_lists) && !$handler->hasValidCampaignDefaults()) {
 }
 
 $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mailchimp_list'])) && array_key_exists($options['mailchimp_list'], $mailchimp_lists);
+
 ?>
 
 <?php if(($newsletter_settings_error = $this->getData('errors.mailchimp_list', false))) : ?>
@@ -126,3 +128,22 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
     </label>
 </fieldset>
 
+<h2 style="padding-top: 1em;">Product Image Size</h2>
+<p>Fine tune which image gets used for product submissions.</p>
+
+<fieldset>
+    <legend class="screen-reader-text">
+        <span>Product Image Size</span>
+    </legend>
+    <label for="<?php echo $this->plugin_name; ?>-mailchimp-product_image_key">
+        <select name="<?php echo $this->plugin_name; ?>[mailchimp_product_image_key]" style="width:30%">
+            <?php
+            $enable_auto_subscribe = (array_key_exists('mailchimp_product_image_key', $options) && !is_null($options['mailchimp_product_image_key'])) ? $options['mailchimp_product_image_key'] : 'medium';
+            foreach (mailchimp_woocommerce_get_all_image_sizes_list() as $key => $value ) {
+                echo '<option value="' . esc_attr( $key ) . '" ' . selected($key == $enable_auto_subscribe, true, false ) . '>' . esc_html( $value ) . '</option>';
+            }
+            ?>
+        </select>
+        <span><?php esc_attr_e('Select a product image size to be used', $this->plugin_name); ?></span>
+    </label>
+</fieldset>

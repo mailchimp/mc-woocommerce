@@ -225,8 +225,7 @@ class MailChimp_WooCommerce_Transform_Products
      */
     public function getProductImageKey()
     {
-        // going to add a setting for this.
-        return 'post-thumbnail';
+        return mailchimp_get_option('mailchimp_product_image_key', 'medium');
     }
 
     /**

@@ -70,7 +70,7 @@ spl_autoload_register(function($class) {
 
     // if the file exists, require it
     $path = plugin_dir_path( __FILE__ );
-    if (($is_mc = array_key_exists($class, $classes)) && file_exists($path.$classes[$class])) {
+    if (array_key_exists($class, $classes) && file_exists($path.$classes[$class])) {
         require $path.$classes[$class];
     }
 });
@@ -367,7 +367,7 @@ function deactivate_mailchimp_woocommerce() {
  * @param null $data
  */
 function mailchimp_debug($action, $message, $data = null) {
-    if (mailchimp_environment_variables()->logging === 'debug') {
+    if (mailchimp_environment_variables()->logging === 'debug' && function_exists('wc_get_logger')) {
         if (is_array($data) && !empty($data)) $message .= " :: ".wc_print_r($data, true);
         wc_get_logger()->debug("{$action} :: {$message}", array('source' => 'mailchimp_woocommerce'));
     }
@@ -380,7 +380,7 @@ function mailchimp_debug($action, $message, $data = null) {
  * @return array|WP_Error
  */
 function mailchimp_log($action, $message, $data = array()) {
-    if (mailchimp_environment_variables()->logging !== 'none') {
+    if (mailchimp_environment_variables()->logging !== 'none' && function_exists('wc_get_logger')) {
         if (is_array($data) && !empty($data)) $message .= " :: ".wc_print_r($data, true);
         wc_get_logger()->notice("{$action} :: {$message}", array('source' => 'mailchimp_woocommerce'));
     }
@@ -393,7 +393,7 @@ function mailchimp_log($action, $message, $data = array()) {
  * @return array|WP_Error
  */
 function mailchimp_error($action, $message, $data = array()) {
-    if (mailchimp_environment_variables()->logging !== 'none') {
+    if (mailchimp_environment_variables()->logging !== 'none' && function_exists('wc_get_logger')) {
         if ($message instanceof \Exception) $message = mailchimp_error_trace($message);
         if (is_array($data) && !empty($data)) $message .= " :: ".wc_print_r($data, true);
         wc_get_logger()->error("{$action} :: {$message}", array('source' => 'mailchimp_woocommerce'));
@@ -577,8 +577,6 @@ function run_mailchimp_woocommerce() {
     $plugin = new MailChimp_WooCommerce($env->environment, $env->version);
     $plugin->run();
 }
-
-
 
 function mailchimp_woocommerce_add_meta_tags() {
     echo '<meta name="referrer" content="always"/>';

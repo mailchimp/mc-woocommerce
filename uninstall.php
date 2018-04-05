@@ -35,6 +35,10 @@ if (!isset($mailchimp_woocommerce_spl_autoloader) || $mailchimp_woocommerce_spl_
 }
 
 try {
+    global $wpdb;
+    $wpdb->query($wpdb->prepare("TRUNCATE `{$wpdb->prefix}queue`"));
+    $wpdb->query($wpdb->prepare("TRUNCATE `{$wpdb->prefix}mailchimp_carts`"));
+
     if (($options = get_option('mailchimp-woocommerce', false)) && is_array($options)) {
         if (isset($options['mailchimp_api_key'])) {
             $store_id = get_option('mailchimp-woocommerce-store_id', false);

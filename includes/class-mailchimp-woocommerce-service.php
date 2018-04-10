@@ -55,6 +55,14 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     }
 
     /**
+     * @param WC_Order $order
+     */
+    public function onNewPayPalOrder($order)
+    {
+        $this->onNewOrder($order->get_id());
+    }
+
+    /**
      * This should only fire on a web based order so we can do real campaign tracking here.
      *
      * @param $order_id

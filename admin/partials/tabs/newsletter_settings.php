@@ -144,6 +144,6 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
             }
             ?>
         </select>
-        <span><?php esc_attr_e('Select a product image size to be used', $this->plugin_name); ?></span>
+        <span><?php esc_attr_e('Define the product image size used by abandoned carts, order notifications, and product recommendations.', $this->plugin_name); ?></span>
     </label>
 </fieldset>

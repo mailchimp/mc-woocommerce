@@ -35,13 +35,6 @@ if (!isset($mailchimp_woocommerce_spl_autoloader) || $mailchimp_woocommerce_spl_
 }
 
 try {
-    global $wpdb;
-    $wpdb->query($wpdb->prepare("TRUNCATE `{$wpdb->prefix}queue`"));
-    $wpdb->query($wpdb->prepare("TRUNCATE `{$wpdb->prefix}failed_jobs`"));
-    $wpdb->query($wpdb->prepare("TRUNCATE `{$wpdb->prefix}mailchimp_carts`"));
-} catch (\Exception $e) {}
-
-try {
     if (($options = get_option('mailchimp-woocommerce', false)) && is_array($options)) {
         if (isset($options['mailchimp_api_key'])) {
             $store_id = get_option('mailchimp-woocommerce-store_id', false);
@@ -56,16 +49,4 @@ try {
     error_log($e->getMessage().' on '.$e->getLine().' in '.$e->getFile());
 }
 
-delete_option('mailchimp-woocommerce-store_id');
-delete_option('mailchimp-woocommerce');
-delete_option('mailchimp-woocommerce-errors.store_info');
-delete_option('mailchimp-woocommerce-sync.orders.completed_at');
-delete_option('mailchimp-woocommerce-sync.orders.current_page');
-delete_option('mailchimp-woocommerce-sync.products.completed_at');
-delete_option('mailchimp-woocommerce-sync.products.current_page');
-delete_option('mailchimp-woocommerce-sync.syncing');
-delete_option('mailchimp-woocommerce-sync.started_at');
-delete_option('mailchimp-woocommerce-sync.completed_at');
-delete_option('mailchimp-woocommerce-validation.api.ping');
-delete_option('mailchimp-woocommerce-cached-api-lists');
-delete_option('mailchimp-woocommerce-cached-api-ping-check');
+mailchimp_clean_database();

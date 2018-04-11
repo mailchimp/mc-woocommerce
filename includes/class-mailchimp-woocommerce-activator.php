@@ -33,6 +33,7 @@ class MailChimp_WooCommerce_Activator {
 
         // if we haven't saved options previously, we will need to create the site id and update base options
         if (empty($saved_options)) {
+            mailchimp_clean_database();
             update_option('mailchimp-woocommerce', array());
         }
 

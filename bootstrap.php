@@ -608,6 +608,35 @@ function mailchimp_call_http_worker_manually() {
     return wp_remote_post(esc_url_raw($url), $post_args);
 }
 
+/**
+ * To be used when running clean up for uninstalls or re-installs.
+ */
+function mailchimp_clean_database() {
+    try {
+        global $wpdb;
+        $wpdb->query($wpdb->prepare("TRUNCATE `{$wpdb->prefix}queue`"));
+        $wpdb->query($wpdb->prepare("TRUNCATE `{$wpdb->prefix}failed_jobs`"));
+        $wpdb->query($wpdb->prepare("TRUNCATE `{$wpdb->prefix}mailchimp_carts`"));
+    } catch (\Exception $e) {}
+
+    // clean up the initial sync pointers
+    foreach (array('orders', 'products', 'coupons') as $resource_type) {
+        delete_option("mailchimp-woocommerce-sync.{$resource_type}.started_at");
+        delete_option("mailchimp-woocommerce-sync.{$resource_type}.completed_at");
+        delete_option("mailchimp-woocommerce-sync.{$resource_type}.current_page");
+    }
+
+    delete_option('mailchimp-woocommerce');
+    delete_option('mailchimp-woocommerce-store_id');
+    delete_option('mailchimp-woocommerce-sync.syncing');
+    delete_option('mailchimp-woocommerce-sync.started_at');
+    delete_option('mailchimp-woocommerce-sync.completed_at');
+    delete_option('mailchimp-woocommerce-validation.api.ping');
+    delete_option('mailchimp-woocommerce-cached-api-lists');
+    delete_option('mailchimp-woocommerce-cached-api-ping-check');
+    delete_option('mailchimp-woocommerce-errors.store_info');
+}
+
 function run_mailchimp_woocommerce() {
     $env = mailchimp_environment_variables();
     $plugin = new MailChimp_WooCommerce($env->environment, $env->version);

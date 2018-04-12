@@ -146,7 +146,9 @@ class MailChimp_WooCommerce {
 	 */
 	private function load_dependencies() {
         global $wp_queue;
-        $wp_queue = new WP_Queue();
+        if (empty($wp_queue)) {
+            $wp_queue = new WP_Queue();
+        }
 
 		// fire up the loader
 		$this->loader = new MailChimp_WooCommerce_Loader();

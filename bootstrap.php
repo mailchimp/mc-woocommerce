@@ -149,6 +149,9 @@ if (!function_exists( 'wp_queue')) {
      */
     function wp_queue( WP_Job $job, $delay = 0 ) {
         global $wp_queue;
+        if (empty($wp_queue)) {
+            $wp_queue = new WP_Queue();
+        }
         $wp_queue->push( $job, $delay );
         do_action( 'wp_queue_job_pushed', $job );
     }

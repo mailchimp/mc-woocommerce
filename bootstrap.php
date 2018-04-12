@@ -608,23 +608,32 @@ function mailchimp_call_http_worker_manually() {
     return wp_remote_post(esc_url_raw($url), $post_args);
 }
 
-/**
- * To be used when running clean up for uninstalls or re-installs.
- */
-function mailchimp_clean_database() {
+function mailchimp_flush_queue_tables() {
     try {
         global $wpdb;
         $wpdb->query($wpdb->prepare("TRUNCATE `{$wpdb->prefix}queue`"));
         $wpdb->query($wpdb->prepare("TRUNCATE `{$wpdb->prefix}failed_jobs`"));
         $wpdb->query($wpdb->prepare("TRUNCATE `{$wpdb->prefix}mailchimp_carts`"));
     } catch (\Exception $e) {}
+}
 
+function mailchimp_flush_sync_pointers() {
     // clean up the initial sync pointers
     foreach (array('orders', 'products', 'coupons') as $resource_type) {
         delete_option("mailchimp-woocommerce-sync.{$resource_type}.started_at");
         delete_option("mailchimp-woocommerce-sync.{$resource_type}.completed_at");
         delete_option("mailchimp-woocommerce-sync.{$resource_type}.current_page");
     }
+}
+
+/**
+ * To be used when running clean up for uninstalls or re-installs.
+ */
+function mailchimp_clean_database() {
+    mailchimp_flush_queue_tables();
+
+    // clean up the initial sync pointers
+    mailchimp_flush_sync_pointers();
 
     delete_option('mailchimp-woocommerce');
     delete_option('mailchimp-woocommerce-store_id');

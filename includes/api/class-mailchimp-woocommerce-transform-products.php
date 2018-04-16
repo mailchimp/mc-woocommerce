@@ -44,7 +44,9 @@ class MailChimp_WooCommerce_Transform_Products
      */
     public function transform(WP_Post $post)
     {
-        $woo = wc_get_product($post);
+        if (!($woo = wc_get_product($post))) {
+            return $this->wooProductNotLoadedCorrectly($post);
+        }
 
         $variant_posts = $this->getProductVariantPosts($post->ID);
 
@@ -252,6 +254,29 @@ class MailChimp_WooCommerce_Transform_Products
 
             return $api->addStoreProduct($store_id, $product);
         }
+
+        return $product;
+    }
+
+    /**
+     * @param \WP_Post $post
+     * @return MailChimp_WooCommerce_Product
+     */
+    protected function wooProductNotLoadedCorrectly($post)
+    {
+        $product = new MailChimp_WooCommerce_Product();
+        $product->setId($post->ID);
+        $product->setHandle($post->post_name);
+        $product->setDescription($post->post_content);
+        $product->setImageUrl($this->getProductImage($post));
+
+        $variant = $this->variant(false, $post, $post->post_name);
+
+        if (!$variant->getImageUrl()) {
+            $variant->setImageUrl($product->getImageUrl());
+        }
+
+        $product->addVariant($variant);
 
         return $product;
     }

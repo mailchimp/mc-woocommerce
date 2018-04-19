@@ -613,10 +613,11 @@ function mailchimp_call_http_worker_manually() {
 
 function mailchimp_flush_queue_tables() {
     try {
+        /** @var \ */
         global $wpdb;
-        $wpdb->query($wpdb->prepare("TRUNCATE `{$wpdb->prefix}queue`"));
-        $wpdb->query($wpdb->prepare("TRUNCATE `{$wpdb->prefix}failed_jobs`"));
-        $wpdb->query($wpdb->prepare("TRUNCATE `{$wpdb->prefix}mailchimp_carts`"));
+        $wpdb->query($wpdb->prepare("TRUNCATE `{$wpdb->prefix}queue`", array()));
+        $wpdb->query($wpdb->prepare("TRUNCATE `{$wpdb->prefix}failed_jobs`", array()));
+        $wpdb->query($wpdb->prepare("TRUNCATE `{$wpdb->prefix}mailchimp_carts`", array()));
     } catch (\Exception $e) {}
 }
 

@@ -31,7 +31,9 @@ class MailChimp_WooCommerce_Activator {
             mailchimp_clean_database();
             update_option('mailchimp-woocommerce', array());
             // only do this if the option has never been set before.
-            add_option('mailchimp_woocommerce_plugin_do_activation_redirect', true);
+            if (!is_multisite()) {
+                add_option('mailchimp_woocommerce_plugin_do_activation_redirect', true);
+            }
         }
 
         // if we haven't saved the store id yet.

@@ -92,6 +92,12 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
             // transform the order
             $order = $job->transform($order_post);
 
+            // will be the same as the customer id. an md5'd hash of a lowercased email.
+            $this->cart_session_id = $order->getCustomer()->getId();
+
+            // delete the AC cart record.
+            $deleted_abandoned_cart = !empty($this->cart_session_id) && $api->deleteCartByID($store_id, $this->cart_session_id);
+
             // skip amazon orders
             if ($order->isFlaggedAsAmazonOrder()) {
                 mailchimp_log('validation.amazon', "Order #{$woo_order_number} was placed through Amazon. Skipping!");
@@ -109,9 +115,6 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
             if ($this->partially_refunded) {
                 $order->setFinancialStatus('partially_refunded');
             }
-
-            // will be the same as the customer id. an md5'd hash of a lowercased email.
-            $this->cart_session_id = $order->getCustomer()->getId();
 
             $log = "$call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}";
 
@@ -140,9 +143,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                 return $api_response;
             }
 
-            // if we're adding a new order and the session id is here, we need to delete the AC cart record.
-            if (!empty($this->cart_session_id)) {
-                $api->deleteCartByID($store_id, $this->cart_session_id);
+            if ($deleted_abandoned_cart) {
                 $log .= " :: abandoned cart deleted [{$this->cart_session_id}]";
             }
 

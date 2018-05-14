@@ -3,8 +3,8 @@ Contributors: ryanhungate, MailChimp
 Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.3
-Tested up to: 4.9
-Stable tag: 2.1.5
+Tested up to: 4.9.5
+Stable tag: 2.1.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -69,6 +69,21 @@ You have 2 options to run this process:
 
 
 == Changelog ==
+= 2.1.6 =
+* moved to an autoloader for performance enhancement
+* flush database tables on un-installation to assist with stale records in the queue
+* turn on standard debugging by default to help troubleshoot issues
+* moved the plugin button to the left main navigation
+* allow store owners to select the image size being used for products
+* fix paypal new order bug where it did not send on initial placement
+* add additional configuration success checks for the plugin being configured before pushing any jobs into the queue
+* fix the multisite network activation issue
+* hide the opt in checkbox for already logged in customers that were previously subscribed
+* miscellaneous UI enhancements
+
+= 2.1.5 =
+* is_configured filters applied before certain jobs were firing and failing.
+
 = 2.1.5 =
 * added support for Polish (zloty - zł) and Moldovan Leu currencies
 * update currency code for Belarusian Rouble

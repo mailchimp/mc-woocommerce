@@ -6,8 +6,8 @@
  * @link       https://mailchimp.com
  * @since      1.0.1
  *
- * @package    MailChimp_Woocommerce
- * @subpackage MailChimp_Woocommerce/includes
+ * @package    MailChimp_WooCommerce
+ * @subpackage MailChimp_WooCommerce/includes
  */
 
 /**
@@ -17,11 +17,11 @@
  * the plugin, and register them with the WordPress API. Call the
  * run function to execute the list of actions and filters.
  *
- * @package    MailChimp_Woocommerce
- * @subpackage MailChimp_Woocommerce/includes
- * @author     Ryan Hungate <ryan@mailchimp.com>
+ * @package    MailChimp_WooCommerce
+ * @subpackage MailChimp_WooCommerce/includes
+ * @author     Ryan Hungate <ryan@vextras.com>
  */
-class MailChimp_Woocommerce_Loader {
+class MailChimp_WooCommerce_Loader {
 
 	/**
 	 * The array of actions registered with WordPress.

@@ -4,7 +4,7 @@
  * Created by Vextras.
  *
  * Name: Ryan Hungate
- * Email: ryan@mailchimp.com
+ * Email: ryan@vextras.com
  * Date: 7/15/16
  * Time: 11:42 AM
  */
@@ -42,6 +42,11 @@ class MailChimp_WooCommerce_Single_Product extends WP_Job
     public function process()
     {
         if (empty($this->product_id)) {
+            return false;
+        }
+
+        if (!mailchimp_is_configured()) {
+            mailchimp_debug(get_called_class(), 'mailchimp is not configured properly');
             return false;
         }
 

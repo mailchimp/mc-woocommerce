@@ -4,11 +4,11 @@
  * Created by MailChimp.
  *
  * Name: Ryan Hungate
- * Email: ryan@mailchimp.com
+ * Email: ryan@vextras.com
  * Date: 2/22/16
  * Time: 3:45 PM
  */
-abstract class MailChimp_Woocommerce_Options
+abstract class MailChimp_WooCommerce_Options
 {
     /**
      * @var MailChimp_WooCommerce_MailChimpApi
@@ -221,6 +221,14 @@ abstract class MailChimp_Woocommerce_Options
     {
         return true;
         //return $this->getOption('public_key', false) && $this->getOption('secret_key', false);
+    }
+
+    /**
+     * @return bool
+     */
+    protected function doingAjax()
+    {
+        return defined('DOING_AJAX') && DOING_AJAX;
     }
 
     /**

@@ -22,46 +22,23 @@
  * @link       https://mailchimp.com
  * @since      1.0.1
  *
- * @package    MailChimp_Woocommerce
+ * @package    MailChimp_WooCommerce
  */
 
 // If uninstall not called from WordPress, then exit.
-if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
+if (!defined( 'WP_UNINSTALL_PLUGIN')) {
 	exit;
 }
 
-if (!function_exists('mailchimp_environment_variables')) {
-    /**
-     * @return object
-     */
-    function mailchimp_environment_variables() {
-        global $wp_version;
-
-        $o = get_option('mailchimp-woocommerce', false);
-
-        return (object) array(
-            'repo' => 'master',
-            'environment' => 'production',
-            'version' => '2.1.4',
-            'php_version' => phpversion(),
-            'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
-            'wc_version' => class_exists('WC') ? WC()->version : null,
-            'logging' => ($o && is_array($o) && isset($o['mailchimp_logging'])) ? $o['mailchimp_logging'] : 'none',
-        );
-    }
+if (!isset($mailchimp_woocommerce_spl_autoloader) || $mailchimp_woocommerce_spl_autoloader === false) {
+    include_once "bootstrap.php";
 }
 
 try {
     if (($options = get_option('mailchimp-woocommerce', false)) && is_array($options)) {
         if (isset($options['mailchimp_api_key'])) {
             $store_id = get_option('mailchimp-woocommerce-store_id', false);
-
             if (!empty($store_id)) {
-                if (!class_exists('MailChimp_WooCommerce_MailChimpApi')) {
-                    require_once 'includes/api/class-mailchimp-api.php';
-                    require_once 'includes/api/errors/class-mailchimp-error.php';
-                    require_once 'includes/api/errors/class-mailchimp-server-error.php';
-                }
                 $api = new MailChimp_WooCommerce_MailChimpApi($options['mailchimp_api_key']);
                 $result = $api->deleteStore($store_id) ? 'has been deleted' : 'did not delete';
                 error_log("store id {$store_id} {$result} MailChimp");
@@ -72,16 +49,4 @@ try {
     error_log($e->getMessage().' on '.$e->getLine().' in '.$e->getFile());
 }
 
-delete_option('mailchimp-woocommerce-store_id');
-delete_option('mailchimp-woocommerce');
-delete_option('mailchimp-woocommerce-errors.store_info');
-delete_option('mailchimp-woocommerce-sync.orders.completed_at');
-delete_option('mailchimp-woocommerce-sync.orders.current_page');
-delete_option('mailchimp-woocommerce-sync.products.completed_at');
-delete_option('mailchimp-woocommerce-sync.products.current_page');
-delete_option('mailchimp-woocommerce-sync.syncing');
-delete_option('mailchimp-woocommerce-sync.started_at');
-delete_option('mailchimp-woocommerce-sync.completed_at');
-delete_option('mailchimp-woocommerce-validation.api.ping');
-delete_option('mailchimp-woocommerce-cached-api-lists');
-delete_option('mailchimp-woocommerce-cached-api-ping-check');
+mailchimp_clean_database();

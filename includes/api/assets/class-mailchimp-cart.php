@@ -4,7 +4,7 @@
  * Created by Vextras.
  *
  * Name: Ryan Hungate
- * Email: ryan@mailchimp.com
+ * Email: ryan@vextras.com
  * Date: 7/15/16
  * Time: 1:26 PM
  */

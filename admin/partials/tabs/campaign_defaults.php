@@ -1,6 +1,6 @@
 <?php
 
-$handler = MailChimp_Woocommerce_Admin::connect();
+$handler = MailChimp_WooCommerce_Admin::connect();
 
 // if we don't have valid campaign defaults we need to redirect back to the 'campaign_defaults' tab.
 if (!$handler->hasValidApiKey()) {
@@ -9,7 +9,6 @@ if (!$handler->hasValidApiKey()) {
 if (!$handler->hasValidStoreInfo()) {
     wp_redirect('options-general.php?page=mailchimp-woocommerce&tab=store_info&error_notice=missing_store');
 }
-
 ?>
 
 <input type="hidden" name="mailchimp_active_settings_tab" value="campaign_defaults"/>

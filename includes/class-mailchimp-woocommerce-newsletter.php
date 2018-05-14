@@ -4,11 +4,11 @@
  * Created by MailChimp.
  *
  * Name: Ryan Hungate
- * Email: ryan@mailchimp.com
+ * Email: ryan@vextras.com
  * Date: 2/22/16
  * Time: 9:09 AM
  */
-class MailChimp_Newsletter extends MailChimp_Woocommerce_Options
+class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
 {
     /**
      * @param WC_Checkout $checkout
@@ -27,16 +27,19 @@ class MailChimp_Newsletter extends MailChimp_Woocommerce_Options
 
             // if the user chose 'check' or nothing at all, we default to true.
             $default_checked = $default_setting === 'check';
+            $status = $default_checked;
 
             // if the user is logged in, we will pull the 'is_subscribed' property out of the meta for the value.
             // otherwise we use the default settings.
             if (is_user_logged_in()) {
                 $status = get_user_meta(get_current_user_id(), 'mailchimp_woocommerce_is_subscribed', true);
+                /// if the user is logged in - and is already subscribed - just ignore this checkbox.
+                if ((bool) $status) {
+                    return;
+                }
                 if ($status === '' || $status === null) {
                     $status = $default_checked;
                 }
-            } else {
-                $status = $default_checked;
             }
 
             // echo out the checkbox.
@@ -98,7 +101,7 @@ class MailChimp_Newsletter extends MailChimp_Woocommerce_Options
 
         if (is_user_logged_in()) {
             update_user_meta(get_current_user_id(), 'mailchimp_woocommerce_is_subscribed', $status);
-
+            
             return $status;
         }
 

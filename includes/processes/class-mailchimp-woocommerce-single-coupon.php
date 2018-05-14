@@ -28,13 +28,19 @@ class MailChimp_WooCommerce_SingleCoupon extends WP_Job
     public function handle()
     {
         try {
-            $api = mailchimp_get_api();
-            $store_id = mailchimp_get_store_id();
+
+            if (!mailchimp_is_configured()) {
+                mailchimp_debug(get_called_class(), 'mailchimp is not configured properly');
+                return false;
+            }
 
             if (empty($this->post_id)) {
                 mailchimp_error('promo_code.failure', "could not process coupon {$this->post_id}");
                 return;
             }
+
+            $api = mailchimp_get_api();
+            $store_id = mailchimp_get_store_id();
 
             $transformer = new MailChimp_WooCommerce_Transform_Coupons();
             $code = $transformer->transform($this->post_id);

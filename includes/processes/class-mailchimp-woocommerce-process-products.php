@@ -4,11 +4,11 @@
  * Created by Vextras.
  *
  * Name: Ryan Hungate
- * Email: ryan@mailchimp.com
+ * Email: ryan@vextras.com
  * Date: 7/14/16
  * Time: 10:57 AM
  */
-class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abtstract_Sync
+class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abstract_Sync
 {
     /**
      * @var string

@@ -40,6 +40,11 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
      */
     public function handle()
     {
+        if (!mailchimp_is_configured()) {
+            mailchimp_debug(get_called_class(), 'mailchimp is not configured properly');
+            return false;
+        }
+
         $options = get_option('mailchimp-woocommerce', array());
         $store_id = mailchimp_get_store_id();
 

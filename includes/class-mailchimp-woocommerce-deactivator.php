@@ -6,8 +6,8 @@
  * @link       https://mailchimp.com
  * @since      1.0.1
  *
- * @package    MailChimp_Woocommerce
- * @subpackage MailChimp_Woocommerce/includes
+ * @package    MailChimp_WooCommerce
+ * @subpackage MailChimp_WooCommerce/includes
  */
 
 /**
@@ -16,11 +16,11 @@
  * This class defines all code necessary to run during the plugin's deactivation.
  *
  * @since      1.0.1
- * @package    MailChimp_Woocommerce
- * @subpackage MailChimp_Woocommerce/includes
- * @author     Ryan Hungate <ryan@mailchimp.com>
+ * @package    MailChimp_WooCommerce
+ * @subpackage MailChimp_WooCommerce/includes
+ * @author     Ryan Hungate <ryan@vextras.com>
  */
-class MailChimp_Woocommerce_Deactivator {
+class MailChimp_WooCommerce_Deactivator {
 
 	/**
 	 * Short Description. (use period)

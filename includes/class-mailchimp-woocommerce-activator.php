@@ -5,11 +5,11 @@
  * This class defines all code necessary to run during the plugin's activation.
  *
  * @since      1.0.1
- * @package    MailChimp_Woocommerce
- * @subpackage MailChimp_Woocommerce/includes
- * @author     Ryan Hungate <ryan@mailchimp.com>
+ * @package    MailChimp_WooCommerce
+ * @subpackage MailChimp_WooCommerce/includes
+ * @author     Ryan Hungate <ryan@vextras.com>
  */
-class MailChimp_Woocommerce_Activator {
+class MailChimp_WooCommerce_Activator {
 
 	/**
 	 * Short Description. (use period)
@@ -20,11 +20,6 @@ class MailChimp_Woocommerce_Activator {
 	 */
 	public static function activate() {
 
-		// only do this if the option has never been set before.
-		if (get_option('mailchimp_woocommerce_plugin_do_activation_redirect', null) === null) {
-			add_option('mailchimp_woocommerce_plugin_do_activation_redirect', true);
-		}
-
 		// create the queue tables because we need them for the sync jobs.
 		static::create_queue_tables();
 
@@ -33,7 +28,12 @@ class MailChimp_Woocommerce_Activator {
 
         // if we haven't saved options previously, we will need to create the site id and update base options
         if (empty($saved_options)) {
+            mailchimp_clean_database();
             update_option('mailchimp-woocommerce', array());
+            // only do this if the option has never been set before.
+            if (!is_multisite()) {
+                add_option('mailchimp_woocommerce_plugin_do_activation_redirect', true);
+            }
         }
 
         // if we haven't saved the store id yet.

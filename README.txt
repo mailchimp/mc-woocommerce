@@ -4,7 +4,7 @@ Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.3
 Tested up to: 4.9.5
-Stable tag: 2.1.6
+Stable tag: 2.1.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -69,6 +69,9 @@ You have 2 options to run this process:
 
 
 == Changelog ==
+= 2.1.7 =
+* GDPR compliance
+
 = 2.1.6 =
 * moved to an autoloader for performance enhancement
 * flush database tables on un-installation to assist with stale records in the queue

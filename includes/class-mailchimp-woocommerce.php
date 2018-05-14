@@ -27,131 +27,135 @@
  * @subpackage MailChimp_WooCommerce/includes
  * @author     Ryan Hungate <ryan@vextras.com>
  */
-class MailChimp_WooCommerce {
+class MailChimp_WooCommerce
+{
 
-	/**
-	 * The loader that's responsible for maintaining and registering all hooks that power
-	 * the plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   protected
-	 * @var      MailChimp_WooCommerce_Loader    $loader    Maintains and registers all hooks for the plugin.
-	 */
-	protected $loader;
+    /**
+     * The loader that's responsible for maintaining and registering all hooks that power
+     * the plugin.
+     *
+     * @since    1.0.0
+     * @access   protected
+     * @var      MailChimp_WooCommerce_Loader $loader Maintains and registers all hooks for the plugin.
+     */
+    protected $loader;
 
-	/**
-	 * The unique identifier of this plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   protected
-	 * @var      string    $plugin_name    The string used to uniquely identify this plugin.
-	 */
-	protected $plugin_name;
+    /**
+     * The unique identifier of this plugin.
+     *
+     * @since    1.0.0
+     * @access   protected
+     * @var      string $plugin_name The string used to uniquely identify this plugin.
+     */
+    protected $plugin_name;
 
-	/**
-	 * The current version of the plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   protected
-	 * @var      string    $version    The current version of the plugin.
-	 */
-	protected $version;
+    /**
+     * The current version of the plugin.
+     *
+     * @since    1.0.0
+     * @access   protected
+     * @var      string $version The current version of the plugin.
+     */
+    protected $version;
 
-	/**
-	 * @var string
-	 */
-	protected $environment = 'production';
+    /**
+     * @var string
+     */
+    protected $environment = 'production';
 
-	protected static $logging_config = null;
+    protected static $logging_config = null;
 
-	/**
-	 * @return object
-	 */
-	public static function getLoggingConfig()
-	{
-		if (is_object(static::$logging_config)) {
-			return static::$logging_config;
-		}
+    /**
+     * @return object
+     */
+    public static function getLoggingConfig()
+    {
+        if (is_object(static::$logging_config)) {
+            return static::$logging_config;
+        }
 
-		$plugin_options = get_option('mailchimp-woocommerce');
-		$is_options = is_array($plugin_options);
+        $plugin_options = get_option('mailchimp-woocommerce');
+        $is_options = is_array($plugin_options);
 
-		$api_key = $is_options && array_key_exists('mailchimp_api_key', $plugin_options) ?
-			$plugin_options['mailchimp_api_key'] : false;
+        $api_key = $is_options && array_key_exists('mailchimp_api_key', $plugin_options) ?
+            $plugin_options['mailchimp_api_key'] : false;
 
-		$enable_logging = $is_options &&
-			array_key_exists('mailchimp_debugging', $plugin_options) &&
-			$plugin_options['mailchimp_debugging'];
+        $enable_logging = $is_options &&
+            array_key_exists('mailchimp_debugging', $plugin_options) &&
+            $plugin_options['mailchimp_debugging'];
 
-		$account_id = $is_options && array_key_exists('mailchimp_account_info_id', $plugin_options) ?
-			$plugin_options['mailchimp_account_info_id'] : false;
+        $account_id = $is_options && array_key_exists('mailchimp_account_info_id', $plugin_options) ?
+            $plugin_options['mailchimp_account_info_id'] : false;
 
-		$username = $is_options && array_key_exists('mailchimp_account_info_username', $plugin_options) ?
-			$plugin_options['mailchimp_account_info_username'] : false;
+        $username = $is_options && array_key_exists('mailchimp_account_info_username', $plugin_options) ?
+            $plugin_options['mailchimp_account_info_username'] : false;
 
-		$api_key_parts = str_getcsv($api_key, '-');
-		$data_center = isset($api_key_parts[1]) ? $api_key_parts[1] : 'us1';
+        $api_key_parts = str_getcsv($api_key, '-');
+        $data_center = isset($api_key_parts[1]) ? $api_key_parts[1] : 'us1';
 
-		return static::$logging_config = (object) array(
-			'enable_logging' => (bool) $enable_logging,
-			'account_id' => $account_id,
-			'username' => $username,
-			'endpoint' => 'https://ecommerce.'.$data_center.'.list-manage.com/ecommerce/log',
-		);
-	}
+        return static::$logging_config = (object)array(
+            'enable_logging' => (bool)$enable_logging,
+            'account_id' => $account_id,
+            'username' => $username,
+            'endpoint' => 'https://ecommerce.' . $data_center . '.list-manage.com/ecommerce/log',
+        );
+    }
 
 
-	/**
-	 * Define the core functionality of the plugin.
-	 *
-	 * Set the plugin name and the plugin version that can be used throughout the plugin.
-	 * Load the dependencies, define the locale, and set the hooks for the admin area and
-	 * the public-facing side of the site.
-	 *
-	 * @param string $environment
-	 * @param string $version
-	 *
-	 * @since    1.0.0
-	 */
-	public function __construct($environment = 'production', $version = '1.0.0') {
+    /**
+     * Define the core functionality of the plugin.
+     *
+     * Set the plugin name and the plugin version that can be used throughout the plugin.
+     * Load the dependencies, define the locale, and set the hooks for the admin area and
+     * the public-facing side of the site.
+     *
+     * @param string $environment
+     * @param string $version
+     *
+     * @since    1.0.0
+     */
+    public function __construct($environment = 'production', $version = '1.0.0')
+    {
 
-		$this->plugin_name = 'mailchimp-woocommerce';
-		$this->version = $version;
-		$this->environment = $environment;
+        $this->plugin_name = 'mailchimp-woocommerce';
+        $this->version = $version;
+        $this->environment = $environment;
 
-		$this->load_dependencies();
-		$this->set_locale();
-		$this->define_admin_hooks();
-		$this->define_public_hooks();
+        $this->load_dependencies();
+        $this->set_locale();
+        $this->define_admin_hooks();
+        $this->define_public_hooks();
+        $this->define_gdpr_hooks();
 
-		$this->activateMailChimpNewsletter();
-		$this->activateMailChimpService();
-	}
+        $this->activateMailChimpNewsletter();
+        $this->activateMailChimpService();
+    }
 
-	/**
-	 * Load the required dependencies for this plugin.
-	 *
-	 * Include the following files that make up the plugin:
-	 *
-	 * - MailChimp_WooCommerce_Loader. Orchestrates the hooks of the plugin.
-	 * - MailChimp_WooCommerce_i18n. Defines internationalization functionality.
-	 * - MailChimp_WooCommerce_Admin. Defines all hooks for the admin area.
-	 * - MailChimp_WooCommerce_Public. Defines all hooks for the public side of the site.
-	 *
-	 * Create an instance of the loader which will be used to register the hooks
-	 * with WordPress.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 */
-	private function load_dependencies() {
+    /**
+     * Load the required dependencies for this plugin.
+     *
+     * Include the following files that make up the plugin:
+     *
+     * - MailChimp_WooCommerce_Loader. Orchestrates the hooks of the plugin.
+     * - MailChimp_WooCommerce_i18n. Defines internationalization functionality.
+     * - MailChimp_WooCommerce_Admin. Defines all hooks for the admin area.
+     * - MailChimp_WooCommerce_Public. Defines all hooks for the public side of the site.
+     *
+     * Create an instance of the loader which will be used to register the hooks
+     * with WordPress.
+     *
+     * @since    1.0.0
+     * @access   private
+     */
+    private function load_dependencies()
+    {
         global $wp_queue;
         if (empty($wp_queue)) {
             $wp_queue = new WP_Queue();
         }
 
-		// fire up the loader
-		$this->loader = new MailChimp_WooCommerce_Loader();
+        // fire up the loader
+        $this->loader = new MailChimp_WooCommerce_Loader();
 
         if (!mailchimp_running_in_console() && mailchimp_is_configured()) {
             // fire up the http worker container
@@ -165,29 +169,43 @@ class MailChimp_WooCommerce {
                 if (!get_site_transient('http_worker_queue_listen')) {
                     // set the site transient to expire in 50 seconds so this will not happen too many times
                     // but still work for cron scripts on the minute mark.
-                    set_site_transient( 'http_worker_queue_listen', microtime(), 50);
+                    set_site_transient('http_worker_queue_listen', microtime(), 50);
                     // if we have available jobs, call the http worker manually
                     if ($wp_queue->available_jobs()) {
                         mailchimp_call_http_worker_manually();
                     }
                 }
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+            }
         }
-	}
+    }
 
-	/**
-	 * Define the locale for this plugin for internationalization.
-	 *
-	 * Uses the MailChimp_WooCommerce_i18n class in order to set the domain and to register the hook
-	 * with WordPress.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 */
-	private function set_locale() {
-		$plugin_i18n = new MailChimp_WooCommerce_i18n();
-		$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
-	}
+    /**
+     * Define the locale for this plugin for internationalization.
+     *
+     * Uses the MailChimp_WooCommerce_i18n class in order to set the domain and to register the hook
+     * with WordPress.
+     *
+     * @since    1.0.0
+     * @access   private
+     */
+    private function set_locale()
+    {
+        $plugin_i18n = new MailChimp_WooCommerce_i18n();
+        $this->loader->add_action('plugins_loaded', $plugin_i18n, 'load_plugin_textdomain');
+    }
+
+    /**
+     * Define the GDPR additions from Automattic.
+     */
+    private function define_gdpr_hooks()
+    {
+        $gdpr = new MailChimp_WooCommerce_GDPR();
+
+        $this->loader->add_action('admin_init', $gdpr, 'privacy_policy');
+        $this->loader->add_filter('wp_privacy_personal_data_exporters', $gdpr, 'register_exporter', 10);
+        $this->loader->add_filter('wp_privacy_personal_data_erasers', $gdpr, 'register_eraser', 10);
+    }
 
 	/**
 	 * Register all of the hooks related to the admin area functionality

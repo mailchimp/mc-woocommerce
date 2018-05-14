@@ -18,6 +18,7 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_Deactivator' => 'includes/class-mailchimp-woocommerce-deactivator.php',
         'MailChimp_WooCommerce_Activator' => 'includes/class-mailchimp-woocommerce-activator.php',
         'MailChimp_WooCommerce' => 'includes/class-mailchimp-woocommerce.php',
+        'MailChimp_WooCommerce_GDPR' => 'includes/class-mailchimp-woocommerce-gdpr.php',
 
         // includes/api/assets
         'MailChimp_WooCommerce_Address' => 'includes/api/assets/class-mailchimp-address.php',

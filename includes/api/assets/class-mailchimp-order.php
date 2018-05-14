@@ -29,7 +29,7 @@ class MailChimp_WooCommerce_Order
     protected $billing_address = null;
     protected $lines = array();
     protected $confirm_and_paid = false;
-    protected $promos = [];
+    protected $promos = array();
     protected $is_amazon_order = false;
 
     /**
@@ -152,11 +152,11 @@ class MailChimp_WooCommerce_Order
      */
     public function addDiscount($code, $amount, $is_percentage = false)
     {
-        $this->promos[] = [
+        $this->promos[] = array(
             'code' => $code,
             'amount_discounted' => $amount,
             'type' => $is_percentage ? 'percent' : 'fixed'
-        ];
+        );
 
         return $this;
     }

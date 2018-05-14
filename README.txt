@@ -69,6 +69,18 @@ You have 2 options to run this process:
 
 
 == Changelog ==
+= 2.1.6 =
+* moved to an autoloader for performance enhancement
+* flush database tables on un-installation to assist with stale records in the queue
+* turn on standard debugging by default to help troubleshoot issues
+* moved the plugin button to the left main navigation
+* allow store owners to select the image size being used for products
+* fix paypal new order bug where it did not send on initial placement
+* add additional configuration success checks for the plugin being configured before pushing any jobs into the queue
+* fix the multisite network activation issue
+* hide the opt in checkbox for already logged in customers that were previously subscribed
+* miscellaneous UI enhancements
+
 = 2.1.5 =
 * is_configured filters applied before certain jobs were firing and failing.
 

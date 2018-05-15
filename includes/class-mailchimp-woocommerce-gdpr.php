@@ -10,10 +10,9 @@ class MailChimp_WooCommerce_GDPR
         if (function_exists( 'wp_add_privacy_policy_content')) {
             $content = sprintf(
                 __( 'When shopping, we keep a temporary record of your cart contents, and your email address. 
-This record is kept to repopulate the contents of your cart if you switch devices or needed to come back another day. 
-You can read more about our privacy policy <a href="%s">here</a>.',
+This record is kept to repopulate the contents of your cart if you switch devices or needed to come back another day. Read our privacy policy <a href="%s">here</a>.',
                     'mailchimp-woocommerce' ),
-                'https://mailchimp.com/legal/'
+                'https://mailchimp.com/legal/privacy/'
             );
 
             wp_add_privacy_policy_content('MailChimp for WooCommerce', wp_kses_post(wpautop($content, false)));

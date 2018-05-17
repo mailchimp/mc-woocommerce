@@ -319,7 +319,9 @@ class MailChimp_WooCommerce {
 			// when someone deletes a user??
 			//$this->loader->add_action('delete_user', $service, 'handleUserDeleting');
 
+			$this->loader->add_action('wp_ajax_mailchimp_get_user_by_hash', $service, 'get_user_by_hash');
 			$this->loader->add_action('wp_ajax_nopriv_mailchimp_get_user_by_hash', $service, 'get_user_by_hash');
+			$this->loader->add_action('wp_ajax_mailchimp_set_user_by_email', $service, 'set_user_by_email');
 			$this->loader->add_action('wp_ajax_nopriv_mailchimp_set_user_by_email', $service, 'set_user_by_email');
 		}
 	}

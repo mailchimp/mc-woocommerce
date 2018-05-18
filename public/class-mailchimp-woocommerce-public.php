@@ -74,7 +74,7 @@ class MailChimp_WooCommerce_Public {
 			'ajax_url' => admin_url('admin-ajax.php'),
 		));
 		// Enqueued script with localized data.
-		wp_enqueue_script($this->plugin_name);
+		wp_enqueue_script($this->plugin_name, '', array(), $this->version, true);
 		//if we have the connected_site script url saved, we need to inject it
         if (($site = mailchimp_get_connected_site_script_url()) && !empty($site)) {
             wp_enqueue_script($this->plugin_name.'_connected_site', $site, array(), $this->version, true);

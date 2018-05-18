@@ -73,6 +73,7 @@ You have 2 options to run this process:
 * GDPR compliance
 * changed css class on checkbox for registration issues
 * added link to privacy policy
+* force javascript into footer for performance gains
 
 = 2.1.7 =
 * fixed autoloader filepath for queue command

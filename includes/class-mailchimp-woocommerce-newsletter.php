@@ -44,11 +44,8 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
 
             // echo out the checkbox.
             $checkbox = '<p class="form-row form-row-wide mailchimp-newsletter">';
-            $checkbox .= '<label for="mailchimp_woocommerce_newsletter" class="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">';
-            $checkbox .= '<input class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" id="mailchimp_woocommerce_newsletter" type="checkbox" ';
-            $checkbox .= 'name="mailchimp_woocommerce_newsletter" value="1"'.($status ? ' checked="checked"' : '').'> ';
-            $checkbox .= '<span>' . $label . '</span>';
-            $checkbox .= '</label>';
+            $checkbox .= '<input class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" id="mailchimp_woocommerce_newsletter" type="checkbox" name="mailchimp_woocommerce_newsletter" value="1"'.($status ? ' checked="checked"' : '').'> ';
+            $checkbox .= '<label for="mailchimp_woocommerce_newsletter" class="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox"><span>' . __($label, 'mailchimp-woocommerce') . '</span></label>';
             $checkbox .= '</p>';
             $checkbox .= '<div class="clear"></div>';
 

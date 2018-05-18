@@ -37,7 +37,7 @@ if (!isset($mailchimp_woocommerce_spl_autoloader) || $mailchimp_woocommerce_spl_
 }
 
 register_activation_hook( __FILE__, 'activate_mailchimp_woocommerce');
-add_action('plugins_loaded', 'mailchimp_on_all_plugins_loaded');
+add_action('plugins_loaded', 'mailchimp_on_all_plugins_loaded', 12);
 
 if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
     $forwarded_address = explode(',',$_SERVER['HTTP_X_FORWARDED_FOR']);

@@ -146,20 +146,30 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
         if (($user_email = $this->getCurrentUserEmail())) {
 
+            // let's skip this right here - no need to go any further.
+            if (mailchimp_email_is_privacy_protected($user_email)) {
+                return !is_null($updated) ? $updated : false;
+            }
+
             $previous = $this->getPreviousEmailFromSession();
 
-            $uid = md5(trim(strtolower($user_email)));
+            $uid = mailchimp_hash_trim_lower($user_email);
+
+            $unique_sid = $this->getUniqueStoreID();
 
             // delete the previous records.
             if (!empty($previous) && $previous !== $user_email) {
 
-                if ($this->api()->deleteCartByID($this->getUniqueStoreID(), $previous_email = md5(trim(strtolower($previous))))) {
+                if ($this->api()->deleteCartByID($unique_sid, $previous_email = mailchimp_hash_trim_lower($previous))) {
                     mailchimp_log('ac.cart_swap', "Deleted cart [$previous] :: ID [$previous_email]");
                 }
 
                 // going to delete the cart because we are switching.
                 $this->deleteCart($previous_email);
             }
+
+            // delete the current cart record if there is one
+            $this->api()->deleteCartByID($unique_sid, $uid);
 
             if ($this->cart && !empty($this->cart)) {
 

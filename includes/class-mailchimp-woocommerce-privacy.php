@@ -1,6 +1,6 @@
 <?php
 
-class MailChimp_WooCommerce_GDPR
+class MailChimp_WooCommerce_Privacy
 {
     /**
      * Privacy policy
@@ -9,12 +9,9 @@ class MailChimp_WooCommerce_GDPR
     {
         if (function_exists( 'wp_add_privacy_policy_content')) {
             $content = sprintf(
-                __( 'When shopping, we keep a temporary record of your cart contents, and your email address. 
-This record is kept to repopulate the contents of your cart if you switch devices or needed to come back another day. Read our privacy policy <a href="%s">here</a>.',
-                    'mailchimp-woocommerce' ),
+                __( 'When shopping, we keep a record of your email and the cart contents for up to 30 days on our server. This record is kept to repopulate the contents of your cart if you switch devices or needed to come back another day. Read our privacy policy <a href="%s">here</a>.', 'mailchimp-woocommerce' ),
                 'https://mailchimp.com/legal/privacy/'
             );
-
             wp_add_privacy_policy_content('MailChimp for WooCommerce', wp_kses_post(wpautop($content, false)));
         }
     }
@@ -39,7 +36,7 @@ This record is kept to repopulate the contents of your cart if you switch device
     public function register_eraser($erasers)
     {
         $erasers['mailchimp-woocommerce'] = array(
-            'exporter_friendly_name' => __('MailChimp for WooCommerce'),
+            'eraser_friendly_name' => __('MailChimp for WooCommerce'),
             'callback'               => array($this, 'erase'),
         );
         return $erasers;
@@ -54,7 +51,7 @@ This record is kept to repopulate the contents of your cart if you switch device
     {
         global $wpdb;
 
-        $uid = md5(trim(strtolower($email_address)));
+        $uid = mailchimp_hash_trim_lower($email_address);
 
         $data = array();
 
@@ -70,10 +67,12 @@ This record is kept to repopulate the contents of your cart if you switch device
 
         return array(
             'data' => array(
-                'group_id'    => 'mailchimp_cart',
-                'group_label' => __('Shopping Cart Data'),
-                'item_id'     => $uid,
-                'data'        => $data,
+                array(
+                    'group_id'    => 'mailchimp_cart',
+                    'group_label' => __('Shopping Cart Data'),
+                    'item_id'     => $uid,
+                    'data'        => $data,
+                )
             ),
             'done' => true,
         );
@@ -83,7 +82,7 @@ This record is kept to repopulate the contents of your cart if you switch device
     {
         global $wpdb;
 
-        $uid = md5(trim(strtolower($email_address)));
+        $uid = mailchimp_hash_trim_lower($email_address);
         $count = 0;
 
         if (get_site_option('mailchimp_woocommerce_db_mailchimp_carts', false)) {
@@ -94,8 +93,8 @@ This record is kept to repopulate the contents of your cart if you switch device
 
         return array(
             'items_removed' => (int) $count,
-            'items_retained' => false, // always false in this example
-            'messages' => array(), // no messages in this example
+            'items_retained' => false,
+            'messages' => array(),
             'done' => true,
         );
     }

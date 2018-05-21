@@ -18,6 +18,8 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
     public $is_admin_save = false;
     public $partially_refunded = false;
     protected $woo_order_number = false;
+    protected $is_amazon_order = false;
+    protected $is_privacy_restricted = false;
 
     /**
      * MailChimp_WooCommerce_Single_Order constructor.
@@ -57,9 +59,13 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
             return false;
         }
 
-        // skip amazon orders
-        if ($this->isAmazonOrder()) {
-            mailchimp_log('validation.amazon', "Order #{$woo_order_number} was placed through Amazon. Skipping!");
+        // see if we need to prevent this order from being submitted.
+        if ($this->shouldPreventSubmission()) {
+            if ($this->is_amazon_order) {
+                mailchimp_log('validation.amazon', "Order #{$woo_order_number} was placed through Amazon. Skipping!");
+            } elseif ($this->is_privacy_restricted) {
+                mailchimp_log('validation.gdpr', "Order #{$woo_order_number} is GDPR restricted. Skipping!");
+            }
             return false;
         }
 
@@ -98,9 +104,12 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
             // delete the AC cart record.
             $deleted_abandoned_cart = !empty($this->cart_session_id) && $api->deleteCartByID($store_id, $this->cart_session_id);
 
-            // skip amazon orders
+            // skip amazon orders and skip privacy protected orders.
             if ($order->isFlaggedAsAmazonOrder()) {
                 mailchimp_log('validation.amazon', "Order #{$woo_order_number} was placed through Amazon. Skipping!");
+                return false;
+            } elseif ($order->isFlaggedAsPrivacyProtected()) {
+                mailchimp_log('validation.gdpr', "Order #{$woo_order_number} is GDPR restricted. Skipping!");
                 return false;
             }
 
@@ -221,15 +230,22 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
     /**
      * @return bool
      */
-    public function isAmazonOrder()
+    public function shouldPreventSubmission()
     {
         try {
             if (empty($this->order_id) || !($order_post = get_post($this->order_id))) {
                 return false;
             }
             $woo = new WC_Order($order_post);
+            $email = $woo->get_billing_email();
+
             // just skip these altogether because we can't submit any amazon orders anyway.
-            return mailchimp_string_contains($woo->get_billing_email(), '@marketplace.amazon.com');
+            $this->is_amazon_order = mailchimp_email_is_amazon($email);
+
+            // see if this is a privacy restricted email address.
+            $this->is_privacy_restricted = mailchimp_email_is_privacy_protected($email);
+
+            return $this->is_amazon_order || $this->is_privacy_restricted;
         } catch (\Exception $e) {
             return false;
         }

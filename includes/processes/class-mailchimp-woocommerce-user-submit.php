@@ -65,16 +65,23 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
             $user = new WP_User($this->user_id);
 
             if ($user->ID <= 0 || empty($store_id) || !is_array($options)) {
-                mailchimp_log('member.sync', "Invalid Data For Submission :: {$user->user_email}");
+                mailchimp_log('member.sync', "Invalid Data For Submission :: {$user->ID}");
                 return false;
             }
+        }
+
+        $email = $user->user_email;
+
+        // make sure we don't need to skip this email
+        if (!is_email($email) || mailchimp_email_is_amazon($email) || mailchimp_email_is_privacy_protected($email)) {
+            return false;
         }
 
         // if we have a null value, we need to grab the correct user meta for is_subscribed
         if (is_null($this->subscribed)) {
             $user_subscribed = get_user_meta($this->user_id, 'mailchimp_woocommerce_is_subscribed', true);
             if ($user_subscribed === '' || $user_subscribed === null) {
-                mailchimp_log('member.sync', "Skipping sync for {$user->user_email} because no subscriber status has been set");
+                mailchimp_log('member.sync', "Skipping sync for {$email} because no subscriber status has been set");
                 return false;
             }
             $this->subscribed = (bool) $user_subscribed;
@@ -85,7 +92,7 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
 
         // we need a valid api key and list id to continue
         if (empty($api_key) || empty($list_id)) {
-            mailchimp_log('member.sync', "Invalid Api Key or ListID :: {$user->user_email}");
+            mailchimp_log('member.sync', "Invalid Api Key or ListID :: {$email}");
             return false;
         }
 
@@ -108,29 +115,29 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
         try {
 
             // see if we have a member.
-            $api->member($list_id, $user->user_email);
+            $api->member($list_id, $email);
 
             // if we're updating a member and the email is different, we need to delete the old person
             if (is_array($this->updated_data) && isset($this->updated_data['user_email'])) {
 
-                if ($this->updated_data['user_email'] !== $user->user_email) {
+                if ($this->updated_data['user_email'] !== $email) {
 
                     // delete the old
                     $api->deleteMember($list_id, $this->updated_data['user_email']);
 
                     // subscribe the new
-                    $api->subscribe($list_id, $user->user_email, $this->subscribed, $merge_vars);
+                    $api->subscribe($list_id, $email, $this->subscribed, $merge_vars);
 
-                    mailchimp_log('member.sync', 'Subscriber Swap '.$this->updated_data['user_email'].' to '.$user->user_email, $merge_vars);
+                    mailchimp_log('member.sync', 'Subscriber Swap '.$this->updated_data['user_email'].' to '.$email, $merge_vars);
 
                     return false;
                 }
             }
 
             // ok let's update this member
-            $api->update($list_id, $user->user_email, $this->subscribed, $merge_vars);
+            $api->update($list_id, $email, $this->subscribed, $merge_vars);
 
-            mailchimp_log('member.sync', "Updated Member {$user->user_email}", $merge_vars);
+            mailchimp_log('member.sync', "Updated Member {$email}", $merge_vars);
         } catch (\Exception $e) {
 
             // if we have a 404 not found, we can create the member

@@ -63,6 +63,8 @@ class MailChimp_WooCommerce
      */
     protected $environment = 'production';
 
+    protected $is_configured;
+
     protected static $logging_config = null;
 
     /**
@@ -120,6 +122,7 @@ class MailChimp_WooCommerce
         $this->plugin_name = 'mailchimp-woocommerce';
         $this->version = $version;
         $this->environment = $environment;
+        $this->is_configured = mailchimp_is_configured();
 
         $this->load_dependencies();
         $this->set_locale();
@@ -175,8 +178,7 @@ class MailChimp_WooCommerce
                         mailchimp_call_http_worker_manually();
                     }
                 }
-            } catch (\Exception $e) {
-            }
+            } catch (\Exception $e) {}
         }
     }
 
@@ -200,7 +202,7 @@ class MailChimp_WooCommerce
      */
     private function define_gdpr_hooks()
     {
-        $gdpr = new MailChimp_WooCommerce_GDPR();
+        $gdpr = new MailChimp_WooCommerce_Privacy();
 
         $this->loader->add_action('admin_init', $gdpr, 'privacy_policy');
         $this->loader->add_filter('wp_privacy_personal_data_exporters', $gdpr, 'register_exporter', 10);
@@ -259,7 +261,7 @@ class MailChimp_WooCommerce
 	{
 		$service = new MailChimp_Newsletter();
 
-		if ($service->isConfigured()) {
+		if ($this->is_configured && $service->isConfigured()) {
 
 			$service->setEnvironment($this->environment);
 			$service->setVersion($this->version);
@@ -334,11 +336,13 @@ class MailChimp_WooCommerce
 			// handle the user updated profile hook
 			$this->loader->add_action('profile_update', $service, 'handleUserUpdated', 10, 2);
 
-			// when someone deletes a user??
-			//$this->loader->add_action('delete_user', $service, 'handleUserDeleting');
+			// get user by hash ( public and private )
+            $this->loader->add_action('wp_ajax_mailchimp_get_user_by_hash', $service, 'get_user_by_hash');
+            $this->loader->add_action('wp_ajax_nopriv_mailchimp_get_user_by_hash', $service, 'get_user_by_hash');
 
-			$this->loader->add_action('wp_ajax_nopriv_mailchimp_get_user_by_hash', $service, 'get_user_by_hash');
-			$this->loader->add_action('wp_ajax_nopriv_mailchimp_set_user_by_email', $service, 'set_user_by_email');
+            // set user by email hash ( public and private )
+            $this->loader->add_action('wp_ajax_mailchimp_set_user_by_email', $service, 'set_user_by_email');
+            $this->loader->add_action('wp_ajax_nopriv_mailchimp_set_user_by_email', $service, 'set_user_by_email');
 		}
 	}
 
@@ -381,81 +385,4 @@ class MailChimp_WooCommerce
 	public function get_version() {
 		return $this->version;
 	}
-
-    /**
-     * This is just in case we ever needed to revert back to the old loading
-     */
-	protected function manual_file_loader()
-    {
-        $path = plugin_dir_path(dirname( __FILE__ ));
-
-        /** The abstract options class.*/
-        require_once $path . 'includes/class-mailchimp-woocommerce-options.php';
-
-        /** The class responsible for orchestrating the actions and filters of the core plugin.*/
-        require_once $path . 'includes/class-mailchimp-woocommerce-loader.php';
-
-        /** The class responsible for defining internationalization functionality of the plugin. */
-        require_once $path . 'includes/class-mailchimp-woocommerce-i18n.php';
-
-        /** The service class.*/
-        require_once $path . 'includes/class-mailchimp-woocommerce-service.php';
-
-        /** The newsletter class. */
-        require_once $path . 'includes/class-mailchimp-woocommerce-newsletter.php';
-
-        /** The class responsible for defining all actions that occur in the admin area.*/
-        require_once $path . 'admin/class-mailchimp-woocommerce-admin.php';
-
-        /** The class responsible for defining all actions that occur in the public-facing side of the site. */
-        require_once $path . 'public/class-mailchimp-woocommerce-public.php';
-
-        /** Require all the MailChimp Assets for the API */
-        require_once $path . 'includes/api/class-mailchimp-api.php';
-        require_once $path . 'includes/api/class-mailchimp-woocommerce-api.php';
-        require_once $path . 'includes/api/class-mailchimp-woocommerce-create-list-submission.php';
-        require_once $path . 'includes/api/class-mailchimp-woocommerce-transform-orders-wc3.php';
-        require_once $path . 'includes/api/class-mailchimp-woocommerce-transform-products.php';
-        require_once $path . 'includes/api/class-mailchimp-woocommerce-transform-coupons.php';
-
-        /** Require all the mailchimp api asset classes */
-        require_once $path . 'includes/api/assets/class-mailchimp-address.php';
-        require_once $path . 'includes/api/assets/class-mailchimp-cart.php';
-        require_once $path . 'includes/api/assets/class-mailchimp-customer.php';
-        require_once $path . 'includes/api/assets/class-mailchimp-line-item.php';
-        require_once $path . 'includes/api/assets/class-mailchimp-order.php';
-        require_once $path . 'includes/api/assets/class-mailchimp-product.php';
-        require_once $path . 'includes/api/assets/class-mailchimp-product-variation.php';
-        require_once $path . 'includes/api/assets/class-mailchimp-store.php';
-        require_once $path . 'includes/api/assets/class-mailchimp-promo-code.php';
-        require_once $path . 'includes/api/assets/class-mailchimp-promo-rule.php';
-
-        /** Require all the api error helpers */
-        require_once $path . 'includes/api/errors/class-mailchimp-error.php';
-        require_once $path . 'includes/api/errors/class-mailchimp-server-error.php';
-
-        /** Require the various helper scripts */
-        require_once $path . 'includes/api/helpers/class-mailchimp-woocommerce-api-currency-codes.php';
-        require_once $path . 'includes/api/helpers/class-mailchimp-woocommerce-api-locales.php';
-
-        /** Background job sync tools */
-
-        // make sure the queue exists first since the other files depend on it.
-        require_once $path . 'includes/vendor/queue.php';
-
-        // the abstract bulk sync class
-        require_once $path.'includes/processes/class-mailchimp-woocommerce-abstract-sync.php';
-
-        // bulk data sync
-        require_once $path.'includes/processes/class-mailchimp-woocommerce-process-orders.php';
-        require_once $path.'includes/processes/class-mailchimp-woocommerce-process-products.php';
-        require_once $path.'includes/processes/class-mailchimp-woocommerce-process-coupons.php';
-
-        // individual item sync
-        require_once $path.'includes/processes/class-mailchimp-woocommerce-cart-update.php';
-        require_once $path.'includes/processes/class-mailchimp-woocommerce-single-order.php';
-        require_once $path.'includes/processes/class-mailchimp-woocommerce-single-product.php';
-        require_once $path.'includes/processes/class-mailchimp-woocommerce-single-coupon.php';
-        require_once $path.'includes/processes/class-mailchimp-woocommerce-user-submit.php';
-    }
 }

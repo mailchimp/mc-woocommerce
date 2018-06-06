@@ -17,8 +17,15 @@ if (!empty($files)) {
         }
     }
 }
-if (!empty($_REQUEST['log_file']) && isset($logs[sanitize_title( $_REQUEST['log_file'])])) {
-    $viewed_log = $logs[sanitize_title($_REQUEST['log_file'])];
+
+$requested_log_file = get_site_transient('mailchimp-woocommerce-view-log-file');
+delete_site_transient('mailchimp-woocommerce-view-log-file');
+
+if (empty($requested_log_file)) {
+    $requested_log_file = !empty($_REQUEST['log_file']) ? $_REQUEST['log_file'] : false;
+}
+if (!empty($requested_log_file) && isset($logs[sanitize_title($requested_log_file)])) {
+    $viewed_log = $logs[sanitize_title($requested_log_file)];
 } elseif (!empty($logs)) {
     $viewed_log = current( $logs );
 }

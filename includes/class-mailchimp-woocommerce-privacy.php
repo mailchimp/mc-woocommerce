@@ -65,13 +65,24 @@ class MailChimp_WooCommerce_Privacy
             }
         }
 
+        // If nothing found, return nothing
+        if (is_array($data) && (count($data) < 1)) {
+            return (array('data' => array(), 'done' => true));
+        }
+
         return array(
             'data' => array(
                 array(
                     'group_id'    => 'mailchimp_cart',
-                    'group_label' => __('Shopping Cart Data'),
-                    'item_id'     => $uid,
-                    'data'        => $data,
+                    'group_label' => __( 'MailChimp Shopping Cart Data', 'mailchimp-woocommerce' ),
+                    'item_id'     => 'mailing-shopping-cart-1',
+                    'data'        => array(
+                        array(
+                            'name'  => __( 'User ID', 'mailchimp-woocommerce' ),
+                            'value' => $uid,
+                        ),
+                        $data, // this is already an associative array with name and value keys
+                    )
                 )
             ),
             'done' => true,

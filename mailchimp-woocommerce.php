@@ -43,3 +43,4 @@ if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
     $forwarded_address = explode(',',$_SERVER['HTTP_X_FORWARDED_FOR']);
     $_SERVER['REMOTE_ADDR'] = $forwarded_address[0];
 }
+

@@ -72,8 +72,14 @@ You have 2 options to run this process:
 = 2.1.8 =
 * GDPR compliance
 * changed css class on checkbox for registration issues
+* added translation for newsletter checkbox text
+* only show newsletter checkbox when plugin is fully configured
+* fixed various sign up form conflicts with newsletter registration button
 * added link to privacy policy
 * force javascript into footer for performance gains
+* fix logged in user abandoned cart tracking
+* WPML support
+* uninstall - reinstall clean ups
 
 = 2.1.7 =
 * fixed autoloader filepath for queue command

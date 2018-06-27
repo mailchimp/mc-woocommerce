@@ -40,13 +40,13 @@ class MailChimp_WooCommerce_Process_Coupons extends MailChimp_WooCommerce_Abstra
                 mailchimp_log('coupon_sync.success', "update promo rule :: #{$item->getCode()}");
                 return $response;
             } catch (MailChimp_WooCommerce_ServerError $e) {
-                mailchimp_error('order_submit.error', mailchimp_error_trace($e, "update promo rule :: {$item->getCode()}"));
+                mailchimp_error('coupons.error', mailchimp_error_trace($e, "update promo rule :: {$item->getCode()}"));
                 return false;
             } catch (MailChimp_WooCommerce_Error $e) {
-                mailchimp_error('order_submit.error', mailchimp_error_trace($e, "update promo rule :: {$item->getCode()}"));
+                mailchimp_error('coupons.error', mailchimp_error_trace($e, "update promo rule :: {$item->getCode()}"));
                 return false;
             } catch (Exception $e) {
-                mailchimp_error('order_submit.error', mailchimp_error_trace($e, "update promo rule :: {$item->getCode()}"));
+                mailchimp_error('coupons.error', mailchimp_error_trace($e, "update promo rule :: {$item->getCode()}"));
                 return false;
             }
         }

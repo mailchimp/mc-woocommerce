@@ -226,14 +226,20 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
             case 'logs':
 
-                if (isset($_POST['mc_action']) && in_array($_POST['mc_action'], array('view_log', 'remove_log'))) {
-                    wp_redirect('options-general.php?page=mailchimp-woocommerce&tab=logs');
-                    exit();
+                if (isset($_POST['log_file']) && !empty($_POST['log_file'])) {
+                    set_site_transient('mailchimp-woocommerce-view-log-file', $_POST['log_file'], 30);
                 }
-
+                
                 $data = array(
                     'mailchimp_logging' => isset($input['mailchimp_logging']) ? $input['mailchimp_logging'] : 'none',
                 );
+
+                if (isset($_POST['mc_action']) && in_array($_POST['mc_action'], array('view_log', 'remove_log'))) {
+                    $path = 'options-general.php?page=mailchimp-woocommerce&tab=logs';
+                    wp_redirect($path);
+                    exit();
+                }
+
                 break;
 		}
 

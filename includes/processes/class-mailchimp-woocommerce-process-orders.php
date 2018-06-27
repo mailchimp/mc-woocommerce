@@ -25,13 +25,21 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abstrac
     }
 
     /**
-     * @param MailChimp_WooCommerce_Order $item
-     *
-     * @return mixed
+     * @param $item
+     * @return bool|mixed
+     * @throws Exception
      */
     protected function iterate($item)
     {
         if ($item instanceof MailChimp_WooCommerce_Order) {
+
+            // see if we need to prevent this order from being submitted.
+            $email = $item->getCustomer()->getEmailAddress();
+
+            // see if we have a bad email
+            if ($this->shouldSkipOrder($email, $item->getId())) {
+                return false;
+            }
 
             // since we're syncing the customer for the first time, this is where we need to add the override
             // for subscriber status. We don't get the checkbox until this plugin is actually installed and working!
@@ -100,5 +108,31 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abstrac
 
         // this is the last thing we're doing so it's complete as of now.
         $this->flagStopSync();
+    }
+
+    /**
+     * @param $email
+     * @param $order_id
+     * @return bool
+     */
+    protected function shouldSkipOrder($email, $order_id)
+    {
+        if (!is_email($email)) {
+            mailchimp_log('validation.bad_email', "Order #{$order_id} has an invalid email address. Skipping!");
+            return true;
+        }
+
+        // make sure we can submit this order to MailChimp or skip it.
+        if (mailchimp_email_is_amazon($email)) {
+            mailchimp_log('validation.amazon', "Order #{$order_id} was placed through Amazon. Skipping!");
+            return true;
+        }
+
+        if (mailchimp_email_is_privacy_protected($email)) {
+            mailchimp_log('validation.gdpr', "Order #{$order_id} is GDPR restricted. Skipping!");
+            return true;
+        }
+
+        return false;
     }
 }

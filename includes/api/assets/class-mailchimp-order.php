@@ -31,6 +31,7 @@ class MailChimp_WooCommerce_Order
     protected $confirm_and_paid = false;
     protected $promos = array();
     protected $is_amazon_order = false;
+    protected $is_privacy_protected = false;
 
     /**
      * @param $bool
@@ -48,6 +49,24 @@ class MailChimp_WooCommerce_Order
     public function isFlaggedAsAmazonOrder()
     {
         return (bool) $this->is_amazon_order;
+    }
+
+    /**
+     * @param $bool
+     * @return $this
+     */
+    public function flagAsPrivacyProtected($bool)
+    {
+        $this->is_privacy_protected = (bool) $bool;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFlaggedAsPrivacyProtected()
+    {
+        return (bool) $this->is_privacy_protected;
     }
 
     /**

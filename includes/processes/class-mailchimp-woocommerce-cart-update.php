@@ -17,6 +17,7 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
     public $cart_data;
     public $ip_address;
 
+
     /**
      * MailChimp_WooCommerce_Cart_Update constructor.
      * @param null $uid
@@ -121,10 +122,9 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
 
             try {
                 // if the post is successful we're all good.
-                $api->addCart($store_id, $cart, false);
-
-                mailchimp_log('abandoned_cart.success', "email: {$customer->getEmailAddress()} :: checkout_url: $checkout_url");
-
+                if ($api->addCart($store_id, $cart, false) !== false) {
+                    mailchimp_log('abandoned_cart.success', "email: {$customer->getEmailAddress()} :: checkout_url: $checkout_url");
+                }
             } catch (\Exception $e) {
 
                 mailchimp_error('abandoned_cart.error', "email: {$customer->getEmailAddress()} :: attempting product update :: {$e->getMessage()}");

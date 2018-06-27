@@ -62,9 +62,13 @@ class MailChimp_WooCommerce_Transform_Orders
 
         $order = new MailChimp_WooCommerce_Order();
 
+        $email = $woo->get_billing_email();
+
         // just skip these altogether because we can't submit any amazon orders anyway.
-        if (mailchimp_string_contains($woo->get_billing_email(), '@marketplace.amazon.com')) {
+        if (mailchimp_email_is_amazon($email)) {
             return $order->flagAsAmazonOrder(true);
+        } elseif (mailchimp_email_is_privacy_protected($email)) {
+            return $order->flagAsPrivacyProtected(true);
         }
 
         $order->setId($woo->get_order_number());
@@ -101,7 +105,9 @@ class MailChimp_WooCommerce_Transform_Orders
 
         // only set this if the order is cancelled.
         if ($status === 'cancelled') {
-            $order->setCancelledAt($woo->get_date_modified()->setTimezone(new \DateTimeZone('UTC')));
+            if (method_exists($woo, 'get_date_modified')) {
+                $order->setCancelledAt($woo->get_date_modified()->setTimezone(new \DateTimeZone('UTC')));
+            }
         }
 
         // set the total
@@ -113,8 +119,10 @@ class MailChimp_WooCommerce_Transform_Orders
         // if we have any tax
         $order->setTaxTotal($woo->get_total_tax());
 
-        // if we have shipping.
-        $order->setShippingTotal($woo->get_shipping_total());
+        // if we have shipping
+        if (method_exists($woo, 'get_shipping_total')) {
+            $order->setShippingTotal($woo->get_shipping_total());
+        }
 
         // set the order discount
         $order->setDiscountTotal($woo->get_total_discount());
@@ -138,8 +146,15 @@ class MailChimp_WooCommerce_Transform_Orders
 
                 $pid = $order_detail->get_product_id();
 
+                try {
+                    $deleted_product = MailChimp_WooCommerce_Transform_Products::deleted($pid);
+                } catch (\Exception $e) {
+                    mailchimp_log('order.items.error', "Order #{$woo->get_id()} :: Product {$pid} does not exist!");
+                    continue;
+                }
+
                 // check if it exists, otherwise create a new one.
-                if (($deleted_product = MailChimp_WooCommerce_Transform_Products::deleted($pid))) {
+                if ($deleted_product) {
                     // swap out the old item id and product variant id with the deleted version.
                     $item->setProductId("deleted_{$pid}");
                     $item->setProductVariantId("deleted_{$pid}");
@@ -171,7 +186,7 @@ class MailChimp_WooCommerce_Transform_Orders
     {
         $customer = new MailChimp_WooCommerce_Customer();
 
-        $customer->setId(md5(trim(strtolower($order->get_billing_email()))));
+        $customer->setId(mailchimp_hash_trim_lower($order->get_billing_email()));
         $customer->setCompany($order->get_billing_company());
         $customer->setEmailAddress(trim($order->get_billing_email()));
         $customer->setFirstName($order->get_billing_first_name());
@@ -320,6 +335,7 @@ class MailChimp_WooCommerce_Transform_Orders
     public function getCustomerOrderTotals($user_id)
     {
         $customer = new WC_Customer($user_id);
+
         $customer->get_order_count();
         $customer->get_total_spent();
 

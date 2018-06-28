@@ -4,7 +4,7 @@
 <?php
 
 if (isset($options['mailchimp_api_key']) && !$handler->hasValidApiKey()) {
-    include_once __DIR__.'/errors/missing_api_key.php';
+    // we need to fix this.
 }
 
 ?>

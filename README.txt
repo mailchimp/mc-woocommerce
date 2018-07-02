@@ -32,6 +32,8 @@ You can run this new integration at the same time as your current WooCommerce in
 
 WordPress.com compatibility is limited to Business tier users only.
 
+At this time, the synchronization of product categories from WooCommerce to MailChimp is not supported.
+
 === Installation ===
 ###Before You Start
 Here are some things to know before you begin this process.

@@ -71,6 +71,11 @@ You have 2 options to run this process:
 
 
 == Changelog ==
+= 2.1.9 =
+* Improved UI feedback when API key is invalid
+* Add documentation about product categories not being supported.
+* Fix order count and order total with guest accounts.
+
 = 2.1.8 =
 * GDPR compliance
 * changed css class on checkbox for registration issues

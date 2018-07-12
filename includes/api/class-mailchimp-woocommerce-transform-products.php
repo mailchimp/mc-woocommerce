@@ -158,6 +158,7 @@ class MailChimp_WooCommerce_Transform_Products
         $products = get_posts(array(
             'post_type' => array_merge(array_keys(wc_get_product_types()), array('product')),
             'posts_per_page' => $posts,
+            'post_status' => 'publish',
             'paged' => $page,
             'orderby' => 'ID',
             'order' => 'ASC',
@@ -170,6 +171,7 @@ class MailChimp_WooCommerce_Transform_Products
             $products = get_posts(array(
                 'post_type' => array_merge(array_keys(wc_get_product_types()), array('product')),
                 'posts_per_page' => $posts,
+                'post_status' => 'publish',
                 'paged' => $page,
                 'orderby' => 'ID',
                 'order' => 'ASC',
@@ -195,6 +197,7 @@ class MailChimp_WooCommerce_Transform_Products
             'orderby' => 'ID',
             'post_type' => 'product_variation',
             'post_parent' => $id,
+            'post_status' => 'publish',
         ));
 
         if (empty($variants)) {

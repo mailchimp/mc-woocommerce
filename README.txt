@@ -4,7 +4,7 @@ Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.3
 Tested up to: 4.9.6
-Stable tag: 2.1.8
+Stable tag: 2.1.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -31,6 +31,8 @@ This plugin supports our most powerful API 3.0 features, and is intended for use
 You can run this new integration at the same time as your current WooCommerce integration for MailChimp. However, data from the older integration will display separately in subscriber profiles, and can’t be used with e-commerce features that require API 3.0.
 
 WordPress.com compatibility is limited to Business tier users only.
+
+At this time, the synchronization of product categories from WooCommerce to MailChimp is not supported.
 
 === Installation ===
 ###Before You Start
@@ -69,6 +71,11 @@ You have 2 options to run this process:
 
 
 == Changelog ==
+= 2.1.9 =
+* Improved UI feedback when API key is invalid
+* Add documentation about product categories not being supported.
+* Fix order count and order total with guest accounts.
+
 = 2.1.8 =
 * GDPR compliance
 * changed css class on checkbox for registration issues

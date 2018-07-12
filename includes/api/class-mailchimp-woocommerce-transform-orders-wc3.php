@@ -193,7 +193,7 @@ class MailChimp_WooCommerce_Transform_Orders
         $customer->setLastName($order->get_billing_last_name());
         $customer->setAddress($this->transformBillingAddress($order));
 
-        if (!($stats = $this->getCustomerOrderTotals($order->get_user_id()))) {
+        if (!($stats = $this->getCustomerOrderTotals($order))) {
             $stats = (object) array('count' => 0, 'total' => 0);
         }
 
@@ -329,10 +329,39 @@ class MailChimp_WooCommerce_Transform_Orders
     /**
      * returns an object with a 'total' and a 'count'.
      *
+     * @param WC_Order $order
+     * @return object
+     */
+    public function getCustomerOrderTotals($order)
+    {
+        if (!function_exists('wc_get_orders')) {
+            return $this->getSingleCustomerOrderTotals($order->get_user_id());
+        }
+
+        $orders = wc_get_orders(array(
+            'customer' => trim($order->get_billing_email()),
+        ));
+
+        $stats = (object) array('count' => 0, 'total' => 0);
+
+        foreach ($orders as $order) {
+            $order = new WC_Order($order);
+            if ($order->get_status() !== 'cancelled') {
+                $stats->total += $order->get_total();
+                $stats->count ++;
+            }
+        }
+
+        return $stats;
+    }
+
+    /**
+     * returns an object with a 'total' and a 'count'.
+     *
      * @param $user_id
      * @return object
      */
-    public function getCustomerOrderTotals($user_id)
+    protected function getSingleCustomerOrderTotals($user_id)
     {
         $customer = new WC_Customer($user_id);
 

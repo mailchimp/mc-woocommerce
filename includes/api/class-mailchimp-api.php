@@ -62,15 +62,19 @@ class MailChimp_WooCommerce_MailChimpApi
 
     /**
      * @param bool $return_profile
+     * @param bool $throw_error
      * @return array|bool|mixed|null|object
      * @throws Exception
      */
-    public function ping($return_profile = false)
+    public function ping($return_profile = false, $throw_error = false)
     {
         try {
             $profile = $this->get('/');
             return $return_profile ? $profile : true;
         } catch (MailChimp_WooCommerce_Error $e) {
+            if ($throw_error) {
+                throw $e;
+            }
             return false;
         }
     }

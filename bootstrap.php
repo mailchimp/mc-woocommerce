@@ -163,7 +163,20 @@ if (!function_exists( 'wp_queue')) {
  * @return bool
  */
 function mailchimp_should_init_queue() {
-    return mailchimp_detect_admin_ajax() && mailchimp_is_configured() && !mailchimp_running_in_console() && !mailchimp_http_worker_is_running();
+    return !mailchimp_running_in_console() &&
+        !mailchimp_detect_request_contains_http_worker() &&
+        mailchimp_detect_admin_ajax() &&
+        mailchimp_is_configured() &&
+        !mailchimp_http_worker_is_running();
+}
+
+/**
+ * @return bool
+ */
+function mailchimp_detect_request_contains_http_worker() {
+    global $wp;
+    $current_url = home_url(add_query_arg(array(), $wp->request));
+    return mailchimp_string_contains($current_url, 'action=http_worker');
 }
 
 /**

@@ -162,7 +162,7 @@ if (!function_exists( 'wp_queue')) {
  * @param WP_Job $job
  * @param $delay
  */
-function mailchimp_handle_or_queue(WP_Job $job, $delay)
+function mailchimp_handle_or_queue(WP_Job $job, $delay = 0)
 {
     wp_queue($job, $delay);
     if (mailchimp_queue_is_disabled()) {

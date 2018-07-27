@@ -4,7 +4,7 @@ Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.3
 Tested up to: 4.9.6
-Stable tag: 2.1.9
+Stable tag: 2.1.10
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,10 @@ You have 2 options to run this process:
 
 
 == Changelog ==
+= 2.1.10 =
+* skip product when no variant can be loaded
+* better validation for the view order url
+
 = 2.1.9 =
 * Improved UI feedback when API key is invalid
 * Add documentation about product categories not being supported.

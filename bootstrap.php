@@ -109,12 +109,12 @@ if (defined( 'WP_CLI' ) && WP_CLI) {
                 switch($args[0]) {
 
                     case 'product_sync':
-                        wp_queue(new MailChimp_WooCommerce_Process_Products());
+                        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Process_Products());
                         WP_CLI::success("queued up the product sync!");
                         break;
 
                     case 'order_sync':
-                        wp_queue(new MailChimp_WooCommerce_Process_Orders());
+                        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Process_Orders());
                         WP_CLI::success("queued up the order sync!");
                         break;
 
@@ -122,7 +122,7 @@ if (defined( 'WP_CLI' ) && WP_CLI) {
                         if (!isset($args[1])) {
                             wp_die('You must specify an order id as the 2nd parameter.');
                         }
-                        wp_queue(new MailChimp_WooCommerce_Single_Order($args[1]));
+                        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Order($args[1]));
                         WP_CLI::success("queued up the order {$args[1]}!");
                         break;
 
@@ -130,7 +130,7 @@ if (defined( 'WP_CLI' ) && WP_CLI) {
                         if (!isset($args[1])) {
                             wp_die('You must specify a product id as the 2nd parameter.');
                         }
-                        wp_queue(new MailChimp_WooCommerce_Single_Product($args[1]));
+                        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($args[1]));
                         WP_CLI::success("queued up the product {$args[1]}!");
                         break;
                 }
@@ -158,12 +158,24 @@ if (!function_exists( 'wp_queue')) {
     }
 }
 
+/**
+ * @param WP_Job $job
+ * @param $delay
+ */
+function mailchimp_handle_or_queue(WP_Job $job, $delay)
+{
+    wp_queue($job, $delay);
+    if (mailchimp_queue_is_disabled()) {
+        mailchimp_call_http_worker_manually();
+    }
+}
 
 /**
  * @return bool
  */
 function mailchimp_should_init_queue() {
-    return !mailchimp_running_in_console() &&
+    return !mailchimp_queue_is_disabled() &&
+        !mailchimp_running_in_console() &&
         !mailchimp_detect_request_contains_http_worker() &&
         mailchimp_detect_admin_ajax() &&
         mailchimp_is_configured() &&
@@ -596,6 +608,13 @@ function mailchimp_get_connected_site_script_fragment() {
  */
 function mailchimp_running_in_console() {
     return (bool) (defined( 'DISABLE_WP_HTTP_WORKER' ) && true === DISABLE_WP_HTTP_WORKER);
+}
+
+/**
+ * @return bool
+ */
+function mailchimp_queue_is_disabled() {
+    return (bool) (defined( 'MAILCHIMP_DISABLE_QUEUE' ) && true === MAILCHIMP_DISABLE_QUEUE);
 }
 
 /**

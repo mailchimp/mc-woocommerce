@@ -869,11 +869,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	    mailchimp_flush_sync_pointers();
 
 	    $coupon_sync = new MailChimp_WooCommerce_Process_Coupons();
-	    wp_queue($coupon_sync);
+	    mailchimp_handle_or_queue($coupon_sync);
 
 		$job = new MailChimp_WooCommerce_Process_Products();
 		$job->flagStartSync();
-		wp_queue($job);
+		mailchimp_handle_or_queue($job);
 	}
 
 	/**

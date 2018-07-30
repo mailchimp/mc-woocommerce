@@ -187,6 +187,7 @@ function mailchimp_should_init_queue() {
  */
 function mailchimp_detect_request_contains_http_worker() {
     global $wp;
+    if (empty($wp) || !is_object($wp) || !isset($wp->request)) return false;
     $current_url = home_url(add_query_arg(array(), $wp->request));
     return mailchimp_string_contains($current_url, 'action=http_worker');
 }

@@ -76,13 +76,15 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
         $call = ($api_response = $api->getStoreOrder($store_id, $woo_order_number)) ? 'updateStoreOrder' : 'addStoreOrder';
 
-        if (!$this->is_admin_save && $call === 'addStoreOrder' && $this->is_update === true) {
+        $new_order = $call === 'addStoreOrder';
+
+        if (!$this->is_admin_save && $new_order && $this->is_update === true) {
             return false;
         }
 
         // if we already pushed this order into the system, we need to unset it now just in case there
         // was another campaign that had been sent and this was only an order update.
-        if ($call === 'updateStoreOrder') {
+        if (!$new_order) {
             $job->campaign_id = null;
             $this->campaign_id = null;
             $this->landing_site = null;
@@ -114,7 +116,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
             }
 
             // if the order is in failed or cancelled status - and it's brand new, we shouldn't submit it.
-            if ($call === 'addStoreOrder' && in_array($order->getFinancialStatus(), array('failed', 'cancelled'))) {
+            if ($new_order && in_array($order->getFinancialStatus(), array('failed', 'cancelled'))) {
                 return false;
             }
 

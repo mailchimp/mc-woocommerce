@@ -404,7 +404,7 @@ class MailChimp_WooCommerce_Transform_Orders
             ),
             // Order fulfilled and complete – requires no further action
             'completed'     => (object) array(
-                'financial' => 'fulfilled',
+                'financial' => 'paid',
                 'fulfillment' => 'fulfilled'
             ),
             // Cancelled by an admin or the customer – no further action required

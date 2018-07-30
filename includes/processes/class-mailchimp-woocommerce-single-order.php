@@ -120,6 +120,13 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                 return false;
             }
 
+            // if the order is brand new, and we already have a paid status,
+            // we need to double up the post to force the confirmation + the invoice.
+            if ($new_order && $order->getFinancialStatus() === 'paid') {
+                $order->setFinancialStatus('pending');
+                $order->confirmAndPay(true);
+            }
+
             mailchimp_debug('order_submit', "#{$woo_order_number}", $order->toArray());
 
             // if we're overriding this we need to set it here.
@@ -130,7 +137,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
             $log = "$call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}";
 
             // only do this stuff on new orders
-            if ($call === 'addStoreOrder') {
+            if ($new_order) {
 
                 // apply a campaign id if we have one.
                 if (!empty($this->campaign_id)) {

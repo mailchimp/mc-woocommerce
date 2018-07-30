@@ -66,7 +66,7 @@ class MailChimp_WooCommerce_Transform_Products
 
         foreach ($variants as $variant) {
 
-            $product_variant = $this->variant($is_variant, $variant, $woo->get_title());
+            $product_variant = $this->variant($variant, $woo->get_title());
 
             if (!$product_variant) continue;
 

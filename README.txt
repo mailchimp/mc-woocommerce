@@ -69,6 +69,11 @@ You have 2 options to run this process:
 
     `/usr/bin/wp --url=http://yourdomain.com --path=/full/path/to/install/ queue listen`
 
+### Optional on-demand queue processing
+If you would like to turn off the background queue processing and handle jobs "on-demand" you can do so by adding a constant in your wp-config.php file:
+
+    `define('MAILCHIMP_DISABLE_QUEUE', true);`
+
 
 == Changelog ==
 = 2.1.10 =

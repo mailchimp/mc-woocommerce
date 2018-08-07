@@ -73,7 +73,7 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
         $email = $user->user_email;
 
         // make sure we don't need to skip this email
-        if (!is_email($email) || mailchimp_email_is_amazon($email) || mailchimp_email_is_privacy_protected($email)) {
+        if (!mailchimp_email_is_allowed($email)) {
             return false;
         }
 
@@ -112,10 +112,16 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
         if (!empty($fn)) $merge_vars['FNAME'] = $fn;
         if (!empty($ln)) $merge_vars['LNAME'] = $ln;
 
+        // see if the store has double opt in configured on the list
+        $requires_double_optin = mailchimp_list_has_double_optin();
+
+        // if it's true - we set this value to NULL so that we do a 'pending' association on the member.
+        $status_if_new = $requires_double_optin ? null : $this->subscribed;
+
         try {
 
             // see if we have a member.
-            $api->member($list_id, $email);
+            $member_data = $api->member($list_id, $email);
 
             // if we're updating a member and the email is different, we need to delete the old person
             if (is_array($this->updated_data) && isset($this->updated_data['user_email'])) {
@@ -126,26 +132,39 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
                     $api->deleteMember($list_id, $this->updated_data['user_email']);
 
                     // subscribe the new
-                    $api->subscribe($list_id, $email, $this->subscribed, $merge_vars);
+                    $api->subscribe($list_id, $email, $status_if_new, $merge_vars);
 
-                    mailchimp_log('member.sync', 'Subscriber Swap '.$this->updated_data['user_email'].' to '.$email, $merge_vars);
+                    if ($status_if_new) {
+                        mailchimp_log('member.sync', 'Subscriber Swap '.$this->updated_data['user_email'].' to '.$email, $merge_vars);
+                    } else {
+                        mailchimp_log('member.sync', 'Subscriber Swap '.$this->updated_data['user_email'].' to '.$email.' Pending Double OptIn');
+                    }
 
                     return false;
                 }
             }
 
+            if (isset($member_data['status']) && in_array($member_data['status'], array('unsubscribed', 'transactional', 'pending'))) {
+                mailchimp_log('member.sync', "Skipped Member Sync For {$email} because the current status is {$member_data['status']}", $merge_vars);
+                return false;
+            }
+
             // ok let's update this member
             $api->update($list_id, $email, $this->subscribed, $merge_vars);
-
             mailchimp_log('member.sync', "Updated Member {$email}", $merge_vars);
+
         } catch (\Exception $e) {
 
             // if we have a 404 not found, we can create the member
             if ($e->getCode() == 404) {
 
                 try {
-                    $api->subscribe($list_id, $user->user_email, $this->subscribed, $merge_vars);
-                    mailchimp_log('member.sync', "Subscribed Member {$user->user_email}", $merge_vars);
+                    $api->subscribe($list_id, $user->user_email, $status_if_new, $merge_vars);
+                    if ($status_if_new) {
+                        mailchimp_log('member.sync', "Subscribed Member {$user->user_email}", array('status_if_new' => $status_if_new, 'merge_vars' => $merge_vars));
+                    } else {
+                        mailchimp_log('member.sync', "{$user->user_email} is Pending Double OptIn");
+                    }
                 } catch (\Exception $e) {
                     mailchimp_log('member.sync', $e->getMessage());
                 }

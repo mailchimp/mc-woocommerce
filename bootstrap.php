@@ -193,6 +193,36 @@ function mailchimp_detect_request_contains_http_worker() {
 }
 
 /**
+ * @param bool $force
+ * @return bool
+ */
+function mailchimp_list_has_double_optin($force = false) {
+    if (!mailchimp_is_configured()) {
+        return false;
+    }
+
+    $key = 'mailchimp_double_optin';
+
+    $double_optin = get_site_transient($key);
+
+    if (!$force && ($double_optin === 'yes' || $double_optin === 'no')) {
+        return $double_optin === 'yes';
+    }
+
+    try {
+        $data = mailchimp_get_api()->getList(mailchimp_get_list_id());
+        $double_optin = array_key_exists('double_optin', $data) ? ($data['double_optin'] ? 'yes' : 'no') : 'no';
+        set_site_transient($key, $double_optin, 600);
+        return $double_optin === 'yes';
+    } catch (\Exception $e) {
+        set_site_transient($key, 'no', 600);
+    }
+
+    return $double_optin === 'yes';
+}
+
+
+/**
  * @return bool
  */
 function mailchimp_is_configured() {

@@ -659,6 +659,18 @@ function mailchimp_http_worker_is_running() {
  * @param $email
  * @return bool
  */
+function mailchimp_email_is_allowed($email) {
+    if (!is_email($email) || mailchimp_email_is_amazon($email) || mailchimp_email_is_privacy_protected($email)) {
+        return false;
+    }
+    return true;
+}
+
+
+/**
+ * @param $email
+ * @return bool
+ */
 function mailchimp_email_is_privacy_protected($email) {
     return $email === 'deleted@site.invalid';
 }

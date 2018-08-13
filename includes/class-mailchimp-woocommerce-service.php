@@ -233,7 +233,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     {
         if (!mailchimp_is_configured()) return;
 
-        if ($post->post_status !== 'auto-draft') {
+        // don't handle any of these statuses because they're not ready for the show
+        if (!in_array($post->post_status, array('trash', 'auto-draft', 'draft', 'pending'))) {
             if ('product' == $post->post_type) {
                 mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
             } elseif ('shop_order' == $post->post_type) {
@@ -274,7 +275,12 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function handlePostRestored($post_id)
     {
-        if (!mailchimp_is_configured()) return;
+        if (!mailchimp_is_configured() || !($post = get_post($post_id))) return;
+
+        // don't handle any of these statuses because they're not ready for the show
+        if (in_array($post->post_status, array('trash', 'auto-draft', 'draft', 'pending'))) {
+            return;
+        }
 
         switch(get_post_type($post_id)) {
             case 'shop_coupon':

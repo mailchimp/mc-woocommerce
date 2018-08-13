@@ -251,8 +251,20 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
         switch (get_post_type($post_id)) {
             case 'shop_coupon':
-                mailchimp_get_api()->deletePromoRule(mailchimp_get_store_id(), $post_id);
-                mailchimp_log('promo_code.deleted', "deleted promo code {$post_id}");
+                try {
+                    mailchimp_get_api()->deletePromoRule(mailchimp_get_store_id(), $post_id);
+                    mailchimp_log('promo_code.deleted', "deleted promo code {$post_id}");
+                } catch (\Exception $e) {
+                    mailchimp_error('delete promo code', $e->getMessage());
+                }
+                break;
+            case 'product':
+                try {
+                    mailchimp_get_api()->deleteStoreProduct(mailchimp_get_store_id(), $post_id);
+                    mailchimp_log('product.deleted', "deleted product {$post_id}");
+                } catch (\Exception $e) {
+                    mailchimp_error('delete product', $e->getMessage());
+                }
                 break;
         }
     }
@@ -267,6 +279,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         switch(get_post_type($post_id)) {
             case 'shop_coupon':
                 return $this->handleCouponRestored($post_id);
+                break;
+
+            case 'product':
+                mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
                 break;
         }
     }

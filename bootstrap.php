@@ -183,6 +183,40 @@ function mailchimp_should_init_queue() {
 }
 
 /**
+ * @param int $max
+ * @return bool|DateTime
+ */
+function mailchimp_get_http_lock_expiration($max = 300) {
+    try {
+        if (($lock_time = (string) get_site_transient('http_worker_lock')) && !empty($lock_time)) {
+            $parts = str_getcsv($lock_time, ' ');
+            if (count($parts) >= 2 && is_numeric($parts[1])) {
+                $lock_duration = apply_filters('http_worker_lock_time', 60);
+                if (empty($lock_duration) || !is_numeric($lock_duration) || ($lock_duration >= $max)) {
+                    $lock_duration = $max;
+                }
+                return new \DateTime(((int) $parts[1] + $lock_duration));
+            }
+        }
+    } catch (\Exception $e) {}
+    return false;
+}
+
+/**
+ * @return bool
+ */
+function mailchimp_should_reset_http_lock() {
+    return ($lock = mailchimp_get_http_lock_expiration()) && $lock->getTimestamp() < time();
+}
+
+/**
+ * @return bool
+ */
+function mailchimp_reset_http_lock() {
+    return delete_site_transient( 'http_worker_lock' );
+}
+
+/**
  * @return bool
  */
 function mailchimp_detect_request_contains_http_worker() {
@@ -652,6 +686,11 @@ function mailchimp_queue_is_disabled() {
  * @return bool
  */
 function mailchimp_http_worker_is_running() {
+    if (mailchimp_should_reset_http_lock()) {
+        mailchimp_reset_http_lock();
+        mailchimp_log('http_worker_lock', "HTTP worker lock needed to be deleted to initiate the queue.");
+        return false;
+    }
     return (bool) get_site_transient('http_worker_lock');
 }
 

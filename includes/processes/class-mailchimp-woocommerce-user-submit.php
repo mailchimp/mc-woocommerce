@@ -117,6 +117,7 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
 
         // if it's true - we set this value to NULL so that we do a 'pending' association on the member.
         $status_if_new = $requires_double_optin ? null : $this->subscribed;
+        $status_if_update = $requires_double_optin ? 'pending' : $this->subscribed;
 
         try {
 
@@ -135,23 +136,32 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
                     $api->subscribe($list_id, $email, $status_if_new, $merge_vars);
 
                     if ($status_if_new) {
-                        mailchimp_log('member.sync', 'Subscriber Swap '.$this->updated_data['user_email'].' to '.$email, $merge_vars);
+                        mailchimp_log('member.sync', 'Subscriber Swap '.$this->updated_data['user_email'].' to '.$email, array(
+                            'status' => $status_if_new,
+                            'merge_vars' => $merge_vars
+                        ));
                     } else {
-                        mailchimp_log('member.sync', 'Subscriber Swap '.$this->updated_data['user_email'].' to '.$email.' Pending Double OptIn');
+                        mailchimp_log('member.sync', 'Subscriber Swap '.$this->updated_data['user_email'].' to '.$email.' Pending Double OptIn', array(
+                            'status' => $status_if_new,
+                            'merge_vars' => $merge_vars
+                        ));
                     }
 
                     return false;
                 }
             }
 
-            if (isset($member_data['status']) && in_array($member_data['status'], array('unsubscribed', 'transactional', 'pending'))) {
+            if (isset($member_data['status']) && in_array($member_data['status'], array('unsubscribed', 'pending'))) {
                 mailchimp_log('member.sync', "Skipped Member Sync For {$email} because the current status is {$member_data['status']}", $merge_vars);
                 return false;
             }
 
             // ok let's update this member
-            $api->update($list_id, $email, $this->subscribed, $merge_vars);
-            mailchimp_log('member.sync', "Updated Member {$email}", $merge_vars);
+            $api->update($list_id, $email, $status_if_update, $merge_vars);
+            mailchimp_log('member.sync', "Updated Member {$email}", array(
+                'status' => $status_if_update,
+                'merge_vars' => $merge_vars
+            ));
 
         } catch (\Exception $e) {
 

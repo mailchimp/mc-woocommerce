@@ -274,9 +274,12 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 $data['mailchimp_account_info_id'] = $profile['account_id'];
                 $data['mailchimp_account_info_username'] = $profile['username'];
             }
+            $data['api_ping_error'] = false;
         } catch (Exception $e) {
             unset($data['mailchimp_api_key']);
             $data['active_tab'] = 'api_key';
+            $data['api_ping_error'] = $e->getCode().' :: '.$e->getMessage().' on '.$e->getLine().' in '.$e->getFile();
+            mailchimp_error('admin@validatePostApiKey', $e->getCode().' :: '.$e->getMessage().' on '.$e->getLine().' in '.$e->getFile());
             add_settings_error('mailchimp_store_settings', $e->getCode(), $e->getMessage());
             return $data;
         }
@@ -538,28 +541,33 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		), $data);
 	}
 
-	/**
-	 * @param null|array $data
-	 * @return bool
-	 */
-	public function hasValidApiKey($data = null)
+    /**
+     * @param null $data
+     * @param bool $throw_if_not_valid
+     * @return array|bool|mixed|null|object
+     * @throws Exception
+     */
+	public function hasValidApiKey($data = null, $throw_if_not_valid = false)
 	{
 		if (!$this->validateOptions(array('mailchimp_api_key'), $data)) {
 			return false;
 		}
 
 		if (($pinged = $this->getCached('api-ping-check', null)) === null) {
-			if (($pinged = $this->api()->ping())) {
-				$this->setCached('api-ping-check', true, 120);
-			}
-			return $pinged;
+            if (($pinged = $this->api()->ping(false, $throw_if_not_valid === true))) {
+                $this->setCached('api-ping-check', true, 120);
+            }
 		}
+
 		return $pinged;
 	}
 
-	/**
-	 * @return bool
-	 */
+    /**
+     * @return array|bool|mixed|null|object
+     * @throws Exception
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_ServerError
+     */
 	public function hasValidMailChimpList()
 	{
 		if (!$this->hasValidApiKey()) {
@@ -575,9 +583,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	}
 
 
-	/**
-	 * @return array|bool|mixed|null
-	 */
+    /**
+     * @return array|bool|mixed|null|object
+     * @throws Exception
+     */
 	public function getAccountDetails()
 	{
 		if (!$this->hasValidApiKey()) {
@@ -861,7 +870,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		return true;
 	}
 
-	/**
+	/**a:4:{s:19:"mailchimp_debugging";b:0;s:25:"mailchimp_account_info_id";N;s:31:"mailchimp_account_info_username";N;s:10:"active_tab";s:7:"api_key";}
 	 * Start the sync
 	 */
 	private function startSync()

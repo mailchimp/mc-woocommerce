@@ -138,7 +138,6 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
             // only do this stuff on new orders
             if ($new_order) {
-
                 // apply a campaign id if we have one.
                 if (!empty($this->campaign_id)) {
                     $log .= ' :: campaign id ' . $this->campaign_id;
@@ -150,7 +149,6 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                     $log .= ' :: landing site ' . $this->landing_site;
                     $order->setLandingSite($this->landing_site);
                 }
-
             }
 
             // update or create
@@ -177,10 +175,12 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                         $member = $api->member(mailchimp_get_list_id(), $email);
                         if ($member['status'] === 'transactional') {
                             $api->update(mailchimp_get_list_id(), $email, 'pending', $merge_vars);
+                            mailchimp_tell_system_about_user_submit($email, mailchimp_get_subscriber_status_options('pending'), 60);
                             mailchimp_log('double_opt_in', "Updated {$email} Using Double Opt In", $merge_vars);
                         }
                     } catch (\Exception $e) {
                         $api->subscribe(mailchimp_get_list_id(), $email, false, $merge_vars);
+                        mailchimp_tell_system_about_user_submit($email, mailchimp_get_subscriber_status_options(false), 60);
                         mailchimp_log('double_opt_in', "Subscribed {$email} Using Double Opt In", $merge_vars);
                     }
                 } catch (\Exception $e) {
@@ -189,47 +189,32 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
             }
 
             return $api_response;
-
         } catch (\Exception $e) {
-
             $message = strtolower($e->getMessage());
-
             mailchimp_error('order_submit.tracing_error', $e);
-
             if (!isset($order)) {
                 // transform the order
                 $order = $job->transform(get_post($this->order_id));
                 $this->cart_session_id = $order->getCustomer()->getId();
             }
-
             // this can happen when a customer changes their email.
             if (isset($order) && strpos($message, 'not be changed')) {
-
                 try {
-
                     mailchimp_log('order_submit.deleting_customer', "#{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}");
-
                     // delete the customer before adding it again.
                     $api->deleteCustomer($store_id, $order->getCustomer()->getId());
-
                     // update or create
                     $api_response = $api->$call($store_id, $order, false);
-
                     $log = "Deleted Customer :: $call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}";
-
                     if (!empty($job->campaign_id)) {
                         $log .= ' :: campaign id '.$job->campaign_id;
                     }
-
                     mailchimp_log('order_submit.success', $log);
-
                     // if we're adding a new order and the session id is here, we need to delete the AC cart record.
                     if (!empty($this->cart_session_id)) {
                         $api->deleteCartByID($store_id, $this->cart_session_id);
                     }
-
                     return $api_response;
-
                 } catch (\Exception $e) {
                     mailchimp_error('order_submit.error', mailchimp_error_trace($e, 'deleting-customer-re-add :: #'.$this->order_id));
                 }

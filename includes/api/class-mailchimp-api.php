@@ -686,10 +686,14 @@ class MailChimp_WooCommerce_MailChimpApi
     {
         try {
             $email = $cart->getCustomer()->getEmailAddress();
+
             if (mailchimp_email_is_privacy_protected($email) || mailchimp_email_is_amazon($email)) {
                 return false;
             }
-            $data = $this->post("ecommerce/stores/$store_id/carts", $cart->toArray());
+
+            mailchimp_debug('api.addCart', "Adding Cart :: {$email}", $data = $cart->toArray());
+
+            $data = $this->post("ecommerce/stores/$store_id/carts", $data);
             $cart = new MailChimp_WooCommerce_Cart();
             return $cart->setStoreID($store_id)->fromArray($data);
         } catch (MailChimp_WooCommerce_Error $e) {
@@ -714,10 +718,14 @@ class MailChimp_WooCommerce_MailChimpApi
     {
         try {
             $email = $cart->getCustomer()->getEmailAddress();
+
             if (mailchimp_email_is_privacy_protected($email) || mailchimp_email_is_amazon($email)) {
                 return false;
             }
-            $data = $this->patch("ecommerce/stores/$store_id/carts/{$cart->getId()}", $cart->toArrayForUpdate());
+
+            mailchimp_debug('api.updateCart', "Updating Cart :: {$email}", $data = $cart->toArrayForUpdate());
+
+            $data = $this->patch("ecommerce/stores/$store_id/carts/{$cart->getId()}", $data);
             $cart = new MailChimp_WooCommerce_Cart();
             return $cart->setStoreID($store_id)->fromArray($data);
         } catch (MailChimp_WooCommerce_Error $e) {

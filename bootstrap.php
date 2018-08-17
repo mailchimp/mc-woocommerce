@@ -750,6 +750,97 @@ function mailchimp_call_http_worker_manually() {
     return wp_remote_post(esc_url_raw($url), $post_args);
 }
 
+/**
+ * @param $key
+ * @param null $default
+ * @return mixed|null
+ */
+function mailchimp_get_transient($key, $default = null) {
+    $transient = get_site_transient("mailchimp-woocommerce.{$key}");
+    return empty($transient) ? $default : $transient;
+}
+
+/**
+ * @param $key
+ * @param $value
+ * @param int $seconds
+ * @return bool
+ */
+function mailchimp_set_transient($key, $value, $seconds = 60) {
+    mailchimp_delete_transient($key);
+    return set_site_transient("mailchimp-woocommerce.{$key}", array(
+        'value' => $value,
+        'expires' => time()+$seconds,
+    ));
+}
+
+/**
+ * @param $key
+ * @return bool
+ */
+function mailchimp_delete_transient($key) {
+    return delete_site_transient("mailchimp-woocommerce.{$key}");
+}
+
+/**
+ * @param $key
+ * @param null $default
+ * @return mixed|null
+ */
+function mailchimp_get_transient_value($key, $default = null) {
+    $transient = mailchimp_get_transient($key, false);
+    return (is_array($transient) && array_key_exists('value', $transient)) ? $transient['value'] : $default;
+}
+
+/**
+ * @param $key
+ * @param $value
+ * @return bool|null
+ */
+function mailchimp_check_serialized_transient_changed($key, $value) {
+    if (($saved = mailchimp_get_transient_value($key)) && !empty($saved)) {
+        return serialize($saved) === serialize($value);
+    }
+    return null;
+}
+
+/**
+ * @param $email
+ * @return bool|string
+ */
+function mailchimp_get_transient_email_key($email) {
+    $email = md5(trim(strtolower($email)));
+    return empty($email) ? false : 'MailChimp_WooCommerce_User_Submit@'.$email;
+}
+
+/**
+ * @param $email
+ * @param $status_meta
+ * @param int $seconds
+ * @return bool
+ */
+function mailchimp_tell_system_about_user_submit($email, $status_meta, $seconds = 60) {
+   return mailchimp_set_transient(mailchimp_get_transient_email_key($email), $status_meta, $seconds);
+}
+
+/**
+ * @param $subscribed
+ * @return array
+ */
+function mailchimp_get_subscriber_status_options($subscribed) {
+    $requires = mailchimp_list_has_double_optin();
+
+    // if it's true - we set this value to NULL so that we do a 'pending' association on the member.
+    $status_if_new = $requires ? null : $subscribed;
+    $status_if_update = $requires ? 'pending' : $subscribed;
+
+    // set an array of status meta that we will use for comparison below to the transient data
+    return array(
+        'created' => $status_if_new,
+        'updated' => $status_if_update
+    );
+}
+
 function mailchimp_flush_queue_tables() {
     try {
         /** @var \ */

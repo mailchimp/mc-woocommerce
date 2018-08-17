@@ -217,12 +217,17 @@ class MailChimp_WooCommerce_Transform_Orders
         if ($doi || !$subscribed_on_order) {
             try {
                 $subscriber = mailchimp_get_api()->member(mailchimp_get_list_id(), $customer->getEmailAddress());
-                if ($subscriber['status'] === 'transactional' && $doi) {
+
+                if ($subscriber['status'] === 'transactional') {
                     $customer->setOptInStatus(false);
                     $customer->requireDoubleOptIn(true);
                     return $customer;
+                } elseif ($subscriber['status'] === 'pending') {
+                    $customer->setOptInStatus(false);
+                    return $customer;
                 }
-                $customer->setOptInStatus($subscriber['status'] !== 'unsubscribed');
+
+                $customer->setOptInStatus($subscriber['status'] === 'subscribed');
             } catch (\Exception $e) {
                 // if double opt in is enabled - we need to make a request now that subscribes the customer as pending
                 // so that the double opt in will actually fire.

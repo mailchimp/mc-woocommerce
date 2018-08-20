@@ -328,6 +328,10 @@ function mailchimp_check_woocommerce_plugin_status()
     if (in_array('woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option('active_plugins')))) {
         return true;
     }
+    // Load this function if not registered, doesn't mean we're not on a multisite..
+    if ( ! function_exists( 'is_plugin_active_for_network' ) ) {
+        require_once( ABSPATH . '/wp-admin/includes/plugin.php' );
+    }
     // lets check for network activation woo installs now too.
     if (function_exists('is_plugin_active_for_network')) {
         return is_plugin_active_for_network( 'woocommerce/woocommerce.php');

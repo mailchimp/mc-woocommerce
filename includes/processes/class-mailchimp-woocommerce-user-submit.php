@@ -10,9 +10,12 @@
  */
 class MailChimp_WooCommerce_User_Submit extends WP_Job
 {
+    public static $handling_for = null;
+
     public $user_id;
     public $subscribed;
     public $updated_data;
+    public $should_ignore = false;
 
     /**
      * MailChimp_WooCommerce_User_Submit constructor.
@@ -23,7 +26,11 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
     public function __construct($user_id = null, $subscribed = null, $updated_data = null)
     {
         if (!empty($user_id)) {
+            if (static::$handling_for === $this->user_id) {
+                $this->should_ignore = true;
+            }
             $this->user_id = $user_id;
+            static::$handling_for = $this->user_id;
         }
 
         if (is_bool($subscribed)) {
@@ -42,6 +49,13 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
     {
         if (!mailchimp_is_configured()) {
             mailchimp_debug(get_called_class(), 'mailchimp is not configured properly');
+            static::$handling_for = null;
+            return false;
+        }
+
+        if ($this->should_ignore) {
+            mailchimp_debug(get_called_class(), "{$this->user_id} is currently in motion - skipping this one.");
+            static::$handling_for = null;
             return false;
         }
 
@@ -66,6 +80,7 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
 
             if ($user->ID <= 0 || empty($store_id) || !is_array($options)) {
                 mailchimp_log('member.sync', "Invalid Data For Submission :: {$user->ID}");
+                static::$handling_for = null;
                 return false;
             }
         }
@@ -74,6 +89,7 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
 
         // make sure we don't need to skip this email
         if (!mailchimp_email_is_allowed($email)) {
+            static::$handling_for = null;
             return false;
         }
 
@@ -82,6 +98,7 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
             $user_subscribed = get_user_meta($this->user_id, 'mailchimp_woocommerce_is_subscribed', true);
             if ($user_subscribed === '' || $user_subscribed === null) {
                 mailchimp_log('member.sync', "Skipping sync for {$email} because no subscriber status has been set");
+                static::$handling_for = null;
                 return false;
             }
             $this->subscribed = (bool) $user_subscribed;
@@ -93,12 +110,14 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
         // we need a valid api key and list id to continue
         if (empty($api_key) || empty($list_id)) {
             mailchimp_log('member.sync', "Invalid Api Key or ListID :: {$email}");
+            static::$handling_for = null;
             return false;
         }
 
         // don't let anyone be unsubscribed from the list - that should only happen on email campaigns
         // and someone clicking the unsubscribe linkage.
         if (!$this->subscribed) {
+            static::$handling_for = null;
             return false;
         }
 
@@ -121,6 +140,7 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
             // check to see if the status meta has changed when a false response is given
             if (mailchimp_check_serialized_transient_changed($transient_id, $status_meta) === false) {
                 mailchimp_debug(get_called_class(), "Skipping sync for {$email} because it was just pushed less than a minute ago.");
+                static::$handling_for = null;
                 return false;
             }
 
@@ -147,11 +167,13 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
                             'merge_vars' => $merge_vars
                         ));
                     }
+                    static::$handling_for = null;
                     return false;
                 }
             }
             if (isset($member_data['status']) && in_array($member_data['status'], array('unsubscribed', 'pending'))) {
                 mailchimp_log('member.sync', "Skipped Member Sync For {$email} because the current status is {$member_data['status']}", $merge_vars);
+                static::$handling_for = null;
                 return false;
             }
             // ok let's update this member
@@ -162,6 +184,7 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
                 'status' => $status_meta['updated'],
                 'merge_vars' => $merge_vars
             ));
+            static::$handling_for = null;
         } catch (\Exception $e) {
             // if we have a 404 not found, we can create the member
             if ($e->getCode() == 404) {
@@ -177,10 +200,13 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
                 } catch (\Exception $e) {
                     mailchimp_log('member.sync', $e->getMessage());
                 }
+                static::$handling_for = null;
                 return false;
             }
             mailchimp_error('member.sync', mailchimp_error_trace($e, $user->user_email));
         }
+
+        static::$handling_for = null;
 
         return false;
     }

@@ -169,22 +169,29 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
             // before the order is submitted.
             if ($order->getCustomer()->requiresDoubleOptIn()) {
                 try {
+                    $list_id = mailchimp_get_list_id();
                     $merge_vars = $order->getCustomer()->getMergeVars();
                     $email = $order->getCustomer()->getEmailAddress();
+
                     try {
-                        $member = $api->member(mailchimp_get_list_id(), $email);
+                        $member = $api->member($list_id, $email);
                         if ($member['status'] === 'transactional') {
-                            $api->update(mailchimp_get_list_id(), $email, 'pending', $merge_vars);
+                            $api->update($list_id, $email, 'pending', $merge_vars);
                             mailchimp_tell_system_about_user_submit($email, mailchimp_get_subscriber_status_options('pending'), 60);
-                            mailchimp_log('double_opt_in', "Updated {$email} Using Double Opt In", $merge_vars);
+                            mailchimp_log('double_opt_in', "Updated {$email} Using Double Opt In - previous status was '{$member['status']}'", $merge_vars);
                         }
                     } catch (\Exception $e) {
-                        $api->subscribe(mailchimp_get_list_id(), $email, false, $merge_vars);
-                        mailchimp_tell_system_about_user_submit($email, mailchimp_get_subscriber_status_options(false), 60);
-                        mailchimp_log('double_opt_in', "Subscribed {$email} Using Double Opt In", $merge_vars);
+                        // if the error code is 404 - need to subscribe them becausce it means they were not on the list.
+                        if ($e->getCode() == 404) {
+                            $api->subscribe($list_id, $email, false, $merge_vars);
+                            mailchimp_tell_system_about_user_submit($email, mailchimp_get_subscriber_status_options(false), 60);
+                            mailchimp_log('double_opt_in', "Subscribed {$email} Using Double Opt In", $merge_vars);
+                        } else {
+                            mailchimp_error('double_opt_in.update', $e->getMessage());
+                        }
                     }
                 } catch (\Exception $e) {
-                    mailchimp_error('double_opt_in', $e->getMessage());
+                    mailchimp_error('double_opt_in.create', $e->getMessage());
                 }
             }
 

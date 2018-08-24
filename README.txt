@@ -11,6 +11,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your MailChimp list to track sales, create targeted emails, send abandoned cart emails, and more.
 
 == Description ==
+
 Join the 17 million customers who use MailChimp, the world's largest marketing automation platform, to develop their e-commerce marketing strategy. With the official MailChimp for WooCommerce integration, your customers and their purchase data are automatically synced with your MailChimp account, making it easy to send targeted campaigns, automatically follow up with customers post-purchase, recommend products, recover abandoned carts, and measure the ROI of your marketing efforts. And it's completely free.
 
 With MailChimp for WooCommerce, you’ll have the power to:
@@ -34,7 +35,8 @@ WordPress.com compatibility is limited to Business tier users only.
 
 At this time, the synchronization of product categories from WooCommerce to MailChimp is not supported.
 
-=== Installation ===
+== Installation ==
+
 ###Before You Start
 Here are some things to know before you begin this process.
 
@@ -74,6 +76,24 @@ If you would like to turn off the background queue processing and handle jobs "o
 
     `define('MAILCHIMP_DISABLE_QUEUE', true);`
 
+
+## Multi-site Setups
+### Installing MailChimp for WooCommerce on WP  Multi-site setups
+
+- Network Admins must install the MailChimp for WooCommerce plugin for sites to have access to the plugin.
+- Sites can activate/deactivate the plugin if the plugin is not Network Installed.
+- Networked Installed means the network admin has installed a plugin by uploading it to their WP Network setup and have not activated the plugin.
+- Activating the plugin manually for each site maintains the option of deactivating the plugin on a site level.
+- If the plugin is Network Activated this means all sites now have MailChimp for WooCommerce installed and activated, then the only way to deactivate is at the network level by the admin. This will deactivate the plugin for all sites on the network.
+
+### Uninstall and Disconnecting from MailChimp
+To disconnect the site(s) from MailChimp users must use the Network admin to deactivate and delete the plugin.
+
+#### Deleting
+Removes the connection between Mailchimp and WooCommerce. It is only possible to delete the MailChimp for WooCommerce plugin by the Network Admin.
+
+#### Deactivating
+Disables the plugin from sending data to MailChimp. Upon reactivating the plugins original setup details will be intact.
 
 == Changelog ==
 = 2.1.10 =

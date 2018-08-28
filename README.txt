@@ -63,6 +63,12 @@ Refer to the Wordpress Codex for more information about [Multisite Network Admin
 = 2.1.10 =
 * skip product when no variant can be loaded
 * better validation for the view order url
+* Add Initial sync label on Sync Tab
+* Multisite Delete and deactivate improvements
+* MailChimp Order Notification issues support for downloadable and virtual products 
+* http worker lock improvement 
+* Add documentation about Multisite setup 
+* Add documentaiton for on-demand syncing
 = 2.1.9 =
 * Improved UI feedback when API key is invalid
 * Add documentation about product categories not being supported.

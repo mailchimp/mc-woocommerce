@@ -1467,10 +1467,12 @@ class MailChimp_WooCommerce_MailChimpApi
         }
 
         if ($info['http_code'] >= 400 && $info['http_code'] <= 500) {
+            mailchimp_error('api.debug', $response);
             throw new MailChimp_WooCommerce_Error($data['title'] .' :: '.$data['detail'], $data['status']);
         }
 
         if ($info['http_code'] >= 500) {
+            mailchimp_error('api.debug', $response);
             throw new MailChimp_WooCommerce_ServerError($data['detail'], $data['status']);
         }
 
@@ -1490,11 +1492,13 @@ class MailChimp_WooCommerce_MailChimpApi
             foreach ($data['errors'] as $error) {
                 $message .= '<p>'.$error['field'].': '.$error['message'].'</p>';
             }
+            mailchimp_error('api.debug', 'tracing error data', $data);
             throw new MailChimp_WooCommerce_Error($message, $data['status']);
         }
 
         // make sure the response is correct from the data in the response array
         if (isset($data['status']) && $data['status'] >= 400) {
+            mailchimp_error('api.debug', 'tracing error data > 400', $data);
             throw new MailChimp_WooCommerce_Error($data['detail'], $data['status']);
         }
 

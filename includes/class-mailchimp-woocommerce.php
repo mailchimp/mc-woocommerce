@@ -178,7 +178,9 @@ class MailChimp_WooCommerce
                         mailchimp_call_http_worker_manually();
                     }
                 }
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+                mailchimp_error_trace($e, "loading dependencies");
+            }
         }
     }
 

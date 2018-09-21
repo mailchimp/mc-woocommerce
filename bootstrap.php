@@ -460,18 +460,28 @@ function mailchimp_woocommerce_get_all_image_sizes_list() {
 }
 
 /**
- * The code that runs during plugin activation.
- * This action is documented in includes/class-mailchimp-woocommerce-activator.php
+ * @param null $network_wide
  */
-function activate_mailchimp_woocommerce() {
-    // if we don't have woocommerce we need to display a horrible error message before the plugin is installed.
-    if (!mailchimp_check_woocommerce_plugin_status()) {
-        // Deactivate the plugin
-        deactivate_plugins(__FILE__);
-        $error_message = __('The MailChimp For WooCommerce plugin requires the <a href="http://wordpress.org/extend/plugins/woocommerce/">WooCommerce</a> plugin to be active!', 'woocommerce');
-        wp_die($error_message);
+function activate_mailchimp_woocommerce($network_wide = null) {
+    if (is_multisite() && $network_wide ) {
+        global $wpdb;
+        foreach ($wpdb->get_col("SELECT blog_id FROM $wpdb->blogs") as $blog_id) {
+            switch_to_blog($blog_id);
+            if (mailchimp_check_woocommerce_plugin_status()) {
+                MailChimp_WooCommerce_Activator::activate();
+            }
+            restore_current_blog();
+        }
+    } else {
+        // if we don't have woocommerce we need to display a horrible error message before the plugin is installed.
+        if (!mailchimp_check_woocommerce_plugin_status()) {
+            // Deactivate the plugin
+            deactivate_plugins(__FILE__);
+            $error_message = __('The MailChimp For WooCommerce plugin requires the <a href="http://wordpress.org/extend/plugins/woocommerce/">WooCommerce</a> plugin to be active!', 'woocommerce');
+            wp_die($error_message);
+        }
+        MailChimp_WooCommerce_Activator::activate();
     }
-    MailChimp_WooCommerce_Activator::activate();
 }
 
 /**

@@ -468,7 +468,10 @@ function activate_mailchimp_woocommerce($network_wide = null) {
         foreach ($wpdb->get_col("SELECT blog_id FROM $wpdb->blogs") as $blog_id) {
             switch_to_blog($blog_id);
             if (mailchimp_check_woocommerce_plugin_status()) {
+                $site_name = get_option('siteurl');
+                mailchimp_log('plugin.activation.multisite', "Installing MailChimp Tables For :: {$site_name}");
                 MailChimp_WooCommerce_Activator::activate();
+                mailchimp_log('plugin.activation.multisite', "Installed MailChimp Tables For :: {$site_name}");
             }
             restore_current_blog();
         }
@@ -480,7 +483,11 @@ function activate_mailchimp_woocommerce($network_wide = null) {
             $error_message = __('The MailChimp For WooCommerce plugin requires the <a href="http://wordpress.org/extend/plugins/woocommerce/">WooCommerce</a> plugin to be active!', 'woocommerce');
             wp_die($error_message);
         }
+
+        $site_name = get_option('siteurl');
+        mailchimp_log('plugin.activation.single_site', "Installing MailChimp Tables For :: {$site_name}");
         MailChimp_WooCommerce_Activator::activate();
+        mailchimp_log('plugin.activation.single_site', "Installed MailChimp Tables For :: {$site_name}");
     }
 }
 

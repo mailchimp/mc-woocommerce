@@ -465,13 +465,11 @@ function mailchimp_woocommerce_get_all_image_sizes_list() {
 function activate_mailchimp_woocommerce($network_wide = null) {
     if (is_multisite() && $network_wide ) {
         global $wpdb;
+        mailchimp_log('plugin.activation.multisite', "Installing MailChimp Tables.");
         foreach ($wpdb->get_col("SELECT blog_id FROM $wpdb->blogs") as $blog_id) {
             switch_to_blog($blog_id);
             if (mailchimp_check_woocommerce_plugin_status()) {
-                $site_name = get_option('siteurl');
-                mailchimp_log('plugin.activation.multisite', "Installing MailChimp Tables For :: {$site_name}");
                 MailChimp_WooCommerce_Activator::activate();
-                mailchimp_log('plugin.activation.multisite', "Installed MailChimp Tables For :: {$site_name}");
             }
             restore_current_blog();
         }

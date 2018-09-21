@@ -47,6 +47,21 @@ if ( ! class_exists( 'WP_Queue' ) ) {
 
 			$id = $wpdb->insert( $this->table, $data );
 
+            if (!$id) {
+                try {
+                    if (mailchimp_string_contains($wpdb->last_error, 'Table')) {
+                        mailchimp_debug('Queue Table Was Not Found!', 'Creating Tables');
+                        MailChimp_WooCommerce_Activator::create_queue_tables();
+                        $id = $wpdb->insert( $this->table, $data );
+                        if (!$id) {
+                            mailchimp_debug('Queue Job '.get_class($job), $wpdb->last_error);
+                        }
+                    }
+                } catch (\Exception $e) {
+                    mailchimp_error_trace($e, 'trying to create queue tables');
+                }
+            }
+
 			return $this;
 		}
 

@@ -73,8 +73,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             'MailChimp',
             'manage_options',
             $this->plugin_name,
-            array($this, 'display_plugin_setup_page'),
-            'data:image/svg+xml;base64,'.$this->mailchimp_svg()
+            array($this, 'display_plugin_setup_page'), 'data:image/svg+xml;base64,'.$this->mailchimp_svg()
         );
 	}
 

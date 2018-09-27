@@ -67,20 +67,20 @@ if (isset($options['mailchimp_api_key'])) {
 
 <?php if (!defined('PHP_VERSION_ID') || (PHP_VERSION_ID < 70000)): ?>
     <div data-dismissible="notice-php-version" class="error notice notice-error is-dismissible">
-        <p><?php _e('MailChimp says: Please upgrade your PHP version to a minimum of 7.0', 'mailchimp-woocommerce'); ?></p>
+        <p><?php _e('Mailchimp says: Please upgrade your PHP version to a minimum of 7.0', 'mailchimp-woocommerce'); ?></p>
     </div>
 <?php endif; ?>
 
 <?php if (!empty($has_api_error)): ?>
     <div data-dismissible="notice-api-error" class="error notice notice-error is-dismissible">
-        <p><?php _e("MailChimp says: API Request Error - ".$has_api_error, 'mailchimp-woocommerce'); ?></p>
+        <p><?php _e("Mailchimp says: API Request Error - ".$has_api_error, 'mailchimp-woocommerce'); ?></p>
     </div>
 <?php endif; ?>
 
 <!-- Create a header in the default WordPress 'wrap' container -->
 <div class="wrap">
     <div id="icon-themes" class="icon32"></div>
-    <h2>MailChimp Settings</h2>
+    <h2>Mailchimp Settings</h2>
 
     <h2 class="nav-tab-wrapper">
         <a href="?page=mailchimp-woocommerce&tab=api_key" class="nav-tab <?php echo $active_tab == 'api_key' ? 'nav-tab-active' : ''; ?>">Connect</a>
@@ -148,7 +148,7 @@ if (isset($options['mailchimp_api_key'])) {
             <li>Order and customer information will not sync if they contain an Amazon or generic email address.</li>
             <li>Need help to connect your store? Visit the MailChimp <a href="http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce/" target="_blank">Knowledge Base</a>.</li>
             <li>Want to tell us how we're doing? <a href="https://wordpress.org/support/plugin/mailchimp-for-woocommerce/reviews/" target="_blank">Leave a review on Wordpress.org</a>.</li>
-            <li>By using this plugin, MailChimp will process customer information in accordance with their <a href="https://mailchimp.com/legal/privacy/ " target="_blank">Privacy Policy</a>.</li>
+            <li>By using this plugin, Mailchimp will process customer information in accordance with their <a href="https://mailchimp.com/legal/privacy/ " target="_blank">Privacy Policy</a>.</li>
         </ul>
     <?php endif; ?>
 

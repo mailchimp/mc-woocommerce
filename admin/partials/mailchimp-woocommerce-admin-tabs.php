@@ -146,7 +146,7 @@ if (isset($options['mailchimp_api_key'])) {
         <ul>
             <li>Have a larger store or having issues syncing? Consider using <a href="https://github.com/mailchimp/mc-woocommerce/issues/158" target="_blank">WP-CLI</a>.</li>
             <li>Order and customer information will not sync if they contain an Amazon or generic email address.</li>
-            <li>Need help to connect your store? Visit the MailChimp <a href="http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce/" target="_blank">Knowledge Base</a>.</li>
+            <li>Need help to connect your store? Visit the Mailchimp <a href="http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce/" target="_blank">Knowledge Base</a>.</li>
             <li>Want to tell us how we're doing? <a href="https://wordpress.org/support/plugin/mailchimp-for-woocommerce/reviews/" target="_blank">Leave a review on Wordpress.org</a>.</li>
             <li>By using this plugin, Mailchimp will process customer information in accordance with their <a href="https://mailchimp.com/legal/privacy/ " target="_blank">Privacy Policy</a>.</li>
         </ul>

@@ -76,13 +76,15 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
         $call = ($api_response = $api->getStoreOrder($store_id, $woo_order_number)) ? 'updateStoreOrder' : 'addStoreOrder';
 
-        if (!$this->is_admin_save && $call === 'addStoreOrder' && $this->is_update === true) {
+        $new_order = $call === 'addStoreOrder';
+
+        if (!$this->is_admin_save && $new_order && $this->is_update === true) {
             return false;
         }
 
         // if we already pushed this order into the system, we need to unset it now just in case there
         // was another campaign that had been sent and this was only an order update.
-        if ($call === 'updateStoreOrder') {
+        if (!$new_order) {
             $job->campaign_id = null;
             $this->campaign_id = null;
             $this->landing_site = null;
@@ -114,8 +116,15 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
             }
 
             // if the order is in failed or cancelled status - and it's brand new, we shouldn't submit it.
-            if ($call === 'addStoreOrder' && in_array($order->getFinancialStatus(), array('failed', 'cancelled'))) {
+            if ($new_order && in_array($order->getFinancialStatus(), array('failed', 'cancelled'))) {
                 return false;
+            }
+
+            // if the order is brand new, and we already have a paid status,
+            // we need to double up the post to force the confirmation + the invoice.
+            if ($new_order && $order->getFinancialStatus() === 'paid') {
+                $order->setFinancialStatus('pending');
+                $order->confirmAndPay(true);
             }
 
             mailchimp_debug('order_submit', "#{$woo_order_number}", $order->toArray());
@@ -128,8 +137,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
             $log = "$call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}";
 
             // only do this stuff on new orders
-            if ($call === 'addStoreOrder') {
-
+            if ($new_order) {
                 // apply a campaign id if we have one.
                 if (!empty($this->campaign_id)) {
                     $log .= ' :: campaign id ' . $this->campaign_id;
@@ -141,7 +149,6 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                     $log .= ' :: landing site ' . $this->landing_site;
                     $order->setLandingSite($this->landing_site);
                 }
-
             }
 
             // update or create
@@ -158,48 +165,63 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
             mailchimp_log('order_submit.success', $log);
 
+            // if the customer has a flag to double opt in - we need to push this data over to MailChimp as pending
+            // before the order is submitted.
+            if ($order->getCustomer()->requiresDoubleOptIn()) {
+                try {
+                    $list_id = mailchimp_get_list_id();
+                    $merge_vars = $order->getCustomer()->getMergeVars();
+                    $email = $order->getCustomer()->getEmailAddress();
+
+                    try {
+                        $member = $api->member($list_id, $email);
+                        if ($member['status'] === 'transactional') {
+                            $api->update($list_id, $email, 'pending', $merge_vars);
+                            mailchimp_tell_system_about_user_submit($email, mailchimp_get_subscriber_status_options('pending'), 60);
+                            mailchimp_log('double_opt_in', "Updated {$email} Using Double Opt In - previous status was '{$member['status']}'", $merge_vars);
+                        }
+                    } catch (\Exception $e) {
+                        // if the error code is 404 - need to subscribe them becausce it means they were not on the list.
+                        if ($e->getCode() == 404) {
+                            $api->subscribe($list_id, $email, false, $merge_vars);
+                            mailchimp_tell_system_about_user_submit($email, mailchimp_get_subscriber_status_options(false), 60);
+                            mailchimp_log('double_opt_in', "Subscribed {$email} Using Double Opt In", $merge_vars);
+                        } else {
+                            mailchimp_error('double_opt_in.update', $e->getMessage());
+                        }
+                    }
+                } catch (\Exception $e) {
+                    mailchimp_error('double_opt_in.create', $e->getMessage());
+                }
+            }
+
             return $api_response;
-
         } catch (\Exception $e) {
-
             $message = strtolower($e->getMessage());
-
             mailchimp_error('order_submit.tracing_error', $e);
-
             if (!isset($order)) {
                 // transform the order
                 $order = $job->transform(get_post($this->order_id));
                 $this->cart_session_id = $order->getCustomer()->getId();
             }
-
             // this can happen when a customer changes their email.
             if (isset($order) && strpos($message, 'not be changed')) {
-
                 try {
-
                     mailchimp_log('order_submit.deleting_customer', "#{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}");
-
                     // delete the customer before adding it again.
                     $api->deleteCustomer($store_id, $order->getCustomer()->getId());
-
                     // update or create
                     $api_response = $api->$call($store_id, $order, false);
-
                     $log = "Deleted Customer :: $call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}";
-
                     if (!empty($job->campaign_id)) {
                         $log .= ' :: campaign id '.$job->campaign_id;
                     }
-
                     mailchimp_log('order_submit.success', $log);
-
                     // if we're adding a new order and the session id is here, we need to delete the AC cart record.
                     if (!empty($this->cart_session_id)) {
                         $api->deleteCartByID($store_id, $this->cart_session_id);
                     }
-
                     return $api_response;
-
                 } catch (\Exception $e) {
                     mailchimp_error('order_submit.error', mailchimp_error_trace($e, 'deleting-customer-re-add :: #'.$this->order_id));
                 }

@@ -63,8 +63,14 @@ if ( ! class_exists( 'WP_Http_Worker' ) ) {
          */
 		public function handle()
         {
+            // if we have the queue runner disabled, process 1 and exit.
+            if (mailchimp_queue_is_disabled()) {
+                $this->process_next_job();
+                wp_die();
+            }
+
+            // Worker already running, die
             if ( $this->is_worker_running() ) {
-                // Worker already running, die
                 wp_die();
             }
 

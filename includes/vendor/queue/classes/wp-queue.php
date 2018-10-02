@@ -47,6 +47,11 @@ if ( ! class_exists( 'WP_Queue' ) ) {
 
 			$id = $wpdb->insert( $this->table, $data );
 
+            if (!$id) {
+                $name = get_class($job);
+                mailchimp_error("queue.failure", "Could not queue job {$name}, your database tables might not be properly set!");
+            }
+
 			return $this;
 		}
 

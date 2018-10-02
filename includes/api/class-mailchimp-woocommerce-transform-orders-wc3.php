@@ -113,8 +113,10 @@ class MailChimp_WooCommerce_Transform_Orders
         // set the total
         $order->setOrderTotal($woo->get_total());
 
-        // set the order URL
-        $order->setOrderURL($woo->get_view_order_url());
+        // set the order URL if it's valid.
+        if (($view_order_url = $woo->get_view_order_url()) && wc_is_valid_url($view_order_url)) {
+            $order->setOrderURL($woo->get_view_order_url());
+        }
 
         // if we have any tax
         $order->setTaxTotal($woo->get_total_tax());
@@ -205,14 +207,34 @@ class MailChimp_WooCommerce_Transform_Orders
         $subscribed_on_order = $subscriber_meta === '' ? false : (bool) $subscriber_meta;
         $customer->setOptInStatus($subscribed_on_order);
 
+        $doi = mailchimp_list_has_double_optin();
+        $status_if_new = $doi ? false : $subscribed_on_order;
+
+        $customer->setOptInStatus($status_if_new);
+
         // if they didn't subscribe on the order, we need to check to make sure they're not already a subscriber
         // if they are, we just need to make sure that we don't unsubscribe them just because they unchecked this box.
-        if (!$subscribed_on_order) {
+        if ($doi || !$subscribed_on_order) {
             try {
                 $subscriber = mailchimp_get_api()->member(mailchimp_get_list_id(), $customer->getEmailAddress());
-                $status = !in_array($subscriber['status'], array('unsubscribed', 'transactional'));
-                $customer->setOptInStatus($status);
-            } catch (\Exception $e) {}
+
+                if ($subscriber['status'] === 'transactional') {
+                    $customer->setOptInStatus(false);
+                    $customer->requireDoubleOptIn(true);
+                    return $customer;
+                } elseif ($subscriber['status'] === 'pending') {
+                    $customer->setOptInStatus(false);
+                    return $customer;
+                }
+
+                $customer->setOptInStatus($subscriber['status'] === 'subscribed');
+            } catch (\Exception $e) {
+                // if double opt in is enabled - we need to make a request now that subscribes the customer as pending
+                // so that the double opt in will actually fire.
+                if ($doi && (!isset($subscriber) || empty($subscriber))) {
+                    $customer->requireDoubleOptIn(true);
+                }
+            }
         }
 
         return $customer;
@@ -402,7 +424,7 @@ class MailChimp_WooCommerce_Transform_Orders
             ),
             // Order fulfilled and complete – requires no further action
             'completed'     => (object) array(
-                'financial' => 'fulfilled',
+                'financial' => 'paid',
                 'fulfillment' => 'fulfilled'
             ),
             // Cancelled by an admin or the customer – no further action required

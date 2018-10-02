@@ -47,12 +47,8 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
 
 <h2 style="padding-top: 1em;">Sync Information</h2>
 
-<?php if ($sync_started_at): ?>
-    <p><strong>Started:</strong> <i><?php echo $sync_started_at->format('D, M j, Y g:i A'); ?></i></p>
-<?php endif; ?>
-
-<?php if ($sync_completed_at): ?>
-    <p><strong>Finished:</strong> <i><?php echo $sync_completed_at->format('D, M j, Y g:i A'); ?></i></p>
+<?php if ($sync_started_at && !$sync_completed_at): ?>
+    <p><strong>Initial Sync:</strong> <i>In Progress</i></p>
 <?php endif; ?>
 
 <?php if ($last_updated_time): ?>

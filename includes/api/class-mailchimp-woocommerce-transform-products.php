@@ -66,7 +66,9 @@ class MailChimp_WooCommerce_Transform_Products
 
         foreach ($variants as $variant) {
 
-            $product_variant = $this->variant($is_variant, $variant, $woo->get_title());
+            $product_variant = $this->variant($variant, $woo->get_title());
+
+            if (!$product_variant) continue;
 
             $product_variant_title = $product_variant->getTitle();
 
@@ -87,12 +89,11 @@ class MailChimp_WooCommerce_Transform_Products
     }
 
     /**
-     * @param $is_variant
      * @param WP_Post $post
      * @param string $fallback_title
      * @return MailChimp_WooCommerce_ProductVariation
      */
-    public function variant($is_variant, $post, $fallback_title = null)
+    public function variant($post, $fallback_title = null)
     {
         if ($post instanceof WC_Product || $post instanceof WC_Product_Variation) {
             $woo = $post;
@@ -105,6 +106,10 @@ class MailChimp_WooCommerce_Transform_Products
         }
 
         $variant = new MailChimp_WooCommerce_ProductVariation();
+
+        if (!$woo) {
+            return $variant;
+        }
 
         $variant->setId($woo->get_id());
         $variant->setUrl($woo->get_permalink());
@@ -273,7 +278,7 @@ class MailChimp_WooCommerce_Transform_Products
         $product->setDescription($post->post_content);
         $product->setImageUrl($this->getProductImage($post));
 
-        $variant = $this->variant(false, $post, $post->post_name);
+        $variant = $this->variant($post, $post->post_name);
 
         if (!$variant->getImageUrl()) {
             $variant->setImageUrl($product->getImageUrl());

@@ -19,6 +19,7 @@ class MailChimp_WooCommerce_Customer
     protected $orders_count = null;
     protected $total_spent = null;
     protected $address;
+    protected $requires_double_optin = false;
 
     /**
      * @return array
@@ -209,6 +210,37 @@ class MailChimp_WooCommerce_Customer
         $this->address = $address;
 
         return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function requiresDoubleOptIn()
+    {
+        return $this->requires_double_optin;
+    }
+
+    /**
+     * @param $bool
+     * @return $this
+     */
+    public function requireDoubleOptIn($bool)
+    {
+        $this->requires_double_optin = (bool) $bool;
+
+        if ($this->requires_double_optin) {
+            $this->opt_in_status = false;
+        }
+
+        return $this;
+    }
+
+    public function getMergeVars()
+    {
+        return array(
+            'FNAME' => trim($this->getFirstName()),
+            'LNAME' => trim($this->getLastName()),
+        );
     }
 
     /**

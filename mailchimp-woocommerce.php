@@ -13,11 +13,11 @@
  * @package           MailChimp_WooCommerce
  *
  * @wordpress-plugin
- * Plugin Name:       MailChimp for WooCommerce
+ * Plugin Name:       Mailchimp for WooCommerce
  * Plugin URI:        https://mailchimp.com/connect-your-store/
- * Description:       MailChimp - WooCommerce plugin
- * Version:           2.1.9
- * Author:            MailChimp
+ * Description:       Mailchimp - WooCommerce plugin
+ * Version:           2.1.10
+ * Author:            Mailchimp
  * Author URI:        https://mailchimp.com
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt

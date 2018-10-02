@@ -195,6 +195,8 @@ class MailChimp_WooCommerce_MailChimpApi
             unset($data['interests']);
         }
 
+        mailchimp_debug('api.subscribe', "Subscribing {$email}", $data);
+
         return $this->post("lists/$list_id/members", $data);
     }
 
@@ -212,9 +214,19 @@ class MailChimp_WooCommerce_MailChimpApi
     {
         $hash = md5(strtolower(trim($email)));
 
+        if ($subscribed === true) {
+            $status = 'subscribed';
+        } elseif ($subscribed === false) {
+            $status = 'unsubscribed';
+        } elseif ($subscribed === null) {
+            $status = 'cleaned';
+        } else {
+            $status = $subscribed;
+        }
+
         $data = array(
             'email_address' => $email,
-            'status' => ($subscribed === null ? 'cleaned' : ($subscribed === true ? 'subscribed' : 'unsubscribed')),
+            'status' => $status,
             'merge_fields' => $merge_fields,
             'interests' => $list_interests,
         );
@@ -227,6 +239,8 @@ class MailChimp_WooCommerce_MailChimpApi
         if (empty($data['interests'])) {
             unset($data['interests']);
         }
+
+        mailchimp_debug('api.update_member', "Updating {$email}", $data);
 
         return $this->patch("lists/$list_id/members/$hash", $data);
     }
@@ -246,10 +260,24 @@ class MailChimp_WooCommerce_MailChimpApi
     {
         $hash = md5(strtolower(trim($email)));
 
+        if ($subscribed === true) {
+            $status = 'subscribed';
+            $status_if_new = 'subscribed';
+        } elseif ($subscribed === false) {
+            $status = 'unsubscribed';
+            $status_if_new = 'pending';
+        } elseif ($subscribed === null) {
+            $status = 'cleaned';
+            $status_if_new = 'subscribed';
+        } else {
+            $status = $subscribed;
+            $status_if_new = 'pending';
+        }
+
         $data = array(
             'email_address' => $email,
-            'status' => ($subscribed === null ? 'cleaned' : ($subscribed === true ? 'subscribed' : 'unsubscribed')),
-            'status_if_new' => ($subscribed === true ? 'subscribed' : 'pending'),
+            'status' => $status,
+            'status_if_new' => $status_if_new,
             'merge_fields' => $merge_fields,
             'interests' => $list_interests,
         );
@@ -261,6 +289,8 @@ class MailChimp_WooCommerce_MailChimpApi
         if (empty($data['interests'])) {
             unset($data['interests']);
         }
+
+        mailchimp_debug('api.update_or_create', "Update Or Create {$email}", $data);
 
         return $this->put("lists/$list_id/members/$hash", $data);
     }
@@ -656,10 +686,14 @@ class MailChimp_WooCommerce_MailChimpApi
     {
         try {
             $email = $cart->getCustomer()->getEmailAddress();
+
             if (mailchimp_email_is_privacy_protected($email) || mailchimp_email_is_amazon($email)) {
                 return false;
             }
-            $data = $this->post("ecommerce/stores/$store_id/carts", $cart->toArray());
+
+            mailchimp_debug('api.addCart', "Adding Cart :: {$email}", $data = $cart->toArray());
+
+            $data = $this->post("ecommerce/stores/$store_id/carts", $data);
             $cart = new MailChimp_WooCommerce_Cart();
             return $cart->setStoreID($store_id)->fromArray($data);
         } catch (MailChimp_WooCommerce_Error $e) {
@@ -684,10 +718,14 @@ class MailChimp_WooCommerce_MailChimpApi
     {
         try {
             $email = $cart->getCustomer()->getEmailAddress();
+
             if (mailchimp_email_is_privacy_protected($email) || mailchimp_email_is_amazon($email)) {
                 return false;
             }
-            $data = $this->patch("ecommerce/stores/$store_id/carts/{$cart->getId()}", $cart->toArrayForUpdate());
+
+            mailchimp_debug('api.updateCart', "Updating Cart :: {$email}", $data = $cart->toArrayForUpdate());
+
+            $data = $this->patch("ecommerce/stores/$store_id/carts/{$cart->getId()}", $data);
             $cart = new MailChimp_WooCommerce_Cart();
             return $cart->setStoreID($store_id)->fromArray($data);
         } catch (MailChimp_WooCommerce_Error $e) {

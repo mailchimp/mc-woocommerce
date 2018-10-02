@@ -86,7 +86,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
         // queue up the single order to be processed.
         $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $campaign_id, $landing_site);
-        wp_queue($handler, 60);
+        mailchimp_handle_or_queue($handler, 60);
     }
 
     /**
@@ -106,7 +106,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, null, null);
         $handler->is_update = true;
         $handler->is_admin_save = $is_admin;
-        wp_queue($handler, 90);
+        mailchimp_handle_or_queue($handler, 90);
     }
 
     /**
@@ -118,7 +118,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
         $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, null, null);
         $handler->partially_refunded = true;
-        wp_queue($handler);
+        mailchimp_handle_or_queue($handler);
     }
 
     /**
@@ -184,7 +184,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
                 // fire up the job handler
                 $handler = new MailChimp_WooCommerce_Cart_Update($uid, $user_email, $campaign, $this->cart);
-                wp_queue($handler);
+                mailchimp_handle_or_queue($handler);
             }
 
             return !is_null($updated) ? $updated : true;
@@ -210,7 +210,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         if (!mailchimp_is_configured()) return;
 
         if ($coupon instanceof WC_Coupon) {
-            wp_queue(new MailChimp_WooCommerce_SingleCoupon($post_id));
+            mailchimp_handle_or_queue(new MailChimp_WooCommerce_SingleCoupon($post_id));
         }
     }
 
@@ -233,9 +233,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     {
         if (!mailchimp_is_configured()) return;
 
-        if ($post->post_status !== 'auto-draft') {
+        // don't handle any of these statuses because they're not ready for the show
+        if (!in_array($post->post_status, array('trash', 'auto-draft', 'draft', 'pending'))) {
             if ('product' == $post->post_type) {
-                wp_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
+                mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
             } elseif ('shop_order' == $post->post_type) {
                 $this->handleOrderStatusChanged($post_id, is_admin());
             }
@@ -251,8 +252,20 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
         switch (get_post_type($post_id)) {
             case 'shop_coupon':
-                mailchimp_get_api()->deletePromoRule(mailchimp_get_store_id(), $post_id);
-                mailchimp_log('promo_code.deleted', "deleted promo code {$post_id}");
+                try {
+                    mailchimp_get_api()->deletePromoRule(mailchimp_get_store_id(), $post_id);
+                    mailchimp_log('promo_code.deleted', "deleted promo code {$post_id}");
+                } catch (\Exception $e) {
+                    mailchimp_error('delete promo code', $e->getMessage());
+                }
+                break;
+            case 'product':
+                try {
+                    mailchimp_get_api()->deleteStoreProduct(mailchimp_get_store_id(), $post_id);
+                    mailchimp_log('product.deleted', "deleted product {$post_id}");
+                } catch (\Exception $e) {
+                    mailchimp_error('delete product', $e->getMessage());
+                }
                 break;
         }
     }
@@ -262,11 +275,20 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function handlePostRestored($post_id)
     {
-        if (!mailchimp_is_configured()) return;
+        if (!mailchimp_is_configured() || !($post = get_post($post_id))) return;
+
+        // don't handle any of these statuses because they're not ready for the show
+        if (in_array($post->post_status, array('trash', 'auto-draft', 'draft', 'pending'))) {
+            return;
+        }
 
         switch(get_post_type($post_id)) {
             case 'shop_coupon':
                 return $this->handleCouponRestored($post_id);
+                break;
+
+            case 'product':
+                mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
                 break;
         }
     }
@@ -285,7 +307,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         update_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', $subscribed);
 
         if ($subscribed) {
-            wp_queue(new MailChimp_WooCommerce_User_Submit($user_id, $subscribed));
+            mailchimp_handle_or_queue(new MailChimp_WooCommerce_User_Submit($user_id, $subscribed));
         }
     }
 
@@ -304,7 +326,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         if ($is_subscribed === '' || $is_subscribed === null) return;
 
         // only send this update if the user actually has a boolean value.
-        wp_queue(new MailChimp_WooCommerce_User_Submit($user_id, (bool) $is_subscribed, $old_user_data));
+        mailchimp_handle_or_queue(new MailChimp_WooCommerce_User_Submit($user_id, (bool) $is_subscribed, $old_user_data));
     }
 
     /**
@@ -330,7 +352,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         if (!$this->isAdmin()) return false;
         $this->removePointers(false, true);
         // since the products are all good, let's sync up the orders now.
-        wp_queue(new MailChimp_WooCommerce_Process_Orders());
+        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Process_Orders());
         return true;
     }
 

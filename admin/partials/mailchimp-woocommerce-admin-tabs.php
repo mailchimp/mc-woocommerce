@@ -15,20 +15,25 @@ $show_sync_tab = isset($_GET['resync']) ? $_GET['resync'] === '1' : false;;
 $show_campaign_defaults = true;
 $has_valid_api_key = false;
 $allow_new_list = true;
-
 $clicked_sync_button = $is_mailchimp_post&& $active_tab == 'sync';
+$has_api_error = isset($options['api_ping_error']) && !empty($options['api_ping_error']) ? $options['api_ping_error'] : null;
 
-if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
-    $has_valid_api_key = true;
-    // if we don't have a valid api key we need to redirect back to the 'api_key' tab.
-    if (($mailchimp_lists = $handler->getMailChimpLists()) && is_array($mailchimp_lists)) {
-        $show_campaign_defaults = false;
-        $allow_new_list = false;
-    }
-
-    // only display this button if the data is not syncing and we have a valid api key
-    if ((bool) $this->getData('sync.started_at', false)) {
-        $show_sync_tab = true;
+if (isset($options['mailchimp_api_key'])) {
+    try {
+        if ($handler->hasValidApiKey(null, true)) {
+            $has_valid_api_key = true;
+            // if we don't have a valid api key we need to redirect back to the 'api_key' tab.
+            if (($mailchimp_lists = $handler->getMailChimpLists()) && is_array($mailchimp_lists)) {
+                $show_campaign_defaults = false;
+                $allow_new_list = false;
+            }
+            // only display this button if the data is not syncing and we have a valid api key
+            if ((bool) $this->getData('sync.started_at', false)) {
+                $show_sync_tab = true;
+            }
+        }
+    } catch (\Exception $e) {
+        $has_api_error = $e->getMessage().' on '.$e->getLine().' in '.$e->getFile();
     }
 }
 ?>
@@ -62,14 +67,20 @@ if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
 
 <?php if (!defined('PHP_VERSION_ID') || (PHP_VERSION_ID < 70000)): ?>
     <div data-dismissible="notice-php-version" class="error notice notice-error is-dismissible">
-        <p><?php _e('MailChimp says: Please upgrade your PHP version to a minimum of 7.0', 'mailchimp-woocommerce'); ?></p>
+        <p><?php _e('Mailchimp says: Please upgrade your PHP version to a minimum of 7.0', 'mailchimp-woocommerce'); ?></p>
+    </div>
+<?php endif; ?>
+
+<?php if (!empty($has_api_error)): ?>
+    <div data-dismissible="notice-api-error" class="error notice notice-error is-dismissible">
+        <p><?php _e("Mailchimp says: API Request Error - ".$has_api_error, 'mailchimp-woocommerce'); ?></p>
     </div>
 <?php endif; ?>
 
 <!-- Create a header in the default WordPress 'wrap' container -->
 <div class="wrap">
     <div id="icon-themes" class="icon32"></div>
-    <h2>MailChimp Settings</h2>
+    <h2>Mailchimp Settings</h2>
 
     <h2 class="nav-tab-wrapper">
         <a href="?page=mailchimp-woocommerce&tab=api_key" class="nav-tab <?php echo $active_tab == 'api_key' ? 'nav-tab-active' : ''; ?>">Connect</a>
@@ -135,9 +146,9 @@ if (isset($options['mailchimp_api_key']) && $handler->hasValidApiKey()) {
         <ul>
             <li>Have a larger store or having issues syncing? Consider using <a href="https://github.com/mailchimp/mc-woocommerce/issues/158" target="_blank">WP-CLI</a>.</li>
             <li>Order and customer information will not sync if they contain an Amazon or generic email address.</li>
-            <li>Need help to connect your store? Visit the MailChimp <a href="http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce/" target="_blank">Knowledge Base</a>.</li>
+            <li>Need help to connect your store? Visit the Mailchimp <a href="http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce/" target="_blank">Knowledge Base</a>.</li>
             <li>Want to tell us how we're doing? <a href="https://wordpress.org/support/plugin/mailchimp-for-woocommerce/reviews/" target="_blank">Leave a review on Wordpress.org</a>.</li>
-            <li>By using this plugin, MailChimp will process customer information in accordance with their <a href="https://mailchimp.com/legal/privacy/ " target="_blank">Privacy Policy</a>.</li>
+            <li>By using this plugin, Mailchimp will process customer information in accordance with their <a href="https://mailchimp.com/legal/privacy/ " target="_blank">Privacy Policy</a>.</li>
         </ul>
     <?php endif; ?>
 

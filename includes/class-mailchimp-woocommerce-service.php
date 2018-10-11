@@ -127,7 +127,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     public function clearCartData()
     {
         if ($user_email = $this->getCurrentUserEmail()) {
-            $this->deleteCart($user_email);
+            $this->deleteCart(mailchimp_hash_trim_lower($user_email));
         }
     }
 

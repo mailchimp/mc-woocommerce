@@ -34,6 +34,7 @@ spl_autoload_register(function($class) {
 
         // includes/api/errors
         'MailChimp_WooCommerce_Error' => 'includes/api/errors/class-mailchimp-error.php',
+        'MailChimp_WooCommerce_RateLimitError' => 'includes/api/errors/class-mailchimp-rate-limit-error.php',
         'MailChimp_WooCommerce_ServerError' => 'includes/api/errors/class-mailchimp-server-error.php',
 
         // includes/api/helpers
@@ -769,7 +770,7 @@ function mailchimp_set_transient($key, $value, $seconds = 60) {
     return set_site_transient("mailchimp-woocommerce.{$key}", array(
         'value' => $value,
         'expires' => time()+$seconds,
-    ));
+    ), $seconds);
 }
 
 /**

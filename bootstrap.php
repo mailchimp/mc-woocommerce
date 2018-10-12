@@ -289,14 +289,19 @@ function mailchimp_get_store_id() {
     return $store_id;
 }
 
-
 /**
  * @return bool|MailChimp_WooCommerce_MailChimpApi
  */
 function mailchimp_get_api() {
-    if (($key = mailchimp_get_api_key())) {
-        return new MailChimp_WooCommerce_MailChimpApi($key);
+
+    if (($api = MailChimp_WooCommerce_MailChimpApi::getInstance())) {
+        return $api;
     }
+
+    if (($key = mailchimp_get_api_key())) {
+        return MailChimp_WooCommerce_MailChimpApi::constructInstance($key);
+    }
+
     return false;
 }
 
@@ -608,37 +613,77 @@ function mailchimp_update_connected_site_script() {
 
     // if the api is configured
     if ($store_id && ($api = mailchimp_get_api())) {
-
         // if we have a store
         if (($store = $api->getStore($store_id))) {
-
             // handle the coupon sync if we don't have a flag that says otherwise.
             $job = new MailChimp_WooCommerce_Process_Coupons();
             if ($job->getData('sync.coupons.completed_at', false) === false) {
                 wp_queue($job);
             }
-
-            // see if we have a connected site script url/fragment
-            $url = $store->getConnectedSiteScriptUrl();
-            $fragment = $store->getConnectedSiteScriptFragment();
-
-            // if it's not empty we need to set the values
-            if ($url && $fragment) {
-
-                // update the options for script_url and script_fragment
-                update_option('mailchimp-woocommerce-script_url', $url);
-                update_option('mailchimp-woocommerce-script_fragment', $fragment);
-
-                // check to see if the site is connected
-                if (!$api->checkConnectedSite($store_id)) {
-
-                    // if it's not, connect it now.
-                    $api->connectSite($store_id);
-                }
-
-                return true;
-            }
+            return mailchimpi_refresh_connected_site_script($store);
         }
+    }
+    return false;
+}
+
+/**
+ * @return bool|DateTime
+ */
+function mailchimp_get_updated_connected_site_since_as_date_string() {
+    $updated_at = get_option('mailchimp-woocommerce-script_updated_at', false);
+    if (empty($updated_at)) return '';
+    try {
+        $date = new \DateTime();
+        $date->setTimestamp($updated_at);
+        return $date->format('D, M j, Y g:i A');
+    } catch (\Exception $e) {
+        return '';
+    }
+}
+
+/**
+ * @return int
+ */
+function mailchimp_get_updated_connected_site_since() {
+    $updated_at = get_option('mailchimp-woocommerce-script_updated_at', false);
+    return empty($updated_at) ? 1000000 : (time() - $updated_at);
+}
+
+/**
+ * @param int $seconds
+ * @return bool
+ */
+function mailchimp_should_update_connected_site_script($seconds = 600) {
+    return mailchimp_get_updated_connected_site_since() >= $seconds;
+}
+
+/**
+ * @param MailChimp_WooCommerce_Store $store
+ * @return bool
+ */
+function mailchimpi_refresh_connected_site_script(MailChimp_WooCommerce_Store $store) {
+
+    $api = mailchimp_get_api();
+
+    $url = $store->getConnectedSiteScriptUrl();
+    $fragment = $store->getConnectedSiteScriptFragment();
+
+    // if it's not empty we need to set the values
+    if ($url && $fragment) {
+
+        // update the options for script_url and script_fragment
+        update_option('mailchimp-woocommerce-script_url', $url);
+        update_option('mailchimp-woocommerce-script_fragment', $fragment);
+        update_option('mailchimp-woocommerce-script_updated_at', time());
+
+        // check to see if the site is connected
+        if (!$api->checkConnectedSite($store->getId())) {
+
+            // if it's not, connect it now.
+            $api->connectSite($store->getId());
+        }
+
+        return true;
     }
     return false;
 }

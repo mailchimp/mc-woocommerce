@@ -10,6 +10,25 @@ class MailChimp_WooCommerce_MailChimpApi
     protected $api_key = null;
     protected $auth_type = 'key';
 
+    protected static $instance = null;
+
+    /**
+     * @return null
+     */
+    public static function getInstance()
+    {
+        return static::$instance;
+    }
+
+    /**
+     * @param $api_key
+     * @return MailChimp_WooCommerce_MailChimpApi
+     */
+    public static function constructInstance($api_key)
+    {
+        return static::$instance = new MailChimp_WooCommerce_MailChimpApi($api_key);
+    }
+
     /**
      * MailChimpService constructor.
      * @param null $api_key

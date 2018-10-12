@@ -718,7 +718,7 @@ function mailchimp_email_is_privacy_protected($email) {
  * @return bool
  */
 function mailchimp_email_is_amazon($email) {
-    return mailchimp_string_contains($email, '@marketplace.amazon.com');
+    return mailchimp_string_contains($email, '@marketplace.amazon.');
 }
 
 /**

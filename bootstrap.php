@@ -658,6 +658,20 @@ function mailchimp_should_update_connected_site_script($seconds = 600) {
 }
 
 /**
+ *
+ */
+function mailchimp_update_connected_site_script_from_cdn() {
+    if (mailchimp_is_configured() && mailchimp_should_update_connected_site_script() && ($store_id = mailchimp_get_store_id())) {
+        try {
+            // pull the store, refresh the connected site url
+            mailchimpi_refresh_connected_site_script(mailchimp_get_api()->getStore($store_id));
+        } catch (\Exception $e) {
+            mailchimp_error("admin.update_connected_site_script", $e->getMessage());
+        }
+    }
+}
+
+/**
  * @param MailChimp_WooCommerce_Store $store
  * @return bool
  */

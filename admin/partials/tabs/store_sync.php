@@ -57,7 +57,6 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
 
 <p><strong>Account Connected:</strong> <?php echo $account_name; ?></p>
 <p><strong>List Connected:</strong> <?php echo $mailchimp_list_name; ?></p>
-<p><strong>Connected Site Script Updated:</strong> <?php echo mailchimp_get_updated_connected_site_since_as_date_string(); ?></p>
 <p><strong>Products Synced:</strong> <?php echo $mailchimp_total_products; ?></p>
 <p><strong>Orders Synced:</strong> <?php echo $mailchimp_total_orders; ?></p>
 

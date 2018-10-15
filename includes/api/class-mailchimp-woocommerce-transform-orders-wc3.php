@@ -220,7 +220,10 @@ class MailChimp_WooCommerce_Transform_Orders
 
                 if ($subscriber['status'] === 'transactional') {
                     $customer->setOptInStatus(false);
-                    $customer->requireDoubleOptIn(true);
+                    // when the list requires a double opt in - flag it here.
+                    if ($doi) {
+                        $customer->requireDoubleOptIn(true);
+                    }
                     return $customer;
                 } elseif ($subscriber['status'] === 'pending') {
                     $customer->setOptInStatus(false);

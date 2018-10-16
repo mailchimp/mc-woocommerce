@@ -235,7 +235,7 @@ function mailchimp_list_has_double_optin($force = false) {
     if (!mailchimp_is_configured()) {
         return false;
     }
-
+    
     $key = 'mailchimp_double_optin';
 
     $double_optin = get_site_transient($key);

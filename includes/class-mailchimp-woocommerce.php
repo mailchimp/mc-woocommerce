@@ -132,6 +132,29 @@ class MailChimp_WooCommerce
 
         $this->activateMailChimpNewsletter();
         $this->activateMailChimpService();
+        $this->applyQueryStringOverrides();
+    }
+
+    /**
+     *
+     */
+    private function applyQueryStringOverrides()
+    {
+        // if we need to refresh the double opt in for any reason - just do it here.
+        if ($this->queryStringEquals('mc_doi_refresh', '1')) {
+            $enabled_doi = mailchimp_list_has_double_optin(true);
+            mailchimp_log('mc.utils.doi_refresh', ($enabled_doi ? 'turned ON' : 'turned OFF'));
+        }
+    }
+
+    /**
+     * @param $key
+     * @param string $value
+     * @return bool
+     */
+    private function queryStringEquals($key, $value = '1')
+    {
+        return isset($_GET[$key]) && $_GET[$key] === $value;
     }
 
     /**

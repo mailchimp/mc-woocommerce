@@ -4,7 +4,7 @@ Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.3
 Tested up to: 4.9.8
-Stable tag: 2.1.10
+Stable tag: 2.1.11
 Requires PHP: 5.6
 WC tested up to: 3.4.5
 License: GPLv2 or later
@@ -61,6 +61,8 @@ The Mailchimp for WooCommerce supports Wordpress Multi Sites and below are a few
 - Deleting removes the connection between Mailchimp and WooCommerce, and uninstalls the plugin from your site.
 Refer to the Wordpress Codex for more information about [Multisite Network Administration](https://codex.wordpress.org/Multisite_Network_Administration)
 == Changelog ==
+= 2.1.11 =
+* fix double opt in sending on transactional customers
 = 2.1.10 =
 * skip product when no variant can be loaded
 * better validation for the view order url

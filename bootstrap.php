@@ -88,7 +88,7 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production',
-        'version' => '2.1.10',
+        'version' => '2.1.12',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => class_exists('WC') ? WC()->version : null,
@@ -235,7 +235,7 @@ function mailchimp_list_has_double_optin($force = false) {
     if (!mailchimp_is_configured()) {
         return false;
     }
-    
+
     $key = 'mailchimp_double_optin';
 
     $double_optin = get_site_transient($key);
@@ -789,9 +789,10 @@ function mailchimp_hash_trim_lower($str) {
 }
 
 /**
+ * @param bool $block
  * @return array|WP_Error
  */
-function mailchimp_call_http_worker_manually() {
+function mailchimp_call_http_worker_manually($block = false) {
     $action = 'http_worker';
     $query_args = apply_filters('http_worker_query_args', array(
         'action' => $action,
@@ -800,7 +801,7 @@ function mailchimp_call_http_worker_manually() {
     $query_url = apply_filters('http_worker_query_url', admin_url('admin-ajax.php'));
     $post_args = apply_filters('http_worker_post_args', array(
         'timeout'   => 0.01,
-        'blocking'  => false,
+        'blocking'  => $block,
         'cookies'   => $_COOKIE,
         'sslverify' => apply_filters('https_local_ssl_verify', false),
     ));

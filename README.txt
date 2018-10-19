@@ -61,6 +61,10 @@ The MailChimp for WooCommerce supports Wordpress Multi Sites and below are a few
 - Deleting removes the connection between Mailchimp and WooCommerce, and uninstalls the plugin from your site.
 Refer to the Wordpress Codex for more information about [Multisite Network Administration](https://codex.wordpress.org/Multisite_Network_Administration)
 == Changelog ==
+= 2.1.12 =
+* working on rate limit scenarios
+= 2.1.11 =
+* fix double opt in sending on transactional customers
 = 2.1.10 =
 * skip product when no variant can be loaded
 * better validation for the view order url

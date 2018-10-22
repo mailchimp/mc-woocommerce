@@ -800,13 +800,37 @@ function mailchimp_call_http_worker_manually($block = false) {
     ));
     $query_url = apply_filters('http_worker_query_url', admin_url('admin-ajax.php'));
     $post_args = apply_filters('http_worker_post_args', array(
-        'timeout'   => 0.01,
+        'timeout'   => $block ? 60 : 0.01,
         'blocking'  => $block,
         'cookies'   => $_COOKIE,
         'sslverify' => apply_filters('https_local_ssl_verify', false),
     ));
     $url = add_query_arg($query_args, $query_url);
     return wp_remote_post(esc_url_raw($url), $post_args);
+}
+
+/**
+ * @return bool|string
+ */
+function mailchimp_woocommerce_check_if_http_worker_fails() {
+    // if the function doesn't exist we can't do anything.
+    if (!function_exists('wp_remote_post')) {
+        mailchimp_set_data('test.can.remote_post', false);
+        mailchimp_set_data('test.can.remote_post.error', 'function "wp_remote_post" does not exist');
+        return 'function "wp_remote_post" does not exist';
+    }
+    // apply a blocking call to make sure we get the response back
+    $response = mailchimp_call_http_worker_manually(true);
+    if (is_wp_error($response)) {
+        // nope, we have problems
+        mailchimp_set_data('test.can.remote_post', false);
+        mailchimp_set_data('test.can.remote_post.error', $response->get_error_message());
+        return $response->get_error_message();
+    }
+    // yep all good.
+    mailchimp_set_data('test.can.remote_post', true);
+    mailchimp_set_data('test.can.remote_post.error', false);
+    return false;
 }
 
 /**

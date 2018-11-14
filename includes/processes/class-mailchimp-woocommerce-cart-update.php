@@ -41,7 +41,22 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
             $this->campaign_id = $campaign_id;
         }
 
+        $this->assignIP();
+    }
+
+    /**
+     * @return null
+     */
+    public function assignIP()
+    {
         $this->ip_address = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null;
+
+        if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $forwarded_address = explode(',',$_SERVER['HTTP_X_FORWARDED_FOR']);
+            $this->ip_address = $forwarded_address[0];
+        }
+
+        return $this->ip_address;
     }
 
     /**

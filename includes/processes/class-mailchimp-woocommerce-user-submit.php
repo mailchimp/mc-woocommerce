@@ -26,11 +26,12 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
     public function __construct($user_id = null, $subscribed = null, $updated_data = null)
     {
         if (!empty($user_id)) {
-            if (static::$handling_for === $this->user_id) {
+            // if we're passing in another user with the same id during the same php process we need to ignore it.
+            if (static::$handling_for === $user_id) {
                 $this->should_ignore = true;
             }
-            $this->user_id = $user_id;
-            static::$handling_for = $this->user_id;
+            // set the user id and the current 'handling_for' to this user id so we don't duplicate jobs.
+            static::$handling_for = $this->user_id = $user_id;
         }
 
         if (is_bool($subscribed)) {

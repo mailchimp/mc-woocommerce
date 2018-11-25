@@ -555,7 +555,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function getWooSession($key, $default = null)
     {
-        if (!function_exists('WC')) return $default;
+        if (!class_exists('WC')) return $default;
 
         if (!($woo = WC()) || empty($woo->session)) {
             return $default;
@@ -570,7 +570,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function setWooSession($key, $value)
     {
-        if (!function_exists('WC')) return $this;
+        if (!class_exists('WC')) return $this;
 
         if (!($woo = WC()) || empty($woo->session)) {
             return $this;
@@ -587,7 +587,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function removeWooSession($key)
     {
-        if (!function_exists('WC')) return $this;
+        if (!class_exists('WC')) return $this;
 
         if (!($woo = WC()) || empty($woo->session)) {
             return $this;

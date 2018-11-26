@@ -49,7 +49,7 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
             $checkbox .= '</p>';
             $checkbox .= '<div class="clear"></div>';
 
-            echo $checkbox;
+            echo apply_filter("mailchimp_checkbox_newsletter_html",$checkbox);
         }
     }
 

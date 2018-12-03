@@ -132,6 +132,15 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
         if (!empty($fn)) $merge_vars['FNAME'] = $fn;
         if (!empty($ln)) $merge_vars['LNAME'] = $ln;
 
+        // allow users to hook into the merge tag submission
+        $merge_vars = apply_filters('mailchimp_sync_user_mergetags', $user, $merge_vars);
+
+        // for whatever reason if this isn't an array we need to skip it.
+        if (!is_array($merge_vars)) {
+            mailchimp_error("custom.merge_tags", "the filter for mailchimp_sync_user_mergetags needs to return an array.");
+            return false;
+        }
+
         // pull the transient key for this job.
         $transient_id = mailchimp_get_transient_email_key($email);
         $status_meta = mailchimp_get_subscriber_status_options($this->subscribed);
@@ -172,19 +181,39 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
                     return false;
                 }
             }
+
+            // if the member is unsubscribed or pending, we really can't do anything here.
             if (isset($member_data['status']) && in_array($member_data['status'], array('unsubscribed', 'pending'))) {
                 mailchimp_log('member.sync', "Skipped Member Sync For {$email} because the current status is {$member_data['status']}", $merge_vars);
                 static::$handling_for = null;
                 return false;
             }
-            // ok let's update this member
-            $api->update($list_id, $email, $status_meta['updated'], $merge_vars);
-            mailchimp_tell_system_about_user_submit($email, $status_meta, 60);
-            mailchimp_log('member.sync', "Updated Member {$email}", array(
-                'previous_status' => isset($member_data['status']) ? $member_data['status'] : 'no status on customer',
-                'status' => $status_meta['updated'],
-                'merge_vars' => $merge_vars
-            ));
+
+            // if the status is not === 'transactional' we can update them to subscribed or pending now.
+            if (isset($member_data['status']) && $member_data['status'] === 'transactional' || $member_data['status'] === 'cleaned') {
+                // ok let's update this member
+                $api->update($list_id, $email, $status_meta['updated'], $merge_vars);
+                mailchimp_tell_system_about_user_submit($email, $status_meta, 60);
+                mailchimp_log('member.sync', "Updated Member {$email}", array(
+                    'previous_status' => $member_data['status'],
+                    'status' => $status_meta['updated'],
+                    'merge_vars' => $merge_vars
+                ));
+                static::$handling_for = null;
+                return true;
+            }
+
+            if (isset($member_data['status'])) {
+                // ok let's update this member
+                $api->update($list_id, $email, $member_data['status'], $merge_vars);
+                mailchimp_tell_system_about_user_submit($email, $status_meta, 60);
+                mailchimp_log('member.sync', "Updated Member {$email} ( merge tags only )", array(
+                    'merge_vars' => $merge_vars
+                ));
+                static::$handling_for = null;
+                return true;
+            }
+
             static::$handling_for = null;
         } catch (MailChimp_WooCommerce_RateLimitError $e) {
             sleep(3);

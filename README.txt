@@ -3,10 +3,10 @@ Contributors: ryanhungate, MailChimp
 Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.3
-Tested up to: 4.9.8
-Stable tag: 2.1.10
+Tested up to: 5.0
+Stable tag: 2.1.12
 Requires PHP: 7.0
-WC tested up to: 3.5.0
+WC tested up to: 3.5.2 
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your MailChimp list to track sales, create targeted emails, send abandoned cart emails, and more.
@@ -62,7 +62,15 @@ The MailChimp for WooCommerce supports Wordpress Multi Sites and below are a few
 Refer to the Wordpress Codex for more information about [Multisite Network Administration](https://codex.wordpress.org/Multisite_Network_Administration)
 == Changelog ==
 = 2.1.12 =
-* working on rate limit scenarios
+* adds error handling for blocked admin-ajax.php files
+* adds support for customer merge variables
+* removes global variable overwrite of REMOTE_ADDR
+* fixes signup form not adding customers to Mailchimp
+* support for rate limiting
+* PHP 7.0 requirement messaging
+* support for WooCommerce 3.5.0
+* ignores amazon marketplace addresses
+* fixes cart entries never being removed
 = 2.1.11 =
 * fix double opt in sending on transactional customers
 = 2.1.10 =

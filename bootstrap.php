@@ -821,11 +821,17 @@ function mailchimp_woocommerce_check_if_http_worker_fails() {
     }
     // apply a blocking call to make sure we get the response back
     $response = mailchimp_call_http_worker_manually(true);
+
     if (is_wp_error($response)) {
         // nope, we have problems
         mailchimp_set_data('test.can.remote_post', false);
         mailchimp_set_data('test.can.remote_post.error', $response->get_error_message());
         return $response->get_error_message();
+    } elseif (is_array($response) && isset($response['http_response']) && ($r = $response['http_response'])){
+        /** @var \WP_HTTP_Requests_Response $r */
+        if ($r->get_status() >= 400) {
+            return 'admin-ajax.php seems to be disabled on this wordpress site. Please enable to sync data.';
+        }
     }
     // yep all good.
     mailchimp_set_data('test.can.remote_post', true);
@@ -979,3 +985,4 @@ function mailchimp_on_all_plugins_loaded() {
         run_mailchimp_woocommerce();
     }
 }
+

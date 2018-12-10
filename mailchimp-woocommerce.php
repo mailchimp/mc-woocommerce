@@ -38,4 +38,3 @@ if (!isset($mailchimp_woocommerce_spl_autoloader) || $mailchimp_woocommerce_spl_
 
 register_activation_hook( __FILE__, 'activate_mailchimp_woocommerce');
 add_action('plugins_loaded', 'mailchimp_on_all_plugins_loaded', 12);
-

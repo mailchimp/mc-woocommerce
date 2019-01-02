@@ -797,6 +797,7 @@ function mailchimp_call_http_worker_manually($block = false) {
     $query_args = apply_filters('http_worker_query_args', array(
         'action' => $action,
         'nonce'  => wp_create_nonce($action),
+        'test' => $block === true ? '1' : '0',
     ));
     $query_url = apply_filters('http_worker_query_url', admin_url('admin-ajax.php'));
     $post_args = apply_filters('http_worker_post_args', array(

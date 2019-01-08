@@ -69,8 +69,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function add_plugin_admin_menu() {
         add_menu_page(
-            'MailChimp - WooCommerce Setup',
-            'MailChimp',
+            'Mailchimp - WooCommerce Setup',
+            'Mailchimp',
             'manage_options',
             $this->plugin_name,
             array($this, 'display_plugin_setup_page'),
@@ -416,7 +416,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
      */
 	protected function addInvalidAddressAlert()
     {
-        add_settings_error('mailchimp_store_settings', '', 'As part of the MailChimp Terms of Use, we require a contact email and a physical mailing address.');
+        add_settings_error('mailchimp_store_settings', '', 'As part of the Mailchimp Terms of Use, we require a contact email and a physical mailing address.');
     }
 
     /**
@@ -424,7 +424,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
      */
     protected function addInvalidPhoneAlert()
     {
-        add_settings_error('mailchimp_store_settings', '', 'As part of the MailChimp Terms of Use, we require a valid phone number for your store.');
+        add_settings_error('mailchimp_store_settings', '', 'As part of the Mailchimp Terms of Use, we require a valid phone number for your store.');
     }
 
     /**
@@ -432,7 +432,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
      */
     protected function addInvalidStoreNameAlert()
     {
-        add_settings_error('mailchimp_store_settings', '', 'MailChimp for WooCommerce requires a Store Name to connect your store.');
+        add_settings_error('mailchimp_store_settings', '', 'Mailchimp for WooCommerce requires a Store Name to connect your store.');
     }
 
 	/**
@@ -579,7 +579,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	public function hasValidMailChimpList()
 	{
 		if (!$this->hasValidApiKey()) {
-			add_settings_error('mailchimp_api_key', '', 'You must supply your MailChimp API key to pull the lists.');
+			add_settings_error('mailchimp_api_key', '', 'You must supply your Mailchimp API key to pull the lists.');
 			return false;
 		}
 

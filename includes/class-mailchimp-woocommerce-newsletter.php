@@ -90,15 +90,26 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
      */
     protected function handleStatus($order_id = null)
     {
-        $status = isset($_POST['mailchimp_woocommerce_newsletter']) ? (int)$_POST['mailchimp_woocommerce_newsletter'] : 0;
+        $post_key = 'mailchimp_woocommerce_newsletter';
+        $meta_key = 'mailchimp_woocommerce_is_subscribed';
+        $logged_in = is_user_logged_in();
 
-        if ($order_id) {
-            update_post_meta($order_id, 'mailchimp_woocommerce_is_subscribed', $status);
+        // if the post key is available we use it - otherwise we null it out.
+        $status = isset($_POST[$post_key]) ? (int) $_POST[$post_key] : null;
+
+        // if the status is null, we don't do anything
+        if ($status === null) {
+            return false;
         }
 
-        if (is_user_logged_in()) {
-            update_user_meta(get_current_user_id(), 'mailchimp_woocommerce_is_subscribed', $status);
-            
+        // if we passed in an order id, we update it here.
+        if ($order_id) {
+            update_post_meta($order_id, $meta_key, $status);
+        }
+
+        // if the user is logged in, we will update the status correctly.
+        if ($logged_in) {
+            update_user_meta(get_current_user_id(), $meta_key, $status);
             return $status;
         }
 

@@ -127,7 +127,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     public function clearCartData()
     {
         if ($user_email = $this->getCurrentUserEmail()) {
-            $this->deleteCart($user_email);
+            $this->deleteCart(mailchimp_hash_trim_lower($user_email));
         }
     }
 
@@ -377,7 +377,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     public function getCartItems()
     {
         if (!($this->cart = $this->getWooSession('cart', false))) {
-            $this->cart = function_exists('WC') ? false : WC()->cart->get_cart();
+            $this->cart = !function_exists('WC') ? false : WC()->cart->get_cart();
         } else {
             $cart_session = array();
             foreach ( $this->cart as $key => $values ) {

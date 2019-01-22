@@ -220,6 +220,7 @@ class MailChimp_WooCommerce_Transform_Orders
 
                 if ($subscriber['status'] === 'transactional') {
                     $customer->setOptInStatus(false);
+                    // when the list requires a double opt in - flag it here.
                     if ($doi) {
                         $customer->requireDoubleOptIn(true);
                     }
@@ -370,7 +371,8 @@ class MailChimp_WooCommerce_Transform_Orders
 
         foreach ($orders as $order) {
             $order = new WC_Order($order);
-            if ($order->get_status() !== 'cancelled') {
+
+            if ($order->get_status() !== 'cancelled' && $order->is_paid()) {
                 $stats->total += $order->get_total();
                 $stats->count ++;
             }

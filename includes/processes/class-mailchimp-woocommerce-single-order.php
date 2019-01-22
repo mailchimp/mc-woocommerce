@@ -151,8 +151,21 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                 }
             }
 
-            // update or create
-            $api_response = $api->$call($store_id, $order, false);
+            try {
+                // update or create
+                $api_response = $api->$call($store_id, $order, false);
+            } catch (\Exception $e) {
+                // if for whatever reason we get a product not found error, we need to iterate
+                // through the order items, and use a "create mode only" on each product
+                // then re-submit the order once they're in the database again.
+                if (mailchimp_string_contains($e->getMessage(), 'product with the provided ID')) {
+                    $api->handleProductsMissingFromAPI($order);
+                    // make another attempt again to add the order.
+                    $api_response = $api->$call($store_id, $order, false);
+                } else {
+                    throw $e;
+                }
+            }
 
             if (empty($api_response)) {
                 mailchimp_error('order_submit.failure', "$call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()} produced a blank response from MailChimp");

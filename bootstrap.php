@@ -540,7 +540,7 @@ function mailchimp_error($action, $message, $data = array()) {
  * @return string
  */
 function mailchimp_error_trace(\Exception $e, $wrap = "") {
-    $error = "{$e->getMessage()} on {$e->getLine()} in {$e->getFile()}";
+    $error = "Error Code {$e->getCode()} :: {$e->getMessage()} on {$e->getLine()} in {$e->getFile()}";
     if (empty($wrap)) return $error;
     return "{$wrap} :: {$error}";
 }

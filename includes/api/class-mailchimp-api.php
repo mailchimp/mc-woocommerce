@@ -991,6 +991,47 @@ class MailChimp_WooCommerce_MailChimpApi
 
     /**
      * @param $store_id
+     * @param MailChimp_WooCommerce_Product $product
+     * @param bool $silent
+     * @return bool|MailChimp_WooCommerce_Product
+     * @throws Exception
+     */
+    public function updateStoreProduct($store_id, MailChimp_WooCommerce_Product $product, $silent = true)
+    {
+        try {
+            if (!$this->validateStoreSubmission($product)) {
+                return false;
+            }
+            $data = $this->patch("ecommerce/stores/$store_id/products/{$product->getId()}", $product->toArray());
+            update_option('mailchimp-woocommerce-resource-last-updated', time());
+            $product = new MailChimp_WooCommerce_Product();
+            return $product->fromArray($data);
+        } catch (\Exception $e) {
+            if (!$silent) throw $e;
+            mailchimp_log('api.update_product.error', $e->getMessage(), array('submission' => $product->toArray()));
+            return false;
+        }
+    }
+
+    /**
+     * @param MailChimp_WooCommerce_Order $order
+     * @return array
+     */
+    public function handleProductsMissingFromAPI(MailChimp_WooCommerce_Order $order)
+    {
+        $missing_products = array();
+        foreach ($order->items() as $order_item) {
+            /** @var \MailChimp_WooCommerce_LineItem $order_item */
+            $job = new MailChimp_WooCommerce_Single_Product($order_item->getId());
+            if ($missing_products[$order_item->getId()] = $job->createModeOnly()->handle()) {
+                mailchimp_log("missing_products.fallback", "Product {$order_item->getId()} had to be re-pushed into Mailchimp");
+            }
+        }
+        return $missing_products;
+    }
+
+    /**
+     * @param $store_id
      * @param $product_id
      * @return bool
      * @throws Exception

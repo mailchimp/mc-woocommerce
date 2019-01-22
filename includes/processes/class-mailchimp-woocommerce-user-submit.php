@@ -124,21 +124,21 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
 
         $api = new MailChimp_WooCommerce_MailChimpApi($api_key);
 
-        $merge_vars = array();
+        $merge_vars_system = array();
 
         $fn = trim($user->first_name);
         $ln = trim($user->last_name);
 
-        if (!empty($fn)) $merge_vars['FNAME'] = $fn;
-        if (!empty($ln)) $merge_vars['LNAME'] = $ln;
+        if (!empty($fn)) $merge_vars_system['FNAME'] = $fn;
+        if (!empty($ln)) $merge_vars_system['LNAME'] = $ln;
 
         // allow users to hook into the merge tag submission
-        $merge_vars = apply_filters('mailchimp_sync_user_mergetags', $user, $merge_vars);
+        $merge_vars = apply_filters('mailchimp_sync_user_mergetags', $user, $merge_vars_system);
 
         // for whatever reason if this isn't an array we need to skip it.
         if (!is_array($merge_vars)) {
-            mailchimp_error("custom.merge_tags", "the filter for mailchimp_sync_user_mergetags needs to return an array.");
-            return false;
+            mailchimp_error("custom.merge_tags", "the filter for mailchimp_sync_user_mergetags needs to return an array, we're using the default setup instead.");
+            $merge_vars = $merge_vars_system;
         }
 
         // pull the transient key for this job.

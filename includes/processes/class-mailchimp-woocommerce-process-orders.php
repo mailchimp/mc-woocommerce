@@ -65,8 +65,21 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abstrac
                     return false;
                 }
 
-                // make the call
-                $response = $this->mailchimp()->$call($this->store_id, $item, false);
+                try {
+                    // make the call
+                    $response = $this->mailchimp()->$call($this->store_id, $item, false);
+                } catch (\Exception $e) {
+                    // if for whatever reason we get a product not found error, we need to iterate
+                    // through the order items, and use a "create mode only" on each product
+                    // then re-submit the order once they're in the database again.
+                    if (mailchimp_string_contains($e->getMessage(), 'product with the provided ID')) {
+                        $this->mailchimp()->handleProductsMissingFromAPI($item);
+                        // make the call again after the product updates
+                        $response = $this->mailchimp()->$call($this->store_id, $item, false);
+                    } else {
+                        throw $e;
+                    }
+                }
 
                 if (empty($response)) {
                     mailchimp_error('order_submit.failure', "$call :: #{$item->getId()} :: email: {$item->getCustomer()->getEmailAddress()} produced a blank response from MailChimp");

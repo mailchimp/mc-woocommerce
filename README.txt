@@ -3,10 +3,10 @@ Contributors: ryanhungate, Mailchimp
 Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.3
-Tested up to: 5.0
+Tested up to: 5.0.3
 Stable tag: 2.1.13
 Requires PHP: 7.0
-WC tested up to: 3.5.2 
+WC tested up to: 3.5.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your Mailchimp list to track sales, create targeted emails, send abandoned cart emails, and more.
@@ -63,9 +63,11 @@ Refer to the Wordpress Codex for more information about [Multisite Network Admin
 == Changelog ==
 = 2.1.13 =
 * fixed spelling issues in plugin meta
+* changed submission sequence for products to use the PATCH endpoint when applicable
+* fallback on order submissions when products are not found in Mailchimp.
 = 2.1.12 =
 * adds error handling for blocked admin-ajax.php files
-* adds support for customer merge variables
+* adds support for custom merge variables
 * removes global variable overwrite of REMOTE_ADDR
 * fixes signup form not adding customers to Mailchimp
 * support for rate limiting

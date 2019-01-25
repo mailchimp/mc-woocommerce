@@ -1477,7 +1477,7 @@ class MailChimp_WooCommerce_MailChimpApi
     {
         $env = mailchimp_environment_variables();
 
-        return array(
+        $curl_options = array(
             CURLOPT_USERPWD => "mailchimp:{$this->api_key}",
             CURLOPT_CUSTOMREQUEST => strtoupper($method),
             CURLOPT_URL => $this->url($url, $params),
@@ -1492,6 +1492,13 @@ class MailChimp_WooCommerce_MailChimpApi
                 "user-agent: MailChimp for WooCommerce/{$env->version}; PHP/{$env->php_version}; WordPress/{$env->wp_version}; Woo/{$env->wc_version};",
             ), $headers)
         );
+
+        // if we have a dedicated IP address, and have set a configuration for it, we'll use it here.
+        if (defined('MAILCHIMP_USE_OUTBOUND_IP')) {
+            $curl_options[CURLOPT_INTERFACE] = MAILCHIMP_USE_OUTBOUND_IP;
+        }
+
+        return $curl_options;
     }
 
     /**

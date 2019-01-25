@@ -196,7 +196,11 @@ function mailchimp_get_http_lock_expiration($max = 300) {
                 if (empty($lock_duration) || !is_numeric($lock_duration) || ($lock_duration >= $max)) {
                     $lock_duration = $max;
                 }
-                return new \DateTime(((int) $parts[1] + $lock_duration));
+                // craft a new date time object
+                $date = new \DateTime();
+                // set the timestamp with the lock duration
+                $date->setTimestamp(((int) $parts[1] + $lock_duration));
+                return $date;
             }
         }
     } catch (\Exception $e) {}

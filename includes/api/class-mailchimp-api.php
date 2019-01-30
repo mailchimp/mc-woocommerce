@@ -10,6 +10,25 @@ class MailChimp_WooCommerce_MailChimpApi
     protected $api_key = null;
     protected $auth_type = 'key';
 
+    protected static $instance = null;
+
+    /**
+     * @return null
+     */
+    public static function getInstance()
+    {
+        return static::$instance;
+    }
+
+    /**
+     * @param $api_key
+     * @return MailChimp_WooCommerce_MailChimpApi
+     */
+    public static function constructInstance($api_key)
+    {
+        return static::$instance = new MailChimp_WooCommerce_MailChimpApi($api_key);
+    }
+
     /**
      * MailChimpService constructor.
      * @param null $api_key
@@ -1467,6 +1486,9 @@ class MailChimp_WooCommerce_MailChimpApi
         }
 
         if ($info['http_code'] >= 400 && $info['http_code'] <= 500) {
+            if ($info['http_code'] == 403) {
+                throw new MailChimp_WooCommerce_RateLimitError();
+            }
             throw new MailChimp_WooCommerce_Error($data['title'] .' :: '.$data['detail'], $data['status']);
         }
 
@@ -1495,6 +1517,9 @@ class MailChimp_WooCommerce_MailChimpApi
 
         // make sure the response is correct from the data in the response array
         if (isset($data['status']) && $data['status'] >= 400) {
+            if ($data['http_code'] == 403) {
+                throw new MailChimp_WooCommerce_RateLimitError();
+            }
             throw new MailChimp_WooCommerce_Error($data['detail'], $data['status']);
         }
 

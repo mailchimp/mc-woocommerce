@@ -34,6 +34,7 @@ spl_autoload_register(function($class) {
 
         // includes/api/errors
         'MailChimp_WooCommerce_Error' => 'includes/api/errors/class-mailchimp-error.php',
+        'MailChimp_WooCommerce_RateLimitError' => 'includes/api/errors/class-mailchimp-rate-limit-error.php',
         'MailChimp_WooCommerce_ServerError' => 'includes/api/errors/class-mailchimp-server-error.php',
 
         // includes/api/helpers
@@ -87,7 +88,7 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production',
-        'version' => '2.1.11',
+        'version' => '2.1.12',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => class_exists('WC') ? WC()->version : null,
@@ -99,7 +100,7 @@ function mailchimp_environment_variables() {
 if (defined( 'WP_CLI' ) && WP_CLI) {
     try {
         /**
-         * Service push to Mailchimp
+         * Service push to MailChimp
          *
          * <type>
          * : product_sync order_sync order product
@@ -288,14 +289,19 @@ function mailchimp_get_store_id() {
     return $store_id;
 }
 
-
 /**
  * @return bool|MailChimp_WooCommerce_MailChimpApi
  */
 function mailchimp_get_api() {
-    if (($key = mailchimp_get_api_key())) {
-        return new MailChimp_WooCommerce_MailChimpApi($key);
+
+    if (($api = MailChimp_WooCommerce_MailChimpApi::getInstance())) {
+        return $api;
     }
+
+    if (($key = mailchimp_get_api_key())) {
+        return MailChimp_WooCommerce_MailChimpApi::constructInstance($key);
+    }
+
     return false;
 }
 
@@ -460,33 +466,18 @@ function mailchimp_woocommerce_get_all_image_sizes_list() {
 }
 
 /**
- * @param null $network_wide
+ * The code that runs during plugin activation.
+ * This action is documented in includes/class-mailchimp-woocommerce-activator.php
  */
-function activate_mailchimp_woocommerce($network_wide = null) {
-    if (is_multisite() && $network_wide ) {
-        global $wpdb;
-        mailchimp_log('plugin.activation.multisite', "Installing Mailchimp Tables.");
-        foreach ($wpdb->get_col("SELECT blog_id FROM $wpdb->blogs") as $blog_id) {
-            switch_to_blog($blog_id);
-            if (mailchimp_check_woocommerce_plugin_status()) {
-                MailChimp_WooCommerce_Activator::activate();
-            }
-            restore_current_blog();
-        }
-    } else {
-        // if we don't have woocommerce we need to display a horrible error message before the plugin is installed.
-        if (!mailchimp_check_woocommerce_plugin_status()) {
-            // Deactivate the plugin
-            deactivate_plugins(__FILE__);
-            $error_message = __('The Mailchimp For WooCommerce plugin requires the <a href="http://wordpress.org/extend/plugins/woocommerce/">WooCommerce</a> plugin to be active!', 'woocommerce');
-            wp_die($error_message);
-        }
-
-        $site_name = get_option('siteurl');
-        mailchimp_log('plugin.activation.single_site', "Installing Mailchimp Tables For :: {$site_name}");
-        MailChimp_WooCommerce_Activator::activate();
-        mailchimp_log('plugin.activation.single_site', "Installed Mailchimp Tables For :: {$site_name}");
+function activate_mailchimp_woocommerce() {
+    // if we don't have woocommerce we need to display a horrible error message before the plugin is installed.
+    if (!mailchimp_check_woocommerce_plugin_status()) {
+        // Deactivate the plugin
+        deactivate_plugins(__FILE__);
+        $error_message = __('The MailChimp For WooCommerce plugin requires the <a href="http://wordpress.org/extend/plugins/woocommerce/">WooCommerce</a> plugin to be active!', 'woocommerce');
+        wp_die($error_message);
     }
+    MailChimp_WooCommerce_Activator::activate();
 }
 
 /**
@@ -622,37 +613,91 @@ function mailchimp_update_connected_site_script() {
 
     // if the api is configured
     if ($store_id && ($api = mailchimp_get_api())) {
-
         // if we have a store
         if (($store = $api->getStore($store_id))) {
-
             // handle the coupon sync if we don't have a flag that says otherwise.
             $job = new MailChimp_WooCommerce_Process_Coupons();
             if ($job->getData('sync.coupons.completed_at', false) === false) {
                 wp_queue($job);
             }
-
-            // see if we have a connected site script url/fragment
-            $url = $store->getConnectedSiteScriptUrl();
-            $fragment = $store->getConnectedSiteScriptFragment();
-
-            // if it's not empty we need to set the values
-            if ($url && $fragment) {
-
-                // update the options for script_url and script_fragment
-                update_option('mailchimp-woocommerce-script_url', $url);
-                update_option('mailchimp-woocommerce-script_fragment', $fragment);
-
-                // check to see if the site is connected
-                if (!$api->checkConnectedSite($store_id)) {
-
-                    // if it's not, connect it now.
-                    $api->connectSite($store_id);
-                }
-
-                return true;
-            }
+            return mailchimpi_refresh_connected_site_script($store);
         }
+    }
+    return false;
+}
+
+/**
+ * @return bool|DateTime
+ */
+function mailchimp_get_updated_connected_site_since_as_date_string() {
+    $updated_at = get_option('mailchimp-woocommerce-script_updated_at', false);
+    if (empty($updated_at)) return '';
+    try {
+        $date = new \DateTime();
+        $date->setTimestamp($updated_at);
+        return $date->format('D, M j, Y g:i A');
+    } catch (\Exception $e) {
+        return '';
+    }
+}
+
+/**
+ * @return int
+ */
+function mailchimp_get_updated_connected_site_since() {
+    $updated_at = get_option('mailchimp-woocommerce-script_updated_at', false);
+    return empty($updated_at) ? 1000000 : (time() - $updated_at);
+}
+
+/**
+ * @param int $seconds
+ * @return bool
+ */
+function mailchimp_should_update_connected_site_script($seconds = 600) {
+    return mailchimp_get_updated_connected_site_since() >= $seconds;
+}
+
+/**
+ *
+ */
+function mailchimp_update_connected_site_script_from_cdn() {
+    if (mailchimp_is_configured() && mailchimp_should_update_connected_site_script() && ($store_id = mailchimp_get_store_id())) {
+        try {
+            // pull the store, refresh the connected site url
+            mailchimpi_refresh_connected_site_script(mailchimp_get_api()->getStore($store_id));
+        } catch (\Exception $e) {
+            mailchimp_error("admin.update_connected_site_script", $e->getMessage());
+        }
+    }
+}
+
+/**
+ * @param MailChimp_WooCommerce_Store $store
+ * @return bool
+ */
+function mailchimpi_refresh_connected_site_script(MailChimp_WooCommerce_Store $store) {
+
+    $api = mailchimp_get_api();
+
+    $url = $store->getConnectedSiteScriptUrl();
+    $fragment = $store->getConnectedSiteScriptFragment();
+
+    // if it's not empty we need to set the values
+    if ($url && $fragment) {
+
+        // update the options for script_url and script_fragment
+        update_option('mailchimp-woocommerce-script_url', $url);
+        update_option('mailchimp-woocommerce-script_fragment', $fragment);
+        update_option('mailchimp-woocommerce-script_updated_at', time());
+
+        // check to see if the site is connected
+        if (!$api->checkConnectedSite($store->getId())) {
+
+            // if it's not, connect it now.
+            $api->connectSite($store->getId());
+        }
+
+        return true;
     }
     return false;
 }
@@ -732,7 +777,7 @@ function mailchimp_email_is_privacy_protected($email) {
  * @return bool
  */
 function mailchimp_email_is_amazon($email) {
-    return mailchimp_string_contains($email, '@marketplace.amazon.com');
+    return mailchimp_string_contains($email, '@marketplace.amazon.');
 }
 
 /**
@@ -744,23 +789,55 @@ function mailchimp_hash_trim_lower($str) {
 }
 
 /**
+ * @param bool $block
  * @return array|WP_Error
  */
-function mailchimp_call_http_worker_manually() {
+function mailchimp_call_http_worker_manually($block = false) {
     $action = 'http_worker';
     $query_args = apply_filters('http_worker_query_args', array(
         'action' => $action,
         'nonce'  => wp_create_nonce($action),
+        'test' => $block === true ? '1' : '0',
     ));
     $query_url = apply_filters('http_worker_query_url', admin_url('admin-ajax.php'));
     $post_args = apply_filters('http_worker_post_args', array(
-        'timeout'   => 0.01,
-        'blocking'  => false,
+        'timeout'   => $block ? 60 : 0.01,
+        'blocking'  => $block,
         'cookies'   => $_COOKIE,
         'sslverify' => apply_filters('https_local_ssl_verify', false),
     ));
     $url = add_query_arg($query_args, $query_url);
     return wp_remote_post(esc_url_raw($url), $post_args);
+}
+
+/**
+ * @return bool|string
+ */
+function mailchimp_woocommerce_check_if_http_worker_fails() {
+    // if the function doesn't exist we can't do anything.
+    if (!function_exists('wp_remote_post')) {
+        mailchimp_set_data('test.can.remote_post', false);
+        mailchimp_set_data('test.can.remote_post.error', 'function "wp_remote_post" does not exist');
+        return 'function "wp_remote_post" does not exist';
+    }
+    // apply a blocking call to make sure we get the response back
+    $response = mailchimp_call_http_worker_manually(true);
+
+    if (is_wp_error($response)) {
+        // nope, we have problems
+        mailchimp_set_data('test.can.remote_post', false);
+        mailchimp_set_data('test.can.remote_post.error', $response->get_error_message());
+        return $response->get_error_message();
+    } elseif (is_array($response) && isset($response['http_response']) && ($r = $response['http_response'])){
+        /** @var \WP_HTTP_Requests_Response $r */
+        if ($r->get_status() >= 400) {
+            return 'admin-ajax.php seems to be disabled on this wordpress site. Please enable to sync data.';
+        }
+    }
+    // yep all good.
+    mailchimp_set_data('test.can.remote_post', true);
+    mailchimp_set_data('test.can.remote_post.error', false);
+    return false;
 }
 
 /**
@@ -784,7 +861,7 @@ function mailchimp_set_transient($key, $value, $seconds = 60) {
     return set_site_transient("mailchimp-woocommerce.{$key}", array(
         'value' => $value,
         'expires' => time()+$seconds,
-    ));
+    ), $seconds);
 }
 
 /**
@@ -909,3 +986,4 @@ function mailchimp_on_all_plugins_loaded() {
         run_mailchimp_woocommerce();
     }
 }
+

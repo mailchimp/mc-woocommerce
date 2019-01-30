@@ -39,7 +39,7 @@ if ( ! class_exists( 'WP_Http_Worker' ) ) {
 			add_action( 'wp_queue_job_pushed', array( $this, 'maybe_dispatch_worker' ) );
 
 			if (isset($_REQUEST['action']) && $_REQUEST['action'] === 'http_worker' && check_ajax_referer( 'http_worker', 'nonce', false)) {
-                add_action('init', array($this, 'handle'));
+			    add_action('init', array($this, 'handle'));
             }
 		}
 

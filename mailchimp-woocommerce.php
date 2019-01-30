@@ -13,10 +13,10 @@
  * @package           MailChimp_WooCommerce
  *
  * @wordpress-plugin
- * Plugin Name:       Mailchimp for WooCommerce
+ * Plugin Name:        for WooCommerce
  * Plugin URI:        https://mailchimp.com/connect-your-store/
  * Description:       Mailchimp - WooCommerce plugin
- * Version:           2.1.11
+ * Version:           2.1.12
  * Author:            Mailchimp
  * Author URI:        https://mailchimp.com
  * License:           GPL-2.0+
@@ -38,9 +38,3 @@ if (!isset($mailchimp_woocommerce_spl_autoloader) || $mailchimp_woocommerce_spl_
 
 register_activation_hook( __FILE__, 'activate_mailchimp_woocommerce');
 add_action('plugins_loaded', 'mailchimp_on_all_plugins_loaded', 12);
-
-if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-    $forwarded_address = explode(',',$_SERVER['HTTP_X_FORWARDED_FOR']);
-    $_SERVER['REMOTE_ADDR'] = $forwarded_address[0];
-}
-

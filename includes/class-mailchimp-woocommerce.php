@@ -132,6 +132,29 @@ class MailChimp_WooCommerce
 
         $this->activateMailChimpNewsletter();
         $this->activateMailChimpService();
+        $this->applyQueryStringOverrides();
+    }
+
+    /**
+     *
+     */
+    private function applyQueryStringOverrides()
+    {
+        // if we need to refresh the double opt in for any reason - just do it here.
+        if ($this->queryStringEquals('mc_doi_refresh', '1')) {
+            $enabled_doi = mailchimp_list_has_double_optin(true);
+            mailchimp_log('mc.utils.doi_refresh', ($enabled_doi ? 'turned ON' : 'turned OFF'));
+        }
+    }
+
+    /**
+     * @param $key
+     * @param string $value
+     * @return bool
+     */
+    private function queryStringEquals($key, $value = '1')
+    {
+        return isset($_GET[$key]) && $_GET[$key] === $value;
     }
 
     /**
@@ -160,7 +183,10 @@ class MailChimp_WooCommerce
         // fire up the loader
         $this->loader = new MailChimp_WooCommerce_Loader();
 
-        if (!mailchimp_running_in_console() && mailchimp_is_configured()) {
+        $has_test = isset($_REQUEST['action']) && $_REQUEST['action'] === 'http_worker' &&
+            (isset($_REQUEST['test']) && $_REQUEST['test'] === '1');
+
+        if ($has_test || (!mailchimp_running_in_console() && mailchimp_is_configured())) {
             // fire up the http worker container
             new WP_Http_Worker($wp_queue);
         }
@@ -178,7 +204,9 @@ class MailChimp_WooCommerce
                         mailchimp_call_http_worker_manually();
                     }
                 }
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+                mailchimp_error_trace($e, "loading dependencies");
+            }
         }
     }
 

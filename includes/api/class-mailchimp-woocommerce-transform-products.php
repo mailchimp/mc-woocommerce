@@ -108,6 +108,7 @@ class MailChimp_WooCommerce_Transform_Products
         $variant = new MailChimp_WooCommerce_ProductVariation();
 
         if (!$woo) {
+            //mailchimp_error("products.transform", "could not load product variant", array('post' => print_r($post, true)));
             return $variant;
         }
 

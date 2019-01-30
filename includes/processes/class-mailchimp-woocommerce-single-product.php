@@ -72,6 +72,10 @@ class MailChimp_WooCommerce_Single_Product extends WP_Job
 
             return $product;
 
+        } catch (MailChimp_WooCommerce_RateLimitError $e) {
+            sleep(3);
+            $this->release();
+            mailchimp_error('product_submit.error', mailchimp_error_trace($e, "RateLimited :: #{$this->product_id}"));
         } catch (MailChimp_WooCommerce_ServerError $e) {
             mailchimp_error('product_submit.error', mailchimp_error_trace($e, "addStoreProduct :: #{$this->product_id}"));
         } catch (MailChimp_WooCommerce_Error $e) {

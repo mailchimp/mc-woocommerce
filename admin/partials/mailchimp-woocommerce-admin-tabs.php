@@ -22,11 +22,13 @@ if (isset($options['mailchimp_api_key'])) {
     try {
         if ($handler->hasValidApiKey(null, true)) {
             $has_valid_api_key = true;
+
             // if we don't have a valid api key we need to redirect back to the 'api_key' tab.
             if (($mailchimp_lists = $handler->getMailChimpLists()) && is_array($mailchimp_lists)) {
                 $show_campaign_defaults = false;
                 $allow_new_list = false;
             }
+
             // only display this button if the data is not syncing and we have a valid api key
             if ((bool) $this->getData('sync.started_at', false)) {
                 $show_sync_tab = true;

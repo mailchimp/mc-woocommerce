@@ -54,6 +54,7 @@ You have 2 options to run this process:
 ### Optional on-demand queue processing
 If you would like to turn off the background queue processing and handle jobs "on-demand" you can do so by adding a constant in your wp-config.php file:
     `define('MAILCHIMP_DISABLE_QUEUE', true);`
+This is helpful with high CPU usage on small servers by making a call to the admin-ajax file and manually processing a single request at a time. 
 ### Multi-site Setups
 The Mailchimp for WooCommerce supports Wordpress Multi Sites and below are a few things to note.
 - Each site that has the plugin installed is a separate connection to Mailchimp.

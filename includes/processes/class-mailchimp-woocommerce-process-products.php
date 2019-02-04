@@ -43,24 +43,28 @@ class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abstr
 
             mailchimp_debug('product_sync', "#{$item->getId()}", $item->toArray());
 
-            // need to run the delete option on this before submitting because the API does not support PATCH yet.
-            $this->mailchimp()->deleteStoreProduct($this->store_id, $item->getId());
+            try {
+                // pull the product from Mailchimp first to see what method we need to call next.
+                $mailchimp_product = $this->mailchimp()->getStoreProduct($this->store_id, $item->getId());
+            } catch (\Exception $e) {
+                $mailchimp_product = false;
+            }
 
-            // add the product.
+            // depending on if it's existing or not - we change the method call
+            $method = $mailchimp_product ? 'updateStoreProduct' : 'addStoreProduct';
+
+            // need to run the delete option on this before submitting because the API does not support PATCH yet.
             try {
                 // make the call
-                $response = $this->mailchimp()->addStoreProduct($this->store_id, $item, false);
-
-                mailchimp_log('product_sync.success', "addStoreProduct :: #{$response->getId()}");
-
+                $response = $this->mailchimp()->{$method}($this->store_id, $item, false);
+                mailchimp_log('product_sync.success', "{$method} :: #{$response->getId()}");
                 return $response;
-
             } catch (MailChimp_WooCommerce_ServerError $e) {
-                mailchimp_error('product_sync.error', mailchimp_error_trace($e, "addStoreProduct :: {$item->getId()}"));
+                mailchimp_error('product_sync.error', mailchimp_error_trace($e, "{$method} :: {$item->getId()}"));
             } catch (MailChimp_WooCommerce_Error $e) {
-                mailchimp_error('product_sync.error', mailchimp_error_trace($e, "addStoreProduct :: {$item->getId()}"));
+                mailchimp_error('product_sync.error', mailchimp_error_trace($e, "{$method} :: {$item->getId()}"));
             } catch (Exception $e) {
-                mailchimp_error('product_sync.error', mailchimp_error_trace($e, "addStoreProduct :: {$item->getId()}"));
+                mailchimp_error('product_sync.error', mailchimp_error_trace($e, "{$method} :: {$item->getId()}"));
             }
         }
 

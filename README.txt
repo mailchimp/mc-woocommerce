@@ -3,10 +3,10 @@ Contributors: ryanhungate, Mailchimp
 Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.3
-Tested up to: 5.0
-Stable tag: 2.1.12
+Tested up to: 5.0.3
+Stable tag: 2.1.13
 Requires PHP: 7.0
-WC tested up to: 3.5.2 
+WC tested up to: 3.5.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your Mailchimp list to track sales, create targeted emails, send abandoned cart emails, and more.
@@ -54,6 +54,7 @@ You have 2 options to run this process:
 ### Optional on-demand queue processing
 If you would like to turn off the background queue processing and handle jobs "on-demand" you can do so by adding a constant in your wp-config.php file:
     `define('MAILCHIMP_DISABLE_QUEUE', true);`
+This is helpful with high CPU usage on small servers by making a call to the admin-ajax file and manually processing a single request at a time. 
 ### Multi-site Setups
 The Mailchimp for WooCommerce supports Wordpress Multi Sites and below are a few things to note.
 - Each site that has the plugin installed is a separate connection to Mailchimp.
@@ -61,9 +62,13 @@ The Mailchimp for WooCommerce supports Wordpress Multi Sites and below are a few
 - Deleting removes the connection between Mailchimp and WooCommerce, and uninstalls the plugin from your site.
 Refer to the Wordpress Codex for more information about [Multisite Network Administration](https://codex.wordpress.org/Multisite_Network_Administration)
 == Changelog ==
+= 2.1.13 =
+* fixed spelling issues in plugin meta
+* changed submission sequence for products to use the PATCH endpoint when applicable
+* fallback on order submissions when products are not found in Mailchimp.
 = 2.1.12 =
 * adds error handling for blocked admin-ajax.php files
-* adds support for customer merge variables
+* adds support for custom merge variables
 * removes global variable overwrite of REMOTE_ADDR
 * fixes signup form not adding customers to Mailchimp
 * support for rate limiting

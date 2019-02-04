@@ -991,6 +991,47 @@ class MailChimp_WooCommerce_MailChimpApi
 
     /**
      * @param $store_id
+     * @param MailChimp_WooCommerce_Product $product
+     * @param bool $silent
+     * @return bool|MailChimp_WooCommerce_Product
+     * @throws Exception
+     */
+    public function updateStoreProduct($store_id, MailChimp_WooCommerce_Product $product, $silent = true)
+    {
+        try {
+            if (!$this->validateStoreSubmission($product)) {
+                return false;
+            }
+            $data = $this->patch("ecommerce/stores/$store_id/products/{$product->getId()}", $product->toArray());
+            update_option('mailchimp-woocommerce-resource-last-updated', time());
+            $product = new MailChimp_WooCommerce_Product();
+            return $product->fromArray($data);
+        } catch (\Exception $e) {
+            if (!$silent) throw $e;
+            mailchimp_log('api.update_product.error', $e->getMessage(), array('submission' => $product->toArray()));
+            return false;
+        }
+    }
+
+    /**
+     * @param MailChimp_WooCommerce_Order $order
+     * @return array
+     */
+    public function handleProductsMissingFromAPI(MailChimp_WooCommerce_Order $order)
+    {
+        $missing_products = array();
+        foreach ($order->items() as $order_item) {
+            /** @var \MailChimp_WooCommerce_LineItem $order_item */
+            $job = new MailChimp_WooCommerce_Single_Product($order_item->getId());
+            if ($missing_products[$order_item->getId()] = $job->createModeOnly()->handle()) {
+                mailchimp_log("missing_products.fallback", "Product {$order_item->getId()} had to be re-pushed into Mailchimp");
+            }
+        }
+        return $missing_products;
+    }
+
+    /**
+     * @param $store_id
      * @param $product_id
      * @return bool
      * @throws Exception
@@ -1436,7 +1477,7 @@ class MailChimp_WooCommerce_MailChimpApi
     {
         $env = mailchimp_environment_variables();
 
-        return array(
+        $curl_options = array(
             CURLOPT_USERPWD => "mailchimp:{$this->api_key}",
             CURLOPT_CUSTOMREQUEST => strtoupper($method),
             CURLOPT_URL => $this->url($url, $params),
@@ -1451,6 +1492,13 @@ class MailChimp_WooCommerce_MailChimpApi
                 "user-agent: MailChimp for WooCommerce/{$env->version}; PHP/{$env->php_version}; WordPress/{$env->wp_version}; Woo/{$env->wc_version};",
             ), $headers)
         );
+
+        // if we have a dedicated IP address, and have set a configuration for it, we'll use it here.
+        if (defined('MAILCHIMP_USE_OUTBOUND_IP')) {
+            $curl_options[CURLOPT_INTERFACE] = MAILCHIMP_USE_OUTBOUND_IP;
+        }
+
+        return $curl_options;
     }
 
     /**

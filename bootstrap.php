@@ -88,7 +88,7 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production',
-        'version' => '2.1.12',
+        'version' => '2.1.13',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => class_exists('WC') ? WC()->version : null,
@@ -196,7 +196,11 @@ function mailchimp_get_http_lock_expiration($max = 300) {
                 if (empty($lock_duration) || !is_numeric($lock_duration) || ($lock_duration >= $max)) {
                     $lock_duration = $max;
                 }
-                return new \DateTime(((int) $parts[1] + $lock_duration));
+                // craft a new date time object
+                $date = new \DateTime();
+                // set the timestamp with the lock duration
+                $date->setTimestamp(((int) $parts[1] + $lock_duration));
+                return $date;
             }
         }
     } catch (\Exception $e) {}
@@ -540,7 +544,7 @@ function mailchimp_error($action, $message, $data = array()) {
  * @return string
  */
 function mailchimp_error_trace(\Exception $e, $wrap = "") {
-    $error = "{$e->getMessage()} on {$e->getLine()} in {$e->getFile()}";
+    $error = "Error Code {$e->getCode()} :: {$e->getMessage()} on {$e->getLine()} in {$e->getFile()}";
     if (empty($wrap)) return $error;
     return "{$wrap} :: {$error}";
 }

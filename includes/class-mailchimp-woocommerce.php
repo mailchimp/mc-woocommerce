@@ -183,10 +183,8 @@ class MailChimp_WooCommerce
         // fire up the loader
         $this->loader = new MailChimp_WooCommerce_Loader();
 
-        $has_test = isset($_REQUEST['action']) && $_REQUEST['action'] === 'http_worker' &&
-            (isset($_REQUEST['test']) && $_REQUEST['test'] === '1');
-
-        if ($has_test || (!mailchimp_running_in_console() && mailchimp_is_configured())) {
+        // only fire this up if they have configured mailchimp - and not running in the console.
+        if ((!mailchimp_running_in_console() && mailchimp_is_configured())) {
             // fire up the http worker container
             new WP_Http_Worker($wp_queue);
         }

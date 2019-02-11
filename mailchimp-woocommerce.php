@@ -37,4 +37,10 @@ if (!isset($mailchimp_woocommerce_spl_autoloader) || $mailchimp_woocommerce_spl_
 }
 
 register_activation_hook( __FILE__, 'activate_mailchimp_woocommerce');
+
+// see if the ajax file is working correctly
+add_action( 'wp_ajax_http_worker_test', 'mailchimp_test_http_worker_ajax');
+add_action( 'wp_ajax_nopriv_http_worker_test', 'mailchimp_test_http_worker_ajax');
+
+// plugins loaded callback
 add_action('plugins_loaded', 'mailchimp_on_all_plugins_loaded', 12);

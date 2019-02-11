@@ -815,17 +815,45 @@ function mailchimp_call_http_worker_manually($block = false) {
 }
 
 /**
+ * @return array|WP_Error
+ */
+function mailchimp_call_admin_ajax_test() {
+    $action = 'http_worker_test';
+    $query_args = apply_filters('http_worker_query_args', array(
+        'action' => $action,
+        'nonce'  => wp_create_nonce($action),
+    ));
+    $query_url = apply_filters('http_worker_query_url', admin_url('admin-ajax.php'));
+    $post_args = apply_filters('http_worker_post_args', array(
+        'timeout'   => 5,
+        'blocking'  => true,
+        'cookies'   => $_COOKIE,
+        'sslverify' => apply_filters('https_local_ssl_verify', false),
+    ));
+    $url = add_query_arg($query_args, $query_url);
+    return wp_remote_post(esc_url_raw($url), $post_args);
+}
+
+/**
  * @return bool|string
  */
 function mailchimp_woocommerce_check_if_http_worker_fails() {
+
+    // if the user has defined that they are going to use the queue from the console, we can just return false here.
+    // this means they've agreed to run the queue from a CLI version instead.
+    if (mailchimp_running_in_console()) {
+        return false;
+    }
+
     // if the function doesn't exist we can't do anything.
     if (!function_exists('wp_remote_post')) {
         mailchimp_set_data('test.can.remote_post', false);
         mailchimp_set_data('test.can.remote_post.error', 'function "wp_remote_post" does not exist');
         return 'function "wp_remote_post" does not exist';
     }
+
     // apply a blocking call to make sure we get the response back
-    $response = mailchimp_call_http_worker_manually(true);
+    $response = mailchimp_call_admin_ajax_test();
 
     if (is_wp_error($response)) {
         // nope, we have problems
@@ -842,6 +870,13 @@ function mailchimp_woocommerce_check_if_http_worker_fails() {
     mailchimp_set_data('test.can.remote_post', true);
     mailchimp_set_data('test.can.remote_post.error', false);
     return false;
+}
+
+/**
+ * @return string
+ */
+function mailchimp_test_http_worker_ajax() {
+    wp_send_json(array('success' => true), 200);
 }
 
 /**

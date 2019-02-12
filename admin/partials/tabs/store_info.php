@@ -107,7 +107,7 @@ if (!$handler->hasValidApiKey()) {
     <legend class="screen-reader-text">
         <span>Postal Code</span>
     </legend>
-    <label for="<?php echo $this->plugin_name; ?>-store-state-label">
+    <label for="<?php echo $this->plugin_name; ?>-store-postal-code-label">
         <input required style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-postal-code-label" name="<?php echo $this->plugin_name; ?>[store_postal_code]" value="<?php echo isset($options['store_postal_code']) ? $options['store_postal_code'] : '' ?>" />
         <span>
             <?php

@@ -11,7 +11,7 @@ if (!isset($_GET['tab']) && isset($options['active_tab'])) {
     $active_tab = $options['active_tab'];
 }
 
-$show_sync_tab = isset($_GET['resync']) ? $_GET['resync'] === '1' : false;;
+$show_sync_tab = isset($_GET['resync']) ? $_GET['resync'] === '1' : false;
 $show_campaign_defaults = true;
 $has_valid_api_key = false;
 $allow_new_list = true;
@@ -25,7 +25,7 @@ if (isset($options['mailchimp_api_key'])) {
 
             // if we don't have a valid api key we need to redirect back to the 'api_key' tab.
             if (($mailchimp_lists = $handler->getMailChimpLists()) && is_array($mailchimp_lists)) {
-                $show_campaign_defaults = false;
+                $show_campaign_defaults = true;
                 $allow_new_list = false;
             }
 
@@ -92,10 +92,12 @@ if (isset($options['mailchimp_api_key'])) {
         <?php if($show_campaign_defaults): ?>
         <a href="?page=mailchimp-woocommerce&tab=campaign_defaults" class="nav-tab <?php echo $active_tab == 'campaign_defaults' ? 'nav-tab-active' : ''; ?>">List Defaults</a>
         <?php endif; ?>
-        <a href="?page=mailchimp-woocommerce&tab=newsletter_settings" class="nav-tab <?php echo $active_tab == 'newsletter_settings' ? 'nav-tab-active' : ''; ?>">List Settings</a>
+        <?php if($handler->hasValidCampaignDefaults()): ?>
+            <a href="?page=mailchimp-woocommerce&tab=newsletter_settings" class="nav-tab <?php echo $active_tab == 'newsletter_settings' ? 'nav-tab-active' : ''; ?>">List Settings</a>
+        <?php endif; ?>
         <?php if($show_sync_tab): ?>
-        <a href="?page=mailchimp-woocommerce&tab=sync" class="nav-tab <?php echo $active_tab == 'sync' ? 'nav-tab-active' : ''; ?>">Sync</a>
-        <a href="?page=mailchimp-woocommerce&tab=logs" class="nav-tab <?php echo $active_tab == 'logs' ? 'nav-tab-active' : ''; ?>">Logs</a>
+            <a href="?page=mailchimp-woocommerce&tab=sync" class="nav-tab <?php echo $active_tab == 'sync' ? 'nav-tab-active' : ''; ?>">Sync</a>
+            <a href="?page=mailchimp-woocommerce&tab=logs" class="nav-tab <?php echo $active_tab == 'logs' ? 'nav-tab-active' : ''; ?>">Logs</a>
         <?php endif; ?>
         <?php endif;?>
         <?php endif; ?>

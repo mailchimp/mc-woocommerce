@@ -22,6 +22,9 @@
  */
 class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
+	protected $swapped_list_id = null;
+	protected $swapped_store_id = null;
+
 	/**
 	 * @return MailChimp_WooCommerce_Admin
 	 */
@@ -489,6 +492,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			// sync the store with MC
 			$this->syncStore(array_merge($this->getOptions(), $data));
 
+			// if there was already a store in mailchimp, use the list ID from mailchimp
+			if ($this->swapped_list_id) {
+				$data['mailchimp_list'] = $this->swapped_list_id;
+			}
+
 			// start the sync automatically if the sync is false
 			if ((bool) $this->getData('sync.started_at', false) === false) {
 				$this->startSync();
@@ -783,7 +791,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		try {
 			// let's create a new store for this user through the API
-			$this->api()->$call($store);
+			$sss = $this->api()->$call($store, false);
 
 			// apply extra meta for store created at
 			$this->setData('errors.store_info', false);
@@ -797,6 +805,27 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			return true;
 
 		} catch (\Exception $e) {
+			if (mailchimp_string_contains($e->getMessage(),'woocommerce already exists in the account' )) {
+				// retrieve mailchimp store using domain
+				$stores = $this->api()->stores();
+				//iterate thru stores, find correct store ID and save it to db
+				foreach ($stores as $mc_store) {
+					if ($mc_store->getDomain() === $store->getDomain() && $store->getPlatform() == "woocommerce") {
+						update_option('mailchimp-woocommerce-store_id', $mc_store->getId(), 'yes');
+						
+						// update the store with the previous listID
+						$store->setListId($mc_store->getListId());
+						$store->setId($mc_store->getId());
+
+						$this->swapped_list_id = $mc_store->getListId();
+						$this->swapped_store_id = $mc_store->getId();
+
+						// check if list id is the same, if not, throw error saying that there's already a store synched to a list, so we can't proceed.
+						
+						$this->api()->updateStore($store);
+					}
+				}
+			}
 			$this->setData('errors.store_info', $e->getMessage());
 		}
 

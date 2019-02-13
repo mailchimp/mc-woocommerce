@@ -23,10 +23,9 @@ if (!$handler->hasValidStoreInfo()) {
     <label for="<?php echo $this->plugin_name; ?>-campaign-from-name-label">
         <input style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-campaign-from-name-label" name="<?php echo $this->plugin_name; ?>[campaign_from_name]" value="<?php echo isset($options['campaign_from_name']) ? $options['campaign_from_name'] : '' ?>" required/>
         <?php
-            if (!empty($options['campaign_from_name']) ) {
-                esc_attr_e('Default from name', $this->plugin_name);
-            } else {
-                esc_attr_e('Default from name', $this->plugin_name); echo '<span style="color:red;">*</span>';
+            esc_attr_e('Default from name', $this->plugin_name);
+            if (empty($options['campaign_from_name']) ) {
+                echo '<span style="color:red;">*</span>';
             }
         ?>
     </label>
@@ -39,10 +38,9 @@ if (!$handler->hasValidStoreInfo()) {
     <label for="<?php echo $this->plugin_name; ?>-campaign-from-email-label">
         <input style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-campaign-from-email-label" name="<?php echo $this->plugin_name; ?>[campaign_from_email]" value="<?php echo isset($options['campaign_from_email']) ? $options['campaign_from_email'] : get_option('admin_email') ?>" required/>
         <?php
-            if (!empty($options['campaign_from_email']) ) {
-                esc_attr_e('Default from email', $this->plugin_name);
-            } else {
-                esc_attr_e('Default from email', $this->plugin_name); echo '<span style="color:red;">*</span>';
+            esc_attr_e('Default from email', $this->plugin_name);
+            if (empty($options['campaign_from_email']) ) {
+                echo '<span style="color:red;">*</span>';
             }
         ?>
     </label>
@@ -55,10 +53,9 @@ if (!$handler->hasValidStoreInfo()) {
     <label for="<?php echo $this->plugin_name; ?>-campaign-subject-label">
         <input style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-campaign-subject-label" name="<?php echo $this->plugin_name; ?>[campaign_subject]" value="<?php echo isset($options['campaign_subject']) ? $options['campaign_subject'] : get_option('blogname') ?>" required/>
         <?php
-            if (!empty($options['campaign_subject']) ) {
-                esc_attr_e('Default subject', $this->plugin_name);
-            } else {
-                esc_attr_e('Default subject', $this->plugin_name); echo '<span style="color:red;">*</span>';
+            esc_attr_e('Default subject', $this->plugin_name);
+            if (empty($options['campaign_subject']) ) {
+                echo '<span style="color:red;">*</span>';
             }
         ?>
     </label>
@@ -78,10 +75,9 @@ if (!$handler->hasValidStoreInfo()) {
             ?>
         </select>
         <?php
-            if (!empty($options['campaign_language']) ) {
-                esc_attr_e('Default language', $this->plugin_name);
-            } else {
-                esc_attr_e('Default language', $this->plugin_name); echo '<span style="color:red;">*</span>';
+            esc_attr_e('Default language', $this->plugin_name);
+            if (empty($options['campaign_language']) ) {
+                echo '<span style="color:red;">*</span>';
             }
         ?>
     </label>
@@ -94,10 +90,9 @@ if (!$handler->hasValidStoreInfo()) {
     <label for="<?php echo $this->plugin_name; ?>-campaign-permission-reminder-label">
         <textarea style="width: 30%;" id="<?php echo $this->plugin_name; ?>-campaign-permission-reminder-label" name="<?php echo $this->plugin_name; ?>[campaign_permission_reminder]" required><?php echo isset($options['campaign_permission_reminder']) ? $options['campaign_permission_reminder'] : 'You were subscribed to the newsletter from '.get_option('blogname') ?></textarea>
         <?php
-            if (!empty($options['campaign_permission_reminder']) ) {
-                esc_attr_e('Permission reminder message', $this->plugin_name);
-            } else {
-                esc_attr_e('Permission reminder message', $this->plugin_name); echo '<span style="color:red;">*</span>';
+            esc_attr_e('Permission reminder message', $this->plugin_name);
+            if (empty($options['campaign_permission_reminder']) ) {
+                echo '<span style="color:red;">*</span>';
             }
         ?>
     </label>

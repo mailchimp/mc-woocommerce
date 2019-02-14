@@ -791,7 +791,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		try {
 			// let's create a new store for this user through the API
-			$sss = $this->api()->$call($store, false);
+			$this->api()->$call($store, false);
 
 			// apply extra meta for store created at
 			$this->setData('errors.store_info', false);

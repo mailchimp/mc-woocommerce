@@ -822,7 +822,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 						// check if list id is the same, if not, throw error saying that there's already a store synched to a list, so we can't proceed.
 						
-						$this->api()->updateStore($store);
+						if ($this->api()->updateStore($store)) {
+							return true;
+						}
 					}
 				}
 			}

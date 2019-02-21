@@ -133,7 +133,7 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
         if (!empty($ln)) $merge_vars_system['LNAME'] = $ln;
 
         // allow users to hook into the merge tag submission
-        $merge_vars = apply_filters('mailchimp_sync_user_mergetags', $user, $merge_vars_system);
+        $merge_vars = apply_filters('mailchimp_sync_user_mergetags', $merge_vars_system, $user);
 
         // for whatever reason if this isn't an array we need to skip it.
         if (!is_array($merge_vars)) {

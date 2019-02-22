@@ -68,6 +68,8 @@ Refer to the Wordpress Codex for more information about [Multisite Network Admin
 * fixes Mailchimp option page flow and displays list defaults tab
 * fixes resource not found error on logs
 * fixes API Key Request errors
+* fixes transactional to pending double opt in issue
+* updated Variables passed to filter
 = 2.1.13 =
 * fixed spelling issues in plugin meta
 * changed submission sequence for products to use the PATCH endpoint when applicable

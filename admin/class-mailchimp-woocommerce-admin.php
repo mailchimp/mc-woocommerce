@@ -80,6 +80,22 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         );
 	}
 
+	/**
+	 * Setup Feedback Survey Form
+	 *
+	 * @since    2.1.15
+	 */
+	public function setup_survey_form() {
+		if (is_admin()) {
+			try {
+				new Mailchimp_Woocommerce_Deactivation_Survey( $this->plugin_name, 'mailchimp-for-woocommerce' );
+			} catch (\Throwable $e) {
+				mailchimp_error('admin@setup_survey_form', $e->getCode().' :: '.$e->getMessage().' on '.$e->getLine().' in '.$e->getFile());
+				return false;
+			}	
+		}		
+	}
+
     /**
      * @return string
      */

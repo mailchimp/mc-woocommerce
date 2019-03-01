@@ -19,7 +19,8 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_Activator' => 'includes/class-mailchimp-woocommerce-activator.php',
         'MailChimp_WooCommerce' => 'includes/class-mailchimp-woocommerce.php',
         'MailChimp_WooCommerce_Privacy' => 'includes/class-mailchimp-woocommerce-privacy.php',
-
+        'Mailchimp_Woocommerce_Deactivation_Survey' => 'includes/class-mailchimp-woocommerce-deactivation-survey.php',
+        
         // includes/api/assets
         'MailChimp_WooCommerce_Address' => 'includes/api/assets/class-mailchimp-address.php',
         'MailChimp_WooCommerce_Cart' => 'includes/api/assets/class-mailchimp-cart.php',

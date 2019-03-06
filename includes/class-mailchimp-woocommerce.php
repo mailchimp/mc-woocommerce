@@ -262,7 +262,8 @@ class MailChimp_WooCommerce
 		// put the menu on the admin top bar.
 		//$this->loader->add_action('admin_bar_menu', $plugin_admin, 'admin_bar', 100);
 
-		$this->loader->add_action('plugins_loaded', $plugin_admin, 'update_db_check');
+        $this->loader->add_action('plugins_loaded', $plugin_admin, 'update_db_check');
+        $this->loader->add_action('admin_init', $plugin_admin, 'setup_survey_form');
 	}
 
 	/**

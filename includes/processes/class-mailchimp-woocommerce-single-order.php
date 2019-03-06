@@ -180,7 +180,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
             // if the customer has a flag to double opt in - we need to push this data over to MailChimp as pending
             // before the order is submitted.
-            if ($order->getCustomer()->requiresDoubleOptIn()) {
+            if ($order->getCustomer()->requiresDoubleOptIn() && $order->getCustomer()->getOriginalSubscriberStatus()) {
                 try {
                     $list_id = mailchimp_get_list_id();
                     $merge_vars = $order->getCustomer()->getMergeVars();
@@ -189,6 +189,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                     try {
                         $member = $api->member($list_id, $email);
                         if ($member['status'] === 'transactional') {
+
                             $api->update($list_id, $email, 'pending', $merge_vars);
                             mailchimp_tell_system_about_user_submit($email, mailchimp_get_subscriber_status_options('pending'), 60);
                             mailchimp_log('double_opt_in', "Updated {$email} Using Double Opt In - previous status was '{$member['status']}'", $merge_vars);

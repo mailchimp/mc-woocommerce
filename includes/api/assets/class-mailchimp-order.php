@@ -427,6 +427,17 @@ class MailChimp_WooCommerce_Order
     }
 
     /**
+     * @return Array lines_ids
+     */
+    public function getLinesIds()
+    {
+        foreach ($this->lines as $line) {
+            $lines_ids[] = $line->getId();
+        }
+        return $lines_ids;
+    }
+
+    /**
      * @param $bool
      * @param $bool
      * @return $this

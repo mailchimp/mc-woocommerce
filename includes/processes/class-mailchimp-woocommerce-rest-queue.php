@@ -61,7 +61,7 @@ class MailChimp_WooCommerce_Rest_Queue
 
         // Worker already running, die
         if ($this->is_worker_running()) {
-            return false;
+            return 'worker is running';
         }
 
         // Lock worker to prevent multiple instances spawning
@@ -72,8 +72,9 @@ class MailChimp_WooCommerce_Rest_Queue
         // Loop over jobs while within server limits
         while (!$this->time_exceeded() && !$this->memory_exceeded()) {
             if ($this->queue->available_jobs() > 0) {
-                $this->process_next_job();
-                $jobs_processed++;
+                if ($this->process_next_job()) {
+                    $jobs_processed++;
+                }
                 continue;
             }
             break;

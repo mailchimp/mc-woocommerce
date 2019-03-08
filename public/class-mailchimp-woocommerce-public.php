@@ -72,9 +72,13 @@ class MailChimp_WooCommerce_Public {
 		wp_localize_script($this->plugin_name, 'mailchimp_public_data', array(
 			'site_url' => site_url(),
 			'ajax_url' => admin_url('admin-ajax.php'),
+            'queue_url' =>  MailChimp_WooCommerce_Rest_Api::url('queue/work'),
+            'queue_should_fire' => mailchimp_should_init_rest_queue(),
 		));
-		// Enqueued script with localized data.
-		wp_enqueue_script($this->plugin_name, '', array(), $this->version, true);
+
+        // Enqueued script with localized data.
+        wp_enqueue_script($this->plugin_name, '', array(), $this->version, true);
+
 		//if we have the connected_site script url saved, we need to inject it
         if (($site = mailchimp_get_connected_site_script_url()) && !empty($site)) {
            wp_enqueue_script($this->plugin_name.'_connected_site', $site, array(), $this->version, true);

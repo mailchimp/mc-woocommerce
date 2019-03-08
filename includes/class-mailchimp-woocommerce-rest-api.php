@@ -18,9 +18,7 @@ class MailChimp_WooCommerce_Rest_Api
      */
     public static function test()
     {
-        // this is the new rest API version
-        $ns = static::$namespace;
-        return wp_remote_post(static::url('ping'), array(
+        return wp_remote_get(static::url('ping'), array(
             'timeout'   => 5,
             'blocking'  => true,
             'cookies'   => $_COOKIE,
@@ -36,7 +34,7 @@ class MailChimp_WooCommerce_Rest_Api
     public static function work()
     {
         // this is the new rest API version
-        return wp_remote_post(static::url('queue/work'), array(
+        return wp_remote_get(static::url('queue/work'), array(
             'timeout'   => 0.01,
             'blocking'  => false,
             'cookies'   => $_COOKIE,

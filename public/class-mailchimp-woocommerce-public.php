@@ -75,6 +75,10 @@ class MailChimp_WooCommerce_Public {
             'queue_url' =>  MailChimp_WooCommerce_Rest_Api::url('queue/work'),
             'queue_should_fire' => mailchimp_should_init_rest_queue(),
 		));
+
+        // Enqueued script with localized data.
+        wp_enqueue_script($this->plugin_name, '', array(), $this->version, true);
+
 		//if we have the connected_site script url saved, we need to inject it
         if (($site = mailchimp_get_connected_site_script_url()) && !empty($site)) {
            wp_enqueue_script($this->plugin_name.'_connected_site', $site, array(), $this->version, true);

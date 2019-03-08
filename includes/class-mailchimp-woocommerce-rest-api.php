@@ -72,6 +72,11 @@ class MailChimp_WooCommerce_Rest_Api
             'callback' => array($this, 'queue_work'),
         ));
 
+        register_rest_route(static::$namespace, "/queue/stats", array(
+            'methods' => 'GET',
+            'callback' => array($this, 'queue_stats'),
+        ));
+
         // this function can only be called after the rest routes have been registered.
         $this->fire_queue_for_fallback();
     }
@@ -83,6 +88,20 @@ class MailChimp_WooCommerce_Rest_Api
     public function ping(WP_REST_Request $request)
     {
         return mailchimp_rest_response(array('success' => true));
+    }
+
+    /**
+     * @return WP_REST_Response
+     */
+    public function queue_stats()
+    {
+        return mailchimp_rest_response(array(
+            'mailchimp_is_configured' => mailchimp_is_configured(),
+            'queue_type' => mailchimp_running_in_console() ? 'console' : 'rest',
+            'one_at_at_time' => mailchimp_queue_is_disabled(),
+            'queue_is_running' => mailchimp_http_worker_is_running(),
+            'jobs_in_queue' => number_format(MailChimp_WooCommerce_Queue::instance()->available_jobs()),
+        ));
     }
 
     /**

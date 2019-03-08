@@ -176,6 +176,7 @@ class MailChimp_WooCommerce
     private function load_dependencies()
     {
         global $wp_queue;
+
         if (empty($wp_queue)) {
             $wp_queue = new WP_Queue();
         }
@@ -183,29 +184,9 @@ class MailChimp_WooCommerce
         // fire up the loader
         $this->loader = new MailChimp_WooCommerce_Loader();
 
-        // only fire this up if they have configured mailchimp - and not running in the console.
-        if ((!mailchimp_running_in_console() && mailchimp_is_configured())) {
-            // fire up the http worker container
-            new WP_Http_Worker($wp_queue);
-        }
-
-        // if we're not running in the console, and the http_worker is not running
-        if (mailchimp_should_init_queue()) {
-            try {
-                // if we do not have a site transient for the queue listener
-                if (!get_site_transient('http_worker_queue_listen')) {
-                    // set the site transient to expire in 50 seconds so this will not happen too many times
-                    // but still work for cron scripts on the minute mark.
-                    set_site_transient('http_worker_queue_listen', microtime(), 50);
-                    // if we have available jobs, call the http worker manually
-                    if ($wp_queue->available_jobs()) {
-                        mailchimp_call_http_worker_manually();
-                    }
-                }
-            } catch (\Exception $e) {
-                mailchimp_error_trace($e, "loading dependencies");
-            }
-        }
+        // change up the queue to use the new rest api version
+        $service = new MailChimp_WooCommerce_Rest_Api();
+        $this->loader->add_action( 'rest_api_init', $service, 'register_routes');
     }
 
     /**

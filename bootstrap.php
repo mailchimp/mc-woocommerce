@@ -20,6 +20,8 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce' => 'includes/class-mailchimp-woocommerce.php',
         'MailChimp_WooCommerce_Privacy' => 'includes/class-mailchimp-woocommerce-privacy.php',
         'Mailchimp_Woocommerce_Deactivation_Survey' => 'includes/class-mailchimp-woocommerce-deactivation-survey.php',
+        'MailChimp_WooCommerce_Queue' => 'includes/class-mailchimp-woocommerce-queue.php',
+        'MailChimp_WooCommerce_Rest_Api' => 'includes/class-mailchimp-woocommerce-rest-api.php',
         
         // includes/api/assets
         'MailChimp_WooCommerce_Address' => 'includes/api/assets/class-mailchimp-address.php',
@@ -60,6 +62,7 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_Single_Order' => 'includes/processes/class-mailchimp-woocommerce-single-order.php',
         'MailChimp_WooCommerce_Single_Product' => 'includes/processes/class-mailchimp-woocommerce-single-product.php',
         'MailChimp_WooCommerce_User_Submit' => 'includes/processes/class-mailchimp-woocommerce-user-submit.php',
+        'MailChimp_WooCommerce_Rest_Queue' => 'includes/processes/class-mailchimp-woocommerce-rest-queue.php',
 
         'MailChimp_WooCommerce_Public' => 'public/class-mailchimp-woocommerce-public.php',
         'MailChimp_WooCommerce_Admin' => 'admin/class-mailchimp-woocommerce-admin.php',
@@ -167,21 +170,22 @@ if (!function_exists( 'wp_queue')) {
 function mailchimp_handle_or_queue(WP_Job $job, $delay = 0)
 {
     wp_queue($job, $delay);
-    if (mailchimp_queue_is_disabled()) {
-        mailchimp_call_http_worker_manually();
+
+    if (mailchimp_should_init_rest_queue()) {
+        mailchimp_call_rest_api_queue_manually();
     }
 }
 
 /**
+ * @param bool $job_check
  * @return bool
  */
-function mailchimp_should_init_queue() {
-    return !mailchimp_queue_is_disabled() &&
-        !mailchimp_running_in_console() &&
-        !mailchimp_detect_request_contains_http_worker() &&
-        mailchimp_detect_admin_ajax() &&
-        mailchimp_is_configured() &&
-        !mailchimp_http_worker_is_running();
+function mailchimp_should_init_rest_queue($job_check = false) {
+    if (mailchimp_running_in_console()) return false;
+    if (mailchimp_queue_is_disabled()) return false;
+    if (!mailchimp_is_configured()) return false;
+    if (mailchimp_http_worker_is_running()) return false;
+    return !$job_check ? true : MailChimp_WooCommerce_Queue::instance()->available_jobs() > 0;
 }
 
 /**
@@ -220,16 +224,6 @@ function mailchimp_should_reset_http_lock() {
  */
 function mailchimp_reset_http_lock() {
     return delete_site_transient( 'http_worker_lock' );
-}
-
-/**
- * @return bool
- */
-function mailchimp_detect_request_contains_http_worker() {
-    global $wp;
-    if (empty($wp) || !is_object($wp) || !isset($wp->request)) return false;
-    $current_url = home_url(add_query_arg(array(), $wp->request));
-    return mailchimp_string_contains($current_url, 'action=http_worker');
 }
 
 /**
@@ -623,7 +617,7 @@ function mailchimp_update_connected_site_script() {
             // handle the coupon sync if we don't have a flag that says otherwise.
             $job = new MailChimp_WooCommerce_Process_Coupons();
             if ($job->getData('sync.coupons.completed_at', false) === false) {
-                wp_queue($job);
+                mailchimp_handle_or_queue($job);
             }
             return mailchimpi_refresh_connected_site_script($store);
         }
@@ -794,45 +788,17 @@ function mailchimp_hash_trim_lower($str) {
 }
 
 /**
- * @param bool $block
  * @return array|WP_Error
  */
-function mailchimp_call_http_worker_manually($block = false) {
-    $action = 'http_worker';
-    $query_args = apply_filters('http_worker_query_args', array(
-        'action' => $action,
-        'nonce'  => wp_create_nonce($action),
-        'test' => $block === true ? '1' : '0',
-    ));
-    $query_url = apply_filters('http_worker_query_url', admin_url('admin-ajax.php'));
-    $post_args = apply_filters('http_worker_post_args', array(
-        'timeout'   => $block ? 60 : 0.01,
-        'blocking'  => $block,
-        'cookies'   => $_COOKIE,
-        'sslverify' => apply_filters('https_local_ssl_verify', false),
-    ));
-    $url = add_query_arg($query_args, $query_url);
-    return wp_remote_post(esc_url_raw($url), $post_args);
+function mailchimp_call_rest_api_queue_manually() {
+    return MailChimp_WooCommerce_Rest_Api::work();
 }
 
 /**
  * @return array|WP_Error
  */
-function mailchimp_call_admin_ajax_test() {
-    $action = 'http_worker_test';
-    $query_args = apply_filters('http_worker_query_args', array(
-        'action' => $action,
-        'nonce'  => wp_create_nonce($action),
-    ));
-    $query_url = apply_filters('http_worker_query_url', admin_url('admin-ajax.php'));
-    $post_args = apply_filters('http_worker_post_args', array(
-        'timeout'   => 5,
-        'blocking'  => true,
-        'cookies'   => $_COOKIE,
-        'sslverify' => apply_filters('https_local_ssl_verify', false),
-    ));
-    $url = add_query_arg($query_args, $query_url);
-    return wp_remote_post(esc_url_raw($url), $post_args);
+function mailchimp_call_rest_api_test() {
+    return MailChimp_WooCommerce_Rest_Api::test();
 }
 
 /**
@@ -854,19 +820,23 @@ function mailchimp_woocommerce_check_if_http_worker_fails() {
     }
 
     // apply a blocking call to make sure we get the response back
-    $response = mailchimp_call_admin_ajax_test();
+    $response = mailchimp_call_rest_api_test();
 
     if (is_wp_error($response)) {
         // nope, we have problems
         mailchimp_set_data('test.can.remote_post', false);
         mailchimp_set_data('test.can.remote_post.error', $response->get_error_message());
         return $response->get_error_message();
-    } elseif (is_array($response) && isset($response['http_response']) && ($r = $response['http_response'])){
+    } elseif (is_array($response) && isset($response['http_response']) && ($r = $response['http_response'])) {
         /** @var \WP_HTTP_Requests_Response $r */
-        if ($r->get_status() >= 400) {
-            return 'admin-ajax.php seems to be disabled on this wordpress site. Please enable to sync data.';
+        if ((int) $r->get_status() !== 200) {
+            $message = 'The REST API seems to be disabled on this wordpress site. Please enable to sync data.';
+            mailchimp_set_data('test.can.remote_post', false);
+            mailchimp_set_data('test.can.remote_post.error', $message);
+            return $message;
         }
     }
+
     // yep all good.
     mailchimp_set_data('test.can.remote_post', true);
     mailchimp_set_data('test.can.remote_post.error', false);
@@ -1008,6 +978,18 @@ function mailchimp_clean_database() {
     delete_option('mailchimp-woocommerce-cached-api-lists');
     delete_option('mailchimp-woocommerce-cached-api-ping-check');
     delete_option('mailchimp-woocommerce-errors.store_info');
+}
+
+/**
+ * @param array $data
+ * @param int $status
+ * @return WP_REST_Response
+ */
+function mailchimp_rest_response($data, $status = 200) {
+    if (!is_array($data)) $data = array();
+    $response = new WP_REST_Response($data);
+    $response->set_status($status);
+    return $response;
 }
 
 function run_mailchimp_woocommerce() {

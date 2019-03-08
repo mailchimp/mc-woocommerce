@@ -277,7 +277,7 @@ if ( ! class_exists( 'WP_Http_Worker' ) ) {
 			$query_args = apply_filters( 'http_worker_query_args', array(
 				'action' => $action,
 				'nonce'  => wp_create_nonce( $action ),
-			) );
+			));
 
 			$query_url = apply_filters( 'http_worker_query_url', admin_url( 'admin-ajax.php' ) );
 

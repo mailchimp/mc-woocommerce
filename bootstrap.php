@@ -165,13 +165,15 @@ if (!function_exists( 'wp_queue')) {
 
 /**
  * @param WP_Job $job
- * @param $delay
+ * @param int $delay
+ * @param bool $force_now
  */
-function mailchimp_handle_or_queue(WP_Job $job, $delay = 0)
+function mailchimp_handle_or_queue(WP_Job $job, $delay = 0, $force_now = false)
 {
     wp_queue($job, $delay);
 
-    if (mailchimp_should_init_rest_queue()) {
+    // force now is used during the sync.
+    if ($force_now === true || mailchimp_should_init_rest_queue()) {
         mailchimp_call_rest_api_queue_manually();
     }
 }

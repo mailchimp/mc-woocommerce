@@ -15,7 +15,6 @@ class MailChimp_WooCommerce_Rest_Queue
      */
     protected $payload;
 
-
     /**
      * Has the worker been dispatched in this request?
      *
@@ -61,6 +60,7 @@ class MailChimp_WooCommerce_Rest_Queue
 
         // Worker already running, die
         if ($this->is_worker_running()) {
+            mailchimp_debug('rest_queue', 'blocked process because it was already running');
             return 'worker is running';
         }
 
@@ -234,7 +234,7 @@ class MailChimp_WooCommerce_Rest_Queue
      */
     protected function again()
     {
-        wp_remote_post(esc_url_raw(rest_url('mailchimp-for-woocommerce/v1/queue/work/force')), array(
+        wp_remote_get(esc_url_raw(rest_url('mailchimp-for-woocommerce/v1/queue/work/force')), array(
             'timeout'   => 0.01,
             'blocking'  => false,
             'cookies'   => $_COOKIE,

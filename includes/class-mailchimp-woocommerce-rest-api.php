@@ -30,12 +30,14 @@ class MailChimp_WooCommerce_Rest_Api
     /**
      * Call the "work" command manually to initiate the queue.
      *
+     * @param bool $force
      * @return mixed
      */
-    public static function work()
+    public static function work($force = false)
     {
+        $path = $force ? 'queue/work/force' : 'queue/work';
         // this is the new rest API version
-        return wp_remote_get(static::url('queue/work'), array(
+        return wp_remote_get(static::url($path), array(
             'timeout'   => 0.01,
             'blocking'  => false,
             'cookies'   => $_COOKIE,
@@ -60,6 +62,17 @@ class MailChimp_WooCommerce_Rest_Api
         register_rest_route(static::$namespace, '/ping', array(
             'methods' => 'GET',
             'callback' => array($this, 'ping'),
+        ));
+    }
+
+    /**
+     * Right now we only have a survey disconnect endpoint.
+     */
+    protected function register_survey_routes()
+    {
+        register_rest_route(static::$namespace, "/survey/disconnect", array(
+            'methods' => 'POST',
+            'callback' => array($this, 'post_disconnect_survey'),
         ));
     }
 
@@ -108,6 +121,7 @@ class MailChimp_WooCommerce_Rest_Api
             'queue_type' => mailchimp_running_in_console() ? 'console' : 'rest',
             'one_at_at_time' => mailchimp_queue_is_disabled(),
             'queue_is_running' => mailchimp_http_worker_is_running(),
+            'should_init_queue' => mailchimp_should_init_rest_queue(),
             'jobs_in_queue' => number_format(MailChimp_WooCommerce_Queue::instance()->available_jobs()),
         ));
     }
@@ -121,6 +135,11 @@ class MailChimp_WooCommerce_Rest_Api
      */
     public function queue_work(WP_REST_Request $request)
     {
+        // if we're going to dispatch the manual request on this process, just return a "spawning" reason.
+        if ($this->http_worker_listen === true) {
+            return mailchimp_rest_response(array('success' => false, 'reason' => 'spawning'));
+        }
+
         // if the queue is running in the console - we need to say tell the response why it's not going to fire this way.
         if (mailchimp_running_in_console()) {
             return mailchimp_rest_response(array('success' => false, 'reason' => 'cli enabled'));
@@ -145,6 +164,11 @@ class MailChimp_WooCommerce_Rest_Api
      */
     public function queue_work_force(WP_REST_Request $request)
     {
+        // if we're going to dispatch the manual request on this process, just return a "spawning" reason.
+        if ($this->http_worker_listen === true) {
+            return mailchimp_rest_response(array('success' => false, 'reason' => 'spawning'));
+        }
+
         // if the queue is running in the console - we need to say tell the response why it's not going to fire this way.
         if (mailchimp_running_in_console()) {
             return mailchimp_rest_response(array('success' => false, 'reason' => 'cli enabled'));
@@ -159,6 +183,31 @@ class MailChimp_WooCommerce_Rest_Api
         // chances are this will never be returned to JS at all just because we're using a 0.01 second timeout
         // but we need to do it just in case.
         return mailchimp_rest_response(array('success' => true, 'processed' => $jobs_processed));
+    }
+
+    /**
+     * @param WP_REST_Request $request
+     * @return WP_REST_Response
+     */
+    public function post_disconnect_survey(WP_REST_Request $request)
+    {
+        // need to send a post request to
+        $host = mailchimp_environment_variables()->environment === 'staging' ?
+            'https://staging.conduit.vextras.com' : 'https://conduit.mailchimpapp.com';
+
+        $route = "{$host}/survey/woocommerce";
+
+        wp_remote_post(esc_url_raw($route), array(
+            'timeout'   => 12,
+            'blocking'  => true,
+            'sslverify' => apply_filters('https_local_ssl_verify', false),
+            'method'      => 'POST',
+            'data_format' => 'body',
+            'headers'     => array('Content-Type' => 'application/json; charset=utf-8'),
+            'body'        => json_encode($request->get_json_params()),
+        ));
+
+        return mailchimp_rest_response(array('success' => true));
     }
 
     /**
@@ -182,7 +231,7 @@ class MailChimp_WooCommerce_Rest_Api
                     return $this->http_worker_listen = true;
                 }
             } catch (\Exception $e) {
-                mailchimp_error_trace($e, "maybe_fire_manually");
+                mailchimp_error('maybe_fire_manually', mailchimp_error_trace($e, "maybe_fire_manually"));
             }
         }
 

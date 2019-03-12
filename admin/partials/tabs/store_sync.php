@@ -24,6 +24,12 @@ $mailchimp_list_name = 'n/a';
 if (!empty($last_updated_time)) {
     $last_updated_time = mailchimp_date_local($last_updated_time);
 }
+
+// if we have a transient set to start the sync on this page view, initiate it now that the values have been saved.
+if ((bool) get_site_transient('mailchimp_woocommerce_start_sync', false)) {
+    MailChimp_WooCommerce_Admin::startSync();
+}
+
 if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore($store_id))) {
     $store_syncing = $store->isSyncing();
     if (($account_details = $handler->getAccountDetails())) {

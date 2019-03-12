@@ -25,26 +25,29 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	protected $swapped_list_id = null;
 	protected $swapped_store_id = null;
 
+    /** @var null|static */
+    protected static $_instance = null;
+
+    /**
+     * @return MailChimp_WooCommerce_Admin
+     */
+    public static function instance()
+    {
+        if (!empty(static::$_instance)) {
+            return static::$_instance;
+        }
+        $env = mailchimp_environment_variables();
+        static::$_instance = new MailChimp_WooCommerce_Admin();
+        static::$_instance->setVersion($env->version);
+        return static::$_instance;
+    }
+
 	/**
-	 * @return MailChimp_WooCommerce_Admin
+	 * @return MailChimp_WooCommerce_Admin|MailChimp_WooCommerce_Options
 	 */
 	public static function connect()
 	{
-		$env = mailchimp_environment_variables();
-
-		return new self('mailchimp-woocommerce', $env->version);
-	}
-
-	/**
-	 * Initialize the class and set its properties.
-	 *
-	 * @since    1.0.0
-	 * @param      string    $plugin_name       The name of this plugin.
-	 * @param      string    $version    The version of this plugin.
-	 */
-	public function __construct( $plugin_name, $version ) {
-		$this->plugin_name = $plugin_name;
-		$this->version = $version;
+		return static::instance();
 	}
 
 	/**
@@ -222,8 +225,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 $service = new MailChimp_Service();
                 $service->removePointers(true, true);
 
-                $this->startSync();
+                static::startSync();
+
                 $this->showSyncStartedMessage();
+
                 $this->setData('sync.config.resync', true);
 				break;
 
@@ -515,8 +520,16 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 			// start the sync automatically if the sync is false
 			if ((bool) $this->getData('sync.started_at', false) === false) {
-				$this->startSync();
-				$this->showSyncStartedMessage();
+                // tell the next page view to start the sync with a transient since the data isn't available yet
+                set_site_transient('mailchimp_woocommerce_start_sync', microtime(), 30);
+
+                $this->setData('sync.config.resync', false);
+                $this->setData('sync.orders.current_page', 1);
+                $this->setData('sync.products.current_page', 1);
+                $this->setData('sync.syncing', true);
+                $this->setData('sync.started_at', time());
+
+                $this->showSyncStartedMessage();
 			}
 
             $data['active_tab'] = 'sync';
@@ -530,6 +543,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
         return $data;
 	}
+
+
 
 	/**
 	 * @param null|array $data
@@ -909,19 +924,23 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		return true;
 	}
 
-	/**a:4:{s:19:"mailchimp_debugging";b:0;s:25:"mailchimp_account_info_id";N;s:31:"mailchimp_account_info_username";N;s:10:"active_tab";s:7:"api_key";}
-	 * Start the sync
-	 */
-	private function startSync()
+    /**
+     * Start the sync
+     */
+	public static function startSync()
 	{
-	    mailchimp_flush_sync_pointers();
+	    // delete the transient so this only happens one time.
+	    delete_site_transient('mailchimp_woocommerce_start_sync');
 
-	    $coupon_sync = new MailChimp_WooCommerce_Process_Coupons();
-	    mailchimp_handle_or_queue($coupon_sync);
+        $coupon_sync = new MailChimp_WooCommerce_Process_Coupons();
+        $product_sync = new MailChimp_WooCommerce_Process_Products();
 
-		$job = new MailChimp_WooCommerce_Process_Products();
-		$job->flagStartSync();
-		mailchimp_handle_or_queue($job, 0, true);
+        // tell Mailchimp that we're syncing
+        $product_sync->flagStartSync();
+
+        // queue up the jobs
+        mailchimp_handle_or_queue($coupon_sync);
+        mailchimp_handle_or_queue($product_sync, 0, true);
 	}
 
 	/**

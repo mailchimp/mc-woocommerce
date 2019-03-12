@@ -52,6 +52,7 @@ class MailChimp_WooCommerce_Rest_Api
     {
         $this->register_ping();
         $this->register_routes_for_queue();
+        $this->register_survey_routes();
     }
 
     /**
@@ -197,17 +198,17 @@ class MailChimp_WooCommerce_Rest_Api
 
         $route = "{$host}/survey/woocommerce";
 
-        wp_remote_post(esc_url_raw($route), array(
+        $result = wp_remote_post(esc_url_raw($route), array(
             'timeout'   => 12,
             'blocking'  => true,
             'sslverify' => apply_filters('https_local_ssl_verify', false),
             'method'      => 'POST',
             'data_format' => 'body',
             'headers'     => array('Content-Type' => 'application/json; charset=utf-8'),
-            'body'        => json_encode($request->get_json_params()),
+            'body'        => json_encode($request->get_params()),
         ));
 
-        return mailchimp_rest_response(array('success' => true));
+        return mailchimp_rest_response($result);
     }
 
     /**

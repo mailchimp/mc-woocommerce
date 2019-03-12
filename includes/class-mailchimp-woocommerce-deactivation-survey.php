@@ -7,7 +7,7 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Deactivation_Survey', false ) ) {
 	 *
 	 * @version    1.2.1
 	 * @package    AwesomeMotive
-	 * @author     Jared Atchison and Chris Christoff
+	 * @author     Jared Atchison and Chris Christoff (modified by Pedro Germani)
 	 * @license    GPL-2.0+
 	 * @copyright  Copyright (c) 2018
 	 */
@@ -19,7 +19,7 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Deactivation_Survey', false ) ) {
 		 * @since 1.0.0
 		 * @var string
 		 */
-		public $api_url = 'http://vextras.local';
+		public $endpoint;
 
 		/**
 		 * Name for this plugin.
@@ -48,6 +48,7 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Deactivation_Survey', false ) ) {
 
 			$this->name   = $name;
 			$this->plugin = $plugin;
+			$this->endpoint = get_rest_url(null, 'mailchimp-for-woocommerce/v1/survey/disconnect');
 
 			// Don't run deactivation survey on dev sites.
 			if ( $this->is_dev_url() ) {
@@ -112,7 +113,7 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Deactivation_Survey', false ) ) {
 					}
 				}
 			}
-			return false; //$is_local_url;
+			return $is_local_url;
 		}
 
 		/**
@@ -148,7 +149,6 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Deactivation_Survey', false ) ) {
 					formOpen        = false;
 				// Plugin listing table deactivate link.
 				$deactivateLink.on('click', function(event) {
-					console.log(event)
 					event.preventDefault();
 					$overlay.css('display', 'table');
 					formOpen = true;
@@ -156,7 +156,6 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Deactivation_Survey', false ) ) {
 				});
 				// Survey radio option selected.
 				$form.on('change', 'input[type=radio]', function(event) {
-					console.log(event)
 					event.preventDefault();
 					$form.find('input[type=text], .error').hide();
 					$form.find('.mailchimp-woocommerce-deactivate-survey-option').removeClass('selected');
@@ -164,34 +163,43 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Deactivation_Survey', false ) ) {
 				});
 				// Survey Skip & Deactivate.
 				$form.on('click', '.mailchimp-woocommerce-deactivate-survey-deactivate', function(event) {
-					console.log(event)
 					event.preventDefault();
 					location.href = $deactivateLink.attr('href');
 				});
 				// Survey submit.
 				$form.submit(function(event) {
-					console.log(event)
 					event.preventDefault();
 					if (! $form.find('input[type=radio]:checked').val()) {
 						$form.find('.mailchimp-woocommerce-deactivate-survey-footer').prepend('<span class="error"><?php echo esc_js( __( 'Please select an option', 'mailchimp-woocommerce' ) ); ?></span>');
 						return;
 					}
-					var data = {
-						code: $form.find('.selected input[type=radio]').val(),
-						reason: $form.find('.selected .mailchimp-woocommerce-deactivate-survey-option-reason').text(),
-						details: $form.find('.selected input[type=text]').val(),
-						site: '<?php echo esc_url( home_url() ); ?>',
-						plugin: '<?php echo sanitize_key( $this->name ); ?>'
-					}
-					console.log('data:', data);
-					// var submitSurvey = $.post('<?php echo $this->api_url; ?>', data);
-					// submitSurvey.always(function() {
-					// 	location.href = $deactivateLink.attr('href');
-					// });
+					var submitSurvey = $.ajax(
+						{
+							url: "<?php echo $this->endpoint; ?>",
+							type: "POST",
+							data: {
+								id: '<?php echo mailchimp_get_store_id()?>',
+								url: '<?php echo esc_url( home_url() ); ?>',
+								data: {
+									code: $form.find('.selected input[type=radio]').val(),
+									reason: $form.find('.selected .mailchimp-woocommerce-deactivate-survey-option-reason').text(),
+									details: $form.find('.selected input[type=text]').val(),
+									plugin: '<?php echo sanitize_key( $this->name ); ?>'
+								}
+							},
+							dataType: 'json',
+							async: false,
+							success: function(msg) {
+								location.href = $deactivateLink.attr('href');
+							},
+							always: function() {
+								
+							},
+						}
+					)
 				});
 				// Exit key closes survey when open.
 				$(document).keyup(function(event) {
-					console.log(event)
 					if (27 === event.keyCode && formOpen) {
 						$overlay.hide();
 						formOpen = false;
@@ -322,24 +330,15 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Deactivation_Survey', false ) ) {
 				),
 				8 => array(
 					'title'   => esc_html__( 'My integration isn’t working as expected.', 'mailchimp-woocommerce' ),
+					'details' => esc_html__( 'Please share the reason', 'mailchimp-woocommerce' ),
 				),
 				9 => array(
 					'title'   => esc_html__( 'I no longer use this integration.', 'mailchimp-woocommerce' ),
 				),
 				10 => array(
-					'title'   => esc_html__( 'My order data isn’t syncing.', 'mailchimp-woocommerce' ),
-				),
-				11 => array(
-					'title'   => esc_html__( 'I\'m switching to a different plugin', 'mailchimp-woocommerce' ),
-					'details' => esc_html__( 'Please share which plugin', 'mailchimp-woocommerce' ),
-				),
-				12 => array(
-					'title'   => esc_html__( 'I couldn\'t get the plugin to work', 'mailchimp-woocommerce' ),
-				),
-				13 => array(
 					'title'   => esc_html__( 'It\'s a temporary deactivation', 'mailchimp-woocommerce' ),
 				),
-				14 => array(
+				11 => array(
 					'title'   => esc_html__( 'Other', 'mailchimp-woocommerce' ),
 					'details' => esc_html__( 'Please share the reason', 'mailchimp-woocommerce' ),
 				),

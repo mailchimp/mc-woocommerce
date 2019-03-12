@@ -225,8 +225,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 $service = new MailChimp_Service();
                 $service->removePointers(true, true);
 
-                $this->startSync();
+                static::startSync();
+
                 $this->showSyncStartedMessage();
+
                 $this->setData('sync.config.resync', true);
 				break;
 
@@ -518,8 +520,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 			// start the sync automatically if the sync is false
 			if ((bool) $this->getData('sync.started_at', false) === false) {
-				$this->startSync();
-				$this->showSyncStartedMessage();
+                // tell the next page view to start the sync with a transient since the data isn't available yet
+                set_site_transient('mailchimp_woocommerce_start_sync', microtime(), 30);
+                $this->showSyncStartedMessage();
 			}
 
             $data['active_tab'] = 'sync';
@@ -533,6 +536,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
         return $data;
 	}
+
+
 
 	/**
 	 * @param null|array $data
@@ -915,17 +920,20 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
     /**
      * Start the sync
      */
-	private function startSync()
+	public static function startSync()
 	{
-        // fire up the coupon sync
+	    // delete the transient so this only happens one time.
+	    delete_site_transient('mailchimp_woocommerce_start_sync');
+
         $coupon_sync = new MailChimp_WooCommerce_Process_Coupons();
         $product_sync = new MailChimp_WooCommerce_Process_Products();
+
+        // tell Mailchimp that we're syncing
         $product_sync->flagStartSync();
 
-        mailchimp_reset_http_lock();
-
-	    mailchimp_handle_or_queue($coupon_sync);
-		mailchimp_handle_or_queue($product_sync, 0, true);
+        // queue up the jobs
+        mailchimp_handle_or_queue($coupon_sync);
+        mailchimp_handle_or_queue($product_sync, 0, true);
 	}
 
 	/**

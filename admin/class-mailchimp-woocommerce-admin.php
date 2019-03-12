@@ -90,13 +90,13 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function setup_survey_form() {
 		if (is_admin()) {
-			try {
-				new Mailchimp_Woocommerce_Deactivation_Survey( $this->plugin_name, 'mailchimp-for-woocommerce' );
-			} catch (\Throwable $e) {
-				mailchimp_error('admin@setup_survey_form', $e->getCode().' :: '.$e->getMessage().' on '.$e->getLine().' in '.$e->getFile());
-				return false;
-			}	
-		}		
+            try {
+                new Mailchimp_Woocommerce_Deactivation_Survey($this->plugin_name, 'mailchimp-for-woocommerce');
+            } catch (\Throwable $e) {
+                mailchimp_error('admin@setup_survey_form', $e->getCode() . ' :: ' . $e->getMessage() . ' on ' . $e->getLine() . ' in ' . $e->getFile());
+                return false;
+            }
+        }
 	}
 
     /**
@@ -709,6 +709,41 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		return true;
 	}
+
+    public function inject_sync_ajax_call() { global $wp; ?>
+        <script type="text/javascript" >
+            jQuery(document).ready(function($) {
+                var endpoint = '<?php echo MailChimp_WooCommerce_Rest_Api::url('sync/stats'); ?>';
+                var on_sync_tab = '<?php echo (mailchimp_check_if_on_sync_tab() ? 'yes' : 'no')?>';
+
+                if (on_sync_tab === 'yes') {
+                    var call_mailchimp_for_stats = function () {
+                        jQuery.get(endpoint, function(response) {
+                            if (response.success) {
+                                jQuery('#mailchimp_product_count').html(response.products_in_mailchimp.toLocaleString(undefined, {
+                                    maximumFractionDigits: 0
+                                }));
+
+                                jQuery('#mailchimp_order_count').html(response.orders_in_mailchimp.toLocaleString(undefined, {
+                                    maximumFractionDigits: 0
+                                }));
+
+                                jQuery('#mailchimp_last_updated').html(response.date);
+
+                                setTimeout(function() {
+                                    call_mailchimp_for_stats();
+                                }, 10000);
+                            }
+                        });
+                    };
+
+                    setTimeout(function() {
+                        call_mailchimp_for_stats();
+                    }, 10000);
+                }
+            });
+        </script> <?php
+    }
 
 	/**
 	 * @param null|array $data

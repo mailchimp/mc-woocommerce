@@ -943,6 +943,15 @@ function mailchimp_get_subscriber_status_options($subscribed) {
     );
 }
 
+function mailchimp_check_if_on_sync_tab() {
+    if ((isset($_GET['page']) && $_GET['page'] === 'mailchimp-woocommerce')) {
+        if ((isset($_GET['tab']) && $_GET['tab'] === 'sync')) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function mailchimp_flush_queue_tables() {
     try {
         /** @var \ */

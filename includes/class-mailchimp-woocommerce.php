@@ -244,7 +244,8 @@ class MailChimp_WooCommerce
 
         $this->loader->add_action('plugins_loaded', $plugin_admin, 'update_db_check');
         $this->loader->add_action('admin_init', $plugin_admin, 'setup_survey_form');
-	}
+        $this->loader->add_action('admin_footer', $plugin_admin, 'inject_sync_ajax_call');
+    }
 
 	/**
 	 * Register all of the hooks related to the public-facing functionality

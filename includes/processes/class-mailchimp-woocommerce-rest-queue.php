@@ -234,7 +234,7 @@ class MailChimp_WooCommerce_Rest_Queue
      */
     protected function again()
     {
-        wp_remote_get(esc_url_raw(rest_url('mailchimp-for-woocommerce/v1/queue/work/force')), array(
+        wp_remote_get(esc_url_raw(rest_url('mailchimp-for-woocommerce/v1/queue/work')), array(
             'timeout'   => 0.01,
             'blocking'  => false,
             'cookies'   => $_COOKIE,

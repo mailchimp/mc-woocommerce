@@ -921,7 +921,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		$job = new MailChimp_WooCommerce_Process_Products();
 		$job->flagStartSync();
-		mailchimp_handle_or_queue($job);
+		mailchimp_handle_or_queue($job, 0, true);
 	}
 
 	/**

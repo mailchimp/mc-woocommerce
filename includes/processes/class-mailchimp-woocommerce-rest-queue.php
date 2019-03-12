@@ -179,8 +179,9 @@ class MailChimp_WooCommerce_Rest_Queue
      */
     protected function time_exceeded()
     {
-        $finish = $this->start_time + apply_filters('http_worker_default_time_limit', 20); // 20 seconds
-        return apply_filters( 'http_worker_time_exceeded', time() >= $finish);
+        $time_limit = apply_filters('http_worker_default_time_limit', 20);
+        $finish = $this->start_time + $time_limit; // 20 seconds
+        return apply_filters( 'http_worker_time_exceeded', ((time() + 2) >= $finish));
     }
 
     /**
@@ -213,7 +214,7 @@ class MailChimp_WooCommerce_Rest_Queue
     public function lock_worker()
     {
         $this->start_time = time(); // Set start time of current worker
-        set_site_transient('http_worker_lock', microtime(), apply_filters('http_worker_lock_time', 60));
+        set_site_transient('http_worker_lock', microtime(), 60);
     }
 
     /**
@@ -223,7 +224,9 @@ class MailChimp_WooCommerce_Rest_Queue
      */
     public function unlock_worker()
     {
-        delete_site_transient('http_worker_lock');
+        if (!delete_site_transient('http_worker_lock')) {
+            mailchimp_log('rest-queue', 'http_worker_lock did not delete properly - will respawn in 60 seconds.');
+        }
     }
 
     /**
@@ -231,7 +234,7 @@ class MailChimp_WooCommerce_Rest_Queue
      */
     protected function again()
     {
-        wp_remote_post(esc_url_raw(rest_url('mailchimp-for-woocommerce/v1/queue/work')), array(
+        wp_remote_post(esc_url_raw(rest_url('mailchimp-for-woocommerce/v1/queue/work/force')), array(
             'timeout'   => 0.01,
             'blocking'  => false,
             'cookies'   => $_COOKIE,

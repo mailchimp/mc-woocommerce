@@ -3,6 +3,7 @@
 class MailChimp_WooCommerce_Rest_Api
 {
     protected static $namespace = 'mailchimp-for-woocommerce/v1';
+    protected $http_worker_listen = false;
 
     /**
      * @param $path
@@ -72,13 +73,20 @@ class MailChimp_WooCommerce_Rest_Api
             'callback' => array($this, 'queue_work'),
         ));
 
+        register_rest_route(static::$namespace, "/queue/work/force", array(
+            'methods' => 'GET',
+            'callback' => array($this, 'queue_work_force'),
+        ));
+
         register_rest_route(static::$namespace, "/queue/stats", array(
             'methods' => 'GET',
             'callback' => array($this, 'queue_stats'),
         ));
 
-        // this function can only be called after the rest routes have been registered.
-        $this->fire_queue_for_fallback();
+        // if we have available jobs, it will handle async
+        if ($this->maybe_fire_manually()) {
+            static::work();
+        }
     }
 
     /**
@@ -132,9 +140,31 @@ class MailChimp_WooCommerce_Rest_Api
     }
 
     /**
-     *
+     * @param WP_REST_Request $request
+     * @return WP_REST_Response
      */
-    protected function fire_queue_for_fallback()
+    public function queue_work_force(WP_REST_Request $request)
+    {
+        // if the queue is running in the console - we need to say tell the response why it's not going to fire this way.
+        if (mailchimp_running_in_console()) {
+            return mailchimp_rest_response(array('success' => false, 'reason' => 'cli enabled'));
+        }
+
+        // reset the lock
+        mailchimp_reset_http_lock();
+
+        // using the singleton - handle the jobs if we have things to do - will return a count
+        $jobs_processed = MailChimp_WooCommerce_Rest_Queue::instance()->handle();
+
+        // chances are this will never be returned to JS at all just because we're using a 0.01 second timeout
+        // but we need to do it just in case.
+        return mailchimp_rest_response(array('success' => true, 'processed' => $jobs_processed));
+    }
+
+    /**
+     * @return bool
+     */
+    protected function maybe_fire_manually()
     {
         $transient = 'http_worker_queue_listen';
         $transient_expiration = 30;
@@ -147,12 +177,15 @@ class MailChimp_WooCommerce_Rest_Api
                     // set the site transient to expire in X seconds so this will not happen too many times
                     // but still work for cron scripts on the minute mark.
                     set_site_transient($transient, microtime(), $transient_expiration);
-                    // if we have available jobs, it will handle async
-                    static::work();
+
+                    // tell the site we're firing off a worker process now.
+                    return $this->http_worker_listen = true;
                 }
             } catch (\Exception $e) {
-                mailchimp_error_trace($e, "loading dependencies");
+                mailchimp_error_trace($e, "maybe_fire_manually");
             }
         }
+
+        return false;
     }
 }

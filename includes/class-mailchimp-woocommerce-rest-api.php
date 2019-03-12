@@ -53,7 +53,6 @@ class MailChimp_WooCommerce_Rest_Api
         $this->register_ping();
         $this->register_routes_for_queue();
         $this->register_survey_routes();
-        $this->register_sync_stats();
     }
 
     /**
@@ -101,19 +100,6 @@ class MailChimp_WooCommerce_Rest_Api
         // if we have available jobs, it will handle async
         if ($this->maybe_fire_manually()) {
             static::work();
-        }
-    }
-
-    /**
-     * Ping
-     */
-    protected function register_sync_stats()
-    {
-        if (current_user_can('editor') || current_user_can('administrator')) {
-            register_rest_route(static::$namespace, '/sync/stats', array(
-                'methods' => 'GET',
-                'callback' => array($this, 'get_sync_stats'),
-            ));
         }
     }
 
@@ -212,55 +198,17 @@ class MailChimp_WooCommerce_Rest_Api
 
         $route = "{$host}/survey/woocommerce";
 
-        wp_remote_post(esc_url_raw($route), array(
+        $result = wp_remote_post(esc_url_raw($route), array(
             'timeout'   => 12,
             'blocking'  => true,
             'sslverify' => apply_filters('https_local_ssl_verify', false),
             'method'      => 'POST',
             'data_format' => 'body',
             'headers'     => array('Content-Type' => 'application/json; charset=utf-8'),
-            'body'        => json_encode($request->get_json_params()),
+            'body'        => json_encode($request->get_params()),
         ));
 
-        return mailchimp_rest_response(array('success' => true));
-    }
-
-    /**
-     * @param WP_REST_Request $request
-     * @return WP_REST_Response
-     */
-    public function get_sync_stats(WP_REST_Request $request)
-    {
-        // if the queue is running in the console - we need to say tell the response why it's not going to fire this way.
-        if (!mailchimp_is_configured() || !($api = mailchimp_get_api())) {
-            return mailchimp_rest_response(array('success' => false, 'reason' => 'not configured'));
-        }
-
-        $store_id = mailchimp_get_store_id();
-        $product_count = mailchimp_get_product_count();
-        $order_count = mailchimp_get_order_count();
-
-        try {
-            $products = $api->products($store_id, 1, 1);
-            $mailchimp_total_products = $products['total_items'];
-            if ($mailchimp_total_products > $product_count) $mailchimp_total_products = $product_count;
-        } catch (\Exception $e) { $mailchimp_total_products = 0; }
-        try {
-            $orders = $api->orders($store_id, 1, 1);
-            $mailchimp_total_orders = $orders['total_items'];
-            if ($mailchimp_total_orders > $order_count) $mailchimp_total_orders = $order_count;
-        } catch (\Exception $e) { $mailchimp_total_orders = 0; }
-
-        $date = mailchimp_date_local('now');
-        // but we need to do it just in case.
-        return mailchimp_rest_response(array(
-            'success' => true,
-            'products_in_store' => $product_count,
-            'products_in_mailchimp' => $mailchimp_total_products,
-            'orders_in_store' => $order_count,
-            'orders_in_mailchimp' => $mailchimp_total_orders,
-            'date' => $date->format('D, M j, Y g:i A'),
-        ));
+        return mailchimp_rest_response($result);
     }
 
     /**

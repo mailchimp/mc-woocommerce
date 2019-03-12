@@ -113,7 +113,7 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Deactivation_Survey', false ) ) {
 					}
 				}
 			}
-			return false; //$is_local_url;
+			return $is_local_url;
 		}
 
 		/**

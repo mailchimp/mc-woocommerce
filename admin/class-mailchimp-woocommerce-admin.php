@@ -25,6 +25,23 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	protected $swapped_list_id = null;
 	protected $swapped_store_id = null;
 
+    /** @var null|static */
+    protected static $_instance = null;
+
+    /**
+     * @return MailChimp_WooCommerce_Admin
+     */
+    public static function instance()
+    {
+        if (!empty(static::$_instance)) {
+            return static::$_instance;
+        }
+        $env = mailchimp_environment_variables();
+        static::$_instance = new MailChimp_WooCommerce_Admin();
+        static::$_instance->setVersion($env->version);
+        return static::$_instance;
+    }
+
 	/**
 	 * @return MailChimp_WooCommerce_Admin|MailChimp_WooCommerce_Options
 	 */

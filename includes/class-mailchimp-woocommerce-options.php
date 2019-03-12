@@ -19,22 +19,6 @@ abstract class MailChimp_WooCommerce_Options
     protected $version = '1.0.0';
     protected $plugin_options = null;
     protected $is_admin = false;
-    /** @var null|static */
-    protected static $_instance = null;
-
-    /**
-     * @return MailChimp_WooCommerce_Options
-     */
-    public static function instance()
-    {
-        if (!empty(static::$_instance)) {
-            return static::$_instance;
-        }
-        $env = mailchimp_environment_variables();
-        static::$_instance = new static();
-        static::$_instance->setVersion($env->version);
-        return static::$_instance;
-    }
 
     /**
      * hook calls this so that we know the admin is here.

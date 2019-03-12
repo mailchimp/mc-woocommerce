@@ -118,7 +118,6 @@ class MailChimp_WooCommerce
      */
     public function __construct($environment = 'production', $version = '1.0.0')
     {
-
         $this->plugin_name = 'mailchimp-woocommerce';
         $this->version = $version;
         $this->environment = $environment;
@@ -225,7 +224,7 @@ class MailChimp_WooCommerce
 	 */
 	private function define_admin_hooks() {
 
-		$plugin_admin = new MailChimp_WooCommerce_Admin( $this->get_plugin_name(), $this->get_version() );
+		$plugin_admin = MailChimp_WooCommerce_Admin::instance();
 
 		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_styles');
 		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
@@ -267,7 +266,7 @@ class MailChimp_WooCommerce
 	 */
 	private function activateMailChimpNewsletter()
 	{
-		$service = new MailChimp_Newsletter();
+		$service = MailChimp_Newsletter::instance();
 
 		if ($this->is_configured && $service->isConfigured()) {
 
@@ -293,7 +292,7 @@ class MailChimp_WooCommerce
 	 */
 	private function activateMailChimpService()
 	{
-		$service = new MailChimp_Service();
+		$service = MailChimp_Service::instance();
 
 		if ($service->isConfigured()) {
 

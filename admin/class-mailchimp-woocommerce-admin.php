@@ -26,25 +26,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	protected $swapped_store_id = null;
 
 	/**
-	 * @return MailChimp_WooCommerce_Admin
+	 * @return MailChimp_WooCommerce_Admin|MailChimp_WooCommerce_Options
 	 */
 	public static function connect()
 	{
-		$env = mailchimp_environment_variables();
-
-		return new self('mailchimp-woocommerce', $env->version);
-	}
-
-	/**
-	 * Initialize the class and set its properties.
-	 *
-	 * @since    1.0.0
-	 * @param      string    $plugin_name       The name of this plugin.
-	 * @param      string    $version    The version of this plugin.
-	 */
-	public function __construct( $plugin_name, $version ) {
-		$this->plugin_name = $plugin_name;
-		$this->version = $version;
+		return static::instance();
 	}
 
 	/**
@@ -909,19 +895,20 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		return true;
 	}
 
-	/**a:4:{s:19:"mailchimp_debugging";b:0;s:25:"mailchimp_account_info_id";N;s:31:"mailchimp_account_info_username";N;s:10:"active_tab";s:7:"api_key";}
-	 * Start the sync
-	 */
+    /**
+     * Start the sync
+     */
 	private function startSync()
 	{
-	    mailchimp_flush_sync_pointers();
+        // fire up the coupon sync
+        $coupon_sync = new MailChimp_WooCommerce_Process_Coupons();
+        $product_sync = new MailChimp_WooCommerce_Process_Products();
+        $product_sync->flagStartSync();
 
-	    $coupon_sync = new MailChimp_WooCommerce_Process_Coupons();
+        mailchimp_reset_http_lock();
+
 	    mailchimp_handle_or_queue($coupon_sync);
-
-		$job = new MailChimp_WooCommerce_Process_Products();
-		$job->flagStartSync();
-		mailchimp_handle_or_queue($job, 0, true);
+		mailchimp_handle_or_queue($product_sync, 0, true);
 	}
 
 	/**

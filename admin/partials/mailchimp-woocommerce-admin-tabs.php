@@ -29,6 +29,11 @@ if (isset($options['mailchimp_api_key'])) {
                 $allow_new_list = false;
             }
 
+            // if we have a transient set to start the sync on this page view, initiate it now that the values have been saved.
+            if ((bool) get_site_transient('mailchimp_woocommerce_start_sync', false)) {
+                $show_sync_tab = true;
+            }
+
             // only display this button if the data is not syncing and we have a valid api key
             if ((bool) $this->getData('sync.started_at', false)) {
                 $show_sync_tab = true;

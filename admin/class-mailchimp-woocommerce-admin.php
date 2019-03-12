@@ -522,6 +522,13 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			if ((bool) $this->getData('sync.started_at', false) === false) {
                 // tell the next page view to start the sync with a transient since the data isn't available yet
                 set_site_transient('mailchimp_woocommerce_start_sync', microtime(), 30);
+
+                $this->setData('sync.config.resync', false);
+                $this->setData('sync.orders.current_page', 1);
+                $this->setData('sync.products.current_page', 1);
+                $this->setData('sync.syncing', true);
+                $this->setData('sync.started_at', time());
+
                 $this->showSyncStartedMessage();
 			}
 

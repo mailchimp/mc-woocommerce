@@ -314,31 +314,24 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Deactivation_Survey', false ) ) {
 					'title'   => esc_html__( 'I want to change the site or store connected through this integration.', 'mailchimp-woocommerce' ),
 				),
 				3 => array(
-					'title'   => esc_html__( 'My order data isn’t syncing.', 'mailchimp-woocommerce' ),
+					'title'   => esc_html__( 'The order data isn’t syncing.', 'mailchimp-woocommerce' ),
 				),
 				4 => array(
-					'title'   => esc_html__( 'My promo codes aren\'t showing up.', 'mailchimp-woocommerce' ),
+					'title'   => esc_html__( 'The promo codes aren\'t showing up.', 'mailchimp-woocommerce' ),
 				),
 				5 => array(
-					'title'   => esc_html__( 'I’m trying to troubleshoot my integration.', 'mailchimp-woocommerce' ),
+					'title'   => esc_html__( 'I’m trying to troubleshoot the integration.', 'mailchimp-woocommerce' ),
 				),
 				6 => array(
 					'title'   => esc_html__( 'I was instructed to disconnect by Mailchimp Support.', 'mailchimp-woocommerce' ),
 				),
 				7 => array(
-					'title'   => esc_html__( 'I have duplicate stores and need to disconnect.', 'mailchimp-woocommerce' ),
-				),
-				8 => array(
-					'title'   => esc_html__( 'My integration isn’t working as expected.', 'mailchimp-woocommerce' ),
-					'details' => esc_html__( 'Please share the reason', 'mailchimp-woocommerce' ),
-				),
-				9 => array(
 					'title'   => esc_html__( 'I no longer use this integration.', 'mailchimp-woocommerce' ),
 				),
-				10 => array(
+				8 => array(
 					'title'   => esc_html__( 'It\'s a temporary deactivation', 'mailchimp-woocommerce' ),
 				),
-				11 => array(
+				9 => array(
 					'title'   => esc_html__( 'Other', 'mailchimp-woocommerce' ),
 					'details' => esc_html__( 'Please share the reason', 'mailchimp-woocommerce' ),
 				),

@@ -173,6 +173,9 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Deactivation_Survey', false ) ) {
 						$form.find('.mailchimp-woocommerce-deactivate-survey-footer').prepend('<span class="error"><?php echo esc_js( __( 'Please select an option', 'mailchimp-woocommerce' ) ); ?></span>');
 						return;
 					}
+
+					$form.find('.mailchimp-woocommerce-deactivate-survey-submit').html("Sending feedback...").attr("disabled", true).removeClass('button-primary');
+
 					var submitSurvey = $.ajax(
 						{
 							url: "<?php echo $this->endpoint; ?>",
@@ -191,10 +194,7 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Deactivation_Survey', false ) ) {
 							async: false,
 							success: function(msg) {
 								location.href = $deactivateLink.attr('href');
-							},
-							always: function() {
-								
-							},
+							}
 						}
 					)
 				});

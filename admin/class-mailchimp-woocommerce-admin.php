@@ -967,15 +967,13 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	    // delete the transient so this only happens one time.
 	    delete_site_transient('mailchimp_woocommerce_start_sync');
 
-        $coupon_sync = new MailChimp_WooCommerce_Process_Coupons();
-        $product_sync = new MailChimp_WooCommerce_Process_Products();
+        $coupon_sync = new MailChimp_WooCommerce_Process_Coupons_Initial_Sync();
 
         // tell Mailchimp that we're syncing
-        $product_sync->flagStartSync();
+        $coupon_sync->flagStartSync();
 
         // queue up the jobs
-        mailchimp_handle_or_queue($coupon_sync);
-        mailchimp_handle_or_queue($product_sync, 0, true);
+        mailchimp_handle_or_queue($coupon_sync, 0, true);
 	}
 
 	/**

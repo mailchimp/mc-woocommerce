@@ -12,10 +12,17 @@ if (!isset($_GET['tab']) && isset($options['active_tab'])) {
 }
 
 $show_sync_tab = isset($_GET['resync']) ? $_GET['resync'] === '1' : false;
+
+// if we have a transient set to start the sync on this page view, initiate it now that the values have been saved.
+if (!$show_sync_tab && (bool) get_site_transient('mailchimp_woocommerce_start_sync', false)) {
+    $show_sync_tab = true;
+    $active_tab = 'sync';
+}
+
 $show_campaign_defaults = true;
 $has_valid_api_key = false;
 $allow_new_list = true;
-$clicked_sync_button = $is_mailchimp_post&& $active_tab == 'sync';
+$clicked_sync_button = $is_mailchimp_post && $active_tab == 'sync';
 $has_api_error = isset($options['api_ping_error']) && !empty($options['api_ping_error']) ? $options['api_ping_error'] : null;
 
 if (isset($options['mailchimp_api_key'])) {
@@ -27,11 +34,6 @@ if (isset($options['mailchimp_api_key'])) {
             if (($mailchimp_lists = $handler->getMailChimpLists()) && is_array($mailchimp_lists)) {
                 $show_campaign_defaults = true;
                 $allow_new_list = false;
-            }
-
-            // if we have a transient set to start the sync on this page view, initiate it now that the values have been saved.
-            if ((bool) get_site_transient('mailchimp_woocommerce_start_sync', false)) {
-                $show_sync_tab = true;
             }
 
             // only display this button if the data is not syncing and we have a valid api key

@@ -68,7 +68,7 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
 
 <?php if($mailchimp_api && (!$store_syncing || isset($_GET['resync']) && $_GET['resync'] === '1')): ?>
     <h2 style="padding-top: 1em;">Advanced</h2>
-    <p>
+    <p id="resync_data_help_text">
         You can resync your list at any time without losing any of your e-commerce data.
     </p>
     <?php submit_button('Resync', 'primary','submit', TRUE); ?>

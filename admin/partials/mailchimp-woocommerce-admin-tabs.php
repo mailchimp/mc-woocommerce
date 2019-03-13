@@ -72,6 +72,8 @@ if (isset($options['mailchimp_api_key'])) {
     }
 </style>
 
+<?php settings_errors(); ?>
+
 <?php if (!defined('PHP_VERSION_ID') || (PHP_VERSION_ID < 70000)): ?>
     <div data-dismissible="notice-php-version" class="error notice notice-error is-dismissible">
         <p><?php _e('Mailchimp says: Please upgrade your PHP version to a minimum of 7.0', 'mailchimp-woocommerce'); ?></p>

@@ -990,10 +990,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	private function showSyncStartedMessage()
 	{
 		$text = 'Starting the sync process…<br/>'.
-			'<p id="sync-status-message">Please hang tight while we work our mojo. Sometimes the sync can take a while, '.
-			'especially on sites with lots of orders and/or products. You may refresh this page at '.
-			'anytime to check on the progress.</p>';
-
+			'<p id="sync-status-message">'.
+            'Please hang tight while we work our mojo. '.
+            'Sometimes the sync can take a while, especially on sites with lots of orders and/or products.'.
+            '</p>';
 		add_settings_error('mailchimp-woocommerce_notice', $this->plugin_name, __($text), 'updated');
 	}
 }

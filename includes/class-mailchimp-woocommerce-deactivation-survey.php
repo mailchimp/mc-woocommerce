@@ -166,6 +166,12 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Deactivation_Survey', false ) ) {
 					event.preventDefault();
 					location.href = $deactivateLink.attr('href');
 				});
+				// close button
+				$form.on('click', '.mailchimp-woocommerce-deactivate-survey-close', function(event) {
+					event.preventDefault();
+					$overlay.css('display', 'none');
+					formOpen = false;
+				});
 				// Survey submit.
 				$form.submit(function(event) {
 					event.preventDefault();
@@ -252,14 +258,25 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Deactivation_Survey', false ) ) {
 				color: red;
 				margin: 0 0 10px 0;
 			}
-			.mailchimp-woocommerce-deactivate-survey-title {
+			.mailchimp-woocommerce-deactivate-survey-header {
 				display: block;
 				font-size: 18px;
 				font-weight: 700;
 				text-transform: uppercase;
 				border-bottom: 1px solid #ddd;
 				padding: 0 0 18px 0;
-				margin: 0 0 18px 0;
+				margin: 0 0 18px 0;	
+				position: relative;
+			}
+			.mailchimp-woocommerce-deactivate-survey-title {
+				text-align: left;
+			}
+			.mailchimp-woocommerce-deactivate-survey-close {
+				text-align: right;
+				position: absolute;
+				right: 0px;
+				font-size: 24px;
+				cursor: pointer;
 			}
 			.mailchimp-woocommerce-deactivate-survey-title span {
 				color: #999;
@@ -340,7 +357,12 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Deactivation_Survey', false ) ) {
 			<div class="mailchimp-woocommerce-deactivate-survey-modal" id="mailchimp-woocommerce-deactivate-survey-<?php echo $this->plugin; ?>">
 				<div class="mailchimp-woocommerce-deactivate-survey-wrap">
 					<form class="mailchimp-woocommerce-deactivate-survey" method="post">
-						<span class="mailchimp-woocommerce-deactivate-survey-title"><span class="dashicons dashicons-testimonial"></span><?php echo ' ' . esc_html__( 'Quick Feedback', 'mailchimp-woocommerce' ); ?></span>
+						<span class="mailchimp-woocommerce-deactivate-survey-header">
+							<span class="dashicons dashicons-testimonial"></span>
+							<?php echo ' ' . esc_html__( 'Quick Feedback', 'mailchimp-woocommerce' ); ?>
+							<span title="<?php _e( 'Close', 'mailchimp-woocommerce' );?> " class="mailchimp-woocommerce-deactivate-survey-close">✕</span>
+						</span>
+
 						<span class="mailchimp-woocommerce-deactivate-survey-desc">
 							<?php
 							printf(

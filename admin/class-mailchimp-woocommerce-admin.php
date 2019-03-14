@@ -715,11 +715,19 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             jQuery(document).ready(function($) {
                 var endpoint = '<?php echo MailChimp_WooCommerce_Rest_Api::url('sync/stats'); ?>';
                 var on_sync_tab = '<?php echo (mailchimp_check_if_on_sync_tab() ? 'yes' : 'no')?>';
+                var sync_status = '<?php echo ((mailchimp_has_started_syncing() && !mailchimp_is_done_syncing()) ? 'historical' : 'current') ?>';
 
                 if (on_sync_tab === 'yes') {
                     var call_mailchimp_for_stats = function () {
                         jQuery.get(endpoint, function(response) {
                             if (response.success) {
+
+                                // if the response is now finished - but the original sync status was "historical"
+                                // perform a page refresh because we need the re-sync buttons to show up again.
+                                if (response.has_finished === true && sync_status === 'historical') {
+                                    return document.location.reload(true);
+                                }
+
                                 jQuery('#mailchimp_product_count').html(response.products_in_mailchimp.toLocaleString(undefined, {
                                     maximumFractionDigits: 0
                                 }));

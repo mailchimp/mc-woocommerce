@@ -252,6 +252,7 @@ class MailChimp_WooCommerce_Rest_Api
         } catch (\Exception $e) { $mailchimp_total_orders = 0; }
 
         $date = mailchimp_date_local('now');
+
         // but we need to do it just in case.
         return mailchimp_rest_response(array(
             'success' => true,
@@ -260,6 +261,8 @@ class MailChimp_WooCommerce_Rest_Api
             'orders_in_store' => $order_count,
             'orders_in_mailchimp' => $mailchimp_total_orders,
             'date' => $date->format('D, M j, Y g:i A'),
+            'has_started' => mailchimp_has_started_syncing(),
+            'has_finished' => mailchimp_is_done_syncing(),
         ));
     }
 

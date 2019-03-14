@@ -1004,6 +1004,22 @@ function mailchimp_rest_response($data, $status = 200) {
     return $response;
 }
 
+/**
+ * @return bool
+ */
+function mailchimp_has_started_syncing() {
+    $sync_started_at = get_option('mailchimp-woocommerce-sync.started_at');
+    return !empty($sync_started_at);
+}
+
+/**
+ * @return bool
+ */
+function mailchimp_is_done_syncing() {
+    $sync_completed_at = get_option('mailchimp-woocommerce-sync.completed_at');
+    return !empty($sync_completed_at);
+}
+
 function run_mailchimp_woocommerce() {
     $env = mailchimp_environment_variables();
     $plugin = new MailChimp_WooCommerce($env->environment, $env->version);

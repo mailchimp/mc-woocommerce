@@ -35,7 +35,7 @@ abstract class MailChimp_WooCommerce_Options
             }
 
             if (!isset($_GET['activate-multi'])) {
-                wp_redirect("options-general.php?page=mailchimp-woocommerce");
+                wp_redirect("admin.php?page=mailchimp-woocommerce");
             }
         }
     }

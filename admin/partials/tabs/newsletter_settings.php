@@ -2,22 +2,22 @@
 
 // if we don't have valid campaign defaults we need to redirect back to the 'campaign_defaults' tab.
 if (!$handler->hasValidApiKey()) {
-    wp_redirect('options-general.php?page=mailchimp-woocommerce&tab=api_key&error_notice=missing_api_key');
+    wp_redirect('admin.php?page=mailchimp-woocommerce&tab=api_key&error_notice=missing_api_key');
 }
 
 // if we don't have valid store information, we need to redirect back to the 'store_info' tab.
 if (!$handler->hasValidStoreInfo()) {
-    wp_redirect('options-general.php?page=mailchimp-woocommerce&tab=store_info&error_notice=missing_store');
+    wp_redirect('admin.php?page=mailchimp-woocommerce&tab=store_info&error_notice=missing_store');
 }
 
 // if we don't have a valid api key we need to redirect back to the 'api_key' tab.
 if (!isset($mailchimp_lists) && ($mailchimp_lists = $handler->getMailChimpLists()) === false) {
-    wp_redirect('options-general.php?page=mailchimp-woocommerce&tab=api_key&error_notice=missing_api_key');
+    wp_redirect('admin.php?page=mailchimp-woocommerce&tab=api_key&error_notice=missing_api_key');
 }
 
 // if we don't have valid campaign defaults we need to redirect back to the 'campaign_defaults' tab.
 if (empty($mailchimp_lists) && !$handler->hasValidCampaignDefaults()) {
-    wp_redirect('options-general.php?page=mailchimp-woocommerce&tab=campaign_defaults&error_notice=missing_campaign_defaults');
+    wp_redirect('admin.php?page=mailchimp-woocommerce&tab=campaign_defaults&error_notice=missing_campaign_defaults');
 }
 
 $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mailchimp_list'])) && array_key_exists($options['mailchimp_list'], $mailchimp_lists);

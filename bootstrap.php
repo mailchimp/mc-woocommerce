@@ -946,9 +946,16 @@ function mailchimp_get_subscriber_status_options($subscribed) {
 
 function mailchimp_check_if_on_sync_tab() {
     if ((isset($_GET['page']) && $_GET['page'] === 'mailchimp-woocommerce')) {
-        if ((isset($_GET['tab']) && $_GET['tab'] === 'sync')) {
-            return true;
+        $options = get_option('mailchimp-woocommerce', array());
+        if (isset($_GET['tab'])) {
+            if ($_GET['tab'] === 'sync') {
+                return true;
+            }
+            return false;
         }
+        else if (isset($options['active_tab']) && $options['active_tab'] === 'sync') {
+			return true;
+		}
     }
     return false;
 }

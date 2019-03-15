@@ -114,7 +114,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function add_action_links($links) {
 		$settings_link = array(
-			'<a href="' . admin_url( 'options-general.php?page=' . $this->plugin_name ) . '">' . __('Settings', $this->plugin_name) . '</a>',
+			'<a href="' . admin_url( 'admin.php?page=' . $this->plugin_name ) . '">' . __('Settings', $this->plugin_name) . '</a>',
 		);
 		return array_merge($settings_link, $links);
 	}
@@ -243,7 +243,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 );
 
                 if (isset($_POST['mc_action']) && in_array($_POST['mc_action'], array('view_log', 'remove_log'))) {
-                    $path = 'options-general.php?page=mailchimp-woocommerce&tab=logs';
+                    $path = 'admin.php?page=mailchimp-woocommerce&tab=logs';
                     wp_redirect($path);
                     exit();
                 }

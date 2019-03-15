@@ -88,6 +88,8 @@ if (isset($options['mailchimp_api_key'])) {
     </div>
 <?php endif; ?>
 
+<?php settings_errors(); ?>
+
 <!-- Create a header in the default WordPress 'wrap' container -->
 <div class="wrap">
     <div id="icon-themes" class="icon32"></div>

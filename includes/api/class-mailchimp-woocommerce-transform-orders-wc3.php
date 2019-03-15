@@ -111,7 +111,17 @@ class MailChimp_WooCommerce_Transform_Orders
         }
 
         // set the total
-        $order->setOrderTotal($woo->get_total());
+        $order->setOrderTotal($order_total = $woo->get_total());
+
+        // if the order has any refunded items, we need to grab that number
+        $refunded_total = $order->get_total_refunded();
+
+        // if they're both greater than 0 we can do the subtraction.
+        if ($order_total > 0 && $refunded_total > 0) {
+            $total = $order_total - $refunded_total;
+            if ($total < 0) $total = 0;
+            $order->setOrderTotal($total);
+        }
 
         // set the order URL if it's valid.
         if (($view_order_url = $woo->get_view_order_url()) && wc_is_valid_url($view_order_url)) {

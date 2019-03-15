@@ -128,6 +128,17 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     /**
      * @param $order_id
      */
+    public function onOrderRefunded($order_id)
+    {
+        if (!mailchimp_is_configured()) return;
+
+        $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, null, null);
+        mailchimp_handle_or_queue($handler);
+    }
+
+    /**
+     * @param $order_id
+     */
     public function onPartiallyRefunded($order_id)
     {
         if (!mailchimp_is_configured()) return;

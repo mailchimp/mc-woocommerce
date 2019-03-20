@@ -8,9 +8,10 @@ class MailChimp_WooCommerce_Privacy
     public function privacy_policy()
     {
         if (function_exists( 'wp_add_privacy_policy_content')) {
-            $content = sprintf(
+            $content = sprintf(/* translators: %s - Mailchimp Privacy Policy URL. */
                 __( 'When shopping, we keep a record of your email and the cart contents for up to 30 days on our server. This record is kept to repopulate the contents of your cart if you switch devices or needed to come back another day. Read our privacy policy <a href="%s">here</a>.', 'mailchimp-woocommerce' ),
                 'https://mailchimp.com/legal/privacy/'
+                
             );
             wp_add_privacy_policy_content('MailChimp for WooCommerce', wp_kses_post(wpautop($content, false)));
         }

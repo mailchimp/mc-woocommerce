@@ -183,11 +183,16 @@ if (!$handler->hasValidApiKey()) {
         <span><?php esc_html_e('Currency Code', 'mailchimp-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-currency-code-label">
-        <select name="<?php echo $this->plugin_name; ?>[store_currency_code]" style="width:30%" required>
+        <select name="<?php echo $this->plugin_name; ?>[store_currency_code]" style="width:30%" required oninvalid="this.setCustomValidity('<?php esc_attr_e('Currency is currently deprecated. Please select one from the list above', 'mailchimp-woocommerce'); ?>')"
+    oninput="this.setCustomValidity('')">
             <?php
-            $selected_currency_code = isset($options['store_currency_code']) && !empty($options['store_currency_code']) ? $options['store_currency_code'] : 'USD';
-            foreach (MailChimp_WooCommerce_CurrencyCodes::lists() as $key => $value ) {
-                echo '<option value="' . esc_attr( $key ) . '" ' . selected($key === $selected_currency_code, true, false ) . '>' . esc_html( $value ) . '</option>';
+            $all_currencies = MailChimp_WooCommerce_CurrencyCodes::lists();
+            $selected_currency_code = isset($options['store_currency_code']) && !empty($options['store_currency_code']) ? $options['store_currency_code'] : 'USD'; 
+            if (! in_array($selected_currency_code, array_keys($all_currencies))) {
+                echo '<option value="" selected>' . $selected_currency_code . ' ['.esc_html__('deprecated', 'mailchimp-woocommerce').']</option>'; 
+            }
+            foreach ($all_currencies as $key => $value ) {
+                echo '<option value="' . esc_attr( $key ) . '" ' . selected($key === $selected_currency_code, true, false ) . '>' . $key .' | '. $value . '</option>';
             }
             ?>
         </select>

@@ -75,7 +75,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function add_plugin_admin_menu() {
         add_menu_page(
-            'Mailchimp - WooCommerce Setup',
+            __('Mailchimp - WooCommerce Setup', 'mailchimp-woocommerce'),
             'Mailchimp',
             'manage_options',
             $this->plugin_name,
@@ -114,7 +114,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function add_action_links($links) {
 		$settings_link = array(
-			'<a href="' . admin_url( 'admin.php?page=' . $this->plugin_name ) . '">' . __('Settings', $this->plugin_name) . '</a>',
+			'<a href="' . admin_url( 'admin.php?page=' . $this->plugin_name ) . '">' . __('Settings') . '</a>',
 		);
 		return array_merge($settings_link, $links);
 	}
@@ -424,7 +424,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
      */
 	protected function addInvalidAddressAlert()
     {
-        add_settings_error('mailchimp_store_settings', '', 'As part of the Mailchimp Terms of Use, we require a contact email and a physical mailing address.');
+        add_settings_error('mailchimp_store_settings', '', __('As part of the Mailchimp Terms of Use, we require a contact email and a physical mailing address.', 'mailchimp-woocommerce'));
     }
 
     /**
@@ -432,7 +432,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
      */
     protected function addInvalidPhoneAlert()
     {
-        add_settings_error('mailchimp_store_settings', '', 'As part of the Mailchimp Terms of Use, we require a valid phone number for your store.');
+        add_settings_error('mailchimp_store_settings', '', __('As part of the Mailchimp Terms of Use, we require a valid phone number for your store.', 'mailchimp-woocommerce'));
     }
 
     /**
@@ -440,7 +440,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
      */
     protected function addInvalidStoreNameAlert()
     {
-        add_settings_error('mailchimp_store_settings', '', 'Mailchimp for WooCommerce requires a Store Name to connect your store.');
+        add_settings_error('mailchimp_store_settings', '', __('Mailchimp for WooCommerce requires a Store Name to connect your store.', 'mailchimp-woocommerce'));
     }
 
 	/**
@@ -458,7 +458,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			'campaign_from_email' => isset($input['campaign_from_email']) && is_email($input['campaign_from_email']) ? $input['campaign_from_email'] : false,
 			'campaign_subject' => isset($input['campaign_subject']) ? $input['campaign_subject'] : get_option('blogname'),
 			'campaign_language' => isset($input['campaign_language']) ? $input['campaign_language'] : 'en',
-			'campaign_permission_reminder' => isset($input['campaign_permission_reminder']) ? $input['campaign_permission_reminder'] : 'You were subscribed to the newsletter from '.get_option('blogname'),
+			'campaign_permission_reminder' => isset($input['campaign_permission_reminder']) ? $input['campaign_permission_reminder'] : sprintf(/* translators: %s - plugin name. */esc_html__( 'You were subscribed to the newsletter from %s', $this->plugin_name ),get_option('blogname')),
 		);
 
 		if (!$this->hasValidCampaignDefaults($data)) {
@@ -494,7 +494,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		$data = array(
 			'mailchimp_list' => isset($input['mailchimp_list']) ? $input['mailchimp_list'] : $this->getOption('mailchimp_list', ''),
-			'newsletter_label' => isset($input['newsletter_label']) ? $input['newsletter_label'] : $this->getOption('newsletter_label', 'Subscribe to our newsletter'),
+			'newsletter_label' => isset($input['newsletter_label']) ? $input['newsletter_label'] : $this->getOption('newsletter_label', __('Subscribe to our newsletter', 'mailchimp-woocommerce')),
 			'mailchimp_auto_subscribe' => isset($input['mailchimp_auto_subscribe']) ? (bool) $input['mailchimp_auto_subscribe'] : $this->getOption('mailchimp_auto_subscribe', '0'),
 			'mailchimp_checkbox_defaults' => $checkbox,
 			'mailchimp_checkbox_action' => isset($input['mailchimp_checkbox_action']) ? $input['mailchimp_checkbox_action'] : $this->getOption('mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form'),
@@ -602,7 +602,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	public function hasValidMailChimpList()
 	{
 		if (!$this->hasValidApiKey()) {
-			add_settings_error('mailchimp_api_key', '', 'You must supply your Mailchimp API key to pull the lists.');
+			add_settings_error('mailchimp_api_key', '', __('You must supply your Mailchimp API key to pull the lists.', 'mailchimp-woocommerce'));
 			return false;
 		}
 
@@ -989,11 +989,12 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	private function showSyncStartedMessage()
 	{
-		$text = 'Starting the sync process…<br/>'.
+		$text = __('Starting the sync process...', 'mailchimp-woocommerce').'<br/>'.
 			'<p id="sync-status-message">'.
-            'Please hang tight while we work our mojo. '.
-            'Sometimes the sync can take a while, especially on sites with lots of orders and/or products.'.
+			__('Please hang tight while we work our mojo.', 'mailchimp-woocommerce') .
+			' ' .
+            __('Sometimes the sync can take a while, especially on sites with lots of orders and/or products.', 'mailchimp-woocommerce') .
             '</p>';
-		add_settings_error('mailchimp-woocommerce_notice', $this->plugin_name, __($text), 'updated');
+		add_settings_error('mailchimp-woocommerce_notice', $this->plugin_name, $text, 'updated');
 	}
 }

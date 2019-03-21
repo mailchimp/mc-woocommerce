@@ -10,21 +10,21 @@ if (!$handler->hasValidApiKey()) {
 ?>
 <input type="hidden" name="mailchimp_active_settings_tab" value="store_info"/>
 
-<h2 style="padding-top: 1em;">Store Settings</h2>
-<p>Please provide the following information about your WooCommerce store.</p>
+<h2 style="padding-top: 1em;"><?php _e('Store Settings', $this->plugin_name);?></h2>
+<p><?= __('Please provide the following information about your WooCommerce store.', $this->plugin_name); ?></p>
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span>Store Name</span>
+        <span><?php esc_html_e('Store Name', 'mailchimp-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-name-label">
         <input required style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-name-label" name="<?php echo $this->plugin_name; ?>[store_name]" value="<?php echo isset($options['store_name']) ? $options['store_name'] : get_option('blogname') ?>" />
         <span>
             <?php
             if (!empty($options['store_name']) ) {
-                esc_attr_e('Name', $this->plugin_name);
+                esc_html_e('Name', $this->plugin_name);
             } else {
-                esc_attr_e('Name', $this->plugin_name); echo '<span style="color:red;">*</span>';
+                esc_html_e('Name', $this->plugin_name); echo '<span style="color:red;">*</span>';
             }
             ?>
         </span>
@@ -33,16 +33,16 @@ if (!$handler->hasValidApiKey()) {
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span>Email</span>
+        <span><?php esc_html_e('Email', 'mailchimp-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-admin-email-label">
         <input required style="width: 30%;" type="email" id="<?php echo $this->plugin_name; ?>-admin-email-label" name="<?php echo $this->plugin_name; ?>[admin_email]" value="<?php echo isset($options['admin_email']) ? $options['admin_email'] : get_option('admin_email') ?>" />
         <span>
             <?php
             if (!empty($options['admin_email']) ) {
-                esc_attr_e('Email', $this->plugin_name);
+                esc_html_e('Email', $this->plugin_name);
             } else {
-                esc_attr_e('Email', $this->plugin_name); echo '<span style="color:red;">*</span>';
+                esc_html_e('Email', $this->plugin_name); echo '<span style="color:red;">*</span>';
             }
             ?>
         </span>
@@ -51,16 +51,16 @@ if (!$handler->hasValidApiKey()) {
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span>Street Address</span>
+        <span><?php esc_html_e('Street Address', 'mailchimp-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-address-label">
         <input required style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-address-label" name="<?php echo $this->plugin_name; ?>[store_street]" value="<?php echo isset($options['store_street']) ? $options['store_street'] : '' ?>" />
         <span>
             <?php
             if (!empty($options['store_street']) ) {
-                esc_attr_e('Street address', $this->plugin_name);
+                esc_html_e('Street address', $this->plugin_name);
             } else {
-                esc_attr_e('Street address', $this->plugin_name); echo '<span style="color:red;">*</span>';
+                esc_html_e('Street address', $this->plugin_name); echo '<span style="color:red;">*</span>';
             }
             ?>
         </span>
@@ -69,16 +69,16 @@ if (!$handler->hasValidApiKey()) {
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span>City</span>
+        <span><?php esc_html_e('City', 'mailchimp-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-city-label">
         <input required style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-city-label" name="<?php echo $this->plugin_name; ?>[store_city]" value="<?php echo isset($options['store_city']) ? $options['store_city'] : '' ?>" />
         <span>
             <?php
             if (!empty($options['store_city']) ) {
-                esc_attr_e('City', $this->plugin_name);
+                esc_html_e('City', $this->plugin_name);
             } else {
-                esc_attr_e('City', $this->plugin_name); echo '<span style="color:red;">*</span>';
+                esc_html_e('City', $this->plugin_name); echo '<span style="color:red;">*</span>';
             }
             ?>
         </span>
@@ -87,16 +87,16 @@ if (!$handler->hasValidApiKey()) {
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span>State</span>
+        <span><?php esc_html_e('State', 'mailchimp-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-state-label">
         <input required style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-state-label" name="<?php echo $this->plugin_name; ?>[store_state]" value="<?php echo isset($options['store_state']) ? $options['store_state'] : '' ?>" />
         <span>
             <?php
             if (!empty($options['store_state']) ) {
-                esc_attr_e('State', $this->plugin_name);
+                esc_html_e('State', $this->plugin_name);
             } else {
-                esc_attr_e('State', $this->plugin_name); echo '<span style="color:red;">*</span>';
+                esc_html_e('State', $this->plugin_name); echo '<span style="color:red;">*</span>';
             }
             ?>
         </span>
@@ -105,16 +105,16 @@ if (!$handler->hasValidApiKey()) {
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span>Postal Code</span>
+        <span><?php esc_html_e('Postal Code', 'mailchimp-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-postal-code-label">
         <input required style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-postal-code-label" name="<?php echo $this->plugin_name; ?>[store_postal_code]" value="<?php echo isset($options['store_postal_code']) ? $options['store_postal_code'] : '' ?>" />
         <span>
             <?php
             if (!empty($options['store_postal_code']) ) {
-                esc_attr_e('Postal Code', $this->plugin_name);
+                esc_html_e('Postal Code', $this->plugin_name);
             } else {
-                esc_attr_e('Postal Code', $this->plugin_name); echo '<span style="color:red;">*</span>';
+                esc_html_e('Postal Code', $this->plugin_name); echo '<span style="color:red;">*</span>';
             }
             ?>
         </span>
@@ -123,16 +123,16 @@ if (!$handler->hasValidApiKey()) {
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span>Country</span>
+        <span><?php esc_html_e('Country', 'mailchimp-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-country-label">
         <input required style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-country-label" name="<?php echo $this->plugin_name; ?>[store_country]" value="<?php echo isset($options['store_country']) ? $options['store_country'] : 'US' ?>" />
         <span>
             <?php
             if (!empty($options['store_country'])) {
-                esc_attr_e('Country', $this->plugin_name);
+                esc_html_e('Country', $this->plugin_name);
             } else {
-                esc_attr_e('Country', $this->plugin_name); echo '<span style="color:red;">*</span>';
+                esc_html_e('Country', $this->plugin_name); echo '<span style="color:red;">*</span>';
             }
             ?>
         </span>
@@ -141,29 +141,29 @@ if (!$handler->hasValidApiKey()) {
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span>Phone</span>
+        <span><?php esc_html_e('Phone Number', 'mailchimp-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-phone-label">
-        <input required style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-phone-label" name="<?php echo $this->plugin_name; ?>[store_phone]" value="<?php echo isset($options['store_phone']) ? $options['store_phone'] : '' ?>" />
+        <input style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-phone-label" name="<?php echo $this->plugin_name; ?>[store_phone]" value="<?php echo isset($options['store_phone']) ? $options['store_phone'] : '' ?>" />
         <span>
             <?php
             if (!empty($options['store_phone']) ) {
-                esc_attr_e('Phone Number', $this->plugin_name);
+                esc_html_e('Phone Number', $this->plugin_name);
             } else {
-                esc_attr_e('Phone Number', $this->plugin_name); echo '<span style="color:red;">*</span>';
+                esc_html_e('Phone Number', $this->plugin_name); echo '<span style="color:red;">*</span>';
             }
             ?>
         </span>
     </label>
 </fieldset>
 
-<h2 style="padding-top: 1em;">Locale Settings</h2>
+<h2 style="padding-top: 1em;"><?= __('Locale Settings', $this->plugin_name);?></h2>
 
-<p>Please apply your locale settings. If you're unsure about these, use the defaults.</p>
+<p><?= __('Please apply your locale settings. If you\'re unsure about these, use the defaults.', $this->plugin_name);?></p>
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span>Locale</span>
+        <span><?php esc_html_e('Locale', 'mailchimp-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-locale-label">
         <select name="<?php echo $this->plugin_name; ?>[store_locale]" style="width:30%" required>
@@ -174,13 +174,13 @@ if (!$handler->hasValidApiKey()) {
             }
             ?>
         </select>
-        <span><?php esc_attr_e('Locale', $this->plugin_name); ?></span>
+        <span><?php esc_html_e('Locale', $this->plugin_name); ?></span>
     </label>
 </fieldset>
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span>Currency Code</span>
+        <span><?php esc_html_e('Currency Code', 'mailchimp-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-currency-code-label">
         <select name="<?php echo $this->plugin_name; ?>[store_currency_code]" style="width:30%" required>
@@ -191,13 +191,13 @@ if (!$handler->hasValidApiKey()) {
             }
             ?>
         </select>
-        <span><?php esc_attr_e('Currency', $this->plugin_name); ?></span>
+        <span><?php esc_html_e('Currency', $this->plugin_name); ?></span>
     </label>
 </fieldset>
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span>Timezone</span>
+        <span><?php esc_html_e('Timezone', 'mailchimp-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-timezone-label">
         <select name="<?php echo $this->plugin_name; ?>[store_timezone]" style="width:30%" required>
@@ -208,7 +208,7 @@ if (!$handler->hasValidApiKey()) {
              }
             ?>
         </select>
-        <span><?php esc_attr_e('Timezone', $this->plugin_name); ?></span>
+        <span><?php esc_html_e('Timezone', $this->plugin_name); ?></span>
     </label>
 </fieldset>
 

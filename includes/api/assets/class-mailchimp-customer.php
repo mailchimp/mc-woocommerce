@@ -53,7 +53,7 @@ class MailChimp_WooCommerce_Customer
      */
     public function setId($id)
     {
-        $this->id = $id;
+        $this->id = absint($id);
 
         return $this;
     }

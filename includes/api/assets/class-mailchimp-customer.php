@@ -53,7 +53,11 @@ class MailChimp_WooCommerce_Customer
      */
     public function setId($id)
     {
-        $this->id = $id;
+        if ( is_numeric( $id ) && $id > 0 ) {
+			$this->id = absint($id);
+		} elseif ( ! empty( $id ) ) {
+            $this->id = $id;
+        }
 
         return $this;
     }

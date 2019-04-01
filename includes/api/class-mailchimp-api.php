@@ -504,6 +504,24 @@ class MailChimp_WooCommerce_MailChimpApi
     }
 
     /**
+     * @param $campaign_id
+     * @return array|bool
+     */
+    public function getCampaign($campaign_id)
+    {
+        try {
+            $data = $this->get("campaigns/$campaign_id");
+            if (!isset($data['id'])) {
+                return false;
+            }
+            return $data;
+        } catch (\Exception $e) {
+            mailchimp_log('campaign_get.error', $e->getMessage(). ' :: in '.$e->getFile().' :: on '.$e->getLine());
+            return false;
+        }
+    }
+
+    /**
      * @param $store_id
      * @return array|bool
      */

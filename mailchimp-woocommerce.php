@@ -25,6 +25,7 @@
  * Domain Path:       /languages
  * Requires at least: 4.4
  * Tested up to: 5.1
+ * WC tested up to: 3.5.0
  */
 
 // If this file is called directly, abort.

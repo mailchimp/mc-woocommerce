@@ -63,10 +63,10 @@ The Mailchimp for WooCommerce supports Wordpress Multi Sites and below are a few
 Refer to the Wordpress Codex for more information about [Multisite Network Administration](https://codex.wordpress.org/Multisite_Network_Administration)
 == Changelog ==
 = 2.1.15 =
-* Adds optional feedback survey on deactivate 
-* Updates syncing engine to use REST API 
-* Fixes edited orders syncing old and new products into Mailchimp 
-* Adds support for remove_action 
+* adds optional feedback survey on deactivate 
+* updates syncing engine to use REST API 
+* fixes edited orders syncing old and new products into Mailchimp 
+* adds support for remove_action 
 = 2.1.14 =
 * Adds support for filter on newsletter field 
 * fixes inactive log delete button 

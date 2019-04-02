@@ -208,10 +208,14 @@ class MailChimp_WooCommerce_Order
      * @param null $campaign_id
      * @return MailChimp_WooCommerce_Order
      */
-    public function setCampaignId($campaign_id)
+    public function setCampaignId($id)
     {
-        $this->campaign_id = $campaign_id;
-
+        $api = MailChimp_WooCommerce_MailChimpApi::getInstance();
+        $cid = trim($id);
+        if(!$api->getCampaign($cid)) {
+            $cid = null;
+        }
+        $this->campaign_id = $cid;
         return $this;
     }
 

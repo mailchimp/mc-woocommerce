@@ -516,7 +516,7 @@ class MailChimp_WooCommerce_MailChimpApi
             }
             return $data;
         } catch (\Exception $e) {
-            mailchimp_log('campaign_get.error', $e->getMessage(). ' :: in '.$e->getFile().' :: on '.$e->getLine());
+            mailchimp_log('campaign_get.error', 'No campaign with provided ID: '. $campaign_id. ' :: '. $e->getMessage(). ' :: in '.$e->getFile().' :: on '.$e->getLine());
             return false;
         }
     }

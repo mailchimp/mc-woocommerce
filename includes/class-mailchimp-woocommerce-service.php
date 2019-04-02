@@ -480,13 +480,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     {
         $cid = trim($id);
 
-        try {
-            if(!$this->api()->getCampaign($cid)) {
-                $cid = null;
-            }
-        } catch (\Throwable $th) {
-            mailchimp_log('set.campaign.fail',  $th);
-            return false;
+        if(!$this->api()->getCampaign($cid)) {
+            $cid = null;
         }
         
         @setcookie('mailchimp_campaign_id', $cid, $cookie_duration, '/' );

@@ -92,7 +92,7 @@ function mailchimp_environment_variables() {
 
     return (object) array(
         'repo' => 'master',
-        'environment' => 'staging', // staging or production
+        'environment' => 'production', // staging or production
         'version' => '2.1.15',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),

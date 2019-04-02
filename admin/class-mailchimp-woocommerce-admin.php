@@ -492,9 +492,18 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			$checkbox = $input['mailchimp_checkbox_defaults'];
 		}
 
+		$allowed_html = array(
+			'a' => array(
+				'href' => array(),
+				'title' => array(),
+				'target' => array()
+			),
+			'br' => array()
+		);
+
 		$data = array(
 			'mailchimp_list' => isset($input['mailchimp_list']) ? $input['mailchimp_list'] : $this->getOption('mailchimp_list', ''),
-			'newsletter_label' => isset($input['newsletter_label']) ? $input['newsletter_label'] : $this->getOption('newsletter_label', __('Subscribe to our newsletter', 'mailchimp-woocommerce')),
+			'newsletter_label' => isset($input['newsletter_label']) ? wp_kses($input['newsletter_label'], $allowed_html) : $this->getOption('newsletter_label', __('Subscribe to our newsletter', 'mailchimp-woocommerce')),
 			'mailchimp_auto_subscribe' => isset($input['mailchimp_auto_subscribe']) ? (bool) $input['mailchimp_auto_subscribe'] : $this->getOption('mailchimp_auto_subscribe', '0'),
 			'mailchimp_checkbox_defaults' => $checkbox,
 			'mailchimp_checkbox_action' => isset($input['mailchimp_checkbox_action']) ? $input['mailchimp_checkbox_action'] : $this->getOption('mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form'),

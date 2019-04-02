@@ -3,7 +3,7 @@ if (!empty( $_REQUEST['handle'])) {
     if (!empty($_REQUEST['_wpnonce']) && wp_verify_nonce($_REQUEST['_wpnonce'], 'remove_log')) {
         $log_handler = new WC_Log_Handler_File();
         $log_handler->remove($_REQUEST['handle']);
-        wp_redirect('options-general.php?page=mailchimp-woocommerce&tab=logs');
+        wp_redirect('admin.php?page=mailchimp-woocommerce&tab=logs');
     }
 }
 $files  = defined('WC_LOG_DIR') ? @scandir( WC_LOG_DIR ) : array();
@@ -63,12 +63,12 @@ $handle = !empty($viewed_log) ? substr($viewed_log, 0, strlen($viewed_log) > 37 
             <h2>
                 <?php echo esc_html( $viewed_log ); ?>
                 <?php if ( ! empty( $handle ) ) : ?>
-                    <a class="page-title-action" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'handle' => sanitize_title($viewed_log) ), admin_url( 'options-general.php?page=mailchimp-woocommerce&tab=logs&mc_action=remove_log' ) ), 'remove_log' ) ); ?>" class="button"><?php esc_html_e( 'Delete log', 'woocommerce' );?></a>
+                    <a class="page-title-action" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'handle' => sanitize_title($viewed_log) ), admin_url( 'admin.php?page=mailchimp-woocommerce&tab=logs&mc_action=remove_log' ) ), 'remove_log' ) ); ?>" class="button"><?php esc_html_e( 'Delete log', 'woocommerce' );?></a>
                 <?php endif; ?>
             </h2>
         </div>
         <div class="alignright">
-            <form action="<?php echo admin_url( 'options-general.php?page=mailchimp-woocommerce&tab=logs&mc_action=view_log' ); ?>" method="post">
+            <form action="<?php echo admin_url( 'admin.php?page=mailchimp-woocommerce&tab=logs&mc_action=view_log' ); ?>" method="post">
                 <input type="hidden" name="<?php echo $this->plugin_name; ?>[mailchimp_active_tab]" value="logs"/>
                 <select name="log_file">
                     <?php foreach ( $logs as $log_key => $log_file ) : ?>

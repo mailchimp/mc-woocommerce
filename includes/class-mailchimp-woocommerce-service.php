@@ -16,6 +16,22 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     protected $cart_was_submitted = false;
     protected $cart = array();
     protected $validated_cart_db = false;
+    /** @var null|static */
+    protected static $_instance = null;
+
+    /**
+     * @return MailChimp_Service
+     */
+    public static function instance()
+    {
+        if (!empty(static::$_instance)) {
+            return static::$_instance;
+        }
+        $env = mailchimp_environment_variables();
+        static::$_instance = new MailChimp_Service();
+        static::$_instance->setVersion($env->version);
+        return static::$_instance;
+    }
 
     /**
      * hook fired when we know everything is booted
@@ -107,6 +123,17 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $handler->is_update = true;
         $handler->is_admin_save = $is_admin;
         mailchimp_handle_or_queue($handler, 90);
+    }
+
+    /**
+     * @param $order_id
+     */
+    public function onOrderRefunded($order_id)
+    {
+        if (!mailchimp_is_configured()) return;
+
+        $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, null, null);
+        mailchimp_handle_or_queue($handler);
     }
 
     /**

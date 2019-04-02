@@ -10,6 +10,23 @@
  */
 class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
 {
+    /** @var null|static */
+    protected static $_instance = null;
+
+    /**
+     * @return MailChimp_Newsletter
+     */
+    public static function instance()
+    {
+        if (!empty(static::$_instance)) {
+            return static::$_instance;
+        }
+        $env = mailchimp_environment_variables();
+        static::$_instance = new MailChimp_Newsletter();
+        static::$_instance->setVersion($env->version);
+        return static::$_instance;
+    }
+
     /**
      * @param WC_Checkout $checkout
      */

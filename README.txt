@@ -3,8 +3,8 @@ Contributors: ryanhungate, Mailchimp
 Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.3
-Tested up to: 5.0.3
-Stable tag: 2.1.14
+Tested up to: 5.1
+Stable tag: 2.1.15
 Requires PHP: 7.0
 WC tested up to: 3.5.4
 License: GPLv2 or later
@@ -24,10 +24,11 @@ With Mailchimp for WooCommerce, you’ll have the power to:
 - Add discount codes created in WooCommerce to your emails and automations with a Promo Code content block
 - Create beautiful landing pages that make it easy to highlight your products, promote a sale or giveaway, and grow your list.
 ###Important Notes
-This plugin supports our most powerful API 3.0 features, and is intended for users who have not yet integrated their WooCommerce stores with Mailchimp.
-You can run this new integration at the same time as your current WooCommerce integration for Mailchimp. However, data from the older integration will display separately in subscriber profiles, and can’t be used with e-commerce features that require API 3.0.
+This plugin supports our most powerful API 3.0 features, and is intended for users who have not yet integrated their WooCommerce stores with Mailchimp.  
+You can run this new integration at the same time as your current WooCommerce integration for Mailchimp. However, data from the older integration will display separately in subscriber profiles, and can’t be used with e-commerce features that require API 3.0.  
 WordPress.com compatibility is limited to Business tier users only.
-At this time, the synchronization of product categories from WooCommerce to Mailchimp is not supported.
+At this time, the synchronization of product categories from WooCommerce to Mailchimp is not supported.  
+Attention advanced users, theme makers and developers! We have a Wiki to help with advanced workflows and features of the plugin. You can find it on our GitHub Repository. <https://github.com/mailchimp/mc-woocommerce/wiki>
 == Installation ==
 ###Before You Start
 Here are some things to know before you begin this process.
@@ -62,6 +63,11 @@ The Mailchimp for WooCommerce supports Wordpress Multi Sites and below are a few
 - Deleting removes the connection between Mailchimp and WooCommerce, and uninstalls the plugin from your site.
 Refer to the Wordpress Codex for more information about [Multisite Network Administration](https://codex.wordpress.org/Multisite_Network_Administration)
 == Changelog ==
+= 2.1.15 =
+* adds optional feedback survey on deactivate 
+* updates syncing engine to use REST API 
+* fixes edited orders syncing old and new products into Mailchimp 
+* adds support for remove_action 
 = 2.1.14 =
 * Adds support for filter on newsletter field 
 * fixes inactive log delete button 

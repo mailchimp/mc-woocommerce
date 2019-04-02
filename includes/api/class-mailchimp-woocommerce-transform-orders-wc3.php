@@ -111,7 +111,7 @@ class MailChimp_WooCommerce_Transform_Orders
         }
 
         // set the total
-        $order->setOrderTotal($woo->get_total());
+        $order->setOrderTotal($order_total = $woo->get_total());
 
         // set the order URL if it's valid.
         if (($view_order_url = $woo->get_view_order_url()) && wc_is_valid_url($view_order_url)) {

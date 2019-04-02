@@ -877,13 +877,22 @@ class MailChimp_WooCommerce_MailChimpApi
             if (!$this->validateStoreSubmission($order)) {
                 return false;
             }
-            $id = $order->getId();
-            $data = $this->patch("ecommerce/stores/{$store_id}/orders/{$id}", $order->toArray());
+            $order_id = $order->getId();
+            $data = $this->patch("ecommerce/stores/{$store_id}/orders/{$order_id}", $order->toArray());
+            
+            // if products list differs, we should remove the old products and add new ones
+            $data_lines = $data['lines'];
+            $order_lines = $order->getLinesIds();
+            foreach ($data_lines as $line) {
+                if (!in_array($line['id'], $order_lines)) {
+                    $this->deleteStoreOrderLine($store_id, $order_id, $line['id']);
+                }
+            }
 
             // if the order is in pending status, we need to submit the order again with a paid status.
             if ($order->shouldConfirmAndPay() && $order->getFinancialStatus() !== 'paid') {
                 $order->setFinancialStatus('paid');
-                $data = $this->patch("ecommerce/stores/{$store_id}/orders/{$id}", $order->toArray());
+                $data = $this->patch("ecommerce/stores/{$store_id}/orders/{$order_id}", $order->toArray());
             }
 
             $order = new MailChimp_WooCommerce_Order();
@@ -922,6 +931,23 @@ class MailChimp_WooCommerce_MailChimpApi
     {
         try {
             $this->delete("ecommerce/stores/$store_id/orders/$order_id");
+            return true;
+        } catch (MailChimp_WooCommerce_Error $e) {
+            return false;
+        }
+    }
+
+     /**
+     * @param $store_id
+     * @param $order_id
+     * @param $line_id
+     * @return bool
+     * @throws Exception
+     */
+    public function deleteStoreOrderLine($store_id, $order_id, $line_id)
+    {
+        try {
+            $this->delete("ecommerce/stores/{$store_id}/orders/{$order_id}/lines/{$line_id}");
             return true;
         } catch (MailChimp_WooCommerce_Error $e) {
             return false;

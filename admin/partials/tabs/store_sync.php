@@ -24,6 +24,12 @@ $mailchimp_list_name = 'n/a';
 if (!empty($last_updated_time)) {
     $last_updated_time = mailchimp_date_local($last_updated_time);
 }
+
+// if we have a transient set to start the sync on this page view, initiate it now that the values have been saved.
+if ((bool) get_site_transient('mailchimp_woocommerce_start_sync', false)) {
+    MailChimp_WooCommerce_Admin::startSync();
+}
+
 if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore($store_id))) {
     $store_syncing = $store->isSyncing();
     if (($account_details = $handler->getAccountDetails())) {
@@ -52,17 +58,17 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
 <?php endif; ?>
 
 <?php if ($last_updated_time): ?>
-    <p><strong>Last Updated:</strong> <i><?php echo $last_updated_time->format('D, M j, Y g:i A'); ?></i></p>
+    <p><strong>Last Updated:</strong> <i id="mailchimp_last_updated"><?php echo $last_updated_time->format('D, M j, Y g:i A'); ?></i></p>
 <?php endif; ?>
 
-<p><strong>Account Connected:</strong> <?php echo $account_name; ?></p>
-<p><strong>List Connected:</strong> <?php echo $mailchimp_list_name; ?></p>
-<p><strong>Products Synced:</strong> <?php echo $mailchimp_total_products; ?></p>
-<p><strong>Orders Synced:</strong> <?php echo $mailchimp_total_orders; ?></p>
+<p><strong>Account Connected:</strong> <span id="mailchimp_account_connected"><?php echo $account_name; ?></span></p>
+<p><strong>List Connected:</strong> <span id="mailchimp_list_name"><?php echo $mailchimp_list_name; ?></span></p>
+<p><strong>Products Synced:</strong> <span id="mailchimp_product_count"><?php echo $mailchimp_total_products; ?></span></p>
+<p><strong>Orders Synced:</strong> <span id="mailchimp_order_count"><?php echo $mailchimp_total_orders; ?></span></p>
 
 <?php if($mailchimp_api && (!$store_syncing || isset($_GET['resync']) && $_GET['resync'] === '1')): ?>
     <h2 style="padding-top: 1em;">Advanced</h2>
-    <p>
+    <p id="resync_data_help_text">
         You can resync your list at any time without losing any of your e-commerce data.
     </p>
     <?php submit_button('Resync', 'primary','submit', TRUE); ?>

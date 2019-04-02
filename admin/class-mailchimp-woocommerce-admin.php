@@ -25,26 +25,29 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	protected $swapped_list_id = null;
 	protected $swapped_store_id = null;
 
+    /** @var null|static */
+    protected static $_instance = null;
+
+    /**
+     * @return MailChimp_WooCommerce_Admin
+     */
+    public static function instance()
+    {
+        if (!empty(static::$_instance)) {
+            return static::$_instance;
+        }
+        $env = mailchimp_environment_variables();
+        static::$_instance = new MailChimp_WooCommerce_Admin();
+        static::$_instance->setVersion($env->version);
+        return static::$_instance;
+    }
+
 	/**
-	 * @return MailChimp_WooCommerce_Admin
+	 * @return MailChimp_WooCommerce_Admin|MailChimp_WooCommerce_Options
 	 */
 	public static function connect()
 	{
-		$env = mailchimp_environment_variables();
-
-		return new self('mailchimp-woocommerce', $env->version);
-	}
-
-	/**
-	 * Initialize the class and set its properties.
-	 *
-	 * @since    1.0.0
-	 * @param      string    $plugin_name       The name of this plugin.
-	 * @param      string    $version    The version of this plugin.
-	 */
-	public function __construct( $plugin_name, $version ) {
-		$this->plugin_name = $plugin_name;
-		$this->version = $version;
+		return static::instance();
 	}
 
 	/**
@@ -80,6 +83,22 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         );
 	}
 
+	/**
+	 * Setup Feedback Survey Form
+	 *
+	 * @since    2.1.15
+	 */
+	public function setup_survey_form() {
+		if (is_admin()) {
+            try {
+                new Mailchimp_Woocommerce_Deactivation_Survey($this->plugin_name, 'mailchimp-for-woocommerce');
+            } catch (\Throwable $e) {
+                mailchimp_error('admin@setup_survey_form', $e->getCode() . ' :: ' . $e->getMessage() . ' on ' . $e->getLine() . ' in ' . $e->getFile());
+                return false;
+            }
+        }
+	}
+
     /**
      * @return string
      */
@@ -95,7 +114,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function add_action_links($links) {
 		$settings_link = array(
-			'<a href="' . admin_url( 'options-general.php?page=' . $this->plugin_name ) . '">' . __('Settings', $this->plugin_name) . '</a>',
+			'<a href="' . admin_url( 'admin.php?page=' . $this->plugin_name ) . '">' . __('Settings', $this->plugin_name) . '</a>',
 		);
 		return array_merge($settings_link, $links);
 	}
@@ -206,8 +225,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 $service = new MailChimp_Service();
                 $service->removePointers(true, true);
 
-                $this->startSync();
+                static::startSync();
+
                 $this->showSyncStartedMessage();
+
                 $this->setData('sync.config.resync', true);
 				break;
 
@@ -222,7 +243,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 );
 
                 if (isset($_POST['mc_action']) && in_array($_POST['mc_action'], array('view_log', 'remove_log'))) {
-                    $path = 'options-general.php?page=mailchimp-woocommerce&tab=logs';
+                    $path = 'admin.php?page=mailchimp-woocommerce&tab=logs';
                     wp_redirect($path);
                     exit();
                 }
@@ -499,8 +520,16 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 			// start the sync automatically if the sync is false
 			if ((bool) $this->getData('sync.started_at', false) === false) {
-				$this->startSync();
-				$this->showSyncStartedMessage();
+                // tell the next page view to start the sync with a transient since the data isn't available yet
+                set_site_transient('mailchimp_woocommerce_start_sync', microtime(), 30);
+
+                $this->setData('sync.config.resync', false);
+                $this->setData('sync.orders.current_page', 1);
+                $this->setData('sync.products.current_page', 1);
+                $this->setData('sync.syncing', true);
+                $this->setData('sync.started_at', time());
+
+                $this->showSyncStartedMessage();
 			}
 
             $data['active_tab'] = 'sync';
@@ -514,6 +543,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
         return $data;
 	}
+
+
 
 	/**
 	 * @param null|array $data
@@ -678,6 +709,49 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		return true;
 	}
+
+    public function inject_sync_ajax_call() { global $wp; ?>
+        <script type="text/javascript" >
+            jQuery(document).ready(function($) {
+                var endpoint = '<?php echo MailChimp_WooCommerce_Rest_Api::url('sync/stats'); ?>';
+                var on_sync_tab = '<?php echo (mailchimp_check_if_on_sync_tab() ? 'yes' : 'no')?>';
+                var sync_status = '<?php echo ((mailchimp_has_started_syncing() && !mailchimp_is_done_syncing()) ? 'historical' : 'current') ?>';
+
+                if (on_sync_tab === 'yes') {
+                    var call_mailchimp_for_stats = function () {
+                        jQuery.get(endpoint, function(response) {
+                            if (response.success) {
+
+                                // if the response is now finished - but the original sync status was "historical"
+                                // perform a page refresh because we need the re-sync buttons to show up again.
+                                if (response.has_finished === true && sync_status === 'historical') {
+                                    return document.location.reload(true);
+                                }
+
+                                jQuery('#mailchimp_product_count').html(response.products_in_mailchimp.toLocaleString(undefined, {
+                                    maximumFractionDigits: 0
+                                }));
+
+                                jQuery('#mailchimp_order_count').html(response.orders_in_mailchimp.toLocaleString(undefined, {
+                                    maximumFractionDigits: 0
+                                }));
+
+                                jQuery('#mailchimp_last_updated').html(response.date);
+
+                                setTimeout(function() {
+                                    call_mailchimp_for_stats();
+                                }, 10000);
+                            }
+                        });
+                    };
+
+                    setTimeout(function() {
+                        call_mailchimp_for_stats();
+                    }, 10000);
+                }
+            });
+        </script> <?php
+    }
 
 	/**
 	 * @param null|array $data
@@ -893,19 +967,21 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		return true;
 	}
 
-	/**a:4:{s:19:"mailchimp_debugging";b:0;s:25:"mailchimp_account_info_id";N;s:31:"mailchimp_account_info_username";N;s:10:"active_tab";s:7:"api_key";}
-	 * Start the sync
-	 */
-	private function startSync()
+    /**
+     * Start the sync
+     */
+	public static function startSync()
 	{
-	    mailchimp_flush_sync_pointers();
+	    // delete the transient so this only happens one time.
+	    delete_site_transient('mailchimp_woocommerce_start_sync');
 
-	    $coupon_sync = new MailChimp_WooCommerce_Process_Coupons();
-	    mailchimp_handle_or_queue($coupon_sync);
+        $coupon_sync = new MailChimp_WooCommerce_Process_Coupons_Initial_Sync();
 
-		$job = new MailChimp_WooCommerce_Process_Products();
-		$job->flagStartSync();
-		mailchimp_handle_or_queue($job);
+        // tell Mailchimp that we're syncing
+        $coupon_sync->flagStartSync();
+
+        // queue up the jobs
+        mailchimp_handle_or_queue($coupon_sync, 0, true);
 	}
 
 	/**
@@ -914,10 +990,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	private function showSyncStartedMessage()
 	{
 		$text = 'Starting the sync process…<br/>'.
-			'<p id="sync-status-message">Please hang tight while we work our mojo. Sometimes the sync can take a while, '.
-			'especially on sites with lots of orders and/or products. You may refresh this page at '.
-			'anytime to check on the progress.</p>';
-
+			'<p id="sync-status-message">'.
+            'Please hang tight while we work our mojo. '.
+            'Sometimes the sync can take a while, especially on sites with lots of orders and/or products.'.
+            '</p>';
 		add_settings_error('mailchimp-woocommerce_notice', $this->plugin_name, __($text), 'updated');
 	}
 }

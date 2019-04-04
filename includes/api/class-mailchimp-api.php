@@ -267,6 +267,26 @@ class MailChimp_WooCommerce_MailChimpApi
     /**
      * @param $list_id
      * @param $email
+     * @return array|mixed|null|object
+     * @throws Exception
+     * @throws MailChimp_WooCommerce_Error
+     */
+    public function updateMemberTags($list_id, $email)
+    {
+        $hash = md5(strtolower(trim($email)));
+        $tags = mailchimp_get_user_tags_to_update();
+        $data = array(
+            'tags' => $tags
+        );
+
+        mailchimp_debug('api.update_member_tags', "Updating {$email}", $data);
+
+        return $this->post("lists/$list_id/members/$hash/tags", $data);;
+    }
+
+    /**
+     * @param $list_id
+     * @param $email
      * @param bool $subscribed
      * @param array $merge_fields
      * @param array $list_interests
@@ -880,6 +900,10 @@ class MailChimp_WooCommerce_MailChimpApi
             $order_id = $order->getId();
             $data = $this->patch("ecommerce/stores/{$store_id}/orders/{$order_id}", $order->toArray());
             
+            $customer = $order->getCustomer();
+            $list_id = mailchimp_get_list_id();
+            $user = $this->updateMemberTags($list_id, $customer->getEmailAddress());
+
             // if products list differs, we should remove the old products and add new ones
             $data_lines = $data['lines'];
             $order_lines = $order->getLinesIds();

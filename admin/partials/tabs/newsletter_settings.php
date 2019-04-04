@@ -124,6 +124,18 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
     </label>
 </fieldset>
 
+<h4 style="padding-top: 1em;font-weight:normal;"><?php esc_html_e('User Tags', 'mailchimp-woocommerce');?></h4>
+<p><?= __( 'Add a comma separated list of tags to add to the user at Mailchimp', 'mailchimp-woocommerce' ); ?></p>
+
+<fieldset>
+    <legend class="screen-reader-text">
+        <span><?php esc_html_e('User Tags', 'mailchimp-woocommerce');?></span>
+    </legend>
+    <label for="<?php echo $this->plugin_name; ?>-user-tags">
+        <input style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-user-tags" name="<?php echo $this->plugin_name; ?>[mailchimp_user_tags]" value="<?php echo isset($options['mailchimp_user_tags']) ? str_replace(',',', ',$options['mailchimp_user_tags']) : '' ?>" />
+    </label>
+</fieldset>
+
 <h2 style="padding-top: 1em;"><?php esc_html_e('Product Image Size', 'mailchimp-woocommerce');?></h2>
 <p><?php esc_html_e('Define the product image size used by abandoned carts, order notifications, and product recommendations.', 'mailchimp-woocommerce');?></p>
 

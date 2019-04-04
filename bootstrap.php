@@ -292,6 +292,20 @@ function mailchimp_get_store_id() {
 }
 
 /**
+ * @return array
+ */
+function mailchimp_get_user_tags_to_update() {
+    $tags = explode(',',mailchimp_get_option('mailchimp_user_tags'));
+    if (empty($tags)) {
+        return false;
+    }
+    foreach ($tags as $tag) {
+        $formatted_tags[] = array("name" => $tag, "status" => 'active');
+    }
+    return $formatted_tags;
+}
+
+/**
  * @return bool|MailChimp_WooCommerce_MailChimpApi
  */
 function mailchimp_get_api() {

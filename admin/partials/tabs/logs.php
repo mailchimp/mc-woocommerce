@@ -56,7 +56,7 @@ With standard logging, you can see basic information about the data submission t
     </label>
 </fieldset>
 
-<?php submit_button('Save all changes', 'primary','submit', TRUE);?>
+<?php submit_button(__('Save all changes'), 'primary','submit', TRUE);?>
 
 <?php if (isset($logs) && isset($viewed_log)) : ?>
     <div id="log-viewer-select">

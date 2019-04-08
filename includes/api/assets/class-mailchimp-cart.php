@@ -93,11 +93,14 @@ class MailChimp_WooCommerce_Cart
     {   
         $api = MailChimp_WooCommerce_MailChimpApi::getInstance();
         $cid = trim($id);
-        if(!$api->getCampaign($cid)) {
-            $cid = null;
+        try {
+            $campaign = $api->getCampaign($cid);
+            $this->campaign_id = $campaign['id'];
+            return $this;
         }
-        $this->campaign_id = $cid;
-        return $this;
+        catch (\Exception $e){
+           throw $e;
+        }
     }
 
     /**

@@ -509,15 +509,17 @@ class MailChimp_WooCommerce_MailChimpApi
      */
     public function getCampaign($campaign_id)
     {
+        if (get_site_transient('mailchimp-woocommerce-no-campaign-id-'.$campaign_id)) {
+            return false;
+        }
         try {
             $data = $this->get("campaigns/$campaign_id");
-            if (!isset($data['id'])) {
-                return false;
-            }
+            delete_site_transient('mailchimp-woocommerce-no-campaign-id-'.$campaign_id);
             return $data;
         } catch (\Exception $e) {
             mailchimp_log('campaign_get.error', 'No campaign with provided ID: '. $campaign_id. ' :: '. $e->getMessage(). ' :: in '.$e->getFile().' :: on '.$e->getLine());
-            return false;
+            set_site_transient('mailchimp-woocommerce-no-campaign-id-'.$campaign_id, true, 60 * 30);
+            throw $e;
         }
     }
 

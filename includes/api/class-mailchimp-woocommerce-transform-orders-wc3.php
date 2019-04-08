@@ -75,7 +75,13 @@ class MailChimp_WooCommerce_Transform_Orders
 
         // if we have a campaign id let's set it now.
         if (!empty($this->campaign_id)) {
-            $order->setCampaignId($this->campaign_id);
+            try {
+                $order->setCampaignId($this->campaign_id);
+                $log .= ' :: campaign id ' . $this->campaign_id;
+            }
+            catch (\Exception $e) {
+                mailchimp_log('transform_order_set_campaign_id.error', 'No campaign added to order, with provided ID: '. $this->campaign_id. ' :: '. $e->getMessage(). ' :: in '.$e->getFile().' :: on '.$e->getLine());
+            }
         }
 
         $order->setProcessedAt($woo->get_date_created()->setTimezone(new \DateTimeZone('UTC')));

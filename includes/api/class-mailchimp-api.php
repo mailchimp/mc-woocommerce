@@ -868,6 +868,11 @@ class MailChimp_WooCommerce_MailChimpApi
             // submit the first one
             $data = $this->post("ecommerce/stores/$store_id/orders", $order->toArray());
 
+            //update user tags
+            $customer = $order->getCustomer();
+            $list_id = mailchimp_get_list_id();
+            $user = $this->updateMemberTags($list_id, $customer->getEmailAddress());
+
             // if the order is in pending status, we need to submit the order again with a paid status.
             if ($order->shouldConfirmAndPay() && $order->getFinancialStatus() !== 'paid') {
                 $order->setFinancialStatus('paid');
@@ -900,6 +905,7 @@ class MailChimp_WooCommerce_MailChimpApi
             $order_id = $order->getId();
             $data = $this->patch("ecommerce/stores/{$store_id}/orders/{$order_id}", $order->toArray());
             
+            //update user tags
             $customer = $order->getCustomer();
             $list_id = mailchimp_get_list_id();
             $user = $this->updateMemberTags($list_id, $customer->getEmailAddress());

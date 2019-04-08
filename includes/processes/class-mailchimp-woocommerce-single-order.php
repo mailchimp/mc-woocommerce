@@ -140,8 +140,13 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
             if ($new_order) {
                 // apply a campaign id if we have one.
                 if (!empty($this->campaign_id)) {
-                    $log .= ' :: campaign id ' . $this->campaign_id;
-                    $order->setCampaignId($this->campaign_id);
+                    try {
+                        $order->setCampaignId($this->campaign_id);
+                        $log .= ' :: campaign id ' . $this->campaign_id;
+                    }
+                    catch (\Exception $e) {
+                        mailchimp_log('single_order_set_campaign_id.error', 'No campaign added to order, with provided ID: '. $this->campaign_id. ' :: '. $e->getMessage(). ' :: in '.$e->getFile().' :: on '.$e->getLine());
+                    }
                 }
 
                 // apply the landing site if we have one.

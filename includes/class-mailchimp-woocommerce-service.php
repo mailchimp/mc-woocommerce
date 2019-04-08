@@ -480,6 +480,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     {
         $cid = trim($id);
 
+        if(!$this->api()->getCampaign($cid)) {
+            $cid = null;
+        }
+        
         @setcookie('mailchimp_campaign_id', $cid, $cookie_duration, '/' );
         $this->setWooSession('mailchimp_campaign_id', $cid);
 

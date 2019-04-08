@@ -111,7 +111,17 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
 
             $cart = new MailChimp_WooCommerce_Cart();
             $cart->setId($this->unique_id);
-            $cart->setCampaignID($this->campaign_id);
+
+            // if we have a campaign id let's set it now.
+            if (!empty($this->campaign_id)) {
+                try {
+                    $cart->setCampaignID($this->campaign_id);
+                }
+                catch (\Exception $e) {
+                    mailchimp_log('cart_set_campaign_id.error', 'No campaign added to abandoned cart, with provided ID: '. $this->campaign_id. ' :: '. $e->getMessage(). ' :: in '.$e->getFile().' :: on '.$e->getLine());
+                }
+            }
+
             $cart->setCheckoutUrl($checkout_url);
             $cart->setCurrencyCode(isset($options['store_currency_code']) ? $options['store_currency_code'] : 'USD');
 

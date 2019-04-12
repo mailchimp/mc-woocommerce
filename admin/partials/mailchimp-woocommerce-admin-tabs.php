@@ -101,10 +101,10 @@ if (isset($options['mailchimp_api_key'])) {
         <a href="?page=mailchimp-woocommerce&tab=store_info" class="nav-tab <?php echo $active_tab == 'store_info' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Store Settings', 'mailchimp-woocommerce');?></a>
         <?php if ($handler->hasValidStoreInfo()) : ?>
         <?php if($show_campaign_defaults): ?>
-        <a href="?page=mailchimp-woocommerce&tab=campaign_defaults" class="nav-tab <?php echo $active_tab == 'campaign_defaults' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('List Defaults', 'mailchimp-woocommerce');?></a>
+        <a href="?page=mailchimp-woocommerce&tab=campaign_defaults" class="nav-tab <?php echo $active_tab == 'campaign_defaults' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Audience Defaults', 'mailchimp-woocommerce');?></a>
         <?php endif; ?>
         <?php if($handler->hasValidCampaignDefaults()): ?>
-            <a href="?page=mailchimp-woocommerce&tab=newsletter_settings" class="nav-tab <?php echo $active_tab == 'newsletter_settings' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('List Settings', 'mailchimp-woocommerce');?></a>
+            <a href="?page=mailchimp-woocommerce&tab=newsletter_settings" class="nav-tab <?php echo $active_tab == 'newsletter_settings' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Audience Settings', 'mailchimp-woocommerce');?></a>
         <?php endif; ?>
         <?php if($show_sync_tab): ?>
             <a href="?page=mailchimp-woocommerce&tab=sync" class="nav-tab <?php echo $active_tab == 'sync' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Sync', 'mailchimp-woocommerce');?></a>

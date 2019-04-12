@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2019-03-20T22:02:13+00:00\n"
+"POT-Creation-Date: 2019-04-12T09:42:19+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.1.0\n"
 "Description: desc\n"
@@ -35,7 +35,7 @@ msgid "Sending Feedback"
 msgstr ""
 
 #: includes/class-mailchimp-woocommerce-deactivation-survey.php:327
-msgid "I want to change the list associated with this integration."
+msgid "I want to change the audience associated with this integration."
 msgstr ""
 
 #: includes/class-mailchimp-woocommerce-deactivation-survey.php:331
@@ -122,7 +122,7 @@ msgid "User ID"
 msgstr ""
 
 #: includes/class-mailchimp-woocommerce-newsletter.php:43
-#: admin/class-mailchimp-woocommerce-admin.php:497
+#: admin/class-mailchimp-woocommerce-admin.php:507
 #: admin/partials/tabs/newsletter_settings.php:94
 msgid "Subscribe to our newsletter"
 msgstr ""
@@ -158,45 +158,45 @@ msgstr ""
 msgid "You were subscribed to the newsletter from %s"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:605
-msgid "You must supply your Mailchimp API key to pull the lists."
+#: admin/class-mailchimp-woocommerce-admin.php:616
+msgid "You must supply your Mailchimp API key to pull the audiences."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:992
+#: admin/class-mailchimp-woocommerce-admin.php:1003
 msgid "Starting the sync process..."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:994
+#: admin/class-mailchimp-woocommerce-admin.php:1005
 msgid "Please hang tight while we work our mojo."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:996
+#: admin/class-mailchimp-woocommerce-admin.php:1007
 msgid "Sometimes the sync can take a while, especially on sites with lots of orders and/or products."
 msgstr ""
 
 #: admin/partials/tabs/newsletter_settings.php:35
 #: admin/partials/mailchimp-woocommerce-admin-tabs.php:107
-msgid "List Settings"
+msgid "Audience Settings"
 msgstr ""
 
 #: admin/partials/tabs/newsletter_settings.php:36
-msgid "Please apply your list settings. If you don't have a list, you can choose to create one."
+msgid "Please apply your audience settings. If you don't have an audience, you can choose to create one."
 msgstr ""
 
 #: admin/partials/tabs/newsletter_settings.php:40
-msgid "List Name"
+msgid "Audience Name"
 msgstr ""
 
 #: admin/partials/tabs/newsletter_settings.php:46
-msgid "Create New List"
+msgid "Create New Audience"
 msgstr ""
 
 #: admin/partials/tabs/newsletter_settings.php:50
-msgid "Select List"
+msgid "Select Audience"
 msgstr ""
 
 #: admin/partials/tabs/newsletter_settings.php:62
-msgid "Choose a list to sync with your store."
+msgid "Choose an audience to sync with your store."
 msgstr ""
 
 #: admin/partials/tabs/newsletter_settings.php:68
@@ -231,50 +231,63 @@ msgstr ""
 msgid "Enter text for the opt-in checkbox"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:99
-#: admin/partials/tabs/newsletter_settings.php:103
+#: admin/partials/tabs/newsletter_settings.php:97
+msgid "HTML tags allowed: <a href=\"\" target=\"\" title=\"\"></a> and <br>"
+msgstr ""
+
+#: admin/partials/tabs/newsletter_settings.php:100
+#: admin/partials/tabs/newsletter_settings.php:104
 msgid "Checkbox Display Options"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:107
+#: admin/partials/tabs/newsletter_settings.php:108
 msgid "Visible, checked by default"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:108
+#: admin/partials/tabs/newsletter_settings.php:109
 msgid "Visible, unchecked by default"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:109
+#: admin/partials/tabs/newsletter_settings.php:110
 msgid "Hidden, unchecked by default"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:113
+#: admin/partials/tabs/newsletter_settings.php:114
 msgid "Advanced Checkbox Settings"
 msgstr ""
 
 #. translators: %s - Woocommerce Actions documentation URL.
-#: admin/partials/tabs/newsletter_settings.php:114
+#: admin/partials/tabs/newsletter_settings.php:115
 msgid "To change the location of the opt-in checkbox at checkout, input one of the <a href=%s target=_blank>available WooCommerce form actions.</a>."
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:118
+#: admin/partials/tabs/newsletter_settings.php:119
 msgid "Newsletter Checkbox Action"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:122
+#: admin/partials/tabs/newsletter_settings.php:123
 msgid "Enter a WooCommerce form action"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:126
-#: admin/partials/tabs/newsletter_settings.php:131
+#: admin/partials/tabs/newsletter_settings.php:127
+#: admin/partials/tabs/newsletter_settings.php:132
+msgid "User Tags"
+msgstr ""
+
+#: admin/partials/tabs/newsletter_settings.php:128
+msgid "Add a comma separated list of tags to add to the user at Mailchimp"
+msgstr ""
+
+#: admin/partials/tabs/newsletter_settings.php:139
+#: admin/partials/tabs/newsletter_settings.php:144
 msgid "Product Image Size"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:127
+#: admin/partials/tabs/newsletter_settings.php:140
 msgid "Define the product image size used by abandoned carts, order notifications, and product recommendations."
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:142
+#: admin/partials/tabs/newsletter_settings.php:155
 msgid "Select an image size"
 msgstr ""
 
@@ -303,6 +316,11 @@ msgstr ""
 msgid "Standard"
 msgstr ""
 
+#: admin/partials/tabs/logs.php:59
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:155
+msgid "Save all changes"
+msgstr ""
+
 #: admin/partials/tabs/logs.php:67
 msgid "Delete log"
 msgstr ""
@@ -324,7 +342,7 @@ msgid "Mailchimp says: Sorry you must set up your campaign defaults before you p
 msgstr ""
 
 #: admin/partials/tabs/notices.php:12
-msgid "Mailchimp says: You must select a marketing list."
+msgid "Mailchimp says: You must select a marketing audience."
 msgstr ""
 
 #: admin/partials/tabs/notices.php:15
@@ -341,7 +359,7 @@ msgstr ""
 
 #: admin/partials/tabs/campaign_defaults.php:16
 #: admin/partials/mailchimp-woocommerce-admin-tabs.php:104
-msgid "List Defaults"
+msgid "Audience Defaults"
 msgstr ""
 
 #: admin/partials/tabs/campaign_defaults.php:17
@@ -403,7 +421,7 @@ msgid "Account Connected:"
 msgstr ""
 
 #: admin/partials/tabs/store_sync.php:65
-msgid "List Connected:"
+msgid "Audience Connected:"
 msgstr ""
 
 #: admin/partials/tabs/store_sync.php:66
@@ -419,7 +437,7 @@ msgid "Advanced"
 msgstr ""
 
 #: admin/partials/tabs/store_sync.php:72
-msgid "You can resync your list at any time without losing any of your e-commerce data."
+msgid "You can resync your audience at any time without losing any of your e-commerce data."
 msgstr ""
 
 #: admin/partials/tabs/store_sync.php:74
@@ -522,12 +540,20 @@ msgstr ""
 msgid "Currency Code"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:194
+#: admin/partials/tabs/store_info.php:186
+msgid "Currency is currently deprecated. Please select one from the list above"
+msgstr ""
+
+#: admin/partials/tabs/store_info.php:192
+msgid "deprecated"
+msgstr ""
+
+#: admin/partials/tabs/store_info.php:199
 msgid "Currency"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:200
-#: admin/partials/tabs/store_info.php:211
+#: admin/partials/tabs/store_info.php:205
+#: admin/partials/tabs/store_info.php:216
 msgid "Timezone"
 msgstr ""
 
@@ -553,10 +579,6 @@ msgstr ""
 
 #: admin/partials/mailchimp-woocommerce-admin-tabs.php:111
 msgid "Logs"
-msgstr ""
-
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:155
-msgid "Save all changes"
 msgstr ""
 
 #: admin/partials/mailchimp-woocommerce-admin-tabs.php:160
@@ -588,14 +610,14 @@ msgstr ""
 msgid "By using this plugin, Mailchimp will process customer information in accordance with their <a href=%s target=_blank>Privacy Policy</a>."
 msgstr ""
 
-#: bootstrap.php:479
+#: bootstrap.php:494
 msgid "The MailChimp For WooCommerce plugin requires the <a href=\"http://wordpress.org/extend/plugins/woocommerce/\">WooCommerce</a> plugin to be active!"
 msgstr ""
 
-#: bootstrap.php:822
+#: bootstrap.php:837
 msgid "function \"wp_remote_post\" does not exist"
 msgstr ""
 
-#: bootstrap.php:836
+#: bootstrap.php:851
 msgid "The REST API seems to be disabled on this wordpress site. Please enable to sync data."
 msgstr ""

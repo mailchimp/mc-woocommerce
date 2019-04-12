@@ -91,7 +91,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
         <span><?php esc_html_e('Newsletter Label', 'mailchimp-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-newsletter-checkbox-label">
-        <input style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-newsletter-checkbox-label" name="<?php echo $this->plugin_name; ?>[newsletter_label]" value="<?php echo isset($options['newsletter_label']) ? esc_html($options['newsletter_label']) : esc_html__('Subscribe to our newsletter', 'mailchimp-woocommerce'); ?>" />
+        <textarea style="width: 30%;" rows="3" id="<?php echo $this->plugin_name; ?>-newsletter-checkbox-label" name="<?php echo $this->plugin_name; ?>[newsletter_label]"><?php echo isset($options['newsletter_label']) ? esc_html($options['newsletter_label']) : esc_html__('Subscribe to our newsletter', 'mailchimp-woocommerce'); ?></textarea>
         <span><?php esc_html_e('Enter text for the opt-in checkbox', $this->plugin_name); ?></span>
     </label>
     <p class="description"><?= esc_html(__('HTML tags allowed: <a href="" target="" title=""></a> and <br>', 'mailchimp-woocommerce')); ?></p>

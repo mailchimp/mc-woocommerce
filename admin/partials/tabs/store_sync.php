@@ -62,14 +62,14 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
 <?php endif; ?>
 
 <p><strong><?php esc_html_e('Account Connected:', 'mailchimp-woocommerce');?></strong> <span id="mailchimp_account_connected"><?php echo $account_name; ?></span></p>
-<p><strong><?php esc_html_e('List Connected:', 'mailchimp-woocommerce');?></strong> <span id="mailchimp_list_name"><?php echo $mailchimp_list_name; ?></span></p>
+<p><strong><?php esc_html_e('Audience Connected:', 'mailchimp-woocommerce');?></strong> <span id="mailchimp_list_name"><?php echo $mailchimp_list_name; ?></span></p>
 <p><strong><?php esc_html_e('Products Synced:', 'mailchimp-woocommerce');?></strong> <span id="mailchimp_product_count"><?php echo $mailchimp_total_products; ?></span></p>
 <p><strong><?php esc_html_e('Orders Synced:', 'mailchimp-woocommerce');?></strong> <span id="mailchimp_order_count"><?php echo $mailchimp_total_orders; ?></span></p>
 
 <?php if($mailchimp_api && (!$store_syncing || isset($_GET['resync']) && $_GET['resync'] === '1')): ?>
     <h2 style="padding-top: 1em;"><?php esc_html_e('Advanced', 'mailchimp-woocommerce');?></h2>
     <p id="resync_data_help_text">
-        <?php esc_html_e('You can resync your list at any time without losing any of your e-commerce data.', 'mailchimp-woocommerce');?>
+        <?php esc_html_e('You can resync your audience at any time without losing any of your e-commerce data.', 'mailchimp-woocommerce');?>
     </p>
     <?php submit_button(__('Resync', 'mailchimp-woocommerce'), 'primary','submit', TRUE); ?>
 <?php endif; ?>

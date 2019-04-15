@@ -32,22 +32,22 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
 
 <input type="hidden" name="mailchimp_active_settings_tab" value="newsletter_settings"/>
 
-<h2 style="padding-top: 1em;"><?php esc_html_e('List Settings', 'mailchimp-woocommerce');?></h2>
-<p><?php esc_html_e('Please apply your list settings. If you don\'t have a list, you can choose to create one.', 'mailchimp-woocommerce');?></p>
+<h2 style="padding-top: 1em;"><?php esc_html_e('Audience Settings', 'mailchimp-woocommerce');?></h2>
+<p><?php esc_html_e('Please apply your audience settings. If you don\'t have an audience, you can choose to create one.', 'mailchimp-woocommerce');?></p>
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span><?php esc_html_e('List Name', 'mailchimp-woocommerce');?></span>
+        <span><?php esc_html_e('Audience Name', 'mailchimp-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-mailchimp-list-label">
         <select name="<?php echo $this->plugin_name; ?>[mailchimp_list]" style="width:30%" required <?php if($list_is_configured): ?> disabled <?php endif; ?>>
 
             <?php if(!isset($allow_new_list) || $allow_new_list === true): ?>
-            <option value="create_new"><?php esc_html_e('Create New List', 'mailchimp-woocommerce');?></option>
+            <option value="create_new"><?php esc_html_e('Create New Audience', 'mailchimp-woocommerce');?></option>
             <?php endif ?>
 
             <?php if(isset($allow_new_list) && $allow_new_list === false): ?>
-                <option value="">-- <?php esc_html_e('Select List', 'mailchimp-woocommerce');?> --</option>
+                <option value="">-- <?php esc_html_e('Select Audience', 'mailchimp-woocommerce');?> --</option>
             <?php endif; ?>
 
             <?php
@@ -59,7 +59,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
             }
             ?>
         </select>
-        <span><?php esc_html_e('Choose a list to sync with your store.', $this->plugin_name); ?></span>
+        <span><?php esc_html_e('Choose an audience to sync with your store.', $this->plugin_name); ?></span>
     </label>
 </fieldset>
 

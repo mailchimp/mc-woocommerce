@@ -613,7 +613,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	public function hasValidMailChimpList()
 	{
 		if (!$this->hasValidApiKey()) {
-			add_settings_error('mailchimp_api_key', '', __('You must supply your Mailchimp API key to pull the lists.', 'mailchimp-woocommerce'));
+			add_settings_error('mailchimp_api_key', '', __('You must supply your Mailchimp API key to pull the audiences.', 'mailchimp-woocommerce'));
 			return false;
 		}
 

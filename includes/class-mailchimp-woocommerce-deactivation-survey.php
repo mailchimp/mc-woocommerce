@@ -324,8 +324,8 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Deactivation_Survey', false ) ) {
 
 			$options = array(
 				1 => array(
-					'title'   => esc_html__( 'I want to change the list associated with this integration.', 'mailchimp-woocommerce' ),
-					'reason'   => 'I want to change the list associated with this integration.'
+					'title'   => esc_html__( 'I want to change the audience associated with this integration.', 'mailchimp-woocommerce' ),
+					'reason'   => 'I want to change the audience associated with this integration.'
 				),
 				2 => array(
 					'title'   => esc_html__( 'I want to change the site or store connected through this integration.', 'mailchimp-woocommerce' ),

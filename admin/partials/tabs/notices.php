@@ -9,7 +9,7 @@
                 esc_html_e('Mailchimp says: Sorry you must set up your campaign defaults before you proceed!', 'mailchimp-woocommerce');
                 break;
             case 'missing_list':
-                esc_html_e('Mailchimp says: You must select a marketing list.', 'mailchimp-woocommerce');
+                esc_html_e('Mailchimp says: You must select a marketing audience.', 'mailchimp-woocommerce');
                 break;
             case 'missing_store':
                 esc_html_e('Mailchimp says: Sorry you must set up your store before you proceed!', 'mailchimp-woocommerce');

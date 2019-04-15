@@ -79,7 +79,7 @@ After you activate the plugin, you’ll be taken to the **Settings** page, where
 
 All set! When you click **Save all changes**, we’ll start syncing your WooCommerce customers to Mailchimp. To view progress, check the **Sync Status** tab. 
 
-If you have no lists in your Mailchimp account, you will be given the option to create a new list on the **List Defaults** tab. To create a new list, set your list defaults, and click **Save all Changes** when you’re done. We’ll create a Mailchimp list for you, and begin the data sync.
+If you have no audiences in your Mailchimp account, you will be given the option to create a new list on the **List Defaults** tab. To create a new list, set your list defaults, and click **Save all Changes** when you’re done. We’ll create a Mailchimp list for you, and begin the data sync.
 
 ![List Defaults tab](https://cloud.githubusercontent.com/assets/19805049/18956260/cffd3926-8628-11e6-9c68-9fe3c964c75c.png)
 

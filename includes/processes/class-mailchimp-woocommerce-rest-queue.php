@@ -230,15 +230,16 @@ class MailChimp_WooCommerce_Rest_Queue
     }
 
     /**
-     *
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_RateLimitError
+     * @throws MailChimp_WooCommerce_ServerError
      */
     protected function again()
     {
-        wp_remote_get(esc_url_raw(rest_url('mailchimp-for-woocommerce/v1/queue/work')), array(
+        mailchimp_woocommerce_rest_api_get(esc_url_raw(rest_url('mailchimp-for-woocommerce/v1/queue/work'), array(
             'timeout'   => 0.01,
             'blocking'  => false,
-            'cookies'   => $_COOKIE,
             'sslverify' => apply_filters('https_local_ssl_verify', false)
-        ));
+        )));
     }
 }

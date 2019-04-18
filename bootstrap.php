@@ -825,6 +825,27 @@ function mailchimp_call_rest_api_test() {
 }
 
 /**
+ * @return bool
+ */
+function mailchimp_should_use_local_curl_for_rest_api() {
+    return defined('MAILCHIMP_USE_CURL') && MAILCHIMP_USE_CURL;
+}
+
+/**
+ * @return int
+ */
+function mailchimp_get_local_curl_http_version() {
+    return defined('MAILCHIMP_USE_LOCAL_CURL_VERSION') ? MAILCHIMP_USE_LOCAL_CURL_VERSION : CURL_HTTP_VERSION_1_1;
+}
+
+/**
+ * @return bool|string
+ */
+function mailchimp_get_curlopt_interface_ip() {
+    return defined('MAILCHIMP_USE_OUTBOUND_IP') ? MAILCHIMP_USE_OUTBOUND_IP : false;
+}
+
+/**
  * @return bool|string
  */
 function mailchimp_woocommerce_check_if_http_worker_fails() {
@@ -836,7 +857,7 @@ function mailchimp_woocommerce_check_if_http_worker_fails() {
     }
 
     // if the function doesn't exist we can't do anything.
-    if (!function_exists('wp_remote_post')) {
+    if (!mailchimp_should_use_local_curl_for_rest_api() && !function_exists('wp_remote_post')) {
         mailchimp_set_data('test.can.remote_post', false);
         mailchimp_set_data('test.can.remote_post.error', 'function "wp_remote_post" does not exist');
         return __('function "wp_remote_post" does not exist', 'mailchimp-woocommerce');
@@ -864,6 +885,138 @@ function mailchimp_woocommerce_check_if_http_worker_fails() {
     mailchimp_set_data('test.can.remote_post', true);
     mailchimp_set_data('test.can.remote_post.error', false);
     return false;
+}
+
+/**
+ * @param $url
+ * @param array $params
+ * @param array $headers
+ * @return array|mixed|object|WP_Error|null
+ */
+function mailchimp_woocommerce_rest_api_get($url, $params = array(), $headers = array()) {
+    if (mailchimp_should_use_local_curl_for_rest_api()) {
+        try {
+            $curl = curl_init();
+            curl_setopt_array($curl, mailchimp_apply_local_curl_options('GET', $url, $params, $headers));
+            return mailchimp_process_local_curl_response($curl);
+        } catch (\Exception $e) {
+            return new WP_Error( 'http_request_failed', $e->getMessage());
+        }
+    }
+    return wp_remote_get($url, $params);
+}
+
+/**
+ * @param $method
+ * @param $url
+ * @param array $params
+ * @param array $headers
+ * @return array
+ */
+function mailchimp_apply_local_curl_options($method, $url, $params = array(), $headers = array()) {
+
+    $curl_options = array(
+        CURLOPT_CUSTOMREQUEST => strtoupper($method),
+        CURLOPT_URL => mailchimp_rest_api_url($url, '', $params),
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => "",
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => $params['timeout'],
+        CURLOPT_HTTP_VERSION => mailchimp_get_local_curl_http_version(),
+        CURLINFO_HEADER_OUT => true,
+        CURLOPT_HTTPHEADER => array_merge(mailchimp_get_http_local_json_header(), $headers)
+    );
+
+    // if we have a dedicated IP address, and have set a configuration for it, we'll use it here.
+    if (($interface = mailchimp_get_curlopt_interface_ip())) {
+        $curl_options[CURLOPT_INTERFACE] = $interface;
+    }
+
+    return $curl_options;
+}
+
+/**
+ * @param $curl
+ * @return array|mixed|object|null
+ * @throws MailChimp_WooCommerce_Error
+ * @throws MailChimp_WooCommerce_ServerError
+ */
+function mailchimp_process_local_curl_response($curl)
+{
+    $response = curl_exec($curl);
+    $err = curl_error($curl);
+    $info = curl_getinfo($curl);
+    curl_close($curl);
+    if ($err) {
+        throw new MailChimp_WooCommerce_Error('CURL error :: '.$err, 500);
+    }
+    $data = json_decode($response, true);
+    if (empty($info) || ($info['http_code'] >= 200 && $info['http_code'] <= 400)) {
+        if (is_array($data)) {
+            mailchimp_rest_check_for_errors($data);
+        }
+        return $data;
+    }
+    if ($info['http_code'] >= 400 && $info['http_code'] < 500) {
+        throw new MailChimp_WooCommerce_Error($data['title'] .' :: '.$data['detail'], $data['status']);
+    } else if ($info['http_code'] >= 500) {
+        throw new MailChimp_WooCommerce_ServerError($data['detail'], $data['status']);
+    }
+    return null;
+}
+
+/**
+ * @param array $data
+ * @return bool
+ * @throws MailChimp_WooCommerce_Error
+ */
+function mailchimp_rest_check_for_errors(array $data)
+{
+    // if we have an array of error data push it into a message
+    if (isset($data['errors'])) {
+        $message = '';
+        foreach ($data['errors'] as $error) {
+            $message .= '<p>'.$error['field'].': '.$error['message'].'</p>';
+        }
+        throw new MailChimp_WooCommerce_Error($message, $data['status']);
+    }
+    // make sure the response is correct from the data in the response array
+    if (isset($data['status']) && $data['status'] >= 400) {
+        throw new MailChimp_WooCommerce_Error($data['detail'], $data['status']);
+    }
+    return false;
+}
+
+/**
+ * @param $url
+ * @param string $extra
+ * @param null $params
+ * @return string
+ */
+function mailchimp_rest_api_url($url, $extra = '', $params = null)
+{
+    if (!empty($extra)) {
+        $url .= $extra;
+    }
+    if (!empty($params)) {
+        $url .= '?'.(is_array($params) ? http_build_query($params) : $params);
+    }
+    return $url;
+}
+
+/**
+ * @return array
+ */
+function mailchimp_get_http_local_json_header() {
+    $server_user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : false;
+    if (empty($server_user_agent)) {
+        $env = mailchimp_environment_variables();
+        $server_user_agent = "MailChimp for WooCommerce/{$env->version} PHP/{$env->php_version} WordPress/{$env->wp_version} Woo/{$env->wc_version}";
+    }
+    return array(
+        'Content-Type' => 'application/json; charset=' . get_option( 'blog_charset' ),
+        'user-agent'  => $server_user_agent
+    );
 }
 
 /**

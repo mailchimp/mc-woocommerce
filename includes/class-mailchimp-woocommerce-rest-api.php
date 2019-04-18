@@ -15,34 +15,42 @@ class MailChimp_WooCommerce_Rest_Api
     }
 
     /**
-     * @return mixed
+     * @return array|mixed|object|WP_Error|null
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_RateLimitError
+     * @throws MailChimp_WooCommerce_ServerError
      */
     public static function test()
     {
-        return wp_remote_get(static::url('ping'), array(
-            'timeout'   => 5,
-            'blocking'  => true,
-            'cookies'   => $_COOKIE,
-            'sslverify' => apply_filters('https_local_ssl_verify', false)
-        ));
+        return mailchimp_woocommerce_rest_api_get(
+            static::url('ping'),
+            array(
+                'timeout'   => 5,
+                'blocking'  => true,
+                'sslverify' => apply_filters('https_local_ssl_verify', false),
+            )
+        );
     }
 
     /**
-     * Call the "work" command manually to initiate the queue.
-     *
      * @param bool $force
-     * @return mixed
+     * @return array|mixed|object|WP_Error|null
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_RateLimitError
+     * @throws MailChimp_WooCommerce_ServerError
      */
     public static function work($force = false)
     {
         $path = $force ? 'queue/work/force' : 'queue/work';
         // this is the new rest API version
-        return wp_remote_get(static::url($path), array(
-            'timeout'   => 0.01,
-            'blocking'  => false,
-            'cookies'   => $_COOKIE,
-            'sslverify' => apply_filters('https_local_ssl_verify', false)
-        ));
+        return mailchimp_woocommerce_rest_api_get(
+            static::url($path),
+            array(
+                'timeout'   => 0.01,
+                'blocking'  => false,
+                'sslverify' => apply_filters('https_local_ssl_verify', false)
+            )
+        );
     }
 
     /**

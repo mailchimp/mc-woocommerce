@@ -275,13 +275,16 @@ class MailChimp_WooCommerce_MailChimpApi
     {
         $hash = md5(strtolower(trim($email)));
         $tags = mailchimp_get_user_tags_to_update();
+        
+        if (empty($tags)) return false;
+        
         $data = array(
             'tags' => $tags
         );
 
         mailchimp_debug('api.update_member_tags', "Updating {$email}", $data);
 
-        return $this->post("lists/$list_id/members/$hash/tags", $data);;
+        return $this->post("lists/$list_id/members/$hash/tags", $data);
     }
 
     /**

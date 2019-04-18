@@ -903,6 +903,9 @@ function mailchimp_woocommerce_rest_api_get($url, $params = array(), $headers = 
             return new WP_Error( 'http_request_failed', $e->getMessage());
         }
     }
+
+    $params['headers'] = $headers;
+
     return wp_remote_get($url, $params);
 }
 

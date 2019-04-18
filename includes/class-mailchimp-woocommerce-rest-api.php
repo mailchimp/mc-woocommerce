@@ -27,8 +27,9 @@ class MailChimp_WooCommerce_Rest_Api
             array(
                 'timeout'   => 5,
                 'blocking'  => true,
-                'sslverify' => apply_filters('https_local_ssl_verify', false),
-            )
+                'sslverify' => apply_filters('https_local_ssl_verify', false)
+            ),
+            mailchimp_get_http_local_json_header()
         );
     }
 
@@ -48,8 +49,9 @@ class MailChimp_WooCommerce_Rest_Api
             array(
                 'timeout'   => 0.01,
                 'blocking'  => false,
-                'sslverify' => apply_filters('https_local_ssl_verify', false)
-            )
+                'sslverify' => apply_filters('https_local_ssl_verify', false),
+            ),
+            mailchimp_get_http_local_json_header()
         );
     }
 

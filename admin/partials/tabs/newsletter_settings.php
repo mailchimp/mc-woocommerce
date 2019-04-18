@@ -103,10 +103,16 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
     <legend class="screen-reader-text">
         <span><?php esc_html_e('Checkbox Display Options', 'mailchimp-woocommerce');?></span>
     </legend>
-    <label for="<?php echo $this->plugin_name; ?>-newsletter-checkbox-defaults">
-        <?php $checkbox_default_settings = (array_key_exists('mailchimp_checkbox_defaults', $options) && !is_null($options['mailchimp_checkbox_defaults'])) ? $options['mailchimp_checkbox_defaults'] : 'check'; ?>
+    <?php $checkbox_default_settings = (array_key_exists('mailchimp_checkbox_defaults', $options) && !is_null($options['mailchimp_checkbox_defaults'])) ? $options['mailchimp_checkbox_defaults'] : 'check'; ?>
+    <label>
         <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_checkbox_defaults]" value="check"<?php if($checkbox_default_settings === 'check') echo ' checked="checked" '; ?>><?php esc_html_e('Visible, checked by default', 'mailchimp-woocommerce');?><br>
+    </label>
+    <br/>
+    <label>
         <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_checkbox_defaults]" value="uncheck"<?php if($checkbox_default_settings === 'uncheck') echo ' checked="checked" '; ?>><?php esc_html_e('Visible, unchecked by default', 'mailchimp-woocommerce');?><br/>
+    </label>
+    <br/>
+    <label>
         <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_checkbox_defaults]" value="hide"<?php if($checkbox_default_settings === 'hide') echo ' checked="checked" '; ?>><?php esc_html_e('Hidden, unchecked by default', 'mailchimp-woocommerce');?><br/>
     </label>
 </fieldset>

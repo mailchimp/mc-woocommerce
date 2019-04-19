@@ -45,6 +45,10 @@ if (isset($options['mailchimp_api_key'])) {
         $has_api_error = $e->getMessage().' on '.$e->getLine().' in '.$e->getFile();
     }
 }
+
+if (mailchimp_should_init_rest_queue()) {
+    mailchimp_call_rest_api_queue_manually();
+}
 ?>
 
 <style>

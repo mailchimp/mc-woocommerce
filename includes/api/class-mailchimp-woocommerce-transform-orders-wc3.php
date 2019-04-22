@@ -77,9 +77,7 @@ class MailChimp_WooCommerce_Transform_Orders
         if (!empty($this->campaign_id)) {
             try {
                 $order->setCampaignId($this->campaign_id);
-                $log .= ' :: campaign id ' . $this->campaign_id;
-            }
-            catch (\Exception $e) {
+            } catch (\Exception $e) {
                 mailchimp_log('transform_order_set_campaign_id.error', 'No campaign added to order, with provided ID: '. $this->campaign_id. ' :: '. $e->getMessage(). ' :: in '.$e->getFile().' :: on '.$e->getLine());
             }
         }

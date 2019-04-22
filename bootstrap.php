@@ -859,7 +859,7 @@ function mailchimp_get_local_rest_domain_or_ip() {
 }
 
 /**
- * @return bool|string domain name
+ * @return string url
  */
 function mailchimp_apply_local_rest_api_override($url, $alternate_host) {
     $parsed_url = parse_url($url);

@@ -863,10 +863,9 @@ function mailchimp_get_local_rest_domain_or_ip() {
  */
 function mailchimp_apply_local_rest_api_override($url, $alternate_host) {
     $parsed_url = parse_url($url);
-    $parsed_url['host'] = $alternate_host;
     $p             = array();
     $p['scheme']   = isset( $parsed_url['scheme'] ) ? $parsed_url['scheme'] . '://' : ''; 
-    $p['host']     = isset( $parsed_url['host'] ) ? $parsed_url['host'] : '';         
+    $p['host']     = $alternate_host;         
     $p['port']     = isset( $parsed_url['port'] ) ? ':' . $parsed_url['port'] : ''; 
     $p['user']     = isset( $parsed_url['user'] ) ? $parsed_url['user'] : ''; 
     $p['pass']     = isset( $parsed_url['pass'] ) ? ':' . $parsed_url['pass']  : ''; 

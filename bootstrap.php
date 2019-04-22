@@ -900,6 +900,7 @@ function mailchimp_woocommerce_rest_api_get($url, $params = array(), $headers = 
             curl_setopt_array($curl, mailchimp_apply_local_curl_options('GET', $url, $params, $headers));
             return mailchimp_process_local_curl_response($curl);
         } catch (\Exception $e) {
+            mailchimp_error("mailchimp_woocommerce_rest_api_get", $e->getMessage());
             return new WP_Error( 'http_request_failed', $e->getMessage());
         }
     }
@@ -917,6 +918,8 @@ function mailchimp_woocommerce_rest_api_get($url, $params = array(), $headers = 
  * @return array
  */
 function mailchimp_apply_local_curl_options($method, $url, $params = array(), $headers = array()) {
+
+    $headers = (array) $headers;
 
     $curl_options = array(
         CURLOPT_CUSTOMREQUEST => strtoupper($method),
@@ -965,7 +968,7 @@ function mailchimp_process_local_curl_response($curl)
     } else if ($info['http_code'] >= 500) {
         throw new MailChimp_WooCommerce_ServerError($data['detail'], $data['status']);
     }
-    return null;
+    return json_encode(array('info' => $info, 'response' => $response));
 }
 
 /**
@@ -1011,14 +1014,12 @@ function mailchimp_rest_api_url($url, $extra = '', $params = null)
  * @return array
  */
 function mailchimp_get_http_local_json_header() {
-    $server_user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : false;
-    if (empty($server_user_agent)) {
-        $env = mailchimp_environment_variables();
-        $server_user_agent = "MailChimp for WooCommerce/{$env->version} PHP/{$env->php_version} WordPress/{$env->wp_version} Woo/{$env->wc_version}";
-    }
+    $env = mailchimp_environment_variables();
+    $server_user_agent = "MailChimp for WooCommerce/{$env->version} PHP/{$env->php_version} WordPress/{$env->wp_version} Woo/{$env->wc_version}";
     return array(
         'Content-Type' => 'application/json; charset=' . get_option( 'blog_charset' ),
-        'user-agent'  => $server_user_agent
+        'Accept' => 'application/json',
+        'User-Agent'  => $server_user_agent
     );
 }
 

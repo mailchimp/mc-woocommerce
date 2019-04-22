@@ -46,9 +46,10 @@ if (isset($options['mailchimp_api_key'])) {
     }
 }
 
-if (mailchimp_should_init_rest_queue()) {
+if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue_listen')) {
     mailchimp_call_rest_api_queue_manually();
 }
+
 ?>
 
 <style>

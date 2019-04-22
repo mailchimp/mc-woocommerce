@@ -236,10 +236,12 @@ class MailChimp_WooCommerce_Rest_Queue
      */
     protected function again()
     {
-        mailchimp_woocommerce_rest_api_get(esc_url_raw(rest_url('mailchimp-for-woocommerce/v1/queue/work'), array(
+        $url = esc_url_raw(rest_url('mailchimp-for-woocommerce/v1/queue/work'));
+        $params = array(
             'timeout'   => 0.01,
             'blocking'  => false,
             'sslverify' => apply_filters('https_local_ssl_verify', false),
-        )), array(), mailchimp_get_http_local_json_header());
+        );
+        mailchimp_woocommerce_rest_api_get($url, $params, mailchimp_get_http_local_json_header());
     }
 }

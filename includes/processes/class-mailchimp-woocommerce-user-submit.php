@@ -124,21 +124,21 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
 
         $api = new MailChimp_WooCommerce_MailChimpApi($api_key);
 
-        $merge_vars_system = array();
+        $merge_fields_system = array();
 
         $fn = trim($user->first_name);
         $ln = trim($user->last_name);
 
-        if (!empty($fn)) $merge_vars_system['FNAME'] = $fn;
-        if (!empty($ln)) $merge_vars_system['LNAME'] = $ln;
+        if (!empty($fn)) $merge_fields_system['FNAME'] = $fn;
+        if (!empty($ln)) $merge_fields_system['LNAME'] = $ln;
 
-        // allow users to hook into the merge tag submission
-        $merge_vars = apply_filters('mailchimp_sync_user_mergetags', $merge_vars_system, $user);
+        // allow users to hook into the merge field submission
+        $merge_fields = apply_filters('mailchimp_sync_user_mergetags', $merge_fields_system, $user);
 
         // for whatever reason if this isn't an array we need to skip it.
-        if (!is_array($merge_vars)) {
-            mailchimp_error("custom.merge_tags", "the filter for mailchimp_sync_user_mergetags needs to return an array, we're using the default setup instead.");
-            $merge_vars = $merge_vars_system;
+        if (!is_array($merge_fields)) {
+            mailchimp_error("custom.merge_fields", "The filter for mailchimp_sync_user_mergetags needs to return an array, using the default setup instead.");
+            $merge_fields = $merge_fields_system;
         }
 
         // pull the transient key for this job.
@@ -163,18 +163,18 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
                     // delete the old
                     $api->deleteMember($list_id, $this->updated_data['user_email']);
                     // subscribe the new
-                    $api->subscribe($list_id, $email, $status_meta['created'], $merge_vars);
+                    $api->subscribe($list_id, $email, $status_meta['created'], $merge_fields);
                     mailchimp_tell_system_about_user_submit($email, $status_meta, 60);
 
                     if ($status_meta['created']) {
                         mailchimp_log('member.sync', 'Subscriber Swap '.$this->updated_data['user_email'].' to '.$email, array(
                             'status' => $status_meta['created'],
-                            'merge_vars' => $merge_vars
+                            'merge_fields' => $merge_fields
                         ));
                     } else {
                         mailchimp_log('member.sync', 'Subscriber Swap '.$this->updated_data['user_email'].' to '.$email.' Pending Double OptIn', array(
                             'status' => $status_meta['created'],
-                            'merge_vars' => $merge_vars
+                            'merge_fields' => $merge_fields
                         ));
                     }
                     static::$handling_for = null;
@@ -184,7 +184,7 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
 
             // if the member is unsubscribed or pending, we really can't do anything here.
             if (isset($member_data['status']) && in_array($member_data['status'], array('unsubscribed', 'pending'))) {
-                mailchimp_log('member.sync', "Skipped Member Sync For {$email} because the current status is {$member_data['status']}", $merge_vars);
+                mailchimp_log('member.sync', "Skipped Member Sync For {$email} because the current status is {$member_data['status']}", $merge_fields);
                 static::$handling_for = null;
                 return false;
             }
@@ -192,12 +192,12 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
             // if the status is not === 'transactional' we can update them to subscribed or pending now.
             if (isset($member_data['status']) && $member_data['status'] === 'transactional' || $member_data['status'] === 'cleaned') {
                 // ok let's update this member
-                $api->update($list_id, $email, $status_meta['updated'], $merge_vars);
+                $api->update($list_id, $email, $status_meta['updated'], $merge_fields);
                 mailchimp_tell_system_about_user_submit($email, $status_meta, 60);
                 mailchimp_log('member.sync', "Updated Member {$email}", array(
                     'previous_status' => $member_data['status'],
                     'status' => $status_meta['updated'],
-                    'merge_vars' => $merge_vars
+                    'merge_fields' => $merge_fields
                 ));
                 static::$handling_for = null;
                 return true;
@@ -205,10 +205,10 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
 
             if (isset($member_data['status'])) {
                 // ok let's update this member
-                $api->update($list_id, $email, $member_data['status'], $merge_vars);
+                $api->update($list_id, $email, $member_data['status'], $merge_fields);
                 mailchimp_tell_system_about_user_submit($email, $status_meta, 60);
-                mailchimp_log('member.sync', "Updated Member {$email} ( merge tags only )", array(
-                    'merge_vars' => $merge_vars
+                mailchimp_log('member.sync', "Updated Member {$email} ( merge fields only )", array(
+                    'merge_fields' => $merge_fields
                 ));
                 static::$handling_for = null;
                 return true;
@@ -224,10 +224,10 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
             if ($e->getCode() == 404) {
 
                 try {
-                    $api->subscribe($list_id, $user->user_email, $status_meta['created'], $merge_vars);
+                    $api->subscribe($list_id, $user->user_email, $status_meta['created'], $merge_fields);
                     mailchimp_tell_system_about_user_submit($email, $status_meta, 60);
                     if ($status_meta['created']) {
-                        mailchimp_log('member.sync', "Subscribed Member {$user->user_email}", array('status_if_new' => $status_meta['created'], 'merge_vars' => $merge_vars));
+                        mailchimp_log('member.sync', "Subscribed Member {$user->user_email}", array('status_if_new' => $status_meta['created'], 'merge_fields' => $merge_fields));
                     } else {
                         mailchimp_log('member.sync', "{$user->user_email} is Pending Double OptIn");
                     }

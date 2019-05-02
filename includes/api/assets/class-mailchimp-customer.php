@@ -260,7 +260,7 @@ class MailChimp_WooCommerce_Customer
     /**
      * @return array
      */
-    public function getMergeVars()
+    public function getMergeFields()
     {
         return array(
             'FNAME' => trim($this->getFirstName()),

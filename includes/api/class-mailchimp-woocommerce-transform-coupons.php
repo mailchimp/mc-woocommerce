@@ -65,6 +65,8 @@ class MailChimp_WooCommerce_Transform_Coupons
 
         switch ($resource->get_discount_type()) {
             case 'fixed_product':
+            // Support to Woocommerce Free Gift Coupon Plugin 
+            case 'free_gift':
                 $rule->setTypeFixed();
                 $rule->setTargetTypePerItem();
                 break;

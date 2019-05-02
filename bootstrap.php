@@ -1231,15 +1231,17 @@ function mailchimp_rest_response($data, $status = 200) {
  */
 function mailchimp_has_started_syncing() {
     $sync_started_at = get_option('mailchimp-woocommerce-sync.started_at');
-    return !empty($sync_started_at);
+    $sync_completed_at = get_option('mailchimp-woocommerce-sync.completed_at');
+    return ($sync_completed_at < $sync_started_at);
 }
 
 /**
  * @return bool
  */
 function mailchimp_is_done_syncing() {
+    $sync_started_at = get_option('mailchimp-woocommerce-sync.started_at');
     $sync_completed_at = get_option('mailchimp-woocommerce-sync.completed_at');
-    return !empty($sync_completed_at);
+    return ($sync_completed_at >= $sync_started_at);
 }
 
 function run_mailchimp_woocommerce() {

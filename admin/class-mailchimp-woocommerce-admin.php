@@ -730,6 +730,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
                 if (on_sync_tab === 'yes') {
                     var call_mailchimp_for_stats = function () {
+						jQuery('#mailchimp_last_updated').next('.spinner').css('visibility', 'visible');
                         jQuery.get(endpoint, function(response) {
                             if (response.success) {
 
@@ -738,6 +739,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                                 if (response.has_finished === true && sync_status === 'historical') {
                                     return document.location.reload(true);
                                 }
+
+								jQuery('#mailchimp_last_updated').next('.spinner').css('visibility', 'hidden');
 
                                 jQuery('#mailchimp_product_count').html(response.products_in_mailchimp.toLocaleString(undefined, {
                                     maximumFractionDigits: 0
@@ -749,9 +752,12 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
                                 jQuery('#mailchimp_last_updated').html(response.date);
 
-                                setTimeout(function() {
-                                    call_mailchimp_for_stats();
-                                }, 10000);
+								// only call status again if sync is running.
+								if (response.has_started && !response.has_finished) {
+									setTimeout(function() {
+										call_mailchimp_for_stats();
+									}, 10000);
+								}
                             }
                         });
                     };

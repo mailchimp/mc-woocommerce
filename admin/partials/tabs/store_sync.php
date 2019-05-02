@@ -58,7 +58,15 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
 <?php endif; ?>
 
 <?php if ($last_updated_time): ?>
-    <p><strong><?php esc_html_e('Last Updated:', 'mailchimp-woocommerce');?></strong> <i id="mailchimp_last_updated"><?php echo date_i18n( __('D, M j, Y g:i A', 'mailchimp-woocommerce'), $last_updated_time->getTimestamp())?></i></p>
+    <p>
+        <strong>
+            <?php esc_html_e('Last Updated:', 'mailchimp-woocommerce');?>
+        </strong>
+        <i id="mailchimp_last_updated">
+            <?php echo date_i18n( __('D, M j, Y g:i A', 'mailchimp-woocommerce'), $last_updated_time->getTimestamp())?>
+        </i>
+        <span class="spinner" style="float:none; background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px"></span>
+    </p>
 <?php endif; ?>
 
 <p><strong><?php esc_html_e('Account Connected:', 'mailchimp-woocommerce');?></strong> <span id="mailchimp_account_connected"><?php echo $account_name; ?></span></p>

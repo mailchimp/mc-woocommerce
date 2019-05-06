@@ -311,10 +311,7 @@ class MailChimp_WooCommerce
 			$this->loader->add_action( 'init', $service, 'handleCampaignTracking' );
 
 			// order hooks
-            $this->loader->add_action('woocommerce_thankyou', $service, 'onNewOrder', 10);
-			$this->loader->add_action('woocommerce_api_create_order', $service, 'onNewOrder', 10);
-            $this->loader->add_action('woocommerce_ppe_do_payaction', $service, 'onNewPayPalOrder', 10, 1);
-			$this->loader->add_action('woocommerce_order_status_changed', $service, 'handleOrderStatusChanged', 10);
+            $this->loader->add_action('woocommerce_order_status_changed', $service, 'handleOrderStatusChanged', 11, 3);
 
 			// refunds
             $this->loader->add_action('woocommerce_order_partially_refunded', $service, 'onPartiallyRefunded', 10, 1);

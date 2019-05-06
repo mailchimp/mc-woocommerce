@@ -100,28 +100,37 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         // remove this record from the db.
         $this->clearCartData();
 
-        // queue up the single order to be processed.
-        $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $campaign_id, $landing_site);
-        mailchimp_handle_or_queue($handler, 60);
+        return array (
+            'campaign_id' => $campaign_id,
+            'landing_site' => $landing_site
+        );
     }
 
     /**
      * @param $order_id
      * @param bool $is_admin
      */
-    public function handleOrderStatusChanged($order_id, $is_admin = false)
+    public function handleOrderStatusChanged($order_id, $old_status, $new_status)
     {
         if (!mailchimp_is_configured()) return;
-
-        // if we got a new order hook first - just skip this for now during the 20 second window.
+        
+        // if this is a new order already being created - just skip this for now during the 20 second window.
         if (get_site_transient("mailchimp_order_created_{$order_id}") === true) {
             return;
         }
 
+        $newOrder = false;
+
+        if ("pending" == $old_status && "processing" == $new_status) {
+            $tracking = $this->onNewOrder($order_id);
+            $newOrder = true;
+        }
+        
         // queue up the single order to be processed.
-        $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, null, null);
-        $handler->is_update = true;
-        $handler->is_admin_save = $is_admin;
+        $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $tracking['campaign_id'], $tracking['landing_site']);
+        $handler->is_update = !$newOrder;
+        $handler->is_admin_save = is_admin();
+        
         mailchimp_handle_or_queue($handler, 90);
     }
 
@@ -264,8 +273,6 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         if (!in_array($post->post_status, array('trash', 'auto-draft', 'draft', 'pending'))) {
             if ('product' == $post->post_type) {
                 mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
-            } elseif ('shop_order' == $post->post_type) {
-                $this->handleOrderStatusChanged($post_id, is_admin());
             }
         }
     }

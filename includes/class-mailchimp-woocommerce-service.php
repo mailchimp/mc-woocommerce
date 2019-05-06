@@ -127,7 +127,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         }
         
         // queue up the single order to be processed.
-        $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $tracking['campaign_id'], $tracking['landing_site']);
+        $campaign_id = isset($tracking) && isset($tracking['campaign_id']) ? $tracking['campaign_id'] : null;
+        $landing_site = isset($tracking) && isset($tracking['landing_site']) ? $tracking['landing_site'] : null;
+
+        $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $campaign_id, $landing_site);
         $handler->is_update = !$newOrder;
         $handler->is_admin_save = is_admin();
         

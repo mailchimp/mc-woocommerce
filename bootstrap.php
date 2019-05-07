@@ -170,7 +170,16 @@ if (!function_exists( 'wp_queue')) {
  * @param bool $force_now
  */
 function mailchimp_handle_or_queue(WP_Job $job, $delay = 0, $force_now = false)
-{
+{   
+    if ($job instanceof \MailChimp_WooCommerce_Single_Order && isset($job->order_id)) {
+        // if this is a order process already queued - just skip this
+        if (get_site_transient("mailchimp_order_being_processed_{$job->order_id}") == true) {
+            return;
+        }
+        // tell the system the order is already queued for processing in this saving process - and we don't need to process it again.
+        set_site_transient( "mailchimp_order_being_processed_{$job->order_id}", true, 5);
+    }
+
     wp_queue($job, $delay);
 
     // force now is used during the sync.

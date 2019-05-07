@@ -85,9 +85,6 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     {
         if (!mailchimp_is_configured()) return;
 
-        // tell the system the order was brand new - and we don't need to process the order update hook.
-        set_site_transient( "mailchimp_order_created_{$order_id}", true, 20);
-
         // see if we have a session id and a campaign id, also only do this when this user is not the admin.
         $campaign_id = $this->getCampaignTrackingID();
 
@@ -113,11 +110,6 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     public function handleOrderStatusChanged($order_id, $old_status, $new_status)
     {
         if (!mailchimp_is_configured()) return;
-        
-        // if this is a new order already being created - just skip this for now during the 20 second window.
-        if (get_site_transient("mailchimp_order_created_{$order_id}") === true) {
-            return;
-        }
 
         $newOrder = false;
 
@@ -126,6 +118,17 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             $newOrder = true;
         }
         
+        $this->onOrderSave($order_id, $tracking);
+    }
+
+    /**
+     * @param $order_id
+     * @param $tracking
+     */
+    public function onOrderSave($order_id, $tracking = null)
+    {
+        if (!mailchimp_is_configured()) return;
+
         // queue up the single order to be processed.
         $campaign_id = isset($tracking) && isset($tracking['campaign_id']) ? $tracking['campaign_id'] : null;
         $landing_site = isset($tracking) && isset($tracking['landing_site']) ? $tracking['landing_site'] : null;
@@ -135,17 +138,6 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $handler->is_admin_save = is_admin();
         
         mailchimp_handle_or_queue($handler, 90);
-    }
-
-    /**
-     * @param $order_id
-     */
-    public function onOrderRefunded($order_id)
-    {
-        if (!mailchimp_is_configured()) return;
-
-        $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, null, null);
-        mailchimp_handle_or_queue($handler);
     }
 
     /**
@@ -276,6 +268,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         if (!in_array($post->post_status, array('trash', 'auto-draft', 'draft', 'pending'))) {
             if ('product' == $post->post_type) {
                 mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
+            } elseif ('shop_order' == $post->post_type) {
+                $this->onOrderSave($post_id);
             }
         }
     }

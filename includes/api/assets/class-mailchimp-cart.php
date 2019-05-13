@@ -133,9 +133,9 @@ class MailChimp_WooCommerce_Cart
      * @param $code
      * @return $this
      */
-    public function setCurrencyCode($code)
+    public function setCurrencyCode()
     {
-        $this->currency_code = $code;
+        $this->currency_code = get_woocommerce_currency();
 
         return $this;
     }
@@ -146,8 +146,7 @@ class MailChimp_WooCommerce_Cart
     public function getCurrencyCode()
     {
         if (empty($this->currency_code)) {
-            $options = get_option('mailchimp-woocommerce', array());
-            $this->currency_code = isset($options['store_currency_code']) ? $options['store_currency_code'] : 'USD';
+            $this->currency_code = get_woocommerce_currency();
         }
 
         return $this->currency_code;

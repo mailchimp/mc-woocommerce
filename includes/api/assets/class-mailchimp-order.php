@@ -267,10 +267,10 @@ class MailChimp_WooCommerce_Order
      * @param null $currency_code
      * @return MailChimp_WooCommerce_Order
      */
-    public function setCurrencyCode($currency_code)
+    public function setCurrencyCode()
     {
-        $this->currency_code = $currency_code;
-
+        $woo = new WC_Order($this->id);
+        $this->currency_code = $woo->get_currency();
         return $this;
     }
 

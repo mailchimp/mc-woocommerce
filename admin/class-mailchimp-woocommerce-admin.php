@@ -156,6 +156,34 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	}
 
 	/**
+	 * Sets the Store Currency code on plugin options
+	 * 
+	 * @param string $code
+	 * @return array $options 
+	 */
+	private function mailchimp_set_store_currency_code($code = null) {
+		if (!isset($code)) {
+			$code = get_woocommerce_currency();
+		}
+		$options = $this->getOptions();
+		$options['store_currency_code'] = $code;
+		update_option($this->plugin_name, $options);
+		return $options;
+	}
+
+	/**
+	 * Fired when woocommerce store settings are saved
+	 * 
+	 * @param string $code
+	 * @return array $options 
+	 */
+	public function mailchimp_update_woo_settings() {
+		$new_currency_code = $_POST['woocommerce_currency'];
+		$data = $this->mailchimp_set_store_currency_code($new_currency_code);
+		$this->syncStore($data);
+	}
+	
+	/**
 	 * We need to do a tidy up function on the mailchimp_carts table to
 	 * remove anything older than 30 days.
 	 *
@@ -364,8 +392,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             'store_phone' => isset($input['store_phone']) ? $input['store_phone'] : false,
             // locale info
             'store_locale' => isset($input['store_locale']) ? $input['store_locale'] : false,
-            'store_timezone' => isset($input['store_timezone']) ? $input['store_timezone'] : false,
-            'store_currency_code' => isset($input['store_currency_code']) ? $input['store_currency_code'] : false,
+			'store_timezone' => isset($input['store_timezone']) ? $input['store_timezone'] : false,
+			'store_currency_code' => isset($input['store_currency_code']) ? $input['store_currency_code'] : false,
             'admin_email' => isset($input['admin_email']) && is_email($input['admin_email']) ? $input['admin_email'] : $this->getOption('admin_email', false),
         );
     }
@@ -566,7 +594,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		return $this->validateOptions(array(
 			'store_name', 'store_street', 'store_city', 'store_state',
 			'store_postal_code', 'store_country', 'store_phone',
-			'store_locale', 'store_timezone', 'store_currency_code',
+			'store_locale', 'store_timezone',
 			'store_phone',
 		), $data);
 	}
@@ -867,6 +895,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$store->setPrimaryLocale($this->array_get($data, 'store_locale', 'en'));
 		$store->setTimezone($this->array_get($data, 'store_timezone', 'America\New_York'));
 		$store->setCurrencyCode($this->array_get($data, 'store_currency_code', 'USD'));
+		$store->setMoneyFormat($store->getCurrencyCode());
 
 		// set the basics
 		$store->setName($this->array_get($data, 'store_name'));
@@ -961,7 +990,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			$address->setPhone($data['store_phone']);
 		}
 
-		$address->setCountryCode($this->array_get($data, 'store_currency_code', 'USD'));
+		$address->setCountryCode(WC_Countries::get_base_country());
 
 		return $address;
 	}

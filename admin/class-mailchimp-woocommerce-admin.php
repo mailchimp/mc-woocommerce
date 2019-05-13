@@ -566,7 +566,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		return $this->validateOptions(array(
 			'store_name', 'store_street', 'store_city', 'store_state',
 			'store_postal_code', 'store_country', 'store_phone',
-			'store_locale', 'store_timezone', 'store_currency_code',
+			'store_locale', 'store_timezone',
 			'store_phone',
 		), $data);
 	}
@@ -961,7 +961,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			$address->setPhone($data['store_phone']);
 		}
 
-		$address->setCountryCode($this->array_get($data, 'store_currency_code', 'USD'));
+		$address->setCountryCode(WC_Countries::get_base_country());
 
 		return $address;
 	}

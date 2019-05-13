@@ -155,6 +155,12 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 	}
 
+	/**
+	 * Sets the Store Currency code on plugin options
+	 * 
+	 * @param string $code
+	 * @return array $options 
+	 */
 	private function mailchimp_set_store_currency_code($code = null) {
 		if (!isset($code)) {
 			$code = get_woocommerce_currency();
@@ -165,11 +171,18 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		return $options;
 	}
 
+	/**
+	 * Fired when woocommerce store settings are saved
+	 * 
+	 * @param string $code
+	 * @return array $options 
+	 */
 	public function mailchimp_update_woo_settings() {
 		$new_currency_code = $_POST['woocommerce_currency'];
 		$data = $this->mailchimp_set_store_currency_code($new_currency_code);
 		$this->syncStore($data);
 	}
+	
 	/**
 	 * We need to do a tidy up function on the mailchimp_carts table to
 	 * remove anything older than 30 days.

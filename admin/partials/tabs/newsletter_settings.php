@@ -97,7 +97,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
     <p class="description"><?= esc_html(__('HTML tags allowed: <a href="" target="" title=""></a> and <br>', 'mailchimp-woocommerce')); ?></p>
 </fieldset>
 
-<h4 style="padding-top: 1em;font-weight:normal;"><?php esc_html_e('Checkbox Display Options', 'mailchimp-woocommerce');?></h4>
+<h4 style="padding-top: 1em;"><?php esc_html_e('Checkbox Display Options', 'mailchimp-woocommerce');?></h4>
 
 <fieldset>
     <legend class="screen-reader-text">
@@ -117,7 +117,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
     </label>
 </fieldset>
 
-<h4 style="padding-top: 1em;font-weight:normal;"><?php esc_html_e('Advanced Checkbox Settings', 'mailchimp-woocommerce');?></h4>
+<h4 style="padding-top: 1em;"><?php esc_html_e('Advanced Checkbox Settings', 'mailchimp-woocommerce');?></h4>
 <p><?= sprintf(/* translators: %s - Woocommerce Actions documentation URL. */wp_kses( __( 'To change the location of the opt-in checkbox at checkout, input one of the <a href=%s target=_blank>available WooCommerce form actions.</a>.', 'mailchimp-woocommerce' ), array(  'a' => array( 'href' => array() ) ) ), esc_url( 'https://docs.woocommerce.com/wc-apidocs/hook-docs.html' ) ); ?></p>
 
 <fieldset>
@@ -130,12 +130,12 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
     </label>
 </fieldset>
 
-<h4 style="padding-top: 1em;font-weight:normal;"><?php esc_html_e('User Tags', 'mailchimp-woocommerce');?></h4>
+<h2 style="padding-top: 1em;"><?php esc_html_e('Audience Member Tags', 'mailchimp-woocommerce');?></h2>
 <p><?= __( 'Add a comma separated list of tags to add to the user at Mailchimp', 'mailchimp-woocommerce' ); ?></p>
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span><?php esc_html_e('User Tags', 'mailchimp-woocommerce');?></span>
+        <span><?php esc_html_e('Audience Member Tags', 'mailchimp-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-user-tags">
         <input style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-user-tags" name="<?php echo $this->plugin_name; ?>[mailchimp_user_tags]" value="<?php echo isset($options['mailchimp_user_tags']) ? str_replace(',',', ',$options['mailchimp_user_tags']) : '' ?>" />

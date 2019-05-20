@@ -118,14 +118,14 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             $newOrder = true;
         }
         
-        $this->onOrderSave($order_id, $tracking);
+        $this->onOrderSave($order_id, $tracking, $newOrder);
     }
 
     /**
      * @param $order_id
      * @param $tracking
      */
-    public function onOrderSave($order_id, $tracking = null)
+    public function onOrderSave($order_id, $tracking = null, $newOrder = null)
     {
         if (!mailchimp_is_configured()) return;
 
@@ -134,7 +134,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $landing_site = isset($tracking) && isset($tracking['landing_site']) ? $tracking['landing_site'] : null;
 
         $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $campaign_id, $landing_site);
-        $handler->is_update = !$newOrder;
+        $handler->is_update = $newOrder ? !$newOrder : null;
         $handler->is_admin_save = is_admin();
         
         mailchimp_handle_or_queue($handler, 90);

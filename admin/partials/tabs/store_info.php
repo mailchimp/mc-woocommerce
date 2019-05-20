@@ -180,6 +180,18 @@ if (!$handler->hasValidApiKey()) {
 
 <fieldset>
     <legend class="screen-reader-text">
+        <span><?php esc_html_e('Currency Code', 'mailchimp-woocommerce');?></span>
+    </legend>
+    <?php $all_currencies = MailChimp_WooCommerce_CurrencyCodes::lists();?>
+    
+    <label for="<?php echo $this->plugin_name; ?>-store-currency-code-label">
+        <input style="width: 30%;" type="text" value="<?php echo isset($options['store_currency_code']) ? $options['store_currency_code'] . ' | ' . $all_currencies[$options['store_currency_code']]: '' ?>" disabled/>
+        <span><?php esc_html_e('Currency', $this->plugin_name); ?> (<span class="description"><?php esc_html_e('Retrieved from Woocommerce Settings', $this->plugin_name); ?></span>)</span>
+    </label>
+</fieldset>
+
+<fieldset>
+    <legend class="screen-reader-text">
         <span><?php esc_html_e('Timezone', 'mailchimp-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-timezone-label">

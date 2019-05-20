@@ -134,6 +134,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	public function options_update() {
 
 		$this->handle_abandoned_cart_table();
+		
+		$this->update_db_check();
 
 		register_setting($this->plugin_name, $this->plugin_name, array($this, 'validate'));
 	}
@@ -143,6 +145,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function update_db_check() {
 		// grab the current version set in the plugin variables
+		global $wpdb;
+
 		$version = mailchimp_environment_variables()->version;
 
 		// grab the saved version or default to 1.0.3 since that's when we first did this.
@@ -152,6 +156,19 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		if (version_compare($version, $saved_version) > 0) {
 			// resave the site option so this only fires once.
 			update_site_option('mailchimp_woocommerce_version', $version);
+		}
+
+		if (!get_option( $this->plugin_name.'_cart_table_add_index_update')) {
+			$sql = "ALTER TABLE {$wpdb->prefix}mailchimp_carts ADD PRIMARY KEY (email);";
+			if ($wpdb->query($sql)) {
+				update_option( $this->plugin_name.'_cart_table_add_index_update', true);
+			}
+		}
+		
+		if (!get_option( $this->plugin_name.'_woo_currency_update')) {
+			if ($this->mailchimp_update_woo_settings()) {
+				update_option( $this->plugin_name.'_woo_currency_update', true);
+			} 
 		}
 	}
 
@@ -166,6 +183,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			$code = get_woocommerce_currency();
 		}
 		$options = $this->getOptions();
+		$options['woocommerce_settings_save_general'] = true;
 		$options['store_currency_code'] = $code;
 		update_option($this->plugin_name, $options);
 		return $options;
@@ -178,9 +196,17 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @return array $options 
 	 */
 	public function mailchimp_update_woo_settings() {
-		$new_currency_code = $_POST['woocommerce_currency'];
+		$new_currency_code = null;
+
+		if (isset($_POST['woo_multi_currency_params'])) {
+			$new_currency_code = $_POST['currency_default'];
+		}
+		else if (isset($_POST['woocommerce_currency'])) {
+			$new_currency_code = $_POST['woocommerce_currency'];
+		}
+		
 		$data = $this->mailchimp_set_store_currency_code($new_currency_code);
-		$this->syncStore($data);
+		return $this->syncStore($data);
 	}
 	
 	/**
@@ -227,8 +253,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		$active_tab = isset($input['mailchimp_active_tab']) ? $input['mailchimp_active_tab'] : null;
 
-		if (empty($active_tab)) {
-			return $this->getOptions();
+		if (empty($active_tab) && $input['woocommerce_settings_save_general']) {
+			unset($input['woocommerce_settings_save_general']);
+			$data['store_currency_code'] = (string) $input['store_currency_code'];
+			//return $this->getOptions();
 		}
 
 		switch ($active_tab) {
@@ -368,6 +396,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$this->setData('validation.store_info', true);
 
         $data['active_tab'] = 'campaign_defaults';
+		$data['store_currency_code'] = get_woocommerce_currency();
 
 		if ($this->hasValidMailChimpList()) {
 			$this->syncStore(array_merge($this->getOptions(), $data));
@@ -394,7 +423,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             // locale info
             'store_locale' => isset($input['store_locale']) ? $input['store_locale'] : false,
 			'store_timezone' => isset($input['store_timezone']) ? $input['store_timezone'] : false,
-			'store_currency_code' => isset($input['store_currency_code']) ? $input['store_currency_code'] : false,
             'admin_email' => isset($input['admin_email']) && is_email($input['admin_email']) ? $input['admin_email'] : $this->getOption('admin_email', false),
         );
     }

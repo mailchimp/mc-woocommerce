@@ -157,6 +157,12 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			// resave the site option so this only fires once.
 			update_site_option('mailchimp_woocommerce_version', $version);
 		}
+
+		if (!get_site_option( $this->plugin_name.'_cart_table_add_index_update')) {
+			$sql = "ALTER TABLE {$wpdb->prefix}mailchimp_carts ADD PRIMARY KEY (email);";
+			$wpdb->query($sql);
+			update_site_option( $this->plugin_name.'_cart_table_add_index_update', true);
+		}
 		
 		if (!get_site_option( $this->plugin_name.'_woo_currency_update')) {
 			$this->mailchimp_update_woo_settings();

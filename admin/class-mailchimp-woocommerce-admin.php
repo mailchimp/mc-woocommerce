@@ -158,15 +158,17 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			update_site_option('mailchimp_woocommerce_version', $version);
 		}
 
-		if (!get_site_option( $this->plugin_name.'_cart_table_add_index_update')) {
+		if (!get_option( $this->plugin_name.'_cart_table_add_index_update')) {
 			$sql = "ALTER TABLE {$wpdb->prefix}mailchimp_carts ADD PRIMARY KEY (email);";
-			$wpdb->query($sql);
-			update_site_option( $this->plugin_name.'_cart_table_add_index_update', true);
+			if ($wpdb->query($sql)) {
+				update_option( $this->plugin_name.'_cart_table_add_index_update', true);
+			}
 		}
 		
-		if (!get_site_option( $this->plugin_name.'_woo_currency_update')) {
-			$this->mailchimp_update_woo_settings();
-			update_site_option( $this->plugin_name.'_woo_currency_update', true);
+		if (!get_option( $this->plugin_name.'_woo_currency_update')) {
+			if ($this->mailchimp_update_woo_settings()) {
+				update_option( $this->plugin_name.'_woo_currency_update', true);
+			} 
 		}
 	}
 
@@ -204,7 +206,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 		
 		$data = $this->mailchimp_set_store_currency_code($new_currency_code);
-		$this->syncStore($data);
+		return $this->syncStore($data);
 	}
 	
 	/**

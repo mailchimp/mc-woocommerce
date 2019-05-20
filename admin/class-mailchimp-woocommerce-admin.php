@@ -179,7 +179,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @return array $options 
 	 */
 	public function mailchimp_update_woo_settings() {
-		$new_currency_code = $_POST['woocommerce_currency'];
+		if (isset($_POST['woo_multi_currency_params'])) {
+			$new_currency_code = $_POST['currency_default'];
+		}
+		else $new_currency_code = $_POST['woocommerce_currency'];
 		$data = $this->mailchimp_set_store_currency_code($new_currency_code);
 		$this->syncStore($data);
 	}

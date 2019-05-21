@@ -75,7 +75,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function add_plugin_admin_menu() {
         add_menu_page(
-            __('Mailchimp - WooCommerce Setup', 'mailchimp-woocommerce'),
+            __('Mailchimp - WooCommerce Setup', 'mc-woocommerce'),
             'Mailchimp',
             'manage_options',
             $this->plugin_name,

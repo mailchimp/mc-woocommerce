@@ -376,7 +376,7 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Deactivation_Survey', false ) ) {
 							printf(
 								/* translators: %s - plugin name. */
 								esc_html__( 'If you have a moment, please share why you are deactivating %s:', 'mailchimp-woocommerce' ),
-								esc_html__( 'Mailchimp for Woocommerce', 'mailchimp-woocommerce')
+								esc_html__( 'Mailchimp for Woocommerce', 'mc-woocommerce')
 							);
 							?>
 						</span>

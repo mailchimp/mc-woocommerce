@@ -307,6 +307,17 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
                 break;
 		}
+		
+		// if no API is provided, check if the one saved on the database is still valid.
+		if (!$input['mailchimp_api_key'] && $this->getOption('mailchimp_api_key')) {
+			// set api key for validation
+			$input['mailchimp_api_key'] = $this->getOption('mailchimp_api_key');
+			$api_key_valid = $this->validatePostApiKey($input);
+			
+			// if there's no error, remove the api_ping_error from the db
+			if (!$api_key_valid['api_ping_error'])
+				$data['api_ping_error'] = $api_key_valid['api_ping_error'];
+		}
 
 		return (isset($data) && is_array($data)) ? array_merge($this->getOptions(), $data) : $this->getOptions();
 	}

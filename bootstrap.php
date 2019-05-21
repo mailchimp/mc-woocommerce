@@ -70,7 +70,6 @@ spl_autoload_register(function($class) {
 
         'WP_Job' => 'includes/vendor/queue/classes/wp-job.php',
         'WP_Queue' => 'includes/vendor/queue/classes/wp-queue.php',
-        'WP_Http_Worker' => 'includes/vendor/queue/classes/worker/wp-http-worker.php',
         'WP_Worker' => 'includes/vendor/queue/classes/worker/wp-worker.php',
         'Queue_Command' => 'includes/vendor/queue/classes/cli/queue-command.php',
     );

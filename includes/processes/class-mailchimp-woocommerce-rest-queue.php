@@ -240,7 +240,7 @@ class MailChimp_WooCommerce_Rest_Queue
         $params = array(
             'timeout'   => 0.01,
             'blocking'  => false,
-            'sslverify' => apply_filters('https_local_ssl_verify', false),
+            'sslverify' => add_filter('https_local_ssl_verify', '__return_false', 100)
         );
         mailchimp_woocommerce_rest_api_get($url, $params, mailchimp_get_http_local_json_header());
     }

@@ -27,7 +27,7 @@ class MailChimp_WooCommerce_Rest_Api
             array(
                 'timeout'   => 5,
                 'blocking'  => true,
-                'sslverify' => apply_filters('https_local_ssl_verify', false)
+                'sslverify' => add_filter('https_local_ssl_verify', '__return_false', 100)
             ),
             mailchimp_get_http_local_json_header()
         );
@@ -49,7 +49,7 @@ class MailChimp_WooCommerce_Rest_Api
             array(
                 'timeout'   => 0.01,
                 'blocking'  => false,
-                'sslverify' => apply_filters('https_local_ssl_verify', false),
+                'sslverify' => add_filter('https_local_ssl_verify', '__return_false', 100)
             ),
             mailchimp_get_http_local_json_header()
         );
@@ -225,7 +225,7 @@ class MailChimp_WooCommerce_Rest_Api
         $result = wp_remote_post(esc_url_raw($route), array(
             'timeout'   => 12,
             'blocking'  => true,
-            'sslverify' => apply_filters('https_local_ssl_verify', false),
+            'sslverify' => add_filter('https_local_ssl_verify', '__return_false', 100),
             'method'      => 'POST',
             'data_format' => 'body',
             'headers'     => array('Content-Type' => 'application/json; charset=utf-8'),

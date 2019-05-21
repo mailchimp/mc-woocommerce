@@ -285,7 +285,7 @@ if ( ! class_exists( 'WP_Http_Worker' ) ) {
 				'timeout'   => 0.01,
 				'blocking'  => false,
 				'cookies'   => $_COOKIE,
-				'sslverify' => apply_filters( 'https_local_ssl_verify', false ),
+				'sslverify' => add_filter('https_local_ssl_verify', '__return_false', 100)
 			) );
 
 			$url = add_query_arg( $query_args, $query_url );

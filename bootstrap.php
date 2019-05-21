@@ -313,10 +313,13 @@ function mailchimp_get_user_tags_to_update() {
     }
 
     $tags = explode(',', $tags);
-    
+
     foreach ($tags as $tag) {
         $formatted_tags[] = array("name" => $tag, "status" => 'active');
     }
+
+    // apply filter to user custom tags addition/removal
+    $formatted_tags = apply_filters('mailchimp_user_tags', $formatted_tags);
     
     return $formatted_tags;
 }

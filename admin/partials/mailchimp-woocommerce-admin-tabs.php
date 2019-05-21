@@ -83,13 +83,13 @@ if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue
 
 <?php if (!defined('PHP_VERSION_ID') || (PHP_VERSION_ID < 70000)): ?>
     <div data-dismissible="notice-php-version" class="error notice notice-error is-dismissible">
-        <p><?php esc_html_e('Mailchimp says: Please upgrade your PHP version to a minimum of 7.0', 'mailchimp-woocommerce'); ?></p>
+        <p><?php esc_html_e('Mailchimp says: Please upgrade your PHP version to a minimum of 7.0', 'mc-woocommerce'); ?></p>
     </div>
 <?php endif; ?>
 
 <?php if (!empty($has_api_error)): ?>
     <div data-dismissible="notice-api-error" class="error notice notice-error is-dismissible">
-        <p><?php esc_html_e("Mailchimp says: API Request Error - ".$has_api_error, 'mailchimp-woocommerce'); ?></p>
+        <p><?php esc_html_e("Mailchimp says: API Request Error - ".$has_api_error, 'mc-woocommerce'); ?></p>
     </div>
 <?php endif; ?>
 
@@ -98,22 +98,22 @@ if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue
 <!-- Create a header in the default WordPress 'wrap' container -->
 <div class="wrap">
     <div id="icon-themes" class="icon32"></div>
-    <h2><?= __('Mailchimp for Woocommerce Settings', 'mailchimp-woocommerce');?></h2>
+    <h2><?= __('Mailchimp for Woocommerce Settings', 'mc-woocommerce');?></h2>
 
     <h2 class="nav-tab-wrapper">
-        <a href="?page=mailchimp-woocommerce&tab=api_key" class="nav-tab <?php echo $active_tab == 'api_key' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Connect', 'mailchimp-woocommerce');?></a>
+        <a href="?page=mailchimp-woocommerce&tab=api_key" class="nav-tab <?php echo $active_tab == 'api_key' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Connect', 'mc-woocommerce');?></a>
         <?php if($has_valid_api_key): ?>
-        <a href="?page=mailchimp-woocommerce&tab=store_info" class="nav-tab <?php echo $active_tab == 'store_info' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Store Settings', 'mailchimp-woocommerce');?></a>
+        <a href="?page=mailchimp-woocommerce&tab=store_info" class="nav-tab <?php echo $active_tab == 'store_info' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Store Settings', 'mc-woocommerce');?></a>
         <?php if ($handler->hasValidStoreInfo()) : ?>
         <?php if($show_campaign_defaults): ?>
-        <a href="?page=mailchimp-woocommerce&tab=campaign_defaults" class="nav-tab <?php echo $active_tab == 'campaign_defaults' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Audience Defaults', 'mailchimp-woocommerce');?></a>
+        <a href="?page=mailchimp-woocommerce&tab=campaign_defaults" class="nav-tab <?php echo $active_tab == 'campaign_defaults' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Audience Defaults', 'mc-woocommerce');?></a>
         <?php endif; ?>
         <?php if($handler->hasValidCampaignDefaults()): ?>
-            <a href="?page=mailchimp-woocommerce&tab=newsletter_settings" class="nav-tab <?php echo $active_tab == 'newsletter_settings' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Audience Settings', 'mailchimp-woocommerce');?></a>
+            <a href="?page=mailchimp-woocommerce&tab=newsletter_settings" class="nav-tab <?php echo $active_tab == 'newsletter_settings' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Audience Settings', 'mc-woocommerce');?></a>
         <?php endif; ?>
         <?php if($show_sync_tab): ?>
-            <a href="?page=mailchimp-woocommerce&tab=sync" class="nav-tab <?php echo $active_tab == 'sync' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Sync', 'mailchimp-woocommerce');?></a>
-            <a href="?page=mailchimp-woocommerce&tab=logs" class="nav-tab <?php echo $active_tab == 'logs' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Logs', 'mailchimp-woocommerce');?></a>
+            <a href="?page=mailchimp-woocommerce&tab=sync" class="nav-tab <?php echo $active_tab == 'sync' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Sync', 'mc-woocommerce');?></a>
+            <a href="?page=mailchimp-woocommerce&tab=logs" class="nav-tab <?php echo $active_tab == 'logs' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Logs', 'mc-woocommerce');?></a>
         <?php endif; ?>
         <?php endif;?>
         <?php endif; ?>
@@ -162,10 +162,10 @@ if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue
     </form>
 
     <?php if ($active_tab == 'sync'): ?>
-        <h2 style="padding-top: 1em;"><?php esc_html_e('More Information', 'mailchimp-woocommerce'); ?></h2>
+        <h2 style="padding-top: 1em;"><?php esc_html_e('More Information', 'mc-woocommerce'); ?></h2>
         <ul>
             <li><?= sprintf(/* translators: %s - WP-CLI URL. */wp_kses( __( 'Have a larger store or having issues syncing? Consider using <a href=%s target=_blank>WP-CLI</a>.', 'mailchimp-woocommerce' ), array(  'a' => array( 'href' => array(), 'target'=> '_blank' ) ) ), esc_url( 'https://github.com/mailchimp/mc-woocommerce/issues/158' ) );?></li>
-            <li><?= esc_html__('Order and customer information will not sync if they contain an Amazon or generic email address.', 'mailchimp-woocommerce');?></li>
+            <li><?= esc_html__('Order and customer information will not sync if they contain an Amazon or generic email address.', 'mc-woocommerce');?></li>
             <li><?= sprintf(/* translators: %s - Mailchimp Support URL. */wp_kses( __( 'Need help to connect your store? Visit the Mailchimp <a href=%s target=_blank>Knowledge Base</a>.', 'mailchimp-woocommerce' ), array(  'a' => array( 'href' => array(), 'target'=> '_blank' ) ) ), esc_url( 'https://mailchimp.com/help/connect-or-disconnect-mailchimp-for-woocommerce/' ) );?></li>
             <li><?= sprintf(/* translators: %s - Plugin review URL. */wp_kses( __( 'Want to tell us how we\'re doing? <a href=%s target=_blank>Leave a review on Wordpress.org</a>.', 'mailchimp-woocommerce' ), array(  'a' => array( 'href' => array(), 'target'=> '_blank' ) ) ), esc_url( 'https://wordpress.org/support/plugin/mailchimp-for-woocommerce/reviews/' ) );?></li>
             <li><?= sprintf(/* translators: %s - Mailchimp Privacy Policy URL. */wp_kses( __( 'By using this plugin, Mailchimp will process customer information in accordance with their <a href=%s target=_blank>Privacy Policy</a>.', 'mailchimp-woocommerce' ), array(  'a' => array( 'href' => array(), 'target'=> '_blank' ) ) ), esc_url( 'https://mailchimp.com/legal/privacy/' ) );?></li>

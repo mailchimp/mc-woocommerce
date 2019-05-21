@@ -15,7 +15,7 @@ if (!$handler->hasValidApiKey()) {
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span><?php esc_html_e('Store Name', 'mailchimp-woocommerce');?></span>
+        <span><?php esc_html_e('Store Name', 'mc-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-name-label">
         <input required style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-name-label" name="<?php echo $this->plugin_name; ?>[store_name]" value="<?php echo isset($options['store_name']) ? $options['store_name'] : get_option('blogname') ?>" />
@@ -33,7 +33,7 @@ if (!$handler->hasValidApiKey()) {
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span><?php esc_html_e('Email', 'mailchimp-woocommerce');?></span>
+        <span><?php esc_html_e('Email', 'mc-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-admin-email-label">
         <input required style="width: 30%;" type="email" id="<?php echo $this->plugin_name; ?>-admin-email-label" name="<?php echo $this->plugin_name; ?>[admin_email]" value="<?php echo isset($options['admin_email']) ? $options['admin_email'] : get_option('admin_email') ?>" />
@@ -51,7 +51,7 @@ if (!$handler->hasValidApiKey()) {
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span><?php esc_html_e('Street Address', 'mailchimp-woocommerce');?></span>
+        <span><?php esc_html_e('Street Address', 'mc-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-address-label">
         <input required style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-address-label" name="<?php echo $this->plugin_name; ?>[store_street]" value="<?php echo isset($options['store_street']) ? $options['store_street'] : '' ?>" />
@@ -69,7 +69,7 @@ if (!$handler->hasValidApiKey()) {
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span><?php esc_html_e('City', 'mailchimp-woocommerce');?></span>
+        <span><?php esc_html_e('City', 'mc-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-city-label">
         <input required style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-city-label" name="<?php echo $this->plugin_name; ?>[store_city]" value="<?php echo isset($options['store_city']) ? $options['store_city'] : '' ?>" />
@@ -87,7 +87,7 @@ if (!$handler->hasValidApiKey()) {
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span><?php esc_html_e('State', 'mailchimp-woocommerce');?></span>
+        <span><?php esc_html_e('State', 'mc-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-state-label">
         <input required style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-state-label" name="<?php echo $this->plugin_name; ?>[store_state]" value="<?php echo isset($options['store_state']) ? $options['store_state'] : '' ?>" />
@@ -105,7 +105,7 @@ if (!$handler->hasValidApiKey()) {
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span><?php esc_html_e('Postal Code', 'mailchimp-woocommerce');?></span>
+        <span><?php esc_html_e('Postal Code', 'mc-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-postal-code-label">
         <input required style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-postal-code-label" name="<?php echo $this->plugin_name; ?>[store_postal_code]" value="<?php echo isset($options['store_postal_code']) ? $options['store_postal_code'] : '' ?>" />
@@ -123,7 +123,7 @@ if (!$handler->hasValidApiKey()) {
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span><?php esc_html_e('Country', 'mailchimp-woocommerce');?></span>
+        <span><?php esc_html_e('Country', 'mc-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-country-label">
         <input required style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-country-label" name="<?php echo $this->plugin_name; ?>[store_country]" value="<?php echo isset($options['store_country']) ? $options['store_country'] : 'US' ?>" />
@@ -141,7 +141,7 @@ if (!$handler->hasValidApiKey()) {
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span><?php esc_html_e('Phone Number', 'mailchimp-woocommerce');?></span>
+        <span><?php esc_html_e('Phone Number', 'mc-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-phone-label">
         <input style="width: 30%;" type="text" id="<?php echo $this->plugin_name; ?>-store-phone-label" name="<?php echo $this->plugin_name; ?>[store_phone]" value="<?php echo isset($options['store_phone']) ? $options['store_phone'] : '' ?>" />
@@ -163,7 +163,7 @@ if (!$handler->hasValidApiKey()) {
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span><?php esc_html_e('Locale', 'mailchimp-woocommerce');?></span>
+        <span><?php esc_html_e('Locale', 'mc-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-locale-label">
         <select name="<?php echo $this->plugin_name; ?>[store_locale]" style="width:30%" required>
@@ -180,7 +180,7 @@ if (!$handler->hasValidApiKey()) {
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span><?php esc_html_e('Currency Code', 'mailchimp-woocommerce');?></span>
+        <span><?php esc_html_e('Currency Code', 'mc-woocommerce');?></span>
     </legend>
     <?php $all_currencies = MailChimp_WooCommerce_CurrencyCodes::lists();?>
     
@@ -192,7 +192,7 @@ if (!$handler->hasValidApiKey()) {
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span><?php esc_html_e('Timezone', 'mailchimp-woocommerce');?></span>
+        <span><?php esc_html_e('Timezone', 'mc-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-store-timezone-label">
         <select name="<?php echo $this->plugin_name; ?>[store_timezone]" style="width:30%" required>

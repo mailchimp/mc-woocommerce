@@ -159,10 +159,16 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 
 		if (!get_option( $this->plugin_name.'_cart_table_add_index_update')) {
-			$sql = "ALTER TABLE {$wpdb->prefix}mailchimp_carts ADD PRIMARY KEY (email);";
-			if ($wpdb->query($sql)) {
-				update_option( $this->plugin_name.'_cart_table_add_index_update', true);
+			$check_index_sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE table_schema='{$wpdb->dbname}' AND table_name='{$wpdb->prefix}mailchimp_carts' AND index_name='primary' and column_name='email';";
+			$index_exists = $wpdb->get_var($check_index_sql);
+			if ($index_exists != '1') {
+				$sql = "ALTER TABLE {$wpdb->prefix}mailchimp_carts ADD PRIMARY KEY (email);";
+			
+				if ($u = $wpdb->query($sql)) {
+					update_option( $this->plugin_name.'_cart_table_add_index_update', true);
+				}
 			}
+			
 		}
 		
 		if (!get_option( $this->plugin_name.'_woo_currency_update')) {

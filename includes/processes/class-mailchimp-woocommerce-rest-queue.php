@@ -165,7 +165,11 @@ class MailChimp_WooCommerce_Rest_Queue
         }
 
         return (int) preg_replace_callback('/(\-?\d+)(.?)/', function ($m) {
-            return $m[1] * pow(1024, strpos('BKMG', $m[2]));
+            if (!isset($m[2]) || $m[2] == '') {
+                mailchimp_log('memory.error', 'Missing memory limit unit. [memory_limit='.$m[0].']');
+                wp_die('Missing memory limit unit. [memory_limit='. $m[0].']');
+            }
+            else return $m[1] * pow(1024, strpos('BKMG', $m[2]));
         }, strtoupper($memory_limit));
     }
 

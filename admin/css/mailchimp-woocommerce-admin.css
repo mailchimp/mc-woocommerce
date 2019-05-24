@@ -2,3 +2,145 @@
  * All of the CSS for your admin-specific functionality should be
  * included in this file.
  */
+
+.mc-woocommece-settings-subtitles {
+	font-family: Proxima Nova, Arial, Helvetica, sans-serif;
+	font-size: 22px;	
+	line-height: 32px;
+	color: #3C3C3C;
+}
+
+.notice {
+	background: rgba(127, 173, 69, 0.1);
+	mix-blend-mode: normal;
+	border: 1px solid rgba(127, 173, 69, 0.5);
+	box-sizing: border-box;
+	border-radius: 4px;
+}
+
+.notice.notice-error {
+	background: rgba(250, 50, 50, 0.1);
+	border: 1px solid rgba(250, 50, 50, 0.5);
+}
+
+.notice.notice-info {
+	background: rgba(0, 160, 210, 0.1);
+	border: 1px solid rgba(0, 160, 210, 0.5);
+}
+
+.notice.notice-warning {
+	background: rgba(255, 185, 0, 0.1);
+	border: 1px solid rgba(255, 185, 0, 0.5);
+}
+
+
+.nav-tab-wrapper {
+	border-bottom: 2px solid white !important;
+	margin-bottom: 25px !important;
+}
+
+.nav-tab-wrapper .nav-tab {
+	background: #F1F1F1;
+	border-radius: 4px 4px 0px 0px;
+	border: 1px solid #F1F1F1;
+	border-bottom: none;
+	font-family: Proxima Nova, Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	line-height: 24px;
+	text-align: center;
+	color: #212121;
+	padding: 20px 25px;
+	-webkit-transition: padding 0.1s ease-out;
+	-moz-transition: padding 0.1s ease-out;
+	-o-transition: padding 0.1s ease-out;
+	transition: padding 0.1s ease-out;
+}
+
+.nav-tab-wrapper .nav-tab:hover:not(.nav-tab-active) {
+	background: #F5F5F5;
+	font-family: Proxima Nova, Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	line-height: 24px;
+	text-align: center;
+	color: #212121;
+	padding: 18px 25px 22px 25px;
+	-webkit-transition: padding 0.1s ease-out;
+	-moz-transition: padding 0.1s ease-out;
+	-o-transition: padding 0.1s ease-out;
+	transition: padding 0.1s ease-out;
+}
+
+.nav-tab-wrapper .nav-tab-active {
+	background: white;
+	padding: 18px 25px 22px 25px;
+	border-radius: 4px 4px 0px 0px;
+	border: 1px solid #F1F1F1;
+	border-bottom: none;
+}
+
+.tab-content-wrapper {
+	background: white;
+	padding: 22px;
+}
+
+.tab-content-wrapper p.submit {
+	margin-top: 0 !important;
+}
+
+.tab-content-wrapper .tab-content-submit {
+	font-family: Proxima Nova Alt, Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	line-height: 16px;
+	padding: 15px 35px 27px 35px;
+	margin-top: 0px;
+	/* identical to box height */
+	text-transform: uppercase;
+	color: #FFFFFF;
+	background: #7FAD45;
+	border-radius: 100px;
+	float:right;
+	border: none;
+	box-shadow:0 1px 0 #719a74;
+	text-shadow:0 -1px 1px #719a74,1px 0 1px #719a74,0 1px 1px #719a74,-1px 0 1px #719a74
+}
+
+.tab-content-wrapper .tab-content-submit:focus,.tab-content-wrapper .tab-content-submit:hover{
+	background: rgb(149, 189, 101);
+	border-color: rgb(149, 189, 101);
+	color:#fff;
+	box-shadow:0 1px 0 rgb(149, 189, 101);
+}
+
+@media screen and (max-width: 782px) {
+	.tab-content-wrapper .tab-content-submit {
+		padding: 15px 35px 15px 35px;
+	}
+}
+
+
+/* Old styles from tabs.php */
+
+#sync-status-message strong {
+	font-weight:inherit;
+}
+#log-viewer {
+	background: #fff;
+	border: 1px solid #e5e5e5;
+	box-shadow: 0 1px 1px rgba(0,0,0,.04);
+	padding: 5px 20px;
+}
+#log-viewer-select {
+	padding: 10px 0 8px;
+	line-height: 28px;
+}
+#log-viewer pre {
+	font-family: monospace;
+	white-space: pre-wrap;
+}
+user agent stylesheet
+pre, xmp, plaintext, listing {
+	display: block;
+	font-family: monospace;
+	white-space: pre;
+	margin: 1em 0px;
+}

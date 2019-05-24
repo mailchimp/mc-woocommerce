@@ -85,6 +85,7 @@
 
 .tab-content-wrapper p.submit {
 	margin-top: 0 !important;
+	margin-bottom: 35px !important;
 }
 
 .tab-content-wrapper .tab-content-submit {
@@ -92,7 +93,7 @@
 	font-size: 14px;
 	line-height: 16px;
 	padding: 15px 35px 27px 35px;
-	margin-top: 0px;
+	
 	/* identical to box height */
 	text-transform: uppercase;
 	color: #FFFFFF;
@@ -111,10 +112,72 @@
 	box-shadow:0 1px 0 rgb(149, 189, 101);
 }
 
-@media screen and (max-width: 782px) {
-	.tab-content-wrapper .tab-content-submit {
-		padding: 15px 35px 15px 35px;
-	}
+.tab-content-wrapper label {
+	display: block;
+	font-family: Proxima Nova, Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	line-height: 30px;
+	color: #3C3C3C;
+}
+
+.tab-content-wrapper fieldset.half {
+	display: inline;
+	width: 48%;
+	margin-bottom: 15px;
+}
+
+.tab-content-wrapper fieldset.full {
+	display: inline;
+	width: 100%;
+	margin-bottom: 15px;
+}
+
+.tab-content-wrapper fieldset.third {
+	display: inline;
+	width: 33%;
+	margin-bottom: 15px;
+}
+
+.tab-content-wrapper fieldset input {
+	border: 1px solid #E6E6E6;
+	box-sizing: border-box;
+	border-radius: 4px;
+	padding: 15px 20px;
+	width: 80%;
+}
+.tab-content-wrapper fieldset .mailchimp-select-wrapper {
+	border: 1px solid #E6E6E6;
+	padding: 7px 20px;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	width: 71%;
+}
+.tab-content-wrapper fieldset select {
+	background: transparent;	
+	font-size: 14px;
+	border: none;
+	-webkit-appearance: none;
+	box-shadow: none;
+	outline: none;
+	width: 100%;
+	color: #000;
+	color: rgba(0,0,0,0);
+	text-shadow: 0 0 0 #000;
+	background: no-repeat right center url("data:image/svg+xml;charset=UTF-8,%3csvg width='13' height='8' viewBox='0 0 13 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M11.34 0.590027L6.75 5.17003L2.16 0.590027L0.75 2.00003L6.75 8.00003L12.75 2.00003L11.34 0.590027Z' fill='%23212121'/%3e%3c/svg%3e ");
+}
+
+.tab-content-wrapper fieldset select:focus {
+	outline: none;
+}
+
+.tab-content-wrapper fieldset textarea {
+	border: 1px solid #E6E6E6;
+	box-sizing: border-box;
+	border-radius: 4px;
+	padding: 15px 20px;
+	width: 100%;
+	
 }
 
 
@@ -143,4 +206,16 @@ pre, xmp, plaintext, listing {
 	font-family: monospace;
 	white-space: pre;
 	margin: 1em 0px;
+}
+
+@media screen and (max-width: 782px) {
+	.tab-content-wrapper .tab-content-submit {
+		padding: 15px 35px 15px 35px;
+	}
+
+	.tab-content-wrapper fieldset.half {
+		display: inline;
+		width: 100%;
+		margin-bottom: 15px;
+	}
 }

@@ -103,7 +103,7 @@ if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue
         <?php endif; ?> -->
     </p>
 
-    <h2 class="nav-tab-wrapper">
+    <div class="nav-tab-wrapper">
         <a href="?page=mailchimp-woocommerce&tab=api_key" class="nav-tab <?php echo $active_tab == 'api_key' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Connect', 'mc-woocommerce');?></a>
         <?php if($has_valid_api_key): ?>
             <a href="?page=mailchimp-woocommerce&tab=store_info" class="nav-tab <?php echo $active_tab == 'store_info' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Store Settings', 'mc-woocommerce');?></a>
@@ -120,19 +120,22 @@ if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue
                 <?php endif; ?>
             <?php endif;?>
         <?php endif; ?>
-    </h2>
+</div>
     <div class="tab-content-wrapper">
-        <form method="post" name="cleanup_options" action="options.php">
-            <?php if ($active_tab !== 'sync' && $active_tab !== 'logs') submit_button(__('Save all changes'), 'primary tab-content-submit','submit', TRUE); ?>
-            <input type="hidden" name="mailchimp_woocommerce_settings_hidden" value="Y">
-
-            <?php
-                if (!$clicked_sync_button) {
-                    settings_fields($this->plugin_name);
-                    do_settings_sections($this->plugin_name);
-                    include('tabs/notices.php');
-                }
-            ?>
+        <form id="mailchimp_woocommerce_options" method="post" name="cleanup_options" action="options.php">
+            <div class="box">
+                <?php if ($active_tab !== 'sync' && $active_tab !== 'logs') submit_button(__('Save all changes'), 'primary tab-content-submit','submit', TRUE); ?>
+                <input type="hidden" name="mailchimp_woocommerce_settings_hidden" value="Y">
+              
+                <?php
+                    if (!$clicked_sync_button) {
+                        settings_fields($this->plugin_name);
+                        do_settings_sections($this->plugin_name);
+                        include('tabs/notices.php');
+                    }
+                ?>
+            </div>
+            
 
             <input type="hidden" name="<?php echo $this->plugin_name; ?>[mailchimp_active_tab]" value="<?php echo esc_attr($active_tab); ?>"/>
 

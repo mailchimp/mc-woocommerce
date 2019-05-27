@@ -90,7 +90,8 @@
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 }
-.tab-content-wrapper * {
+.tab-content-wrapper *,
+.sync-content-wrapper {
 	margin: 0;
 	padding: 0;
 	border: 0;
@@ -120,21 +121,95 @@
 	margin-bottom: 35px !important;
 }
 
-.tab-content-wrapper .tab-content-submit {
-	font-family: Proxima Nova Alt, Arial, Helvetica, sans-serif;
-	font-size: 14px;
-	line-height: 16px;
-	padding: 15px 35px 27px 35px;
+.tab-content-wrapper .tab-content-submit,
+.mc-woocommerce-resync-button {
+	font-family: Proxima Nova Alt, Arial, Helvetica, sans-serif !important;
+	font-size: 14px !important;
+	line-height: 16px !important;
+	padding: 15px 35px 27px 35px !important;
 	
 	/* identical to box height */
-	text-transform: uppercase;
-	color: #FFFFFF;
-	background: #7FAD45;
-	border-radius: 100px;
+	text-transform: uppercase !important;
+	color: #FFFFFF !important;
+	border-radius: 100px !important;
+	border: none !important;
+	
+}
+.tab-content-wrapper .tab-content-submit {
 	float:right;
-	border: none;
-	box-shadow:0 1px 0 #719a74;
-	text-shadow:0 -1px 1px #719a74,1px 0 1px #719a74,0 1px 1px #719a74,-1px 0 1px #719a74
+	background: #7FAD45 !important;
+	box-shadow:0 1px 0 #7FAD45 !important;
+	text-shadow: 0 -1px 1px #7FAD45,1px 0 1px #7FAD45,0 1px 1px #7FAD45,-1px 0 1px #7FAD45 !important;
+	-webkit-transition: background-color 0.3s ease-out,
+		text-shadow 0.3s ease-out,
+		box-shadow 0.3s ease-out;
+	-moz-transition: background-color 0.3s ease-out,
+		text-shadow 0.3s ease-out,
+		box-shadow 0.3s ease-out;
+	-o-transition: background-color 0.3s ease-out,
+		text-shadow 0.3s ease-out,
+		box-shadow 0.3s ease-out;
+	transition: background-color 0.3s ease-out,
+		text-shadow 0.3s ease-out,
+		box-shadow 0.3s ease-out;
+}
+
+.tab-content-wrapper .tab-content-submit:hover {
+	float:right;
+	background: #9EC769 !important;
+	box-shadow:0 1px 0 #9EC769 !important;
+	text-shadow: 0 -1px 1px #9EC769,1px 0 1px #9EC769,0 1px 1px #9EC769,-1px 0 1px #9EC769 !important;
+	-webkit-transition: background-color 0.3s ease-out,
+		text-shadow 0.3s ease-out,
+		box-shadow 0.3s ease-out;
+	-moz-transition: background-color 0.3s ease-out,
+		text-shadow 0.3s ease-out,
+		box-shadow 0.3s ease-out;
+	-o-transition: background-color 0.3s ease-out,
+		text-shadow 0.3s ease-out,
+		box-shadow 0.3s ease-out;
+	transition: background-color 0.3s ease-out,
+		text-shadow 0.3s ease-out,
+		box-shadow 0.3s ease-out;
+}
+
+.mc-woocommerce-resync-button {
+	color: #3C3C3C !important;
+	background: #E6E6E6 !important;
+	box-shadow:0 1px 0 #E6E6E6 !important;
+	text-shadow: 0 -1px 1px #E6E6E6,1px 0 1px #E6E6E6,0 1px 1px #E6E6E6,-1px 0 1px #E6E6E6 !important;
+	-webkit-transition: background-color 0.3s ease-out,
+		text-shadow 0.3s ease-out,
+		box-shadow 0.3s ease-out;
+	-moz-transition: background-color 0.3s ease-out,
+		text-shadow 0.3s ease-out,
+		box-shadow 0.3s ease-out;
+	-o-transition: background-color 0.3s ease-out,
+		text-shadow 0.3s ease-out,
+		box-shadow 0.3s ease-out;
+	transition: background-color 0.3s ease-out,
+		text-shadow 0.3s ease-out,
+		box-shadow 0.3s ease-out;
+	
+}
+
+.mc-woocommerce-resync-button:hover {
+	color: #3C3C3C !important;
+	background: #DADADA !important;
+	box-shadow:0 1px 0 #DADADA !important;
+	text-shadow: 0 -1px 1px #DADADA,1px 0 1px #DADADA,0 1px 1px #DADADA,-1px 0 1px #DADADA !important;
+	-webkit-transition: background-color 0.3s ease-out,
+		text-shadow 0.3s ease-out,
+		box-shadow 0.3s ease-out;
+	-moz-transition: background-color 0.3s ease-out,
+		text-shadow 0.3s ease-out,
+		box-shadow 0.3s ease-out;
+	-o-transition: background-color 0.3s ease-out,
+		text-shadow 0.3s ease-out,
+		box-shadow 0.3s ease-out;
+	transition: background-color 0.3s ease-out,
+		text-shadow 0.3s ease-out,
+		box-shadow 0.3s ease-out;
 }
 
 .tab-content-wrapper .tab-content-submit:focus,.tab-content-wrapper .tab-content-submit:hover{
@@ -157,16 +232,142 @@
 	margin-top: 0;
 }
 
+.sync-content-wrapper {
+	display: table;
+	width: 100%;
+}
+
+.sync-content-wrapper .sync-stats-wrapper {
+	display: table-cell;
+	width: 30%;
+	height: 50%;
+	position:relative;
+}
+
+.sync-content-wrapper .sync-stats-card {
+	height: 50%;
+	width: 100%;
+}
+
+.sync-content-wrapper .sync-stats-card div{
+	background-color: white;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	position: relative;
+	top:50%;
+	height: 90%;
+	transform: translateY(-50%);
+	margin-right: 2em;
+	
+}
+.sync-content-wrapper .sync-stats-card.products {
+	position: absolute;
+	top:0;
+}
+
+.sync-content-wrapper .sync-stats-card.products div{
+	transform: translateY(-55%);
+}
+
+.sync-content-wrapper .sync-stats-card.orders div{
+	transform: translateY(-45%);
+}
+
+.sync-content-wrapper .sync-stats-card p,
+.sync-content-wrapper .sync-stats-card p{
+	font-family: Proxima Nova Alt, Arial, Helvetica, sans-serif;
+	font-size: 48px;
+	line-height: 48px;
+	padding-left: 0.5em;
+	padding-top: 1.5em;
+	margin:0;
+}
+
+.sync-content-wrapper .sync-stats-card.orders {
+	position: absolute;
+	top: 50%;
+}
+
+.sync-content-wrapper .sync-stats-card span,
+.sync-content-wrapper .sync-stats-card span{
+	padding-left: 2em;
+	position: relative;
+	top: 2em;
+	transform: translateY(-100%);
+	font-family: Proxima Nova Alt, Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	line-height: 14px;
+}
+
+.sync-content-wrapper .sync-controls-wrapper {
+	background-color: #E6E6E6;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	display: table-cell;
+	width: 70%;
+}
+
+.sync-content-wrapper .sync-controls {
+	padding: 1em 3em;
+	font-size: 14px;
+	line-height: 14px;
+}
+
+.sync-content-wrapper .sync-controls .mc-woocommerce-last-sync{
+	margin-top: 15em;
+}
+
+.sync-content-wrapper a.mc-woocommerce-disconnect-button {
+	float: right;
+	cursor: pointer;
+	padding-top: 1em;
+	font-family: Proxima Nova, Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	line-height: 17px;
+	display: flex;
+	align-items: center;
+	text-transform: uppercase;
+	color: #3C3C3C;
+	border-radius: 100px;
+	padding: 1em 2em 1em 1em;
+	background: #E6E6E6;
+	-webkit-transition: background-color 0.3s ease-out;
+	-moz-transition: background-color 0.3s ease-out;
+	-o-transition: background-color 0.3s ease-out;
+	transition: background-color 0.3s ease-out;
+}
+
+.sync-content-wrapper a.mc-woocommerce-disconnect-button:hover {
+	background-color: #DADADA;
+	-webkit-transition: background-color 0.3s ease-out;
+	-moz-transition: background-color 0.3s ease-out;
+	-o-transition: background-color 0.3s ease-out;
+	transition: background-color 0.3s ease-out;
+}
+
+.sync-content-wrapper .mc-woocommerce-disconnect-button svg {
+	margin-right: 2em;
+}
+
+
 .tab-content-wrapper .box {
 	padding: 0.5rem 1rem;
 	margin: 0;
 	clear:both;
 }
 
-.tab-content-wrapper .box.box-half {
+.tab-content-wrapper .box.box-half,
+.sync-content-wrapper .box.box-half {
 	float: left;
-	clear:none;
+	clear: none;
 	width: 50%;
+	
+}
+
+.sync-content-wrapper .box.box-half {
+	height: 100%;
 }
 
 .tab-content-wrapper .box.box-half.margin-large {
@@ -177,21 +378,6 @@
 	float: left;
 	clear:none;
 	width: 33%;
-}
-
-.tab-content-wrapper .half-left {
-	display: inline-block;
-	width: 33%;
-	margin-right: 30px;
-	vertical-align: top;
-	margin-bottom: 55px;
-}
-
-.tab-content-wrapper .half-right {
-	display: inline-block;
-	width: 60%;
-	margin-bottom: 15px;
-	margin-bottom: 55px;
 }
 
 .tab-content-wrapper fieldset input[type="text"],
@@ -271,8 +457,9 @@ pre, xmp, plaintext, listing {
 }
 
 @media screen and (max-width: 782px) {
-	.tab-content-wrapper .tab-content-submit {
-		padding: 15px 35px 15px 35px;
+	.tab-content-wrapper .tab-content-submit,
+	.mc-woocommerce-resync-button {
+		padding: 15px 35px 15px 35px !important;
 	}
 
 	.tab-content-wrapper form{
@@ -283,7 +470,29 @@ pre, xmp, plaintext, listing {
 	.tab-content-wrapper .box.box-third {
 		width: 100%;
 	}
+
+	.sync-content-wrapper .sync-stats-wrapper {
+		display: block;
+		width: 100%;
+		height: 350px;
+		position:relative;
+		margin-bottom: 2em;
+	}
+
+	.sync-content-wrapper .sync-stats-wrapper div{
+		margin-right: 0;
+		margin-bottom: 1em;
+	}
+
+	.sync-content-wrapper .sync-controls-wrapper {
+		display: block;
+		width: 100%;
+		position:relative;
+	}
+
+	.sync-content-wrapper .sync-controls .mc-woocommerce-last-sync{
+		margin-top: 3em;
+	}
 }
 
-
-
+ 

@@ -120,25 +120,47 @@
 	color: #3C3C3C;
 }
 
-.tab-content-wrapper fieldset.half {
-	display: inline;
+.tab-content-wrapper h4 {
+	margin-top: 0;
+}
+
+.tab-content-wrapper .half {
+	display: inline-block;
 	width: 48%;
 	margin-bottom: 15px;
 }
 
-.tab-content-wrapper fieldset.full {
+.tab-content-wrapper .full {
 	display: inline;
 	width: 100%;
 	margin-bottom: 15px;
 }
 
-.tab-content-wrapper fieldset.third {
-	display: inline;
+.tab-content-wrapper .third {
+	display: inline-block;
 	width: 33%;
 	margin-bottom: 15px;
+	vertical-align: top;
 }
 
-.tab-content-wrapper fieldset input {
+.tab-content-wrapper .half-left {
+	display: inline-block;
+	width: 33%;
+	margin-right: 30px;
+	vertical-align: top;
+	margin-bottom: 55px;
+}
+
+.tab-content-wrapper .half-right {
+	display: inline-block;
+	width: 60%;
+	margin-bottom: 15px;
+	margin-bottom: 55px;
+}
+
+.tab-content-wrapper fieldset input[type="text"],
+.tab-content-wrapper fieldset input[type="password"],
+.tab-content-wrapper fieldset input[type="email"] {
 	border: 1px solid #E6E6E6;
 	box-sizing: border-box;
 	border-radius: 4px;
@@ -213,8 +235,9 @@ pre, xmp, plaintext, listing {
 		padding: 15px 35px 15px 35px;
 	}
 
-	.tab-content-wrapper fieldset.half {
-		display: inline;
+	.tab-content-wrapper .half,
+	.tab-content-wrapper .half-left,
+	.tab-content-wrapper .half-right {
 		width: 100%;
 		margin-bottom: 15px;
 	}

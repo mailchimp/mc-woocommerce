@@ -24,10 +24,18 @@ class MailChimp_WooCommerce_Rest_Api
     {
         add_filter( 'https_local_ssl_verify', '__return_false', 1 );
 
+        // allow people to change this value just in case, but default to a sensible 10 second timeout.
+        $timeout = apply_filters('mailchimp_woocommerce_test_rest_api_timeout', 10);
+
+        // just in case someone didn't return a valid timeout value, go back to the default
+        if (!is_numeric($timeout)) {
+            $timeout = 10;
+        }
+
         return mailchimp_woocommerce_rest_api_get(
             static::url('ping'),
             array(
-                'timeout'   => 5,
+                'timeout'   => $timeout,
                 'blocking'  => true,
             ),
             mailchimp_get_http_local_json_header()

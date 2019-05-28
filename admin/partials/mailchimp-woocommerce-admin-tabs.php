@@ -174,7 +174,7 @@ if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue
     <?php endif; ?>
         <form id="mailchimp_woocommerce_options" method="post" name="cleanup_options" action="options.php">
             <div class="box">
-                <?php if ($active_tab !== 'sync' && $active_tab !== 'logs') submit_button(__('Save all changes'), 'primary tab-content-submit','submit', TRUE); ?>
+                <?php if ($active_tab !== 'sync') submit_button(__('Save all changes'), 'primary tab-content-submit','submit', TRUE); ?>
                 <input type="hidden" name="mailchimp_woocommerce_settings_hidden" value="Y">
               
                 <?php

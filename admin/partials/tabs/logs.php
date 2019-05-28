@@ -32,58 +32,80 @@ if (!empty($requested_log_file) && isset($logs[sanitize_title($requested_log_fil
 $handle = !empty($viewed_log) ? substr($viewed_log, 0, strlen($viewed_log) > 37 ? strlen($viewed_log) - 37 : strlen($viewed_log) - 4) : '';
 ?>
 
-<h2 style="padding-top: 1em;"><?php esc_html_e('Logging Preference', 'mc-woocommerce');?></h2>
-<p>
-    <?php esc_html_e('Advanced troubleshooting can be conducted with the logging capability turned on.
-By default, it’s set to “none” and you may toggle to either “standard” or “debug” as needed.
-With standard logging, you can see basic information about the data submission to Mailchimp including any errors.
-“Debug” gives a much deeper insight that is useful to share with support if problems arise.', 'mc-woocommerce');
-    ?>
-</p>
+
 <fieldset>
     <legend class="screen-reader-text">
         <span><?php esc_html_e('Logging Preference', 'mc-woocommerce');?></span>
     </legend>
-    <label for="<?php echo $this->plugin_name; ?>-logging">
-        <select name="<?php echo $this->plugin_name; ?>[mailchimp_logging]" style="width:30%" required>
-            <?php $logging_preference = mailchimp_environment_variables()->logging; ?>
-            <?php
-            foreach(array('none' => esc_html__('None', 'mc-woocommerce'), 'debug' => esc_html__('Debug', 'mc-woocommerce'), 'standard' => esc_html__('Standard', 'mc-woocommerce')) as $log_value => $log_label) {
-                echo '<option value="'.esc_attr($log_value).'" '.selected($log_value === $logging_preference, true, false ) . '>' . esc_html($log_label) . '</option>';
-            }
+    
+    <div class="box fieldset-header" >
+        <label for="<?php echo $this->plugin_name; ?>-logging"><h2 style="padding-top: 1em;"><?php esc_html_e('Logging Preferences', 'mc-woocommerce');?></h2></label>
+    </div>
+
+    <div class="box box-half">
+        <p>
+            <?php esc_html_e('Advanced troubleshooting can be conducted with the logging capability turned on.
+            By default, it’s set to “none” and you may toggle to either “standard” or “debug” as needed.
+            With standard logging, you can see basic information about the data submission to Mailchimp including any errors.
+            “Debug” gives a much deeper insight that is useful to share with support if problems arise.', 'mc-woocommerce');
             ?>
-        </select>
-    </label>
+        </p>
+    </div>
+    <div class="box box-half">
+        <div class="mailchimp-select-wrapper">
+            <select name="<?php echo $this->plugin_name; ?>[mailchimp_logging]" required>
+                <?php $logging_preference = mailchimp_environment_variables()->logging; ?>
+                <?php
+                foreach(array('none' => esc_html__('None', 'mc-woocommerce'), 'debug' => esc_html__('Debug', 'mc-woocommerce'), 'standard' => esc_html__('Standard', 'mc-woocommerce')) as $log_value => $log_label) {
+                    echo '<option value="'.esc_attr($log_value).'" '.selected($log_value === $logging_preference, true, false ) . '>' . esc_html($log_label) . '</option>';
+                }
+                ?>
+            </select>
+        </div>
+    </div>
 </fieldset>
 
-<?php submit_button(__('Save all changes'), 'primary','submit', TRUE);?>
+<fieldset>
+    <div class="box fieldset-header" >
+        <h2>
+            Recent Logs
+        </h2>
+    </div>
+    
+    <div class="box">
+        <input type="hidden" name="<?php echo $this->plugin_name; ?>[mailchimp_active_tab]" value="logs"/>
+        <div class="mailchimp-select-wrapper view-log-select">
+            <select id="log_file" name="log_file">
+                <?php foreach ( $logs as $log_key => $log_file ) : ?>
+                    <option value="<?php echo esc_attr( $log_key ); ?>" <?php selected( sanitize_title( $viewed_log ), $log_key ); ?>><?php echo date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), filemtime( WC_LOG_DIR . $log_file ) ); ?> - <?php echo esc_html( $log_file ); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <input type="submit" class="button tab-content-submit view-log-submit" value="<?php esc_attr_e( 'View', 'woocommerce' ); ?>" />
+    </div>
 
-<?php if (isset($logs) && isset($viewed_log)) : ?>
-    <div id="log-viewer-select">
-        <div class="alignleft">
-            <h2>
-                <?php echo esc_html( $viewed_log ); ?>
+</fieldset>
+<div class="box">
+    <?php if (isset($logs) && isset($viewed_log)) : ?>
+        <div id="log-viewer">
+            <div style="height: 100px;">
                 <?php if ( ! empty( $handle ) ) : ?>
-                    <a class="page-title-action" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'handle' => sanitize_title($viewed_log) ), admin_url( 'admin.php?page=mailchimp-woocommerce&tab=logs&mc_action=remove_log' ) ), 'remove_log' ) ); ?>" class="button"><?php esc_html_e( 'Delete log', 'woocommerce' );?></a>
+                    <a style="display:inline-block" class="mc-woocommerce-delete-log-button" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'handle' => sanitize_title($viewed_log) ), admin_url( 'admin.php?page=mailchimp-woocommerce&tab=logs&mc_action=remove_log' ) ), 'remove_log' ) ); ?>">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M14 1.41L12.59 0L7 5.59L1.41 0L0 1.41L5.59 7L0 12.59L1.41 14L7 8.41L12.59 14L14 12.59L8.41 7L14 1.41Z" fill="#3C3C3C"/>
+                        </svg>
+                        Delete log
+                    </a>
+                    <a style="display:inline-block" class="mc-woocommerce-copy-log-button" href="#">
+                        Copy log
+                    </a>
                 <?php endif; ?>
-            </h2>
+            </div>
+            <div>
+                <pre id="log-text"><?php echo esc_html( file_get_contents( WC_LOG_DIR . $viewed_log ) ); ?></pre>
+            </div>
         </div>
-        <div class="alignright">
-            <form action="<?php echo admin_url( 'admin.php?page=mailchimp-woocommerce&tab=logs&mc_action=view_log' ); ?>" method="post">
-                <input type="hidden" name="<?php echo $this->plugin_name; ?>[mailchimp_active_tab]" value="logs"/>
-                <select name="log_file">
-                    <?php foreach ( $logs as $log_key => $log_file ) : ?>
-                        <option value="<?php echo esc_attr( $log_key ); ?>" <?php selected( sanitize_title( $viewed_log ), $log_key ); ?>><?php echo esc_html( $log_file ); ?> (<?php echo date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), filemtime( WC_LOG_DIR . $log_file ) ); ?>)</option>
-                    <?php endforeach; ?>
-                </select>
-                <input type="submit" class="button" value="<?php esc_attr_e( 'View', 'woocommerce' ); ?>" />
-            </form>
-        </div>
-        <div class="clear"></div>
-    </div>
-    <div id="log-viewer">
-        <pre><?php echo esc_html( file_get_contents( WC_LOG_DIR . $viewed_log ) ); ?></pre>
-    </div>
-<?php else : ?>
-    <div class="updated woocommerce-message inline"><p><?php _e( 'There are currently no logs to view.', 'woocommerce' ); ?></p></div>
-<?php endif; ?>
+    <?php else : ?>
+        <div class="updated woocommerce-message inline"><p><?php _e( 'There are currently no logs to view.', 'woocommerce' ); ?></p></div>
+    <?php endif; ?>
+</div>

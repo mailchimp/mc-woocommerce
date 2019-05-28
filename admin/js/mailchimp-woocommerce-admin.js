@@ -30,6 +30,7 @@
 	 */
 	$( window ).load(function() {
 		console.log('asd');
+		var form = $( "#mailchimp_woocommerce_options" );
 		$('a.wizard-tab').hover(function (e) {
 			e.stopPropagation();
 			$('.wizard-tab-tooltip').hide();
@@ -41,9 +42,18 @@
 			e.stopPropagation();
 			$('.wizard-tab-tooltip').hide();
 			$('.wizard-tab-active .wizard-tab-tooltip').show();
-
 		});
 
+		$('.mc-woocommerce-copy-log-button').click(function (e) {
+			e.preventDefault();
+			var copyText = $('#log-text');
+			var $temp = $("<textarea>");
+			$("body").append($temp);
+			$temp.val($(copyText).text()).select();
+			/* Copy the text inside the text field */
+			document.execCommand("copy");
+			$temp.remove();
+		});
 	});
 	
 })( jQuery );

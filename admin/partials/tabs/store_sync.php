@@ -55,14 +55,21 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
     <div class="sync-stats-wrapper">
       
         <div class="box sync-stats-card products" >
-            <div>
+            <div class="sync-stats-card-content">
                 <span><strong><?php esc_html_e('Products', 'mc-woocommerce');?></strong></span>
+                <div class="progress-bar-wrapper">
+                    <div class="progress-bar"></div>
+                </div>
                 <p id="mailchimp_product_count"><?php echo $mailchimp_total_products; ?></p>
+                
             </div>
         </div>
         <div class="box sync-stats-card orders" >
-            <div>
+            <div class="sync-stats-card-content">
                 <span><strong><?php esc_html_e('Orders', 'mc-woocommerce');?></strong></span>
+                <div class="progress-bar-wrapper">
+                    <div class="progress-bar"></div>
+                </div>
                 <p id="mailchimp_order_count"><?php echo $mailchimp_total_orders; ?></p>
             </div>
         </div>

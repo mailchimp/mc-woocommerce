@@ -311,7 +311,7 @@
 	width: 100%;
 }
 
-.sync-content-wrapper .sync-stats-card div{
+.sync-content-wrapper .sync-stats-card .sync-stats-card-content{
 	background-color: white;
 	-webkit-border-radius: 4px;
 	-moz-border-radius: 4px;
@@ -328,11 +328,11 @@
 	top:0;
 }
 
-.sync-content-wrapper .sync-stats-card.products div{
+.sync-content-wrapper .sync-stats-card.products .sync-stats-card-content{
 	transform: translateY(-55%);
 }
 
-.sync-content-wrapper .sync-stats-card.orders div{
+.sync-content-wrapper .sync-stats-card.orders .sync-stats-card-content{
 	transform: translateY(-45%);
 }
 
@@ -501,6 +501,21 @@
 	
 }
 
+.progress-bar-wrapper {
+	position: absolute;
+	top: 67%;
+	background: #F7F7F7;
+	width: 70%;
+	height: 3px;
+	margin: 0 15%;
+	display: none;
+}
+
+.progress-bar {
+	background: #8D5C87;
+	width: 0%;
+	height: 3px;
+}
 
 /* Old styles from tabs.php */
 
@@ -563,7 +578,7 @@
 		margin-bottom: 2em;
 	}
 
-	.sync-content-wrapper .sync-stats-wrapper div{
+	.sync-content-wrapper .sync-stats-wrapper .sync-stats-card-content{
 		margin-right: 0;
 		margin-bottom: 1em;
 	}

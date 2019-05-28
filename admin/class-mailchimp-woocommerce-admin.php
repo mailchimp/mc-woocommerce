@@ -801,28 +801,38 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 var endpoint = '<?php echo MailChimp_WooCommerce_Rest_Api::url('sync/stats'); ?>';
                 var on_sync_tab = '<?php echo (mailchimp_check_if_on_sync_tab() ? 'yes' : 'no')?>';
                 var sync_status = '<?php echo ((mailchimp_has_started_syncing() && !mailchimp_is_done_syncing()) ? 'historical' : 'current') ?>';
+				var orderProgress = 0;
+				var productProgress = 0;
 
                 if (on_sync_tab === 'yes') {
                     var call_mailchimp_for_stats = function () {
 						jQuery('#mailchimp_last_updated').next('.spinner').css('visibility', 'visible');
                         jQuery.get(endpoint, function(response) {
                             if (response.success) {
-
+								jQuery('#mailchimp_order_count').hide();
+								jQuery('#mailchimp_product_count').hide();
+								jQuery('.sync-stats-card .progress-bar-wrapper').show();
                                 // if the response is now finished - but the original sync status was "historical"
                                 // perform a page refresh because we need the re-sync buttons to show up again.
                                 if (response.has_finished === true && sync_status === 'historical') {
                                     return document.location.reload(true);
                                 }
 
-								jQuery('#mailchimp_last_updated').next('.spinner').css('visibility', 'hidden');
-
                                 jQuery('#mailchimp_product_count').html(response.products_in_mailchimp.toLocaleString(undefined, {
                                     maximumFractionDigits: 0
                                 }));
 
+								productProgress = response.products_in_mailchimp == 0 ? 0 : response.products_in_mailchimp / response.products_in_store * 100;
+								
+								jQuery('.sync-stats-card.products .progress-bar').width(productProgress+"%");
+
                                 jQuery('#mailchimp_order_count').html(response.orders_in_mailchimp.toLocaleString(undefined, {
                                     maximumFractionDigits: 0
-                                }));
+								}));
+								
+								orderProgress = response.orders_in_mailchimp == 0 ? 0 : response.orders_in_mailchimp / response.orders_in_store * 100;
+								
+								jQuery('.sync-stats-card.orders .progress-bar').width(orderProgress+"%");
 
                                 jQuery('#mailchimp_last_updated').html(response.date);
 
@@ -830,7 +840,13 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 								if (response.has_started && !response.has_finished) {
 									setTimeout(function() {
 										call_mailchimp_for_stats();
-									}, 10000);
+									}, 1000);
+								}
+								else {
+									jQuery('.sync-stats-card .progress-bar-wrapper').hide();
+									jQuery('#mailchimp_last_updated').next('.spinner').css('visibility', 'hidden');
+									jQuery('#mailchimp_order_count').show();
+									jQuery('#mailchimp_product_count').show();
 								}
                             }
                         });
@@ -838,7 +854,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
                     setTimeout(function() {
                         call_mailchimp_for_stats();
-                    }, 10000);
+                    }, 1000);
                 }
             });
         </script> <?php

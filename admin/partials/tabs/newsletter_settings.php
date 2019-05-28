@@ -56,7 +56,6 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
                     $selected_list = isset($options['mailchimp_list']) ? $options['mailchimp_list'] : null;
                     foreach ($mailchimp_lists as $key => $value ) {
                         echo '<option value="' . esc_attr( $key ) . '" ' . selected(((string) $key === (string) $selected_list), true, false) . '>' . esc_html( $value ) . '</option>';
-                        echo '<option value="' . esc_attr( $key ) . '" ' . selected(((string) $key === (string) $selected_list), true, false) . '>' . esc_html( $value ) . '</option>';
                     }
                 }
                 ?>
@@ -156,7 +155,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
 
 
     <div class="box box-half">
-        <label for="<?php echo $this->plugin_name; ?>-newsletter-checkbox-action">
+        <label for="<?php echo $this->plugin_name; ?>[mailchimp_product_image_key]">
             <h4><?php esc_html_e('Product Image Size', 'mc-woocommerce');?></h4>
             <p><?= __( 'Define the product image size used by abandoned carts, order notifications, and product recommendations.', 'mailchimp-woocommerce' ); ?></p>
         </label>

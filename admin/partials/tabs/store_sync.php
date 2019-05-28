@@ -94,7 +94,14 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
                 <?php endif; ?>
                 
                 <?php if ($sync_started_at && !$sync_completed_at): ?>
-                    <p><strong><?php esc_html_e('Initial Sync:', 'mc-woocommerce');?></strong> <i><?php esc_html_e('In Progress', 'mc-woocommerce');?></i></p>
+                    <p>
+                        <strong><?php esc_html_e('Initial Sync:', 'mc-woocommerce');?></strong>
+                        <i id="mailchimp_last_updated">
+                            <?php esc_html_e('In Progress', 'mc-woocommerce');?>
+                        </i>
+                        <span class="spinner" style="float:none; background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px"></span>
+                    </p>
+                    
                 <?php endif; ?>
             </div>
         </div>

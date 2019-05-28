@@ -102,29 +102,73 @@ if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue
         <?php if ($active_tab == 'logs' && $show_sync_tab): ?>
         <?php endif; ?> -->
     </p>
-
-    <div class="nav-tab-wrapper">
-        <?php if($has_valid_api_key): ?>
-            <?php if($show_sync_tab): ?>
+    <?php if($show_sync_tab): ?>  
+        <div class="nav-tab-wrapper">
+            <?php if($has_valid_api_key): ?>
                 <a href="?page=mailchimp-woocommerce&tab=sync" class="nav-tab <?php echo $active_tab == 'sync' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Sync', 'mc-woocommerce');?></a>
-            <?php endif; ?>
-            <a href="?page=mailchimp-woocommerce&tab=store_info" class="nav-tab <?php echo $active_tab == 'store_info' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Store Settings', 'mc-woocommerce');?></a>
-            <?php if ($handler->hasValidStoreInfo()) : ?>
-                <?php if($show_campaign_defaults): ?>
-                <a href="?page=mailchimp-woocommerce&tab=campaign_defaults" class="nav-tab <?php echo $active_tab == 'campaign_defaults' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Audience Defaults', 'mc-woocommerce');?></a>
-                <?php endif; ?>
-                <?php if($handler->hasValidCampaignDefaults()): ?>
-                    <a href="?page=mailchimp-woocommerce&tab=newsletter_settings" class="nav-tab <?php echo $active_tab == 'newsletter_settings' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Audience Settings', 'mc-woocommerce');?></a>
-                <?php endif; ?>
-            <?php endif;?>
-            <?php if($show_sync_tab): ?>
+                <a href="?page=mailchimp-woocommerce&tab=store_info" class="nav-tab <?php echo $active_tab == 'store_info' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Store Settings', 'mc-woocommerce');?></a>
+                <?php if ($handler->hasValidStoreInfo()) : ?>
+                    <?php if($show_campaign_defaults): ?>
+                    <a href="?page=mailchimp-woocommerce&tab=campaign_defaults" class="nav-tab <?php echo $active_tab == 'campaign_defaults' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Audience Defaults', 'mc-woocommerce');?></a>
+                    <?php endif; ?>
+                    <?php if($handler->hasValidCampaignDefaults()): ?>
+                        <a href="?page=mailchimp-woocommerce&tab=newsletter_settings" class="nav-tab <?php echo $active_tab == 'newsletter_settings' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Audience Settings', 'mc-woocommerce');?></a>
+                    <?php endif; ?>
+                <?php endif;?>
                 <a href="?page=mailchimp-woocommerce&tab=logs" class="nav-tab <?php echo $active_tab == 'logs' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Logs', 'mc-woocommerce');?></a>
+                <?php else: ?>
+                <a href="?page=mailchimp-woocommerce&tab=api_key" class="nav-tab <?php echo $active_tab == 'api_key' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Connect', 'mc-woocommerce');?></a>
             <?php endif; ?>
-        <?php else: ?>
-            <a href="?page=mailchimp-woocommerce&tab=api_key" class="nav-tab <?php echo $active_tab == 'api_key' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Connect', 'mc-woocommerce');?></a>
-        <?php endif; ?>
-    </div>
-    <h2></h2>
+        </div>
+    <?php else: ?>
+        <div class="nav-wizard-wrapper">
+            <a href="?page=mailchimp-woocommerce&tab=api_key" class="wizard-tab <?php echo $active_tab == 'api_key' ? 'wizard-tab-active' : ''; ?>">
+                <div class="wizard-tab-tooltip wizard-tab-tooltip-api-key ">Connect Store
+                    <svg width="29" height="29" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="14.498" width="20" height="20" transform="rotate(45 14.498 0)" fill="white"/>
+                    </svg>
+                </div>
+            </a>
+            
+            <?php if ($has_valid_api_key) : ?>    
+                <a href="?page=mailchimp-woocommerce&tab=store_info" class="wizard-tab <?php echo $active_tab == 'store_info' ? 'wizard-tab-active' : ''; ?>">
+                    <div class="wizard-tab-tooltip wizard-tab-tooltip-store-info ">Store Settings
+                        <svg width="29" height="29" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="14.498" width="20" height="20" transform="rotate(45 14.498 0)" fill="white"/>
+                        </svg>
+                    </div>
+                </a>
+            <?php else: ?>
+                <span class="wizard-tab"></span>    
+            <?php endif; ?>
+
+            <?php if ($handler->hasValidStoreInfo() && $show_campaign_defaults) : ?>  
+                <a href="?page=mailchimp-woocommerce&tab=campaign_defaults" class="wizard-tab <?php echo $active_tab == 'campaign_defaults' ? 'wizard-tab-active' : ''; ?>">
+                    <div class="wizard-tab-tooltip wizard-tab-tooltip-store-info ">Audience Defaults
+                        <svg width="29" height="29" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="14.498" width="20" height="20" transform="rotate(45 14.498 0)" fill="white"/>
+                        </svg>
+                    </div>
+                </a>
+            <?php else: ?>
+                <span class="wizard-tab"></span>    
+            <?php endif; ?>
+
+            <?php if ($handler->hasValidCampaignDefaults()) : ?>  
+                <a href="?page=mailchimp-woocommerce&tab=newsletter_settings" class="wizard-tab <?php echo $active_tab == 'newsletter_settings' ? 'wizard-tab-active' : ''; ?>">
+                    <div class="wizard-tab-tooltip wizard-tab-tooltip-store-info ">Audience Settings
+                        <svg width="29" height="29" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="14.498" width="20" height="20" transform="rotate(45 14.498 0)" fill="white"/>
+                        </svg>
+                    </div>
+                </a>
+            <?php else: ?>
+                <span class="wizard-tab"></span>    
+            <?php endif; ?>
+        </div>      
+    <?php endif; ?>
+    <h2><!-- Needed to show the notifications on the right spot --></h2>
+    
     <?php if ($active_tab != 'sync'): ?>
     <div class="tab-content-wrapper">
     <?php endif; ?>

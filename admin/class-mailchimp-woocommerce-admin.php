@@ -68,8 +68,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 *
 	 * @since    1.0.0
 	 */
-	public function enqueue_scripts() {
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery' ), $this->version, false );
+	public function enqueue_scripts($hook) {
+		if ( $hook === 'toplevel_page_mailchimp-woocommerce' ) {
+			wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery' ), $this->version, false );
+		}
 	}
 
 	/**

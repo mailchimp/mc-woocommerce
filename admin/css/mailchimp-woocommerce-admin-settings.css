@@ -38,6 +38,58 @@
 }
 
 
+.nav-wizard-wrapper {
+	cursor: default;
+	margin-bottom: 110px !important;
+	
+}
+
+.nav-wizard-wrapper .wizard-tab {
+	display: inline-block;
+	height: 13px;
+	width: 57px;
+	margin-right: 0.5em;
+	border-bottom: 3px solid #E6E6E6;
+	position: relative;
+	align-items: center;
+	text-align: center;
+	text-transform: uppercase;
+}
+
+.nav-wizard-wrapper .wizard-tab-active,
+.nav-wizard-wrapper a.wizard-tab:hover {
+	border-bottom: 3px solid #212121;
+}
+
+.nav-wizard-wrapper .wizard-tab .wizard-tab-tooltip{
+	display: none;
+}
+
+.nav-wizard-wrapper .wizard-tab-active .wizard-tab-tooltip{
+	display: block;
+}
+
+.nav-wizard-wrapper .wizard-tab .wizard-tab-tooltip {
+	position: absolute;
+	left: 0;
+	top: 40px;
+	width: 150px;
+	background: white;
+	border-radius: 6px;
+	padding: 20px 30px;
+	font-family: Proxima Nova, Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	line-height: 17px;
+	color: #E6E6E6;
+}
+
+.nav-wizard-wrapper .wizard-tab .wizard-tab-tooltip svg{
+	position: absolute;
+	left: 13px;
+	top: -13px;
+	
+}
+
 .nav-tab-wrapper {
 	border-bottom: 2px solid white !important;
 	margin-bottom: 25px !important;

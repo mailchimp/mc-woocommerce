@@ -28,5 +28,22 @@
 	 * Although scripts in the WordPress core, Plugins and Themes may be
 	 * practising this, we should strive to set a better example in our own work.
 	 */
+	$( window ).load(function() {
+		console.log('asd');
+		$('a.wizard-tab').hover(function (e) {
+			e.stopPropagation();
+			$('.wizard-tab-tooltip').hide();
+			$(this).find('.wizard-tab-tooltip').show();
 
+		});
+
+		$('.nav-wizard-wrapper').mouseout(function (e) {
+			e.stopPropagation();
+			$('.wizard-tab-tooltip').hide();
+			$('.wizard-tab-active .wizard-tab-tooltip').show();
+
+		});
+
+	});
+	
 })( jQuery );

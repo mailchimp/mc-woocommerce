@@ -112,6 +112,15 @@
 	transition: padding 0.1s ease-out;
 }
 
+.nav-tab-wrapper .nav-tab:first-of-type {
+	margin-left: 0;
+}
+
+.nav-tab-wrapper .nav-tab:focus {
+	outline: none !important;
+	box-shadow: none !important;
+}
+
 .nav-tab-wrapper .nav-tab:hover:not(.nav-tab-active) {
 	background: #F5F5F5;
 	font-family: Proxima Nova, Arial, Helvetica, sans-serif;

@@ -166,7 +166,8 @@ class MailChimp_WooCommerce_Rest_Queue
 
         return (int) preg_replace_callback('/(\-?\d+)(.?)/', function ($m) {
             if (!isset($m[2]) || $m[2] == '') {
-                $memory_limit = '128M';
+                $m[1] = '128';
+                $m[2] = 'M';
             }
             return $m[1] * pow(1024, strpos('BKMG', $m[2]));
         }, strtoupper($memory_limit));

@@ -364,13 +364,22 @@
 	margin:0;
 }
 
+.sync-content-wrapper .sync-stats-card .mailchimp_order_count_partial,
+.sync-content-wrapper .sync-stats-card .mailchimp_product_count_partial {
+	position: absolute;
+	top: -1.3em;
+	right: 0;
+	color: #E6E6E6;
+}
+	
+
 .sync-content-wrapper .sync-stats-card.orders {
 	position: absolute;
 	top: 50%;
 }
 
-.sync-content-wrapper .sync-stats-card span,
-.sync-content-wrapper .sync-stats-card span{
+.sync-content-wrapper .sync-stats-card span.card_label,
+.sync-content-wrapper .sync-stats-card span.card_label{
 	padding-left: 2em;
 	position: relative;
 	top: 2em;
@@ -570,9 +579,9 @@
 	position: absolute;
 	top: 67%;
 	background: #F7F7F7;
-	width: 70%;
+	width: 80%;
 	height: 3px;
-	margin: 0 15%;
+	margin: 0 10%;
 	display: none;
 }
 

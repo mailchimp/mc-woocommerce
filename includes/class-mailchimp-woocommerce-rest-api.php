@@ -271,6 +271,8 @@ class MailChimp_WooCommerce_Rest_Api
             'products_in_mailchimp' => $mailchimp_total_products,
             'orders_in_store' => $order_count,
             'orders_in_mailchimp' => $mailchimp_total_orders,
+            'products_page' => get_option('mailchimp-woocommerce-sync.products.current_page'),
+            'orders_page' => get_option('mailchimp-woocommerce-sync.orders.current_page'),
             'date' => date_i18n( __('D, M j, Y g:i A', 'mc-woocommerce'), $date->getTimestamp()),
             'has_started' => mailchimp_has_started_syncing(),
             'has_finished' => mailchimp_is_done_syncing(),

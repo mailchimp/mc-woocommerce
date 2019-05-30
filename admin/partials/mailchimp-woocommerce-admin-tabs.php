@@ -81,7 +81,7 @@ if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue
     
     <p class="mc-woocommerce-settings-subtitles">
         <?php if ($active_tab == 'api_key' ): ?>
-            Add Mailchimp for WooCommerce to build custom segments,<br/>send automations, and track purhase activity in Mailchimp
+            Add Mailchimp for WooCommerce to build custom segments,<br/>send automations, and track purchase activity in Mailchimp
         <?php endif; ?>
 
         <?php if ($active_tab == 'store_info' && $has_valid_api_key): ?>

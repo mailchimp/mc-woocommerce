@@ -56,8 +56,9 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
       
         <div class="box sync-stats-card products" >
             <div class="sync-stats-card-content">
-                <span><strong><?php esc_html_e('Products', 'mc-woocommerce');?></strong></span>
+                <span class="card_label"><strong><?php esc_html_e('Products', 'mc-woocommerce');?></strong></span>
                 <div class="progress-bar-wrapper">
+                    <span class="mailchimp_product_count_partial">x / x</span>
                     <div class="progress-bar"></div>
                 </div>
                 <p id="mailchimp_product_count"><?php echo $mailchimp_total_products; ?></p>
@@ -66,9 +67,11 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
         </div>
         <div class="box sync-stats-card orders" >
             <div class="sync-stats-card-content">
-                <span><strong><?php esc_html_e('Orders', 'mc-woocommerce');?></strong></span>
+                <span class="card_label"><strong><?php esc_html_e('Orders', 'mc-woocommerce');?></strong></span>
                 <div class="progress-bar-wrapper">
                     <div class="progress-bar"></div>
+                    <span class="mailchimp_order_count_partial">x / x</span>
+                </span>
                 </div>
                 <p id="mailchimp_order_count"><?php echo $mailchimp_total_orders; ?></p>
             </div>

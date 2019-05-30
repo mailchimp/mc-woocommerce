@@ -13,7 +13,7 @@ class MailChimp_WooCommerce_MailChimpApi
     protected static $instance = null;
 
     /**
-     * @return null
+     * @return null|MailChimp_WooCommerce_MailChimpApi
      */
     public static function getInstance()
     {

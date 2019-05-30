@@ -1,15 +1,23 @@
 /**
  * mc-woocommerce Settings Page
  */
+ @import url('https://use.typekit.net/wvc2hnb.css');
 
 .mc-woocommerce-settings {
 	width:90%;
 	margin: 4em auto 0 auto;
+	font-family: "proxima-nova", Arial, Helvetica, sans-serif;
 
 }
+
+.mc-woocommerce-settings p {
+	font-size: 14px;
+	font-family: "proxima-nova", Arial, Helvetica, sans-serif;
+}
+
 .mc-woocommerce-settings-subtitles {
 	font-family: "proxima-nova", Arial, Helvetica, sans-serif;
-	font-size: 22px;	
+	font-size: 22px !important;	
 	line-height: 32px;
 	color: #3C3C3C;
 }
@@ -77,7 +85,7 @@
 	background: white;
 	border-radius: 6px;
 	padding: 20px 30px;
-	font-family: Proxima Nova, Arial, Helvetica, sans-serif;
+	font-family: proxima-nova, Arial, Helvetica, sans-serif;
 	font-size: 14px;
 	line-height: 17px;
 	color: #E6E6E6;
@@ -100,7 +108,7 @@
 	border-radius: 4px 4px 0px 0px;
 	border: 1px solid #F1F1F1;
 	border-bottom: none;
-	font-family: Proxima Nova, Arial, Helvetica, sans-serif;
+	font-family: proxima-nova, Arial, Helvetica, sans-serif;
 	font-size: 14px;
 	line-height: 24px;
 	text-align: center;
@@ -123,7 +131,7 @@
 
 .nav-tab-wrapper .nav-tab:hover:not(.nav-tab-active) {
 	background: #F5F5F5;
-	font-family: Proxima Nova, Arial, Helvetica, sans-serif;
+	font-family: proxima-nova, Arial, Helvetica, sans-serif;
 	font-size: 14px;
 	line-height: 24px;
 	text-align: center;
@@ -175,6 +183,7 @@
 	float: left;
 	padding-top: 3em;
 	width: 100%;
+	font-size: 18px;
 }
 
 .tab-content-wrapper p.submit {
@@ -186,7 +195,7 @@
 .tab-content-wrapper .tab-content-submit,
 .mc-woocommerce-resync-button,
 .mc-woocommerce-copy-log-button {
-	font-family: Proxima Nova Alt, Arial, Helvetica, sans-serif !important;
+	font-family: proxima-nova, Arial, Helvetica, sans-serif !important;
 	font-size: 14px !important;
 	line-height: 16px !important;
 	padding: 15px 35px 27px 35px !important;
@@ -292,7 +301,7 @@
 
 .tab-content-wrapper label {
 	display: block;
-	font-family: Proxima Nova, Arial, Helvetica, sans-serif;
+	font-family: proxima-nova, Arial, Helvetica, sans-serif;
 	font-size: 14px;
 	line-height: 30px;
 	width: 100%;
@@ -347,7 +356,7 @@
 
 .sync-content-wrapper .sync-stats-card p,
 .sync-content-wrapper .sync-stats-card p{
-	font-family: Proxima Nova Alt, Arial, Helvetica, sans-serif;
+	font-family: proxima-nova, Arial, Helvetica, sans-serif;
 	font-size: 48px;
 	line-height: 48px;
 	padding-left: 0.5em;
@@ -366,7 +375,7 @@
 	position: relative;
 	top: 2em;
 	transform: translateY(-100%);
-	font-family: Proxima Nova Alt, Arial, Helvetica, sans-serif;
+	font-family: proxima-nova, Arial, Helvetica, sans-serif;
 	font-size: 14px;
 	line-height: 14px;
 }
@@ -378,6 +387,9 @@
 	border-radius: 4px;
 	display: table-cell;
 	width: 70%;
+	font-family: proxima-nova, Arial, Helvetica, sans-serif;
+	font-size: 14px ;
+	line-height: 14px;
 }
 
 .sync-content-wrapper .sync-controls {
@@ -394,7 +406,7 @@
 .mc-woocommerce-delete-log-button {
 	cursor: pointer;
 	padding-top: 1em;
-	font-family: Proxima Nova, Arial, Helvetica, sans-serif;
+	font-family: proxima-nova, Arial, Helvetica, sans-serif;
 	font-size: 14px;
 	line-height: 17px;
 	display: flex;
@@ -462,6 +474,9 @@
 	width: 33%;
 }
 
+.tab-content-wrapper fieldset label {
+	font-weight: 500;
+}
 .tab-content-wrapper fieldset input[type="text"],
 .tab-content-wrapper fieldset input[type="password"],
 .tab-content-wrapper fieldset input[type="email"] {
@@ -480,6 +495,7 @@
 	border-radius: 4px;
 	box-shadow: inset 0 1px 2px rgba(0,0,0,.07);
 }
+
 .tab-content-wrapper .mailchimp-select-wrapper select {
 	padding: 0;
 	background: transparent;	
@@ -495,11 +511,26 @@
 	background: no-repeat right center url("data:image/svg+xml;charset=UTF-8,%3csvg width='13' height='8' viewBox='0 0 13 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M11.34 0.590027L6.75 5.17003L2.16 0.590027L0.75 2.00003L6.75 8.00003L12.75 2.00003L11.34 0.590027Z' fill='%23212121'/%3e%3c/svg%3e ");
 }
 
-.tab-content-wrapper fieldset select:focus {
-	outline: none;
-	/* background: no-repeat right center url("data:image/svg+xml;charset=UTF-8,%3csvg width='13' height='8' viewBox='0 0 13 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M 1.66,8 6.25,3.419996 10.84,8 l 1.41,-1.410004 -6,-6 -6,6 z' fill='%23212121'/%3e%3c/svg%3e "); */
+.tab-content-wrapper .mailchimp-select-wrapper select:disabled {
+	color: #aaa;
+	background: none;
 }
 
+.tab-content-wrapper fieldset select:focus {
+	outline: none;
+}
+
+.tab-content-wrapper input[type='checkbox']::before {
+	color: #7FAD45;
+	margin: 0.1em;
+}
+
+.tab-content-wrapper input[type='checkbox'] {
+	width: 2em;
+	height: 2em;
+	border-radius: 4px;
+	border: 1px solid #E6E6E6;
+}
 
 .tab-content-wrapper fieldset textarea {
 	border: 1px solid #E6E6E6;
@@ -509,6 +540,31 @@
 	width: 100%;
 	
 }
+
+.tab-content-wrapper .optional-settings-button {
+	margin-top: 3em;	
+}
+
+.tab-content-wrapper .optional-settings-button:hover span {
+	color: #628735;
+}
+.tab-content-wrapper .optional-settings-button span {
+	text-transform: uppercase;
+	color: #7FAD45 ;
+	padding-left: 2em;
+	background: no-repeat left center url("data:image/svg+xml;charset=UTF-8,%3csvg width='13' height='8' viewBox='0 0 13 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M11.34 0.590027L6.75 5.17003L2.16 0.590027L0.75 2.00003L6.75 8.00003L12.75 2.00003L11.34 0.590027Z' fill='%23212121'/%3e%3c/svg%3e ");
+	font-size: 14px;
+	cursor: pointer;
+}
+
+.tab-content-wrapper .optional-settings-button span.active {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg width='13' height='8' viewBox='0 0 13 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M2.16 7.40997L6.75 2.82997L11.34 7.40997L12.75 5.99997L6.75 -2.61783e-05L0.75 5.99997L2.16 7.40997Z' fill='%23212121'/%3e%3c/svg%3e ");
+}
+
+.tab-content-wrapper .optional-settings-content {
+	display: none;
+}
+
 
 .progress-bar-wrapper {
 	position: absolute;

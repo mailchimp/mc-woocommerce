@@ -29,8 +29,7 @@
 	 * practising this, we should strive to set a better example in our own work.
 	 */
 	$( window ).load(function() {
-		console.log('asd');
-		var form = $( "#mailchimp_woocommerce_options" );
+		// show/hide wizard tabs tooltips
 		$('a.wizard-tab').hover(function (e) {
 			e.stopPropagation();
 			$('.wizard-tab-tooltip').hide();
@@ -38,12 +37,29 @@
 
 		});
 
-		$('.nav-wizard-wrapper').mouseout(function (e) {
+		$('a.wizard-tab').mouseleave(function (e) {
 			e.stopPropagation();
 			$('.wizard-tab-tooltip').hide();
 			$('.wizard-tab-active .wizard-tab-tooltip').show();
 		});
 
+		// show/hide optional settings
+		var optionalSettings = false;
+		$('.optional-settings-button').click(function () {
+			if (optionalSettings) {
+				$('.optional-settings-content').slideUp();
+				$(this).find('span').removeClass('active');
+				optionalSettings = false;
+			} else {
+				$('.optional-settings-content').slideDown();
+				$(this).find('span').addClass('active');
+				optionalSettings = true;
+			}
+			
+
+		});
+
+		// copy log button
 		$('.mc-woocommerce-copy-log-button').click(function (e) {
 			e.preventDefault();
 			var copyText = $('#log-text');
@@ -54,6 +70,8 @@
 			document.execCommand("copy");
 			$temp.remove();
 		});
+
+
 	});
 	
 })( jQuery );

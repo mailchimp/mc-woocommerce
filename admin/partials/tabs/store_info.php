@@ -76,7 +76,7 @@ if (!$handler->hasValidApiKey()) {
         <p><?= __('Please apply your locale settings. If you\'re unsure about these, use the defaults.', $this->plugin_name);?></p>
     </div>
 
-    <div class="box box-half" >
+    <div class="box box-third" >
         <label for="<?php echo $this->plugin_name; ?>-store-locale-label">
             <span><?php esc_html_e('Locale', $this->plugin_name); ?></span>
         </label>
@@ -92,7 +92,7 @@ if (!$handler->hasValidApiKey()) {
         </div>
     </div>
 
-    <div class="box box-half" >
+    <div class="box box-third" >
         <?php $all_currencies = MailChimp_WooCommerce_CurrencyCodes::lists();?>
         <label for="<?php echo $this->plugin_name; ?>-store-currency-code-label">
             <span><?php esc_html_e('Woocommerce Currency', $this->plugin_name); ?></span>
@@ -100,7 +100,7 @@ if (!$handler->hasValidApiKey()) {
         <input type="text" value="<?php echo isset($options['store_currency_code']) ? $options['store_currency_code'] . ' | ' . $all_currencies[$options['store_currency_code']]: '' ?>" disabled/>
     </div>
 
-    <div class="box" >
+    <div class="box box-third" >
         <label for="<?php echo $this->plugin_name; ?>-store-timezone-label">
             <span><?php esc_html_e('Timezone', $this->plugin_name); ?></span>
         </label>
@@ -114,5 +114,12 @@ if (!$handler->hasValidApiKey()) {
                 ?>
             </select>
         </div>
+    </div>
+    <div class="box optional-settings-button" >
+        <span><?php esc_html_e('Optional Store Settings', 'mc-woocommerce');?></span>
+    </div>
+
+    <div class="optional-settings-content">
+        Other options comes here
     </div>
 </fieldset>

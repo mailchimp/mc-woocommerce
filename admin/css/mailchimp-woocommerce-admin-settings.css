@@ -22,7 +22,13 @@
 	color: #3C3C3C;
 }
 
-.notice {
+.description {
+	font-family: proxima-nova, Arial, Helvetica, sans-serif;
+	font-size: 12px !important;
+	line-height: 16px  !important;
+	color: #B3B3B3 !important;
+}
+/* .notice {
 	background: rgba(127, 173, 69, 0.1) !important;
 	mix-blend-mode: normal !important;
 	border: 1px solid rgba(127, 173, 69, 0.5) !important;
@@ -43,7 +49,7 @@
 .notice.notice-warning {
 	background: rgba(255, 185, 0, 0.1) !important;
 	border: 1px solid rgba(255, 185, 0, 0.5) !important;
-}
+} */
 
 
 .nav-wizard-wrapper {
@@ -319,50 +325,52 @@
 
 .sync-content-wrapper .sync-stats-wrapper {
 	display: table-cell;
-	width: 30%;
-	height: 50%;
+	width: 40%;
 	position:relative;
+	
 }
 
-.sync-content-wrapper .sync-stats-card {
-	height: 50%;
-	width: 100%;
-}
-
-.sync-content-wrapper .sync-stats-card .sync-stats-card-content{
+.sync-content-wrapper .sync-stats-content-wrapper {
+	margin-right: 2em;
 	background-color: white;
 	-webkit-border-radius: 4px;
 	-moz-border-radius: 4px;
 	border-radius: 4px;
-	position: relative;
-	top:50%;
-	height: 90%;
-	transform: translateY(-50%);
-	margin-right: 2em;
-	
-}
-.sync-content-wrapper .sync-stats-card.products {
-	position: absolute;
-	top:0;
+	padding: 0 2em;
 }
 
-.sync-content-wrapper .sync-stats-card.products .sync-stats-card-content{
-	transform: translateY(-55%);
+.sync-content-wrapper .sync-stats-card {
+	width: 100%;
+	border-bottom: 1px solid #E6E6E6;
+	padding: 2em 0;
 }
 
-.sync-content-wrapper .sync-stats-card.orders .sync-stats-card-content{
-	transform: translateY(-45%);
+.sync-content-wrapper .sync-stats-card:last-child {
+	border-bottom: none;
 }
 
-.sync-content-wrapper .sync-stats-card p,
-.sync-content-wrapper .sync-stats-card p{
+.sync-content-wrapper .sync-stats-card .sync-stats-card-content{
+	position:relative;
+}
+
+.sync-content-wrapper .sync-stats-card span.card_label,
+.sync-content-wrapper .sync-stats-card span.card_label{
+	padding-left: 0.7em;
 	font-family: proxima-nova, Arial, Helvetica, sans-serif;
-	font-size: 48px;
-	line-height: 48px;
-	padding-left: 0.5em;
-	padding-top: 1.5em;
-	margin:0;
+	font-size: 14px;
+	line-height: 14px;
 }
+
+.sync-content-wrapper .sync-stats-card span.card_count,
+.sync-content-wrapper .sync-stats-card span.card_count{
+	font-family: proxima-nova, Arial, Helvetica, sans-serif;
+	font-size: 22px;
+	line-height: 22px;
+	position: absolute;
+	right: 1em;
+	margin: 0;
+}
+
 
 .sync-content-wrapper .sync-stats-card .mailchimp_order_count_partial,
 .sync-content-wrapper .sync-stats-card .mailchimp_product_count_partial {
@@ -371,22 +379,21 @@
 	right: 0;
 	color: #E6E6E6;
 }
-	
 
-.sync-content-wrapper .sync-stats-card.orders {
+.progress-bar-wrapper {
 	position: absolute;
-	top: 50%;
+	top: 0.6em;
+	right: 1.8em;
+	background: #F7F7F7;
+	width: 50%;
+	height: 3px;
+	display: none;
 }
 
-.sync-content-wrapper .sync-stats-card span.card_label,
-.sync-content-wrapper .sync-stats-card span.card_label{
-	padding-left: 2em;
-	position: relative;
-	top: 2em;
-	transform: translateY(-100%);
-	font-family: proxima-nova, Arial, Helvetica, sans-serif;
-	font-size: 14px;
-	line-height: 14px;
+.progress-bar {
+	background: #8D5C87;
+	width: 0%;
+	height: 3px;
 }
 
 .sync-content-wrapper .sync-controls-wrapper {
@@ -395,7 +402,7 @@
 	-moz-border-radius: 4px;
 	border-radius: 4px;
 	display: table-cell;
-	width: 70%;
+	width: 60%;
 	font-family: proxima-nova, Arial, Helvetica, sans-serif;
 	font-size: 14px ;
 	line-height: 14px;
@@ -531,7 +538,7 @@
 
 .tab-content-wrapper input[type='checkbox']::before {
 	color: #7FAD45;
-	margin: 0.1em;
+	margin: 3px 0px 0px 2px;
 }
 
 .tab-content-wrapper input[type='checkbox'] {
@@ -572,23 +579,6 @@
 
 .tab-content-wrapper .optional-settings-content {
 	display: none;
-}
-
-
-.progress-bar-wrapper {
-	position: absolute;
-	top: 67%;
-	background: #F7F7F7;
-	width: 80%;
-	height: 3px;
-	margin: 0 10%;
-	display: none;
-}
-
-.progress-bar {
-	background: #8D5C87;
-	width: 0%;
-	height: 3px;
 }
 
 /* Old styles from tabs.php */
@@ -647,9 +637,12 @@
 	.sync-content-wrapper .sync-stats-wrapper {
 		display: block;
 		width: 100%;
-		height: 350px;
 		position:relative;
 		margin-bottom: 2em;
+	}
+
+	.sync-content-wrapper .sync-stats-content-wrapper {
+		margin-right: 0;
 	}
 
 	.sync-content-wrapper .sync-stats-wrapper .sync-stats-card-content{
@@ -665,6 +658,11 @@
 
 	.sync-content-wrapper .sync-controls .mc-woocommerce-last-sync{
 		margin-top: 3em;
+	}
+	
+
+	.sync-content-wrapper .sync-controls .spinner {
+		margin: -3px 10px 0 5px;
 	}
 
 	.view-log-select,

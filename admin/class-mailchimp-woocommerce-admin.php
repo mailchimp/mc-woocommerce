@@ -822,7 +822,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 									jQuery('.sync-stats-card .progress-bar-wrapper').show();
 									if (response.products_page == 'complete') {
 										productsProgress = 100;
-										jQuery('#mailchimp_product_count').html(response.products_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0})).show();
+										jQuery('#mailchimp_product_count').html(response.products_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0})).css('display', 'inline-block');
 										jQuery('.sync-stats-card.products .progress-bar-wrapper').hide();
 									} else {
 										if (response.products_in_mailchimp == 0) {
@@ -842,7 +842,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 									if (response.orders_page == 'complete') {
 										ordersProgress = 100;
-										jQuery('#mailchimp_order_count').html(response.orders_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0})).show();
+										jQuery('#mailchimp_order_count').html(response.orders_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0})).css('display', 'inline-block');
 										jQuery('.sync-stats-card.orders .progress-bar-wrapper').hide();
 									} else {
 										if (response.orders_in_mailchimp == 0) {
@@ -865,14 +865,14 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 									// only call status again if sync is running.
 									setTimeout(function() {
 										call_mailchimp_for_stats();
-									}, 10000);
+									}, 1000);
 									jQuery('#mailchimp_last_updated').next('.spinner').css('visibility', 'hidden');
 								}
 								else {
 									jQuery('#mailchimp_last_updated').next('.spinner').css('visibility', 'hidden');	
 									jQuery('.sync-stats-card .progress-bar-wrapper').hide();
-									jQuery('#mailchimp_order_count').show();
-									jQuery('#mailchimp_product_count').show();
+									jQuery('#mailchimp_order_count').css('display', 'inline-block');
+									jQuery('#mailchimp_product_count').css('display', 'inline-block');
 								}
                             }
                         });

@@ -923,6 +923,10 @@ function mailchimp_woocommerce_check_if_http_worker_fails() {
             $message = __('The REST API seems to be disabled on this wordpress site. Please enable to sync data.', 'mailchimp-woocommerce');
             mailchimp_set_data('test.can.remote_post', false);
             mailchimp_set_data('test.can.remote_post.error', $message);
+            mailchimp_error('test.rest_api', '', array(
+                'status' => $r->get_status(),
+                'body' => $r->get_data(),
+            ));
             return $message;
         }
     }

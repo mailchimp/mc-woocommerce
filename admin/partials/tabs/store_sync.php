@@ -48,12 +48,13 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
     $mailchimp_list_name = $handler->getListName();
 }
 ?>
+<input type="hidden" name="mailchimp_active_settings_tab" value="store_sync"/>
 <div class="sync-content-wrapper">
 
-    <input type="hidden" name="mailchimp_active_settings_tab" value="store_sync"/>
+    
     
     <div class="sync-stats-wrapper">
-        <div class="sync-stats-content-wrapper">
+        
       
             <div class="box sync-stats-card products" >
                 <div class="sync-stats-card-content">
@@ -118,7 +119,7 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
                 </div>
             </div>
             
-        </div>
+        
     </div>
 
     <div class="sync-controls-wrapper">
@@ -127,7 +128,7 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M14 1.41L12.59 0L7 5.59L1.41 0L0 1.41L5.59 7L0 12.59L1.41 14L7 8.41L12.59 14L14 12.59L8.41 7L14 1.41Z" fill="#3C3C3C"/>
                 </svg>
-                DISCONNECT
+                DISCONNECT STORE
             </a>
             <p><strong><?php esc_html_e('Account Connected', 'mc-woocommerce');?></strong></p> <p id="mailchimp_account_connected"><?php echo $account_name; ?></p>
             <br/>

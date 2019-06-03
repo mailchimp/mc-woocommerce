@@ -109,15 +109,13 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
 
         <div class="box box-half margin-large">
             <?php $checkbox_default_settings = (array_key_exists('mailchimp_checkbox_defaults', $options) && !is_null($options['mailchimp_checkbox_defaults'])) ? $options['mailchimp_checkbox_defaults'] : 'check'; ?>
-            <label>
+            <label class="radio-label">
                 <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_checkbox_defaults]" value="check"<?php if($checkbox_default_settings === 'check') echo ' checked="checked" '; ?>><?php esc_html_e('Visible, checked by default', 'mc-woocommerce');?><br>
             </label>
-            <br/>
-            <label>
+            <label class="radio-label">
                 <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_checkbox_defaults]" value="uncheck"<?php if($checkbox_default_settings === 'uncheck') echo ' checked="checked" '; ?>><?php esc_html_e('Visible, unchecked by default', 'mc-woocommerce');?><br/>
             </label>
-            <br/>
-            <label>
+            <label class="radio-label">
                 <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_checkbox_defaults]" value="hide"<?php if($checkbox_default_settings === 'hide') echo ' checked="checked" '; ?>><?php esc_html_e('Hidden, unchecked by default', 'mc-woocommerce');?><br/>
             </label>
         </div>

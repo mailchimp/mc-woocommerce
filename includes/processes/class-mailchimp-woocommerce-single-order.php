@@ -103,6 +103,18 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
             // will be the same as the customer id. an md5'd hash of a lowercased email.
             $this->cart_session_id = $order->getCustomer()->getId();
 
+            // see if we have a campaign ID already from the order transformer / cookie.
+            $campaign_id = $order->getCampaignId();
+
+            // if the campaign ID is empty, and we have a cart session id
+            if (empty($campaign_id) && !empty($this->cart_session_id)) {
+                // pull the cart info from Mailchimp
+                if (($abandoned_cart_record = $api->getCart($store_id, $this->cart_session_id))) {
+                    // set the campaign ID
+                    $order->setCampaignId($abandoned_cart_record->getCampaignID());
+                }
+            }
+
             // delete the AC cart record.
             $deleted_abandoned_cart = !empty($this->cart_session_id) && $api->deleteCartByID($store_id, $this->cart_session_id);
 

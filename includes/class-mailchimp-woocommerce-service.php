@@ -489,7 +489,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $cid = trim($id);
 
         // don't throw the error if it's not found.
-        if(!$this->api()->getCampaign($cid, false)) {
+        if (!$this->api()->getCampaign($cid, false)) {
             $cid = null;
         }
         

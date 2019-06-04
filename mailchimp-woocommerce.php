@@ -21,7 +21,7 @@
  * Author URI:        https://mailchimp.com
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
- * Text Domain:       mailchimp-woocommerce
+ * Text Domain:       mc-woocommerce
  * Domain Path:       /languages
  * Requires at least: 4.4
  * Tested up to: 5.1

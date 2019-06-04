@@ -38,7 +38,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
 
     <div class="box" >
         <label for="<?php echo $this->plugin_name; ?>-mailchimp-list-label">
-            <strong><?php esc_html_e('Sync audience with your store', $this->plugin_name); ?></strong>
+            <strong><?php esc_html_e('Sync audience with your store', 'mc-woocommerce'); ?></strong>
         </label>
         <div class="mailchimp-select-wrapper">
             <select name="<?php echo $this->plugin_name; ?>[mailchimp_list]" required <?php if($list_is_configured): ?> disabled <?php endif; ?>>
@@ -74,7 +74,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
                 <?= $list_is_configured ? 'disabled': '' ?>
                 value=1
                 <?= $enable_auto_subscribe ? 'checked' : ''?>>
-            <strong><?php esc_html_e('During initial sync, auto subscribe the existing customers.', $this->plugin_name); ?></strong>
+            <strong><?php esc_html_e('During initial sync, auto subscribe the existing customers.', 'mc-woocommerce'); ?></strong>
         </label>
     </div>
 
@@ -89,7 +89,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
 
         <div class="box box-half">
             <label for="<?php echo $this->plugin_name; ?>-newsletter-checkbox-label">
-                <h4><?php esc_html_e('Message for the opt-in checkbox', $this->plugin_name); ?></h4>
+                <h4><?php esc_html_e('Message for the opt-in checkbox', 'mc-woocommerce'); ?></h4>
                 <p><?php _e('Add text to go along with the other opt-in checkboxes. <br/>Customers can click a box at checkout to opt in to your newsletter.', 'mc-woocommerce');?> </p>
             </label>
         </div>
@@ -124,13 +124,13 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
         <div class="box box-half margin-large">
             <label for="<?php echo $this->plugin_name; ?>-newsletter-checkbox-action">
                 <h4><?php esc_html_e('Advanced Checkbox Settings', 'mc-woocommerce');?></h4>
-                <p><?= sprintf(/* translators: %s - Woocommerce Actions documentation URL. */wp_kses( __( 'To change the location of the opt-in <br/>checkbox at checkout, input one of the <a href=%s target=_blank>available WooCommerce form actions</a>.', 'mailchimp-woocommerce' ), array(  'a' => array( 'href' => array() ) ) ), esc_url( 'https://docs.woocommerce.com/wc-apidocs/hook-docs.html' ) ); ?></p>
+                <p><?= sprintf(/* translators: %s - Woocommerce Actions documentation URL. */wp_kses( __( 'To change the location of the opt-in <br/>checkbox at checkout, input one of the <a href=%s target=_blank>available WooCommerce form actions</a>.', 'mc-woocommerce' ), array(  'a' => array( 'href' => array() ) ) ), esc_url( 'https://docs.woocommerce.com/wc-apidocs/hook-docs.html' ) ); ?></p>
             </label>
         </div>
 
         <div class="box box-half margin-large">
             <input type="text" id="<?php echo $this->plugin_name; ?>-newsletter-checkbox-action" name="<?php echo $this->plugin_name; ?>[mailchimp_checkbox_action]" value="<?php echo isset($options['mailchimp_checkbox_action']) ? $options['mailchimp_checkbox_action'] : 'woocommerce_after_checkout_billing_form' ?>" />        
-            <p class="description"><?php esc_html_e('Enter a WooCommerce form action', $this->plugin_name); ?></p>
+            <p class="description"><?php esc_html_e('Enter a WooCommerce form action', 'mc-woocommerce'); ?></p>
         </div>
 
         <div class="box fieldset-header" >
@@ -145,7 +145,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
 
         <div class="box box-half" >
             <input type="text" id="<?php echo $this->plugin_name; ?>-user-tags" name="<?php echo $this->plugin_name; ?>[mailchimp_user_tags]" value="<?php echo isset($options['mailchimp_user_tags']) ? str_replace(',',', ',$options['mailchimp_user_tags']) : '' ?>" />
-            <p class="description"><?= __( 'Add a comma separated list of tags to add to the subscriber at Mailchimp', 'mailchimp-woocommerce' ); ?></p>
+            <p class="description"><?= __( 'Add a comma separated list of tags to add to the subscriber at Mailchimp', 'mc-woocommerce' ); ?></p>
         </div>
 
         <div class="box fieldset-header" >
@@ -156,13 +156,13 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
         <div class="box box-half">
             <label for="<?php echo $this->plugin_name; ?>[mailchimp_product_image_key]">
                 <h4><?php esc_html_e('Product Image Size', 'mc-woocommerce');?></h4>
-                <p><?= __( 'Define the product image size used by abandoned carts, order notifications, and product recommendations.', 'mailchimp-woocommerce' ); ?></p>
+                <p><?= __( 'Define the product image size used by abandoned carts, order notifications, and product recommendations.', 'mc-woocommerce' ); ?></p>
             </label>
         </div>
         
         <div class="box box-half" >
             <label for="<?php echo $this->plugin_name; ?>-mailchimp-product_image_key">
-                <span><?php esc_html_e('Size', $this->plugin_name); ?></span>
+                <span><?php esc_html_e('Size', 'mc-woocommerce'); ?></span>
             </label>
             <div class="mailchimp-select-wrapper">
                 <select name="<?php echo $this->plugin_name; ?>[mailchimp_product_image_key]">

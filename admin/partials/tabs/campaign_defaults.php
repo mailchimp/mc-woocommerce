@@ -21,28 +21,28 @@ if (!$handler->hasValidStoreInfo()) {
     </legend>
     <div class="box box-half">
         <label for="<?php echo $this->plugin_name; ?>-campaign-from-name-label"> 
-            <?php esc_html_e('Default from name', $this->plugin_name); ?>
+            <?php esc_html_e('Default from name', 'mc-woocommerce'); ?>
         </label>
         <input type="text" id="<?php echo $this->plugin_name; ?>-campaign-from-name-label" name="<?php echo $this->plugin_name; ?>[campaign_from_name]" value="<?php echo isset($options['campaign_from_name']) ? $options['campaign_from_name'] : '' ?>" required/>
     </div>
 
     <div class="box box-half">
         <label for="<?php echo $this->plugin_name; ?>-campaign-from-email-label">
-                <?php esc_html_e('Default from email', $this->plugin_name); ?>
+                <?php esc_html_e('Default from email', 'mc-woocommerce'); ?>
         </label>
         <input type="text" id="<?php echo $this->plugin_name; ?>-campaign-from-email-label" name="<?php echo $this->plugin_name; ?>[campaign_from_email]" value="<?php echo isset($options['campaign_from_email']) ? $options['campaign_from_email'] : get_option('admin_email') ?>" required/>
     </div>
 
     <div class="box box-half">
         <label for="<?php echo $this->plugin_name; ?>-campaign-subject-label">
-                <?php esc_html_e('Default subject', $this->plugin_name); ?>
+                <?php esc_html_e('Default subject', 'mc-woocommerce'); ?>
         </label>
         <input type="text" id="<?php echo $this->plugin_name; ?>-campaign-subject-label" name="<?php echo $this->plugin_name; ?>[campaign_subject]" value="<?php echo isset($options['campaign_subject']) ? $options['campaign_subject'] : get_option('blogname') ?>" required/>
     </div>
 
     <div class="box box-half">
         <label for="<?php echo $this->plugin_name; ?>-campaign-language-label">
-                <?php esc_html_e('Default language', $this->plugin_name); ?>
+                <?php esc_html_e('Default language', 'mc-woocommerce'); ?>
         </label>
         
         <div class="mailchimp-select-wrapper">
@@ -59,13 +59,13 @@ if (!$handler->hasValidStoreInfo()) {
 
     <div class="box">
         <label for="<?php echo $this->plugin_name; ?>-campaign-permission-reminder-label">
-                <?php esc_html_e('Permission reminder message', $this->plugin_name); ?>
+                <?php esc_html_e('Permission reminder message', 'mc-woocommerce'); ?>
         </label>
         <textarea
             rows="4"
             id="<?php echo $this->plugin_name; ?>-campaign-permission-reminder-label"
             name="<?php echo $this->plugin_name; ?>[campaign_permission_reminder]"
-            required><?php echo isset($options['campaign_permission_reminder']) ? $options['campaign_permission_reminder'] : sprintf(/* translators: %s - plugin name. */esc_html__( 'You were subscribed to the newsletter from %s', $this->plugin_name ),get_option('blogname'));?>
+            required><?php echo isset($options['campaign_permission_reminder']) ? $options['campaign_permission_reminder'] : sprintf(/* translators: %s - plugin name. */esc_html__( 'You were subscribed to the newsletter from %s', 'mc-woocommerce' ),get_option('blogname'));?>
         </textarea>
     </div>
 

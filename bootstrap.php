@@ -906,7 +906,7 @@ function mailchimp_woocommerce_check_if_http_worker_fails() {
     if (!mailchimp_should_use_local_curl_for_rest_api() && !function_exists('wp_remote_post')) {
         mailchimp_set_data('test.can.remote_post', false);
         mailchimp_set_data('test.can.remote_post.error', 'function "wp_remote_post" does not exist');
-        return __('function "wp_remote_post" does not exist', 'mailchimp-woocommerce');
+        return __('function "wp_remote_post" does not exist', 'mc-woocommerce');
     }
 
     // apply a blocking call to make sure we get the response back
@@ -920,7 +920,7 @@ function mailchimp_woocommerce_check_if_http_worker_fails() {
     } elseif (is_array($response) && isset($response['http_response']) && ($r = $response['http_response'])) {
         /** @var \WP_HTTP_Requests_Response $r */
         if ((int) $r->get_status() !== 200) {
-            $message = __('The REST API seems to be disabled on this wordpress site. Please enable to sync data.', 'mailchimp-woocommerce');
+            $message = __('The REST API seems to be disabled on this wordpress site. Please enable to sync data.', 'mc-woocommerce');
             mailchimp_set_data('test.can.remote_post', false);
             mailchimp_set_data('test.can.remote_post.error', $message);
             return $message;

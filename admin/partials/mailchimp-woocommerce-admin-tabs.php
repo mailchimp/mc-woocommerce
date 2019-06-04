@@ -80,27 +80,33 @@ if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue
     </svg>
     
     <p class="mc-woocommerce-settings-subtitles">
-        <?php if ($active_tab == 'api_key' ): ?>
-            Add Mailchimp for WooCommerce to build custom segments,<br/>send automations, and track purchase activity in Mailchimp
-        <?php endif; ?>
-
-        <?php if ($active_tab == 'store_info' && $has_valid_api_key): ?>
-            Please provide a bit of information<br/>about your WooCommerce store
-        <?php endif; ?>
-
-        <?php if ($active_tab == 'campaign_defaults' ): ?>
-            Please fill out the audience default<br/>campaign information
-        <?php endif; ?>
-
-        <?php if ($active_tab == 'newsletter_settings' ): ?>
-            Please apply your audience settings. If you don’t<br/>have an audience, you can choose to create one 
-        <?php endif; ?>
-<!-- 
-        <?php if ($active_tab == 'sync' && $show_sync_tab): ?>
-        <?php endif; ?>
-
-        <?php if ($active_tab == 'logs' && $show_sync_tab): ?>
-        <?php endif; ?> -->
+        <?php
+        
+        $allowed_html = array(
+			'br' => array()
+        );
+        
+        if ($active_tab == 'api_key' ) {
+            wp_kses(_e('Add Mailchimp for WooCommerce to build custom segments,<br/>send automations, and track purchase activity in Mailchimp', 'mc-woocommerce'), $allowed_html);
+        }
+ 
+        if ($active_tab == 'store_info' && $has_valid_api_key) {
+            wp_kses(_e('Please provide a bit of information<br/>about your WooCommerce store', 'mc-woocommerce'), $allowed_html);
+        }
+ 
+        if ($active_tab == 'campaign_defaults' ) {
+            wp_kses(_e('Please fill out the audience default<br/>campaign information', 'mc-woocommerce'), $allowed_html);
+        }
+ 
+        if ($active_tab == 'newsletter_settings' ) {
+            wp_kses(_e('Please apply your audience settings. If you don’t<br/>have an audience, you can choose to create one', 'mc-woocommerce'), $allowed_html);
+        }
+        if ($active_tab == 'sync' && $show_sync_tab) {
+        }
+ 
+        if ($active_tab == 'logs' && $show_sync_tab) {
+        }
+        ?>
     </p>
     <?php if($show_sync_tab): ?>  
         <div class="nav-tab-wrapper">
@@ -123,7 +129,7 @@ if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue
     <?php else: ?>
         <div class="nav-wizard-wrapper">
             <a href="?page=mailchimp-woocommerce&tab=api_key" class="wizard-tab <?php echo $active_tab == 'api_key' ? 'wizard-tab-active' : ''; ?>">
-                <div class="wizard-tab-tooltip wizard-tab-tooltip-api-key ">Connect Store
+                <div class="wizard-tab-tooltip wizard-tab-tooltip-api-key "><?= esc_html_e('Connect', 'mc-woocommerce');?>
                     <svg width="29" height="29" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect x="14.498" width="20" height="20" transform="rotate(45 14.498 0)" fill="white"/>
                     </svg>
@@ -132,7 +138,7 @@ if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue
             
             <?php if ($has_valid_api_key) : ?>    
                 <a href="?page=mailchimp-woocommerce&tab=store_info" class="wizard-tab <?php echo $active_tab == 'store_info' ? 'wizard-tab-active' : ''; ?>">
-                    <div class="wizard-tab-tooltip wizard-tab-tooltip-store-info ">Store Settings
+                    <div class="wizard-tab-tooltip wizard-tab-tooltip-store-info "><?= esc_html_e('Store Settings', 'mc-woocommerce');?>
                         <svg width="29" height="29" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect x="14.498" width="20" height="20" transform="rotate(45 14.498 0)" fill="white"/>
                         </svg>
@@ -144,7 +150,7 @@ if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue
 
             <?php if ($handler->hasValidStoreInfo() && $show_campaign_defaults) : ?>  
                 <a href="?page=mailchimp-woocommerce&tab=campaign_defaults" class="wizard-tab <?php echo $active_tab == 'campaign_defaults' ? 'wizard-tab-active' : ''; ?>">
-                    <div class="wizard-tab-tooltip wizard-tab-tooltip-store-info ">Audience Defaults
+                    <div class="wizard-tab-tooltip wizard-tab-tooltip-store-info "><?= esc_html_e('Audience Defaults', 'mc-woocommerce');?>
                         <svg width="29" height="29" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect x="14.498" width="20" height="20" transform="rotate(45 14.498 0)" fill="white"/>
                         </svg>
@@ -156,7 +162,7 @@ if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue
 
             <?php if ($handler->hasValidCampaignDefaults()) : ?>  
                 <a href="?page=mailchimp-woocommerce&tab=newsletter_settings" class="wizard-tab <?php echo $active_tab == 'newsletter_settings' ? 'wizard-tab-active' : ''; ?>">
-                    <div class="wizard-tab-tooltip wizard-tab-tooltip-store-info ">Audience Settings
+                    <div class="wizard-tab-tooltip wizard-tab-tooltip-store-info "><?= esc_html_e('Audience Settings', 'mc-woocommerce');?>
                         <svg width="29" height="29" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect x="14.498" width="20" height="20" transform="rotate(45 14.498 0)" fill="white"/>
                         </svg>

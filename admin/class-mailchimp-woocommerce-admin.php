@@ -865,7 +865,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 									// only call status again if sync is running.
 									setTimeout(function() {
 										call_mailchimp_for_stats();
-									}, 1000);
+									}, 10000);
 									jQuery('#mailchimp_last_updated').next('.spinner').css('visibility', 'hidden');
 								}
 								else {

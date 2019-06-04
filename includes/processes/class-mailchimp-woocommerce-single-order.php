@@ -111,7 +111,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                 // pull the cart info from Mailchimp
                 if (($abandoned_cart_record = $api->getCart($store_id, $this->cart_session_id))) {
                     // set the campaign ID
-                    $order->setCampaignId($abandoned_cart_record->getCampaignID());
+                    $order->setCampaignId($this->campaign_id = $abandoned_cart_record->getCampaignID());
                 }
             }
 

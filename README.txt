@@ -64,7 +64,7 @@ Refer to the Wordpress Codex for more information about [Multisite Network Admin
 == Changelog ==
 = 2.1.17 =
 * Re add resync button to sync tab, after sync finishes
-* Renamed 'merge_vas' to 'merge_fields' as per new Mailchimp naming convention
+* Renamed 'merge_vars' to 'merge_fields' as per new Mailchimp naming convention
 * fixes issues with cloudflare
 * honors woo currency settings 
 * fix for failing custom coupon type

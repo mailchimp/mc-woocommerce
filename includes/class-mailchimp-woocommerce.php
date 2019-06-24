@@ -332,17 +332,17 @@ class MailChimp_WooCommerce
 
 			// save post hooks
 			$this->loader->add_action('save_post', $service, 'handlePostSaved', 10, 3);
-            $this->loader->add_action('wp_trash_post', $service, 'handlePostTrashed', 10);
-            $this->loader->add_action('untrashed_post', $service, 'handlePostRestored', 10);
+            $this->loader->add_action('wp_trash_post', $service, 'handlePostTrashed', 10, 1);
+            $this->loader->add_action('untrashed_post', $service, 'handlePostRestored', 10, 1);
 
 			//coupons
-            $this->loader->add_action('woocommerce_new_coupon', $service, 'handleNewCoupon', 10);
+            $this->loader->add_action('woocommerce_new_coupon', $service, 'handleNewCoupon', 10, 1);
             $this->loader->add_action('woocommerce_coupon_options_save', $service, 'handleCouponSaved', 10, 2);
             $this->loader->add_action('woocommerce_api_create_coupon', $service, 'handleCouponSaved', 9, 2);
 
-            $this->loader->add_action('woocommerce_delete_coupon', $service, 'handleCouponTrashed', 10);
-            $this->loader->add_action('woocommerce_trash_coupon', $service, 'handleCouponTrashed', 10);
-            $this->loader->add_action('woocommerce_api_delete_coupon', $service, 'handleCouponTrashed', 9);
+            $this->loader->add_action('woocommerce_delete_coupon', $service, 'handlePostTrashed', 10, 1);
+            $this->loader->add_action('woocommerce_trash_coupon', $service, 'handlePostTrashed', 10, 1);
+            $this->loader->add_action('woocommerce_rest_delete_shop_coupon_object', $service, 'handleAPICouponTrashed', 10, 3);
 
 			// handle the user registration hook
 			$this->loader->add_action('user_register', $service, 'handleUserRegistration');

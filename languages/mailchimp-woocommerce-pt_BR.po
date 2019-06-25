@@ -1,10 +1,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mc-woocommerce-"
-"pedro\n"
-"POT-Creation-Date: 2019-05-02T19:05:35+00:00\n"
-"PO-Revision-Date: 2019-05-02 21:07+0200\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mc-woocommerce\n"
+"POT-Creation-Date: 2019-05-21T12:55:04+00:00\n"
+"PO-Revision-Date: 2019-05-21 14:56+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: pt_BR\n"
@@ -19,6 +18,10 @@ msgstr ""
 msgid "Mailchimp for WooCommerce"
 msgstr "Mailchimp para Woocommerce"
 
+#. Plugin URI of the plugin
+msgid "https://mailchimp.com/connect-your-store/"
+msgstr ""
+
 #. Description of the plugin
 msgid ""
 "Connects WooCommerce to Mailchimp to sync your store data, send targeted "
@@ -30,6 +33,10 @@ msgstr ""
 #. Author of the plugin
 msgid "Mailchimp"
 msgstr "Mailchimp"
+
+#. Author URI of the plugin
+msgid "https://mailchimp.com"
+msgstr ""
 
 #: includes/class-mailchimp-woocommerce-deactivation-survey.php:179
 msgid "Please select an option"
@@ -137,13 +144,13 @@ msgid "User ID"
 msgstr "ID do Usuário"
 
 #: includes/class-mailchimp-woocommerce-newsletter.php:43
-#: admin/class-mailchimp-woocommerce-admin.php:507
+#: admin/class-mailchimp-woocommerce-admin.php:564
 #: admin/partials/tabs/newsletter_settings.php:94
 msgid "Subscribe to our newsletter"
 msgstr "Inscreva-se em nossa newsletter"
 
-#: includes/class-mailchimp-woocommerce-rest-api.php:273
-#: admin/partials/tabs/store_sync.php:61
+#: includes/class-mailchimp-woocommerce-rest-api.php:274
+#: admin/partials/tabs/store_sync.php:66
 msgid "D, M j, Y g:i A"
 msgstr "l, d\\/m\\/Y H:i"
 
@@ -155,7 +162,7 @@ msgstr "Mailchimp para Woocommerce"
 msgid "Settings"
 msgstr "Configurações"
 
-#: admin/class-mailchimp-woocommerce-admin.php:427
+#: admin/class-mailchimp-woocommerce-admin.php:484
 msgid ""
 "As part of the Mailchimp Terms of Use, we require a contact email and a "
 "physical mailing address."
@@ -163,7 +170,7 @@ msgstr ""
 "Como parte dos Termos de Uso do Mailchimp, são mandatórios um email de "
 "contato e um endereço físico de correspondência."
 
-#: admin/class-mailchimp-woocommerce-admin.php:435
+#: admin/class-mailchimp-woocommerce-admin.php:492
 msgid ""
 "As part of the Mailchimp Terms of Use, we require a valid phone number for "
 "your store."
@@ -171,31 +178,31 @@ msgstr ""
 "Como parte dos Termos de Uso do Mailchimp, é mandatório um número de "
 "telefone válido para sua Loja."
 
-#: admin/class-mailchimp-woocommerce-admin.php:443
+#: admin/class-mailchimp-woocommerce-admin.php:500
 msgid "Mailchimp for WooCommerce requires a Store Name to connect your store."
 msgstr ""
 "Mailchimp para Woocommerce requer um Nome de Loja para conectar sua Loja."
 
 #. translators: %s - plugin name.
-#: admin/class-mailchimp-woocommerce-admin.php:461
+#: admin/class-mailchimp-woocommerce-admin.php:518
 #: admin/partials/tabs/campaign_defaults.php:95
 msgid "You were subscribed to the newsletter from %s"
 msgstr "Você foi inscrito na newsletter de %s"
 
-#: admin/class-mailchimp-woocommerce-admin.php:616
+#: admin/class-mailchimp-woocommerce-admin.php:673
 msgid "You must supply your Mailchimp API key to pull the audiences."
 msgstr ""
 "É necessário fornecer a sua Mailchimp API Key para recuperar as audiências."
 
-#: admin/class-mailchimp-woocommerce-admin.php:1003
+#: admin/class-mailchimp-woocommerce-admin.php:1067
 msgid "Starting the sync process..."
 msgstr "Iniciando a Sincronização…"
 
-#: admin/class-mailchimp-woocommerce-admin.php:1005
+#: admin/class-mailchimp-woocommerce-admin.php:1069
 msgid "Please hang tight while we work our mojo."
 msgstr "Por favor aguarde."
 
-#: admin/class-mailchimp-woocommerce-admin.php:1007
+#: admin/class-mailchimp-woocommerce-admin.php:1071
 msgid ""
 "Sometimes the sync can take a while, especially on sites with lots of orders "
 "and/or products."
@@ -483,31 +490,31 @@ msgstr "Sincronização inicial:"
 msgid "In Progress"
 msgstr "Em progresso"
 
-#: admin/partials/tabs/store_sync.php:61
+#: admin/partials/tabs/store_sync.php:63
 msgid "Last Updated:"
 msgstr "Última atualização:"
 
-#: admin/partials/tabs/store_sync.php:64
+#: admin/partials/tabs/store_sync.php:72
 msgid "Account Connected:"
 msgstr "Conta conectada:"
 
-#: admin/partials/tabs/store_sync.php:65
+#: admin/partials/tabs/store_sync.php:73
 msgid "Audience Connected:"
 msgstr "Audiência conectada:"
 
-#: admin/partials/tabs/store_sync.php:66
+#: admin/partials/tabs/store_sync.php:74
 msgid "Products Synced:"
 msgstr "Produtos sincronizados:"
 
-#: admin/partials/tabs/store_sync.php:67
+#: admin/partials/tabs/store_sync.php:75
 msgid "Orders Synced:"
 msgstr "Pedidos sincronizados:"
 
-#: admin/partials/tabs/store_sync.php:70
+#: admin/partials/tabs/store_sync.php:78
 msgid "Advanced"
 msgstr "Avançado"
 
-#: admin/partials/tabs/store_sync.php:72
+#: admin/partials/tabs/store_sync.php:80
 msgid ""
 "You can resync your audience at any time without losing any of your e-"
 "commerce data."
@@ -515,7 +522,7 @@ msgstr ""
 "Você pode ressincronizar sua Audiência a qualquer momento, sem perder nenhum "
 "de seus dados."
 
-#: admin/partials/tabs/store_sync.php:74
+#: admin/partials/tabs/store_sync.php:82
 msgid "Resync"
 msgstr "Ressincronizar"
 
@@ -620,20 +627,16 @@ msgstr "Língua"
 msgid "Currency Code"
 msgstr "Código da Moeda"
 
-#: admin/partials/tabs/store_info.php:186
-msgid "Currency is currently deprecated. Please select one from the list above"
-msgstr "Moeda obsoleta. Selecione uma da lista acima"
-
-#: admin/partials/tabs/store_info.php:192
-msgid "deprecated"
-msgstr "obsoleta"
-
-#: admin/partials/tabs/store_info.php:199
+#: admin/partials/tabs/store_info.php:189
 msgid "Currency"
 msgstr "Moeda"
 
-#: admin/partials/tabs/store_info.php:205
-#: admin/partials/tabs/store_info.php:216
+#: admin/partials/tabs/store_info.php:189
+msgid "Retrieved from Woocommerce Settings"
+msgstr "Configuração do Woocommerce"
+
+#: admin/partials/tabs/store_info.php:195
+#: admin/partials/tabs/store_info.php:206
 msgid "Timezone"
 msgstr "Fuso Horário"
 
@@ -711,7 +714,7 @@ msgstr ""
 "clientes de acordo com sua <a href=%s target=_blank>Política de Privacidade</"
 "a>."
 
-#: bootstrap.php:499
+#: bootstrap.php:510
 msgid ""
 "The MailChimp For WooCommerce plugin requires the <a href=\"http://wordpress."
 "org/extend/plugins/woocommerce/\">WooCommerce</a> plugin to be active!"
@@ -719,17 +722,24 @@ msgstr ""
 "O plugin Mailchimp para Woocommerce requer que o plugin <a href=“http://"
 "wordpress.org/extend/plugins/woocommerce/“>WooCommerce</a> esteja ativo!"
 
-#: bootstrap.php:896
+#: bootstrap.php:907
 msgid "function \"wp_remote_post\" does not exist"
 msgstr "a funcão “wp_remote_post” não existe"
 
-#: bootstrap.php:910
+#: bootstrap.php:921
 msgid ""
 "The REST API seems to be disabled on this wordpress site. Please enable to "
 "sync data."
 msgstr ""
 "A REST API aparenta ester desabilitada nest site WordPress. For favor, "
 "habilite para sincronizar dados."
+
+#~ msgid ""
+#~ "Currency is currently deprecated. Please select one from the list above"
+#~ msgstr "Moeda obsoleta. Selecione uma da lista acima"
+
+#~ msgid "deprecated"
+#~ msgstr "obsoleta"
 
 #~ msgid "User Tags"
 #~ msgstr "Etiquetas de Usuário"

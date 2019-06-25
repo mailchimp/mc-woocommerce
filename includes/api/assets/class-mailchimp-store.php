@@ -169,13 +169,15 @@ class MailChimp_WooCommerce_Store
      * @param null $currency_code
      * @return MailChimp_WooCommerce_Store;
      */
-    public function setCurrencyCode($currency_code)
-    {
-        $this->currency_code = $currency_code;
-
+    public function setCurrencyCode($code)
+    {   
+        if(!isset($code)){
+            $code = get_woocommerce_currency();
+        }
+        $this->currency_code = $code;
         return $this;
     }
-
+    
     /**
      * @return null
      */
@@ -188,9 +190,13 @@ class MailChimp_WooCommerce_Store
      * @param null $money_format
      * @return MailChimp_WooCommerce_Store;
      */
-    public function setMoneyFormat($money_format)
-    {
-        $this->money_format = $money_format;
+    public function setMoneyFormat($code)
+    {   
+        if(!isset($code)){
+            $code = get_woocommerce_currency();
+        }
+        
+        $this->money_format = html_entity_decode(get_woocommerce_currency_symbol($code));
 
         return $this;
     }

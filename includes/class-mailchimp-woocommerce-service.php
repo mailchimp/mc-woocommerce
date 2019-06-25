@@ -85,9 +85,6 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     {
         if (!mailchimp_is_configured()) return;
 
-        // tell the system the order was brand new - and we don't need to process the order update hook.
-        set_site_transient( "mailchimp_order_created_{$order_id}", true, 20);
-
         // see if we have a session id and a campaign id, also only do this when this user is not the admin.
         $campaign_id = $this->getCampaignTrackingID();
 
@@ -100,40 +97,47 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         // remove this record from the db.
         $this->clearCartData();
 
-        // queue up the single order to be processed.
-        $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $campaign_id, $landing_site);
-        mailchimp_handle_or_queue($handler, 60);
+        return array (
+            'campaign_id' => $campaign_id,
+            'landing_site' => $landing_site
+        );
     }
 
     /**
      * @param $order_id
      * @param bool $is_admin
      */
-    public function handleOrderStatusChanged($order_id, $is_admin = false)
+    public function handleOrderStatusChanged($order_id, $old_status, $new_status)
     {
         if (!mailchimp_is_configured()) return;
 
-        // if we got a new order hook first - just skip this for now during the 20 second window.
-        if (get_site_transient("mailchimp_order_created_{$order_id}") === true) {
-            return;
-        }
+        $newOrder = false;
 
-        // queue up the single order to be processed.
-        $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, null, null);
-        $handler->is_update = true;
-        $handler->is_admin_save = $is_admin;
-        mailchimp_handle_or_queue($handler, 90);
+        if ("pending" == $old_status && "processing" == $new_status) {
+            $tracking = $this->onNewOrder($order_id);
+            $newOrder = true;
+        }
+        
+        $this->onOrderSave($order_id, $tracking, $newOrder);
     }
 
     /**
      * @param $order_id
+     * @param $tracking
      */
-    public function onOrderRefunded($order_id)
+    public function onOrderSave($order_id, $tracking = null, $newOrder = null)
     {
         if (!mailchimp_is_configured()) return;
 
-        $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, null, null);
-        mailchimp_handle_or_queue($handler);
+        // queue up the single order to be processed.
+        $campaign_id = isset($tracking) && isset($tracking['campaign_id']) ? $tracking['campaign_id'] : null;
+        $landing_site = isset($tracking) && isset($tracking['landing_site']) ? $tracking['landing_site'] : null;
+
+        $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $campaign_id, $landing_site);
+        $handler->is_update = $newOrder ? !$newOrder : null;
+        $handler->is_admin_save = is_admin();
+        
+        mailchimp_handle_or_queue($handler, 90);
     }
 
     /**
@@ -265,7 +269,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             if ('product' == $post->post_type) {
                 mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
             } elseif ('shop_order' == $post->post_type) {
-                $this->handleOrderStatusChanged($post_id, is_admin());
+                $this->onOrderSave($post_id);
             }
         }
     }
@@ -478,9 +482,14 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function setCampaignTrackingID($id, $cookie_duration)
     {
+        if (!mailchimp_is_configured()) {
+            return $this;
+        }
+
         $cid = trim($id);
 
-        if(!$this->api()->getCampaign($cid)) {
+        // don't throw the error if it's not found.
+        if (!$this->api()->getCampaign($cid, false)) {
             $cid = null;
         }
         

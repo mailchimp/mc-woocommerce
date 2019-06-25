@@ -165,6 +165,10 @@ class MailChimp_WooCommerce_Rest_Queue
         }
 
         return (int) preg_replace_callback('/(\-?\d+)(.?)/', function ($m) {
+            if (!isset($m[2]) || $m[2] == '') {
+                $m[1] = '128';
+                $m[2] = 'M';
+            }
             return $m[1] * pow(1024, strpos('BKMG', $m[2]));
         }, strtoupper($memory_limit));
     }
@@ -236,11 +240,11 @@ class MailChimp_WooCommerce_Rest_Queue
      */
     protected function again()
     {
+        add_filter( 'https_local_ssl_verify', '__return_false', 1 );
         $url = esc_url_raw(rest_url('mailchimp-for-woocommerce/v1/queue/work'));
         $params = array(
             'timeout'   => 0.01,
             'blocking'  => false,
-            'sslverify' => apply_filters('https_local_ssl_verify', false),
         );
         mailchimp_woocommerce_rest_api_get($url, $params, mailchimp_get_http_local_json_header());
     }

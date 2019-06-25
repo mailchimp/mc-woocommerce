@@ -103,6 +103,18 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
             // will be the same as the customer id. an md5'd hash of a lowercased email.
             $this->cart_session_id = $order->getCustomer()->getId();
 
+            // see if we have a campaign ID already from the order transformer / cookie.
+            $campaign_id = $order->getCampaignId();
+
+            // if the campaign ID is empty, and we have a cart session id
+            if (empty($campaign_id) && !empty($this->cart_session_id)) {
+                // pull the cart info from Mailchimp
+                if (($abandoned_cart_record = $api->getCart($store_id, $this->cart_session_id))) {
+                    // set the campaign ID
+                    $order->setCampaignId($this->campaign_id = $abandoned_cart_record->getCampaignID());
+                }
+            }
+
             // delete the AC cart record.
             $deleted_abandoned_cart = !empty($this->cart_session_id) && $api->deleteCartByID($store_id, $this->cart_session_id);
 
@@ -188,23 +200,23 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
             if ($order->getCustomer()->requiresDoubleOptIn() && $order->getCustomer()->getOriginalSubscriberStatus()) {
                 try {
                     $list_id = mailchimp_get_list_id();
-                    $merge_vars = $order->getCustomer()->getMergeVars();
+                    $merge_fields = $order->getCustomer()->getMergeFields();
                     $email = $order->getCustomer()->getEmailAddress();
 
                     try {
                         $member = $api->member($list_id, $email);
                         if ($member['status'] === 'transactional') {
 
-                            $api->update($list_id, $email, 'pending', $merge_vars);
+                            $api->update($list_id, $email, 'pending', $merge_fields);
                             mailchimp_tell_system_about_user_submit($email, mailchimp_get_subscriber_status_options('pending'), 60);
-                            mailchimp_log('double_opt_in', "Updated {$email} Using Double Opt In - previous status was '{$member['status']}'", $merge_vars);
+                            mailchimp_log('double_opt_in', "Updated {$email} Using Double Opt In - previous status was '{$member['status']}'", $merge_fields);
                         }
                     } catch (\Exception $e) {
                         // if the error code is 404 - need to subscribe them becausce it means they were not on the list.
                         if ($e->getCode() == 404) {
-                            $api->subscribe($list_id, $email, false, $merge_vars);
+                            $api->subscribe($list_id, $email, false, $merge_fields);
                             mailchimp_tell_system_about_user_submit($email, mailchimp_get_subscriber_status_options(false), 60);
-                            mailchimp_log('double_opt_in', "Subscribed {$email} Using Double Opt In", $merge_vars);
+                            mailchimp_log('double_opt_in', "Subscribed {$email} Using Double Opt In", $merge_fields);
                         } else {
                             mailchimp_error('double_opt_in.update', $e->getMessage());
                         }

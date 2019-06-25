@@ -32,23 +32,23 @@ if (!empty($requested_log_file) && isset($logs[sanitize_title($requested_log_fil
 $handle = !empty($viewed_log) ? substr($viewed_log, 0, strlen($viewed_log) > 37 ? strlen($viewed_log) - 37 : strlen($viewed_log) - 4) : '';
 ?>
 
-<h2 style="padding-top: 1em;"><?php esc_html_e('Logging Preference', 'mailchimp-woocommerce');?></h2>
+<h2 style="padding-top: 1em;"><?php esc_html_e('Logging Preference', 'mc-woocommerce');?></h2>
 <p>
     <?php esc_html_e('Advanced troubleshooting can be conducted with the logging capability turned on.
 By default, it’s set to “none” and you may toggle to either “standard” or “debug” as needed.
 With standard logging, you can see basic information about the data submission to Mailchimp including any errors.
-“Debug” gives a much deeper insight that is useful to share with support if problems arise.', 'mailchimp-woocommerce');
+“Debug” gives a much deeper insight that is useful to share with support if problems arise.', 'mc-woocommerce');
     ?>
 </p>
 <fieldset>
     <legend class="screen-reader-text">
-        <span><?php esc_html_e('Logging Preference', 'mailchimp-woocommerce');?></span>
+        <span><?php esc_html_e('Logging Preference', 'mc-woocommerce');?></span>
     </legend>
     <label for="<?php echo $this->plugin_name; ?>-logging">
         <select name="<?php echo $this->plugin_name; ?>[mailchimp_logging]" style="width:30%" required>
             <?php $logging_preference = mailchimp_environment_variables()->logging; ?>
             <?php
-            foreach(array('none' => esc_html__('None', 'mailchimp-woocommerce'), 'debug' => esc_html__('Debug', 'mailchimp-woocommerce'), 'standard' => esc_html__('Standard', 'mailchimp-woocommerce')) as $log_value => $log_label) {
+            foreach(array('none' => esc_html__('None', 'mc-woocommerce'), 'debug' => esc_html__('Debug', 'mc-woocommerce'), 'standard' => esc_html__('Standard', 'mc-woocommerce')) as $log_value => $log_label) {
                 echo '<option value="'.esc_attr($log_value).'" '.selected($log_value === $logging_preference, true, false ) . '>' . esc_html($log_label) . '</option>';
             }
             ?>

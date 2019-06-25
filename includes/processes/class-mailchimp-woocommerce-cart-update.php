@@ -123,7 +123,7 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
             }
 
             $cart->setCheckoutUrl($checkout_url);
-            $cart->setCurrencyCode(isset($options['store_currency_code']) ? $options['store_currency_code'] : 'USD');
+            $cart->setCurrencyCode();
 
             $cart->setCustomer($customer);
 

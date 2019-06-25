@@ -4,7 +4,7 @@ Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.3
 Tested up to: 5.1
-Stable tag: 2.1.16
+Stable tag: 2.1.17
 Requires PHP: 7.0
 WC tested up to: 3.5.4
 License: GPLv2 or later
@@ -62,6 +62,12 @@ The Mailchimp for WooCommerce supports Wordpress Multi Sites and below are a few
 - Deleting removes the connection between Mailchimp and WooCommerce, and uninstalls the plugin from your site.
 Refer to the Wordpress Codex for more information about [Multisite Network Administration](https://codex.wordpress.org/Multisite_Network_Administration)
 == Changelog ==
+= 2.1.17 =
+* Re add resync button to sync tab, after sync finishes
+* Renamed 'merge_vars' to 'merge_fields' as per new Mailchimp naming convention
+* fixes issues with cloudflare
+* honors woo currency settings 
+* fix for failing custom coupon type
 = 2.1.16 =
 * support for HTML in opt-in checkbox
 * support for language translation 

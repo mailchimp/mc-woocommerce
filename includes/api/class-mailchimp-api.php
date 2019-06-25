@@ -13,7 +13,7 @@ class MailChimp_WooCommerce_MailChimpApi
     protected static $instance = null;
 
     /**
-     * @return null
+     * @return null|MailChimp_WooCommerce_MailChimpApi
      */
     public static function getInstance()
     {
@@ -528,20 +528,31 @@ class MailChimp_WooCommerce_MailChimpApi
 
     /**
      * @param $campaign_id
-     * @return array|bool
+     * @param bool $throw_if_invalid
+     * @return array|bool|mixed|object|null
+     * @throws Exception
      */
-    public function getCampaign($campaign_id)
+    public function getCampaign($campaign_id, $throw_if_invalid = true)
     {
+        // if we found the campaign ID already and it's been stored in the cache, return it from the cache instead.
+        if (($data = get_site_transient('mailchimp-woocommerce-has-campaign-id-'.$campaign_id))) {
+            return $data;
+        }
         if (get_site_transient('mailchimp-woocommerce-no-campaign-id-'.$campaign_id)) {
             return false;
         }
         try {
             $data = $this->get("campaigns/$campaign_id");
             delete_site_transient('mailchimp-woocommerce-no-campaign-id-'.$campaign_id);
+            set_site_transient('mailchimp-woocommerce-has-campaign-id-'.$campaign_id, $data, 60 * 30);
             return $data;
         } catch (\Exception $e) {
             mailchimp_log('campaign_get.error', 'No campaign with provided ID: '. $campaign_id. ' :: '. $e->getMessage(). ' :: in '.$e->getFile().' :: on '.$e->getLine());
             set_site_transient('mailchimp-woocommerce-no-campaign-id-'.$campaign_id, true, 60 * 30);
+
+            if (!$throw_if_invalid) {
+                return false;
+            }
             throw $e;
         }
     }

@@ -1037,8 +1037,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		if (isset($data['store_phone']) && $data['store_phone']) {
 			$address->setPhone($data['store_phone']);
 		}
-
-		$address->setCountryCode(WC_Countries::get_base_country());
+		
+		$woo_countries = new WC_Countries();
+		$address->setCountryCode($woo_countries->get_base_country());
 
 		return $address;
 	}

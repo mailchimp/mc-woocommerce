@@ -32,35 +32,35 @@ if (!$handler->hasValidApiKey()) {
         <label for="<?php echo $this->plugin_name; ?>-store-address-label">
                 <span> <?php esc_html_e('Street address', 'mc-woocommerce'); ?></span>
         </label>
-        <input required type="text" id="<?php echo $this->plugin_name; ?>-store-address-label" name="<?php echo $this->plugin_name; ?>[store_street]" value="<?php echo isset($options['store_street']) ? $options['store_street'] : '' ?>" />
+        <input required type="text" id="<?php echo $this->plugin_name; ?>-store-address-label" name="<?php echo $this->plugin_name; ?>[store_street]" value="<?php echo isset($options['store_street']) ? $options['store_street'] : WC()->countries->get_base_address(); ?>" />
     </div>
 
     <div class="box box-half" >
         <label for="<?php echo $this->plugin_name; ?>-store-city-label">
                 <span> <?php esc_html_e('City', 'mc-woocommerce'); ?></span>
         </label>
-        <input required type="text" id="<?php echo $this->plugin_name; ?>-store-city-label" name="<?php echo $this->plugin_name; ?>[store_city]" value="<?php echo isset($options['store_city']) ? $options['store_city'] : '' ?>" />
+        <input required type="text" id="<?php echo $this->plugin_name; ?>-store-city-label" name="<?php echo $this->plugin_name; ?>[store_city]" value="<?php echo isset($options['store_city']) ? $options['store_city'] : WC()->countries->get_base_city(); ?>" />
     </div>
 
     <div class="box box-half" >
         <label for="<?php echo $this->plugin_name; ?>-store-state-label">
                 <span> <?php esc_html_e('State', 'mc-woocommerce'); ?></span>
         </label>
-        <input required type="text" id="<?php echo $this->plugin_name; ?>-store-state-label" name="<?php echo $this->plugin_name; ?>[store_state]" value="<?php echo isset($options['store_state']) ? $options['store_state'] : '' ?>" />
+        <input required type="text" id="<?php echo $this->plugin_name; ?>-store-state-label" name="<?php echo $this->plugin_name; ?>[store_state]" value="<?php echo isset($options['store_state']) ? $options['store_state'] : WC()->countries->get_base_state(); ?>" />
     </div>
 
     <div class="box box-half" >
         <label for="<?php echo $this->plugin_name; ?>-store-postal-code-label">
                 <span> <?php esc_html_e('Postal Code', 'mc-woocommerce'); ?></span>
         </label>
-        <input required type="text" id="<?php echo $this->plugin_name; ?>-store-postal-code-label" name="<?php echo $this->plugin_name; ?>[store_postal_code]" value="<?php echo isset($options['store_postal_code']) ? $options['store_postal_code'] : '' ?>" />
+        <input required type="text" id="<?php echo $this->plugin_name; ?>-store-postal-code-label" name="<?php echo $this->plugin_name; ?>[store_postal_code]" value="<?php echo isset($options['store_postal_code']) ? $options['store_postal_code'] : WC()->countries->get_base_postcode(); ?>" />
     </div>
 
     <div class="box box-half" >
         <label for="<?php echo $this->plugin_name; ?>-store-country-label">
                 <span> <?php esc_html_e('Country', 'mc-woocommerce'); ?></span>
         </label>
-        <input required type="text" id="<?php echo $this->plugin_name; ?>-store-country-label" name="<?php echo $this->plugin_name; ?>[store_country]" value="<?php echo isset($options['store_country']) ? $options['store_country'] : 'US' ?>" />
+        <input required type="text" id="<?php echo $this->plugin_name; ?>-store-country-label" name="<?php echo $this->plugin_name; ?>[store_country]" value="<?php echo isset($options['store_country']) ? $options['store_country'] : WC()->countries->get_base_country(); ?>" />
     </div>
 
     <div class="box box-half" >
@@ -82,7 +82,8 @@ if (!$handler->hasValidApiKey()) {
         </label>
         <div class="mailchimp-select-wrapper">
             <select name="<?php echo $this->plugin_name; ?>[store_locale]" required>
-                <?php $selected_locale = isset($options['store_locale']) && !empty($options['store_locale']) ? $options['store_locale'] : 'en'; ?>
+                <option disabled selected value="<?= __('','mc-woocommerce')?>"><?= __("Select store's locale",'mc-woocommerce')?></option>
+                <?php $selected_locale = isset($options['store_locale']) && !empty($options['store_locale']) ? $options['store_locale'] : ''; ?>
                 <?php
                 foreach(MailChimp_Api_Locales::simple() as $locale_key => $local_value) {
                     echo '<option value="' . esc_attr( $locale_key ) . '" ' . selected($locale_key === $selected_locale, true, false ) . '>' . esc_html( $local_value ) . '</option>';
@@ -106,7 +107,8 @@ if (!$handler->hasValidApiKey()) {
         </label>
         <div class="mailchimp-select-wrapper">
             <select name="<?php echo $this->plugin_name; ?>[store_timezone]" required>
-                <?php $selected_timezone = isset($options['store_timezone']) && !empty($options['store_timezone']) ? $options['store_timezone'] : 'America/New_York'; ?>
+                <option disabled selected value="<?= __('','mc-woocommerce')?>"><?= __("Select store's timezone",'mc-woocommerce')?></option>
+                <?php $selected_timezone = isset($options['store_timezone']) && !empty($options['store_timezone']) ? $options['store_timezone'] : get_option('timezone_string'); ?>
                 <?php
                     foreach(mailchimp_get_timezone_list() as $t) {
                     echo '<option value="' . esc_attr( $t['zone'] ) . '" ' . selected($t['zone'] === $selected_timezone, true, false ) . '>' . esc_html( $t['diff_from_GMT'] . ' - ' . $t['zone'] ) . '</option>';

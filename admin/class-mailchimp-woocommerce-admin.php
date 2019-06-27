@@ -407,7 +407,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
             $data['active_tab'] = 'store_info';
 
-			return array();
+			return $input;
 		}
 
 		$this->setData('validation.store_info', true);

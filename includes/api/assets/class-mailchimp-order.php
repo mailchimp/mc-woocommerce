@@ -212,8 +212,9 @@ class MailChimp_WooCommerce_Order
     {
         $api = MailChimp_WooCommerce_MailChimpApi::getInstance();
         $cid = trim($id);
-        $campaign = $api->getCampaign($cid);
-        $this->campaign_id = $campaign['id'];
+        if (($campaign = $api->getCampaign($cid, false))) {
+            $this->campaign_id = $campaign['id'];
+        }
         return $this;
     }
 
@@ -508,11 +509,14 @@ class MailChimp_WooCommerce_Order
      */
     public function toArray()
     {
+        $campaign_id = (string) $this->getCampaignId();
+
         return mailchimp_array_remove_empty(array(
             'id' => (string) $this->getId(),
             'landing_site' => (string) $this->getLandingSite(),
             'customer' => $this->getCustomer()->toArray(),
-            'campaign_id' => (string) $this->getCampaignId(),
+            //'campaign_id' => (string) $this->getCampaignId(),
+            'outreach' => $campaign_id ? ['id' => $campaign_id] : null,
             'financial_status' => (string) $this->getFinancialStatus(),
             'fulfillment_status' => (string) $this->getFulfillmentStatus(),
             'currency_code' => (string) $this->getCurrencyCode(),

@@ -13,7 +13,7 @@ class MailChimp_WooCommerce_MailChimpApi
     protected static $instance = null;
 
     /**
-     * @return null
+     * @return null|MailChimp_WooCommerce_MailChimpApi
      */
     public static function getInstance()
     {
@@ -528,9 +528,11 @@ class MailChimp_WooCommerce_MailChimpApi
 
     /**
      * @param $campaign_id
-     * @return array|bool
+     * @param bool $throw_if_invalid
+     * @return array|bool|mixed|object|null
+     * @throws Exception
      */
-    public function getCampaign($campaign_id)
+    public function getCampaign($campaign_id, $throw_if_invalid = true)
     {
         if (get_site_transient('mailchimp-woocommerce-no-campaign-id-'.$campaign_id)) {
             return false;
@@ -542,6 +544,9 @@ class MailChimp_WooCommerce_MailChimpApi
         } catch (\Exception $e) {
             mailchimp_log('campaign_get.error', 'No campaign with provided ID: '. $campaign_id. ' :: '. $e->getMessage(). ' :: in '.$e->getFile().' :: on '.$e->getLine());
             set_site_transient('mailchimp-woocommerce-no-campaign-id-'.$campaign_id, true, 60 * 30);
+            if (!$throw_if_invalid) {
+                return false;
+            }
             throw $e;
         }
     }

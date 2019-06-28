@@ -382,8 +382,7 @@
 }
 
 
-.sync-content-wrapper .sync-stats-card .mailchimp_order_count_partial,
-.sync-content-wrapper .sync-stats-card .mailchimp_product_count_partial {
+.sync-content-wrapper .sync-stats-card .card_count_label {
 	position: absolute;
 	top: -1.3em;
 	right: 0;

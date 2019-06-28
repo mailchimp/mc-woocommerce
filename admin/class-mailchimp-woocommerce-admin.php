@@ -809,6 +809,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 var endpoint = '<?php echo MailChimp_WooCommerce_Rest_Api::url('sync/stats'); ?>';
                 var on_sync_tab = '<?php echo (mailchimp_check_if_on_sync_tab() ? 'yes' : 'no')?>';
                 var sync_status = '<?php echo ((mailchimp_has_started_syncing() && !mailchimp_is_done_syncing()) ? 'historical' : 'current') ?>';
+				
+				var promo_rulesProgress = 0;
 				var orderProgress = 0;
 				var productProgress = 0;
 
@@ -825,9 +827,30 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                                 }
 								
 								if (response.has_started && !response.has_finished) {
-									jQuery('#mailchimp_order_count').hide();
-									jQuery('#mailchimp_product_count').hide();
+									jQuery('.card_count').hide();
+
 									jQuery('.sync-stats-card .progress-bar-wrapper').show();
+									
+									if (response.promo_rules_page == 'complete') {
+										promo_rulesProgress = 100;
+										jQuery('#mailchimp_promo_rules_count').html(response.promo_rules_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0})).css('display', 'inline-block');
+										jQuery('.sync-stats-card.promo_rules .progress-bar-wrapper').hide();
+									} else {
+										if (response.promo_rules_in_mailchimp == 0) {
+											promo_rulesProgress = 0;
+											promo_rulesPartial = "0 / " + response.promo_rules_in_store;
+										} else if (response.promo_rules_in_mailchimp == response.promo_rules_in_store) {
+											promo_rulesProgress =  (100 / Math.ceil(response.promo_rules_in_store / 5) + 1) * (response.promo_rules_page - 1) ;
+											promo_rulesPartial = (((response.promo_rules_page - 1) * 5) < response.promo_rules_in_mailchimp ? (response.promo_rules_page - 1) * 5 : response.promo_rules_in_mailchimp)  + " / " + response.promo_rules_in_store;
+										} else {
+											promo_rulesProgress = response.promo_rules_in_mailchimp / response.promo_rules_in_store * 100
+											promo_rulesPartial = response.promo_rules_in_mailchimp + " / " + response.promo_rules_in_store;
+										}
+										if (promo_rulesProgress > 100) promo_rulesProgress = 100;
+										jQuery('.mailchimp_promo_rules_count_partial').html(promo_rulesPartial);
+									}
+									jQuery('.sync-stats-card.promo_rules .progress-bar').width(promo_rulesProgress+"%");
+
 									if (response.products_page == 'complete') {
 										productsProgress = 100;
 										jQuery('#mailchimp_product_count').html(response.products_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0})).css('display', 'inline-block');
@@ -881,6 +904,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 									jQuery('.sync-stats-card .progress-bar-wrapper').hide();
 									jQuery('#mailchimp_order_count').css('display', 'inline-block');
 									jQuery('#mailchimp_product_count').css('display', 'inline-block');
+									jQuery('#mailchimp_promo_rules_count').css('display', 'inline-block');
 								}
                             }
                         });

@@ -1,8 +1,18 @@
 <?php
-$mailchimp_total_products = $mailchimp_total_orders = 0;
+
 $store_id = mailchimp_get_store_id();
+
 $product_count = mailchimp_get_product_count();
 $order_count = mailchimp_get_order_count();
+$promo_rules_count = mailchimp_count_posts('shop_coupon');
+$subscribers_args = array(
+    'meta_key' => 'mailchimp_woocommerce_is_subscribed',
+    'meta_value' => true
+);
+$subscribers_count = get_users($subscribers_args);
+
+$mailchimp_total_products = $mailchimp_total_orders = $mailchimp_total_promo_rules = 0;
+
 $store_syncing = false;
 $last_updated_time = get_option('mailchimp-woocommerce-resource-last-updated');
 $sync_started_at = get_option('mailchimp-woocommerce-sync.started_at');
@@ -36,6 +46,11 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
         $account_name = $account_details['account_name'];
     }
     try {
+        $promo_rules = $mailchimp_api->getPromoRules($store_id, 1, 1, 1);
+        $mailchimp_total_promo_rules = $promo_rules['total_items'];
+        if ($mailchimp_total_promo_rules > $promo_rules_count['publish']) $mailchimp_total_promo_rules = $promo_rules_count['publish'];
+    } catch (\Exception $e) { $mailchimp_total_promo_rules = 0; }
+    try {
         $products = $mailchimp_api->products($store_id, 1, 1);
         $mailchimp_total_products = $products['total_items'];
         if ($mailchimp_total_products > $product_count) $mailchimp_total_products = $product_count;
@@ -45,81 +60,57 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
         $mailchimp_total_orders = $orders['total_items'];
         if ($mailchimp_total_orders > $order_count) $mailchimp_total_orders = $order_count;
     } catch (\Exception $e) { $mailchimp_total_orders = 0; }
+    try {
+        $list = $mailchimp_api->getList($store->getListId());
+        $mailchimp_total_subscribers = $list['stats']['member_count'];
+        if ($mailchimp_total_subscribers > $subscribers_count) $mailchimp_total_subscribers = $subscribers_count;
+    } catch (\Exception $e) { $mailchimp_total_subscribers = 0; }
+    
     $mailchimp_list_name = $handler->getListName();
 }
 ?>
 <input type="hidden" name="mailchimp_active_settings_tab" value="store_sync"/>
 <div class="sync-content-wrapper">
-
-    
-    
     <div class="sync-stats-wrapper">
-        
-      
-            <div class="box sync-stats-card products" >
-                <div class="sync-stats-card-content">
-                    <span class="card_label"><strong><?php esc_html_e('Products', 'mc-woocommerce');?></strong></span>
-                    <span class="card_count" id="mailchimp_product_count"><?php echo $mailchimp_total_products; ?></span>
-                    <div class="progress-bar-wrapper">
-                        <span class="mailchimp_product_count_partial">x / x</span>
-                        <div class="progress-bar"></div>
-                    </div>
+        <div class="box sync-stats-card promo_rules" >
+            <div class="sync-stats-card-content">
+                <span class="card_label"><strong><?php esc_html_e('Coupons', 'mc-woocommerce');?></strong></span>
+                <span class="card_count" id="mailchimp_promo_rules_count"><?php echo $mailchimp_total_promo_rules; ?></span>
+                <div class="progress-bar-wrapper">
+                    <span class="card_count_label mailchimp_promo_rules_count_partial">x / x</span>
+                    <div class="progress-bar"></div>
                 </div>
             </div>
-            <div class="box sync-stats-card orders" >
-                <div class="sync-stats-card-content">
-                    <span class="card_label"><strong><?php esc_html_e('Orders', 'mc-woocommerce');?></strong></span>
-                    <span class="card_count" id="mailchimp_order_count"><?php echo $mailchimp_total_orders; ?></span>
-                    <div class="progress-bar-wrapper">
-                        <div class="progress-bar"></div>
-                        <span class="mailchimp_order_count_partial">x / x</span>
-                    </div>
+        </div>
+        <div class="box sync-stats-card products" >
+            <div class="sync-stats-card-content">
+                <span class="card_label"><strong><?php esc_html_e('Products', 'mc-woocommerce');?></strong></span>
+                <span class="card_count" id="mailchimp_product_count"><?php echo $mailchimp_total_products; ?></span>
+                <div class="progress-bar-wrapper">
+                    <span class="card_count_label mailchimp_product_count_partial">x / x</span>
+                    <div class="progress-bar"></div>
                 </div>
             </div>
+        </div>
+        <div class="box sync-stats-card orders" >
+            <div class="sync-stats-card-content">
+                <span class="card_label"><strong><?php esc_html_e('Orders', 'mc-woocommerce');?></strong></span>
+                <span class="card_count" id="mailchimp_order_count"><?php echo $mailchimp_total_orders; ?></span>
+                <div class="progress-bar-wrapper">
+                    <div class="progress-bar"></div>
+                    <span class="card_count_label mailchimp_order_count_partial">x / x</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            <div class="box sync-stats-card products" >
-                <div class="sync-stats-card-content">
-                    <span class="card_label"><strong><?php esc_html_e('Products', 'mc-woocommerce');?></strong></span>
-                    <span class="card_count" id="mailchimp_product_count"><?php echo $mailchimp_total_products; ?></span>
-                    <div class="progress-bar-wrapper">
-                        <span class="mailchimp_product_count_partial">x / x</span>
-                        <div class="progress-bar"></div>
-                    </div>
-                </div>
+    <div class="sync-stats-wrapper" style="margin-top: 26px;">
+        <div class="box sync-stats-card subscribers" >
+            <div class="sync-stats-card-content">
+                <span class="card_label"><strong><?php esc_html_e('Subscribers', 'mc-woocommerce');?></strong></span>
+                <span class="card_count" id="mailchimp_subscriber_count"><?php echo $mailchimp_total_subscribers; ?></span>
             </div>
-            <div class="box sync-stats-card orders" >
-                <div class="sync-stats-card-content">
-                    <span class="card_label"><strong><?php esc_html_e('Orders', 'mc-woocommerce');?></strong></span>
-                    <span class="card_count" id="mailchimp_order_count"><?php echo $mailchimp_total_orders; ?></span>
-                    <div class="progress-bar-wrapper">
-                        <div class="progress-bar"></div>
-                        <span class="mailchimp_order_count_partial">x / x</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="box sync-stats-card products" >
-                <div class="sync-stats-card-content">
-                    <span class="card_label"><strong><?php esc_html_e('Products', 'mc-woocommerce');?></strong></span>
-                    <span class="card_count" id="mailchimp_product_count"><?php echo $mailchimp_total_products; ?></span>
-                    <div class="progress-bar-wrapper">
-                        <span class="mailchimp_product_count_partial">x / x</span>
-                        <div class="progress-bar"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="box sync-stats-card orders" >
-                <div class="sync-stats-card-content">
-                    <span class="card_label"><strong><?php esc_html_e('Orders', 'mc-woocommerce');?></strong></span>
-                    <span class="card_count" id="mailchimp_order_count"><?php echo $mailchimp_total_orders; ?></span>
-                    <div class="progress-bar-wrapper">
-                        <div class="progress-bar"></div>
-                        <span class="mailchimp_order_count_partial">x / x</span>
-                    </div>
-                </div>
-            </div>
-            
-        
+        </div>
     </div>
 
     <div class="sync-controls-wrapper">
@@ -150,7 +141,9 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
                 
                 <?php if ($sync_started_at && !$sync_completed_at): ?>
                     <p>
-                        <strong><?php esc_html_e('Initial Sync:', 'mc-woocommerce');?></strong>
+                        <strong><?php esc_html_e('Initial Sync.', 'mc-woocommerce');?></strong>
+                        <br/>
+                        <?php esc_html_e('Last Updated:', 'mc-woocommerce');?>
                         <i id="mailchimp_last_updated">
                             <?php esc_html_e('In Progress', 'mc-woocommerce');?>
                         </i>

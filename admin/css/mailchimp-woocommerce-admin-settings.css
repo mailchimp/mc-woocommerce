@@ -3,6 +3,13 @@
  */
  @import url('https://use.typekit.net/wvc2hnb.css');
 
+ @font-face {
+	font-family: 'Proxima Nova Alt Light';
+	font-style: normal;
+	font-weight: normal;
+	src: local('Proxima Nova Alt Light'), url('../fonts/Mark Simonson - Proxima Nova Alt Light.woff') format('woff');
+	}
+
 .mc-woocommerce-settings {
 	width:90%;
 	margin: 4em auto 0 auto;
@@ -12,7 +19,7 @@
 
 .mc-woocommerce-settings p {
 	font-size: 14px;
-	font-family: "proxima-nova", Arial, Helvetica, sans-serif;
+	font-family: "Proxima Nova Alt Light", Arial, Helvetica, sans-serif;
 }
 
 .mc-woocommerce-settings-subtitles {
@@ -510,12 +517,15 @@
 
 .tab-content-wrapper fieldset input[type="text"],
 .tab-content-wrapper fieldset input[type="password"],
-.tab-content-wrapper fieldset input[type="email"] {
+.tab-content-wrapper fieldset input[type="email"],
+.tab-content-wrapper fieldset textarea {
 	border: 1px solid #E6E6E6;
 	box-sizing: border-box;
 	border-radius: 4px;
 	padding: 1em 1.5em;
 	width: 100%;
+	font-family: "Proxima Nova Alt Light", Arial, Helvetica, sans-serif
+	
 }
 
 .tab-content-wrapper .mailchimp-select-wrapper {
@@ -531,12 +541,12 @@
 	padding: 0;
 	background: transparent;	
 	font-size: 14px;
+	font-family: "Proxima Nova Alt Light", Arial, Helvetica, sans-serif;
 	border: none;
 	-webkit-appearance: none;
 	box-shadow: none;
 	outline: none;
 	width: 100%;
-	color: 32373c;
 	background: no-repeat right center url("data:image/svg+xml;charset=UTF-8,%3csvg width='13' height='8' viewBox='0 0 13 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M11.34 0.590027L6.75 5.17003L2.16 0.590027L0.75 2.00003L6.75 8.00003L12.75 2.00003L11.34 0.590027Z' fill='%23212121'/%3e%3c/svg%3e ");
 }
 

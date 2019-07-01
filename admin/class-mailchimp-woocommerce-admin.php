@@ -51,6 +51,33 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	}
 
 	/**
+	 * @return bool 
+	 */
+	public static function disconnect_store()
+	{
+		$options = static::instance()->getOptions();
+		$options['mailchimp_api_key'] = null;
+		$options['active_tab'] = 'sync';
+		
+		return update_option('mailchimp-woocommerce', $options)
+			&& update_option('mailchimp-woocommerce-validation.store_info', false)
+			&& update_option('mailchimp-woocommerce-validation.campaign_defaults', false)
+			&& update_option('mailchimp-woocommerce-validation.newsletter_settings', false);
+	}
+	
+	/**
+	 * Tests admin permissions, disconnect action and nonce
+	 * @return bool 
+	 */
+	protected function is_disconnecting() {
+		return isset($_REQUEST['mailchimp_woocommerce_disconnect_store'])
+			   && current_user_can( 'manage_options' )
+			   && $_REQUEST['mailchimp_woocommerce_disconnect_store'] == 1 
+			   && isset($_REQUEST['_disconnect-nonce']) 
+			   && wp_verify_nonce($_REQUEST['_disconnect-nonce'], '_disconnect-nonce-'.mailchimp_get_store_id());
+	}
+		
+	/**
 	 * Register the stylesheets for the admin area.
 	 *
 	 * @since    1.0.0
@@ -292,15 +319,25 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				break;
 
 			case 'sync':
-                // remove all the pointers to be sure
-                $service = new MailChimp_Service();
-                $service->removePointers(true, true);
-
-                static::startSync();
-
-                $this->showSyncStartedMessage();
-
-                $this->setData('sync.config.resync', true);
+				// case disconnect
+				if ($this->is_disconnecting()) { 
+					// Disconnect store!
+					if ($this->disconnect_store()) {
+						add_settings_error('mailchimp_store_settings', '', __('Store Disconnected', 'mc-woocommerce'),'notice-info');
+					}
+					else {
+						add_settings_error('mailchimp_store_settings', '', __('Store Disconnect Failed', 'mc-woocommerce'),'notice-warning');
+					}	
+				}
+				//case sync
+				else {
+					// remove all the pointers to be sure
+					$service = new MailChimp_Service();
+					$service->removePointers(true, true);
+					static::startSync();
+					$this->showSyncStartedMessage();
+					$this->setData('sync.config.resync', true);
+				}
 				break;
 
             case 'logs':
@@ -321,9 +358,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
                 break;
 		}
-		
-		// if no API is provided, check if the one saved on the database is still valid.
-		if (!$input['mailchimp_api_key'] && $this->getOption('mailchimp_api_key')) {
+
+		// if no API is provided, check if the one saved on the database is still valid, ** only not if disconnect store is issued **.
+		if (!$this->is_disconnecting() && !$input['mailchimp_api_key'] && $this->getOption('mailchimp_api_key')) {
 			// set api key for validation
 			$input['mailchimp_api_key'] = $this->getOption('mailchimp_api_key');
 			$api_key_valid = $this->validatePostApiKey($input);
@@ -331,6 +368,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			// if there's no error, remove the api_ping_error from the db
 			if (!$api_key_valid['api_ping_error'])
 				$data['api_ping_error'] = $api_key_valid['api_ping_error'];
+		}
+		else {
+			$data['mailchimp_api_key'] = $input['mailchimp_api_key'];	
 		}
 
 		return (isset($data) && is_array($data)) ? array_merge($this->getOptions(), $data) : $this->getOptions();

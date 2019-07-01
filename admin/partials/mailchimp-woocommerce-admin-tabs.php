@@ -22,6 +22,7 @@ if (!$show_sync_tab && (bool) get_site_transient('mailchimp_woocommerce_start_sy
 $show_campaign_defaults = true;
 $has_valid_api_key = false;
 $allow_new_list = true;
+$show_wizard = true;
 $clicked_sync_button = $is_mailchimp_post && $active_tab == 'sync';
 $has_api_error = isset($options['api_ping_error']) && !empty($options['api_ping_error']) ? $options['api_ping_error'] : null;
 
@@ -40,12 +41,20 @@ if (isset($options['mailchimp_api_key'])) {
             if ((bool) $this->getData('sync.started_at', false)) {
                 $show_sync_tab = true;
             }
+
+            //display wizard if not all steps are complete
+            if ($show_sync_tab && $this->getData('validation.store_info', false) && $this->getData('validation.campaign_defaults', false) && $this->getData('validation.newsletter_settings', false)) {
+                $show_wizard = false;        
+            }
+                
         }
     } catch (\Exception $e) {
         $has_api_error = $e->getMessage().' on '.$e->getLine().' in '.$e->getFile();
     }
 }
-
+else {
+    $active_tab = 'api_key';
+}
 if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue_listen')) {
     mailchimp_call_rest_api_queue_manually();
 }
@@ -108,25 +117,7 @@ if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue
         }
         ?>
     </p>
-    <?php if($show_sync_tab): ?>  
-        <div class="nav-tab-wrapper">
-            <?php if($has_valid_api_key): ?>
-                <a href="?page=mailchimp-woocommerce&tab=sync" class="nav-tab <?php echo $active_tab == 'sync' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Sync', 'mc-woocommerce');?></a>
-                <a href="?page=mailchimp-woocommerce&tab=store_info" class="nav-tab <?php echo $active_tab == 'store_info' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Store Settings', 'mc-woocommerce');?></a>
-                <?php if ($handler->hasValidStoreInfo()) : ?>
-                    <?php if($show_campaign_defaults): ?>
-                    <a href="?page=mailchimp-woocommerce&tab=campaign_defaults" class="nav-tab <?php echo $active_tab == 'campaign_defaults' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Audience Defaults', 'mc-woocommerce');?></a>
-                    <?php endif; ?>
-                    <?php if($handler->hasValidCampaignDefaults()): ?>
-                        <a href="?page=mailchimp-woocommerce&tab=newsletter_settings" class="nav-tab <?php echo $active_tab == 'newsletter_settings' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Audience Settings', 'mc-woocommerce');?></a>
-                    <?php endif; ?>
-                <?php endif;?>
-                <a href="?page=mailchimp-woocommerce&tab=logs" class="nav-tab <?php echo $active_tab == 'logs' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Logs', 'mc-woocommerce');?></a>
-                <?php else: ?>
-                <a href="?page=mailchimp-woocommerce&tab=api_key" class="nav-tab <?php echo $active_tab == 'api_key' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Connect', 'mc-woocommerce');?></a>
-            <?php endif; ?>
-        </div>
-    <?php else: ?>
+    <?php if($show_wizard): ?>  
         <div class="nav-wizard-wrapper">
             <a href="?page=mailchimp-woocommerce&tab=api_key" class="wizard-tab <?php echo $active_tab == 'api_key' ? 'wizard-tab-active' : ''; ?>">
                 <div class="wizard-tab-tooltip wizard-tab-tooltip-api-key "><?= esc_html_e('Connect', 'mc-woocommerce');?>
@@ -171,7 +162,26 @@ if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue
             <?php else: ?>
                 <span class="wizard-tab"></span>    
             <?php endif; ?>
-        </div>      
+        </div>     
+    <?php else: ?>
+        <div class="nav-tab-wrapper">
+            <?php if($has_valid_api_key): ?>
+                <?php if ($active_tab == 'api_key'): ?>
+                    <a href="?page=mailchimp-woocommerce&tab=api_key" class="nav-tab <?php echo $active_tab == 'api_key' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Connect', 'mc-woocommerce');?></a>
+                <?php endif ;?>
+                <a href="?page=mailchimp-woocommerce&tab=sync" class="nav-tab <?php echo $active_tab == 'sync' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Sync', 'mc-woocommerce');?></a>
+                <a href="?page=mailchimp-woocommerce&tab=store_info" class="nav-tab <?php echo $active_tab == 'store_info' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Store Settings', 'mc-woocommerce');?></a>
+                <?php if ($handler->hasValidStoreInfo()) : ?>
+                    <?php if($show_campaign_defaults): ?>
+                        <a href="?page=mailchimp-woocommerce&tab=campaign_defaults" class="nav-tab <?php echo $active_tab == 'campaign_defaults' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Audience Defaults', 'mc-woocommerce');?></a>
+                    <?php endif; ?>
+                    <?php if($handler->hasValidCampaignDefaults()): ?>
+                        <a href="?page=mailchimp-woocommerce&tab=newsletter_settings" class="nav-tab <?php echo $active_tab == 'newsletter_settings' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Audience Settings', 'mc-woocommerce');?></a>
+                    <?php endif; ?>
+                <?php endif;?>
+                <a href="?page=mailchimp-woocommerce&tab=logs" class="nav-tab <?php echo $active_tab == 'logs' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Logs', 'mc-woocommerce');?></a>
+            <?php endif; ?>
+        </div> 
     <?php endif; ?>
     <h2><!-- Needed to show the notifications on the right spot --></h2>
     

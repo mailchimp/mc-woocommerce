@@ -53,23 +53,25 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	/**
 	 * @return bool 
 	 */
-	public static function disconnect_store()
+	private function disconnect_store()
 	{
-		$options = static::instance()->getOptions();
+		$options = array();
 		$options['mailchimp_api_key'] = null;
-		$options['active_tab'] = 'sync';
+		$options['active_tab'] = 'api_key';
+
+		update_option('mailchimp-woocommerce-validation.store_info', false);
+		update_option('mailchimp-woocommerce-validation.campaign_defaults', false);
+		update_option('mailchimp-woocommerce-validation.newsletter_settings', false);
+		update_option('mailchimp-woocommerce-sync.started_at', false);
 		
-		return update_option('mailchimp-woocommerce', $options)
-			&& update_option('mailchimp-woocommerce-validation.store_info', false)
-			&& update_option('mailchimp-woocommerce-validation.campaign_defaults', false)
-			&& update_option('mailchimp-woocommerce-validation.newsletter_settings', false);
+		return $options;
 	}
 	
 	/**
 	 * Tests admin permissions, disconnect action and nonce
 	 * @return bool 
 	 */
-	protected function is_disconnecting() {
+	private function is_disconnecting() {
 		return isset($_REQUEST['mailchimp_woocommerce_disconnect_store'])
 			   && current_user_can( 'manage_options' )
 			   && $_REQUEST['mailchimp_woocommerce_disconnect_store'] == 1 
@@ -322,10 +324,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				// case disconnect
 				if ($this->is_disconnecting()) { 
 					// Disconnect store!
-					if ($this->disconnect_store()) {
+					if ($data = $this->disconnect_store()) {
 						add_settings_error('mailchimp_store_settings', '', __('Store Disconnected', 'mc-woocommerce'),'notice-info');
 					}
 					else {
+						$data['active_tab'] = 'sync';
 						add_settings_error('mailchimp_store_settings', '', __('Store Disconnect Failed', 'mc-woocommerce'),'notice-warning');
 					}	
 				}
@@ -368,9 +371,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			// if there's no error, remove the api_ping_error from the db
 			if (!$api_key_valid['api_ping_error'])
 				$data['api_ping_error'] = $api_key_valid['api_ping_error'];
-		}
-		else {
-			$data['mailchimp_api_key'] = $input['mailchimp_api_key'];	
 		}
 
 		return (isset($data) && is_array($data)) ? array_merge($this->getOptions(), $data) : $this->getOptions();

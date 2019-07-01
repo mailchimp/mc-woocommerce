@@ -169,7 +169,7 @@ if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue
                 <?php if ($active_tab == 'api_key'): ?>
                     <a href="?page=mailchimp-woocommerce&tab=api_key" class="nav-tab <?php echo $active_tab == 'api_key' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Connect', 'mc-woocommerce');?></a>
                 <?php endif ;?>
-                <a href="?page=mailchimp-woocommerce&tab=sync" class="nav-tab <?php echo $active_tab == 'sync' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Sync', 'mc-woocommerce');?></a>
+                <a href="?page=mailchimp-woocommerce&tab=sync" class="nav-tab <?php echo $active_tab == 'sync' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Overview', 'mc-woocommerce');?></a>
                 <a href="?page=mailchimp-woocommerce&tab=store_info" class="nav-tab <?php echo $active_tab == 'store_info' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Store Settings', 'mc-woocommerce');?></a>
                 <?php if ($handler->hasValidStoreInfo()) : ?>
                     <?php if($show_campaign_defaults): ?>

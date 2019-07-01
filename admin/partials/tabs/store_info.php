@@ -60,7 +60,26 @@ if (!$handler->hasValidApiKey()) {
         <label for="<?php echo $this->plugin_name; ?>-store-country-label">
                 <span> <?php esc_html_e('Country', 'mc-woocommerce'); ?></span>
         </label>
-        <input required type="text" id="<?php echo $this->plugin_name; ?>-store-country-label" name="<?php echo $this->plugin_name; ?>[store_country]" value="<?php echo isset($options['store_country']) ? $options['store_country'] : WC()->countries->get_base_country(); ?>" />
+        
+        <?php global $woocommerce;
+            $countries_obj   = new WC_Countries();
+            $countries   = $countries_obj->__get('countries');
+        ?>
+
+        <div class="mailchimp-select-wrapper">
+            <?php 
+            woocommerce_form_field($this->plugin_name.'[store_country]', array(
+                'type'          => 'select',
+                'class'         => array( 'chzn-drop' ),
+                'placeholder'   => __('Select a Country'),
+                'options'       => $countries,
+                'required'      => true
+                ),
+                isset($options['store_country']) ? $options['store_country'] : WC()->countries->get_base_country()
+            );
+            
+            ?>
+        </div>
     </div>
 
     <div class="box box-half" >
@@ -116,12 +135,5 @@ if (!$handler->hasValidApiKey()) {
                 ?>
             </select>
         </div>
-    </div>
-    <div class="box optional-settings-button" >
-        <span><?php esc_html_e('Optional Store Settings', 'mc-woocommerce');?></span>
-    </div>
-
-    <div class="optional-settings-content">
-        Other options comes here
     </div>
 </fieldset>

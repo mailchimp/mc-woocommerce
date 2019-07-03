@@ -363,7 +363,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 
 		// if no API is provided, check if the one saved on the database is still valid, ** only not if disconnect store is issued **.
-		if (!$this->is_disconnecting() && !$input['mailchimp_api_key'] && $this->getOption('mailchimp_api_key')) {
+		if (!$this->is_disconnecting() && !isset($input['mailchimp_api_key']) && $this->getOption('mailchimp_api_key')) {
 			// set api key for validation
 			$input['mailchimp_api_key'] = $this->getOption('mailchimp_api_key');
 			$api_key_valid = $this->validatePostApiKey($input);

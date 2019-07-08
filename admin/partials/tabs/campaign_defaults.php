@@ -23,7 +23,7 @@ if (!$handler->hasValidStoreInfo()) {
         <label for="<?php echo $this->plugin_name; ?>-campaign-from-name-label"> 
             <?php esc_html_e('Default from name', 'mc-woocommerce'); ?>
         </label>
-        <input type="text" id="<?php echo $this->plugin_name; ?>-campaign-from-name-label" name="<?php echo $this->plugin_name; ?>[campaign_from_name]" value="<?php echo isset($options['campaign_from_name']) ? $options['campaign_from_name'] : '' ?>" required/>
+        <input type="text" id="<?php echo $this->plugin_name; ?>-campaign-from-name-label" name="<?php echo $this->plugin_name; ?>[campaign_from_name]" value="<?php echo isset($options['campaign_from_name']) ? $options['campaign_from_name'] : get_option('blogname') ?>" required/>
     </div>
 
     <div class="box box-half">
@@ -37,7 +37,7 @@ if (!$handler->hasValidStoreInfo()) {
         <label for="<?php echo $this->plugin_name; ?>-campaign-subject-label">
                 <?php esc_html_e('Default subject', 'mc-woocommerce'); ?>
         </label>
-        <input type="text" id="<?php echo $this->plugin_name; ?>-campaign-subject-label" name="<?php echo $this->plugin_name; ?>[campaign_subject]" value="<?php echo isset($options['campaign_subject']) ? $options['campaign_subject'] : get_option('blogname') ?>" required/>
+        <input type="text" id="<?php echo $this->plugin_name; ?>-campaign-subject-label" name="<?php echo $this->plugin_name; ?>[campaign_subject]" value="<?php echo isset($options['campaign_subject']) ? $options['campaign_subject'] : esc_html__('Store Newsletter', 'mc-woocommerce'); ?>" required/>
     </div>
 
     <div class="box box-half">

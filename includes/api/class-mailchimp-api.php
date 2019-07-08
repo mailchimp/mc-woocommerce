@@ -302,16 +302,16 @@ class MailChimp_WooCommerce_MailChimpApi
         }
         return $this->get("lists/{$list_id}/members?status=transactional&count=1")['total_items'];
     }
-    
+
 
     /**
      * @param $list_id
      * @param $email
-     * @return array|mixed|null|object
-     * @throws Exception
-     * @throws MailChimp_WooCommerce_Error
+     * @param bool $fail_silently
+     * @return array|bool|mixed|object|null
+     * @throws MailChimp_WooCommerce_Error|\Exception
      */
-    public function updateMemberTags($list_id, $email)
+    public function updateMemberTags($list_id, $email, $fail_silently = false)
     {
         $hash = md5(strtolower(trim($email)));
         $tags = mailchimp_get_user_tags_to_update();
@@ -324,7 +324,13 @@ class MailChimp_WooCommerce_MailChimpApi
 
         mailchimp_debug('api.update_member_tags', "Updating {$email}", $data);
 
-        return $this->post("lists/$list_id/members/$hash/tags", $data);
+        try {
+            return $this->post("lists/$list_id/members/$hash/tags", $data);
+        } catch (\Exception $e) {
+            if (!$fail_silently) throw $e;
+        }
+
+        return false;
     }
 
     /**
@@ -942,16 +948,16 @@ class MailChimp_WooCommerce_MailChimpApi
             // submit the first one
             $data = $this->post("ecommerce/stores/$store_id/orders", $order->toArray());
 
-            //update user tags
-            $customer = $order->getCustomer();
-            $list_id = mailchimp_get_list_id();
-            $user = $this->updateMemberTags($list_id, $customer->getEmailAddress());
+            $email_address = $order->getCustomer()->getEmailAddress();
 
             // if the order is in pending status, we need to submit the order again with a paid status.
             if ($order->shouldConfirmAndPay() && $order->getFinancialStatus() !== 'paid') {
                 $order->setFinancialStatus('paid');
                 $data = $this->patch("ecommerce/stores/{$store_id}/orders/{$order->getId()}", $order->toArray());
             }
+
+            // update the member tags but fail silently just in case.
+            $this->updateMemberTags(mailchimp_get_list_id(), $email_address, true);
 
             update_option('mailchimp-woocommerce-resource-last-updated', time());
             $order = new MailChimp_WooCommerce_Order();
@@ -980,9 +986,7 @@ class MailChimp_WooCommerce_MailChimpApi
             $data = $this->patch("ecommerce/stores/{$store_id}/orders/{$order_id}", $order->toArray());
             
             //update user tags
-            $customer = $order->getCustomer();
-            $list_id = mailchimp_get_list_id();
-            $user = $this->updateMemberTags($list_id, $customer->getEmailAddress());
+            $email_address = $order->getCustomer()->getEmailAddress();
 
             // if products list differs, we should remove the old products and add new ones
             $data_lines = $data['lines'];
@@ -998,6 +1002,9 @@ class MailChimp_WooCommerce_MailChimpApi
                 $order->setFinancialStatus('paid');
                 $data = $this->patch("ecommerce/stores/{$store_id}/orders/{$order_id}", $order->toArray());
             }
+
+            // update the member tags but fail silently just in case.
+            $this->updateMemberTags(mailchimp_get_list_id(), $email_address, true);
 
             $order = new MailChimp_WooCommerce_Order();
             return $order->fromArray($data);
@@ -1664,6 +1671,9 @@ class MailChimp_WooCommerce_MailChimpApi
         }
 
         if ($info['http_code'] >= 400 && $info['http_code'] <= 500) {
+            if ($info['http_code'] == 404) {
+                mailchimp_error('api', 'processCurlResponse', array('info' => $info, 'data' => $data));
+            }
             if ($info['http_code'] == 403) {
                 throw new MailChimp_WooCommerce_RateLimitError();
             }

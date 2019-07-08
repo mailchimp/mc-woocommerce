@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the Mailchimp for WooCommerce plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Mailchimp for WooCommerce 2.1.16\n"
+"Project-Id-Version: Mailchimp for WooCommerce 2.1.17\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mc-woocommerce\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -129,13 +129,13 @@ msgid "User ID"
 msgstr ""
 
 #: includes/class-mailchimp-woocommerce-newsletter.php:43
-#: admin/class-mailchimp-woocommerce-admin.php:581
-#: admin/partials/tabs/newsletter_settings.php:98
+#: admin/class-mailchimp-woocommerce-admin.php:583
+#: admin/partials/tabs/newsletter_settings.php:94
 msgid "Subscribe to our newsletter"
 msgstr ""
 
-#: includes/class-mailchimp-woocommerce-rest-api.php:276
-#: admin/partials/tabs/store_sync.php:145
+#: includes/class-mailchimp-woocommerce-rest-api.php:282
+#: admin/partials/tabs/store_sync.php:66
 msgid "D, M j, Y g:i A"
 msgstr ""
 
@@ -147,37 +147,37 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:501
+#: admin/class-mailchimp-woocommerce-admin.php:503
 msgid "As part of the Mailchimp Terms of Use, we require a contact email and a physical mailing address."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:509
+#: admin/class-mailchimp-woocommerce-admin.php:511
 msgid "As part of the Mailchimp Terms of Use, we require a valid phone number for your store."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:517
+#: admin/class-mailchimp-woocommerce-admin.php:519
 msgid "Mailchimp for WooCommerce requires a Store Name to connect your store."
 msgstr ""
 
 #. translators: %s - plugin name.
-#: admin/class-mailchimp-woocommerce-admin.php:535
-#: admin/partials/tabs/campaign_defaults.php:68
+#: admin/class-mailchimp-woocommerce-admin.php:537
+#: admin/partials/tabs/campaign_defaults.php:95
 msgid "You were subscribed to the newsletter from %s"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:690
+#: admin/class-mailchimp-woocommerce-admin.php:692
 msgid "You must supply your Mailchimp API key to pull the audiences."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1124
+#: admin/class-mailchimp-woocommerce-admin.php:1086
 msgid "Starting the sync process..."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1126
+#: admin/class-mailchimp-woocommerce-admin.php:1088
 msgid "Please hang tight while we work our mojo."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1128
+#: admin/class-mailchimp-woocommerce-admin.php:1090
 msgid "Sometimes the sync can take a while, especially on sites with lots of orders and/or products."
 msgstr ""
 
@@ -563,13 +563,33 @@ msgstr ""
 msgid "Logs"
 msgstr ""
 
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:126
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:132
-msgid "Connect"
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:165
+msgid "More Information"
 msgstr ""
 
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:183
-msgid "Save all changes"
+#. translators: %s - WP-CLI URL.
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:167
+msgid "Have a larger store or having issues syncing? Consider using <a href=%s target=_blank>WP-CLI</a>."
+msgstr ""
+
+#. translators: %s - WP-CLI URL.
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:168
+msgid "Order and customer information will not sync if they contain an Amazon or generic email address."
+msgstr ""
+
+#. translators: %s - Mailchimp Support URL.
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:169
+msgid "Need help to connect your store? Visit the Mailchimp <a href=%s target=_blank>Knowledge Base</a>."
+msgstr ""
+
+#. translators: %s - Plugin review URL.
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:170
+msgid "Want to tell us how we're doing? <a href=%s target=_blank>Leave a review on Wordpress.org</a>."
+msgstr ""
+
+#. translators: %s - Mailchimp Privacy Policy URL.
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:171
+msgid "By using this plugin, Mailchimp will process customer information in accordance with their <a href=%s target=_blank>Privacy Policy</a>."
 msgstr ""
 
 #: bootstrap.php:512

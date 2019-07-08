@@ -482,10 +482,14 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function setCampaignTrackingID($id, $cookie_duration)
     {
+        if (!mailchimp_is_configured()) {
+            return $this;
+        }
+
         $cid = trim($id);
 
         // don't throw the error if it's not found.
-        if(!$this->api()->getCampaign($cid, false)) {
+        if (!$this->api()->getCampaign($cid, false)) {
             $cid = null;
         }
         

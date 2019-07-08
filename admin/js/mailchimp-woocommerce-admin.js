@@ -71,6 +71,51 @@
 			$temp.remove();
 		});
 
+		var mailchimp_woocommerce_disconnect_done = false;
+
+		$('#mailchimp_woocommerce_disconnect').click(function (e){
+			if (mailchimp_woocommerce_disconnect_done) {
+				mailchimp_woocommerce_disconnect_done = false; // reset flag
+				return; // let the event bubble away
+			}
+
+			e.preventDefault();
+		
+			const swalWithBootstrapButtons = Swal.mixin({
+				customClass: {
+				  confirmButton: 'button button-primary tab-content-submit disconnect-button',
+				  cancelButton: 'button button-default mc-woocommerce-resync-button disconnect-button'
+				},
+				buttonsStyling: false,
+			})
+			
+			swalWithBootstrapButtons.fire({
+				title: 'Are you sure?',
+				text: "You are about to disconnect your store from Mailchimp.",
+				type: 'warning',
+				showCancelButton: true,
+				confirmButtonText: 'Yes, disconnect.',
+				cancelButtonText: 'No, cancel!',
+				reverseButtons: true, 
+				animations: false
+			}).then((result) => {
+				console.log(result.value)
+				if (result.value) {
+					console.log ('disconnecting');
+					mailchimp_woocommerce_disconnect_done = true;
+					e.target.click();
+				} else if (
+					// Read more about handling dismissals
+					result.dismiss === Swal.DismissReason.cancel
+				) {
+					swalWithBootstrapButtons.fire(
+					'Cancelled',
+					'Your Store remains connected to Mailchimp',
+					'info'
+					)
+				}
+			})	
+		});
 
 	});
 	

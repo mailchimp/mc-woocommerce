@@ -219,7 +219,7 @@
 	margin-top: 10px !important;
 }
 
-.tab-content-wrapper .tab-content-submit,
+.tab-content-submit,
 .mc-woocommerce-resync-button,
 .mc-woocommerce-copy-log-button {
 	font-family: proxima-nova, Arial, Helvetica, sans-serif !important;
@@ -240,7 +240,7 @@
 	text-decoration: none;
 }
 
-.tab-content-wrapper .tab-content-submit {
+.tab-content-submit {
 	float:right;
 	background: #7FAD45 !important;
 	box-shadow:0 1px 0 #7FAD45 !important;
@@ -259,7 +259,12 @@
 		box-shadow 0.3s ease-out;
 }
 
-.tab-content-wrapper .tab-content-submit:hover {
+.disconnect-button {
+	width:180px;
+	margin: 0 0.5em !important;
+}
+
+.tab-content-submit:hover {
 	float:right;
 	background: #9EC769 !important;
 	box-shadow:0 1px 0 #9EC769 !important;
@@ -319,7 +324,7 @@
 		box-shadow 0.3s ease-out;
 }
 
-.tab-content-wrapper .tab-content-submit:focus,.tab-content-wrapper .tab-content-submit:hover{
+.tab-content-submit:focus,.tab-content-submit:hover{
 	background: rgb(149, 189, 101);
 	border-color: rgb(149, 189, 101);
 	color:#fff;
@@ -658,7 +663,7 @@
 
 
 @media screen and (max-width: 782px) {
-	.tab-content-wrapper .tab-content-submit,
+	.tab-content-submit,
 	.mc-woocommerce-resync-button,
 	.mc-woocommerce-copy-log-button,
 	.mc-woocommerce-delete-log-button {
@@ -746,7 +751,9 @@
 	.nav-tab.nav-tab-active {
 		border: 1px solid white !important;
 	}
-
+	.disconnect-button {
+		margin: 0.5em 0em !important;
+	}
 }
 
  

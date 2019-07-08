@@ -586,7 +586,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		if (!$this->hasValidCampaignDefaults($data)) {
 			$this->setData('validation.campaign_defaults', false);
-
+			add_settings_error('mailchimp_list_settings', '', __('One or more fields were not updated', 'mc-woocommerce'));
 			return array('active_tab' => 'campaign_defaults');
 		}
 

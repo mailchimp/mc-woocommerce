@@ -30,7 +30,7 @@ if (!$handler->hasValidStoreInfo()) {
         <label for="<?php echo $this->plugin_name; ?>-campaign-from-email-label">
                 <?php esc_html_e('Default from email', 'mc-woocommerce'); ?>
         </label>
-        <input type="text" id="<?php echo $this->plugin_name; ?>-campaign-from-email-label" name="<?php echo $this->plugin_name; ?>[campaign_from_email]" value="<?php echo isset($options['campaign_from_email']) ? $options['campaign_from_email'] : get_option('admin_email') ?>" required/>
+        <input type="email" id="<?php echo $this->plugin_name; ?>-campaign-from-email-label" name="<?php echo $this->plugin_name; ?>[campaign_from_email]" value="<?php echo isset($options['campaign_from_email']) ? $options['campaign_from_email'] : get_option('admin_email') ?>" required/>
     </div>
 
     <div class="box box-half">

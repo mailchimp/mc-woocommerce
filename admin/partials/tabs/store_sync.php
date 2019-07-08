@@ -61,10 +61,14 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
         if ($mailchimp_total_orders > $order_count) $mailchimp_total_orders = $order_count;
     } catch (\Exception $e) { $mailchimp_total_orders = 0; }
     try {
-        $list = $mailchimp_api->getList($store->getListId());
-        $mailchimp_total_subscribers = $list['stats']['member_count'];
-        if ($mailchimp_total_subscribers > $subscribers_count) $mailchimp_total_subscribers = $subscribers_count;
+        $mailchimp_total_subscribers = $mailchimp_api->getSubscribedCount($store->getListId());
     } catch (\Exception $e) { $mailchimp_total_subscribers = 0; }
+    try {
+        $mailchimp_total_transactional = $mailchimp_api->getTransactionalCount($store->getListId());
+    } catch (\Exception $e) { $mailchimp_total_transactional = 0; }
+    try {
+        $mailchimp_total_unsubscribed = $mailchimp_api->getUnsubscribedCount($store->getListId());
+    } catch (\Exception $e) { $mailchimp_total_unsubscribed = 0; }
     
     $mailchimp_list_name = $handler->getListName();
 }
@@ -109,6 +113,18 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
             <div class="sync-stats-card-content">
                 <span class="card_label"><strong><?php esc_html_e('Subscribers', 'mc-woocommerce');?></strong></span>
                 <span class="card_count" id="mailchimp_subscriber_count"><?php echo $mailchimp_total_subscribers; ?></span>
+            </div>
+        </div>
+        <div class="box sync-stats-card transactional" >
+            <div class="sync-stats-card-content">
+                <span class="card_label"><strong><?php esc_html_e('Transactional', 'mc-woocommerce');?></strong></span>
+                <span class="card_count" id="mailchimp_subscriber_count"><?php echo $mailchimp_total_transactional; ?></span>
+            </div>
+        </div>
+        <div class="box sync-stats-card unsubscribed" >
+            <div class="sync-stats-card-content">
+                <span class="card_label"><strong><?php esc_html_e('Unsubscribed', 'mc-woocommerce');?></strong></span>
+                <span class="card_count" id="mailchimp_subscriber_count"><?php echo $mailchimp_total_unsubscribed; ?></span>
             </div>
         </div>
     </div>

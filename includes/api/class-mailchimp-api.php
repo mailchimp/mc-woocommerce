@@ -266,6 +266,46 @@ class MailChimp_WooCommerce_MailChimpApi
 
     /**
      * @param $list_id
+     * @return mixed
+     * @throws \Throwable
+     */
+    public function getSubscribedCount($list_id)
+    {
+        if (empty($list_id)) {
+            return 0;
+        }
+        return $this->get("lists/{$list_id}/members?status=subscribed&count=1")['total_items'];
+    }
+
+    /**
+     * @param $list_id
+     * @return mixed
+     * @throws \Throwable
+     */
+    public function getUnsubscribedCount($list_id)
+    {
+        if (empty($list_id)) {
+            return 0;
+        }
+        return $this->get("lists/{$list_id}/members?status=unsubscribed&count=1")['total_items'];
+    }
+
+    /**
+     * @param $list_id
+     * @return mixed
+     * @throws \Throwable
+     */
+    public function getTransactionalCount($list_id)
+    {
+        if (empty($list_id)) {
+            return 0;
+        }
+        return $this->get("lists/{$list_id}/members?status=transactional&count=1")['total_items'];
+    }
+    
+
+    /**
+     * @param $list_id
      * @param $email
      * @return array|mixed|null|object
      * @throws Exception

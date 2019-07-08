@@ -155,7 +155,7 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
                     
                     <?php esc_html_e('Last Updated:', 'mc-woocommerce');?>
                     <i id="mailchimp_last_updated">
-                        <?php echo date_i18n( __('D, M j, Y g:i A', 'mc-woocommerce'), $last_updated_time->getTimestamp())?>
+                        <?php echo $last_updated_time->format( __('D, M j, Y g:i A', 'mc-woocommerce')); ?>
                     </i>
                     <span class="spinner" style="float:none; background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px"></span>
                 </p>

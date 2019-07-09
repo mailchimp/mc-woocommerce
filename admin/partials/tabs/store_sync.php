@@ -76,13 +76,13 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
 ?>
 <input type="hidden" name="mailchimp_active_settings_tab" value="store_sync"/>
 <div class="sync-content-wrapper">
-    <div class="sync-stats-wrapper">
+    <div class="sync-stats-wrapper sync-stats-store">
         <div class="box sync-stats-card promo_rules" >
             <div class="sync-stats-card-content">
                 <span class="card_label"><strong><?php esc_html_e('Coupons', 'mc-woocommerce');?></strong></span>
                 <span class="card_count" id="mailchimp_promo_rules_count"><?php echo $mailchimp_total_promo_rules; ?></span>
                 <div class="progress-bar-wrapper">
-                    <span class="card_count_label mailchimp_promo_rules_count_partial">x / x</span>
+                    <span class="card_count_label mailchimp_promo_rules_count_partial"></span>
                     <div class="progress-bar"></div>
                 </div>
             </div>
@@ -92,7 +92,7 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
                 <span class="card_label"><strong><?php esc_html_e('Products', 'mc-woocommerce');?></strong></span>
                 <span class="card_count" id="mailchimp_product_count"><?php echo $mailchimp_total_products; ?></span>
                 <div class="progress-bar-wrapper">
-                    <span class="card_count_label mailchimp_product_count_partial">x / x</span>
+                    <span class="card_count_label mailchimp_product_count_partial"></span>
                     <div class="progress-bar"></div>
                 </div>
             </div>
@@ -103,29 +103,32 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
                 <span class="card_count" id="mailchimp_order_count"><?php echo $mailchimp_total_orders; ?></span>
                 <div class="progress-bar-wrapper">
                     <div class="progress-bar"></div>
-                    <span class="card_count_label mailchimp_order_count_partial">x / x</span>
+                    <span class="card_count_label mailchimp_order_count_partial"></span>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="sync-stats-wrapper" style="margin-top: 26px;">
+    <div class="sync-stats-wrapper sync-stats-audience" style="margin-top: 26px;">
         <div class="box sync-stats-card subscribers" >
             <div class="sync-stats-card-content">
                 <span class="card_label"><strong><?php esc_html_e('Subscribers', 'mc-woocommerce');?></strong></span>
                 <span class="card_count" id="mailchimp_subscriber_count"><?php echo $mailchimp_total_subscribers; ?></span>
+                <span class="spinner" style="background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px; position: absolute; right: 1em;"></span>
             </div>
         </div>
         <div class="box sync-stats-card transactional" >
             <div class="sync-stats-card-content">
                 <span class="card_label"><strong><?php esc_html_e('Transactional', 'mc-woocommerce');?></strong></span>
-                <span class="card_count" id="mailchimp_subscriber_count"><?php echo $mailchimp_total_transactional; ?></span>
+                <span class="card_count" id="mailchimp_transactional_count"><?php echo $mailchimp_total_transactional; ?></span>
+                <span class="spinner" style="background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px; position: absolute; right: 1em;"></span>
             </div>
         </div>
         <div class="box sync-stats-card unsubscribed" >
             <div class="sync-stats-card-content">
                 <span class="card_label"><strong><?php esc_html_e('Unsubscribed', 'mc-woocommerce');?></strong></span>
-                <span class="card_count" id="mailchimp_subscriber_count"><?php echo $mailchimp_total_unsubscribed; ?></span>
+                <span class="card_count" id="mailchimp_unsubscribed_count"><?php echo $mailchimp_total_unsubscribed; ?></span>
+                <span class="spinner" style="background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px; position: absolute; right: 1em;"></span>
             </div>
         </div>
     </div>
@@ -152,14 +155,17 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
 
             <div class="mc-woocommerce-last-sync">
                 <?php if ($last_updated_time): ?>
-                <p>
-                    
-                    <?php esc_html_e('Last Updated:', 'mc-woocommerce');?>
-                    <i id="mailchimp_last_updated">
-                        <?php echo $last_updated_time->format( __('D, M j, Y g:i A', 'mc-woocommerce')); ?>
-                    </i>
-                    <span class="spinner" style="float:none; background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px"></span>
-                </p>
+                    <p>
+                        
+                        <?php esc_html_e('Last Updated:', 'mc-woocommerce');?>
+                        <i id="mailchimp_last_updated">
+                            <?php echo $last_updated_time->format( __('D, M j, Y g:i A', 'mc-woocommerce')); ?>
+                        </i>
+                        <span class="spinner" style="float:none; background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px"></span>
+                    </p>
+                    <p>
+                        Status:
+                    <?= mailchimp_is_done_syncing() ? "Sync Completed" : "Syncing..."; ?></p>
                 <?php endif; ?>
                 
                 <?php if ($sync_started_at && !$sync_completed_at): ?>

@@ -856,8 +856,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				var productProgress = 0;
 
                 if (on_sync_tab === 'yes') {
-                    var call_mailchimp_for_stats = function () {
-						jQuery('#mailchimp_last_updated').next('.spinner').css('visibility', 'visible');
+                    var call_mailchimp_for_stats = function (showSpinner = false) {
+						if (showSpinner ) jQuery('#mailchimp_last_updated').next('.spinner').css('visibility', 'visible');
                         jQuery.get(endpoint, function(response) {
                             if (response.success) {
 								
@@ -868,7 +868,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                                 }
 								
 								if (response.has_started && !response.has_finished) {
-									jQuery('.card_count').hide();
+									jQuery('.sync-stats-audience .spinner').css('visibility', 'visible');
+									jQuery('.sync-stats-audience .card_count').hide();
+									
+									jQuery('.sync-stats-store .card_count').hide();
 
 									jQuery('.sync-stats-card .progress-bar-wrapper').show();
 									
@@ -936,7 +939,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 									// only call status again if sync is running.
 									setTimeout(function() {
-										call_mailchimp_for_stats();
+										call_mailchimp_for_stats(true);
 									}, 10000);
 									jQuery('#mailchimp_last_updated').next('.spinner').css('visibility', 'hidden');
 								}

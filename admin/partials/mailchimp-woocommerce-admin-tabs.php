@@ -111,9 +111,11 @@ if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue
             wp_kses(_e('Please apply your audience settings. If you don’t<br/>have an audience, you can choose to create one', 'mc-woocommerce'), $allowed_html);
         }
         if ($active_tab == 'sync' && $show_sync_tab) {
+            wp_kses(_e('Connect your WooCommerce store to a<br/>Mailchimp audience in less than 60 seconds', 'mc-woocommerce'), $allowed_html);
         }
  
         if ($active_tab == 'logs' && $show_sync_tab) {
+            wp_kses(_e('Log events from the <br/>Mailchimp plugin', 'mc-woocommerce'), $allowed_html);
         }
         ?>
     </p>

@@ -12,6 +12,7 @@ $subscribers_args = array(
 $subscribers_count = get_users($subscribers_args);
 
 $mailchimp_total_products = $mailchimp_total_orders = $mailchimp_total_promo_rules = 0;
+$mailchimp_total_subscribers = $mailchimp_total_unsubscribed = $mailchimp_total_transactional = 0;
 
 $store_syncing = false;
 $last_updated_time = get_option('mailchimp-woocommerce-resource-last-updated');

@@ -296,17 +296,18 @@ function mailchimp_get_list_id() {
 function mailchimp_get_store_id() {
     $store_id = mailchimp_get_data('store_id', false);
     $api = mailchimp_get_api();
-    
-    // let's retrieve the store for this domain, through the API
-    $store = $api->getStore($store_id, false);
-    // if there's no store, try to fetch from mc a store related to the current domain
-    if (!$store) {
-        $stores = $api->stores();
-        //iterate thru stores, find correct store ID and save it to db
-        foreach ($stores as $mc_store) {
-            if ($mc_store->getDomain() === get_option('siteurl')) {
-                update_option('mailchimp-woocommerce-store_id', $mc_store->getId(), 'yes');
-                $store_id = $mc_store->getId();
+    if (mailchimp_is_configured()) {
+        // let's retrieve the store for this domain, through the API
+        $store = $api->getStore($store_id, false);
+        // if there's no store, try to fetch from mc a store related to the current domain
+        if (!$store) {
+            $stores = $api->stores();
+            //iterate thru stores, find correct store ID and save it to db
+            foreach ($stores as $mc_store) {
+                if ($mc_store->getDomain() === get_option('siteurl')) {
+                    update_option('mailchimp-woocommerce-store_id', $mc_store->getId(), 'yes');
+                    $store_id = $mc_store->getId();
+                }
             }
         }
     }

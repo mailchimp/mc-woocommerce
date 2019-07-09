@@ -639,7 +639,7 @@ class MailChimp_WooCommerce_MailChimpApi
     public function stores()
     {
         try {
-            $data = $this->get("ecommerce/stores", array('count' => 50));
+            $data = $this->get("ecommerce/stores", array('count' => 1000));
 
             if (!isset($data['stores']) || empty($data['stores'])) {
                 return array();

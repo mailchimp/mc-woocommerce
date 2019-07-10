@@ -74,6 +74,7 @@
 		var mailchimp_woocommerce_disconnect_done = false;
 
 		$('#mailchimp_woocommerce_disconnect').click(function (e){
+			// this is to trigger the event even after preventDefault() is issued.
 			if (mailchimp_woocommerce_disconnect_done) {
 				mailchimp_woocommerce_disconnect_done = false; // reset flag
 				return; // let the event bubble away
@@ -96,24 +97,17 @@
 				showCancelButton: true,
 				confirmButtonText: 'Yes, disconnect.',
 				cancelButtonText: 'No, cancel!',
-				reverseButtons: true, 
-				animations: false
+				reverseButtons: true
 			}).then((result) => {
-				console.log(result.value)
 				if (result.value) {
-					console.log ('disconnecting');
+					var query = window.location.href.match(/^(.*)\&/);
+					if (query){
+						history.replaceState({}, "", query[1]);
+						$('input[name=_wp_http_referer]').val(query[1]);
+					}
 					mailchimp_woocommerce_disconnect_done = true;
 					e.target.click();
-				} else if (
-					// Read more about handling dismissals
-					result.dismiss === Swal.DismissReason.cancel
-				) {
-					swalWithBootstrapButtons.fire(
-					'Cancelled',
-					'Your Store remains connected to Mailchimp',
-					'info'
-					)
-				}
+				} 
 			})	
 		});
 

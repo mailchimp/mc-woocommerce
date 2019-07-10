@@ -1,15 +1,17 @@
 <?php
-$active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'api_key';
-$is_mailchimp_post = isset($_POST['mailchimp_woocommerce_settings_hidden']) && $_POST['mailchimp_woocommerce_settings_hidden'] === 'Y';
-
+// Grab plugin admin object
 $handler = MailChimp_WooCommerce_Admin::connect();
 
-//Grab all options for this particular tab we're viewing.
+// Grab all options for this particular tab we're viewing.
 $options = get_option($this->plugin_name, array());
 
-if (!isset($_GET['tab']) && isset($options['active_tab'])) {
-    $active_tab = $options['active_tab'];
+$active_tab = isset($_GET['tab']) ? $_GET['tab'] : ((isset($options['active_tab'])) ? $options['active_tab'] : 'api_key');
+
+if (!mailchimp_is_configured()) {
+    if ($active_tab == 'sync' || $active_tab == 'logs' ) isset($options['active_tab']) ? $options['active_tab'] : 'api_key';
 }
+
+$is_mailchimp_post = isset($_POST['mailchimp_woocommerce_settings_hidden']) && $_POST['mailchimp_woocommerce_settings_hidden'] === 'Y';
 
 $show_sync_tab = isset($_GET['resync']) ? $_GET['resync'] === '1' : false;
 
@@ -73,7 +75,7 @@ if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue
     </div>
 <?php endif; ?>
 
-<?php settings_errors(); ?>
+<?php if (!$show_wizard) settings_errors(); ?>
 
 <!-- Create a header in the default WordPress 'wrap' container -->
 <div class="mc-woocommerce-settings wrap">
@@ -192,12 +194,12 @@ if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue
     <?php endif; ?>
         <form id="mailchimp_woocommerce_options" method="post" name="cleanup_options" action="options.php">
             <div class="box">
-            
                 <?php 
                     if ($active_tab !== 'sync') {
                         submit_button((!$show_wizard) ? __('Save all changes') : __('Next'), 'primary tab-content-submit','submit', TRUE);
                     }
                 ?>
+
                 <input type="hidden" name="mailchimp_woocommerce_settings_hidden" value="Y">
               
                 <?php

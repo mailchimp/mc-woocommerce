@@ -64,7 +64,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		update_option('mailchimp-woocommerce-validation.campaign_defaults', false);
 		update_option('mailchimp-woocommerce-validation.newsletter_settings', false);
 		update_option('mailchimp-woocommerce-sync.started_at', false);
-		
+		update_option('mailchimp-woocommerce-sync.completed_at', false);
+		update_option('mailchimp-woocommerce-resource-last-updated', false);
+
 		return $options;
 	}
 	

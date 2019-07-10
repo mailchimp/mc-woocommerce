@@ -154,32 +154,25 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
             <p id="mailchimp_list_name"><?php echo $mailchimp_list_name; ?></p>
 
             <div class="mc-woocommerce-last-sync">
-                <?php if ($last_updated_time): ?>
-                    <p>
-                        
-                        <?php esc_html_e('Last Updated:', 'mc-woocommerce');?>
-                        <i id="mailchimp_last_updated">
+                <p>
+                    <?php if ($last_updated_time): ?>
+                        <?php esc_html_e('Status:', 'mc-woocommerce');?>
+                        <?= mailchimp_is_done_syncing() ? "Sync Completed" : "Syncing..."; ?>
+                    <?php elseif ($sync_started_at && !$sync_completed_at): ?>
+                        <?php esc_html_e('Initial sync in progress', 'mc-woocommerce');?>
+                    <?php endif;?>
+                </p>
+                <p>
+                    <?php esc_html_e('Last Updated:', 'mc-woocommerce');?>
+                    <i id="mailchimp_last_updated">
+                        <?php if ($last_updated_time): ?>
                             <?php echo $last_updated_time->format( __('D, M j, Y g:i A', 'mc-woocommerce')); ?>
-                        </i>
-                        <span class="spinner" style="float:none; background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px"></span>
-                    </p>
-                    <p>
-                        Status:
-                    <?= mailchimp_is_done_syncing() ? "Sync Completed" : "Syncing..."; ?></p>
-                <?php endif; ?>
-                
-                <?php if ($sync_started_at && !$sync_completed_at): ?>
-                    <p>
-                        <strong><?php esc_html_e('Initial Sync.', 'mc-woocommerce');?></strong>
-                        <br/>
-                        <?php esc_html_e('Last Updated:', 'mc-woocommerce');?>
-                        <i id="mailchimp_last_updated">
-                            <?php esc_html_e('In Progress', 'mc-woocommerce');?>
-                        </i>
-                        <span class="spinner" style="float:none; background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px"></span>
-                    </p>
-                    
-                <?php endif; ?>
+                        <?php else : ?>
+                        <?php esc_html_e('Starting...', 'mc-woocommerce'); ?>
+                        <?php endif;?>
+                    </i>
+                    <span class="spinner" style="float:none; background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px"></span>
+                </p>
             </div>
         </div>
         

@@ -196,7 +196,11 @@ if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue
             <div class="box">
                 <?php 
                     if ($active_tab !== 'sync') {
-                        submit_button((!$show_wizard) ? __('Save all changes') : __('Next'), 'primary tab-content-submit','submit', TRUE);
+                        if ($active_tab == 'newsletter_settings' && !mailchimp_is_configured()) {
+                            $submit_button_label = __('Start sync','mc-woocommerce');
+                        }
+                        else $submit_button_label = !$show_wizard ? __('Save all changes') : __('Next');
+                        submit_button($submit_button_label, 'primary tab-content-submit','submit', TRUE);
                     }
                 ?>
 

@@ -58,6 +58,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$options = array();
 		$options['mailchimp_api_key'] = null;
 		$options['active_tab'] = 'api_key';
+		$options['mailchimp_list'] = null;
 
 		update_option('mailchimp-woocommerce-validation.store_info', false);
 		update_option('mailchimp-woocommerce-validation.campaign_defaults', false);

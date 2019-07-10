@@ -45,7 +45,7 @@ $handle = !empty($viewed_log) ? substr($viewed_log, 0, strlen($viewed_log) > 37 
     <div class="box box-half">
         <p>
             <?php esc_html_e('Advanced troubleshooting can be conducted with the logging capability turned on.
-            By default, it’s set to “none” and you may toggle to either “standard” or “debug” as needed.
+            By default, it’s set to “standard” and you may toggle to either “debug” or “none” as needed.
             With standard logging, you can see basic information about the data submission to Mailchimp including any errors.
             “Debug” gives a much deeper insight that is useful to share with support if problems arise.', 'mc-woocommerce');
             ?>

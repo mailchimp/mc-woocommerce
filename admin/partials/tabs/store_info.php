@@ -102,12 +102,10 @@ if (!$handler->hasValidApiKey()) {
         <div class="mailchimp-select-wrapper">
             <select name="<?php echo $this->plugin_name; ?>[store_locale]" required>
                 <option disabled selected value="<?= __('','mc-woocommerce')?>"><?= __("Select store's locale",'mc-woocommerce')?></option>
-                <?php $selected_locale = isset($options['store_locale']) && !empty($options['store_locale']) ? $options['store_locale'] : ''; ?>
-                <?php
-                foreach(MailChimp_Api_Locales::simple() as $locale_key => $local_value) {
-                    echo '<option value="' . esc_attr( $locale_key ) . '" ' . selected($locale_key === $selected_locale, true, false ) . '>' . esc_html( $local_value ) . '</option>';
-                }
-                ?>
+                <?php $selected_locale = isset($options['store_locale']) && !empty($options['store_locale']) ? $options['store_locale'] : substr(get_locale(), 0, 2); ?>
+                <?php foreach(MailChimp_Api_Locales::simple() as $locale_key => $local_value) : ?>
+                    <option value="<?php echo esc_attr( $locale_key ) . '" ' . selected($locale_key === $selected_locale, true, false ); ?>"> <?php esc_html_e( $local_value ) ?> </option>;
+                <?php endforeach;?>
             </select>
         </div>
     </div>

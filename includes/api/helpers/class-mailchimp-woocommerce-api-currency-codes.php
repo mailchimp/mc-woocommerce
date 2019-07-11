@@ -1101,4 +1101,19 @@ class MailChimp_WooCommerce_CurrencyCodes
         }
         return $response;
     }
+
+    /**
+     * @return array
+     */
+    public static function getCurrency($alpha3)
+    {
+        $response = array();
+        foreach (static::currencies() as $key => $data) {
+            if ($data['alpha3'] == $alpha3) {
+                return $data;
+            }
+            
+        }
+        return null;
+    }
 }

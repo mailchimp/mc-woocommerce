@@ -113,11 +113,14 @@ if (!$handler->hasValidApiKey()) {
     </div>
 
     <div class="box box-half" >
-        <?php $all_currencies = MailChimp_WooCommerce_CurrencyCodes::lists();?>
+        <?php 
+            $current_currency = isset($options['store_currency_code']) ? $options['store_currency_code'] : get_woocommerce_currency();
+            $current_currency_data = MailChimp_WooCommerce_CurrencyCodes::getCurrency($current_currency);
+        ?>
         <label for="<?php echo $this->plugin_name; ?>-store-currency-code-label">
             <span><?php esc_html_e('Woocommerce Currency', 'mc-woocommerce'); ?></span>
         </label>
-        <input type="text" value="<?php echo isset($options['store_currency_code']) ? $options['store_currency_code'] . ' | ' . $all_currencies[$options['store_currency_code']]: '' ?>" disabled/>
+        <input type="text" value="<?php echo isset($current_currency_data) ? $current_currency . ' | ' .  $current_currency_data['name']: $current_currency ?>" disabled/>
     </div>
 
     <div class="box" >

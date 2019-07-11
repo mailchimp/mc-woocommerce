@@ -303,7 +303,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		if (empty($active_tab) && $input['woocommerce_settings_save_general']) {
 			unset($input['woocommerce_settings_save_general']);
 			$data['store_currency_code'] = (string) $input['store_currency_code'];
-			//return $this->getOptions();
 		}
 
 		switch ($active_tab) {

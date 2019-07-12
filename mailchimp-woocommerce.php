@@ -23,10 +23,10 @@
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       mc-woocommerce
  * Domain Path:       /languages
- * Requires at least: 4.4
- * Tested up to: 5.1
+ * Requires at least: 4.7
+ * Tested up to: 5.2.2
  * WC requires at least: 3.5
- * WC tested up to: 3.6.4
+ * WC tested up to: 3.6.5
  */
 
 // If this file is called directly, abort.

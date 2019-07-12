@@ -229,7 +229,7 @@ class MailChimp_WooCommerce_Rest_Queue
     public function unlock_worker()
     {
         if (!delete_site_transient('http_worker_lock')) {
-            mailchimp_log('rest-queue', 'http_worker_lock did not delete properly - will respawn in 60 seconds.');
+            mailchimp_log('rest-queue', 'http_worker_lock enabled - respawn in 60 seconds.');
         }
     }
 

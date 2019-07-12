@@ -870,7 +870,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                                 }
 								
 								if (response.has_started && !response.has_finished) {
-									jQuery('.sync-stats-audience .spinner').css('visibility', 'visible');
+									jQuery('.sync-stats-audience .sync-loader').css('visibility', 'visible');
 									jQuery('.sync-stats-audience .card_count').hide();
 									
 									jQuery('.sync-stats-store .card_count').hide();

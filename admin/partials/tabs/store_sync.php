@@ -114,21 +114,21 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
             <div class="sync-stats-card-content">
                 <span class="card_label"><strong><?php esc_html_e('Subscribers', 'mc-woocommerce');?></strong></span>
                 <span class="card_count" id="mailchimp_subscriber_count"><?php echo $mailchimp_total_subscribers; ?></span>
-                <span class="spinner" style="background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px; position: absolute; right: 1em;"></span>
+                <img class="sync-loader" src="<?php echo plugin_dir_url( __FILE__ ) . "images/3dotpurple.gif"; ?>"/>
             </div>
         </div>
         <div class="box sync-stats-card transactional" >
             <div class="sync-stats-card-content">
                 <span class="card_label"><strong><?php esc_html_e('Transactional', 'mc-woocommerce');?></strong></span>
                 <span class="card_count" id="mailchimp_transactional_count"><?php echo $mailchimp_total_transactional; ?></span>
-                <span class="spinner" style="background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px; position: absolute; right: 1em;"></span>
+                <img class="sync-loader" src="<?php echo plugin_dir_url( __FILE__ ) . "images/3dotpurple.gif"; ?>"/>
             </div>
         </div>
         <div class="box sync-stats-card unsubscribed" >
             <div class="sync-stats-card-content">
                 <span class="card_label"><strong><?php esc_html_e('Unsubscribed', 'mc-woocommerce');?></strong></span>
                 <span class="card_count" id="mailchimp_unsubscribed_count"><?php echo $mailchimp_total_unsubscribed; ?></span>
-                <span class="spinner" style="background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px; position: absolute; right: 1em;"></span>
+                <img class="sync-loader" src="<?php echo plugin_dir_url( __FILE__ ) . "images/3dotpurple.gif"; ?>"/>
             </div>
         </div>
     </div>
@@ -157,7 +157,7 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
                 <p>
                     <?php if ($last_updated_time): ?>
                         <?php esc_html_e('Status:', 'mc-woocommerce');?>
-                        <?= mailchimp_is_done_syncing() ? "Sync Completed" : "Syncing..."; ?>
+                        <?= mailchimp_is_done_syncing() ? esc_html_e('Sync Completed', 'mc-woocommerce') : esc_html_e('Syncing...', 'mc-woocommerce'); ?>
                     <?php elseif ($sync_started_at && !$sync_completed_at): ?>
                         <?php esc_html_e('Initial sync in progress', 'mc-woocommerce');?>
                     <?php endif;?>

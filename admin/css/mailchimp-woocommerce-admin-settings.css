@@ -401,6 +401,16 @@
 	color: #E6E6E6;
 }
 
+.sync-content-wrapper .sync-stats-card .sync-loader {
+	font-family: proxima-nova, Arial, Helvetica, sans-serif;
+	font-size: 22px;
+	line-height: 22px;
+	position: absolute;
+	right: 1em;
+	margin: 8px 0px;
+	visibility: hidden;
+}
+
 .progress-bar-wrapper {
 	position: absolute;
 	top: 0.6em;

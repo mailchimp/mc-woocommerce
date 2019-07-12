@@ -204,10 +204,14 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				update_option( $this->plugin_name.'_cart_table_add_index_update', true);
 			}
 			else {
-				$sql = "ALTER TABLE {$wpdb->prefix}mailchimp_carts ADD PRIMARY KEY (email);";
-				// only update the option if the query returned sucessfully
-				if ($wpdb->query($sql)) {
-					update_option( $this->plugin_name.'_cart_table_add_index_update', true);
+				//remove table duplicates
+				$delete_sql = "DELETE carts_1 FROM {$wpdb->prefix}mailchimp_carts carts_1 INNER JOIN {$wpdb->prefix}mailchimp_carts carts_2 WHERE carts_1.created_at < carts_2.created_at AND carts_1.email = carts_2.email;";
+				if ($wpdb->query($delete_sql) !== false) {
+					$sql = "ALTER TABLE {$wpdb->prefix}mailchimp_carts ADD PRIMARY KEY (email);";
+					// only update the option if the query returned sucessfully
+					if ($wpdb->query($sql) !== false) {
+						update_option( $this->plugin_name.'_cart_table_add_index_update', true);
+					}	
 				}
 			}
 		}

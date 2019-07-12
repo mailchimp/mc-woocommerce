@@ -110,7 +110,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     public function handleOrderStatusChanged($order_id, $old_status, $new_status)
     {
         if (!mailchimp_is_configured()) return;
-
+        
+        $tracking = null;
         $newOrder = false;
 
         if ("pending" == $old_status && "processing" == $new_status) {

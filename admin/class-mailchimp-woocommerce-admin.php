@@ -1202,9 +1202,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	{
 		$text = __('Starting the sync process...', 'mc-woocommerce').'<br/>'.
 			'<p id="sync-status-message">'.
-			__('Please hang tight while we work our mojo.', 'mc-woocommerce') .
+			__('The plugin has started the initial sync with your store, and the process will work in the background automatically.', 'mc-woocommerce') .
 			' ' .
-            __('Sometimes the sync can take a while, especially on sites with lots of orders and/or products.', 'mc-woocommerce') .
+            __('Sometimes the sync can take a while, especially on sites with lots of orders and/or products. It is safe to navigate away from this screen while it is running.', 'mc-woocommerce') .
             '</p>';
 		add_settings_error('mailchimp-woocommerce_notice', $this->plugin_name, $text, 'updated');
 	}

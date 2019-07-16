@@ -5,7 +5,7 @@ $handler = MailChimp_WooCommerce_Admin::connect();
 // Grab all options for this particular tab we're viewing.
 $options = get_option($this->plugin_name, array());
 
-$active_tab = isset($_GET['tab']) ? $_GET['tab'] : ((isset($options['active_tab'])) ? $options['active_tab'] : 'api_key');
+$active_tab = isset($_GET['tab']) ? $_GET['tab'] : (isset($options['active_tab']) ? $options['active_tab'] : 'api_key');
 
 if (!mailchimp_is_configured()) {
     if ($active_tab == 'sync' || $active_tab == 'logs' ) isset($options['active_tab']) ? $options['active_tab'] : 'api_key';
@@ -75,7 +75,12 @@ if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue
     </div>
 <?php endif; ?>
 
-<?php if (!$show_wizard) settings_errors(); ?>
+<?php
+    $settings_errors = get_settings_errors();
+    if (!$show_wizard || ($show_wizard && isset($settings_errors[0]) && $settings_errors[0]['type'] != 'updated' )) {
+        settings_errors();
+    }
+?>
 
 <!-- Create a header in the default WordPress 'wrap' container -->
 <div class="mc-woocommerce-settings wrap">
@@ -203,7 +208,11 @@ if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue
                         submit_button($submit_button_label, 'primary tab-content-submit','submit', TRUE);
                     }
                 ?>
-
+                
+                <?php if ($show_wizard) : ?>
+                    <input type="hidden" name="mailchimp_woocommerce_wizard_on" value=1>
+                <?php endif; ?>
+                
                 <input type="hidden" name="mailchimp_woocommerce_settings_hidden" value="Y">
               
                 <?php

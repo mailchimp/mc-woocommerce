@@ -71,8 +71,11 @@
 			$temp.remove();
 		});
 
+		/*
+		* Shows dialog on store disconnect
+		* Change wp_http_referer URL in case of store disconnect
+		*/ 
 		var mailchimp_woocommerce_disconnect_done = false;
-
 		$('#mailchimp_woocommerce_disconnect').click(function (e){
 			// this is to trigger the event even after preventDefault() is issued.
 			if (mailchimp_woocommerce_disconnect_done) {
@@ -109,6 +112,30 @@
 					e.target.click();
 				} 
 			})	
+		});
+
+		/* 
+		* Change wp_http_referer URL in case of in-wizard tab change
+		*/ 
+		var mailchimp_woocommerce_submit_done = false;
+		$('#mailchimp_woocommerce_options .tab-content-submit').click(function(e){
+			// this is to trigger the event even after preventDefault() is issued.
+			if (mailchimp_woocommerce_submit_done) {
+				mailchimp_woocommerce_submit_done = false; // reset flag
+				return; // let the event bubble away
+			}
+			e.preventDefault();
+
+			if ($('input[name=mailchimp_woocommerce_wizard_on]').val() == 1) {
+				var query = window.location.href.match(/^(.*)\&/);
+				if (query){
+					history.replaceState({}, "", query[1]);
+					$('input[name=_wp_http_referer]').val(query[1]);		
+				}
+			}
+			mailchimp_woocommerce_submit_done = true;
+			e.target.click();
+
 		});
 
 	});

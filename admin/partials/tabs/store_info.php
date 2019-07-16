@@ -86,7 +86,7 @@ if (!$handler->hasValidApiKey()) {
         <label for="<?php echo $this->plugin_name; ?>-store-phone-label">
                 <span> <?php esc_html_e('Phone Number', 'mc-woocommerce'); ?></span>
         </label>
-        <input type="text" id="<?php echo $this->plugin_name; ?>-store-phone-label" name="<?php echo $this->plugin_name; ?>[store_phone]" value="<?php echo isset($options['store_phone']) ? $options['store_phone'] : '' ?>" />
+        <input required type="text" id="<?php echo $this->plugin_name; ?>-store-phone-label" name="<?php echo $this->plugin_name; ?>[store_phone]" value="<?php echo isset($options['store_phone']) ? $options['store_phone'] : '' ?>" />
     </div>
 
     <div class="box fieldset-header" >

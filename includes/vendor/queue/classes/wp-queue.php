@@ -37,32 +37,46 @@ if ( ! class_exists( 'WP_Queue' ) ) {
 		 * @return $this
 		 */
 		public function push( WP_Job $job, $delay = 0 ) {
-			global $wpdb;
+			if (get_class($job) == "MailChimp_WooCommerce_Single_Product" || get_class($job) == "MailChimp_WooCommerce_Single_Coupon"){
+				$args = array(
+					'action' => get_class($job),
+					'job' => $job);
+				
+				as_schedule_single_action( strtotime( '+20 seconds' ), 'MailChimp_WooCommerce_Single_Job', $args);
+				
+				mailchimp_log('action_scheduler', "Single Action ".get_class($job), $args);
+				
+				return true;
+			}
+			else {
+				global $wpdb;
 
-			$data = array(
-				'job'          => maybe_serialize( $job ),
-				'available_at' => $this->datetime( $delay ),
-				'created_at'   => $this->datetime(),
-			);
+				$data = array(
+					'job'          => maybe_serialize( $job ),
+					'available_at' => $this->datetime( $delay ),
+					'created_at'   => $this->datetime(),
+				);
+	
+				$id = $wpdb->insert( $this->table, $data );
+	
+				if (!$id) {
+					try {
+						if (mailchimp_string_contains($wpdb->last_error, 'Table')) {
+							mailchimp_debug('Queue Table Was Not Found!', 'Creating Tables');
+							MailChimp_WooCommerce_Activator::create_queue_tables();
+							$id = $wpdb->insert( $this->table, $data );
+							if (!$id) {
+								mailchimp_debug('Queue Job '.get_class($job), $wpdb->last_error);
+							}
+						}
+					} catch (\Exception $e) {
+						mailchimp_error_trace($e, 'trying to create queue tables');
+					}
+				}
+	
+				return $this;	
+			}
 
-			$id = $wpdb->insert( $this->table, $data );
-
-            if (!$id) {
-                try {
-                    if (mailchimp_string_contains($wpdb->last_error, 'Table')) {
-                        mailchimp_debug('Queue Table Was Not Found!', 'Creating Tables');
-                        MailChimp_WooCommerce_Activator::create_queue_tables();
-                        $id = $wpdb->insert( $this->table, $data );
-                        if (!$id) {
-                            mailchimp_debug('Queue Job '.get_class($job), $wpdb->last_error);
-                        }
-                    }
-                } catch (\Exception $e) {
-                    mailchimp_error_trace($e, 'trying to create queue tables');
-                }
-            }
-
-			return $this;
 		}
 
 		/**

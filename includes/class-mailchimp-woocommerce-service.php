@@ -800,4 +800,9 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         exit;
     }
 
+    public function mailchimp_process_single_job($action, $job) {
+        $job = new $action($job['id']);
+        $job->handle();
+    }
+
 }

@@ -73,7 +73,7 @@ class MailChimp_WooCommerce_Transform_Orders
             return $order->flagAsPrivacyProtected(true);
         }
 
-        $order->setId($woo->get_order_number());
+        $order->setId($woo->get_id());
 
         // if we have a campaign id let's set it now.
         if (!empty($this->campaign_id)) {

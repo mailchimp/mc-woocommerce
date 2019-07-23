@@ -72,6 +72,7 @@ spl_autoload_register(function($class) {
         'WP_Queue' => 'includes/vendor/queue/classes/wp-queue.php',
         'WP_Worker' => 'includes/vendor/queue/classes/worker/wp-worker.php',
         'Queue_Command' => 'includes/vendor/queue/classes/cli/queue-command.php',
+        'ActionScheduler' => 'includes/vendor/action-scheduler/action-scheduler.php',
     );
 
     // if the file exists, require it
@@ -170,15 +171,15 @@ if (!function_exists( 'wp_queue')) {
  */
 function mailchimp_handle_or_queue(WP_Job $job, $delay = 0, $force_now = false)
 {   
-    if ($job instanceof \MailChimp_WooCommerce_Single_Order && isset($job->order_id)) {
+    if ($job instanceof \MailChimp_WooCommerce_Single_Order && isset($job->id)) {
         // if this is a order process already queued - just skip this
-        if (get_site_transient("mailchimp_order_being_processed_{$job->order_id}") == true) {
-            mailchimp_debug('order_sync.skip', "Order {$job->order_id} already added successfully to queue. Skipping.");
+        if (get_site_transient("mailchimp_order_being_processed_{$job->id}") == true) {
+            mailchimp_debug('order_sync.skip', "Order {$job->id} already added successfully to queue. Skipping.");
             return;
         }
         // tell the system the order is already queued for processing in this saving process - and we don't need to process it again.
-        set_site_transient( "mailchimp_order_being_processed_{$job->order_id}", true, 30);
-        mailchimp_debug('order_sync.transient', "transient set for order {$job->order_id}");
+        set_site_transient( "mailchimp_order_being_processed_{$job->id}", true, 30);
+        mailchimp_debug('order_sync.transient', "transient set for order {$job->id}");
     }
 
     wp_queue($job, $delay);

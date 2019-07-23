@@ -356,6 +356,8 @@ class MailChimp_WooCommerce
             // set user by email hash ( public and private )
             $this->loader->add_action('wp_ajax_mailchimp_set_user_by_email', $service, 'set_user_by_email');
             $this->loader->add_action('wp_ajax_nopriv_mailchimp_set_user_by_email', $service, 'set_user_by_email');
+
+            $this->loader->add_action('MailChimp_WooCommerce_Single_Job', $service, 'mailchimp_process_single_job', 10, 2);
 		}
 	}
 

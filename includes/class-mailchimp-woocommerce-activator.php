@@ -94,6 +94,15 @@ class MailChimp_WooCommerce_Activator {
 				) $charset_collate;";
 
 		dbDelta( $sql );
+		
+		$sql = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}mailchimp_jobs (
+			id bigint(20) NOT NULL AUTO_INCREMENT,
+			job text NOT NULL,
+			created_at datetime NOT NULL,
+			PRIMARY KEY  (id)
+			) $charset_collate;";
+
+		dbDelta( $sql );
 
 		// set the mailchimp woocommerce version at the time of install
 		update_site_option('mailchimp_woocommerce_version', mailchimp_environment_variables()->version);

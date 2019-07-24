@@ -200,12 +200,12 @@ if (mailchimp_should_init_rest_queue() && !get_site_transient('http_worker_queue
         <form id="mailchimp_woocommerce_options" method="post" name="cleanup_options" action="options.php">
             <div class="box">
                 <?php 
-                    if ($active_tab !== 'sync') {
+                    if ($active_tab !== 'api_key' && $active_tab !== 'sync') {
                         if ($active_tab == 'newsletter_settings' && !mailchimp_is_configured()) {
                             $submit_button_label = __('Start sync','mc-woocommerce');
                         }
                         else $submit_button_label = !$show_wizard ? __('Save all changes') : __('Next');
-                        submit_button($submit_button_label, 'primary tab-content-submit','submit', TRUE);
+                        submit_button($submit_button_label, 'primary tab-content-submit','mailchimp_submit', TRUE);
                     }
                 ?>
                 

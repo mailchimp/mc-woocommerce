@@ -138,6 +138,73 @@
 
 		});
 
+		// Mailchimp OAuth connection (tab "connect")
+		$('#mailchimp-oauth-connect').click(function(e){
+			var token = '';
+			var startData = {action:'mailchimp_woocommerce_oauth_start'};
+			$('#mailchimp-oauth-waiting').show();
+			$.post(ajaxurl, startData, function(response) {
+				if (response.success) {
+					console.log("response:",response);
+					token = JSON.parse(response.data.body).token;
+					var domain = 'https://woocommerce.mailchimpapp.com';
+					var options = {
+						path: domain+'/auth/start/'+token,
+						windowName: 'Mailchimp For WooCommerce OAuth',
+						height: 500,
+						width: 800,
+					};
+					var left = (screen.width - options.width) / 2;
+					var top = (screen.height - options.height) / 4;
+					var window_options = 'toolbar=no, location=no, directories=no, ' +
+						'status=no, menubar=no, scrollbars=no, resizable=no, ' +
+						'copyhistory=no, width=' + options.width +
+						', height=' + options.height + ', top=' + top + ', left=' + left +
+						'domain='+domain.replace('https://', '');
+					
+					var popup = window.open(options.path, options.windowName, window_options);
+					
+					var oauthInterval = window.setInterval(function(){
+						if (popup.closed) {
+							$('#mailchimp-oauth-waiting').hide();
+							$('#mailchimp-oauth-connecting').show();
+							window.clearInterval(oauthInterval);
+							$.post(domain + '/api/status/' + token).done(function(statusData){
+								if (statusData.status == "accepted") {
+									console.log('accepted');
+									var finishData = {
+										action: 'mailchimp_woocommerce_oauth_finish', 
+										token: token
+									}
+									$.post(ajaxurl, finishData, function(response) {
+										if (response.success) {
+											$('#mailchimp-oauth-connecting').hide();
+											$('#mailchimp-oauth-connected').show();
+											console.log('finish success:', response);
+											var accessToken = JSON.parse(response.data.body).access_token + '-' + JSON.parse(response.data.body).data_center 
+											$('#mailchimp-woocommerce-mailchimp-api-key').val(accessToken);
+											var aform = $('#mailchimp_woocommerce_options');
+											console.log(aform);
+											aform.submit();
+										}
+										else {
+											console.log('finish data:', response);
+										}
+									});
+								}
+								else {
+									console.log('status data:', statusData.status);
+								}
+							});
+						}
+					}, 250);
+					
+				}
+				else {
+					console.log("start response:",response);
+				}		
+			});
+		});
 	});
 	
 })( jQuery );

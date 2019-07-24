@@ -433,6 +433,58 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	}
 
 	/**
+     * Mailchimp OAuth connection start
+     */
+    public function mailchimp_woocommerce_ajax_oauth_start()
+    {   
+        $args = array(
+            'domain' => site_url(),
+            'secret' => '123123123123',
+        );
+
+        $pload = array(
+            'headers' => array( 
+                'Content-type' => 'application/json',
+            ),
+            'body' => json_encode($args)
+        );
+
+        $response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/start', $pload);
+        if ($response['response']['code'] == 201 ){
+            wp_send_json_success($response);
+        }
+        else wp_send_json_error( $response );
+        
+    }
+
+	/**
+     * Mailchimp OAuth connection finish
+     */
+    public function mailchimp_woocommerce_ajax_oauth_finish()
+    {   
+        $args = array(
+            'domain' => site_url(),
+            'secret' => '123123123123',
+            'token' => $_POST['token']
+        );
+
+        $pload = array(
+            'headers' => array( 
+                'Content-type' => 'application/json',
+            ),
+            'body' => json_encode($args)
+        );
+
+        $response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/finish', $pload);
+        if ($response['response']['code'] == 200 ){
+            // save api_key? If yes, we can skip api key validation for validatePostApiKey();
+            wp_send_json_success($response);
+        }
+        else wp_send_json_error( $response );
+        
+    }
+
+	/**
 	 * STEP 2.
 	 *
 	 * Handle the 'store_info' tab post.

@@ -235,6 +235,14 @@
 	
 }
 
+.oauth-description {
+	display: none;
+}
+
+#mailchimp-oauth-connected {
+	color: #7FAD45;
+}
+
 .mc-woocommerce-copy-log-button {
 	padding-bottom: 15px !important;
 	text-decoration: none;
@@ -281,6 +289,7 @@
 	transition: background-color 0.3s ease-out,
 		text-shadow 0.3s ease-out,
 		box-shadow 0.3s ease-out;
+	text-decoration: none !important;
 }
 
 .mc-woocommerce-resync-button,

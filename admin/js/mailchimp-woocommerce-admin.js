@@ -118,7 +118,7 @@
 		* Change wp_http_referer URL in case of in-wizard tab change
 		*/ 
 		var mailchimp_woocommerce_submit_done = false;
-		$('#mailchimp_woocommerce_options .tab-content-submit').click(function(e){
+		$('#mailchimp_woocommerce_options .tab-content-submit:not(.oauth-connect)').click(function(e){
 			// this is to trigger the event even after preventDefault() is issued.
 			if (mailchimp_woocommerce_submit_done) {
 				mailchimp_woocommerce_submit_done = false; // reset flag
@@ -139,14 +139,13 @@
 		});
 
 		// Mailchimp OAuth connection (tab "connect")
-		$('#mailchimp-oauth-connect').click(function(e){
+		$('#mailchimp_woocommerce_options #mailchimp-oauth-connect').click(function(e){
 			var token = '';
 			var startData = {action:'mailchimp_woocommerce_oauth_start'};
 			$('#mailchimp-oauth-waiting').show();
-			$.post(ajaxurl, startData, function(response) {
-				if (response.success) {
-					console.log("response:",response);
-					token = JSON.parse(response.data.body).token;
+			$.post(ajaxurl, startData, function(startResponse) {
+				if (startResponse.success) {
+					token = JSON.parse(startResponse.data.body).token;
 					var domain = 'https://woocommerce.mailchimpapp.com';
 					var options = {
 						path: domain+'/auth/start/'+token,
@@ -162,38 +161,57 @@
 						', height=' + options.height + ', top=' + top + ', left=' + left +
 						'domain='+domain.replace('https://', '');
 					
+					// open Mailchimp OAuth popup
 					var popup = window.open(options.path, options.windowName, window_options);
 					
+					// While the popup is open, wait. when closed, try to get status=accepted
 					var oauthInterval = window.setInterval(function(){
 						if (popup.closed) {
+							// hide/show messages
 							$('#mailchimp-oauth-waiting').hide();
 							$('#mailchimp-oauth-connecting').show();
+							
+							// clear interval
 							window.clearInterval(oauthInterval);
+							
+							// ping status to check if auth was accepted
 							$.post(domain + '/api/status/' + token).done(function(statusData){
 								if (statusData.status == "accepted") {
-									console.log('accepted');
+
+									// call for finish endpoint to retrieve access_token
 									var finishData = {
 										action: 'mailchimp_woocommerce_oauth_finish', 
 										token: token
 									}
-									$.post(ajaxurl, finishData, function(response) {
-										if (response.success) {
+
+									$.post(ajaxurl, finishData, function(finishResponse) {
+										if (finishResponse.success) {
+											// hide/show messages
 											$('#mailchimp-oauth-connecting').hide();
 											$('#mailchimp-oauth-connected').show();
-											console.log('finish success:', response);
-											var accessToken = JSON.parse(response.data.body).access_token + '-' + JSON.parse(response.data.body).data_center 
+											
+											// get access_token from finishResponse and fill api-key field value including data_center
+											var accessToken = JSON.parse(finishResponse.data.body).access_token + '-' + JSON.parse(finishResponse.data.body).data_center 
 											$('#mailchimp-woocommerce-mailchimp-api-key').val(accessToken);
-											var aform = $('#mailchimp_woocommerce_options');
-											console.log(aform);
-											aform.submit();
+
+											// always go to next step on success, so change url of wp_http_referer
+											if ($('input[name=mailchimp_woocommerce_wizard_on]').val() == 1) {
+												var query = window.location.href.match(/^(.*)\&/);
+												if (query){
+													history.replaceState({}, "", query[1]);
+													$('input[name=_wp_http_referer]').val(query[1]);		
+												}
+											}
+											// submit api_key/access_token form 
+											$('#mailchimp_woocommerce_options').submit();
 										}
 										else {
-											console.log('finish data:', response);
+											console.log('Error calling OAuth finish endpoint. Data:', finishResponse);
 										}
 									});
 								}
 								else {
-									console.log('status data:', statusData.status);
+									console.log('Error calling OAuth status endpoint. Data:', statusData);
 								}
 							});
 						}
@@ -201,7 +219,7 @@
 					
 				}
 				else {
-					console.log("start response:",response);
+					console.log("start response:",startResponse);
 				}		
 			});
 		});

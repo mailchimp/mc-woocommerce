@@ -179,6 +179,11 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                     $api->handleProductsMissingFromAPI($order);
                     // make another attempt again to add the order.
                     $api_response = $api->$call($store_id, $order, false);
+                } elseif (mailchimp_string_contains($e->getMessage(), 'campaign with the provided ID')) {
+                    // the campaign was invalid, we need to remove it and re-submit
+                    $order->setCampaignId(null);
+                    // make another attempt again to add the order.
+                    $api_response = $api->$call($store_id, $order, false);
                 } else {
                     throw $e;
                 }

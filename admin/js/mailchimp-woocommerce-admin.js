@@ -142,6 +142,7 @@
 		$('#mailchimp_woocommerce_options #mailchimp-oauth-connect').click(function(e){
 			var token = '';
 			var startData = {action:'mailchimp_woocommerce_oauth_start'};
+			$('#mailchimp-oauth-api-key-valid').hide();
 			$('#mailchimp-oauth-waiting').show();
 			$.post(ajaxurl, startData, function(startResponse) {
 				if (startResponse.success) {

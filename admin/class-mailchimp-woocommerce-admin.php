@@ -891,10 +891,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 											promo_rulesPartial = "0 / " + response.promo_rules_in_store;
 										} else if (response.promo_rules_in_mailchimp == response.promo_rules_in_store) {
 											promo_rulesProgress =  (100 / Math.ceil(response.promo_rules_in_store / 5) + 1) * (response.promo_rules_page - 1) ;
-											promo_rulesPartial = (((response.promo_rules_page - 1) * 5) < response.promo_rules_in_mailchimp ? (response.promo_rules_page - 1) * 5 : response.promo_rules_in_mailchimp)  + " / " + response.promo_rules_in_store;
+											var promo_page = response.promo_rules_page ? response.promo_rules_page : 1; 
+											promo_rulesPartial = (((promo_page - 1) * 5) < response.promo_rules_in_mailchimp ? (promo_page - 1) * 5 : response.promo_rules_in_mailchimp)  + " / " + response.promo_rules_in_store;
 										} else {
 											promo_rulesProgress = response.promo_rules_in_mailchimp / response.promo_rules_in_store * 100
-											promo_rulesPartial = response.promo_rules_in_mailchimp + " / " + response.promo_rules_in_store;
+											promo_rulesPartial = (response.promo_rules_in_mailchimp <= 0 ? 0 : response.promo_rules_in_mailchimp) + " / " + response.promo_rules_in_store;
 										}
 										if (promo_rulesProgress > 100) promo_rulesProgress = 100;
 										jQuery('.mailchimp_promo_rules_count_partial').html(promo_rulesPartial);

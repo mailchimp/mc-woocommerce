@@ -437,9 +437,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
      */
     public function mailchimp_woocommerce_ajax_oauth_start()
     {   
+		$secret = uniqid();
         $args = array(
             'domain' => site_url(),
-            'secret' => '123123123123',
+            'secret' => $secret,
         );
 
         $pload = array(
@@ -451,7 +452,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
         $response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/start', $pload);
         if ($response['response']['code'] == 201 ){
-            wp_send_json_success($response);
+			set_site_transient('mailchimp-woocommerce-oauth-secret', $secret, 60*60);
+			wp_send_json_success($response);
         }
         else wp_send_json_error( $response );
         
@@ -464,7 +466,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
     {   
         $args = array(
             'domain' => site_url(),
-            'secret' => '123123123123',
+            'secret' => get_site_transient('mailchimp-woocommerce-oauth-secret'),
             'token' => $_POST['token']
         );
 
@@ -477,6 +479,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
         $response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/finish', $pload);
         if ($response['response']['code'] == 200 ){
+			delete_site_transient('mailchimp-woocommerce-oauth-secret');
             // save api_key? If yes, we can skip api key validation for validatePostApiKey();
             wp_send_json_success($response);
         }

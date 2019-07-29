@@ -86,7 +86,7 @@ class MailChimp_WooCommerce_Transform_Orders
 
         $order->setProcessedAt($woo->get_date_created()->setTimezone(new \DateTimeZone('UTC')));
 
-        $order->setCurrencyCode();
+        $order->setCurrencyCode($woo->get_currency());
 
         // grab the current statuses - this will end up being custom at some point.
         $statuses = $this->getOrderStatuses();

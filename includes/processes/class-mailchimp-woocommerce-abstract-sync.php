@@ -190,6 +190,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends WP_Job
         $this->setData('sync.config.resync', false);
         $this->setData('sync.orders.current_page', 1);
         $this->setData('sync.products.current_page', 1);
+        $this->setData('sync.coupons.current_page', 1);
         $this->setData('sync.syncing', true);
         $this->setData('sync.started_at', time());
 
@@ -220,6 +221,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends WP_Job
         // set the current sync pages back to 1 if the user hits resync.
         $this->setData('sync.orders.current_page', 1);
         $this->setData('sync.products.current_page', 1);
+        $this->setData('sync.coupons.current_page', 1);
 
         mailchimp_log('sync.completed', "Finished Sync :: ".date('D, M j, Y g:i A'));
 

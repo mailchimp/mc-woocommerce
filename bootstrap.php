@@ -173,12 +173,11 @@ function mailchimp_handle_or_queue(WP_Job $job, $delay = 0, $force_now = false)
     if ($job instanceof \MailChimp_WooCommerce_Single_Order && isset($job->order_id)) {
         // if this is a order process already queued - just skip this
         if (get_site_transient("mailchimp_order_being_processed_{$job->order_id}") == true) {
-            mailchimp_debug('order_sync.skip', "Order {$job->order_id} already added successfully to queue. Skipping.");
             return;
         }
         // tell the system the order is already queued for processing in this saving process - and we don't need to process it again.
         set_site_transient( "mailchimp_order_being_processed_{$job->order_id}", true, 30);
-        mailchimp_debug('order_sync.transient', "transient set for order {$job->order_id}");
+        mailchimp_debug('order_sync.queue_job', "Sync job queued for order {$job->order_id}");
     }
 
     wp_queue($job, $delay);

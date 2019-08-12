@@ -721,6 +721,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 $this->setData('sync.config.resync', false);
                 $this->setData('sync.orders.current_page', 1);
                 $this->setData('sync.products.current_page', 1);
+				$this->setData('sync.coupons.current_page', 1);
                 $this->setData('sync.syncing', true);
                 $this->setData('sync.started_at', time());
 

@@ -59,7 +59,7 @@ if ( ! class_exists( 'WP_Queue' ) ) {
 			}
 			// deal with errors
 			$job_id = $wpdb->insert_id;
-			as_schedule_single_action( strtotime( '+'.$delay.' seconds' ), 'MailChimp_WooCommerce_Single_Job', array('job_id' => $job_id));
+			as_schedule_single_action( strtotime( '+'.$delay.' seconds' ), 'MailChimp_WooCommerce_Single_Job', array('job_id' => $job_id), "mc-woocommerce");
 			mailchimp_log('action_scheduler.job', "Single Action starts in ".$delay. ': '.get_class($job) . ' / id:'.$job_id);
 			return $this;	
 		}

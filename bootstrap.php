@@ -178,7 +178,6 @@ function mailchimp_handle_or_queue(WP_Job $job, $delay = 0, $force_now = false)
         }
         // tell the system the order is already queued for processing in this saving process - and we don't need to process it again.
         set_site_transient( "mailchimp_order_being_processed_{$job->id}", true, 30);
-        mailchimp_debug('order_sync.transient', "transient set for order {$job->id}");
     }
 
     wp_queue($job, $delay);

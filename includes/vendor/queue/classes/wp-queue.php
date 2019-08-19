@@ -46,7 +46,14 @@ if ( ! class_exists( 'WP_Queue' ) ) {
 				'created_at'   => $this->datetime()
 			);
 			
-			$existing_actions = as_get_scheduled_actions(array('hook' => get_class($job), 'status' => ActionScheduler_Store::STATUS_PENDING,  'args' => array('obj_id' => $job->id), 'group' => 'mc-woocommerce'));
+			$existing_actions = as_get_scheduled_actions(array(
+				'hook' => get_class($job), 
+				'status' => ActionScheduler_Store::STATUS_PENDING,  
+				'args' => array(
+					'obj_id' => $job->id), 
+					'group' => 'mc-woocommerce'
+				)
+			);
 			
 			if (!empty($existing_actions)) {
 				as_unschedule_action(get_class($job), array('obj_id' => $job->id), 'mc-woocommerce');
@@ -67,19 +74,17 @@ if ( ! class_exists( 'WP_Queue' ) ) {
 						mailchimp_error_trace($e, 'trying to create queue tables');
 					}
 				}
-				
 			}
 
-			// deal with errors
+			// TODO: deal with errors
 			as_schedule_single_action( strtotime( '+'.$delay.' seconds' ), get_class($job), array('obj_id' => $job_id), "mc-woocommerce");
 			
 			if (!empty($existing_actions)) {
-				mailchimp_debug('action_scheduler.reschedule_job', "Job ". get_class($job) . ' / id:'.$job_id);
-			}else{
-				mailchimp_log('action_scheduler.add_job', "Job ". get_class($job) . " starts in ".$delay. 's. / id:'.$job_id);
+				mailchimp_debug('action_scheduler.reschedule_job', get_class($job) . ($delay > 0 ? ' restarts in '.$delay. ' seconds' : ' restarts in the next minute' ) . ' :: obj_id '.$job_id);
+			} 
+			else {
+				mailchimp_log('action_scheduler.queue_job', get_class($job) . ($delay > 0 ? ' starts in '.$delay. ' seconds' : ' starts in the next minute' ) .' :: obj_id '.$job_id);
 			}
-			
-			
 
 			return $this;	
 		}

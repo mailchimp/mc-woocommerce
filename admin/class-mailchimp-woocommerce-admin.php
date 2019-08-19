@@ -433,6 +433,61 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	}
 
 	/**
+     * Mailchimp OAuth connection start
+     */
+    public function mailchimp_woocommerce_ajax_oauth_start()
+    {   
+		$secret = uniqid();
+        $args = array(
+            'domain' => site_url(),
+            'secret' => $secret,
+        );
+
+        $pload = array(
+            'headers' => array( 
+                'Content-type' => 'application/json',
+            ),
+            'body' => json_encode($args)
+        );
+
+        $response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/start', $pload);
+        if ($response['response']['code'] == 201 ){
+			set_site_transient('mailchimp-woocommerce-oauth-secret', $secret, 60*60);
+			wp_send_json_success($response);
+        }
+        else wp_send_json_error( $response );
+        
+    }
+
+	/**
+     * Mailchimp OAuth connection finish
+     */
+    public function mailchimp_woocommerce_ajax_oauth_finish()
+    {   
+        $args = array(
+            'domain' => site_url(),
+            'secret' => get_site_transient('mailchimp-woocommerce-oauth-secret'),
+            'token' => $_POST['token']
+        );
+
+        $pload = array(
+            'headers' => array( 
+                'Content-type' => 'application/json',
+            ),
+            'body' => json_encode($args)
+        );
+
+        $response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/finish', $pload);
+        if ($response['response']['code'] == 200 ){
+			delete_site_transient('mailchimp-woocommerce-oauth-secret');
+            // save api_key? If yes, we can skip api key validation for validatePostApiKey();
+            wp_send_json_success($response);
+        }
+        else wp_send_json_error( $response );
+        
+    }
+
+	/**
 	 * STEP 2.
 	 *
 	 * Handle the 'store_info' tab post.
@@ -666,6 +721,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 $this->setData('sync.config.resync', false);
                 $this->setData('sync.orders.current_page', 1);
                 $this->setData('sync.products.current_page', 1);
+				$this->setData('sync.coupons.current_page', 1);
                 $this->setData('sync.syncing', true);
                 $this->setData('sync.started_at', time());
 

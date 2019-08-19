@@ -253,6 +253,10 @@ class MailChimp_WooCommerce
         if ( class_exists( 'WOOMULTI_CURRENCY_F' ) ) {
             $this->loader->add_action('villatheme_support_woo-multi-currency', $plugin_admin, 'mailchimp_update_woo_settings');
         }
+
+        // Mailchimp oAuth
+        $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_oauth_start', $plugin_admin, 'mailchimp_woocommerce_ajax_oauth_start' );
+        $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_oauth_finish', $plugin_admin, 'mailchimp_woocommerce_ajax_oauth_finish' );
     }
 
 	/**

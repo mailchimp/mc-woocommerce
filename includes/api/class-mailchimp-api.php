@@ -1672,7 +1672,7 @@ class MailChimp_WooCommerce_MailChimpApi
 
         if ($info['http_code'] >= 400 && $info['http_code'] <= 500) {
             if ($info['http_code'] == 404) {
-                //mailchimp_error('api', 'processCurlResponse', array('info' => $info, 'data' => $data));
+                // mailchimp_error('api', 'processCurlResponse', array('info' => $info, 'data' => $data));
             }
             if ($info['http_code'] == 403) {
                 throw new MailChimp_WooCommerce_RateLimitError();
@@ -1705,7 +1705,7 @@ class MailChimp_WooCommerce_MailChimpApi
 
         // make sure the response is correct from the data in the response array
         if (isset($data['status']) && $data['status'] >= 400) {
-            if (isset($data['http_code']) && $data['http_code'] == 403)  {
+            if (isset($data['http_code']) && $data['http_code'] == 403) {
                 throw new MailChimp_WooCommerce_RateLimitError();
             }
             throw new MailChimp_WooCommerce_Error($data['detail'], $data['status']);

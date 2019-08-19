@@ -212,7 +212,7 @@ class MailChimp_WooCommerce_Order
     {
         $api = MailChimp_WooCommerce_MailChimpApi::getInstance();
         $cid = trim($id);
-        if (($campaign = $api->getCampaign($cid, false))) {
+        if (!empty($cid) && $campaign = $api->getCampaign($cid, false)) {
             $this->campaign_id = $campaign['id'];
         }
         return $this;
@@ -265,13 +265,23 @@ class MailChimp_WooCommerce_Order
     }
 
     /**
-     * @param null $currency_code
+     * @param null $code
      * @return MailChimp_WooCommerce_Order
      */
-    public function setCurrencyCode()
+    public function setCurrencyCode($code = null)
     {
-        $woo = new WC_Order($this->id);
-        $this->currency_code = $woo->get_currency();
+        if (!empty($code)) {
+            $this->currency_code = $code;
+            return $this;
+        }
+
+        try {
+            $woo = new WC_Order($this->id);
+            $this->currency_code = $woo->get_currency();
+        } catch (\Exception $e) {
+            $this->currency_code = get_woocommerce_currency();
+        }
+
         return $this;
     }
 

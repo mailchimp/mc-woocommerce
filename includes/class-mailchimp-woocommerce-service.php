@@ -801,14 +801,15 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         exit;
     }
 
-    public function mailchimp_process_single_job($job_id) {
+    public function mailchimp_process_single_job($obj_id) {
         global $wpdb;
-        $sql = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}mailchimp_jobs	WHERE id= %d", $job_id );
+        $sql = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}mailchimp_jobs	WHERE obj_id = %s", $obj_id );
         $job = $wpdb->get_row( $sql );
+        $job_id =$job->id;
         $job = unserialize($job->job);
         //$job->set_job($job);
         $job->handle();
-        $sql = $wpdb->prepare("DELETE FROM {$wpdb->prefix}mailchimp_jobs WHERE id = %s", $job_id);
+        $sql = $wpdb->prepare("DELETE FROM {$wpdb->prefix}mailchimp_jobs WHERE id = %s AND obj_id = %s", array($job_id, $obj_id));
         $wpdb->query($sql);
     }
 

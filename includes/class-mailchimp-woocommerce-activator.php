@@ -97,6 +97,7 @@ class MailChimp_WooCommerce_Activator {
 		
 		$sql = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}mailchimp_jobs (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
+			obj_id text,
 			job text NOT NULL,
 			created_at datetime NOT NULL,
 			PRIMARY KEY  (id)

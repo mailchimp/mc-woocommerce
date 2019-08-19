@@ -357,7 +357,20 @@ class MailChimp_WooCommerce
             $this->loader->add_action('wp_ajax_mailchimp_set_user_by_email', $service, 'set_user_by_email');
             $this->loader->add_action('wp_ajax_nopriv_mailchimp_set_user_by_email', $service, 'set_user_by_email');
 
-            $this->loader->add_action('MailChimp_WooCommerce_Single_Job', $service, 'mailchimp_process_single_job', 10, 2);
+            $jobs_classes = array(
+                "MailChimp_WooCommerce_Single_Order",
+                "MailChimp_WooCommerce_SingleCoupon",
+                "MailChimp_WooCommerce_Single_Product",
+                "MailChimp_WooCommerce_Cart_Update",
+                "MailChimp_WooCommerce_User_Submit",
+                "MailChimp_WooCommerce_Process_Coupons",
+                "MailChimp_WooCommerce_Process_Coupons_Initial_Sync",
+                "MailChimp_WooCommerce_Process_Orders",
+                "MailChimp_WooCommerce_Process_Products"
+            );
+            foreach ($jobs_classes as $job_class) {
+                $this->loader->add_action($job_class, $service, 'mailchimp_process_single_job', 10, 1);
+            }
 		}
 	}
 

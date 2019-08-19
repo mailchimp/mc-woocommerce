@@ -38,29 +38,46 @@ if ( ! class_exists( 'WP_Queue' ) ) {
 		 */
 		public function push( WP_Job $job, $delay = 0 ) {			
 			global $wpdb;
+			$job_id = isset($job->id) ? $job->id : get_class($job);
 			$args = array(
 				'job' => maybe_serialize($job),
+				'obj_id' => $job_id,
 				'created_at'   => $this->datetime()
 			);
-			$inserted = $wpdb->insert($wpdb->prefix."mailchimp_jobs", $args);
-			if (!$inserted) {
-				try {
-					if (mailchimp_string_contains($wpdb->last_error, 'Table')) {
-						mailchimp_debug('DB Issue: `mailchimp_job` table was not found!', 'Creating Tables');
-						MailChimp_WooCommerce_Activator::create_queue_tables();
-						$inserted = $wpdb->insert($wpdb->prefix."mailchimp_jobs", $args);
-						if (!$inserted) {
-							mailchimp_debug('Queue Job '.get_class($job), $wpdb->last_error);
-						}
-					}
-				} catch (\Exception $e) {
-					mailchimp_error_trace($e, 'trying to create queue tables');
-				}
+			$existing_actions = as_get_scheduled_actions(array('hook' => get_class($job), 'status' => ActionScheduler_Store::STATUS_PENDING,  'args' => array('obj_id' => $job->id), 'group' => 'mc-woocommerce'));
+			if (!empty($existing_actions)) {
+				as_unschedule_action(get_class($job), array('obj_id' => $job->id), 'mc-woocommerce');
 			}
+			else {
+				$inserted = $wpdb->insert($wpdb->prefix."mailchimp_jobs", $args);
+				if (!$inserted) {
+					try {
+						if (mailchimp_string_contains($wpdb->last_error, 'Table')) {
+							mailchimp_debug('DB Issue: `mailchimp_job` table was not found!', 'Creating Tables');
+							MailChimp_WooCommerce_Activator::create_queue_tables();
+							$inserted = $wpdb->insert($wpdb->prefix."mailchimp_jobs", $args);
+							if (!$inserted) {
+								mailchimp_debug('Queue Job '.get_class($job), $wpdb->last_error);
+							}
+						}
+					} catch (\Exception $e) {
+						mailchimp_error_trace($e, 'trying to create queue tables');
+					}
+				}
+				
+			}
+
 			// deal with errors
-			$job_id = $wpdb->insert_id;
-			as_schedule_single_action( strtotime( '+'.$delay.' seconds' ), 'MailChimp_WooCommerce_Single_Job', array('job_id' => $job_id), "mc-woocommerce");
-			mailchimp_log('action_scheduler.job', "Single Action starts in ".$delay. ': '.get_class($job) . ' / id:'.$job_id);
+			as_schedule_single_action( strtotime( '+'.$delay.' seconds' ), get_class($job), array('obj_id' => $job_id), "mc-woocommerce");
+			
+			if (!empty($existing_actions)) {
+				mailchimp_debug('action_scheduler.reschedule_job', "Job ". get_class($job) . ' / id:'.$job_id);
+			}else{
+				mailchimp_log('action_scheduler.add_job', "Job ". get_class($job) . " starts in ".$delay. 's. / id:'.$job_id);
+			}
+			
+			
+
 			return $this;	
 		}
 

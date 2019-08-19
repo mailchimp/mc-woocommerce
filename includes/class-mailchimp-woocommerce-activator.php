@@ -95,7 +95,7 @@ class MailChimp_WooCommerce_Activator {
 
 		dbDelta( $sql );
 
-		// set the mailchimp woocommerce version at the time of install
+		// set the Mailchimp woocommerce version at the time of install
 		update_site_option('mailchimp_woocommerce_version', mailchimp_environment_variables()->version);
 	}
 }

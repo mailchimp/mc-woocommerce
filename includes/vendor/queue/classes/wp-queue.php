@@ -39,12 +39,15 @@ if ( ! class_exists( 'WP_Queue' ) ) {
 		public function push( WP_Job $job, $delay = 0 ) {			
 			global $wpdb;
 			$job_id = isset($job->id) ? $job->id : get_class($job);
+			
 			$args = array(
 				'job' => maybe_serialize($job),
 				'obj_id' => $job_id,
 				'created_at'   => $this->datetime()
 			);
+			
 			$existing_actions = as_get_scheduled_actions(array('hook' => get_class($job), 'status' => ActionScheduler_Store::STATUS_PENDING,  'args' => array('obj_id' => $job->id), 'group' => 'mc-woocommerce'));
+			
 			if (!empty($existing_actions)) {
 				as_unschedule_action(get_class($job), array('obj_id' => $job->id), 'mc-woocommerce');
 			}

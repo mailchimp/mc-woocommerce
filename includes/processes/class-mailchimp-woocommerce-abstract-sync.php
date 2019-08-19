@@ -82,7 +82,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends WP_Job
     public function handle()
     {
         if (!mailchimp_is_configured()) {
-            mailchimp_debug(get_called_class(), 'mailchimp is not configured properly');
+            mailchimp_debug(get_called_class(), 'Mailchimp is not configured properly');
             return false;
         }
 

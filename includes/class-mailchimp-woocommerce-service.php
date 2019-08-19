@@ -423,7 +423,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     }
 
     /**
-     * Set the cookie of the mailchimp campaigns if we have one.
+     * Set the cookie of the Mailchimp campaigns if we have one.
      */
     public function handleCampaignTracking()
     {

@@ -285,16 +285,18 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         switch (get_post_type($post_id)) {
             case 'shop_coupon':
                 try {
-                    mailchimp_get_api()->deletePromoRule(mailchimp_get_store_id(), $post_id);
-                    mailchimp_log('promo_code.deleted', "deleted promo code {$post_id}");
+                    $deleted = mailchimp_get_api()->deletePromoRule(mailchimp_get_store_id(), $post_id);
+                    if ($deleted) mailchimp_log('promo_code.deleted', "deleted promo code {$post_id}");
+                    else mailchimp_log('promo_code.delete_fail', "Unable to delete promo code {$post_id}");
                 } catch (\Exception $e) {
                     mailchimp_error('delete promo code', $e->getMessage());
                 }
                 break;
             case 'product':
                 try {
-                    mailchimp_get_api()->deleteStoreProduct(mailchimp_get_store_id(), $post_id);
-                    mailchimp_log('product.deleted', "deleted product {$post_id}");
+                    $deleted = mailchimp_get_api()->deleteStoreProduct(mailchimp_get_store_id(), $post_id);
+                    if ($deleted) mailchimp_log('product.deleted', "deleted product {$post_id}");
+                    else mailchimp_log('product.delete_fail', "Unable to deleted product {$post_id}");
                 } catch (\Exception $e) {
                     mailchimp_error('delete product', $e->getMessage());
                 }
@@ -423,7 +425,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     }
 
     /**
-     * Set the cookie of the mailchimp campaigns if we have one.
+     * Set the cookie of the Mailchimp campaigns if we have one.
      */
     public function handleCampaignTracking()
     {

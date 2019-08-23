@@ -1252,7 +1252,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         $coupon_sync->flagStartSync();
 
         // queue up the jobs
-        mailchimp_handle_or_queue($coupon_sync, 0, true);
+        mailchimp_handle_or_queue($coupon_sync, 0);
 	}
 
 	/**

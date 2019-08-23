@@ -174,12 +174,6 @@ class MailChimp_WooCommerce
      */
     private function load_dependencies()
     {
-        global $wp_queue;
-
-        if (empty($wp_queue)) {
-            $wp_queue = new WP_Queue();
-        }
-
         // fire up the loader
         $this->loader = new MailChimp_WooCommerce_Loader();
 
@@ -269,8 +263,6 @@ class MailChimp_WooCommerce
 	private function define_public_hooks() {
 
 		$plugin_public = new MailChimp_WooCommerce_Public( $this->get_plugin_name(), $this->get_version() );
-
-		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_styles');
 		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_scripts');
 	}
 

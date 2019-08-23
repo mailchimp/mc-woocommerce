@@ -812,7 +812,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $job_id =$job_row->id;
         
         // process job
-        mailchimp_debug('action_scheduler.process_job', get_class($job) . ' :: obj_id '.$job->id);
+        //mailchimp_debug('action_scheduler.process_job', get_class($job) . ' :: obj_id '.$job->id);
         $job->handle();
 
         // delete processed job

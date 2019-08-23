@@ -148,82 +148,17 @@ class Queue_Command extends WP_CLI_Command {
      * @param $args
      * @param array $assoc_args
      */
-	public function listen( $args, $assoc_args = array() ) {
-		global $wp_queue;
-
-		$this->command_called = 'listen';
-
-        $this->start_time = time(); // Set start time of current command
-
-        $allow_multiple = (isset($assoc_args['multiple']) ? (bool) $assoc_args['multiple'] : null) === true;
-        $running_as_daemon = (isset($assoc_args['daemon']) ? (bool) $assoc_args['daemon'] : null) === true;
-        $force = (isset($assoc_args['force']) ? (bool) $assoc_args['force'] : null) === true;
-
-		$sleep_between_jobs = isset($assoc_args['sleep_processing']) ? (int) $assoc_args['sleep_processing'] : 1;
-        $sleep_when_empty = isset($assoc_args['sleep_empty']) ? (int) $assoc_args['sleep_empty'] : 5;
-
-        $expire_time = $this->getQueueTimer();
-
-        if (!$force && !$allow_multiple) {
-            if (!empty($expire_time) && ($expire_time+100) > $this->start_time) {
-                WP_CLI::log('Currently running in another process');
-                //mailchimp_debug("queue", $message = "wp queue listen is running in another process or waiting to restart at [{$expire_time}] but clock says [{$this->start_time}].");
-                wp_die();
-            }
-        }
-
-        $this->updateQueueTimer();
-
-        mailchimp_debug("queue", $message = "[start] queue listen process_id [{$this->pid}] :: max_time [{$this->getServerMaxExecutionTime()}] :: memory limit [{$this->getServerMemoryLimit()}]");
-
-        WP_CLI::log($message);
-
-		$worker = new WP_Worker( $wp_queue );
-
-		$loop_counter = 0;
-
-		// if the user specifies that they want to run as a daemon we need to allow that.
-		while ($running_as_daemon || $this->all_good_under_the_hood()) {
-
-            $loop_counter++;
-
-            // if we're doing single processing only, set the transient
-            if (!$allow_multiple) {
-                if ($loop_counter % 5 === 0) {
-                    $this->updateQueueTimer(time() + 300);
-                }
-            }
-
-		    // allow queue to break out of the forever loop if something is going wrong by adding a transient
-		    if ((bool) get_site_transient('kill_wp_queue_listener')) {
-		        break;
-            }
-
-            // log it in increments of 20 to be lighter on the log file
-            if ($loop_counter % 20 === 0) {
-                mailchimp_debug("queue listen", $message = "process id {$this->pid} :: loop #{$loop_counter}");
-                WP_CLI::log($message);
-            }
-
-            $sleep = $sleep_when_empty;
-
-		    // if the worker has a job, apply the sleep between job timeout
-			if ($worker->should_run() && $worker->process_next_job()) {
-                $sleep = $sleep_between_jobs;
-                if (($job_name = $worker->get_job_name()) !== 'WP_Worker') {
-                    WP_CLI::success('Processed: ' . $job_name);
-                }
-			}
-
-            sleep($sleep);
-		}
-
-		if (!$allow_multiple) {
-            $this->deleteQueueTimer();
-        }
-
-        mailchimp_debug("queue", $message = '[end] queue listen process_id = '.$this->pid);
-        WP_CLI::log($message);
+	public function listen() {
+        mailchimp_debug('cli.queue.listen.process','Starting command `action-scheduler run`'); 
+        WP_CLI::log('Starting sync'); 
+        $options = array(
+            'return'     => true,   // Return 'STDOUT'; use 'all' for full object.
+            //'parse'      => 'json', // Parse captured STDOUT to JSON array.
+            'launch'     => true,  // Reuse the current process.
+            'exit_error' => true,   // Halt script execution on error.
+          );
+        $output = WP_CLI::runcommand( 'action-scheduler run --group=mc-woocommerce', $options );
+        WP_CLI::log($output);  
         exit;
 	}
 

@@ -41,7 +41,7 @@ class MailChimp_WooCommerce_SingleCoupon extends Mailchimp_Woocommerce_Job
         try {
 
             if (!mailchimp_is_configured()) {
-                mailchimp_debug(get_called_class(), 'mailchimp is not configured properly');
+                mailchimp_debug(get_called_class(), 'Mailchimp is not configured properly');
                 return false;
             }
 

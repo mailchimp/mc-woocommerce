@@ -182,7 +182,7 @@ class MailChimp_WooCommerce_MailChimpApi
     public function deleteMember($list_id, $email)
     {
         $hash = md5(strtolower(trim($email)));
-        return $this->delete("lists/$list_id/members/$hash", array());
+        return (bool) $this->delete("lists/$list_id/members/$hash", array());
     }
 
     /**
@@ -459,7 +459,7 @@ class MailChimp_WooCommerce_MailChimpApi
      */
     public function deleteList($id)
     {
-        return $this->delete('lists/'.$id);
+        return (bool) $this->delete('lists/'.$id);
     }
 
     /**
@@ -730,8 +730,7 @@ class MailChimp_WooCommerce_MailChimpApi
     public function deleteStore($store_id)
     {
         try {
-            $this->delete("ecommerce/stores/$store_id");
-            return true;
+            return (bool) $this->delete("ecommerce/stores/$store_id");
         } catch (MailChimp_WooCommerce_Error $e) {
             return false;
         } catch (\Exception $e) {
@@ -883,8 +882,7 @@ class MailChimp_WooCommerce_MailChimpApi
     public function deleteCartByID($store_id, $id)
     {
         try {
-            $this->delete("ecommerce/stores/$store_id/carts/$id");
-            return true;
+            return (bool) $this->delete("ecommerce/stores/$store_id/carts/$id");
         } catch (MailChimp_WooCommerce_Error $e) {
             return false;
         } catch (\Exception $e) {
@@ -924,8 +922,7 @@ class MailChimp_WooCommerce_MailChimpApi
     public function deleteCustomer($store_id, $customer_id)
     {
         try {
-            $this->delete("ecommerce/stores/$store_id/customers/$customer_id");
-            return true;
+            return (bool) $this->delete("ecommerce/stores/$store_id/customers/$customer_id");
         } catch (MailChimp_WooCommerce_Error $e) {
             return false;
         }
@@ -1041,8 +1038,7 @@ class MailChimp_WooCommerce_MailChimpApi
     public function deleteStoreOrder($store_id, $order_id)
     {
         try {
-            $this->delete("ecommerce/stores/$store_id/orders/$order_id");
-            return true;
+            return (bool) $this->delete("ecommerce/stores/$store_id/orders/$order_id");
         } catch (MailChimp_WooCommerce_Error $e) {
             return false;
         }
@@ -1058,8 +1054,7 @@ class MailChimp_WooCommerce_MailChimpApi
     public function deleteStoreOrderLine($store_id, $order_id, $line_id)
     {
         try {
-            $this->delete("ecommerce/stores/{$store_id}/orders/{$order_id}/lines/{$line_id}");
-            return true;
+            return (bool) $this->delete("ecommerce/stores/{$store_id}/orders/{$order_id}/lines/{$line_id}");
         } catch (MailChimp_WooCommerce_Error $e) {
             return false;
         }
@@ -1176,8 +1171,7 @@ class MailChimp_WooCommerce_MailChimpApi
     public function deleteStoreProduct($store_id, $product_id)
     {
         try {
-            $this->delete("ecommerce/stores/$store_id/products/$product_id");
-            return true;
+            return (bool) $this->delete("ecommerce/stores/$store_id/products/$product_id");
         } catch (MailChimp_WooCommerce_Error $e) {
             return false;
         }
@@ -1640,7 +1634,7 @@ class MailChimp_WooCommerce_MailChimpApi
 
     /**
      * @param $curl
-     * @return array|mixed|null|object
+     * @return array|mixed|bool|null|object
      * @throws Exception
      * @throws MailChimp_WooCommerce_Error
      * @throws MailChimp_WooCommerce_ServerError
@@ -1660,6 +1654,10 @@ class MailChimp_WooCommerce_MailChimpApi
         $data = json_decode($response, true);
 
         if (empty($info) || ($info['http_code'] >= 200 && $info['http_code'] <= 400)) {
+            if ($info['http_code'] == 204) {
+                // possibily a successful DELETE operation
+                return true;
+            }
             if (is_array($data)) {
                 try {
                     $this->checkForErrors($data);

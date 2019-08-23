@@ -709,7 +709,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			// sync the store with MC
 			$this->syncStore(array_merge($this->getOptions(), $data));
 
-			// if there was already a store in mailchimp, use the list ID from mailchimp
+			// if there was already a store in Mailchimp, use the list ID from Mailchimp
 			if ($this->swapped_list_id) {
 				$data['mailchimp_list'] = $this->swapped_list_id;
 			}
@@ -1151,7 +1151,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		} catch (\Exception $e) {
 			if (mailchimp_string_contains($e->getMessage(),'woocommerce already exists in the account' )) {
-				// retrieve mailchimp store using domain
+				// retrieve Mailchimp store using domain
 				$stores = $this->api()->stores();
 				//iterate thru stores, find correct store ID and save it to db
 				foreach ($stores as $mc_store) {

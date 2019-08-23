@@ -8,7 +8,7 @@
  * Date: 7/15/16
  * Time: 11:42 AM
  */
-class MailChimp_WooCommerce_Single_Order extends WP_Job
+class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 {
     public $id;
     public $cart_session_id;

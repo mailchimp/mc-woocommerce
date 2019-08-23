@@ -52,6 +52,7 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_Transform_Products' => 'includes/api/class-mailchimp-woocommerce-transform-products.php',
 
         // includes/processes
+        'Mailchimp_Woocommerce_Job' => 'includes/processes/class-mailchimp-woocommerce-job.php',
         'MailChimp_WooCommerce_Abstract_Sync' => 'includes/processes/class-mailchimp-woocommerce-abstract-sync.php',
         'MailChimp_WooCommerce_Cart_Update' => 'includes/processes/class-mailchimp-woocommerce-cart-update.php',
         'MailChimp_WooCommerce_Process_Coupons' => 'includes/processes/class-mailchimp-woocommerce-process-coupons.php',
@@ -66,7 +67,6 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_Public' => 'public/class-mailchimp-woocommerce-public.php',
         'MailChimp_WooCommerce_Admin' => 'admin/class-mailchimp-woocommerce-admin.php',
 
-        'WP_Job' => 'includes/vendor/queue/classes/wp-job.php',
         'Queue_Command' => 'includes/vendor/queue/classes/cli/queue-command.php',
         'ActionScheduler' => 'includes/vendor/action-scheduler/action-scheduler.php',
     );

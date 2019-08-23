@@ -8,7 +8,7 @@
  * Date: 7/14/16
  * Time: 11:54 AM
  */
-abstract class MailChimp_WooCommerce_Abstract_Sync extends WP_Job
+abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce_Job
 {
     /**
      * @var MailChimp_WooCommerce_Api
@@ -88,7 +88,6 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends WP_Job
 
         if (!($this->store_id = $this->getStoreID())) {
             mailchimp_debug(get_called_class().'@handle', 'store id not loaded');
-            $this->delete();
             return false;
         }
 
@@ -108,7 +107,6 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends WP_Job
         // don't let recursion happen.
         if ($this->getResourceType() === 'orders' && $this->getResourceCompleteTime()) {
             mailchimp_log('sync.stop', "halting the sync for :: {$this->getResourceType()}");
-            $this->delete();
             return false;
         }
 
@@ -119,7 +117,6 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends WP_Job
             // call the completed event to process further
             $this->resourceComplete($this->getResourceType());
             $this->complete();
-            $this->delete();
 
             return false;
         }
@@ -137,7 +134,6 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends WP_Job
             // call the completed event to process further
             $this->complete();
 
-            $this->delete();
 
             return false;
         }
@@ -466,8 +462,6 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends WP_Job
     protected function next()
     {
         global $wpdb;
-
-        $this->delete();
 
         $class_name = get_called_class();
         $wpdb->query("DELETE FROM {$wpdb->prefix}queue WHERE job LIKE '%{$class_name}%'");

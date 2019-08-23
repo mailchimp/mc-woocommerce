@@ -8,7 +8,7 @@
  * Date: 7/15/16
  * Time: 11:42 AM
  */
-class MailChimp_WooCommerce_Single_Product extends WP_Job
+class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
 {
     public $id;
     protected $store_id;

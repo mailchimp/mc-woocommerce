@@ -8,7 +8,7 @@
  * Date: 11/14/16
  * Time: 9:38 AM
  */
-class MailChimp_WooCommerce_User_Submit extends WP_Job
+class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 {
     public static $handling_for = null;
 

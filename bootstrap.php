@@ -179,7 +179,7 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
             try {
                 if (mailchimp_string_contains($wpdb->last_error, 'Table')) {
                     mailchimp_debug('DB Issue: `mailchimp_job` table was not found!', 'Creating Tables');
-                    MailChimp_WooCommerce_Activator::create_queue_tables();
+                    install_mailchimp_queue();
                     $inserted = $wpdb->insert($wpdb->prefix."mailchimp_jobs", $args);
                     if (!$inserted) {
                         mailchimp_debug('Queue Job '.get_class($job), $wpdb->last_error);
@@ -783,18 +783,6 @@ function mailchimp_queue_is_disabled() {
 }
 
 /**
- * @return bool
- */
-function mailchimp_http_worker_is_running() {
-    if (mailchimp_should_reset_http_lock()) {
-        mailchimp_reset_http_lock();
-        mailchimp_log('http_worker_lock', "HTTP worker lock needed to be deleted to initiate the queue.");
-        return false;
-    }
-    return (bool) get_site_transient('http_worker_lock');
-}
-
-/**
  * @param $email
  * @return bool
  */
@@ -804,7 +792,6 @@ function mailchimp_email_is_allowed($email) {
     }
     return true;
 }
-
 
 /**
  * @param $email
@@ -828,13 +815,6 @@ function mailchimp_email_is_amazon($email) {
  */
 function mailchimp_hash_trim_lower($str) {
     return md5(trim(strtolower($str)));
-}
-
-/**
- * @return array|WP_Error
- */
-function mailchimp_call_rest_api_queue_manually() {
-    return MailChimp_WooCommerce_Rest_Api::work();
 }
 
 /**

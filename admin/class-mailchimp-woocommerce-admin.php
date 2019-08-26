@@ -222,6 +222,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				update_option( $this->plugin_name.'_woo_currency_update', true);
 			} 
 		}
+		if($wpdb->get_var("SHOW TABLES LIKE '{$wpdb->prefix}mailchimp_jobs';") != $wpdb->prefix.'mailchimp_jobs') {
+			MailChimp_WooCommerce_Activator::create_queue_tables();
+			MailChimp_WooCommerce_Activator::migrate_jobs();
+		}
 	}
 
 	/**

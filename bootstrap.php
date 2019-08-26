@@ -1172,13 +1172,26 @@ function mailchimp_check_if_on_sync_tab() {
     return false;
 }
 
-function mailchimp_flush_queue_tables() {
+function mailchimp_flush_database_tables() {
     try {
         /** @var \ */
         global $wpdb;
-        $wpdb->query("TRUNCATE `{$wpdb->prefix}queue`");
-        $wpdb->query("TRUNCATE `{$wpdb->prefix}failed_jobs`");
+        $existing_as_actions = as_get_scheduled_actions(
+            array(
+                'status' => ActionScheduler_Store::STATUS_PENDING,  
+                'group' => 'mc-woocommerce',
+                'per_page' => -1,
+            )
+        );
+        
+        if (!empty($existing_as_actions)) {
+            foreach ($existing_as_actions as $as_action) {
+                as_unschedule_action($as_action->get_hook(), $as_action->get_args(), 'mc-woocommerce');    # code...
+            }
+        }
+
         $wpdb->query("TRUNCATE `{$wpdb->prefix}mailchimp_carts`");
+        $wpdb->query("TRUNCATE `{$wpdb->prefix}mailchimp_jobs`");
     } catch (\Exception $e) {}
 }
 
@@ -1195,7 +1208,8 @@ function mailchimp_flush_sync_pointers() {
  * To be used when running clean up for uninstalls or re-installs.
  */
 function mailchimp_clean_database() {
-    mailchimp_flush_queue_tables();
+    // delete custom tables data
+    mailchimp_flush_database_tables();
 
     // clean up the initial sync pointers
     mailchimp_flush_sync_pointers();

@@ -128,7 +128,7 @@ class MailChimp_WooCommerce_Activator {
 				
 				mailchimp_as_push($job, 180);
 			}
-			//static::remove_legacy_tables();
+			static::remove_legacy_tables();
 		}
 	}
 

@@ -193,7 +193,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
         global $wpdb;
         try {
             $wpdb->show_errors(false);
-            $wpdb->query("DELETE FROM {$wpdb->prefix}queue");
+            delete_all_as_jobs();
             $wpdb->show_errors(true);
         } catch (\Exception $e) {}
 
@@ -461,11 +461,6 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
      */
     protected function next()
     {
-        global $wpdb;
-
-        $class_name = get_called_class();
-        $wpdb->query("DELETE FROM {$wpdb->prefix}queue WHERE job LIKE '%{$class_name}%'");
-
         // this will paginate through all records for the resource type until they return no records.
         mailchimp_handle_or_queue(new static(), 0);
         mailchimp_debug(get_called_class().'@handle', 'queuing up the next job');

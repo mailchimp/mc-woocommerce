@@ -49,7 +49,7 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
     try {
         $promo_rules = $mailchimp_api->getPromoRules($store_id, 1, 1, 1);
         $mailchimp_total_promo_rules = $promo_rules['total_items'];
-        if ($mailchimp_total_promo_rules > $promo_rules_count['publish']) $mailchimp_total_promo_rules = $promo_rules_count['publish'];
+        if (isset($promo_rules_count['publish']) && $mailchimp_total_promo_rules > $promo_rules_count['publish']) $mailchimp_total_promo_rules = $promo_rules_count['publish'];
     } catch (\Exception $e) { $mailchimp_total_promo_rules = 0; }
     try {
         $products = $mailchimp_api->products($store_id, 1, 1);

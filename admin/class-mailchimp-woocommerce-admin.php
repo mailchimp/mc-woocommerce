@@ -406,14 +406,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			'mailchimp_account_info_username' => null,
 		);
 
-        if (($failure = mailchimp_woocommerce_check_if_http_worker_fails())) {
-            unset($data['mailchimp_api_key']);
-            $data['active_tab'] = 'api_key';
-            $data['api_ping_error'] = $failure;
-            mailchimp_error('admin@validateCanUseHttpWorker', $failure);
-            return $data;
-        }
-
 		$api = new MailChimp_WooCommerce_MailChimpApi($data['mailchimp_api_key']);
 
 		try {

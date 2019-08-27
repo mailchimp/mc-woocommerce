@@ -193,7 +193,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
         global $wpdb;
         try {
             $wpdb->show_errors(false);
-            delete_all_as_jobs();
+            mailchimp_delete_as_jobs();
             $wpdb->show_errors(true);
         } catch (\Exception $e) {}
 

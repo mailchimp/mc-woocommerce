@@ -1582,24 +1582,6 @@ class MailChimp_WooCommerce_MailChimpApi
     /**
      * @param $method
      * @param $url
-     * @param $body
-     * @return array|WP_Error
-     */
-    protected function sendWithHttpClient($method, $url, $body)
-    {
-        return _wp_http_get_object()->request($this->url($url), array(
-            'method' => strtoupper($method),
-            'headers' => array(
-                'Authorization' => 'Basic ' . base64_encode('mailchimp:'.$this->api_key),
-                'Content-Type' => 'application/json',
-            ),
-            'body' => json_encode($body),
-        ));
-    }
-
-    /**
-     * @param $method
-     * @param $url
      * @param array $params
      * @param array $headers
      * @return array

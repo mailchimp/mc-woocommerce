@@ -12,35 +12,6 @@ class MailChimp_WooCommerce_Rest_Api
     {
         return esc_url_raw(rest_url(static::$namespace.'/'.ltrim($path, '/')));
     }
-
-    /**
-     * @return array|mixed|object|WP_Error|null
-     * @throws MailChimp_WooCommerce_Error
-     * @throws MailChimp_WooCommerce_RateLimitError
-     * @throws MailChimp_WooCommerce_ServerError
-     */
-    public static function test()
-    {
-        add_filter( 'https_local_ssl_verify', '__return_false', 1 );
-
-        // allow people to change this value just in case, but default to a sensible 10 second timeout.
-        $timeout = apply_filters('mailchimp_woocommerce_test_rest_api_timeout', 10);
-
-        // just in case someone didn't return a valid timeout value, go back to the default
-        if (!is_numeric($timeout)) {
-            $timeout = 10;
-        }
-
-        return mailchimp_woocommerce_rest_api_get(
-            static::url('ping'),
-            array(
-                'timeout'   => $timeout,
-                'blocking'  => true,
-            ),
-            mailchimp_get_http_local_json_header()
-        );
-    }
-
     /**
      * Register all Mailchimp API routes.
      */
@@ -80,7 +51,7 @@ class MailChimp_WooCommerce_Rest_Api
      */
     public function ping(WP_REST_Request $request)
     {
-        return mailchimp_rest_response(array('success' => true));
+        return $this->mailchimp_rest_response(array('success' => true));
     }
 
     /**
@@ -118,7 +89,7 @@ class MailChimp_WooCommerce_Rest_Api
             'body'        => json_encode($request->get_params()),
         ));
 
-        return mailchimp_rest_response($result);
+        return $this->mailchimp_rest_response($result);
     }
 
     /**
@@ -129,7 +100,7 @@ class MailChimp_WooCommerce_Rest_Api
     {
         // if the queue is running in the console - we need to say tell the response why it's not going to fire this way.
         if (!mailchimp_is_configured() || !($api = mailchimp_get_api())) {
-            return mailchimp_rest_response(array('success' => false, 'reason' => 'not configured'));
+            return $this->mailchimp_rest_response(array('success' => false, 'reason' => 'not configured'));
         }
 
         $store_id = mailchimp_get_store_id();
@@ -140,7 +111,7 @@ class MailChimp_WooCommerce_Rest_Api
         try {
             $promo_rules = $api->getPromoRules($store_id, 1, 1, 1);
             $mailchimp_total_promo_rules = $promo_rules['total_items'];
-            if ($mailchimp_total_promo_rules > $promo_rules_count['publish']) $mailchimp_total_promo_rules = $promo_rules_count['publish'];
+            if (isset($promo_rules_count['publish']) && $mailchimp_total_promo_rules > $promo_rules_count['publish']) $mailchimp_total_promo_rules = $promo_rules_count['publish'];
         } catch (\Exception $e) { $mailchimp_total_promo_rules = 0; }
         try {
             $products = $api->products($store_id, 1, 1);
@@ -156,9 +127,9 @@ class MailChimp_WooCommerce_Rest_Api
         $date = mailchimp_date_local('now');
 
         // but we need to do it just in case.
-        return mailchimp_rest_response(array(
+        return $this->mailchimp_rest_response(array(
             'success' => true,
-            'promo_rules_in_store' => (int) $promo_rules_count['publish'],
+            'promo_rules_in_store' => isset($promo_rules_count['publish']) ? (int) $promo_rules_count['publish'] : 0,
             'promo_rules_in_mailchimp' => $mailchimp_total_promo_rules,
             'products_in_store' => $product_count,
             'products_in_mailchimp' => $mailchimp_total_products,
@@ -171,5 +142,17 @@ class MailChimp_WooCommerce_Rest_Api
             'has_started' => mailchimp_has_started_syncing(),
             'has_finished' => mailchimp_is_done_syncing(),
         ));
+    }
+
+    /**
+     * @param array $data
+     * @param int $status
+     * @return WP_REST_Response
+     */
+    private function mailchimp_rest_response($data, $status = 200) {
+        if (!is_array($data)) $data = array();
+        $response = new WP_REST_Response($data);
+        $response->set_status($status);
+        return $response;
     }
 }

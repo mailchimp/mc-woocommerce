@@ -90,23 +90,6 @@ class MailChimp_WooCommerce_Activator {
 		update_site_option('mailchimp_woocommerce_version', mailchimp_environment_variables()->version);
 	}
 
-	/**
-	 * Remove queue tables created with versions <2.3 from DB.
-	 */
-	private static function remove_legacy_tables()
-	{
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-
-		global $wpdb;
-
-		$wpdb->hide_errors();
-
-		$charset_collate = $wpdb->get_charset_collate();
-	
-		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}queue;");
-		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}failed_jobs;");
-	}
-
 		/**
 	 * Migrate wp_queue jobs to Action Scheduler
 	 * 
@@ -123,12 +106,9 @@ class MailChimp_WooCommerce_Activator {
 			foreach ($queue_jobs as $queue_job) {
 				$job = unserialize($queue_job->job);
 				$job->job = $job;
-				$job->id = static::get_possible_job_ids($job);
-				
-				
-				mailchimp_as_push($job, 180);
+				$job->id = static::get_possible_job_ids($job);	
+				mailchimp_as_push($job, 90);
 			}
-			static::remove_legacy_tables();
 		}
 	}
 

@@ -804,22 +804,33 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     }
 
     public function mailchimp_process_single_job($obj_id) {
-        // get job row from db
-        global $wpdb;
-        $sql = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}mailchimp_jobs	WHERE obj_id = %s", $obj_id );
-        $job_row = $wpdb->get_row( $sql );
-        
-        // get variables
-        $job = unserialize($job_row->job);
-        $job_id =$job_row->id;
-        
-        // process job
-        //mailchimp_debug('action_scheduler.process_job', get_class($job) . ' :: obj_id '.$job->id);
-        $job->handle();
-
-        // delete processed job
-        $sql = $wpdb->prepare("DELETE FROM {$wpdb->prefix}mailchimp_jobs WHERE id = %s AND obj_id = %s", array($job_id, $obj_id));
-        $wpdb->query($sql);
+        try {
+            // get job row from db
+            global $wpdb;
+            $sql = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}mailchimp_jobs	WHERE obj_id = %s", $obj_id );
+            $job_row = $wpdb->get_row( $sql );
+            
+            if (is_null($job_row) || !is_object($job_row)) {
+                mailchimp_debug('action_scheduler.process_job.fail','Job '.current_action().' not found at '.$wpdb->prefix.'_mailchimp_jobs database table :: obj_id '.$obj_id);
+                return false;
+            }
+            // get variables
+            $job = unserialize($job_row->job);
+            
+            $job_id =$job_row->id;
+            
+            // process job
+            //mailchimp_debug('action_scheduler.process_job', get_class($job) . ' :: obj_id '.$job->id);
+            $job->handle();
+    
+            // delete processed job
+            $sql = $wpdb->prepare("DELETE FROM {$wpdb->prefix}mailchimp_jobs WHERE id = %s AND obj_id = %s", array($job_id, $obj_id));
+            $wpdb->query($sql);
+            
+        } catch (\Exception $e) {
+            mailchimp_debug('action_scheduler.process_job.fail', get_class($job) . ' :: obj_id '.$obj_id, $e->message);
+        }
+        return true;
     }
 
 }

@@ -21,6 +21,7 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_Privacy' => 'includes/class-mailchimp-woocommerce-privacy.php',
         'Mailchimp_Woocommerce_Deactivation_Survey' => 'includes/class-mailchimp-woocommerce-deactivation-survey.php',
         'MailChimp_WooCommerce_Rest_Api' => 'includes/class-mailchimp-woocommerce-rest-api.php',
+        'Mailchimp_Wocoomerce_CLI' => 'includes/class-mailchimp-woocommerce-cli.php',
         
         // includes/api/assets
         'MailChimp_WooCommerce_Address' => 'includes/api/assets/class-mailchimp-address.php',
@@ -66,8 +67,8 @@ spl_autoload_register(function($class) {
         
         'MailChimp_WooCommerce_Public' => 'public/class-mailchimp-woocommerce-public.php',
         'MailChimp_WooCommerce_Admin' => 'admin/class-mailchimp-woocommerce-admin.php',
-
-        'Queue_Command' => 'includes/vendor/queue/classes/cli/queue-command.php',
+        
+        // Queue system Action Scheduler
         'ActionScheduler' => 'includes/vendor/action-scheduler/action-scheduler.php',
     );
 
@@ -139,7 +140,7 @@ if (defined( 'WP_CLI' ) && WP_CLI) {
             }
         };
         WP_CLI::add_command( 'mailchimp_push', 'mailchimp_cli_push_command');
-        WP_CLI::add_command( 'queue', 'Queue_Command' );
+        WP_CLI::add_command( 'queue', 'Mailchimp_Wocoomerce_CLI' );
     } catch (\Exception $e) {}
 }
 

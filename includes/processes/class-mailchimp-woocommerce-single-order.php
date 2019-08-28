@@ -48,7 +48,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
     public function process()
     {
         if (!mailchimp_is_configured() || !($api = mailchimp_get_api())) {
-            mailchimp_debug(get_called_class(), 'mailchimp is not configured properly');
+            mailchimp_debug(get_called_class(), 'Mailchimp is not configured properly');
             return false;
         }
 
@@ -177,6 +177,11 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                 // then re-submit the order once they're in the database again.
                 if (mailchimp_string_contains($e->getMessage(), 'product with the provided ID')) {
                     $api->handleProductsMissingFromAPI($order);
+                    // make another attempt again to add the order.
+                    $api_response = $api->$call($store_id, $order, false);
+                } elseif (mailchimp_string_contains($e->getMessage(), 'campaign with the provided ID')) {
+                    // the campaign was invalid, we need to remove it and re-submit
+                    $order->setCampaignId(null);
                     // make another attempt again to add the order.
                     $api_response = $api->$call($store_id, $order, false);
                 } else {

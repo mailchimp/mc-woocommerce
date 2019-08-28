@@ -35,7 +35,7 @@ class MailChimp_WooCommerce_i18n {
 	public function load_plugin_textdomain() {
 
 		load_plugin_textdomain(
-			'mailchimp-woocommerce',
+			'mc-woocommerce',
 			false,
 			dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/'
 		);

@@ -9,7 +9,7 @@ class MailChimp_WooCommerce_Privacy
     {
         if (function_exists( 'wp_add_privacy_policy_content')) {
             $content = sprintf(/* translators: %s - Mailchimp Privacy Policy URL. */
-                __( 'When shopping, we keep a record of your email and the cart contents for up to 30 days on our server. This record is kept to repopulate the contents of your cart if you switch devices or needed to come back another day. Read our privacy policy <a href="%s">here</a>.', 'mailchimp-woocommerce' ),
+                __( 'When shopping, we keep a record of your email and the cart contents for up to 30 days on our server. This record is kept to repopulate the contents of your cart if you switch devices or needed to come back another day. Read our privacy policy <a href="%s">here</a>.', 'mc-woocommerce' ),
                 'https://mailchimp.com/legal/privacy/'
                 
             );
@@ -75,11 +75,11 @@ class MailChimp_WooCommerce_Privacy
             'data' => array(
                 array(
                     'group_id'    => 'mailchimp_cart',
-                    'group_label' => __( 'MailChimp Shopping Cart Data', 'mailchimp-woocommerce' ),
+                    'group_label' => __( 'MailChimp Shopping Cart Data', 'mc-woocommerce' ),
                     'item_id'     => 'mailing-shopping-cart-1',
                     'data'        => array(
                         array(
-                            'name'  => __( 'User ID', 'mailchimp-woocommerce' ),
+                            'name'  => __( 'User ID', 'mc-woocommerce' ),
                             'value' => $uid,
                         ),
                         $data, // this is already an associative array with name and value keys

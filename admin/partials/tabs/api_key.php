@@ -1,15 +1,20 @@
 <input type="hidden" name="mailchimp_active_settings_tab" value="api_key"/>
 
-<h2 style="padding-top: 1em;"><?php esc_html_e('API Information', $this->plugin_name);?></h2>
-<p><?php esc_html_e('To find your Mailchimp API key, log into your account settings > Extras > API keys. From there, either grab an existing key or generate a new one for your WooCommerce store.', $this->plugin_name);?></p>
-
 <!-- remove some meta and generators from the <head> -->
-<fieldset>
+<fieldset class="full">
     <legend class="screen-reader-text">
-        <span><?php esc_html_e('Mailchimp API Key', $this->plugin_name);?></span>
+        <span><?php esc_html_e('Connect your store to Mailchimp', 'mc-woocommerce');?></span>
     </legend>
-    <label for="<?php echo $this->plugin_name; ?>-mailchimp-api-key">
-        <input style="width: 30%;" type="password" id="<?php echo $this->plugin_name; ?>-mailchimp-api-key" name="<?php echo $this->plugin_name; ?>[mailchimp_api_key]" value="<?php echo isset($options['mailchimp_api_key']) ? $options['mailchimp_api_key'] : '' ?>" />
-        <span><?php esc_html_e('Enter your Mailchimp API key.', $this->plugin_name); ?></span>
-    </label>
+    
+    
+    <a id="mailchimp-oauth-connect" class="button button-primary tab-content-submit oauth-connect"><?php $has_valid_api_key ? esc_html_e('Reconnect', 'mc-woocommerce') : esc_html_e('Connect', 'mc-woocommerce');?></a>
+    <h4><?php esc_html_e('Connect your store to Mailchimp', 'mc-woocommerce'); ?></h4>
+    <input type="hidden" id="<?php echo $this->plugin_name; ?>-mailchimp-api-key" name="<?php echo $this->plugin_name; ?>[mailchimp_api_key]" value="<?php echo isset($options['mailchimp_api_key']) ? $options['mailchimp_api_key'] : '' ?>" required/>
+    <?php if ($has_valid_api_key) :?>
+        <p id="mailchimp-oauth-api-key-valid"><?php esc_html_e('Already connected. You can reconnect with another Mailchimp account if you want.' , 'mc-woocommerce');?></p>
+    <?php endif;?>
+    <p id="mailchimp-oauth-waiting" class="oauth-description"><?php esc_html_e('Connecting. A new window will open with Mailchimp\'s OAuth service. Please log-in an we will take care of the rest.' , 'mc-woocommerce');?></p>
+    <p id="mailchimp-oauth-connecting" class="oauth-description"><?php esc_html_e('Connection in progress' , 'mc-woocommerce');?></p>
+    <p id="mailchimp-oauth-connected" class="oauth-description "><?php esc_html_e('Connected! Please wait while loading next step', 'mc-woocommerce');?></p>
 </fieldset>
+

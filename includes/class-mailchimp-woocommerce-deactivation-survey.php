@@ -176,10 +176,10 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Deactivation_Survey', false ) ) {
 				$form.submit(function(event) {
 					event.preventDefault();
 					if (! $form.find('input[type=radio]:checked').val()) {
-						$form.find('.mailchimp-woocommerce-deactivate-survey-footer').prepend('<span class="error"><?php echo esc_js( __( 'Please select an option', 'mailchimp-woocommerce' ) ); ?></span>');
+						$form.find('.mailchimp-woocommerce-deactivate-survey-footer').prepend('<span class="error"><?php echo esc_js( __( 'Please select an option', 'mc-woocommerce' ) ); ?></span>');
 						return;
 					}
-					$form.find('.mailchimp-woocommerce-deactivate-survey-submit').html('<?php echo esc_js( __( 'Sending Feedback', 'mailchimp-woocommerce' ) ); ?>').attr("disabled", true).removeClass('button-primary');
+					$form.find('.mailchimp-woocommerce-deactivate-survey-submit').html('<?php echo esc_js( __( 'Sending Feedback', 'mc-woocommerce' ) ); ?>').attr("disabled", true).removeClass('button-primary');
 					var submitSurvey = $.ajax(
 						{
 							url: "<?php echo $this->endpoint; ?>",
@@ -324,41 +324,41 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Deactivation_Survey', false ) ) {
 
 			$options = array(
 				1 => array(
-					'title'   => esc_html__( 'I want to change the audience associated with this integration.', 'mailchimp-woocommerce' ),
+					'title'   => esc_html__( 'I want to change the audience associated with this integration.', 'mc-woocommerce' ),
 					'reason'   => 'I want to change the audience associated with this integration.'
 				),
 				2 => array(
-					'title'   => esc_html__( 'I want to change the site or store connected through this integration.', 'mailchimp-woocommerce' ),
+					'title'   => esc_html__( 'I want to change the site or store connected through this integration.', 'mc-woocommerce' ),
 					'reason'   => 'I want to change the site or store connected through this integration.'
 				),
 				3 => array(
-					'title'   => esc_html__( 'The order data isn\'t syncing.', 'mailchimp-woocommerce' ),
+					'title'   => esc_html__( 'The order data isn\'t syncing.', 'mc-woocommerce' ),
 					'reason'   => 'The order data isn\'t syncing.'
 				),
 				4 => array(
-					'title'   => esc_html__( 'The promo codes aren\'t showing up.', 'mailchimp-woocommerce' ),
+					'title'   => esc_html__( 'The promo codes aren\'t showing up.', 'mc-woocommerce' ),
 					'reason'   => 'The promo codes aren\'t showing up.'
 				),
 				5 => array(
-					'title'   => esc_html__( 'I\'m trying to troubleshoot the integration.', 'mailchimp-woocommerce' ),
+					'title'   => esc_html__( 'I\'m trying to troubleshoot the integration.', 'mc-woocommerce' ),
 					'reason'   => 'I\'m trying to troubleshoot the integration.'
 				),
 				6 => array(
-					'title'   => esc_html__( 'I was instructed to disconnect by Mailchimp Support.', 'mailchimp-woocommerce' ),
+					'title'   => esc_html__( 'I was instructed to disconnect by Mailchimp Support.', 'mc-woocommerce' ),
 					'reason'   => 'I was instructed to disconnect by Mailchimp Support.'
 				),
 				7 => array(
-					'title'   => esc_html__( 'I no longer use this integration.', 'mailchimp-woocommerce' ),
+					'title'   => esc_html__( 'I no longer use this integration.', 'mc-woocommerce' ),
 					'reason'   => 'I no longer use this integration.'
 				),
 				8 => array(
-					'title'   => esc_html__( 'It\'s a temporary deactivation.', 'mailchimp-woocommerce' ),
+					'title'   => esc_html__( 'It\'s a temporary deactivation.', 'mc-woocommerce' ),
 					'reason'   => 'It\'s a temporary deactivation.'
 				),
 				9 => array(
-					'title'   => esc_html__( 'Other', 'mailchimp-woocommerce' ),
+					'title'   => esc_html__( 'Other', 'mc-woocommerce' ),
 					'reason'   => 'Other',
-					'details' => esc_html__( 'Please share the reason', 'mailchimp-woocommerce' ),
+					'details' => esc_html__( 'Please share the reason', 'mc-woocommerce' ),
 				),
 			);
 			?>
@@ -367,15 +367,15 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Deactivation_Survey', false ) ) {
 					<form class="mailchimp-woocommerce-deactivate-survey" method="post">
 						<span class="mailchimp-woocommerce-deactivate-survey-header">
 							<span class="dashicons dashicons-testimonial"></span>
-							<?php echo ' ' . esc_html__( 'Quick Feedback', 'mailchimp-woocommerce' ); ?>
-							<span title="<?php esc_attr_e( 'Close', 'mailchimp-woocommerce' );?> " class="mailchimp-woocommerce-deactivate-survey-close">✕</span>
+							<?php echo ' ' . esc_html__( 'Quick Feedback', 'mc-woocommerce' ); ?>
+							<span title="<?php esc_attr_e( 'Close', 'mc-woocommerce' );?> " class="mailchimp-woocommerce-deactivate-survey-close">✕</span>
 						</span>
 
 						<span class="mailchimp-woocommerce-deactivate-survey-desc">
 							<?php
 							printf(
 								/* translators: %s - plugin name. */
-								esc_html__( 'If you have a moment, please share why you are deactivating %s:', 'mailchimp-woocommerce' ),
+								esc_html__( 'If you have a moment, please share why you are deactivating %s:', 'mc-woocommerce' ),
 								esc_html__( 'Mailchimp for Woocommerce', 'mc-woocommerce')
 							);
 							?>
@@ -395,8 +395,8 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Deactivation_Survey', false ) ) {
 							<?php endforeach; ?>
 						</div>
 						<div class="mailchimp-woocommerce-deactivate-survey-footer">
-							<button type="submit" class="mailchimp-woocommerce-deactivate-survey-submit button button-primary button-large"><?php echo esc_html__( 'Submit & Deactivate', 'mailchimp-woocommerce' ); ?></button>
-							<a href="#" class="mailchimp-woocommerce-deactivate-survey-deactivate"><?php echo esc_html__( 'Skip & Deactivate', 'mailchimp-woocommerce' ); ?></a>
+							<button type="submit" class="mailchimp-woocommerce-deactivate-survey-submit button button-primary button-large"><?php echo esc_html__( 'Submit & Deactivate', 'mc-woocommerce' ); ?></button>
+							<a href="#" class="mailchimp-woocommerce-deactivate-survey-deactivate"><?php echo esc_html__( 'Skip & Deactivate', 'mc-woocommerce' ); ?></a>
 						</div>
 					</form>
 				</div>

@@ -6,19 +6,6 @@ var mailchimp,
     mailchimp_submitted_email = false,
     mailchimpReady = function (a) { /in/.test(document.readyState) ? setTimeout("mailchimpReady(" + a + ")", 9) : a(); };
 
-function mailchimpPollQueue() {
-    try {
-        var queue = new XMLHttpRequest;
-        queue.open("GET", mailchimp_public_data.queue_url, true);
-        queue.setRequestHeader("Accept", "application/json");
-        queue.timeout = 4000; // Set timeout to 4 seconds (4000 milliseconds)
-        queue.ontimeout = function () { console.log('queue success'); };
-        queue.send();
-    } catch (a) {
-        console.log("mailchimp.init_queue.error", a)
-    }
-}
-
 function mailchimpGetCurrentUserByHash(a) {
     try {
         var b = mailchimp_public_data.ajax_url + "?action=mailchimp_get_user_by_hash&hash=" + a, c = new XMLHttpRequest;
@@ -213,9 +200,6 @@ mailchimpReady(function () {
             mailchimp_registration_email.onfocus = function () { mailchimpHandleBillingEmail('#reg_email'); }
         }
 
-        if (mailchimp_public_data.queue_should_fire) {
-            mailchimpPollQueue();
-        }
     } catch (e) {
         console.log('mailchimp ready error', e);
     }

@@ -67,6 +67,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		update_option('mailchimp-woocommerce-sync.completed_at', false);
 		update_option('mailchimp-woocommerce-resource-last-updated', false);
 
+		mailchimp_log('store.disconnected', 'Store id ' . mailchimp_get_store_id() . ' has been disconnected');
 		return $options;
 	}
 	
@@ -220,6 +221,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			if ($this->mailchimp_update_woo_settings()) {
 				update_option( $this->plugin_name.'_woo_currency_update', true);
 			} 
+		}
+
+		if($wpdb->get_var("SHOW TABLES LIKE '{$wpdb->prefix}mailchimp_jobs';") != $wpdb->prefix.'mailchimp_jobs') {
+			MailChimp_WooCommerce_Activator::create_queue_tables();
+			MailChimp_WooCommerce_Activator::migrate_jobs();
 		}
 	}
 
@@ -399,14 +405,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			'mailchimp_account_info_id' => null,
 			'mailchimp_account_info_username' => null,
 		);
-
-        if (($failure = mailchimp_woocommerce_check_if_http_worker_fails())) {
-            unset($data['mailchimp_api_key']);
-            $data['active_tab'] = 'api_key';
-            $data['api_ping_error'] = $failure;
-            mailchimp_error('admin@validateCanUseHttpWorker', $failure);
-            return $data;
-        }
 
 		$api = new MailChimp_WooCommerce_MailChimpApi($data['mailchimp_api_key']);
 
@@ -708,7 +706,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			// sync the store with MC
 			$this->syncStore(array_merge($this->getOptions(), $data));
 
-			// if there was already a store in mailchimp, use the list ID from mailchimp
+			// if there was already a store in Mailchimp, use the list ID from Mailchimp
 			if ($this->swapped_list_id) {
 				$data['mailchimp_list'] = $this->swapped_list_id;
 			}
@@ -721,6 +719,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 $this->setData('sync.config.resync', false);
                 $this->setData('sync.orders.current_page', 1);
                 $this->setData('sync.products.current_page', 1);
+				$this->setData('sync.coupons.current_page', 1);
                 $this->setData('sync.syncing', true);
                 $this->setData('sync.started_at', time());
 
@@ -1149,7 +1148,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		} catch (\Exception $e) {
 			if (mailchimp_string_contains($e->getMessage(),'woocommerce already exists in the account' )) {
-				// retrieve mailchimp store using domain
+				// retrieve Mailchimp store using domain
 				$stores = $this->api()->stores();
 				//iterate thru stores, find correct store ID and save it to db
 				foreach ($stores as $mc_store) {
@@ -1251,7 +1250,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         $coupon_sync->flagStartSync();
 
         // queue up the jobs
-        mailchimp_handle_or_queue($coupon_sync, 0, true);
+        mailchimp_handle_or_queue($coupon_sync, 0);
 	}
 
 	/**

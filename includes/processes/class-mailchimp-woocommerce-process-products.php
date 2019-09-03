@@ -20,7 +20,7 @@ class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abstr
     {
         $job = new MailChimp_WooCommerce_Process_Products();
         $job->flagStartSync();
-        mailchimp_handle_or_queue($job, 0, true);
+        mailchimp_handle_or_queue($job, 0);
     }
 
 

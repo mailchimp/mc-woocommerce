@@ -174,12 +174,6 @@ class MailChimp_WooCommerce
      */
     private function load_dependencies()
     {
-        global $wp_queue;
-
-        if (empty($wp_queue)) {
-            $wp_queue = new WP_Queue();
-        }
-
         // fire up the loader
         $this->loader = new MailChimp_WooCommerce_Loader();
 
@@ -269,8 +263,6 @@ class MailChimp_WooCommerce
 	private function define_public_hooks() {
 
 		$plugin_public = new MailChimp_WooCommerce_Public( $this->get_plugin_name(), $this->get_version() );
-
-		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_styles');
 		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_scripts');
 	}
 
@@ -360,6 +352,21 @@ class MailChimp_WooCommerce
             // set user by email hash ( public and private )
             $this->loader->add_action('wp_ajax_mailchimp_set_user_by_email', $service, 'set_user_by_email');
             $this->loader->add_action('wp_ajax_nopriv_mailchimp_set_user_by_email', $service, 'set_user_by_email');
+
+            $jobs_classes = array(
+                "MailChimp_WooCommerce_Single_Order",
+                "MailChimp_WooCommerce_SingleCoupon",
+                "MailChimp_WooCommerce_Single_Product",
+                "MailChimp_WooCommerce_Cart_Update",
+                "MailChimp_WooCommerce_User_Submit",
+                "MailChimp_WooCommerce_Process_Coupons",
+                "MailChimp_WooCommerce_Process_Coupons_Initial_Sync",
+                "MailChimp_WooCommerce_Process_Orders",
+                "MailChimp_WooCommerce_Process_Products"
+            );
+            foreach ($jobs_classes as $job_class) {
+                $this->loader->add_action($job_class, $service, 'mailchimp_process_single_job', 10, 1);
+            }
 		}
 	}
 

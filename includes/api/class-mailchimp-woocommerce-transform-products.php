@@ -138,7 +138,7 @@ class MailChimp_WooCommerce_Transform_Products
             $title = array($variation_title);
 
             foreach ($woo->get_variation_attributes() as $attribute => $value) {
-                if (is_string($value)) {
+                if (is_string($value) && !empty($value)) {
                     $name = ucfirst(str_replace(array('attribute_pa_', 'attribute_'), '', $attribute));
                     $title[] = "$name = $value";
                 }

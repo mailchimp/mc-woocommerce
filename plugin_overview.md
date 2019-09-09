@@ -12,6 +12,8 @@ In this article, you’ll learn how to connect Mailchimp for WooCommerce.
 
 - Your host environment must meet [WooCommerce's minimum requirements](https://docs.woocommerce.com/document/server-requirements), including PHP 7.0 or greater.
 
+- WordPress REST API should be enabled in order for this plugin to work.
+
 - We recommend you use this plugin in a staging environment before installing it on production servers. 
 
 - Mailchimp for WooCommerce syncs the customer’s first name, last name, email address, and orders.

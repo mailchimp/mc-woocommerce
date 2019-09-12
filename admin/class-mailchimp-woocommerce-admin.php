@@ -231,13 +231,19 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		if ((defined( 'DISABLE_WP_HTTP_WORKER' ) && true === DISABLE_WP_HTTP_WORKER) ||
 			(defined( 'MAILCHIMP_USE_CURL' ) && true === MAILCHIMP_USE_CURL) ||
 			(defined( 'MAILCHIMP_REST_LOCALHOST' ) && true === MAILCHIMP_REST_LOCALHOST) ||
-			(defined( 'MAILCHIMP_REST_IP' ))
+			(defined( 'MAILCHIMP_REST_IP' )) ||
+			(defined( 'MAILCHIMP_DISABLE_QUEUE' && true === MAILCHIMP_DISABLE_QUEUE))
+			
 			) {
 			
 			$constants_used = array();
 			
 			if (defined( 'DISABLE_WP_HTTP_WORKER')) {
 				$constants_used[] = 'DISABLE_WP_HTTP_WORKER';
+			}
+
+			if (defined( 'MAILCHIMP_DISABLE_QUEUE')) {
+				$constants_used[] = 'MAILCHIMP_DISABLE_QUEUE';
 			}
 
 			if (defined( 'MAILCHIMP_USE_CURL')) {
@@ -253,8 +259,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			}
 			
 			$text = __('Mailchimp for Woocommerce','mc-woocommerce').'<br/>'.
-			'<p id="http-worker-deprecated-message">'.__('We dectected that this site has defined the following constants, likely at wp-config.php file.' ,'mc-woocommerce').'<br/>'.
-			implode('<br/> ', $constants_used).'<br/><br/>'.
+			'<p id="http-worker-deprecated-message">'.__('We dectected that this site has the following constants defined, likely at wp-config.php file' ,'mc-woocommerce').': '.
+			implode(' | ', $constants_used).'<br/>'.
 			__('These constants are deprecated since Mailchimp for Woocommerce version 2.3. Please refer to the <a href="https://github.com/mailchimp/mc-woocommerce/wiki/">plugin official wiki</a> for further details.' ,'mc-woocommerce').'</p>';
 			
 			add_settings_error('mailchimp-woocommerce_notice', $this->plugin_name, $text, 'notice-info');

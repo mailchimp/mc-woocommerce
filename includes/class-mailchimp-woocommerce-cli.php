@@ -30,7 +30,6 @@ class Mailchimp_Wocoomerce_CLI extends WP_CLI_Command {
     public function flush($args, $assoc_args = array())
     {
         global $wpdb;
-        $this->command_called = 'flush';
         WP_CLI::confirm( "This will delete all current queued sync jobs, and entries from {$wpdb->prefix}mailchimp_jobs table. Are you sure?", $assoc_args );
         mailchimp_delete_as_jobs();
         $wpdb->query("DELETE FROM {$wpdb->prefix}mailchimp_jobs");
@@ -42,8 +41,9 @@ class Mailchimp_Wocoomerce_CLI extends WP_CLI_Command {
     public function show()
     {
         global $wpdb;
-        $this->command_called = 'show';
+        WP_CLI::log("Showing contents of {$wpdb->prefix}mailchimp_jobs"); 
         print_r($wpdb->get_results("SELECT * FROM {$wpdb->prefix}mailchimp_jobs"));
+        exit;
     }
 
 	/**
@@ -52,7 +52,6 @@ class Mailchimp_Wocoomerce_CLI extends WP_CLI_Command {
 	 * @subcommand create-tables
 	 */
 	public function create_tables( $args, $assoc_args = array() ) {
-        $this->command_called = 'create_tables';
         install_mailchimp_queue();
 		WP_CLI::success( "Table {$wpdb->prefix}queue created." );
 	}
@@ -89,8 +88,6 @@ class Mailchimp_Wocoomerce_CLI extends WP_CLI_Command {
             $force_arg = " --force=1 ";
         }
 
-        $sleep_between_jobs = isset($assoc_args['sleep_processing']) ? (int) $assoc_args['sleep_processing'] : 1;
-
         $options = array(
             'return'     => true,   // Return 'STDOUT'; use 'all' for full object.
             //'parse'      => 'json', // Parse captured STDOUT to JSON array.
@@ -102,6 +99,24 @@ class Mailchimp_Wocoomerce_CLI extends WP_CLI_Command {
         $output = WP_CLI::runcommand( $command, $options );
         WP_CLI::log($output);  
         exit;
-	}
+    }
+    
+    /**
+	 * Deprecated commands
+	 */
+	public function work( $args, $assoc_args = array() ) {
+        WP_CLI::warning(WP_CLI::colorize('%Wqueue work%n').' command is deprecated since Mailchimp for Woocommerce version 2.3. Please use '.WP_CLI::colorize('%ywp action-scheduler run --group="mc-woocommerce%n"').' instead'); 
+        exit;
+    }
+    
+	public function status( $args, $assoc_args = array() ) {
+        WP_CLI::warning(WP_CLI::colorize('%Wqueue status%n').' command is deprecated since Mailchimp for Woocommerce version 2.3.'); 
+        exit;
+    }
+    
+	public function restart_failed( $args, $assoc_args = array() ) {
+		WP_CLI::warning(WP_CLI::colorize('%Wqueue restart_failed%n').' command is deprecated since Mailchimp for Woocommerce version 2.3.'); 
+        exit;
+    }
 }
 

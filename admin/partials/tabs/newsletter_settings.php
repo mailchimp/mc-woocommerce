@@ -70,7 +70,6 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
                 type="checkbox"
                 name="<?php echo $this->plugin_name; ?>[mailchimp_auto_subscribe]" 
                 id="<?php echo $this->plugin_name; ?>[mailchimp_auto_subscribe]" 
-                required 
                 <?= $list_is_configured ? 'disabled': '' ?>
                 value=1
                 <?= $enable_auto_subscribe ? 'checked' : ''?>>

@@ -150,16 +150,25 @@
 					
 			if (popup == null) {
 				window.clearInterval(oauthInterval);
-				Swal.fire({
+				const swalWithBootstrapButtons = Swal.mixin({
+					customClass: {
+					  confirmButton: 'button button-primary tab-content-submit disconnect-button',
+					  cancelButton: 'button button-default mc-woocommerce-resync-button disconnect-button'
+					},
+					buttonsStyling: false,
+				})
+				
+				swalWithBootstrapButtons.fire({
 					type : 'error',
 					title: 'Login Popup is blocked!',
 					text: 'Please allow your browser to show popups for this page',
 					footer: '<a href="https://mailchimp.com/help/enable-pop-ups-in-your-browser/">How to Enable Pop-ups in Your Browser</a>',
 					showCancelButton: true,
-					confirmButtonColor: '#7fad45',
 					cancelButtonColor: '#d33',
-					confirmButtonText: 'Try again',
+					confirmButtonColor: '#7fad45',
 					cancelButtonText: 'Cancel',
+					confirmButtonText: 'Try again',
+					reverseButtons: true
 				}).then((result) => {
 					if (result.value) {
 						openOAuthPopup(token);

@@ -14,6 +14,7 @@
         <p id="mailchimp-oauth-api-key-valid"><?php esc_html_e('Already connected. You can reconnect with another Mailchimp account if you want.' , 'mc-woocommerce');?></p>
     <?php endif;?>
     <p id="mailchimp-oauth-waiting" class="oauth-description"><?php esc_html_e('Connecting. A new window will open with Mailchimp\'s OAuth service. Please log-in an we will take care of the rest.' , 'mc-woocommerce');?></p>
+    <p id="mailchimp-oauth-error" class="oauth-description"><?php esc_html_e('Error, can\'t login.' , 'mc-woocommerce');?></p>
     <p id="mailchimp-oauth-connecting" class="oauth-description"><?php esc_html_e('Connection in progress' , 'mc-woocommerce');?></p>
     <p id="mailchimp-oauth-connected" class="oauth-description "><?php esc_html_e('Connected! Please wait while loading next step', 'mc-woocommerce');?></p>
 </fieldset>

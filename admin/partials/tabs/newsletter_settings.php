@@ -44,7 +44,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
             <select name="<?php echo $this->plugin_name; ?>[mailchimp_list]" required <?php if($list_is_configured): ?> disabled <?php endif; ?>>
 
                 <?php if(!isset($allow_new_list) || $allow_new_list === true): ?>
-                <option value="create_new"><?php esc_html_e('Create New Audience', 'mc-woocommerce');?></option>
+                    <option value="create_new"><?php esc_html_e('Create New Audience', 'mc-woocommerce');?></option>
                 <?php endif ?>
 
                 <?php if(isset($allow_new_list) && $allow_new_list === false): ?>
@@ -62,17 +62,16 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
             </select>
         </div>
     </div>
-    
+
     <div class="box" >
         <?php $enable_auto_subscribe = (array_key_exists('mailchimp_auto_subscribe', $options) && !is_null($options['mailchimp_auto_subscribe'])) ? $options['mailchimp_auto_subscribe'] : '1'; ?>
         <label>
-            <input 
-                type="checkbox"
-                name="<?php echo $this->plugin_name; ?>[mailchimp_auto_subscribe]" 
-                id="<?php echo $this->plugin_name; ?>[mailchimp_auto_subscribe]" 
-                required 
+            <input
+                    type="checkbox"
+                    name="<?php echo $this->plugin_name; ?>[mailchimp_auto_subscribe]"
+                    id="<?php echo $this->plugin_name; ?>[mailchimp_auto_subscribe]"
                 <?= $list_is_configured ? 'disabled': '' ?>
-                value=1
+                    value=1
                 <?= $enable_auto_subscribe ? 'checked' : ''?>>
             <strong><?php esc_html_e('During initial sync, auto subscribe the existing customers.', 'mc-woocommerce'); ?></strong>
         </label>
@@ -129,7 +128,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
         </div>
 
         <div class="box box-half margin-large">
-            <input type="text" id="<?php echo $this->plugin_name; ?>-newsletter-checkbox-action" name="<?php echo $this->plugin_name; ?>[mailchimp_checkbox_action]" value="<?php echo isset($options['mailchimp_checkbox_action']) ? $options['mailchimp_checkbox_action'] : 'woocommerce_after_checkout_billing_form' ?>" />        
+            <input type="text" id="<?php echo $this->plugin_name; ?>-newsletter-checkbox-action" name="<?php echo $this->plugin_name; ?>[mailchimp_checkbox_action]" value="<?php echo isset($options['mailchimp_checkbox_action']) ? $options['mailchimp_checkbox_action'] : 'woocommerce_after_checkout_billing_form' ?>" />
             <p class="description"><?php esc_html_e('Enter a WooCommerce form action', 'mc-woocommerce'); ?></p>
         </div>
 
@@ -159,7 +158,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
                 <p><?= __( 'Define the product image size used by abandoned carts, order notifications, and product recommendations.', 'mc-woocommerce' ); ?></p>
             </label>
         </div>
-        
+
         <div class="box box-half" >
             <label for="<?php echo $this->plugin_name; ?>-mailchimp-product_image_key">
                 <span><?php esc_html_e('Size', 'mc-woocommerce'); ?></span>

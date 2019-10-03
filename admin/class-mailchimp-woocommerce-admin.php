@@ -228,14 +228,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			MailChimp_WooCommerce_Activator::migrate_jobs();
 		}
 
-		if ((defined( 'DISABLE_WP_HTTP_WORKER' ) && true === DISABLE_WP_HTTP_WORKER) ||
-			(defined( 'MAILCHIMP_USE_CURL' ) && true === MAILCHIMP_USE_CURL) ||
-			(defined( 'MAILCHIMP_REST_LOCALHOST' ) && true === MAILCHIMP_REST_LOCALHOST) ||
-			(defined( 'MAILCHIMP_REST_IP' )) ||
-			(defined( 'MAILCHIMP_DISABLE_QUEUE' && true === MAILCHIMP_DISABLE_QUEUE))
-			
-			) {
-			
+		if (defined( 'DISABLE_WP_HTTP_WORKER' ) || defined( 'MAILCHIMP_USE_CURL' ) || defined( 'MAILCHIMP_REST_LOCALHOST' ) || defined( 'MAILCHIMP_REST_IP' ) || defined( 'MAILCHIMP_DISABLE_QUEUE') && true === MAILCHIMP_DISABLE_QUEUE) {
 			$constants_used = array();
 			
 			if (defined( 'DISABLE_WP_HTTP_WORKER')) {

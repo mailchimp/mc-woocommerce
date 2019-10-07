@@ -68,6 +68,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		update_option('mailchimp-woocommerce-resource-last-updated', false);
 
 		mailchimp_log('store.disconnected', 'Store id ' . mailchimp_get_store_id() . ' has been disconnected');
+
+		if (($store_id = mailchimp_get_store_id()) && ($mc = mailchimp_get_api()))  {
+            $mc->deleteStore($store_id);
+        }
+
 		return $options;
 	}
 	

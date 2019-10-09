@@ -41,7 +41,7 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Job' ) ) {
 			$job = $this;
 			if (null == $job->attempts) $job->set_attempts(0);
 			$job->set_attempts($job->get_attempts() + 1);
-			if ($job->get_attempts() < 4 ) mailchimp_as_push($job, $delay);
+			mailchimp_as_push($job, $delay);
 		}
 
 		/**

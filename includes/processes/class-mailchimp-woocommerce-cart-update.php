@@ -173,8 +173,8 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
 
         } catch (MailChimp_WooCommerce_RateLimitError $e) {
             sleep(3);
-            $this->release();
             mailchimp_error('cart.error', mailchimp_error_trace($e, "RateLimited :: email {$this->email}"));
+            $this->retry();
         } catch (\Exception $e) {
             update_option('mailchimp-woocommerce-cart-error', $e->getMessage());
             mailchimp_error('abandoned_cart.error', $e);

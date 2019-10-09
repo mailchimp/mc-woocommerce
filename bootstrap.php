@@ -192,15 +192,15 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
         }
     }
 
-    // TODO: deal with errors
     $action = as_schedule_single_action( strtotime( '+'.$delay.' seconds' ), get_class($job), array('obj_id' => $job_id), "mc-woocommerce");
     
     $message = ($job_id != get_class($job)) ? ' :: obj_id '.$job_id : '';
+    $attempts = $job->get_attempts() > 0 ? ' attempt:' . $job->get_attempts() : '';
     if (!empty($existing_actions)) {
-        mailchimp_debug('action_scheduler.reschedule_job', get_class($job) . ($delay > 0 ? ' restarts in '.$delay. ' seconds' : ' restarts in the next minute' ) . $message);
+        mailchimp_debug('action_scheduler.reschedule_job', get_class($job) . ($delay > 0 ? ' restarts in '.$delay. ' seconds' : ' restarts in the next minute' ) . $message . $attempts);
     } 
     else {
-        mailchimp_log('action_scheduler.queue_job', get_class($job) . ($delay > 0 ? ' starts in '.$delay. ' seconds' : ' starts in the next minute' ) .$message);
+        mailchimp_log('action_scheduler.queue_job', get_class($job) . ($delay > 0 ? ' starts in '.$delay. ' seconds' : ' starts in the next minute' ) . $message . $attempts);
     }
 
     return $action;	

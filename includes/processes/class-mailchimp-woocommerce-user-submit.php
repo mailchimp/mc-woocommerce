@@ -217,8 +217,8 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
             static::$handling_for = null;
         } catch (MailChimp_WooCommerce_RateLimitError $e) {
             sleep(3);
-            $this->release();
             mailchimp_error('member.sync.error', mailchimp_error_trace($e, "RateLimited :: user #{$this->id}"));
+            $this->retry();
         } catch (\Exception $e) {
             // if we have a 404 not found, we can create the member
             if ($e->getCode() == 404) {

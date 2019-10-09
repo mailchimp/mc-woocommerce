@@ -62,9 +62,9 @@ class MailChimp_WooCommerce_SingleCoupon extends Mailchimp_Woocommerce_Job
             mailchimp_log('promo_code.update', "updated promo code {$code->getCode()}");
         } catch (MailChimp_WooCommerce_RateLimitError $e) {
             sleep(3);
-            $this->release();
             $promo_code = isset($code) ? "code {$code->getCode()}" : "id {$this->id}";
             mailchimp_error('promo_code.error', mailchimp_error_trace($e, "RateLimited :: #{$promo_code}"));
+            $this->retry();
         } catch (\Exception $e) {
             $promo_code = isset($code) ? "code {$code->getCode()}" : "id {$this->id}";
             mailchimp_error('promo_code.error', mailchimp_error_trace($e, "error updating promo {$promo_code}"));

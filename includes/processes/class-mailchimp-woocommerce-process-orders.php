@@ -92,6 +92,9 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abstrac
 
                 return $response;
 
+            } catch (MailChimp_WooCommerce_RateLimitError $e) {
+                mailchimp_error('order_submit.error', mailchimp_error_trace($e, "$call :: {$item->getId()}"));
+                throw $e;
             } catch (MailChimp_WooCommerce_ServerError $e) {
                 mailchimp_error('order_submit.error', mailchimp_error_trace($e, "$call :: {$item->getId()}"));
                 return false;

@@ -128,8 +128,8 @@ class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
 
         } catch (MailChimp_WooCommerce_RateLimitError $e) {
             sleep(3);
-            $this->release();
-            mailchimp_error('product_submit.error', mailchimp_error_trace($e, "RateLimited :: #{$this->id}"));
+            mailchimp_error('product_submit.error', mailchimp_error_trace($e, "{$method} :: #{$this->id}"));
+            $this->retry();
         } catch (MailChimp_WooCommerce_ServerError $e) {
             mailchimp_error('product_submit.error', mailchimp_error_trace($e, "{$method} :: #{$this->id}"));
         } catch (MailChimp_WooCommerce_Error $e) {

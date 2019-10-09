@@ -593,7 +593,7 @@ class MailChimp_WooCommerce_MailChimpApi
             set_site_transient('mailchimp-woocommerce-has-campaign-id-'.$campaign_id, $data, 60 * 30);
             return $data;
         } catch (\Exception $e) {
-            mailchimp_log('campaign_get.error', 'No campaign with provided ID: '. $campaign_id. ' :: '. $e->getMessage(). ' :: in '.$e->getFile().' :: on '.$e->getLine());
+            mailchimp_debug('campaign_get.error', 'No campaign with provided ID: '. $campaign_id. ' :: '. $e->getMessage(). ' :: in '.$e->getFile().' :: on '.$e->getLine());
             set_site_transient('mailchimp-woocommerce-no-campaign-id-'.$campaign_id, true, 60 * 30);
 
             if (!$throw_if_invalid) {
@@ -1156,7 +1156,7 @@ class MailChimp_WooCommerce_MailChimpApi
             /** @var \MailChimp_WooCommerce_LineItem $order_item */
             $job = new MailChimp_WooCommerce_Single_Product($order_item->getId());
             if ($missing_products[$order_item->getId()] = $job->createModeOnly()->handle()) {
-                mailchimp_log("missing_products.fallback", "Product {$order_item->getId()} had to be re-pushed into Mailchimp");
+                mailchimp_debug("missing_products.fallback", "Product {$order_item->getId()} had to be re-pushed into Mailchimp");
             }
         }
         return $missing_products;

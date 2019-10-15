@@ -245,8 +245,8 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             return $api_response;
         } catch (MailChimp_WooCommerce_RateLimitError $e) {
             sleep(3);
-            $this->release();
             mailchimp_error('order_submit.error', mailchimp_error_trace($e, "RateLimited :: #{$this->id}"));
+            $this->retry();
         } catch (\Exception $e) {
             $message = strtolower($e->getMessage());
             mailchimp_error('order_submit.tracing_error', $e);

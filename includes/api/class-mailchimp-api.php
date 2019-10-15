@@ -1202,7 +1202,7 @@ class MailChimp_WooCommerce_MailChimpApi
     public function addPromoRule($store_id, MailChimp_WooCommerce_PromoRule $rule, $throw = true)
     {
         try {
-            if (($response = $this->updatePromoRule($store_id, $rule, false))) {
+            if (($response = $this->updatePromoRule($store_id, $rule, $throw))) {
                 return $response;
             }
             $data = $this->post("ecommerce/stores/{$store_id}/promo-rules", $rule->toArray());
@@ -1368,7 +1368,7 @@ class MailChimp_WooCommerce_MailChimpApi
     public function addPromoCodeForRule($store_id, MailChimp_WooCommerce_PromoRule $rule, MailChimp_WooCommerce_PromoCode $code, $throw = true)
     {
         try {
-            if (($result = $this->updatePromoCodeForRule($store_id, $rule, $code, false))) {
+            if (($result = $this->updatePromoCodeForRule($store_id, $rule, $code, $throw))) {
                 return $result;
             }
             $data = $this->post("ecommerce/stores/{$store_id}/promo-rules/{$rule->getId()}/promo-codes", $code->toArray());

@@ -59,6 +59,9 @@ class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abstr
                 $response = $this->mailchimp()->{$method}($this->store_id, $item, false);
                 mailchimp_log('product_sync.success', "{$method} :: #{$response->getId()}");
                 return $response;
+            } catch (MailChimp_WooCommerce_RateLimitError $e) {
+                mailchimp_error('product_sync.error', mailchimp_error_trace($e, "{$method} :: {$item->getId()}"));
+                throw $e;
             } catch (MailChimp_WooCommerce_ServerError $e) {
                 mailchimp_error('product_sync.error', mailchimp_error_trace($e, "{$method} :: {$item->getId()}"));
             } catch (MailChimp_WooCommerce_Error $e) {

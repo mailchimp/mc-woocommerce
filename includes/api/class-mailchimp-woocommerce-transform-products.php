@@ -63,6 +63,11 @@ class MailChimp_WooCommerce_Transform_Products
         $product->setPublishedAtForeign(mailchimp_date_utc($post->post_date));
         $product->setTitle($woo->get_title());
         $product->setUrl($woo->get_permalink());
+        
+        $vendor = apply_filters('mailchimp_sync_product_vendor', $product);
+        if (is_string($vendor)) {
+            $product->setVendor($vendor);
+        }
 
         foreach ($variants as $variant) {
 

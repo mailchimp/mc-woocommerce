@@ -59,7 +59,7 @@ class MailChimp_WooCommerce_Rest_Api
      */
     protected function register_sync_stats()
     {
-        if (current_user_can('editor') || current_user_can('administrator')) {
+        if (get_allowed_capability()) {
             register_rest_route(static::$namespace, '/sync/stats', array(
                 'methods' => 'GET',
                 'callback' => array($this, 'get_sync_stats'),

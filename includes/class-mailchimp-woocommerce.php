@@ -251,6 +251,9 @@ class MailChimp_WooCommerce
         // Mailchimp oAuth
         $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_oauth_start', $plugin_admin, 'mailchimp_woocommerce_ajax_oauth_start' );
         $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_oauth_finish', $plugin_admin, 'mailchimp_woocommerce_ajax_oauth_finish' );
+
+        // add Shop Manager capability to save options
+        $this->loader->add_action('option_page_capability_mailchimp-woocommerce', $plugin_admin, 'mailchimp_woocommerce_option_page_capability');
     }
 
 	/**

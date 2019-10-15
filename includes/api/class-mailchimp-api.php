@@ -196,7 +196,7 @@ class MailChimp_WooCommerce_MailChimpApi
      * @throws MailChimp_WooCommerce_Error
      * @throws MailChimp_WooCommerce_ServerError
      */
-    public function subscribe($list_id, $email, $subscribed = true, $merge_fields = array(), $list_interests = array())
+    public function subscribe($list_id, $email, $subscribed = true, $merge_fields = array(), $list_interests = array(), $language = null)
     {
         $data = array(
             'email_type' => 'html',
@@ -204,6 +204,7 @@ class MailChimp_WooCommerce_MailChimpApi
             'status' => ($subscribed === true ? 'subscribed' : 'pending'),
             'merge_fields' => $merge_fields,
             'interests' => $list_interests,
+            'language' => $language
         );
 
         if (empty($data['merge_fields'])) {
@@ -212,6 +213,10 @@ class MailChimp_WooCommerce_MailChimpApi
 
         if (empty($data['interests'])) {
             unset($data['interests']);
+        }
+        
+        if (empty($data['language'])) {
+            unset($data['language']);
         }
 
         mailchimp_debug('api.subscribe', "Subscribing {$email}", $data);
@@ -229,7 +234,7 @@ class MailChimp_WooCommerce_MailChimpApi
      * @throws Exception
      * @throws MailChimp_WooCommerce_Error
      */
-    public function update($list_id, $email, $subscribed = true, $merge_fields = array(), $list_interests = array())
+    public function update($list_id, $email, $subscribed = true, $merge_fields = array(), $list_interests = array(), $language = null)
     {
         $hash = md5(strtolower(trim($email)));
 
@@ -248,15 +253,19 @@ class MailChimp_WooCommerce_MailChimpApi
             'status' => $status,
             'merge_fields' => $merge_fields,
             'interests' => $list_interests,
+            'language' => $language
         );
 
         if (empty($data['merge_fields'])) {
             unset($data['merge_fields']);
         }
 
-
         if (empty($data['interests'])) {
             unset($data['interests']);
+        }
+
+        if (empty($data['language'])) {
+            unset($data['language']);
         }
 
         mailchimp_debug('api.update_member', "Updating {$email}", $data);
@@ -344,7 +353,7 @@ class MailChimp_WooCommerce_MailChimpApi
      * @throws MailChimp_WooCommerce_Error
      * @throws MailChimp_WooCommerce_ServerError
      */
-    public function updateOrCreate($list_id, $email, $subscribed = true, $merge_fields = array(), $list_interests = array())
+    public function updateOrCreate($list_id, $email, $subscribed = true, $merge_fields = array(), $list_interests = array(), $language = null)
     {
         $hash = md5(strtolower(trim($email)));
 
@@ -368,6 +377,7 @@ class MailChimp_WooCommerce_MailChimpApi
             'status_if_new' => $status_if_new,
             'merge_fields' => $merge_fields,
             'interests' => $list_interests,
+            'language' => $language
         );
 
         if (empty($data['merge_fields'])) {
@@ -377,7 +387,11 @@ class MailChimp_WooCommerce_MailChimpApi
         if (empty($data['interests'])) {
             unset($data['interests']);
         }
-
+        
+        if (empty($data['language'])) {
+            unset($data['language']);
+        }
+        
         mailchimp_debug('api.update_or_create', "Update Or Create {$email}", $data);
 
         return $this->put("lists/$list_id/members/$hash", $data);

@@ -122,10 +122,17 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         add_menu_page(
             __('Mailchimp - WooCommerce Setup', 'mc-woocommerce'),
             'Mailchimp',
-            'manage_options',
+            get_allowed_capability(),
             $this->plugin_name,
             array($this, 'display_plugin_setup_page'), 'data:image/svg+xml;base64,'.$this->mailchimp_svg()
         );
+	}
+
+	/**
+	 * check if current user can view options pages/ save plugin options
+	 */
+	public function mailchimp_woocommerce_option_page_capability() {
+		return get_allowed_capability();
 	}
 
 	/**
@@ -576,7 +583,13 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
      * @return array
      */
 	protected function compileStoreInfoData($input)
-    {
+    {	
+		$checkbox = $this->getOption('mailchimp_permission_cap', 'check');
+
+		// see if it's posted in the form.
+		if (isset($input['mailchimp_permission_cap']) && !empty($input['mailchimp_permission_cap'])) {
+			$checkbox = $input['mailchimp_permission_cap'];
+		}
         return array(
             // store basics
             'store_name' => trim((isset($input['store_name']) ? $input['store_name'] : get_option('blogname'))),
@@ -590,6 +603,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             'store_locale' => isset($input['store_locale']) ? $input['store_locale'] : false,
 			'store_timezone' => isset($input['store_timezone']) ? $input['store_timezone'] : false,
             'admin_email' => isset($input['admin_email']) && is_email($input['admin_email']) ? $input['admin_email'] : $this->getOption('admin_email', false),
+			'mailchimp_permission_cap' => $checkbox,
         );
     }
 
@@ -791,7 +805,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			'store_name', 'store_street', 'store_city', 'store_state',
 			'store_postal_code', 'store_country', 'store_phone',
 			'store_locale', 'store_timezone',
-			'store_phone',
+			'store_phone','mailchimp_permission_cap',
 		), $data);
 	}
 

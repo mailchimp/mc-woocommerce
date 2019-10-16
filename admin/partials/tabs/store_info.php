@@ -137,4 +137,32 @@ if (!$handler->hasValidApiKey()) {
             </select>
         </div>
     </div>
+
+    <?php 
+        // Only admins should see mailchimp_permission_cap radio buttons
+        if (current_user_can('manage_options')) : ?>
+        
+        <div class="box optional-settings-button" >
+            <span><?php esc_html_e('Optional Store Settings', 'mc-woocommerce');?></span>
+        </div>
+
+        <div class="optional-settings-content">
+            <div class="box box-half margin-large">
+                <label>
+                    <h4><?php esc_html_e('Plugin Permission Level', 'mc-woocommerce');?></h4>
+                    <p><?php _e('Select the minimum permission capability to manage Mailchimp for Woocommerce options', 'mc-woocommerce');?> </p>
+                </label>
+            </div>
+
+            <div class="box box-half margin-large">
+                <?php $checkbox_default_settings = (array_key_exists('mailchimp_permission_cap', $options) && !is_null($options['mailchimp_permission_cap'])) ? $options['mailchimp_permission_cap'] : 'manage_options'; ?>
+                <label class="radio-label">
+                    <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_permission_cap]" value="manage_options"<?php if($checkbox_default_settings === 'manage_options') echo ' checked="checked" '; ?>><?php esc_html_e('Administrators Only', 'mc-woocommerce');?><br>
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_permission_cap]" value="manage_woocommerce"<?php if($checkbox_default_settings === 'manage_woocommerce') echo ' checked="checked" '; ?>><?php esc_html_e('Shop Managers and Administrators', 'mc-woocommerce');?><br/>
+                </label>
+            </div>
+        </div>
+    <?php endif; ?>
 </fieldset>

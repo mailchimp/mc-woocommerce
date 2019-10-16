@@ -138,7 +138,7 @@ class MailChimp_WooCommerce_Rest_Api
             'promo_rules_page' => get_option('mailchimp-woocommerce-sync.coupons.current_page'),
             'products_page' => get_option('mailchimp-woocommerce-sync.products.current_page'),
             'orders_page' => get_option('mailchimp-woocommerce-sync.orders.current_page'),
-            'date' => $date->format( __('D, M j, Y g:i A', 'mc-woocommerce')),
+            'date' => $date->format( __('D, M j, Y g:i A', 'mailchimp-for-woocommerce')),
             'has_started' => mailchimp_has_started_syncing(),
             'has_finished' => mailchimp_is_done_syncing(),
         ));

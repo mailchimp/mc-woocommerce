@@ -997,7 +997,7 @@ function mailchimp_on_all_plugins_loaded() {
     }
 }
 
-function get_allowed_capability() {
+function mailchimp_get_allowed_capability() {
     if (current_user_can('manage_woocommerce') && mailchimp_get_option('mailchimp_permission_cap') == 'manage_woocommerce') {
         return 'manage_woocommerce';
     }

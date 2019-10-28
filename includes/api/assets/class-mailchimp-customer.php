@@ -21,6 +21,7 @@ class MailChimp_WooCommerce_Customer
     protected $address;
     protected $requires_double_optin = false;
     protected $original_subscriber_status = null;
+    protected $wordpress_user = null;
 
     /**
      * @return array
@@ -266,6 +267,26 @@ class MailChimp_WooCommerce_Customer
             'FNAME' => trim($this->getFirstName()),
             'LNAME' => trim($this->getLastName()),
         );
+    }
+
+    /**
+     * @param $user
+     * @return $this
+     */
+    public function setWordpressUser($user)
+    {
+        if ($user instanceof \WP_User) {
+            $this->wordpress_user = $user;
+        }
+        return $this;
+    }
+
+    /**
+     * @return null|\WP_User
+     */
+    public function getWordpressUser()
+    {
+        return $this->wordpress_user;
     }
 
     /**

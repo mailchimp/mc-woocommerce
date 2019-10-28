@@ -197,6 +197,9 @@ class MailChimp_WooCommerce_Transform_Orders
     {
         $customer = new MailChimp_WooCommerce_Customer();
 
+        // attach the wordpress user to the Mailchimp customer object.
+        $customer->setWordpressUser($order->get_user());
+
         $customer->setId(mailchimp_hash_trim_lower($order->get_billing_email()));
         $customer->setCompany($order->get_billing_company());
         $customer->setEmailAddress(trim($order->get_billing_email()));

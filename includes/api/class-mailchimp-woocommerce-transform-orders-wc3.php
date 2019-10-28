@@ -436,7 +436,7 @@ class MailChimp_WooCommerce_Transform_Orders
             ),
             // Awaiting payment – stock is reduced, but you need to confirm payment
             'on-hold'       => (object) array(
-                'financial' => 'on-hold',
+                'financial' => 'pending',
                 'fulfillment' => null
             ),
             // Order fulfilled and complete – requires no further action

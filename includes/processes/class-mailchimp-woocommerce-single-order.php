@@ -212,35 +212,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             mailchimp_log('order_submit.success', $log);
 
             // if the customer has a flag to double opt in - we need to push this data over to MailChimp as pending
-            // before the order is submitted.
-            if ($order->getCustomer()->requiresDoubleOptIn() && $order->getCustomer()->getOriginalSubscriberStatus()) {
-                try {
-                    $list_id = mailchimp_get_list_id();
-                    $merge_fields = $order->getCustomer()->getMergeFields();
-                    $email = $order->getCustomer()->getEmailAddress();
-
-                    try {
-                        $member = $api->member($list_id, $email);
-                        if ($member['status'] === 'transactional') {
-
-                            $api->update($list_id, $email, 'pending', $merge_fields);
-                            mailchimp_tell_system_about_user_submit($email, mailchimp_get_subscriber_status_options('pending'), 60);
-                            mailchimp_log('double_opt_in', "Updated {$email} Using Double Opt In - previous status was '{$member['status']}'", $merge_fields);
-                        }
-                    } catch (\Exception $e) {
-                        // if the error code is 404 - need to subscribe them becausce it means they were not on the list.
-                        if ($e->getCode() == 404) {
-                            $api->subscribe($list_id, $email, false, $merge_fields);
-                            mailchimp_tell_system_about_user_submit($email, mailchimp_get_subscriber_status_options(false), 60);
-                            mailchimp_log('double_opt_in', "Subscribed {$email} Using Double Opt In", $merge_fields);
-                        } else {
-                            mailchimp_error('double_opt_in.update', $e->getMessage());
-                        }
-                    }
-                } catch (\Exception $e) {
-                    mailchimp_error('double_opt_in.create', $e->getMessage());
-                }
-            }
+            mailchimp_update_member_with_double_opt_in($order, $order->getCustomer()->getOriginalSubscriberStatus());
 
             return $api_response;
         } catch (MailChimp_WooCommerce_RateLimitError $e) {

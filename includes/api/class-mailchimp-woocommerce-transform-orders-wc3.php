@@ -91,8 +91,8 @@ class MailChimp_WooCommerce_Transform_Orders
         // grab the current statuses - this will end up being custom at some point.
         $statuses = $this->getOrderStatuses();
 
-        // grab the order status
-        $status = $woo->get_status();
+        // grab the order status and set it into the object for future comparison.
+        $order->setOriginalWooStatus(($status = $woo->get_status()));
 
         // map the fulfillment and financial statuses based on the map above.
         $fulfillment_status = array_key_exists($status, $statuses) ? $statuses[$status]->fulfillment : null;

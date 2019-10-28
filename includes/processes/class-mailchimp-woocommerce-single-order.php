@@ -139,7 +139,10 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             }
 
             // if the order is in failed or cancelled status - and it's brand new, we shouldn't submit it.
-            if ($new_order && in_array($order->getFinancialStatus(), array('failed', 'cancelled'))) {
+            // if the original woocommerce status is actually pending, we need to skip these on new orders because
+            // it is probably happening due to 3rd party payment processing and it's still pending. These orders
+            // don't always make it over because someone could be cancelling out of the payment there.
+            if ($new_order && (in_array($order->getFinancialStatus(), array('failed', 'cancelled')) || $order->getOriginalWooStatus() === 'pending')) {
                 return false;
             }
 

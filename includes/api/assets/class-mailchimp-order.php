@@ -32,6 +32,7 @@ class MailChimp_WooCommerce_Order
     protected $promos = array();
     protected $is_amazon_order = false;
     protected $is_privacy_protected = false;
+    protected $original_woo_status = null;
 
     /**
      * @param $bool
@@ -67,6 +68,24 @@ class MailChimp_WooCommerce_Order
     public function isFlaggedAsPrivacyProtected()
     {
         return (bool) $this->is_privacy_protected;
+    }
+
+    /**
+     * @param string $status
+     * @return $this
+     */
+    public function setOriginalWooStatus($status)
+    {
+        $this->original_woo_status = (string) $status;
+        return $this;
+    }
+
+    /**
+     * @return null
+     */
+    public function getOriginalWooStatus()
+    {
+        return $this->original_woo_status;
     }
 
     /**

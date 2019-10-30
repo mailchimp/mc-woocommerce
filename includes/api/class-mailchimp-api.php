@@ -1616,6 +1616,7 @@ class MailChimp_WooCommerce_MailChimpApi
             CURLINFO_HEADER_OUT => true,
             CURLOPT_HTTPHEADER => array_merge(array(
                 'content-type: application/json',
+                'accept' => 'application/json',
                 "user-agent: MailChimp for WooCommerce/{$env->version}; PHP/{$env->php_version}; WordPress/{$env->wp_version}; Woo/{$env->wc_version};",
             ), $headers)
         );
@@ -1623,6 +1624,11 @@ class MailChimp_WooCommerce_MailChimpApi
         // if we have a dedicated IP address, and have set a configuration for it, we'll use it here.
         if (defined('MAILCHIMP_USE_OUTBOUND_IP')) {
             $curl_options[CURLOPT_INTERFACE] = MAILCHIMP_USE_OUTBOUND_IP;
+        }
+
+        // if we need to define a specific http version being used for curl requests, we can override this here.
+        if (defined('MAILCHIMP_USE_HTTP_VERSION')) {
+            $curl_options[CURLOPT_HTTP_VERSION] = MAILCHIMP_USE_HTTP_VERSION;
         }
 
         return $curl_options;

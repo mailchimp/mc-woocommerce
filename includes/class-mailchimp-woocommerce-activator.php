@@ -20,8 +20,11 @@ class MailChimp_WooCommerce_Activator {
 	 */
 	public static function activate() {
 
-		// create the queue tables because we need them for the sync jobs.
+		// Create the queue tables
 		static::create_queue_tables();
+
+		// Remove legacy queue tables
+		static::migrate_jobs();
 
 		// update the settings so we have them for use.
         $saved_options = get_option('mailchimp-woocommerce', false);
@@ -62,28 +65,6 @@ class MailChimp_WooCommerce_Activator {
 
 		$charset_collate = $wpdb->get_charset_collate();
 
-		$sql = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}queue (
-				id bigint(20) NOT NULL AUTO_INCREMENT,
-                job text NOT NULL,
-                attempts tinyint(1) NOT NULL DEFAULT 0,
-                locked tinyint(1) NOT NULL DEFAULT 0,
-                locked_at datetime DEFAULT NULL,
-                available_at datetime NOT NULL,
-                created_at datetime NOT NULL,
-                PRIMARY KEY  (id)
-				) $charset_collate;";
-
-		dbDelta( $sql );
-
-		$sql = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}failed_jobs (
-				id bigint(20) NOT NULL AUTO_INCREMENT,
-                job text NOT NULL,
-                failed_at datetime NOT NULL,
-                PRIMARY KEY  (id)
-				) $charset_collate;";
-
-		dbDelta( $sql );
-
 		$sql = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}mailchimp_carts (
 				id VARCHAR (255) NOT NULL,
 				email VARCHAR (100) NOT NULL,
@@ -94,8 +75,54 @@ class MailChimp_WooCommerce_Activator {
 				) $charset_collate;";
 
 		dbDelta( $sql );
+		
+		$sql = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}mailchimp_jobs (
+			id bigint(20) NOT NULL AUTO_INCREMENT,
+			obj_id text,
+			job text NOT NULL,
+			created_at datetime NOT NULL,
+			PRIMARY KEY  (id)
+			) $charset_collate;";
+
+		dbDelta( $sql );
 
 		// set the Mailchimp woocommerce version at the time of install
 		update_site_option('mailchimp_woocommerce_version', mailchimp_environment_variables()->version);
 	}
+
+		/**
+	 * Migrate wp_queue jobs to Action Scheduler
+	 * 
+	 * @param string $code
+	 * @return array $options 
+	 */
+	public static function migrate_jobs() {
+		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		global $wpdb;
+        if($wpdb->get_var("SHOW TABLES LIKE '{$wpdb->prefix}queue';") == $wpdb->prefix.'queue') {
+			mailchimp_log('update.db','Migrating job to Action Scheduler');
+			$sql = "SELECT * FROM {$wpdb->prefix}queue;";
+			$queue_jobs = $wpdb->get_results($sql);
+			foreach ($queue_jobs as $queue_job) {
+				$job = unserialize($queue_job->job);
+				$job->job = $job;
+				$job->id = static::get_possible_job_ids($job);	
+				mailchimp_as_push($job, 90);
+			}
+		}
+	}
+
+	private static function get_possible_job_ids($job) {
+		$id = null;
+		
+		if (isset($job->id)) $id = $job->id;
+		if (isset($job->product_id)) $id = $job->product_id;
+		if (isset($job->order_id)) $id = $job->order_id;
+		if (isset($job->unique_id)) $id = $job->unique_id;
+		if (isset($job->user_id)) $id = $job->user_id;
+		if (isset($job->post_id)) $id = $job->post_id;
+			
+		return $id;
+	}
+
 }

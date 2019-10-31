@@ -654,7 +654,8 @@
 
 /* Old styles from tabs.php */
 
-#sync-status-message strong {
+#sync-status-message strong,
+#http-worker-deprecated-message strong {
 	font-weight:inherit;
 }
 

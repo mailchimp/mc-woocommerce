@@ -8,9 +8,9 @@
  * Date: 7/15/16
  * Time: 11:42 AM
  */
-class MailChimp_WooCommerce_Single_Order extends WP_Job
+class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 {
-    public $order_id;
+    public $id;
     public $cart_session_id;
     public $campaign_id;
     public $landing_site;
@@ -23,17 +23,28 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
 
     /**
      * MailChimp_WooCommerce_Single_Order constructor.
-     * @param null $order_id
+     * @param null $id
      * @param null $cart_session_id
      * @param null $campaign_id
      * @param null $landing_site
      */
-    public function __construct($order_id = null, $cart_session_id = null, $campaign_id = null, $landing_site = null)
+    public function __construct($id = null, $cart_session_id = null, $campaign_id = null, $landing_site = null)
     {
-        if (!empty($order_id)) $this->order_id = $order_id;
+        if (!empty($id)) $this->id = $id;
         if (!empty($cart_session_id)) $this->cart_session_id = $cart_session_id;
         if (!empty($campaign_id)) $this->campaign_id = $campaign_id;
         if (!empty($landing_site)) $this->landing_site = $landing_site;
+    }
+
+    /**
+     * @param null $id
+     * @return MailChimp_WooCommerce_Single_Order
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     /**
@@ -93,7 +104,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
         // will either add or update the order
         try {
 
-            if (!($order_post = get_post($this->order_id))) {
+            if (!($order_post = get_post($this->id))) {
                 return false;
             }
 
@@ -235,13 +246,13 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
         } catch (MailChimp_WooCommerce_RateLimitError $e) {
             sleep(3);
             $this->release();
-            mailchimp_error('order_submit.error', mailchimp_error_trace($e, "RateLimited :: #{$this->order_id}"));
+            mailchimp_error('order_submit.error', mailchimp_error_trace($e, "RateLimited :: #{$this->id}"));
         } catch (\Exception $e) {
             $message = strtolower($e->getMessage());
             mailchimp_error('order_submit.tracing_error', $e);
             if (!isset($order)) {
                 // transform the order
-                $order = $job->transform(get_post($this->order_id));
+                $order = $job->transform(get_post($this->id));
                 $this->cart_session_id = $order->getCustomer()->getId();
             }
             // this can happen when a customer changes their email.
@@ -263,7 +274,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
                     }
                     return $api_response;
                 } catch (\Exception $e) {
-                    mailchimp_error('order_submit.error', mailchimp_error_trace($e, 'deleting-customer-re-add :: #'.$this->order_id));
+                    mailchimp_error('order_submit.error', mailchimp_error_trace($e, 'deleting-customer-re-add :: #'.$this->id));
                 }
             }
         }
@@ -277,14 +288,14 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
     public function getRealOrderNumber()
     {
         try {
-            if (empty($this->order_id) || !($order_post = get_post($this->order_id))) {
+            if (empty($this->id) || !($order_post = get_post($this->id))) {
                 return false;
             }
             $woo = new WC_Order($order_post);
             return $this->woo_order_number = $woo->get_order_number();
         } catch (\Exception $e) {
             $this->woo_order_number = false;
-            mailchimp_error('order_sync.failure', mailchimp_error_trace($e, "{$this->order_id} could not be loaded"));
+            mailchimp_error('order_sync.failure', mailchimp_error_trace($e, "{$this->id} could not be loaded"));
             return false;
         }
     }
@@ -295,7 +306,7 @@ class MailChimp_WooCommerce_Single_Order extends WP_Job
     public function shouldPreventSubmission()
     {
         try {
-            if (empty($this->order_id) || !($order_post = get_post($this->order_id))) {
+            if (empty($this->id) || !($order_post = get_post($this->id))) {
                 return false;
             }
             $woo = new WC_Order($order_post);

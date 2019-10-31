@@ -212,7 +212,7 @@ class MailChimp_WooCommerce_Order
     {
         $api = MailChimp_WooCommerce_MailChimpApi::getInstance();
         $cid = trim($id);
-        if (($campaign = $api->getCampaign($cid, false))) {
+        if (!empty($cid) && $campaign = $api->getCampaign($cid, false)) {
             $this->campaign_id = $campaign['id'];
         }
         return $this;

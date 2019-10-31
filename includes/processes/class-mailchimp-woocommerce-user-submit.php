@@ -8,30 +8,30 @@
  * Date: 11/14/16
  * Time: 9:38 AM
  */
-class MailChimp_WooCommerce_User_Submit extends WP_Job
+class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 {
     public static $handling_for = null;
 
-    public $user_id;
+    public $id;
     public $subscribed;
     public $updated_data;
     public $should_ignore = false;
 
     /**
      * MailChimp_WooCommerce_User_Submit constructor.
-     * @param null $user_id
+     * @param null $id
      * @param null $subscribed
      * @param WP_User|null $updated_data
      */
-    public function __construct($user_id = null, $subscribed = null, $updated_data = null)
+    public function __construct($id = null, $subscribed = null, $updated_data = null)
     {
-        if (!empty($user_id)) {
+        if (!empty($id)) {
             // if we're passing in another user with the same id during the same php process we need to ignore it.
-            if (static::$handling_for === $user_id) {
+            if (static::$handling_for === $id) {
                 $this->should_ignore = true;
             }
             // set the user id and the current 'handling_for' to this user id so we don't duplicate jobs.
-            static::$handling_for = $this->user_id = $user_id;
+            static::$handling_for = $this->id = $id;
         }
 
         if (is_bool($subscribed)) {
@@ -55,7 +55,7 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
         }
 
         if ($this->should_ignore) {
-            mailchimp_debug(get_called_class(), "{$this->user_id} is currently in motion - skipping this one.");
+            mailchimp_debug(get_called_class(), "{$this->id} is currently in motion - skipping this one.");
             static::$handling_for = null;
             return false;
         }
@@ -64,7 +64,7 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
         $store_id = mailchimp_get_store_id();
 
         // load up the user.
-        $user = new WP_User($this->user_id);
+        $user = new WP_User($this->id);
 
         // we need a valid user, a valid store id and options to continue
         if ($user->ID <= 0 || empty($store_id) || !is_array($options)) {
@@ -77,7 +77,7 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
             $store_id = mailchimp_get_store_id();
 
             // load up the user.
-            $user = new WP_User($this->user_id);
+            $user = new WP_User($this->id);
 
             if ($user->ID <= 0 || empty($store_id) || !is_array($options)) {
                 mailchimp_log('member.sync', "Invalid Data For Submission :: {$user->ID}");
@@ -96,7 +96,7 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
 
         // if we have a null value, we need to grab the correct user meta for is_subscribed
         if (is_null($this->subscribed)) {
-            $user_subscribed = get_user_meta($this->user_id, 'mailchimp_woocommerce_is_subscribed', true);
+            $user_subscribed = get_user_meta($this->id, 'mailchimp_woocommerce_is_subscribed', true);
             if ($user_subscribed === '' || $user_subscribed === null) {
                 mailchimp_log('member.sync', "Skipping sync for {$email} because no subscriber status has been set");
                 static::$handling_for = null;
@@ -218,7 +218,7 @@ class MailChimp_WooCommerce_User_Submit extends WP_Job
         } catch (MailChimp_WooCommerce_RateLimitError $e) {
             sleep(3);
             $this->release();
-            mailchimp_error('member.sync.error', mailchimp_error_trace($e, "RateLimited :: user #{$this->user_id}"));
+            mailchimp_error('member.sync.error', mailchimp_error_trace($e, "RateLimited :: user #{$this->id}"));
         } catch (\Exception $e) {
             // if we have a 404 not found, we can create the member
             if ($e->getCode() == 404) {

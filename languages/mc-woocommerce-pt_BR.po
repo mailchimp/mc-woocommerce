@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mc-woocommerce\n"
-"POT-Creation-Date: 2019-08-19T19:53:56+00:00\n"
-"PO-Revision-Date: 2019-08-19 22:03+0200\n"
+"POT-Creation-Date: 2019-09-12T08:42:01+00:00\n"
+"PO-Revision-Date: 2019-09-12 10:43+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: pt_BR\n"
@@ -101,6 +101,7 @@ msgstr ""
 "Se você tiver um momento, por favor nos diga porque você está desativando %s:"
 
 #: includes/class-mailchimp-woocommerce-deactivation-survey.php:379
+#: admin/class-mailchimp-woocommerce-admin.php:261
 msgid "Mailchimp for Woocommerce"
 msgstr "Mailchimp para Woocommerce"
 
@@ -144,33 +145,51 @@ msgid "User ID"
 msgstr "ID do Usuário"
 
 #: includes/class-mailchimp-woocommerce-newsletter.php:43
-#: admin/class-mailchimp-woocommerce-admin.php:691
+#: admin/class-mailchimp-woocommerce-admin.php:732
 #: admin/partials/tabs/newsletter_settings.php:98
 msgid "Subscribe to our newsletter"
 msgstr "Inscreva-se em nossa newsletter"
 
-#: includes/class-mailchimp-woocommerce-rest-api.php:293
+#: includes/class-mailchimp-woocommerce-rest-api.php:141
 #: admin/partials/tabs/store_sync.php:169
 msgid "D, M j, Y g:i A"
 msgstr "l, d\\/m\\/Y H:i"
 
-#: admin/class-mailchimp-woocommerce-admin.php:117
+#: admin/class-mailchimp-woocommerce-admin.php:118
 msgid "Mailchimp - WooCommerce Setup"
 msgstr "Mailchimp para Woocommerce"
 
-#: admin/class-mailchimp-woocommerce-admin.php:156
+#: admin/class-mailchimp-woocommerce-admin.php:157
 msgid "Settings"
 msgstr "Configurações"
 
-#: admin/class-mailchimp-woocommerce-admin.php:335
-msgid "Store Disconnected"
-msgstr "Lista desconectada:"
+#: admin/class-mailchimp-woocommerce-admin.php:262
+msgid ""
+"We dectected that this site has the following constants defined, likely at "
+"wp-config.php file"
+msgstr ""
+"Detectamos que este site tem as seguintes constantes definidas, "
+"possivelmente no arquivo wp-config.php"
 
-#: admin/class-mailchimp-woocommerce-admin.php:339
+#: admin/class-mailchimp-woocommerce-admin.php:264
+msgid ""
+"These constants are deprecated since Mailchimp for Woocommerce version 2.3. "
+"Please refer to the <a href=\"https://github.com/mailchimp/mc-woocommerce/"
+"wiki/\">plugin official wiki</a> for further details."
+msgstr ""
+"Estas constantes estão obsoletas desde Mailchimp para Woocommerce versão "
+"2.3. Leia o <a href=“https://github.com/mailchimp/mc-woocommerce/wiki/“>wiki "
+"oficial do plugin</a> para maiores detalhes."
+
+#: admin/class-mailchimp-woocommerce-admin.php:384
+msgid "Store Disconnected"
+msgstr "Loja desconectada"
+
+#: admin/class-mailchimp-woocommerce-admin.php:388
 msgid "Store Disconnect Failed"
 msgstr "Falha ao desconectar da Loja"
 
-#: admin/class-mailchimp-woocommerce-admin.php:611
+#: admin/class-mailchimp-woocommerce-admin.php:652
 msgid ""
 "As part of the Mailchimp Terms of Use, we require a contact email and a "
 "physical mailing address."
@@ -178,7 +197,7 @@ msgstr ""
 "Como parte dos Termos de Uso do Mailchimp, são mandatórios um email de "
 "contato e um endereço físico de correspondência."
 
-#: admin/class-mailchimp-woocommerce-admin.php:619
+#: admin/class-mailchimp-woocommerce-admin.php:660
 msgid ""
 "As part of the Mailchimp Terms of Use, we require a valid phone number for "
 "your store."
@@ -186,31 +205,31 @@ msgstr ""
 "Como parte dos Termos de Uso do Mailchimp, é mandatório um número de "
 "telefone válido para sua Loja."
 
-#: admin/class-mailchimp-woocommerce-admin.php:627
+#: admin/class-mailchimp-woocommerce-admin.php:668
 msgid "Mailchimp for WooCommerce requires a Store Name to connect your store."
 msgstr ""
 "Mailchimp para Woocommerce requer um Nome de Loja para conectar sua Loja."
 
 #. translators: %s - plugin name.
-#: admin/class-mailchimp-woocommerce-admin.php:645
+#: admin/class-mailchimp-woocommerce-admin.php:686
 #: admin/partials/tabs/campaign_defaults.php:68
 msgid "You were subscribed to the newsletter from %s"
 msgstr "Você foi inscrito na newsletter de %s"
 
-#: admin/class-mailchimp-woocommerce-admin.php:650
+#: admin/class-mailchimp-woocommerce-admin.php:691
 msgid "One or more fields were not updated"
 msgstr "Um ou mais campos não foram atualizados"
 
-#: admin/class-mailchimp-woocommerce-admin.php:800
+#: admin/class-mailchimp-woocommerce-admin.php:842
 msgid "You must supply your Mailchimp API key to pull the audiences."
 msgstr ""
 "É necessário fornecer a sua Mailchimp API Key para recuperar as audiências."
 
-#: admin/class-mailchimp-woocommerce-admin.php:1262
+#: admin/class-mailchimp-woocommerce-admin.php:1304
 msgid "Starting the sync process..."
 msgstr "Iniciando a Sincronização…"
 
-#: admin/class-mailchimp-woocommerce-admin.php:1264
+#: admin/class-mailchimp-woocommerce-admin.php:1306
 msgid ""
 "The plugin has started the initial sync with your store, and the process "
 "will work in the background automatically."
@@ -218,7 +237,7 @@ msgstr ""
 "O plugin iniciou a sincronização inicial com a sua Loja, e o processo "
 "executará em segundo plano automaticamente."
 
-#: admin/class-mailchimp-woocommerce-admin.php:1266
+#: admin/class-mailchimp-woocommerce-admin.php:1308
 msgid ""
 "Sometimes the sync can take a while, especially on sites with lots of orders "
 "and/or products. It is safe to navigate away from this screen while it is "
@@ -229,8 +248,8 @@ msgstr ""
 "página."
 
 #: admin/partials/tabs/newsletter_settings.php:36
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:165
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:188
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:162
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:185
 msgid "Audience Settings"
 msgstr "Configurações de Audiência"
 
@@ -435,8 +454,8 @@ msgid "Mailchimp says: Your re-sync has been started!"
 msgstr "Maichimp diz: A ressincronização foi iniciada!"
 
 #: admin/partials/tabs/campaign_defaults.php:19
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:153
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:185
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:150
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:182
 msgid "Audience Defaults"
 msgstr "Padrões de Audiência"
 
@@ -599,8 +618,8 @@ msgid "Reconnect"
 msgstr "Reconectar"
 
 #: admin/partials/tabs/api_key.php:10
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:132
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:179
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:129
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:176
 msgid "Connect"
 msgstr "Conectar"
 
@@ -629,8 +648,8 @@ msgid "Connected! Please wait while loading next step"
 msgstr "Conectado! Por favor aguarde o carregamento do próximo passo"
 
 #: admin/partials/tabs/store_info.php:15
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:141
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:182
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:138
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:179
 msgid "Store Settings"
 msgstr "Configurações de Loja"
 
@@ -702,15 +721,15 @@ msgstr "Fuso Horário"
 msgid "Select store's timezone"
 msgstr "Selecione o fuso horário da Loja"
 
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:68
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:65
 msgid "Mailchimp says: Please upgrade your PHP version to a minimum of 7.0"
 msgstr "Mailchimp diz: Atualize a versão do PHP para no mínimo 7.0"
 
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:74
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:71
 msgid "Mailchimp says: API Request Error - "
 msgstr "Mailchimp diz: API Request Error - "
 
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:106
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:103
 msgid ""
 "Add Mailchimp for WooCommerce to build custom segments,<br/>send "
 "automations, and track purchase activity in Mailchimp"
@@ -718,15 +737,15 @@ msgstr ""
 "Configure o Mailchimp para Woocommerce para criar segmentações customizadas, "
 "<br/> enviar automatizações, e rastrear atividade de compras no Mailchimp"
 
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:110
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:107
 msgid "Please provide a bit of information<br/>about your WooCommerce store"
-msgstr "Insira as informações relativas<br/>à sua loja WooCommerce."
+msgstr "Insira as informações relativas<br/>à sua loja WooCommerce"
 
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:114
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:111
 msgid "Please fill out the audience default<br/>campaign information"
-msgstr "Por favor preencha <br/>as informações padrão da Lista."
+msgstr "Por favor preencha <br/>as informações padrão da Lista"
 
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:118
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:115
 msgid ""
 "Please apply your audience settings. If you don’t<br/>have an audience, you "
 "can choose to create one"
@@ -734,7 +753,7 @@ msgstr ""
 "Configure sua Audiência. Se você não tem <br/>nenhuma audiência, você pode "
 "escolher criar uma"
 
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:121
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:118
 msgid ""
 "Connect your WooCommerce store to a<br/>Mailchimp audience in less than 60 "
 "seconds"
@@ -742,31 +761,31 @@ msgstr ""
 "Conecte sua loja Woocommerce a uma<br/>Audiência Mailchimp em menos de 60 "
 "segundos"
 
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:125
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:122
 msgid "Log events from the <br/>Mailchimp plugin"
 msgstr "Grave eventos do<br/>plugin Mailchimp"
 
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:181
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:178
 msgid "Overview"
 msgstr "Visão Geral"
 
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:191
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:188
 msgid "Logs"
 msgstr "Logs"
 
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:205
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:202
 msgid "Start sync"
 msgstr "Iniciar Sincronização"
 
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:207
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:204
 msgid "Save all changes"
 msgstr "Salvar todas alterações"
 
-#: admin/partials/mailchimp-woocommerce-admin-tabs.php:207
+#: admin/partials/mailchimp-woocommerce-admin-tabs.php:204
 msgid "Next"
 msgstr "Próximo"
 
-#: bootstrap.php:529
+#: bootstrap.php:520
 msgid ""
 "The MailChimp For WooCommerce plugin requires the <a href=\"http://wordpress."
 "org/extend/plugins/woocommerce/\">WooCommerce</a> plugin to be active!"
@@ -774,17 +793,15 @@ msgstr ""
 "O plugin Mailchimp para Woocommerce requer que o plugin <a href=“http://"
 "wordpress.org/extend/plugins/woocommerce/“>WooCommerce</a> esteja ativo!"
 
-#: bootstrap.php:926
-msgid "function \"wp_remote_post\" does not exist"
-msgstr "a funcão “wp_remote_post” não existe"
+#~ msgid "function \"wp_remote_post\" does not exist"
+#~ msgstr "a funcão “wp_remote_post” não existe"
 
-#: bootstrap.php:940
-msgid ""
-"The REST API seems to be disabled on this wordpress site. Please enable to "
-"sync data."
-msgstr ""
-"A REST API aparenta ester desabilitada nest site WordPress. For favor, "
-"habilite para sincronizar dados."
+#~ msgid ""
+#~ "The REST API seems to be disabled on this wordpress site. Please enable "
+#~ "to sync data."
+#~ msgstr ""
+#~ "A REST API aparenta ester desabilitada nest site WordPress. For favor, "
+#~ "habilite para sincronizar dados."
 
 #~ msgid "Please hang tight while we work our mojo."
 #~ msgstr "Por favor aguarde."

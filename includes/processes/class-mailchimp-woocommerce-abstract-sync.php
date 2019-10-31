@@ -8,7 +8,7 @@
  * Date: 7/14/16
  * Time: 11:54 AM
  */
-abstract class MailChimp_WooCommerce_Abstract_Sync extends WP_Job
+abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce_Job
 {
     /**
      * @var MailChimp_WooCommerce_Api
@@ -88,7 +88,6 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends WP_Job
 
         if (!($this->store_id = $this->getStoreID())) {
             mailchimp_debug(get_called_class().'@handle', 'store id not loaded');
-            $this->delete();
             return false;
         }
 
@@ -108,7 +107,6 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends WP_Job
         // don't let recursion happen.
         if ($this->getResourceType() === 'orders' && $this->getResourceCompleteTime()) {
             mailchimp_log('sync.stop', "halting the sync for :: {$this->getResourceType()}");
-            $this->delete();
             return false;
         }
 
@@ -119,7 +117,6 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends WP_Job
             // call the completed event to process further
             $this->resourceComplete($this->getResourceType());
             $this->complete();
-            $this->delete();
 
             return false;
         }
@@ -137,7 +134,6 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends WP_Job
             // call the completed event to process further
             $this->complete();
 
-            $this->delete();
 
             return false;
         }
@@ -190,13 +186,14 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends WP_Job
         $this->setData('sync.config.resync', false);
         $this->setData('sync.orders.current_page', 1);
         $this->setData('sync.products.current_page', 1);
+        $this->setData('sync.coupons.current_page', 1);
         $this->setData('sync.syncing', true);
         $this->setData('sync.started_at', time());
 
         global $wpdb;
         try {
             $wpdb->show_errors(false);
-            $wpdb->query("DELETE FROM {$wpdb->prefix}queue");
+            mailchimp_delete_as_jobs();
             $wpdb->show_errors(true);
         } catch (\Exception $e) {}
 
@@ -220,6 +217,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends WP_Job
         // set the current sync pages back to 1 if the user hits resync.
         $this->setData('sync.orders.current_page', 1);
         $this->setData('sync.products.current_page', 1);
+        $this->setData('sync.coupons.current_page', 1);
 
         mailchimp_log('sync.completed', "Finished Sync :: ".date('D, M j, Y g:i A'));
 
@@ -463,15 +461,8 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends WP_Job
      */
     protected function next()
     {
-        global $wpdb;
-
-        $this->delete();
-
-        $class_name = get_called_class();
-        $wpdb->query("DELETE FROM {$wpdb->prefix}queue WHERE job LIKE '%{$class_name}%'");
-
         // this will paginate through all records for the resource type until they return no records.
-        mailchimp_handle_or_queue(new static(), 0, true);
+        mailchimp_handle_or_queue(new static(), 0);
         mailchimp_debug(get_called_class().'@handle', 'queuing up the next job');
     }
 }

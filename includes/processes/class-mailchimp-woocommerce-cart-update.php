@@ -8,9 +8,9 @@
  * Date: 7/15/16
  * Time: 11:42 AM
  */
-class MailChimp_WooCommerce_Cart_Update extends WP_Job
+class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
 {
-    public $unique_id;
+    public $id;
     public $email;
     public $previous_email;
     public $campaign_id;
@@ -28,7 +28,7 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
     public function __construct($uid = null, $email = null, $campaign_id = null, array $cart_data = array())
     {
         if ($uid) {
-            $this->unique_id = $uid;
+            $this->id = $uid;
         }
         if ($email) {
             $this->email = $email;
@@ -89,7 +89,7 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
             $this->cart_data = json_decode($this->cart_data, true);
 
             // delete it and the add it back.
-            $api->deleteCartByID($store_id, $this->unique_id);
+            $api->deleteCartByID($store_id, $this->id);
 
             // if they emptied the cart ignore it.
             if (!is_array($this->cart_data) || empty($this->cart_data)) {
@@ -99,18 +99,18 @@ class MailChimp_WooCommerce_Cart_Update extends WP_Job
             $checkout_url = wc_get_checkout_url();
 
             if (mailchimp_string_contains($checkout_url, '?')) {
-                $checkout_url .= '&mc_cart_id='.$this->unique_id;
+                $checkout_url .= '&mc_cart_id='.$this->id;
             } else {
-                $checkout_url .= '?mc_cart_id='.$this->unique_id;
+                $checkout_url .= '?mc_cart_id='.$this->id;
             }
 
             $customer = new MailChimp_WooCommerce_Customer();
-            $customer->setId($this->unique_id);
+            $customer->setId($this->id);
             $customer->setEmailAddress($this->email);
             $customer->setOptInStatus(false);
 
             $cart = new MailChimp_WooCommerce_Cart();
-            $cart->setId($this->unique_id);
+            $cart->setId($this->id);
 
             // if we have a campaign id let's set it now.
             if (!empty($this->campaign_id)) {

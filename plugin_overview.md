@@ -8,9 +8,11 @@ In this article, you’ll learn how to connect Mailchimp for WooCommerce.
 
 - For the most up-to-date install instructions, read [Connect or Disconnect Mailchimp for WooCommerce](http://kb.mailchimp.com/integrations/e-commerce/connect-or-disconnect-mailchimp-for-woocommerce). 
 
-- This plugin requires you to have the [WooCommerce plugin](https://wordpress.org/plugins/woocommerce) already installed and activated in WordPress. 
+- This plugin requires you to have the latest [WooCommerce plugin](https://wordpress.org/plugins/woocommerce) already installed and activated in WordPress. 
 
 - Your host environment must meet [WooCommerce's minimum requirements](https://docs.woocommerce.com/document/server-requirements), including PHP 7.0 or greater.
+
+- WordPress REST API should be enabled in order for this plugin to work.
 
 - We recommend you use this plugin in a staging environment before installing it on production servers. 
 

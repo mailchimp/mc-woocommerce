@@ -54,15 +54,6 @@ class MailChimp_WooCommerce_Public {
 	}
 
 	/**
-	 * Register the stylesheets for the public-facing side of the site.
-	 *
-	 * @since    1.0.0
-	 */
-	public function enqueue_styles() {
-		//wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-public.css', array(), $this->version, 'all' );
-	}
-
-	/**
 	 * Register the JavaScript for the public-facing side of the site.
 	 *
 	 * @since    1.0.0
@@ -72,8 +63,6 @@ class MailChimp_WooCommerce_Public {
 		wp_localize_script($this->plugin_name, 'mailchimp_public_data', array(
 			'site_url' => site_url(),
 			'ajax_url' => admin_url('admin-ajax.php'),
-            'queue_url' =>  MailChimp_WooCommerce_Rest_Api::url('queue/work'),
-            'queue_should_fire' => mailchimp_should_init_rest_queue(),
 		));
 
         // Enqueued script with localized data.

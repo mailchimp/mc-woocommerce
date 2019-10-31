@@ -24,9 +24,9 @@
  * Text Domain:       mc-woocommerce
  * Domain Path:       /languages
  * Requires at least: 4.9
- * Tested up to: 5.2.2
+ * Tested up to: 5.2.5
  * WC requires at least: 3.5
- * WC tested up to: 3.7
+ * WC tested up to: 3.7.1
  */
 
 // If this file is called directly, abort.

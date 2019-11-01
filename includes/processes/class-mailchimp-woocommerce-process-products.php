@@ -34,8 +34,8 @@ class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abstr
 
     /**
      * @param MailChimp_WooCommerce_Product $item
-     *
-     * @return mixed
+     * @return bool|mixed
+     * @throws MailChimp_WooCommerce_RateLimitError
      */
     protected function iterate($item) {
 
@@ -45,8 +45,13 @@ class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abstr
 
             try {
                 // pull the product from Mailchimp first to see what method we need to call next.
-                $mailchimp_product = $this->mailchimp()->getStoreProduct($this->store_id, $item->getId());
+                $mailchimp_product = $this->mailchimp()->getStoreProduct($this->store_id, $item->getId(), true);
             } catch (\Exception $e) {
+                // if we're getting rate limited, we need to throw this error to re-queue things.
+                if ($e instanceof MailChimp_WooCommerce_RateLimitError) {
+                    mailchimp_error('product_sync.error', mailchimp_error_trace($e, "GET product :: {$item->getId()}"));
+                    throw $e;
+                }
                 $mailchimp_product = false;
             }
 

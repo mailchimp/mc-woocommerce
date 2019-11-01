@@ -421,6 +421,10 @@ class MailChimp_WooCommerce_MailChimpApi
     {
         $result = $this->get('lists', array('count' => $count));
 
+        if (!is_array($result)) {
+            throw new MailChimp_WooCommerce_RateLimitError('getting lists api failure, retry again.');
+        }
+
         if ($as_list) {
             $lists = array();
             if ($result) {
@@ -461,7 +465,11 @@ class MailChimp_WooCommerce_MailChimpApi
      */
     public function getList($id)
     {
-        return $this->get('lists/' . $id);
+        $result = $this->get('lists/' . $id);
+        if (!is_array($result)) {
+            throw new MailChimp_WooCommerce_RateLimitError('getting list api failure, retry again.');
+        }
+        return $result;
     }
 
     /**
@@ -485,6 +493,7 @@ class MailChimp_WooCommerce_MailChimpApi
     public function getListsWithMergeFields()
     {
         $lists = $this->getLists(true);
+
         foreach ($lists as $id => $name) {
             $lists[$id] = $this->mergeFields($id, 100);
         }
@@ -503,6 +512,10 @@ class MailChimp_WooCommerce_MailChimpApi
     public function mergeFields($list_id, $count = 10)
     {
         $result = $this->get("lists/$list_id/merge-fields", array('count' => $count,));
+
+        if (!is_array($result)) {
+            throw new MailChimp_WooCommerce_RateLimitError('getting merge field api failure, retry again.');
+        }
 
         return $result;
     }
@@ -568,20 +581,27 @@ class MailChimp_WooCommerce_MailChimpApi
 
     /**
      * @param $store_id
-     * @return MailChimp_WooCommerce_Store|bool
+     * @param bool $throw
+     * @return bool|MailChimp_WooCommerce_Store
+     * @throws MailChimp_WooCommerce_Error
      */
-    public function getStore($store_id)
+    public function getStore($store_id, $throw = false)
     {
         try {
             $data = $this->get("ecommerce/stores/$store_id");
+            if (!is_array($data)) {
+                throw new MailChimp_WooCommerce_RateLimitError('getting store api failure, retry again.');
+            }
             if (!isset($data['id']) || !isset($data['name'])) {
                 return false;
             }
             $store = new MailChimp_WooCommerce_Store();
             return $store->fromArray($data);
         } catch (MailChimp_WooCommerce_Error $e) {
+            if ($throw) throw $e;
             return false;
         } catch (\Exception $e) {
+            if ($throw) throw $e;
             return false;
         }
     }
@@ -655,7 +675,7 @@ class MailChimp_WooCommerce_MailChimpApi
         try {
             $data = $this->get("ecommerce/stores", array('count' => 1000));
 
-            if (!isset($data['stores']) || empty($data['stores'])) {
+            if (!isset($data['stores']) || empty($data['stores']) || !is_array($data['stores'])) {
                 return array();
             }
 
@@ -755,16 +775,21 @@ class MailChimp_WooCommerce_MailChimpApi
     /**
      * @param $store_id
      * @param $customer_id
+     * @param boolean $throw
      * @return bool|MailChimp_WooCommerce_Customer
      * @throws Exception
      */
-    public function getCustomer($store_id, $customer_id)
+    public function getCustomer($store_id, $customer_id, $throw = false)
     {
         try {
             $data = $this->get("ecommerce/stores/$store_id/customers/$customer_id");
+            if (!is_array($data)) {
+                throw new MailChimp_WooCommerce_RateLimitError('getting customer api failure, retry again.');
+            }
             $customer = new MailChimp_WooCommerce_Customer();
             return $customer->fromArray($data);
         } catch (MailChimp_WooCommerce_Error $e) {
+            if ($throw) throw $e;
             return false;
         }
     }
@@ -782,6 +807,9 @@ class MailChimp_WooCommerce_MailChimpApi
             return false;
         }
         $data = $this->post("ecommerce/stores", $customer->toArray());
+        if (!is_array($data)) {
+            throw new MailChimp_WooCommerce_RateLimitError('adding customer api failure, retry again.');
+        }
         $customer = new MailChimp_WooCommerce_Customer();
         return $customer->fromArray($data);
     }
@@ -1029,16 +1057,21 @@ class MailChimp_WooCommerce_MailChimpApi
     /**
      * @param $store_id
      * @param $order_id
+     * @param boolean $throw
      * @return bool|MailChimp_WooCommerce_Order
      * @throws Exception
      */
-    public function getStoreOrder($store_id, $order_id)
+    public function getStoreOrder($store_id, $order_id, $throw = false)
     {
         try {
             $data = $this->get("ecommerce/stores/$store_id/orders/$order_id");
+            if (!is_array($data)) {
+                throw new MailChimp_WooCommerce_RateLimitError('getting order api failure, retry again.');
+            }
             $order = new MailChimp_WooCommerce_Order();
             return $order->fromArray($data);
         } catch (MailChimp_WooCommerce_Error $e) {
+            if ($throw) throw $e;
             return false;
         }
     }
@@ -1077,16 +1110,21 @@ class MailChimp_WooCommerce_MailChimpApi
     /**
      * @param $store_id
      * @param $product_id
+     * @param boolean $throw
      * @return bool|MailChimp_WooCommerce_Product
      * @throws Exception
      */
-    public function getStoreProduct($store_id, $product_id)
+    public function getStoreProduct($store_id, $product_id, $throw = false)
     {
         try {
             $data = $this->get("ecommerce/stores/$store_id/products/$product_id");
+            if (!is_array($data)) {
+                throw new MailChimp_WooCommerce_RateLimitError('getting product api failure, retry again.');
+            }
             $product = new MailChimp_WooCommerce_Product();
             return $product->fromArray($data);
         } catch (MailChimp_WooCommerce_Error $e) {
+            if ($throw) throw $e;
             return false;
         }
     }
@@ -1655,11 +1693,20 @@ class MailChimp_WooCommerce_MailChimpApi
 
         $data = json_decode($response, true);
 
-        if (empty($info) || ($info['http_code'] >= 200 && $info['http_code'] <= 400)) {
-            if ($info['http_code'] == 204) {
-                // possibily a successful DELETE operation
-                return true;
-            }
+        $http_code = !empty($info) && isset($info['http_code']) ? $info['http_code'] : -1;
+        $called_url = !empty($info) && isset($info['url']) ? $info['url'] : 'none';
+
+        // let's block these from doing anything below because the API seems to be having trouble.
+        if ($http_code <= 99) {
+            throw new MailChimp_WooCommerce_RateLimitError('API is failing - retry again.');
+        }
+
+        // possibily a successful DELETE operation
+        if ($http_code == 204) {
+            return true;
+        }
+
+        if ($http_code >= 200 && $http_code <= 400) {
             if (is_array($data)) {
                 try {
                     $this->checkForErrors($data);
@@ -1670,18 +1717,20 @@ class MailChimp_WooCommerce_MailChimpApi
             return $data;
         }
 
-        if ($info['http_code'] >= 400 && $info['http_code'] <= 500) {
-            if ($info['http_code'] == 404) {
-                // mailchimp_error('api', 'processCurlResponse', array('info' => $info, 'data' => $data));
-            }
-            if ($info['http_code'] == 403) {
+        if ($http_code >= 400 && $http_code <= 500) {
+            if ($http_code == 403) {
                 throw new MailChimp_WooCommerce_RateLimitError();
             }
             throw new MailChimp_WooCommerce_Error($data['title'] .' :: '.$data['detail'], $data['status']);
         }
 
-        if ($info['http_code'] >= 500) {
+        if ($http_code >= 500) {
             throw new MailChimp_WooCommerce_ServerError($data['detail'], $data['status']);
+        }
+
+        if (!is_array($data)) {
+            mailchimp_error("api.debug", 'fallback when data is empty from API', array('url' => $called_url, 'response' => $response));
+            throw new MailChimp_WooCommerce_ServerError('API response could not be decoded.');
         }
 
         return null;

@@ -51,6 +51,10 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abstrac
                     $subscriber = $this->mailchimp()->member(mailchimp_get_list_id(), $item->getCustomer()->getEmailAddress());
                     $status = !in_array($subscriber['status'], array('unsubscribed', 'transactional'));
                 } catch (\Exception $e) {
+                    if ($e instanceof MailChimp_WooCommerce_RateLimitError) {
+                        mailchimp_error('order_sync.error', mailchimp_error_trace($e, "GET subscriber :: {$item->getId()}"));
+                        throw $e;
+                    }
                     $status = $should_auto_subscribe;
                 }
                 $item->getCustomer()->setOptInStatus($status);
@@ -58,7 +62,16 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abstrac
 
             mailchimp_debug('order_sync', "#{$item->getId()}", $item->toArray());
 
-            $type = $this->mailchimp()->getStoreOrder($this->store_id, $item->getId()) ? 'update' : 'create';
+            try {
+                $type = $this->mailchimp()->getStoreOrder($this->store_id, $item->getId(), true) ? 'update' : 'create';
+            } catch (MailChimp_WooCommerce_Error $e) {
+                if ($e instanceof MailChimp_WooCommerce_RateLimitError) {
+                    mailchimp_error('order_sync.error', mailchimp_error_trace($e, "GET order :: {$item->getId()}"));
+                    throw $e;
+                }
+                $type = 'create';
+            }
+
             $call = $type === 'create' ? 'addStoreOrder' : 'updateStoreOrder';
 
             try {

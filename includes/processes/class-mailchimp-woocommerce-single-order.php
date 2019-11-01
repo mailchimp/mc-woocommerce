@@ -85,7 +85,16 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
         // set the campaign ID
         $job->campaign_id = $this->campaign_id;
 
-        $call = ($api_response = $api->getStoreOrder($store_id, $woo_order_number)) ? 'updateStoreOrder' : 'addStoreOrder';
+        try {
+            $call = ($api_response = $api->getStoreOrder($store_id, $woo_order_number, true)) ? 'updateStoreOrder' : 'addStoreOrder';
+        } catch (\Exception $e) {
+            if ($e instanceof MailChimp_WooCommerce_RateLimitError) {
+                sleep(2);
+                mailchimp_error('order_submit.error', mailchimp_error_trace($e, "RateLimited :: #{$this->id}"));
+                $this->retry();
+            }
+            $call = 'addStoreOrder';
+        }
 
         $new_order = $call === 'addStoreOrder';
 

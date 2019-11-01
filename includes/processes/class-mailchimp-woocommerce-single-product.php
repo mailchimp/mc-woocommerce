@@ -97,8 +97,15 @@ class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
                 return false;
             }
 
-            // pull the product from Mailchimp first to see what method we need to call next.
-            $mailchimp_product = $this->api()->getStoreProduct($this->store_id, $this->id);
+            try {
+                // pull the product from Mailchimp first to see what method we need to call next.
+                $mailchimp_product = $this->api()->getStoreProduct($this->store_id, $this->id, true);
+            } catch (\Exception $e) {
+                if ($e instanceof MailChimp_WooCommerce_RateLimitError) {
+                    throw $e;
+                }
+                $mailchimp_product = false;
+            }
 
             // depending on if it's existing or not - we change the method call
             $method = $mailchimp_product ? 'updateStoreProduct' : 'addStoreProduct';

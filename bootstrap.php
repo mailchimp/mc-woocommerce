@@ -98,52 +98,6 @@ function mailchimp_environment_variables() {
     );
 }
 
-// Add WP CLI commands
-if (defined( 'WP_CLI' ) && WP_CLI) {
-    try {
-        /**
-         * Service push to MailChimp
-         *
-         * <type>
-         * : product_sync order_sync order product
-         */
-        function mailchimp_cli_push_command( $args, $assoc_args ) {
-            if (is_array($args) && isset($args[0])) {
-                switch($args[0]) {
-
-                    case 'product_sync':
-                        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Process_Products());
-                        WP_CLI::success("queued up the product sync!");
-                        break;
-
-                    case 'order_sync':
-                        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Process_Orders());
-                        WP_CLI::success("queued up the order sync!");
-                        break;
-
-                    case 'order':
-                        if (!isset($args[1])) {
-                            wp_die('You must specify an order id as the 2nd parameter.');
-                        }
-                        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Order($args[1]));
-                        WP_CLI::success("queued up the order {$args[1]}!");
-                        break;
-
-                    case 'product':
-                        if (!isset($args[1])) {
-                            wp_die('You must specify a product id as the 2nd parameter.');
-                        }
-                        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($args[1]));
-                        WP_CLI::success("queued up the product {$args[1]}!");
-                        break;
-                }
-            }
-        };
-        WP_CLI::add_command( 'mailchimp_push', 'mailchimp_cli_push_command');
-        WP_CLI::add_command( 'queue', 'Mailchimp_Wocoomerce_CLI' );
-    } catch (\Exception $e) {}
-}
-
 /**
  * Push a job onto the Action Scheduler queue.
  *
@@ -1051,4 +1005,50 @@ function mailchimp_update_member_with_double_opt_in(MailChimp_WooCommerce_Order 
             }
         }
     }
+}
+
+// Add WP CLI commands
+if (defined( 'WP_CLI' ) && WP_CLI) {
+    try {
+        /**
+         * Service push to MailChimp
+         *
+         * <type>
+         * : product_sync order_sync order product
+         */
+        function mailchimp_cli_push_command( $args, $assoc_args ) {
+            if (is_array($args) && isset($args[0])) {
+                switch($args[0]) {
+
+                    case 'product_sync':
+                        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Process_Products());
+                        WP_CLI::success("queued up the product sync!");
+                        break;
+
+                    case 'order_sync':
+                        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Process_Orders());
+                        WP_CLI::success("queued up the order sync!");
+                        break;
+
+                    case 'order':
+                        if (!isset($args[1])) {
+                            wp_die('You must specify an order id as the 2nd parameter.');
+                        }
+                        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Order($args[1]));
+                        WP_CLI::success("queued up the order {$args[1]}!");
+                        break;
+
+                    case 'product':
+                        if (!isset($args[1])) {
+                            wp_die('You must specify a product id as the 2nd parameter.');
+                        }
+                        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($args[1]));
+                        WP_CLI::success("queued up the product {$args[1]}!");
+                        break;
+                }
+            }
+        };
+        WP_CLI::add_command( 'mailchimp_push', 'mailchimp_cli_push_command');
+        WP_CLI::add_command( 'queue', 'Mailchimp_Wocoomerce_CLI' );
+    } catch (\Exception $e) {}
 }

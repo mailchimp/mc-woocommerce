@@ -120,6 +120,13 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             // transform the order
             $order = $job->transform($order_post);
 
+            // if the order is new, and has been flagged as a status that should not be pushed over to
+            // Mailchimp - just ignore it and log it.
+            if ($new_order && $order->shouldIgnoreIfNotInMailchimp()) {
+                mailchimp_log('system.debug', "order {$order->getId()} is in {$order->getOriginalWooStatus()} status, and is being skipped for now.");
+                return false;
+            }
+
             // will be the same as the customer id. an md5'd hash of a lowercased email.
             $this->cart_session_id = $order->getCustomer()->getId();
 

@@ -33,6 +33,7 @@ class MailChimp_WooCommerce_Order
     protected $is_amazon_order = false;
     protected $is_privacy_protected = false;
     protected $original_woo_status = null;
+    protected $ignore_if_new = false;
 
     /**
      * @param $bool
@@ -86,6 +87,25 @@ class MailChimp_WooCommerce_Order
     public function getOriginalWooStatus()
     {
         return $this->original_woo_status;
+    }
+
+    /**
+     * @return bool
+     */
+    public function shouldIgnoreIfNotInMailchimp()
+    {
+        return (bool) $this->ignore_if_new;
+    }
+
+    /**
+     * @param $bool
+     * @return $this
+     */
+    public function flagAsIgnoreIfNotInMailchimp($bool)
+    {
+        $this->ignore_if_new = (bool) $bool;
+
+        return $this;
     }
 
     /**

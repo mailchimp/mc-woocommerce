@@ -94,6 +94,13 @@ class MailChimp_WooCommerce_Transform_Orders
         // grab the order status and set it into the object for future comparison.
         $order->setOriginalWooStatus(($status = $woo->get_status()));
 
+        // if the order is "on-hold" status, and is not currently in Mailchimp, we need to ignore it
+        // because the payment gateways are putting this on hold while they navigate to the payment processor
+        // and they technically haven't paid yet.
+        if (in_array($status, array('on-hold', 'failed'))) {
+            $order->flagAsIgnoreIfNotInMailchimp(true);
+        }
+
         // map the fulfillment and financial statuses based on the map above.
         $fulfillment_status = array_key_exists($status, $statuses) ? $statuses[$status]->fulfillment : null;
         $financial_status = array_key_exists($status, $statuses) ? $statuses[$status]->financial : $status;
@@ -436,7 +443,7 @@ class MailChimp_WooCommerce_Transform_Orders
             ),
             // Awaiting payment – stock is reduced, but you need to confirm payment
             'on-hold'       => (object) array(
-                'financial' => 'pending',
+                'financial' => 'on-hold',
                 'fulfillment' => null
             ),
             // Order fulfilled and complete – requires no further action

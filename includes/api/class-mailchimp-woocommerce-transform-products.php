@@ -64,6 +64,11 @@ class MailChimp_WooCommerce_Transform_Products
         $product->setTitle($woo->get_title());
         $product->setUrl($woo->get_permalink());
         
+        if(in_array('woocommerce-product-vendors/woocommerce-product-vendors.php', apply_filters('active_plugins', get_option('active_plugins'))) || is_defined('WC_PRODUCT_VENDORS_VERSION') ){ 
+            $v = WC_Product_Vendors_Utils::get_vendor_id_from_product( $product->get_id() );
+            $vendor = 'pedro';
+        }
+
         $vendor = apply_filters('mailchimp_sync_product_vendor', $product);
         if (is_string($vendor)) {
             $product->setVendor($vendor);

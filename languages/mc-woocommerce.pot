@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2019-10-16T09:57:17+00:00\n"
+"POT-Creation-Date: 2019-11-06T10:22:06+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.1.0\n"
 "X-Domain: mailchimp-for-woocommerce\n"
@@ -96,7 +96,7 @@ msgid "If you have a moment, please share why you are deactivating %s:"
 msgstr ""
 
 #: includes/class-mailchimp-woocommerce-deactivation-survey.php:379
-#: admin/class-mailchimp-woocommerce-admin.php:259
+#: admin/class-mailchimp-woocommerce-admin.php:270
 msgid "Mailchimp for Woocommerce"
 msgstr ""
 
@@ -122,7 +122,7 @@ msgid "User ID"
 msgstr ""
 
 #: includes/class-mailchimp-woocommerce-newsletter.php:43
-#: admin/class-mailchimp-woocommerce-admin.php:730
+#: admin/class-mailchimp-woocommerce-admin.php:748
 #: admin/partials/tabs/newsletter_settings.php:97
 msgid "Subscribe to our newsletter"
 msgstr ""
@@ -136,58 +136,76 @@ msgstr ""
 msgid "Mailchimp - WooCommerce Setup"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:260
+#: admin/class-mailchimp-woocommerce-admin.php:271
 msgid "We dectected that this site has the following constants defined, likely at wp-config.php file"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:262
+#: admin/class-mailchimp-woocommerce-admin.php:273
 msgid "These constants are deprecated since Mailchimp for Woocommerce version 2.3. Please refer to the <a href=\"https://github.com/mailchimp/mc-woocommerce/wiki/\">plugin official wiki</a> for further details."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:382
+#: admin/class-mailchimp-woocommerce-admin.php:393
 msgid "Store Disconnected"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:386
+#: admin/class-mailchimp-woocommerce-admin.php:397
 msgid "Store Disconnect Failed"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:650
+#: admin/class-mailchimp-woocommerce-admin.php:668
 msgid "As part of the Mailchimp Terms of Use, we require a contact email and a physical mailing address."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:658
+#: admin/class-mailchimp-woocommerce-admin.php:676
 msgid "As part of the Mailchimp Terms of Use, we require a valid phone number for your store."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:666
+#: admin/class-mailchimp-woocommerce-admin.php:684
 msgid "Mailchimp for WooCommerce requires a Store Name to connect your store."
 msgstr ""
 
 #. translators: %s - plugin name.
-#: admin/class-mailchimp-woocommerce-admin.php:684
+#: admin/class-mailchimp-woocommerce-admin.php:702
 #: admin/partials/tabs/campaign_defaults.php:68
 msgid "You were subscribed to the newsletter from %s"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:689
+#: admin/class-mailchimp-woocommerce-admin.php:707
 msgid "One or more fields were not updated"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:840
+#: admin/class-mailchimp-woocommerce-admin.php:858
 msgid "You must supply your Mailchimp API key to pull the audiences."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1302
+#: admin/class-mailchimp-woocommerce-admin.php:1320
 msgid "Starting the sync process..."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1304
+#: admin/class-mailchimp-woocommerce-admin.php:1322
 msgid "The plugin has started the initial sync with your store, and the process will work in the background automatically."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1306
+#: admin/class-mailchimp-woocommerce-admin.php:1324
 msgid "Sometimes the sync can take a while, especially on sites with lots of orders and/or products. It is safe to navigate away from this screen while it is running."
+msgstr ""
+
+#: admin/class-mailchimp-woocommerce-admin.php:1334
+msgid "Your store is synced with Mailchimp!"
+msgstr ""
+
+#. translators: %1$s: Number of synced orders %2$s: Audience name
+#: admin/class-mailchimp-woocommerce-admin.php:1337
+msgid "We've successfully synced %1$s orders to your Audience %2$s, that's awesome!"
+msgstr ""
+
+#. translators: %s - Wordpress.org plugin review URL.
+#: admin/class-mailchimp-woocommerce-admin.php:1345
+msgid "Could you please do us a favor and leave the plugin a 5-star <a href=%s target='_blank'>rating on Wordpress.org</a>? It helps our community know that we're working hard to make it better each day."
+msgstr ""
+
+#: admin/class-mailchimp-woocommerce-admin.php:1348
+msgid "Leave a Review"
 msgstr ""
 
 #: admin/partials/tabs/newsletter_settings.php:36
@@ -455,31 +473,6 @@ msgstr ""
 
 #: admin/partials/tabs/store_sync.php:189
 msgid "More Information"
-msgstr ""
-
-#. translators: %s - WP-CLI URL.
-#: admin/partials/tabs/store_sync.php:191
-msgid "Have a larger store or having issues syncing? Consider using <a href=%s target=_blank>WP-CLI</a>."
-msgstr ""
-
-#. translators: %s - WP-CLI URL.
-#: admin/partials/tabs/store_sync.php:192
-msgid "Order and customer information will not sync if they contain an Amazon or generic email address."
-msgstr ""
-
-#. translators: %s - Mailchimp Support URL.
-#: admin/partials/tabs/store_sync.php:193
-msgid "Need help to connect your store? Visit the Mailchimp <a href=%s target=_blank>Knowledge Base</a>."
-msgstr ""
-
-#. translators: %s - Plugin review URL.
-#: admin/partials/tabs/store_sync.php:194
-msgid "Want to tell us how we're doing? <a href=%s target=_blank>Leave a review on Wordpress.org</a>."
-msgstr ""
-
-#. translators: %s - Mailchimp Privacy Policy URL.
-#: admin/partials/tabs/store_sync.php:195
-msgid "By using this plugin, Mailchimp will process customer information in accordance with their <a href=%s target=_blank>Privacy Policy</a>."
 msgstr ""
 
 #: admin/partials/tabs/api_key.php:6

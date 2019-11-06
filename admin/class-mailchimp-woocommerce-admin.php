@@ -190,6 +190,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$this->update_db_check();
 
 		register_setting($this->plugin_name, $this->plugin_name, array($this, 'validate'));
+
+		if (get_option('mailchimp-woocommerce-sync.initial_sync') == 1 && get_option('mailchimp-woocommerce-sync.completed_at') > 0 ) {
+			$this->mailchimp_show_initial_sync_message();
+		}
 	}
 
 	/**
@@ -1320,5 +1324,38 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             __('Sometimes the sync can take a while, especially on sites with lots of orders and/or products. It is safe to navigate away from this screen while it is running.', 'mailchimp-for-woocommerce') .
             '</p>';
 		add_settings_error('mailchimp-woocommerce_notice', $this->plugin_name, $text, 'updated');
+	}
+
+	/**
+	 * Show the review banner.
+	 */
+	private function mailchimp_show_initial_sync_message()
+	{
+		$text = __('Your store is synced with Mailchimp!', 'mailchimp-for-woocommerce').'</br>'.
+		'<p id="sync-status-message">'.
+			/* translators: %1$s: Number of synced orders %2$s: Audience name */	
+			sprintf(__('We\'ve successfully synced %1$s orders to your Audience %2$s, that\'s awesome!', 'mailchimp-for-woocommerce'),
+				mailchimp_get_order_count(),
+				$this->getListName()
+			).
+		'</p>'.
+
+		'<p id="sync-status-message">'.
+			/* translators: %s - Wordpress.org plugin review URL. */	
+			sprintf(wp_kses( __( 'Could you please do us a favor and leave the plugin a 5-star <a href=%s target=\'_blank\'>rating on Wordpress.org</a>? It helps our community know that we\'re working hard to make it better each day.', 'mailchimp-for-woocommerce' ), array(  'a' => array( 'href' => array(), 'target' => '_blank' ) ) ), esc_url( 'https://wordpress.org/support/plugin/mailchimp-for-woocommerce/reviews/' ) ).
+		'</p>'.
+		'<a style="display:inline align-right" class="button" href="https://wordpress.org/support/plugin/mailchimp-for-woocommerce/reviews/" target=_blank>'.
+			esc_html__('Leave a Review', 'mailchimp-for-woocommerce').
+        '</a>';
+		
+		add_settings_error('mailchimp-woocommerce_notice', $this->plugin_name.'-initial-sync-end', $text, 'updated');
+	}
+
+	/**
+	 * Remove review banner.
+	 */
+	public function mailchimp_woocommerce_remove_review_banner() {
+		$this->removeData('sync.initial_sync');
+		wp_die();
 	}
 }

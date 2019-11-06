@@ -123,7 +123,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
         <div class="box box-half margin-large">
             <label for="<?php echo $this->plugin_name; ?>-newsletter-checkbox-action">
                 <h4><?php esc_html_e('Advanced Checkbox Settings', 'mailchimp-for-woocommerce');?></h4>
-                <p><?= sprintf(/* translators: %s - Woocommerce Actions documentation URL. */wp_kses( __( 'To change the location of the opt-in <br/>checkbox at checkout, input one of the <a href=%s target=_blank>available WooCommerce form actions</a>.', 'mailchimp-for-woocommerce' ), array(  'a' => array( 'href' => array() ) ) ), esc_url( 'https://docs.woocommerce.com/wc-apidocs/hook-docs.html' ) ); ?></p>
+                <p><?= sprintf(/* translators: %s - Woocommerce Actions documentation URL. */wp_kses( __( 'To change the location of the opt-in <br/>checkbox at checkout, input one of the <a href=%s target=_blank>available WooCommerce form actions</a>.', 'mailchimp-for-woocommerce' ), array(  'a' => array( 'href' => array(), 'target'=> '_blank' ) ) ), esc_url( 'https://docs.woocommerce.com/wc-apidocs/hook-docs.html' ) ); ?></p>
             </label>
         </div>
 

@@ -1698,7 +1698,7 @@ class MailChimp_WooCommerce_MailChimpApi
 
         // let's block these from doing anything below because the API seems to be having trouble.
         if ($http_code <= 99) {
-            throw new MailChimp_WooCommerce_RateLimitError('API is failing - retry again.');
+            throw new MailChimp_WooCommerce_RateLimitError('API is failing - try again.');
         }
 
         // possibily a successful DELETE operation

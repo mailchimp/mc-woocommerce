@@ -64,14 +64,17 @@ class MailChimp_WooCommerce_Transform_Products
         $product->setTitle($woo->get_title());
         $product->setUrl($woo->get_permalink());
         
-        if(in_array('woocommerce-product-vendors/woocommerce-product-vendors.php', apply_filters('active_plugins', get_option('active_plugins'))) || is_defined('WC_PRODUCT_VENDORS_VERSION') ){ 
-            $v = WC_Product_Vendors_Utils::get_vendor_id_from_product( $product->get_id() );
-            $vendor = 'pedro';
+        $original_vendor = '';
+        if (in_array('woocommerce-product-vendors/woocommerce-product-vendors.php', apply_filters('active_plugins', get_option('active_plugins'))) || defined('WC_PRODUCT_VENDORS_VERSION') ){ 
+            $vendor_id = WC_Product_Vendors_Utils::get_vendor_id_from_product($woo->get_id() );
+            $vendor_data = WC_Product_Vendors_Utils::get_vendor_data_by_id( $vendor_id );
+            $original_vendor = $vendor_data['name'];
         }
-
-        $vendor = apply_filters('mailchimp_sync_product_vendor', $product);
-        if (is_string($vendor)) {
-            $product->setVendor($vendor);
+        $vendor_filter = apply_filters('mailchimp_sync_product_vendor', $original_vendor, $product);
+        if ($original_vendor != '' && is_string($vendor_filter)) {
+            $product->setVendor($vendor_filter);
+        } else if ($original_vendor != '' && is_string($original_vendor)) {
+            $product->setVendor($original_vendor);
         }
 
         foreach ($variants as $variant) {

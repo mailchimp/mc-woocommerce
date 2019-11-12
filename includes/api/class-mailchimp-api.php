@@ -1654,7 +1654,7 @@ class MailChimp_WooCommerce_MailChimpApi
             CURLINFO_HEADER_OUT => true,
             CURLOPT_HTTPHEADER => array_merge(array(
                 'content-type: application/json',
-                'accept' => 'application/json',
+                'accept: application/json',
                 "user-agent: MailChimp for WooCommerce/{$env->version}; PHP/{$env->php_version}; WordPress/{$env->wp_version}; Woo/{$env->wc_version};",
             ), $headers)
         );
@@ -1698,7 +1698,7 @@ class MailChimp_WooCommerce_MailChimpApi
 
         // let's block these from doing anything below because the API seems to be having trouble.
         if ($http_code <= 99) {
-            throw new MailChimp_WooCommerce_RateLimitError('API is failing - retry again.');
+            throw new MailChimp_WooCommerce_RateLimitError('API is failing - try again.');
         }
 
         // possibily a successful DELETE operation

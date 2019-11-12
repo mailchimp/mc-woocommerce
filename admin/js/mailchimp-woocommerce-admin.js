@@ -232,6 +232,13 @@
 			}
 			// While the popup is open, wait. when closed, try to get status=accepted
 		}
+
+		// Mailchimp OAuth connection (tab "connect")
+		$('#setting-error-mailchimp-woocommerce-initial-sync-end .notice-dismiss').click(function(e){
+			var data = {action:'mailchimp_woocommerce_remove_review_banner'};
+			$.get(ajaxurl, data);
+		});
+
 	});
 	
 })( jQuery );

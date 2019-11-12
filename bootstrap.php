@@ -910,6 +910,7 @@ function mailchimp_clean_database() {
     delete_option('mailchimp-woocommerce-sync.syncing');
     delete_option('mailchimp-woocommerce-sync.started_at');
     delete_option('mailchimp-woocommerce-sync.completed_at');
+    delete_option('mailchimp-woocommerce-sync.initial_sync');
     delete_option('mailchimp-woocommerce-validation.api.ping');
     delete_option('mailchimp-woocommerce-cached-api-lists');
     delete_option('mailchimp-woocommerce-cached-api-ping-check');

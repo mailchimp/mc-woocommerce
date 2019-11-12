@@ -71,7 +71,7 @@ class MailChimp_WooCommerce_Transform_Products
             $original_vendor = $vendor_data['name'];
         }
         $vendor_filter = apply_filters('mailchimp_sync_product_vendor', $original_vendor, $product);
-        if (is_string($vendor_filter)) {
+        if ($original_vendor != '' && is_string($vendor_filter)) {
             $product->setVendor($vendor_filter);
         } else if ($original_vendor != '' && is_string($original_vendor)) {
             $product->setVendor($original_vendor);

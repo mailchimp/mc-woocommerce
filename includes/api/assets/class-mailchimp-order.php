@@ -315,7 +315,7 @@ class MailChimp_WooCommerce_Order
         }
 
         try {
-            $woo = new WC_Order($this->id);
+            $woo = wc_get_order($this->id);
             $this->currency_code = $woo->get_currency();
         } catch (\Exception $e) {
             $this->currency_code = get_woocommerce_currency();

@@ -239,6 +239,26 @@
 			$.get(ajaxurl, data);
 		});
 
+		// communications box radio ajax call
+		$('input.comm-box-input').change(function(e){
+			var data = {
+				action: 'mailchimp_woocommerce_communication_status', 
+				opt: this.value
+			}
+			var opt = this.value;
+			
+			$.post(ajaxurl, data, function(response) {
+				if (response.success) {
+					$('#mc-comm-save-'+opt).html(response.data);
+					$('#mc-comm-save-'+opt).css('color', '#628735').show().fadeOut(5000);
+				}
+				else {
+					$('#mc-comm-save-'+opt).html(response.data.error);
+					$('#mc-comm-save-'+opt).css('color', 'red').show().fadeOut(5000);
+					$('#mc-comm-input-'+response.data.opt).prop('checked', true);
+				}
+			});
+		});
 	});
 	
 })( jQuery );

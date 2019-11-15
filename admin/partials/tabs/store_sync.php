@@ -175,9 +175,42 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
                 </p>
             </div>
         </div>
-        
     </div>
 </div>
+
+<div class="sync-content-wrapper sync-comm-wrapper">
+   
+        <div class="box box-half">    
+            <h3>Communication</h3>
+            <p>
+            Occasionally we may send you information about how-to’s, updates and other news. Choose whether or not you want to receive these messages.
+            </p>
+            
+        </div>
+
+        <div class="box box-half">    
+            <?php
+                $opt = get_option('mailchimp-woocommerce-comm.opt');
+                $comm_enabled = $opt != null ? $opt : '0';     
+            ?>
+            <fieldset>    
+            <p> Messaging is currently</p>
+            <label class="radio-label">
+                <input id="mc-comm-input-1" class="comm-box-input" type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_checkbox_defaults]" value="1" <?php if($comm_enabled === '1') echo ' checked="checked" '; ?>>
+                <?php esc_html_e('Enabled', 'mailchimp-for-woocommerce');?>
+                <span class="mc-comm-save" id="mc-comm-save-1">Saved!</span>
+            </label>
+            <br/><br/>
+            <label class="radio-label">
+                <input id="mc-comm-input-0" class="comm-box-input" type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_checkbox_defaults]" value="0" <?php if($comm_enabled === '0') echo ' checked="checked" '; ?>>
+                <?php esc_html_e('Disabled', 'mailchimp-for-woocommerce');?>
+                <span class="mc-comm-save" id="mc-comm-save-0">Saved!</span>
+            </label>
+            </fieldset>
+        </div>
+    
+</div>
+
 <?php if($mailchimp_api && (!$store_syncing || isset($_GET['resync']) && $_GET['resync'] === '1')): ?>
 <h2 style="padding-top: 1em;"><?php esc_html_e('Advanced', 'mailchimp-for-woocommerce');?></h2>
 <p id="resync_data_help_text">

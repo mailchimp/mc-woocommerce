@@ -257,6 +257,9 @@ class MailChimp_WooCommerce
 
         // remove initial sync "leave a review" banner on notice dismiss
         $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_remove_review_banner', $plugin_admin, 'mailchimp_woocommerce_remove_review_banner' );
+
+         // set communications box status
+         $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_communication_status', $plugin_admin, 'mailchimp_woocommerce_communication_status' );
     }
 
 	/**

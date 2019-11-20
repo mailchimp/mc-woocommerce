@@ -238,7 +238,55 @@
 			var data = {action:'mailchimp_woocommerce_remove_review_banner'};
 			$.get(ajaxurl, data);
 		});
+		$('#comm_box_switch').change(function (e){
+			var switch_button = this;
+			var opt = this.checked ? 1 : 0;
+			
+			var data = {
+				action: 'mailchimp_woocommerce_communication_status', 
+				opt: opt
+			}
 
+			$('.comm_box_status').hide();
+			$('#comm_box_status_' + opt).show();
+
+			$.post(ajaxurl, data, function(response) {
+				if (response.success) {
+					$('#mc-comm-save').html(response.data);
+					$('#mc-comm-save').css('color', '#628735').show().fadeOut(5000);
+					switch_button.checked = opt;
+				}
+				else {
+					$('#mc-comm-save').html(response.data.error);
+					$('#mc-comm-save').css('color', 'red').show().fadeOut(5000);
+					switch_button.checked = 1 - opt;
+					$('.comm_box_status').hide();
+					$('#comm_box_status_' + (1 - opt)).show();
+				}
+			});
+		});
+		// communications box radio ajax call
+		$('input.comm-box-input').change(function(e){
+			var data = {
+				action: 'mailchimp_woocommerce_communication_status', 
+				opt: this.value
+			}
+			var opt = this.value;
+			
+			$.post(ajaxurl, data, function(response) {
+				if (response.success) {
+					$('#mc-comm-save-'+opt).html(response.data);
+					$('#mc-comm-save-'+opt).css('color', '#628735').show().fadeOut(5000);
+					$('#swi').checked = true;
+				}
+				else {
+					$('#mc-comm-save-'+opt).html(response.data.error);
+					$('#mc-comm-save-'+opt).css('color', 'red').show().fadeOut(5000);
+					$('#mc-comm-input-'+response.data.opt).prop('checked', true);
+					$('#swi').checked = false;
+				}
+			});
+		});
 	});
 	
 })( jQuery );

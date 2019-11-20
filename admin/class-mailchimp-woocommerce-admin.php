@@ -95,6 +95,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function enqueue_styles($hook) {
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin.css', array(), $this->version, 'all' );
+		wp_enqueue_style( $this->plugin_name . 'checkbox', plugin_dir_url( __FILE__ ) . 'css/checkbox.min.css', array(), $this->version, 'all' );
 
 		if ( $hook === 'toplevel_page_mailchimp-woocommerce' ) {
 			wp_enqueue_style( $this->plugin_name."-settings", plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin-settings.css', array(), $this->version, 'all' );
@@ -569,6 +570,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 			return $input;
 		}
+
+		// change communication status options
+		$comm_opt = get_option('mailchimp-woocommerce-comm.opt', 0);
+		$this->mailchimp_set_communications_status_on_server($comm_opt, $data['admin_email']);
 
 		$this->setData('validation.store_info', true);
 
@@ -1358,4 +1363,63 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$this->removeData('sync.initial_sync');
 		wp_die();
 	}
+
+	/**
+	 * set Communications status via sync page.
+	 */
+	public function mailchimp_woocommerce_communication_status() {
+		$original_opt = $this->getData('comm.opt',0);
+		$opt = $_POST['opt'];
+		$admin_email = $this->getOptions()['admin_email'];
+		
+		// try to set the info on the server
+		// post to communications api
+		$response = $this->mailchimp_set_communications_status_on_server($opt, $admin_email);
+		
+		// if success, set internal option to check for opt and display on sync page
+		if ($response['response']['code'] == 200) {
+			$response_body = json_decode($response['body']);
+			if (isset($response_body) && $response_body->success == true) {
+				$this->setData('comm.opt', $opt);
+				wp_send_json_success(__('Saved', 'mailchimp-for-woocommerce'));	
+			}
+		}
+		else {
+			//if error, keep option to original value 
+			wp_send_json_error(array('error' => __('Error setting communications status', 'mailchimp-for-woocommerce'), 'opt' => $original_opt));	
+		}
+		
+		wp_die();
+	}
+	
+	/**
+	 * set Communications box status.
+	 */
+	public function mailchimp_set_communications_status_on_server($opt, $admin_email) {
+		$env = mailchimp_environment_variables();
+
+		$post_data = array(
+			'store_id' => mailchimp_get_store_id(),
+			'email' => $admin_email,
+			'domain' => site_url(),
+			'marketing_status' => $opt,
+			'plugin_version' => "MailChimp for WooCommerce/{$env->version}; PHP/{$env->php_version}; WordPress/{$env->wp_version}; Woo/{$env->wc_version};"
+		);
+
+        $host = mailchimp_environment_variables()->environment === 'staging' ?
+            'https://staging.conduit.vextras.com' : 'https://conduit.mailchimpapp.com';
+
+		$route = "{$host}/survey/woocommerce/opt_in_status";
+		
+		return wp_remote_post(esc_url_raw($route), array(
+			'timeout'   => 12,
+			'cache-control' => 'no-cache',
+            'blocking'  => true,
+            'method'      => 'POST',
+            'data_format' => 'body',
+            'headers'     => array('Content-Type' => 'application/json; charset=utf-8'),
+            'body'        => json_encode($post_data),
+		));
+	}
+
 }

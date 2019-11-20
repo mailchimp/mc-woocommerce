@@ -175,9 +175,39 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
                 </p>
             </div>
         </div>
-        
     </div>
 </div>
+
+<div class="sync-content-wrapper sync-comm-wrapper">
+<h3>Communication</h3>
+        <div class="box box-half">    
+            <p>
+            Occasionally we may send you information about how-to’s, updates and other news. Choose whether or not you want to receive these messages.
+            </p>
+        </div>
+
+        <div class="box box-half comm_box_wrapper">    
+            <?php
+                $opt = get_option('mailchimp-woocommerce-comm.opt');
+                $comm_enabled = $opt != null ? $opt : '0';     
+            ?>
+            <fieldset>    
+                <p>
+                    <span>Messaging is currently
+                        <span class="comm_box_status <?= $comm_enabled === '0' ? 'hidden' : '';?>" id="comm_box_status_1" <?php if($comm_enabled === '0') echo ' class="hidden" '; ?> > <?php esc_html_e('enabled', 'mailchimp-for-woocommerce');?></span>
+                        <span class="comm_box_status <?= $comm_enabled === '1' ? 'hidden' : '';?>" id="comm_box_status_0" <?php if($comm_enabled === '1') echo ' class="hidden" '; ?>> <?php esc_html_e('disabled', 'mailchimp-for-woocommerce');?></span>
+                    </span>
+                    <label class="el-switch el-checkbox-green">
+                        <input id="comm_box_switch" type="checkbox" name="switch" <?php if($comm_enabled === '1') echo ' checked="checked" '; ?> value="1">
+                        <span class="el-switch-style"></span>
+                    </label>
+                    <span class="mc-comm-save" id="mc-comm-save">Saved!</span>
+                </p>
+            </fieldset>
+        </div>
+    
+</div>
+
 <?php if($mailchimp_api && (!$store_syncing || isset($_GET['resync']) && $_GET['resync'] === '1')): ?>
 <h2 style="padding-top: 1em;"><?php esc_html_e('Advanced', 'mailchimp-for-woocommerce');?></h2>
 <p id="resync_data_help_text">

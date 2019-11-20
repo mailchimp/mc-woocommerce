@@ -359,6 +359,40 @@
 	width: 100%;
 }
 
+.sync-comm-wrapper {
+	position:relative;
+	background-color: white;
+	padding: 4px 2em;
+	margin-top: 26px;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	height: 164px;
+}
+
+.sync-comm-wrapper .comm_box_status {
+	font-weight: 700;
+}
+
+.el-switch > input[type="checkbox"]:checked + .el-switch-style {
+	background-color: #4DD463;
+}
+
+.comm_box_wrapper fieldset {
+	border: 2px solid #E0E0E0;
+	padding: 0 1em 0 1em;
+	margin: 1em 0;
+}
+
+.comm_box_wrapper .el-switch, 
+.comm_box_wrapper .mc-comm-save{
+	float: right;
+}
+
+.comm_box_wrapper .mc-comm-save {
+	margin-right: 10px;
+}
+
 .sync-content-wrapper .sync-stats-wrapper {
 	position:relative;
 	background-color: white;
@@ -511,6 +545,11 @@
 	clear:both;
 }
 
+.sync-comm-wrapper .box {
+	padding: 0.5rem 0rem;
+	margin: 0;
+}
+
 .tab-content-wrapper .box.box-half,
 .sync-content-wrapper .box.box-half {
 	float: left;
@@ -599,14 +638,16 @@
 }
 
 
-.tab-content-wrapper fieldset input[type='radio'] {
+.tab-content-wrapper fieldset input[type='radio'],
+.sync-content-wrapper fieldset input[type='radio'] {
 	width: 2em;
 	height: 2em;
 	border: 1px solid #E6E6E6;
 	margin-right: 10px;
 }
 
-.tab-content-wrapper fieldset input[type='radio']:checked::before {
+.tab-content-wrapper fieldset input[type='radio']:checked::before,
+.sync-content-wrapper fieldset input[type='radio']:checked::before {
 	background: url("data:image/svg+xml;charset=UTF-8,%3csvg width='13' height='9' viewBox='0 0 13 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M10.75 0.5L12.25 2L5.26 9L0.75 4.5L2.25 3L5.26 6L10.75 0.5Z' fill='%237FAD45'/%3e%3c/svg%3e ");
 	background-repeat: none; 
 	width: 13px;
@@ -614,8 +655,15 @@
 	margin: 8px 0 0 7px;
 }
 
-.tab-content-wrapper fieldset .radio-label {
+.tab-content-wrapper fieldset .radio-label,
+.sync-content-wrapper fieldset .radio-label {
 	margin-bottom: 10px;
+}
+
+.mc-comm-save {
+	display:none;
+	color: #628735;
+	margin-left: 10px;
 }
 
 .tab-content-wrapper fieldset textarea {
@@ -702,7 +750,8 @@
 	}
 
 	.tab-content-wrapper .box.box-half,
-	.tab-content-wrapper .box.box-third {
+	.tab-content-wrapper .box.box-third,
+	.sync-comm-wrapper .box.box-half {
 		width: 100%;
 	}
 
@@ -739,6 +788,10 @@
 		margin: -3px 10px 0 5px;
 	}
 
+	.sync-comm-wrapper {
+		padding-bottom: 20px;
+	}
+	
 	.view-log-select,
 	.view-log-submit {
 		width: 100%;

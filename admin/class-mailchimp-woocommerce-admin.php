@@ -1374,11 +1374,14 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		// try to set the info on the server
 		// post to communications api
 		$response = $this->mailchimp_set_communications_status_on_server($opt, $admin_email);
-
+		
 		// if success, set internal option to check for opt and display on sync page
-		if (isset($response['success']) && $response['success'] == true) {
-			$this->setData('comm.opt', $opt);
-			wp_send_json_success(__('Saved', 'mailchimp-for-woocommerce'));	
+		if ($response['response']['code'] == 200) {
+			$response_body = json_decode($response['body']);
+			if (isset($response_body) && $response_body->success == true) {
+				$this->setData('comm.opt', $opt);
+				wp_send_json_success(__('Saved', 'mailchimp-for-woocommerce'));	
+			}
 		}
 		else {
 			//if error, keep option to original value 
@@ -1405,9 +1408,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         $host = mailchimp_environment_variables()->environment === 'staging' ?
             'https://staging.conduit.vextras.com' : 'https://conduit.mailchimpapp.com';
 
-		$route = "{$host}/opt_in_status/woocommerce/";
+		$route = "{$host}/survey/woocommerce/opt_in_status";
 		
-		$r = wp_remote_post(esc_url_raw($route), array(
+		return wp_remote_post(esc_url_raw($route), array(
 			'timeout'   => 12,
 			'cache-control' => 'no-cache',
             'blocking'  => true,
@@ -1416,8 +1419,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             'headers'     => array('Content-Type' => 'application/json; charset=utf-8'),
             'body'        => json_encode($post_data),
 		));
-
-		return $r['response'];
 	}
 
 }

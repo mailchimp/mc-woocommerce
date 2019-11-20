@@ -282,7 +282,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             if (empty($this->id) || !($order_post = get_post($this->id))) {
                 return false;
             }
-            $woo = new WC_Order($order_post);
+            $woo = wc_get_order($order_post);
             return $this->woo_order_number = $woo->get_order_number();
         } catch (\Exception $e) {
             $this->woo_order_number = false;
@@ -300,7 +300,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             if (empty($this->id) || !($order_post = get_post($this->id))) {
                 return false;
             }
-            $woo = new WC_Order($order_post);
+            $woo = wc_get_order($order_post);
             $email = $woo->get_billing_email();
 
             // just skip these altogether because we can't submit any amazon orders anyway.

@@ -58,7 +58,7 @@ class MailChimp_WooCommerce_Transform_Orders
      */
     public function transform(WP_Post $post)
     {
-        $woo = new WC_Order($post);
+        $woo = wc_get_order($post);
 
         $order = new MailChimp_WooCommerce_Order();
 
@@ -390,7 +390,7 @@ class MailChimp_WooCommerce_Transform_Orders
         $stats = (object) array('count' => 0, 'total' => 0);
 
         foreach ($orders as $order) {
-            $order = new WC_Order($order);
+            $order = wc_get_order($order);
 
             if ($order->get_status() !== 'cancelled' && $order->is_paid()) {
                 $stats->total += $order->get_total();

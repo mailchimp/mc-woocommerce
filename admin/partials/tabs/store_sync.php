@@ -179,33 +179,30 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
 </div>
 
 <div class="sync-content-wrapper sync-comm-wrapper">
-   
+<h3>Communication</h3>
         <div class="box box-half">    
-            <h3>Communication</h3>
             <p>
             Occasionally we may send you information about how-to’s, updates and other news. Choose whether or not you want to receive these messages.
             </p>
-            
         </div>
 
-        <div class="box box-half">    
+        <div class="box box-half comm_box_wrapper">    
             <?php
                 $opt = get_option('mailchimp-woocommerce-comm.opt');
                 $comm_enabled = $opt != null ? $opt : '0';     
             ?>
             <fieldset>    
-            <p> Messaging is currently</p>
-            <label class="radio-label">
-                <input id="mc-comm-input-1" class="comm-box-input" type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_checkbox_defaults]" value="1" <?php if($comm_enabled === '1') echo ' checked="checked" '; ?>>
-                <?php esc_html_e('Enabled', 'mailchimp-for-woocommerce');?>
-                <span class="mc-comm-save" id="mc-comm-save-1">Saved!</span>
-            </label>
-            <br/><br/>
-            <label class="radio-label">
-                <input id="mc-comm-input-0" class="comm-box-input" type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_checkbox_defaults]" value="0" <?php if($comm_enabled === '0') echo ' checked="checked" '; ?>>
-                <?php esc_html_e('Disabled', 'mailchimp-for-woocommerce');?>
-                <span class="mc-comm-save" id="mc-comm-save-0">Saved!</span>
-            </label>
+                <p>
+                    <span>Messaging is currently
+                        <span class="comm_box_status <?= $comm_enabled === '0' ? 'hidden' : '';?>" id="comm_box_status_1" <?php if($comm_enabled === '0') echo ' class="hidden" '; ?> > <?php esc_html_e('enabled', 'mailchimp-for-woocommerce');?></span>
+                        <span class="comm_box_status <?= $comm_enabled === '1' ? 'hidden' : '';?>" id="comm_box_status_0" <?php if($comm_enabled === '1') echo ' class="hidden" '; ?>> <?php esc_html_e('disabled', 'mailchimp-for-woocommerce');?></span>
+                    </span>
+                    <label class="el-switch el-checkbox-green">
+                        <input id="comm_box_switch" type="checkbox" name="switch" <?php if($comm_enabled === '1') echo ' checked="checked" '; ?> value="1">
+                        <span class="el-switch-style"></span>
+                    </label>
+                    <span class="mc-comm-save" id="mc-comm-save">Saved!</span>
+                </p>
             </fieldset>
         </div>
     

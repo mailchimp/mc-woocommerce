@@ -370,6 +370,29 @@
 	height: 164px;
 }
 
+.sync-comm-wrapper .comm_box_status {
+	font-weight: 700;
+}
+
+.el-switch > input[type="checkbox"]:checked + .el-switch-style {
+	background-color: #4DD463;
+}
+
+.comm_box_wrapper fieldset {
+	border: 2px solid #E0E0E0;
+	padding: 0 1em 0 1em;
+	margin: 1em 0;
+}
+
+.comm_box_wrapper .el-switch, 
+.comm_box_wrapper .mc-comm-save{
+	float: right;
+}
+
+.comm_box_wrapper .mc-comm-save {
+	margin-right: 10px;
+}
+
 .sync-content-wrapper .sync-stats-wrapper {
 	position:relative;
 	background-color: white;
@@ -727,7 +750,8 @@
 	}
 
 	.tab-content-wrapper .box.box-half,
-	.tab-content-wrapper .box.box-third {
+	.tab-content-wrapper .box.box-third,
+	.sync-comm-wrapper .box.box-half {
 		width: 100%;
 	}
 

@@ -729,6 +729,107 @@
 	white-space: pre-wrap;
 }
 
+#mc-woocommerce-create-account-link {
+	padding-top: 20px;
+}
+
+#mc-woocommerce-create-account {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: absolute;
+	top: 0;
+	left: 0;
+	visibility: hidden;
+	display: none;
+	padding-top: 20px;
+	/* background: red;
+	opacity: 0.5; */
+}
+
+#mc-woocommerce-create-account:target {
+	visibility: visible;
+	display: block;
+}
+
+#mc-woocommerce-create-account .reveal-modal {
+	position: relative;
+	margin: 0 auto;
+	width: 70%;
+	max-width: 580px;
+	background-color: #ffffff;
+	box-shadow: 5px 10px 40px rgba(0, 0, 0, 0.1);
+	font-family: proxima-nova, Arial, Helvetica, sans-serif;
+	line-height: 17px;
+}
+
+#mc-woocommerce-create-account .close-modal {
+	position: absolute;
+	left: 10px;
+	top: 10px;
+}
+
+.mc-woocommerce-create-account-modal-header {
+	text-align: center;
+	padding-top: 30px;
+}
+
+.mc-woocommerce-create-account-modal-header h2{
+	text-align: center;
+	padding-top: 30px;
+	font-size: 2em;
+}
+
+.mc-woocommerce-create-account-modal-footer {
+	padding: 35px;
+	bottom: 0px;
+	color: #B0B4BD;
+	font-size: 10px;
+}
+
+.mc-woocommerce-create-account-step {
+	padding: 5px 35px 10px 35px;
+}
+
+#mc-woocommerce-create-account-step-1 {
+	/* display: none; */
+}
+
+#mc-woocommerce-create-account-step-2 {
+	display: none;
+}
+
+.mc-woocommerce-create-account-step-error {
+	display:none;
+	color: red;
+}
+
+.mc-woocommerce-create-account-step .whitebtn{
+	color: #3C3C3C !important;
+	background: white !important;
+	box-shadow: 0 1px 0 #E6E6E6 !important;
+	text-shadow: 0 -1px 1px	#E6E6E6,1px 0 1px #E6E6E6,0 1px 1px #E6E6E6,-1px 0 1px #E6E6E6 !important;
+	border: 1px solid #E6E6E6 !important;
+}
+
+#mc-woocommerce-create-account-next {
+}
+
+#mc-woocommerce-create-account-prev {
+	float: none;
+}
+
+#mc-woocommerce-create-account-step-1 .tab-content-submit:hover{
+	background: #F7F7F7;
+}
+
+#mc-woocommerce-create-account-step-1 ul{
+	list-style: disc !important;
+	margin-left: 13px;
+}
+
 
 @media screen and (max-width: 782px) {
 	.tab-content-submit,
@@ -799,6 +900,13 @@
 		margin-bottom: 1em;
 	}
 
+	#mc-woocommerce-create-account {
+		padding-top: 60px;
+	}
+	#mc-woocommerce-create-account .reveal-modal{
+		width: 80%;
+	}
+
 }
 
 
@@ -827,6 +935,9 @@
 	.disconnect-button {
 		margin: 0.5em 0em !important;
 	}
-}
 
- 
+	#mc-woocommerce-create-account .reveal-modal{
+		width: 100%;
+	}
+	
+}

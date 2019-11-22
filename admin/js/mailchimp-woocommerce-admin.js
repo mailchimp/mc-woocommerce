@@ -287,6 +287,19 @@
 				}
 			});
 		});
+
+		$('#mc-woocommerce-create-account-next').click(function () {
+			$('#mc-woocommerce-create-account-step-1').hide();
+			$('#mc-woocommerce-create-account-step-2').show();
+			$('#step_count').html('2');
+		});
+
+		$('#mc-woocommerce-create-account-prev').click(function () {
+			$('#mc-woocommerce-create-account-step-1').show();
+			$('#mc-woocommerce-create-account-step-2').hide();
+			$('#step_count').html('1');
+		});
+
 	});
 	
 })( jQuery );

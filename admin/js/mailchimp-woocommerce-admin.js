@@ -288,18 +288,206 @@
 			});
 		});
 
+		// Account create functionality
 		$('#mc-woocommerce-create-account-next').click(function () {
-			$('#mc-woocommerce-create-account-step-1').hide();
-			$('#mc-woocommerce-create-account-step-2').show();
-			$('#step_count').html('2');
+			var next_button = $(this);
+			var spinner = $(this).next('.spinner');
+			spinner.css('visibility', 'visible')
+			
+			$('.mc-woocommerce-create-account-step-error > p').hide();
+			$('#username_suggestion').css('visibility', 'hidden');
+			var email = $('input#email');
+			var username = $('input#username');
+			
+			var isValid= true;
+		
+			if (! email[0].checkValidity()) {
+				$('#email_error').show();
+				isValid= false;
+			}
+			else {
+				$('#email_error').hide();
+			}
+			
+			if (! username[0].checkValidity()) {
+				$('#username_invalid_error').show();
+				spinner.css('visibility', 'hidden');
+			}
+			else {
+				$('#username_invalid_error').hide();
+				var data = {
+					action:'mailchimp_woocommerce_create_account_check_username',
+					username: username.val(),
+				};
+
+				$.post(ajaxurl, data, function(response) {
+					if (response.success) {
+						$('#username_exists_error').hide();
+						if ( isValid == true) {
+							spinner.css('visibility', 'hidden');
+							$('.mc-woocommerce-settings').css('height', '900px');
+							$('#mc-woocommerce-create-account-step-1').hide();
+							$('#mc-woocommerce-create-account-step-2').show();
+							$('#step_count').html('2');
+						}
+					}
+					else {
+						$('#username_exists_error').show();
+						$('#username_suggestion').css('visibility', 'visible');
+						$('#username_suggestion span').html(response.data.suggestion);
+						spinner.css('visibility', 'hidden');
+					}		
+				});
+			}
 		});
 
 		$('#mc-woocommerce-create-account-prev').click(function () {
 			$('#mc-woocommerce-create-account-step-1').show();
 			$('#mc-woocommerce-create-account-step-2').hide();
 			$('#step_count').html('1');
+			
 		});
 
+		$('#mc-woocommerce-create-account-go').click(function () {
+			var email = $('input#email');
+			var firstName = $('input#first_name');
+			var lastName = $('input#last_name');
+			var org = $('input#org');
+			var timezone = $('select#timezone');
+
+			var username = $('input#username');
+
+			var address = $('input#address');
+			var address2 = $('input#address2');
+			var city = $('input#city');
+			var state = $('input#city');
+			var zip = $('input#zip');
+			var country = $('select#country');
+			var phone = $('input#phone');
+			
+			var isValid = true;
+			
+			var spinner = $(this).next('.spinner');
+			spinner.css('visibility', 'visible');
+
+			if (! address[0].checkValidity()) {
+				$('#address_error').show();
+				isValid= false;
+			}
+			else {
+				$('#address_error').hide();
+			}
+
+			if (! address2[0].checkValidity()) {
+				$('#address_error').show();
+				isValid= false;
+			}
+			else {
+				$('#address_error').hide();
+			}
+
+			if (! city[0].checkValidity()) {
+				$('#city_error').show();
+				isValid= false;
+			}
+			else {
+				$('#city_error').hide();
+			}
+
+			if (! state[0].checkValidity()) {
+				$('#state_error').show();
+				isValid= false;
+			}
+			else {
+				$('#state_error').hide();
+			}
+
+			if (! zip[0].checkValidity()) {
+				$('#zip_error').show();
+				isValid= false;
+			}
+			else {
+				$('#zip_error').hide();
+			}
+
+			if (! country[0].checkValidity()) {
+				$('#country_error').show();
+				isValid= false;
+			}
+			else {
+				$('#phone_error').hide();
+			}
+
+			if (! phone[0].checkValidity()) {
+				$('#phone_error').show();
+				isValid= false;
+			}
+			else {
+				$('#phone_error').hide();
+			}
+
+			if (! timezone[0].checkValidity()) {
+				$('#timezone_error').show();
+				isValid= false;
+			}
+			else {
+				$('#phone_error').hide();
+			}
+
+			if (isValid) {
+				var data = {
+					action:'mailchimp_woocommerce_create_account_signup',
+					data: {
+						email: email.val(),
+						first_name: firstName.val(),
+						last_name: lastName.val(),
+						org: org.val(),
+						timezone: timezone.val(),
+						username: username.val(),
+						address: {
+							address1: address.val(),
+							address2: address2.val(),
+							city: city.val(),
+							state: state.val(),
+							zip: zip.val(),
+							country: country.val()
+						}
+					},
+				};
+
+				$.post(ajaxurl, data, function(response) {
+					if (response.success) {
+						$('#connecting').show();
+						spinner.css('visibility', 'hidden');
+										
+						// get access_token and fill api-key field value including data_center
+						var accessToken = response.data.data.oauth_token + '-' + response.data.data.dc
+						
+						$('#mailchimp-woocommerce-mailchimp-api-key').val(accessToken);
+
+						// always go to next step on success, so change url of wp_http_referer
+						if ($('input[name=mailchimp_woocommerce_wizard_on]').val() == 1) {
+							var query = window.location.href.match(/^(.*)\&/);
+							if (query){
+								history.replaceState({}, "", query[1]);
+								$('input[name=_wp_http_referer]').val(query[1]);		
+							}
+						}
+						// submit api_key/access_token form 
+						$('#mailchimp_woocommerce_options').submit();
+					}
+				}).fail(function (err) {
+					console.log('FAIL:' , err);
+				});
+			}
+			else {
+				spinner.css('visibility', 'hidden')
+			}
+		});
+
+		$('#username_suggestion span').click(function (){
+			$('input#username').val($(this).html());
+		});
 	});
-	
 })( jQuery );
+

@@ -360,7 +360,7 @@
 			var address = $('input#address');
 			var address2 = $('input#address2');
 			var city = $('input#city');
-			var state = $('input#city');
+			var state = $('input#state');
 			var zip = $('input#zip');
 			var country = $('select#country');
 			var phone = $('input#phone');
@@ -415,7 +415,7 @@
 				isValid= false;
 			}
 			else {
-				$('#phone_error').hide();
+				$('#country_error').hide();
 			}
 
 			if (! phone[0].checkValidity()) {
@@ -431,7 +431,7 @@
 				isValid= false;
 			}
 			else {
-				$('#phone_error').hide();
+				$('#timezone_error').hide();
 			}
 
 			if (isValid) {
@@ -487,6 +487,22 @@
 
 		$('#username_suggestion span').click(function (){
 			$('input#username').val($(this).html());
+		});
+
+		$('#mc-woocommerce-create-account-step-1').keypress(function(event){
+			event.stopPropagation();
+			var keycode = (event.keyCode ? event.keyCode : event.which);
+			if ( keycode == '13' ){
+				$("#mc-woocommerce-create-account-next").click(); 				
+			}
+		});
+
+		$('#mc-woocommerce-create-account-step-2').keypress(function(event){
+			event.stopPropagation();
+			var keycode = (event.keyCode ? event.keyCode : event.which);
+			if ( keycode == '13' ){
+				$("#mc-woocommerce-create-account-go").click(); 				
+			}
 		});
 	});
 })( jQuery );

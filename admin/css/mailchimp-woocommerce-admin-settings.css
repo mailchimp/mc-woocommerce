@@ -750,6 +750,29 @@
 	opacity: 0.5; */
 }
 
+#mc-woocommerce-create-account .terms {
+	padding-top: 20px;
+	padding-bottom: 20px;
+}
+
+#mc-woocommerce-create-account .terms a {
+	color: #7FAD45 !important;
+}
+
+#mc-woocommerce-create-account h2 {
+	padding-bottom: 20px;
+}
+
+#mc-woocommerce-create-account .notices {
+	background:#fff;
+	border-left: 4px solid#fff;
+	border-left-color: rgb(255, 255, 255);
+	box-shadow: 0 1px 1px 0 rgba(0,0,0,.1);
+	margin: 5px 15px 2px;
+	padding: 1px 12px;
+    padding-right: 12px;
+}
+
 #mc-woocommerce-create-account:target {
 	visibility: visible;
 	display: block;
@@ -803,15 +826,22 @@
 }
 
 .mc-woocommerce-create-account-step-error {
-	color: red;
-}
-
-.mc-woocommerce-create-account-step-error #connecting{
-	color: #7FAD45;
 }
 
 .mc-woocommerce-create-account-step-error p{
 	display: none;
+
+	background:#fff;
+	border-left: 4px solid#fff;
+	border-left-color: red;
+	box-shadow: 1px 1px 1px 1px rgba(0,0,0,.1);
+	margin: 5px 15px 2px;
+	padding: 4px 12px;
+    padding-right: 12px;
+}
+
+.mc-woocommerce-create-account-step-error #connecting{
+	border-left-color: #7FAD45;
 }
 
 .mc-woocommerce-create-account-step #username_suggestion {

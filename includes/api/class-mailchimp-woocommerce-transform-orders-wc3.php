@@ -353,11 +353,16 @@ class MailChimp_WooCommerce_Transform_Orders
      */
     public function getOrderPosts($page = 1, $posts = 5)
     {
+        $offset = 0;
+        if ($page > 1) {
+            $offset = ($page * $posts);
+        }
+
         $params = array(
             'post_type' => wc_get_order_types(),
             'post_status' => array_keys(wc_get_order_statuses()),
             'posts_per_page' => $posts,
-            'paged' => $page,
+            'offset' => $offset,
             'orderby' => 'id',
             'order' => 'ASC',
         );

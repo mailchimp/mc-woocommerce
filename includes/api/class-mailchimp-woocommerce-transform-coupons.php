@@ -108,10 +108,15 @@ class MailChimp_WooCommerce_Transform_Coupons
      */
     public function getCouponPosts($page = 1, $posts = 5)
     {
+        $offset = 0;
+        if ($page > 1) {
+            $offset = ($page * $posts);
+        }
+
         $coupons = get_posts(array(
             'post_type' => array_merge(array_keys(wc_get_product_types()), array('shop_coupon')),
             'posts_per_page' => $posts,
-            'paged' => $page,
+            'offset' => $offset,
             'orderby' => 'ID',
             'order' => 'ASC',
         ));
@@ -123,7 +128,7 @@ class MailChimp_WooCommerce_Transform_Coupons
             $coupons = get_posts(array(
                 'post_type' => array_merge(array_keys(wc_get_product_types()), array('shop_coupon')),
                 'posts_per_page' => $posts,
-                'paged' => $page,
+                'offset' => $offset,
                 'orderby' => 'ID',
                 'order' => 'ASC',
             ));

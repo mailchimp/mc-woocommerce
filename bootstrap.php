@@ -116,14 +116,14 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
         'created_at'   => gmdate( 'Y-m-d H:i:s', time() )
     );
     
-    $existing_actions = as_get_scheduled_actions(array(
+    $existing_actions =  function_exists('as_get_scheduled_actions') ? as_get_scheduled_actions(array(
         'hook' => get_class($job), 
         'status' => ActionScheduler_Store::STATUS_PENDING,  
         'args' => array(
             'obj_id' => isset($job->id) ? $job->id : null), 
             'group' => 'mc-woocommerce'
         )
-    );
+    ) : null;
     
     if (!empty($existing_actions)) {
         as_unschedule_action(get_class($job), array('obj_id' => $job->id), 'mc-woocommerce');
@@ -869,13 +869,13 @@ function mailchimp_flush_database_tables() {
 
 function mailchimp_delete_as_jobs() {
 
-    $existing_as_actions = as_get_scheduled_actions(
+    $existing_as_actions = function_exists('as_get_scheduled_actions') ? as_get_scheduled_actions(
         array(
             'status' => ActionScheduler_Store::STATUS_PENDING,  
             'group' => 'mc-woocommerce',
             'per_page' => -1,
         )
-    );
+    ) : null;
     
     if (!empty($existing_as_actions)) {
         foreach ($existing_as_actions as $as_action) {

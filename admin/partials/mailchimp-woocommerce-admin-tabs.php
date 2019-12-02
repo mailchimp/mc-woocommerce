@@ -249,6 +249,11 @@ else {
             <?php endif; ?>
 
         </form>
+        
+        <?php if ($active_tab == 'api_key'): ?>
+            <?php include_once 'tabs/api_key_create_account.php'; ?>
+        <?php endif; ?>
+        
     <?php if ($active_tab != 'sync'): ?>
     </div>
     <?php endif; ?>

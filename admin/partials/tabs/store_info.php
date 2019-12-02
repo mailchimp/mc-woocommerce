@@ -143,24 +143,24 @@ if (!$handler->hasValidApiKey()) {
         if (current_user_can('manage_options')) : ?>
         
         <div class="box optional-settings-button" >
-            <span><?php esc_html_e('Optional Store Settings', 'mc-woocommerce');?></span>
+            <span><?php esc_html_e('Optional Store Settings', 'mailchimp-for-woocommerce');?></span>
         </div>
 
         <div class="optional-settings-content">
             <div class="box box-half margin-large">
                 <label>
-                    <h4><?php esc_html_e('Plugin Permission Level', 'mc-woocommerce');?></h4>
-                    <p><?php _e('Select the minimum permission capability to manage Mailchimp for Woocommerce options', 'mc-woocommerce');?> </p>
+                    <h4><?php esc_html_e('Plugin Permission Level', 'mailchimp-for-woocommerce');?></h4>
+                    <p><?php _e('Select the minimum permission capability to manage Mailchimp for Woocommerce options', 'mailchimp-for-woocommerce');?> </p>
                 </label>
             </div>
 
             <div class="box box-half margin-large">
                 <?php $checkbox_default_settings = (array_key_exists('mailchimp_permission_cap', $options) && !is_null($options['mailchimp_permission_cap'])) ? $options['mailchimp_permission_cap'] : 'manage_options'; ?>
                 <label class="radio-label">
-                    <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_permission_cap]" value="manage_options"<?php if($checkbox_default_settings === 'manage_options') echo ' checked="checked" '; ?>><?php esc_html_e('Administrators Only', 'mc-woocommerce');?><br>
+                    <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_permission_cap]" value="manage_options"<?php if($checkbox_default_settings === 'manage_options') echo ' checked="checked" '; ?>><?php esc_html_e('Administrators Only', 'mailchimp-for-woocommerce');?><br>
                 </label>
                 <label class="radio-label">
-                    <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_permission_cap]" value="manage_woocommerce"<?php if($checkbox_default_settings === 'manage_woocommerce') echo ' checked="checked" '; ?>><?php esc_html_e('Shop Managers and Administrators', 'mc-woocommerce');?><br/>
+                    <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_permission_cap]" value="manage_woocommerce"<?php if($checkbox_default_settings === 'manage_woocommerce') echo ' checked="checked" '; ?>><?php esc_html_e('Shop Managers and Administrators', 'mailchimp-for-woocommerce');?><br/>
                 </label>
             </div>
         </div>

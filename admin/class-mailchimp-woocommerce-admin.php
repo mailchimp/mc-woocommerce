@@ -98,6 +98,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		wp_enqueue_style( $this->plugin_name . 'checkbox', plugin_dir_url( __FILE__ ) . 'css/checkbox.min.css', array(), $this->version, 'all' );
 
 		if ( $hook === 'toplevel_page_mailchimp-woocommerce' ) {
+			if ( get_bloginfo( 'version' ) < '5.3') {
+				wp_enqueue_style( $this->plugin_name."-settings", plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin-settings-5.2.css', array(), $this->version, 'all' );
+			}	
 			wp_enqueue_style( $this->plugin_name."-settings", plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin-settings.css', array(), $this->version, 'all' );
 		}
 	}

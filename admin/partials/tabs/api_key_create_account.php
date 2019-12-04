@@ -46,7 +46,7 @@
 
                     <div class="box " >
                         <a id="mc-woocommerce-create-account-next" class="button button-primary whitebtn tab-content-submit"><?php esc_html_e('Next Step', 'mailchimp-for-woocommerce'); ?></a>
-                        <span class="spinner" style="float:right; background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px"></span>
+                        <span class="spinner"></span>
                     </div>
 
                     <div class="box mc-woocommerce-create-account-step-error alignright" >
@@ -169,7 +169,7 @@
                 
                 <div class="box box-half" >
                     <a id="mc-woocommerce-create-account-go" class="button button-primary tab-content-submit"><?php esc_html_e('Get Started!', 'mailchimp-for-woocommerce'); ?></a>
-                    <span class="spinner" style="float:right; background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px"></span>
+                    <span class="spinner"></span>
                 </div>
                 
                 <div class="box mc-woocommerce-create-account-step-error alignright" >

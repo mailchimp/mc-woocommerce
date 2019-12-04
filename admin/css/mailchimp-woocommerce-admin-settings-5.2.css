@@ -225,7 +225,7 @@
 	font-family: proxima-nova, Arial, Helvetica, sans-serif !important;
 	font-size: 14px !important;
 	line-height: 16px !important;
-	padding: 15px 35px 15px 35px !important;
+	padding: 15px 35px 27px 35px !important;
 	
 	/* identical to box height */
 	text-transform: uppercase !important;
@@ -587,7 +587,7 @@
 	border: 1px solid #E6E6E6;
 	box-sizing: border-box;
 	border-radius: 4px;
-	padding: 0.6em 1.5em;
+	padding: 1em 1.5em;
 	width: 100%;
 	font-family: "Proxima Nova Alt Light", Arial, Helvetica, sans-serif
 	
@@ -603,20 +603,16 @@
 }
 
 .tab-content-wrapper .mailchimp-select-wrapper select {
-	padding: 3px 24px 3px 0px;
+	padding: 0;
+	background: transparent;	
 	font-size: 14px;
 	font-family: "Proxima Nova Alt Light", Arial, Helvetica, sans-serif;
 	border: none;
 	-webkit-appearance: none;
 	box-shadow: none;
 	outline: none;
-	width: 100% !important;
-	max-width: 10000px;
-	color: #32373c;
-}
-
-.tab-content-wrapper .mailchimp-select-wrapper select option{
-	outline: none;
+	width: 100%;
+	background: no-repeat right center url("data:image/svg+xml;charset=UTF-8,%3csvg width='13' height='8' viewBox='0 0 13 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M11.34 0.590027L6.75 5.17003L2.16 0.590027L0.75 2.00003L6.75 8.00003L12.75 2.00003L11.34 0.590027Z' fill='%23212121'/%3e%3c/svg%3e ");
 }
 
 .tab-content-wrapper .mailchimp-select-wrapper select:disabled {
@@ -636,7 +632,7 @@
 }
 .tab-content-wrapper fieldset input[type='checkbox']:checked::before {
 	color: #7FAD45;
-	margin: 0.6em 0px 0px 0.2em;
+	margin: -3px 0px 0px 5px;
 	content: url("data:image/svg+xml;charset=UTF-8,%3csvg width='13' height='9' viewBox='0 0 13 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M10.75 0.5L12.25 2L5.26 9L0.75 4.5L2.25 3L5.26 6L10.75 0.5Z' fill='%237FAD45'/%3e%3c/svg%3e ");
 
 }
@@ -821,16 +817,16 @@
 	padding: 5px 35px 10px 35px;
 }
 
-#mc-woocommerce-create-account-step-2 {
-	display: none;
-}
-
 .mc-woocommerce-create-account-step .spinner{
 	float:right;
 	background-size: 16px 16px;
 	width: 16px;
 	height: 16px;
 	margin: 15px 10px;
+}
+
+#mc-woocommerce-create-account-step-2 {
+	display: none;
 }
 
 .mc-woocommerce-create-account-step-error p{

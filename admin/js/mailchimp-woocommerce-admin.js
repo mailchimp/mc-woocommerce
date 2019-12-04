@@ -370,15 +370,7 @@
 			var spinner = $(this).next('.spinner');
 			spinner.css('visibility', 'visible');
 
-			if (! address[0].checkValidity()) {
-				$('#address_error').show();
-				isValid= false;
-			}
-			else {
-				$('#address_error').hide();
-			}
-
-			if (! address2[0].checkValidity()) {
+			if (! address[0].checkValidity() || ! address2[0].checkValidity()) {
 				$('#address_error').show();
 				isValid= false;
 			}
@@ -446,7 +438,6 @@
 						username: username.val(),
 						address: {
 							address1: address.val(),
-							address2: address2.val(),
 							city: city.val(),
 							state: state.val(),
 							zip: zip.val(),
@@ -454,6 +445,11 @@
 						}
 					},
 				};
+
+				// add optional address 2 only if it's filled out
+				if (address2.val() != '') {
+					data.data.address.address2 = address2.val();
+				}
 
 				$.post(ajaxurl, data, function(response) {
 					if (response.success) {

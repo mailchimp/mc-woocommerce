@@ -73,7 +73,7 @@
                     <label for="address2">
                         <span> <?php esc_html_e('Address Line 2', 'mailchimp-for-woocommerce'); ?></span>
                     </label>
-                    <input required type="text" id="address2" name="address2"/>
+                    <input type="text" id="address2" name="address2"/>
                 </div>
 
                 
@@ -173,7 +173,7 @@
                 </div>
                 
                 <div class="box mc-woocommerce-create-account-step-error alignright" >
-                    <p id ="address_error"><?= esc_html__( 'Invalid Address, all fields are required', 'mailchimp-for-woocommerce' ); ?></p>
+                    <p id ="address_error"><?= esc_html__( 'Invalid Address', 'mailchimp-for-woocommerce' ); ?></p>
                     <p id ="city_error"><?= esc_html__( 'Invalid City', 'mailchimp-for-woocommerce' ); ?></p>
                     <p id ="state_error"><?= esc_html__( 'Invalid State', 'mailchimp-for-woocommerce' ); ?></p>
                     <p id ="zip_error"><?= esc_html__( 'Invalid Zip', 'mailchimp-for-woocommerce' ); ?></p>

@@ -1,12 +1,7 @@
 <?php
 
 /**
- * Created by Vextras.
- *
- * Name: Ryan Hungate
- * Email: ryan@vextras.com
- * Date: 7/13/16
- * Time: 8:29 AM
+ * Class MailChimp_WooCommerce_Transform_Orders
  */
 class MailChimp_WooCommerce_Transform_Orders
 {
@@ -15,7 +10,8 @@ class MailChimp_WooCommerce_Transform_Orders
     /**
      * @param int $page
      * @param int $limit
-     * @return \stdClass
+     * @return object
+     * @throws Exception
      */
     public function compile($page = 1, $limit = 5)
     {
@@ -39,10 +35,14 @@ class MailChimp_WooCommerce_Transform_Orders
                     continue;
                 }
 
-                $order = $this->transform($post);
-                if (!$order->isFlaggedAsAmazonOrder()) {
-                    $response->valid++;
-                    $response->items[] = $order;
+                try {
+                    $order = $this->transform($post);
+                    if (!$order->isFlaggedAsAmazonOrder()) {
+                        $response->valid++;
+                        $response->items[] = $order;
+                    }
+                } catch (\Exception $e) {
+                    mailchimp_error('initial_sync', $e->getMessage(), array('post' => $post));
                 }
             }
         }
@@ -55,12 +55,17 @@ class MailChimp_WooCommerce_Transform_Orders
     /**
      * @param WP_Post $post
      * @return MailChimp_WooCommerce_Order
+     * @throws Exception
      */
     public function transform(WP_Post $post)
     {
         $woo = wc_get_order($post);
 
         $order = new MailChimp_WooCommerce_Order();
+
+        if (empty($woo)) {
+            return $order;
+        }
 
         $customer = $this->buildCustomerFromOrder($woo);
 
@@ -197,10 +202,11 @@ class MailChimp_WooCommerce_Transform_Orders
     }
 
     /**
-     * @param WC_Order $order
+     * @param WC_Abstract_Order $order
      * @return MailChimp_WooCommerce_Customer
+     * @throws Exception
      */
-    public function buildCustomerFromOrder(WC_Order $order)
+    public function buildCustomerFromOrder($order)
     {
         $customer = new MailChimp_WooCommerce_Customer();
 
@@ -291,10 +297,10 @@ class MailChimp_WooCommerce_Transform_Orders
     }
 
     /**
-     * @param WC_Order $order
+     * @param WC_Abstract_Order $order
      * @return MailChimp_WooCommerce_Address
      */
-    public function transformBillingAddress(WC_Order $order)
+    public function transformBillingAddress(WC_Abstract_Order $order)
     {
         // use the info from the order to compile an address.
         $address = new MailChimp_WooCommerce_Address();
@@ -318,10 +324,10 @@ class MailChimp_WooCommerce_Transform_Orders
     }
 
     /**
-     * @param WC_Order $order
+     * @param WC_Abstract_Order $order
      * @return MailChimp_WooCommerce_Address
      */
-    public function transformShippingAddress(WC_Order $order)
+    public function transformShippingAddress(WC_Abstract_Order $order)
     {
         $address = new MailChimp_WooCommerce_Address();
 
@@ -377,10 +383,9 @@ class MailChimp_WooCommerce_Transform_Orders
     }
 
     /**
-     * returns an object with a 'total' and a 'count'.
-     *
-     * @param WC_Order $order
+     * @param WC_Abstract_Order $order
      * @return object
+     * @throws Exception
      */
     public function getCustomerOrderTotals($order)
     {
@@ -407,10 +412,9 @@ class MailChimp_WooCommerce_Transform_Orders
     }
 
     /**
-     * returns an object with a 'total' and a 'count'.
-     *
      * @param $user_id
      * @return object
+     * @throws Exception
      */
     protected function getSingleCustomerOrderTotals($user_id)
     {

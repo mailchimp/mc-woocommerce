@@ -6,6 +6,7 @@
 class MailChimp_WooCommerce_Transform_Orders
 {
     public $campaign_id = null;
+    protected $is_syncing = false;
 
     /**
      * @param int $page
@@ -15,6 +16,8 @@ class MailChimp_WooCommerce_Transform_Orders
      */
     public function compile($page = 1, $limit = 5)
     {
+        $this->is_syncing = true;
+
         $response = (object) array(
             'endpoint' => 'orders',
             'page' => $page ? $page : 1,
@@ -48,6 +51,7 @@ class MailChimp_WooCommerce_Transform_Orders
         }
 
         $response->stuffed = ($response->count > 0 && (int) $response->count === (int) $limit) ? true : false;
+        $this->is_syncing = false;
 
         return $response;
     }
@@ -63,9 +67,22 @@ class MailChimp_WooCommerce_Transform_Orders
 
         $order = new MailChimp_WooCommerce_Order();
 
+        // if the woo get order returns an empty value, we need to skip the whole thing.
         if (empty($woo)) {
+            mailchimp_error('sync', 'get woo post was not found for order '.$post->ID);
             return $order;
         }
+
+        // if the woo object does not have a "get_billing_email" method, then we need to skip this until
+        // we know how to resolve these types of things.
+        if (!method_exists($woo, 'get_billing_email')) {
+            if ($this->is_syncing) {
+                throw new MailChimp_WooCommerce_Error("Post ID {$post->ID} was an order refund. Skipping this.");
+            }
+            return $order;
+        }
+
+        /** @var \Automattic\WooCommerce\Admin\Overrides\OrderRefund $customer */
 
         $customer = $this->buildCustomerFromOrder($woo);
 
@@ -366,7 +383,8 @@ class MailChimp_WooCommerce_Transform_Orders
 
         $params = array(
             'post_type' => wc_get_order_types(),
-            'post_status' => array_keys(wc_get_order_statuses()),
+            //'post_status' => array_keys(wc_get_order_statuses()),
+            'post_status' => array('completed', 'wc-completed'),
             'posts_per_page' => $posts,
             'offset' => $offset,
             'orderby' => 'id',

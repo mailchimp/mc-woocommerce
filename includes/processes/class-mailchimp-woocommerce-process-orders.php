@@ -75,8 +75,8 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abstrac
             try {
 
                 // if the order is in failed or cancelled status - and it's brand new, we shouldn't submit it.
-                if ($call === 'addStoreOrder' && !in_array(strtolower($item->getFinancialStatus()), array('processing', 'completed'))) {
-                    mailchimp_debug('order_sync', "#{$item->getId()} has a financial status of {$item->getFinancialStatus()} and was skipped.");
+                if ($call === 'addStoreOrder' && !in_array(strtolower($item->getFinancialStatus()), array('processing', 'completed', 'paid'))) {
+                    mailchimp_log('order_sync', "#{$item->getId()} has a financial status of {$item->getFinancialStatus()} and was skipped.");
                     return false;
                 }
 

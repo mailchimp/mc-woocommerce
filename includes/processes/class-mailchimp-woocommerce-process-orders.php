@@ -60,8 +60,6 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abstrac
                 $item->getCustomer()->setOptInStatus($status);
             }
 
-            mailchimp_debug('order_sync', "#{$item->getId()}", $item->toArray());
-
             try {
                 $type = $this->mailchimp()->getStoreOrder($this->store_id, $item->getId(), true) ? 'update' : 'create';
             } catch (MailChimp_WooCommerce_Error $e) {
@@ -78,8 +76,11 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abstrac
 
                 // if the order is in failed or cancelled status - and it's brand new, we shouldn't submit it.
                 if ($call === 'addStoreOrder' && !in_array(strtolower($item->getFinancialStatus()), array('processing', 'completed'))) {
+                    mailchimp_debug('order_sync', "#{$item->getId()} has a financial status of {$item->getFinancialStatus()} and was skipped.");
                     return false;
                 }
+
+                mailchimp_debug('order_sync', "#{$item->getId()}", $item->toArray());
 
                 try {
                     // make the call

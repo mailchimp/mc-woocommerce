@@ -190,6 +190,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	public function options_update() {
 
 		$this->handle_abandoned_cart_table();
+
+		$this->handle_initial_subscribed_to_marketing();
 		
 		$this->update_db_check();
 
@@ -321,6 +323,43 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$data = $this->mailchimp_set_store_currency_code($new_currency_code);
 		return $this->syncStore($data);
 	}
+
+    /**
+     * @return array|WP_Error|null
+     */
+	protected function handle_initial_subscribed_to_marketing()
+    {
+        $site_option = 'mailchimp_woocommerce_updated_marketing_status';
+
+        // if we've already done this, just return null.
+        if (get_site_option($site_option, false)) {
+            return null;
+        }
+
+        // if we've already set this value to something other than NULL, that means they've already done this.
+        if (($original_opt = $this->getData('comm.opt',null)) !== null) {
+            return null;
+        }
+
+        // if they have not set the admin_email yet during plugin setup, we will just return null
+        $admin_email = $this->getOption('admin_email');
+
+        if (empty($admin_email)) {
+            return null;
+        }
+
+        // tell the site options that we've already subscribed this person to marketing through the
+        // plugin update process.
+        update_site_option($site_option, true);
+
+        try {
+            // send the post to the mailchimp server
+            return $this->mailchimp_set_communications_status_on_server(true, $admin_email);
+        } catch (\Exception $e) {
+            mailchimp_error("initial_marketing_status", $e->getMessage());
+            return null;
+        }
+    }
 	
 	/**
 	 * We need to do a tidy up function on the mailchimp_carts table to

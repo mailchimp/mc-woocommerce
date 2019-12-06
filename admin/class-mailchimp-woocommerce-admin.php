@@ -1481,7 +1481,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$original_opt = $this->getData('comm.opt',0);
 		$opt = $_POST['opt'];
 		$admin_email = $this->getOptions()['admin_email'];
-		
+
+		mailchimp_debug('communication_status', "setting to {$opt}");
+
 		// try to set the info on the server
 		// post to communications api
 		$response = $this->mailchimp_set_communications_status_on_server($opt, $admin_email);

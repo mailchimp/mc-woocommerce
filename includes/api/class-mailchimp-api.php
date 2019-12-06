@@ -581,6 +581,21 @@ class MailChimp_WooCommerce_MailChimpApi
 
     /**
      * @param $store_id
+     * @return int|mixed
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_ServerError
+     */
+    public function getOrderCount($store_id)
+    {
+        $data = $this->get("ecommerce/stores/{$store_id}/orders?count=1");
+        if (!is_array($data)) {
+            return 0;
+        }
+        return $data['total_items'];
+    }
+
+    /**
+     * @param $store_id
      * @param bool $throw
      * @return bool|MailChimp_WooCommerce_Store
      * @throws MailChimp_WooCommerce_Error

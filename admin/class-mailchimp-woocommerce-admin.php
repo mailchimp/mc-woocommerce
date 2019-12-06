@@ -1446,11 +1446,17 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	private function mailchimp_show_initial_sync_message()
 	{
+	    try {
+            $order_count = mailchimp_get_api()->getOrderCount(mailchimp_get_store_id());
+        } catch (\Exception $e) {
+	        $order_count = mailchimp_get_order_count();
+        }
+
 		$text = __('Your store is synced with Mailchimp!', 'mailchimp-for-woocommerce').'</br>'.
 		'<p id="sync-status-message">'.
 			/* translators: %1$s: Number of synced orders %2$s: Audience name */	
 			sprintf(__('We\'ve successfully synced %1$s orders to your Audience %2$s, that\'s awesome!', 'mailchimp-for-woocommerce'),
-				mailchimp_get_order_count(),
+                $order_count,
 				$this->getListName()
 			).
 		'</p>'.

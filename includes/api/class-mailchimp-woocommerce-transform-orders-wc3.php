@@ -76,13 +76,13 @@ class MailChimp_WooCommerce_Transform_Orders
         // if the woo object does not have a "get_billing_email" method, then we need to skip this until
         // we know how to resolve these types of things.
         if (!method_exists($woo, 'get_billing_email')) {
+            $message = "Post ID {$post->ID} was an order refund. Skipping this.";
             if ($this->is_syncing) {
-                throw new MailChimp_WooCommerce_Error("Post ID {$post->ID} was an order refund. Skipping this.");
+                throw new MailChimp_WooCommerce_Error($message);
             }
+            mailchimp_error('initial_sync', $message, array('post' => $post, 'order_class' => get_class($woo)));
             return $order;
         }
-
-        /** @var \Automattic\WooCommerce\Admin\Overrides\OrderRefund $customer */
 
         $customer = $this->buildCustomerFromOrder($woo);
 
@@ -384,7 +384,7 @@ class MailChimp_WooCommerce_Transform_Orders
         $params = array(
             'post_type' => wc_get_order_types(),
             //'post_status' => array_keys(wc_get_order_statuses()),
-            'post_status' => array('completed', 'wc-completed'),
+            'post_status' => 'wc-completed',
             'posts_per_page' => $posts,
             'offset' => $offset,
             'orderby' => 'id',

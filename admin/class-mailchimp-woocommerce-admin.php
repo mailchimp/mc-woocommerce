@@ -1477,10 +1477,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			'plugin_version' => "MailChimp for WooCommerce/{$env->version}; PHP/{$env->php_version}; WordPress/{$env->wp_version}; Woo/{$env->wc_version};"
 		);
 
-        $host = mailchimp_environment_variables()->environment === 'staging' ?
-            'https://staging.conduit.vextras.com' : 'https://conduit.mailchimpapp.com';
-
-		$route = "{$host}/survey/woocommerce/opt_in_status";
+		$route = "https://woocommerce.mailchimpapp.com/api/opt_in_status";
 		
 		return wp_remote_post(esc_url_raw($route), array(
 			'timeout'   => 12,

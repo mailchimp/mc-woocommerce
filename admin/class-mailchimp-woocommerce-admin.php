@@ -191,8 +191,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		$this->handle_abandoned_cart_table();
 
-		$this->handle_initial_subscribed_to_marketing();
-		
 		$this->update_db_check();
 
 		register_setting($this->plugin_name, $this->plugin_name, array($this, 'validate'));
@@ -325,9 +323,12 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	}
 
     /**
+     * We were considering auto subscribing people that had just updated the plugin for the first time
+     * after releasing the marketing status block, but decided against that. The admin user must subscribe specifically.
+     *
      * @return array|WP_Error|null
      */
-	protected function handle_initial_subscribed_to_marketing()
+	protected function automatically_subscribe_admin_to_marketing()
     {
         $site_option = 'mailchimp_woocommerce_updated_marketing_status';
 

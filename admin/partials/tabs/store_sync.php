@@ -179,18 +179,19 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
 </div>
 
 <div class="sync-content-wrapper sync-comm-wrapper">
+<?php
+$opt = get_option('mailchimp-woocommerce-comm.opt');
+$admin_email = mailchimp_get_option('admin_email', get_option('admin_email'));
+$comm_enabled = $opt != null ? $opt : '0';
+?>
 <h3>Communication</h3>
         <div class="box box-half">    
             <p>
-            Occasionally we may send you information about how-to’s, updates and other news. Choose whether or not you want to receive these messages.
+                Occasionally we may send you information about how-to's, updates, and other news to the store's admin email address. Choose whether or not you want to receive these messages at <?php echo $admin_email; ?>.
             </p>
         </div>
 
-        <div class="box box-half comm_box_wrapper">    
-            <?php
-                $opt = get_option('mailchimp-woocommerce-comm.opt');
-                $comm_enabled = $opt != null ? $opt : '0';     
-            ?>
+        <div class="box box-half comm_box_wrapper">
             <fieldset>    
                 <p>
                     <span>Messaging is currently

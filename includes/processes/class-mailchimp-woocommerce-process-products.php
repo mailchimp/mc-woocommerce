@@ -15,7 +15,6 @@ class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abstr
      */
     protected $action = 'mailchimp_woocommerce_process_products';
 
-
     public static function push()
     {
         $job = new MailChimp_WooCommerce_Process_Products();

@@ -175,32 +175,25 @@ class MailChimp_WooCommerce_Transform_Products
     public function getProductPosts($page = 1, $posts = 5)
     {
         $offset = 0;
+
         if ($page > 1) {
-            $offset = ($page * $posts);
+            $offset = (($page-1) * $posts);
         }
 
-        $products = get_posts(array(
+        $params = array(
             'post_type' => array_merge(array_keys(wc_get_product_types()), array('product')),
             'posts_per_page' => $posts,
             'post_status' => 'publish',
             'offset' => $offset,
             'orderby' => 'ID',
             'order' => 'ASC',
-        ));
+        );
+
+        $products = get_posts($params);
 
         if (empty($products)) {
-
             sleep(2);
-
-            $products = get_posts(array(
-                'post_type' => array_merge(array_keys(wc_get_product_types()), array('product')),
-                'posts_per_page' => $posts,
-                'post_status' => 'publish',
-                'offset' => $offset,
-                'orderby' => 'ID',
-                'order' => 'ASC',
-            ));
-
+            $products = get_posts($params);
             if (empty($products)) {
                 return false;
             }

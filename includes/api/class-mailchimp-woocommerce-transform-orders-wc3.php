@@ -378,7 +378,7 @@ class MailChimp_WooCommerce_Transform_Orders
     {
         $offset = 0;
         if ($page > 1) {
-            $offset = ($page * $posts);
+            $offset = (($page-1) * $posts);
         }
 
         $params = array(

@@ -1,4 +1,4 @@
-<p id="mc-woocommerce-create-account-link" class="create-account-link alignright">Don’t have a Mailchimp account yet? <a href='#mc-woocommerce-create-account'>Create one here</a></p>
+<p id="mc-woocommerce-create-account-link" class="create-account-link alignright">Don’t have a Mailchimp account yet? <a style="font-weight:bold;" href='#mc-woocommerce-create-account'>Create one here</a></p>
 <div id="mc-woocommerce-create-account">
     <div id="exampleModal" class="reveal-modal">
         <a href="#" class="close-modal"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -550,12 +550,15 @@ function mailchimp_error_trace(\Exception $e, $wrap = "") {
  * @return bool
  */
 function mailchimp_string_contains($haystack, $needles) {
+    $has_mb = function_exists('mb_strpos');
     foreach ((array) $needles as $needle) {
-        if ($needle != '' && mb_strpos($haystack, $needle) !== false) {
+        $has_needle = $needle != '';
+        // make sure the server has "mb_strpos" otherwise this fails. Fallback to "strpos"
+        $position = $has_mb ? mb_strpos($haystack, $needle) : strpos($haystack, $needle);
+        if ($has_needle && $position !== false) {
             return true;
         }
     }
-
     return false;
 }
 

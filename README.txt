@@ -64,6 +64,7 @@ The Mailchimp for WooCommerce supports Wordpress Multi Sites and below are a few
 Refer to the Wordpress Codex for more information about [Multisite Network Administration](https://codex.wordpress.org/Multisite_Network_Administration)
 == Changelog ==
 = 2.3.1 =
+* adds fallback for mb_strpos if extension is not installed 
 * implements communications box on sync page
 * adds account create for Mailchimp 
 * fixes Pending Payment and On-hold status orders passed to Mailchimp

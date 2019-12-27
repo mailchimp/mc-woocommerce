@@ -803,8 +803,16 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         exit;
     }
 
-    public function mailchimp_process_single_job($obj_id) {
+    /**
+     * @param null $obj_id
+     * @return bool
+     */
+    public function mailchimp_process_single_job($obj_id = null) {
         try {
+            // not sure why this is happening - but we need to prepare for it and return false when it does.
+            if (empty($obj_id)) {
+                return false;
+            }
             // get job row from db
             global $wpdb;
             $sql = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}mailchimp_jobs	WHERE obj_id = %s", $obj_id );

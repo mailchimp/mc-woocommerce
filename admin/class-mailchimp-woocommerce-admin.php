@@ -870,7 +870,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         );
 
 		if ($data['mailchimp_list'] === 'create_new') {
-			$data['mailchimp_list'] = $this->createMailChimpList(array_merge($this->getOptions(), $data));
+			$data['mailchimp_list'] = $this->updateMailChimpList(array_merge($this->getOptions(), $data));
 		}
 
 		// as long as we have a list set, and it's currently in MC as a valid list, let's sync the store.
@@ -1199,7 +1199,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @param null|array $data
 	 * @return bool|string
 	 */
-	private function createMailChimpList($data = null)
+	private function updateMailChimpList($data = null, $list_id = null)
 	{
 		if (empty($data)) {
 			$data = $this->getOptions();
@@ -1244,9 +1244,13 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$submission->setContact($this->address($data));
 
 		try {
-			$response = $this->api()->createList($submission);
+			$response = !empty($list_id) ?
+                $this->api()->updateList($list_id, $submission) :
+                $this->api()->createList($submission);
 
-			$list_id = array_key_exists('id', $response) ? $response['id'] : false;
+			if (empty($list_id)) {
+			    $list_id = array_key_exists('id', $response) ? $response['id'] : false;
+            }
 
 			$this->setData('errors.mailchimp_list', false);
 
@@ -1318,6 +1322,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			if ($new) {
                 mailchimp_update_connected_site_script();
             }
+
+			// we need to update the list again with the campaign defaults
+			$this->updateMailChimpList(null, $list_id);
 
 			return true;
 

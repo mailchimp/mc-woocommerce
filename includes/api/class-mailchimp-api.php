@@ -410,6 +410,19 @@ class MailChimp_WooCommerce_MailChimpApi
     }
 
     /**
+     * @param string $list_id
+     * @param MailChimp_WooCommerce_CreateListSubmission $submission
+     * @return array|mixed|null|object
+     * @throws Exception
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_ServerError
+     */
+    public function updateList($list_id, MailChimp_WooCommerce_CreateListSubmission $submission)
+    {
+        return $this->patch("lists/{$list_id}", $submission->getSubmission());
+    }
+
+    /**
      * @param bool $as_list
      * @param int $count
      * @return array|mixed|null|object

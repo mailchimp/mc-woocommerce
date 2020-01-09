@@ -1328,9 +1328,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			$this->setData($time_key, time());
 
 			// on a new store push, we need to make sure we save the site script into a local variable.
-			if ($new) {
-                mailchimp_update_connected_site_script();
-            }
+            mailchimp_update_connected_site_script();
 
 			// we need to update the list again with the campaign defaults
 			$this->updateMailChimpList(null, $list_id);

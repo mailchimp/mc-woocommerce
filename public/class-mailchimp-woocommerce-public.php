@@ -70,10 +70,14 @@ class MailChimp_WooCommerce_Public {
 
         // if we have the "fragment" we can just inject this vs. loading the file
         // otherwise, if we have the connected_site script url saved, we need to inject it and load from the CDN.
-        if (($fragment = mailchimp_get_connected_site_script_fragment()) && !empty($fragment)) {
-            wp_add_inline_script($this->plugin_name.'_connected_site', $fragment, 'after');
-        } else if (($site = mailchimp_get_connected_site_script_url()) && !empty($site)) {
-           wp_enqueue_script($this->plugin_name.'_connected_site', $site, array(), $this->version, true);
-        }
+        //if (($site = mailchimp_get_connected_site_script_url()) && !empty($site)) {
+        //   wp_enqueue_script($this->plugin_name.'_connected_site', $site, array(), $this->version, true);
+        //}
 	}
+
+    public function add_inline_footer_script(){
+        if (($fragment = mailchimp_get_connected_site_script_fragment()) && !empty($fragment)) {
+            echo $fragment;
+        }
+    }
 }

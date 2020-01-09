@@ -870,7 +870,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         );
 
 		$list_id = mailchimp_get_list_id();
-		
+
 		if (!empty($list_id)) {
 			$data['mailchimp_list'] = $this->updateMailChimpList(array_merge($this->getOptions(), $data), $list_id);
 		}
@@ -1225,8 +1225,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		// allow the subscribers to choose preferred email type (html or text).
 		$submission->setEmailTypeOption(true);
 
-		// set the store name
-		$submission->setName($data['store_name']);
+        // set the store name if the list id is not set.
+		if (empty($list_id)) {
+            $submission->setName($data['store_name']);
+        }
 
 		// set the campaign defaults
 		$submission->setCampaignDefaults(

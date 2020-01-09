@@ -828,6 +828,12 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
         $data['active_tab'] = 'newsletter_settings';
 
+        $list_id = mailchimp_get_list_id();
+
+        if (!empty($list_id)) {
+            $this->updateMailChimpList(array_merge($this->getOptions(), $data), $list_id);
+        }
+
 		return $data;
 	}
 
@@ -868,12 +874,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			'mailchimp_user_tags' => isset($input['mailchimp_user_tags']) ? implode(",",$sanitized_tags) : $this->getOption('mailchimp_user_tags'),
             'mailchimp_product_image_key' => isset($input['mailchimp_product_image_key']) ? $input['mailchimp_product_image_key'] : 'medium',
         );
-
-		$list_id = mailchimp_get_list_id();
-
-		if (!empty($list_id)) {
-			$data['mailchimp_list'] = $this->updateMailChimpList(array_merge($this->getOptions(), $data), $list_id);
-		}
 
 		// as long as we have a list set, and it's currently in MC as a valid list, let's sync the store.
 		if (!empty($data['mailchimp_list']) && $this->api()->hasList($data['mailchimp_list'])) {

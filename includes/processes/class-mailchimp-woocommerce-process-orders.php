@@ -55,7 +55,8 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abstrac
                         mailchimp_error('order_sync.error', mailchimp_error_trace($e, "GET subscriber :: {$item->getId()}"));
                         throw $e;
                     }
-                    $status = $should_auto_subscribe;
+                    // if they are using double opt in, we need to pass this in as false here so it doesn't auto subscribe.
+                    $status = mailchimp_list_has_double_optin() ? false : $should_auto_subscribe;
                 }
                 $item->getCustomer()->setOptInStatus($status);
             }

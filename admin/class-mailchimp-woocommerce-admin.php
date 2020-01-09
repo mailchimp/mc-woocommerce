@@ -869,8 +869,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             'mailchimp_product_image_key' => isset($input['mailchimp_product_image_key']) ? $input['mailchimp_product_image_key'] : 'medium',
         );
 
-		if ($data['mailchimp_list'] === 'create_new') {
-			$data['mailchimp_list'] = $this->updateMailChimpList(array_merge($this->getOptions(), $data));
+		$list_id = mailchimp_get_list_id();
+		
+		if (!empty($list_id)) {
+			$data['mailchimp_list'] = $this->updateMailChimpList(array_merge($this->getOptions(), $data), $list_id);
 		}
 
 		// as long as we have a list set, and it's currently in MC as a valid list, let's sync the store.
@@ -1213,6 +1215,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		foreach ($required as $requirement) {
 			if (!isset($data[$requirement]) || empty($data[$requirement])) {
+			    mailchimp_log('admin', 'does not have enough data to update the mailchimp list.');
 				return false;
 			}
 		}
@@ -1243,6 +1246,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		$submission->setContact($this->address($data));
 
+		// let's turn this on for debugging purposes.
+		mailchimp_debug('admin', 'list info submission', array('submission' => print_r($submission->getSubmission(), true)));
+
 		try {
 			$response = !empty($list_id) ?
                 $this->api()->updateList($list_id, $submission) :
@@ -1257,6 +1263,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			return $list_id;
 
 		} catch (MailChimp_WooCommerce_Error $e) {
+            mailchimp_error('admin', $e->getMessage());
 			$this->setData('errors.mailchimp_list', $e->getMessage());
 			return false;
 		}

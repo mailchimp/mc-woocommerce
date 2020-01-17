@@ -5,11 +5,6 @@ $store_id = mailchimp_get_store_id();
 $product_count = mailchimp_get_product_count();
 $order_count = mailchimp_get_order_count();
 $promo_rules_count = mailchimp_count_posts('shop_coupon');
-$subscribers_args = array(
-    'meta_key' => 'mailchimp_woocommerce_is_subscribed',
-    'meta_value' => true
-);
-$subscribers_count = get_users($subscribers_args);
 
 $mailchimp_total_products = $mailchimp_total_orders = $mailchimp_total_promo_rules = 0;
 $mailchimp_total_subscribers = $mailchimp_total_unsubscribed = $mailchimp_total_transactional = 0;

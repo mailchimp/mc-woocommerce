@@ -67,9 +67,6 @@ spl_autoload_register(function($class) {
         
         'MailChimp_WooCommerce_Public' => 'public/class-mailchimp-woocommerce-public.php',
         'MailChimp_WooCommerce_Admin' => 'admin/class-mailchimp-woocommerce-admin.php',
-        
-        // Queue system Action Scheduler
-        'ActionScheduler' => 'includes/vendor/action-scheduler/action-scheduler.php',
     );
 
     // if the file exists, require it
@@ -77,6 +74,9 @@ spl_autoload_register(function($class) {
     if (array_key_exists($class, $classes) && file_exists($path.$classes[$class])) {
         require $path.$classes[$class];
     }
+
+    // require Action Scheduler
+    include_once "includes/vendor/action-scheduler/action-scheduler.php";
 });
 
 /**

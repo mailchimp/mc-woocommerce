@@ -599,8 +599,8 @@ function mailchimp_count_posts($type) {
         $query = "SELECT post_status, COUNT( * ) AS num_posts FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s";
         $posts = $wpdb->get_results( $wpdb->prepare($query, $type, 'wc-completed'));
     } else {
-        $query = "SELECT post_status, COUNT( * ) AS num_posts FROM {$wpdb->posts} WHERE post_type = %s";
-        $posts = $wpdb->get_results( $wpdb->prepare($query, $type));
+        $query = "SELECT post_status, COUNT( * ) AS num_posts FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s";
+        $posts = $wpdb->get_results( $wpdb->prepare($query, $type, 'publish'));
     }
 
     $response = array();

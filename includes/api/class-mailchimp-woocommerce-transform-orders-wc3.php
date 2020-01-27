@@ -202,7 +202,8 @@ class MailChimp_WooCommerce_Transform_Orders
                     // swap out the old item id and product variant id with the deleted version.
                     $item->setProductId("deleted_{$pid}");
                     $item->setProductVariantId("deleted_{$pid}");
-
+                    $item->setQuantity(0);
+                    
                     // add the item and continue on the loop.
                     $order->addItem($item);
                     continue;

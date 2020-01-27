@@ -1485,6 +1485,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         '</a>';
 		
 		add_settings_error('mailchimp-woocommerce_notice', $this->plugin_name.'-initial-sync-end', $text, 'updated');
+		$this->removeData('sync.initial_sync');
 	}
 
 	/**
@@ -1492,7 +1493,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function mailchimp_woocommerce_remove_review_banner() {
 		$this->removeData('sync.initial_sync');
-		wp_die();
+		wp_send_json_success(__('Initial Sync Flag Removed', 'mailchimp-for-woocommerce'));	
 	}
 
 	/**

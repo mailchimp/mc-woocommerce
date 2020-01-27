@@ -269,6 +269,7 @@ class MailChimp_WooCommerce_Transform_Products
             $variant = new MailChimp_WooCommerce_ProductVariation();
             $variant->setId("deleted_{$id}");
             $variant->setTitle("deleted_{$id}");
+            $variant->setVisibility('hidden');
 
             $product->addVariant($variant);
 

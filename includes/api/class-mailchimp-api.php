@@ -221,7 +221,7 @@ class MailChimp_WooCommerce_MailChimpApi
 
         mailchimp_debug('api.subscribe', "Subscribing {$email}", $data);
 
-        return $this->post("lists/$list_id/members", $data);
+        return $this->post("lists/$list_id/members?skip_merge_validation=true", $data);
     }
 
     /**
@@ -270,7 +270,7 @@ class MailChimp_WooCommerce_MailChimpApi
 
         mailchimp_debug('api.update_member', "Updating {$email}", $data);
 
-        return $this->patch("lists/$list_id/members/$hash", $data);
+        return $this->patch("lists/$list_id/members/$hash?skip_merge_validation=true", $data);
     }
 
     /**

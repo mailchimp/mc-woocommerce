@@ -81,6 +81,13 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abstrac
                     return false;
                 }
 
+                $line_items = $item->items();
+
+                if (empty($line_items) || !count($line_items)) {
+                    mailchimp_error('order_sync.error', "order {$item->getId()} does not have any line items, we have to skip this.");
+                    return false;
+                }
+
                 mailchimp_debug('order_sync', "#{$item->getId()}", $item->toArray());
 
                 try {

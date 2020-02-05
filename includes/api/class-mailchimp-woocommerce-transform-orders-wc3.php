@@ -421,7 +421,7 @@ class MailChimp_WooCommerce_Transform_Orders
         foreach ($orders as $order) {
             $order = wc_get_order($order);
 
-            if ($order->get_status() !== 'cancelled' && $order->is_paid()) {
+            if ($order->get_status() !== 'cancelled' && (method_exists($order, 'is_paid') && $order->is_paid())) {
                 $stats->total += $order->get_total();
                 $stats->count ++;
             }

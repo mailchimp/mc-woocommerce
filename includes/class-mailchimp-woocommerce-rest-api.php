@@ -17,33 +17,32 @@ class MailChimp_WooCommerce_Rest_Api
      */
     public function register_routes()
     {
-        $this->register_ping();
-        $this->register_survey_routes();
-        $this->register_sync_stats();
-    }
-
-    /**
-     * Ping
-     */
-    protected function register_ping()
-    {
+        // ping
         register_rest_route(static::$namespace, '/ping', array(
             'methods' => 'GET',
             'callback' => array($this, 'ping'),
         ));
-    }
 
-    /**
-     * Right now we only have a survey disconnect endpoint.
-     */
-    protected function register_survey_routes()
-    {
+        // Right now we only have a survey disconnect endpoint.
         register_rest_route(static::$namespace, "/survey/disconnect", array(
             'methods' => 'POST',
             'callback' => array($this, 'post_disconnect_survey'),
         ));
-    }
 
+        // Sync Stats
+        if (mailchimp_get_allowed_capability()) {
+            register_rest_route(static::$namespace, '/sync/stats', array(
+                'methods' => 'GET',
+                'callback' => array($this, 'get_sync_stats'),
+            ));
+        }
+
+        // remove review banner
+        register_rest_route(static::$namespace, "/review-banner", array(
+            'methods' => 'GET',
+            'callback' => array($this, 'dismiss_review_banner'),
+        ));
+    }
 
     /**
      * @param WP_REST_Request $request
@@ -53,20 +52,6 @@ class MailChimp_WooCommerce_Rest_Api
     {
         return $this->mailchimp_rest_response(array('success' => true));
     }
-
-    /**
-     * Ping
-     */
-    protected function register_sync_stats()
-    {
-        if (mailchimp_get_allowed_capability()) {
-            register_rest_route(static::$namespace, '/sync/stats', array(
-                'methods' => 'GET',
-                'callback' => array($this, 'get_sync_stats'),
-            ));
-        }
-    }
-
 
     /**
      * @param WP_REST_Request $request
@@ -143,6 +128,16 @@ class MailChimp_WooCommerce_Rest_Api
             'has_finished' => mailchimp_is_done_syncing(),
         ));
     }
+    
+    /**
+     * @param WP_REST_Request $request
+     * @return WP_Error|WP_REST_Response
+     */
+    public function dismiss_review_banner(WP_REST_Request $request)
+    {
+        return $this->mailchimp_rest_response(array('success' => delete_option('mailchimp-woocommerce-sync.initial_sync')));
+    }
+
 
     /**
      * @param array $data

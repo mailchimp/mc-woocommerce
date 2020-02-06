@@ -1485,7 +1485,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         '</a>';
 		
 		add_settings_error('mailchimp-woocommerce_notice', $this->plugin_name.'-initial-sync-end', $text, 'updated');
-		$this->removeData('sync.initial_sync');
 	}
 
 	/**

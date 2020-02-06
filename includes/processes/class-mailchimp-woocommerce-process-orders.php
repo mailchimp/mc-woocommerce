@@ -83,9 +83,23 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abstrac
 
                 $line_items = $item->items();
 
+                // if we don't have any line items, we need to create the mailchimp product
+                // with a price of 1.00 and we'll use the inventory quantity to adjust correctly.
                 if (empty($line_items) || !count($line_items)) {
-                    mailchimp_error('order_sync.error', "order {$item->getId()} does not have any line items, we have to skip this.");
-                    return false;
+
+                    // this will create an empty product placeholder, or return the pre populated version if already
+                    // sent to Mailchimp.
+                    $product = $this->mailchimp()->createEmptyLineItemProductPlaceholder();
+
+                    $line_item = new MailChimp_WooCommerce_LineItem();
+                    $line_item->setId($product->getId());
+                    $line_item->setPrice(1);
+                    $line_item->setProductVariantId($product->getId());
+                    $line_item->setQuantity((int) $item->getOrderTotal());
+
+                    $item->addItem($line_item);
+
+                    mailchimp_log('order_sync.error', "order {$item->getId()} does not have any line items, so we are using 'empty_line_item_placeholder' instead.");
                 }
 
                 mailchimp_debug('order_sync', "#{$item->getId()}", $item->toArray());

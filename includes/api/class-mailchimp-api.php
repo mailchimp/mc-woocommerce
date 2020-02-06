@@ -1243,6 +1243,41 @@ class MailChimp_WooCommerce_MailChimpApi
     }
 
     /**
+     * @return MailChimp_WooCommerce_Product
+     */
+    public function createEmptyLineItemProductPlaceholder()
+    {
+        $product = new MailChimp_WooCommerce_Product();
+        $product->setId('empty_line_item_placeholder');
+        $product->setTitle('Empty Line Item Placeholder');
+        $product->setVendor('deleted');
+
+        $variation = new MailChimp_WooCommerce_ProductVariation();
+        $variation->setId($product->getId());
+        $variation->setTitle($product->getTitle());
+        $variation->setInventoryQuantity(0);
+        $variation->setVisibility('hidden');
+        $variation->setPrice(1);
+
+        $product->addVariant($variation);
+
+        if ((bool) mailchimp_get_data('empty_line_item_placeholder', false)) {
+            return $product;
+        }
+
+        $store_id = mailchimp_get_store_id();
+        $api = mailchimp_get_api();
+
+        try {
+            $response = $api->addStoreProduct($store_id, $product);
+            mailchimp_set_data('empty_line_item_placeholder', true, 'yes');
+            return $response;
+        } catch (\Exception $e) {
+            return $product;
+        }
+    }
+
+    /**
      * @param $store_id
      * @param $product_id
      * @return bool

@@ -28,7 +28,7 @@ class MailChimp_WooCommerce_Rest_Api
             'methods' => 'POST',
             'callback' => array($this, 'post_disconnect_survey'),
         ));
-        
+
         // Sync Stats
         if (mailchimp_get_allowed_capability()) {
             register_rest_route(static::$namespace, '/sync/stats', array(
@@ -36,6 +36,12 @@ class MailChimp_WooCommerce_Rest_Api
                 'callback' => array($this, 'get_sync_stats'),
             ));
         }
+
+        // remove review banner
+        register_rest_route(static::$namespace, "/review-banner", array(
+            'methods' => 'GET',
+            'callback' => array($this, 'dismiss_review_banner'),
+        ));
     }
 
     /**
@@ -122,6 +128,16 @@ class MailChimp_WooCommerce_Rest_Api
             'has_finished' => mailchimp_is_done_syncing(),
         ));
     }
+    
+    /**
+     * @param WP_REST_Request $request
+     * @return WP_Error|WP_REST_Response
+     */
+    public function dismiss_review_banner(WP_REST_Request $request)
+    {
+        return $this->mailchimp_rest_response(array('success' => delete_option('mailchimp-woocommerce-sync.initial_sync')));
+    }
+
 
     /**
      * @param array $data

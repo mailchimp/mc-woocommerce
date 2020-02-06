@@ -112,7 +112,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function enqueue_scripts($hook) {
 		if ( $hook === 'toplevel_page_mailchimp-woocommerce' ) {
-			wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version, false );
+			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version, false );
+			wp_localize_script( $this->plugin_name, 'phpVars', array( 'removeReviewBannerRestUrl' => MailChimp_WooCommerce_Rest_Api::url('review-banner')) );
+			wp_enqueue_script( $this->plugin_name);
 			wp_enqueue_script('swal', "//cdn.jsdelivr.net/npm/sweetalert2@8", '', $this->version, false);
 		}
 	}
@@ -1488,14 +1490,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         '</a>';
 		
 		add_settings_error('mailchimp-woocommerce_notice', $this->plugin_name.'-initial-sync-end', $text, 'updated');
-	}
-
-	/**
-	 * Remove review banner.
-	 */
-	public function mailchimp_woocommerce_remove_review_banner() {
-		$this->removeData('sync.initial_sync');
-		wp_send_json_success(__('Initial Sync Flag Removed', 'mailchimp-for-woocommerce'));	
 	}
 
 	/**

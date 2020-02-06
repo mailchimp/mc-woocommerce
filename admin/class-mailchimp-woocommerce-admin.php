@@ -188,6 +188,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 *
 	 */
 	public function options_update() {
+		global $pagenow;
 
 		$this->handle_abandoned_cart_table();
 
@@ -195,8 +196,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		register_setting($this->plugin_name, $this->plugin_name, array($this, 'validate'));
 
-		if (get_option('mailchimp-woocommerce-sync.initial_sync') == 1 && get_option('mailchimp-woocommerce-sync.completed_at') > 0 ) {
-			$this->mailchimp_show_initial_sync_message();
+		if ($pagenow == 'admin.php' && 'mailchimp-woocommerce' === $_GET['page']) {
+			if (get_option('mailchimp-woocommerce-sync.initial_sync') == 1 && get_option('mailchimp-woocommerce-sync.completed_at') > 0 ) {
+				$this->mailchimp_show_initial_sync_message();
+			}
 		}
 	}
 

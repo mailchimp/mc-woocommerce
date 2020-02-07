@@ -66,6 +66,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		update_option('mailchimp-woocommerce-sync.started_at', false);
 		update_option('mailchimp-woocommerce-sync.completed_at', false);
 		update_option('mailchimp-woocommerce-resource-last-updated', false);
+		update_option('mailchimp-woocommerce-empty_line_item_placeholder', false);
 
 		if (($store_id = mailchimp_get_store_id()) && ($mc = mailchimp_get_api()))  {
             if ($mc->deleteStore($store_id)) {

@@ -189,9 +189,10 @@ class MailChimp_WooCommerce_Transform_Orders
             if (!($product = $order_detail->get_product()) || 'trash' === $product->get_status()) {
 
                 $pid = $order_detail->get_product_id();
-
+                $title = $order_detail->get_name();
+                
                 try {
-                    $deleted_product = MailChimp_WooCommerce_Transform_Products::deleted($pid);
+                    $deleted_product = MailChimp_WooCommerce_Transform_Products::deleted($pid, $title);
                 } catch (\Exception $e) {
                     mailchimp_log('order.items.error', "Order #{$woo->get_id()} :: Product {$pid} does not exist!");
                     continue;
@@ -202,7 +203,6 @@ class MailChimp_WooCommerce_Transform_Orders
                     // swap out the old item id and product variant id with the deleted version.
                     $item->setProductId("deleted_{$pid}");
                     $item->setProductVariantId("deleted_{$pid}");
-                    $item->setQuantity(0);
                     
                     // add the item and continue on the loop.
                     $order->addItem($item);

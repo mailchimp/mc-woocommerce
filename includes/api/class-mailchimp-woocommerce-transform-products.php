@@ -253,7 +253,7 @@ class MailChimp_WooCommerce_Transform_Products
      * @return bool|MailChimp_WooCommerce_Product
      * @throws Exception
      */
-    public static function deleted($id)
+    public static function deleted($id, $title)
     {
         $store_id = mailchimp_get_store_id();
         $api = mailchimp_get_api();
@@ -262,11 +262,11 @@ class MailChimp_WooCommerce_Transform_Products
             $product = new MailChimp_WooCommerce_Product();
 
             $product->setId("deleted_{$id}");
-            $product->setTitle("deleted_{$id}");
+            $product->setTitle($title);
 
             $variant = new MailChimp_WooCommerce_ProductVariation();
             $variant->setId($product->getId());
-            $variant->setTitle($product->getTitle());
+            $variant->setTitle($title);
             $variant->setInventoryQuantity(0);
             $variant->setVisibility('hidden');
 

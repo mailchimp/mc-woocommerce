@@ -94,6 +94,7 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abstrac
                     $line_item = new MailChimp_WooCommerce_LineItem();
                     $line_item->setId($product->getId());
                     $line_item->setPrice(1);
+                    $line_item->setProductId($product->getId());
                     $line_item->setProductVariantId($product->getId());
                     $line_item->setQuantity((int) $item->getOrderTotal());
 

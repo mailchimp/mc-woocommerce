@@ -924,6 +924,7 @@ function mailchimp_clean_database() {
     delete_option('mailchimp-woocommerce-cached-api-lists');
     delete_option('mailchimp-woocommerce-cached-api-ping-check');
     delete_option('mailchimp-woocommerce-errors.store_info');
+    delete_option('mailchimp-woocommerce-empty_line_item_placeholder');
 }
 
 /**

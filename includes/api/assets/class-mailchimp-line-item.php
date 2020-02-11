@@ -15,6 +15,8 @@ class MailChimp_WooCommerce_LineItem
     protected $product_variant_id;
     protected $quantity;
     protected $price;
+    protected $fallback_title = null;
+    protected $fallback_sku = null;
 
     /**
      * @return array
@@ -143,6 +145,42 @@ class MailChimp_WooCommerce_LineItem
         $this->price = $price;
 
         return $this;
+    }
+
+    /**
+     * @param $fallback
+     * @return $this
+     */
+    public function setFallbackTitle($fallback)
+    {
+        $this->fallback_title = $fallback;
+        return $this;
+    }
+
+    /**
+     * @return null
+     */
+    public function getFallbackTitle()
+    {
+        return $this->fallback_title;
+    }
+
+    /**
+     * @param $fallback
+     * @return $this
+     */
+    public function setFallbackSku($fallback)
+    {
+        $this->fallback_sku = $fallback;
+        return $this;
+    }
+
+    /**
+     * @return null
+     */
+    public function getFallbackSku()
+    {
+        return $this->fallback_sku;
     }
 
     /**

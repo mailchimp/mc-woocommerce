@@ -1234,8 +1234,9 @@ class MailChimp_WooCommerce_MailChimpApi
         $missing_products = array();
         foreach ($order->items() as $order_item) {
             /** @var \MailChimp_WooCommerce_LineItem $order_item */
-            $job = new MailChimp_WooCommerce_Single_Product($order_item->getId());
-            if ($missing_products[$order_item->getId()] = $job->createModeOnly()->handle()) {
+            // get the line item name from the order detail just in case we need that title for the product.
+            $job = new MailChimp_WooCommerce_Single_Product($order_item->getProductId(), $order_item->getFallbackTitle());
+            if ($missing_products[$order_item->getId()] = $job->createModeOnly()->fromOrderItem($order_item)->handle()) {
                 mailchimp_debug("missing_products.fallback", "Product {$order_item->getId()} had to be re-pushed into Mailchimp");
             }
         }

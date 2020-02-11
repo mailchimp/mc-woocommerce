@@ -67,9 +67,6 @@ spl_autoload_register(function($class) {
         
         'MailChimp_WooCommerce_Public' => 'public/class-mailchimp-woocommerce-public.php',
         'MailChimp_WooCommerce_Admin' => 'admin/class-mailchimp-woocommerce-admin.php',
-        
-        // Queue system Action Scheduler
-        'ActionScheduler' => 'includes/vendor/action-scheduler/action-scheduler.php',
     );
 
     // if the file exists, require it
@@ -77,6 +74,9 @@ spl_autoload_register(function($class) {
     if (array_key_exists($class, $classes) && file_exists($path.$classes[$class])) {
         require $path.$classes[$class];
     }
+
+    // require Action Scheduler
+    include_once "includes/vendor/action-scheduler/action-scheduler.php";
 });
 
 /**
@@ -90,58 +90,12 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production', // staging or production
-        'version' => '2.3',
+        'version' => '2.3.2',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => function_exists('WC') ? WC()->version : null,
         'logging' => ($o && is_array($o) && isset($o['mailchimp_logging'])) ? $o['mailchimp_logging'] : 'standard',
     );
-}
-
-// Add WP CLI commands
-if (defined( 'WP_CLI' ) && WP_CLI) {
-    try {
-        /**
-         * Service push to MailChimp
-         *
-         * <type>
-         * : product_sync order_sync order product
-         */
-        function mailchimp_cli_push_command( $args, $assoc_args ) {
-            if (is_array($args) && isset($args[0])) {
-                switch($args[0]) {
-
-                    case 'product_sync':
-                        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Process_Products());
-                        WP_CLI::success("queued up the product sync!");
-                        break;
-
-                    case 'order_sync':
-                        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Process_Orders());
-                        WP_CLI::success("queued up the order sync!");
-                        break;
-
-                    case 'order':
-                        if (!isset($args[1])) {
-                            wp_die('You must specify an order id as the 2nd parameter.');
-                        }
-                        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Order($args[1]));
-                        WP_CLI::success("queued up the order {$args[1]}!");
-                        break;
-
-                    case 'product':
-                        if (!isset($args[1])) {
-                            wp_die('You must specify a product id as the 2nd parameter.');
-                        }
-                        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($args[1]));
-                        WP_CLI::success("queued up the product {$args[1]}!");
-                        break;
-                }
-            }
-        };
-        WP_CLI::add_command( 'mailchimp_push', 'mailchimp_cli_push_command');
-        WP_CLI::add_command( 'queue', 'Mailchimp_Wocoomerce_CLI' );
-    } catch (\Exception $e) {}
 }
 
 /**
@@ -162,14 +116,14 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
         'created_at'   => gmdate( 'Y-m-d H:i:s', time() )
     );
     
-    $existing_actions = as_get_scheduled_actions(array(
+    $existing_actions =  function_exists('as_get_scheduled_actions') ? as_get_scheduled_actions(array(
         'hook' => get_class($job), 
         'status' => ActionScheduler_Store::STATUS_PENDING,  
         'args' => array(
             'obj_id' => isset($job->id) ? $job->id : null), 
             'group' => 'mc-woocommerce'
         )
-    );
+    ) : null;
     
     if (!empty($existing_actions)) {
         as_unschedule_action(get_class($job), array('obj_id' => $job->id), 'mc-woocommerce');
@@ -192,15 +146,15 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
         }
     }
 
-    // TODO: deal with errors
     $action = as_schedule_single_action( strtotime( '+'.$delay.' seconds' ), get_class($job), array('obj_id' => $job_id), "mc-woocommerce");
     
     $message = ($job_id != get_class($job)) ? ' :: obj_id '.$job_id : '';
+    $attempts = $job->get_attempts() > 0 ? ' attempt:' . $job->get_attempts() : '';
     if (!empty($existing_actions)) {
-        mailchimp_debug('action_scheduler.reschedule_job', get_class($job) . ($delay > 0 ? ' restarts in '.$delay. ' seconds' : ' restarts in the next minute' ) . $message);
+        mailchimp_debug('action_scheduler.reschedule_job', get_class($job) . ($delay > 0 ? ' restarts in '.$delay. ' seconds' : ' restarts in the next minute' ) . $message . $attempts);
     } 
     else {
-        mailchimp_log('action_scheduler.queue_job', get_class($job) . ($delay > 0 ? ' starts in '.$delay. ' seconds' : ' starts in the next minute' ) .$message);
+        mailchimp_log('action_scheduler.queue_job', get_class($job) . ($delay > 0 ? ' starts in '.$delay. ' seconds' : ' starts in the next minute' ) . $message . $attempts);
     }
 
     return $action;	
@@ -596,12 +550,15 @@ function mailchimp_error_trace(\Exception $e, $wrap = "") {
  * @return bool
  */
 function mailchimp_string_contains($haystack, $needles) {
+    $has_mb = function_exists('mb_strpos');
     foreach ((array) $needles as $needle) {
-        if ($needle != '' && mb_strpos($haystack, $needle) !== false) {
+        $has_needle = $needle != '';
+        // make sure the server has "mb_strpos" otherwise this fails. Fallback to "strpos"
+        $position = $has_mb ? mb_strpos($haystack, $needle) : strpos($haystack, $needle);
+        if ($has_needle && $position !== false) {
             return true;
         }
     }
-
     return false;
 }
 
@@ -638,8 +595,14 @@ function mailchimp_get_order_count() {
  */
 function mailchimp_count_posts($type) {
     global $wpdb;
-    $query = "SELECT post_status, COUNT( * ) AS num_posts FROM {$wpdb->posts} WHERE post_type = %s GROUP BY post_status";
-    $posts = $wpdb->get_results( $wpdb->prepare($query, $type));
+    if ($type === 'shop_order') {
+        $query = "SELECT post_status, COUNT( * ) AS num_posts FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s";
+        $posts = $wpdb->get_results( $wpdb->prepare($query, $type, 'wc-completed'));
+    } else {
+        $query = "SELECT post_status, COUNT( * ) AS num_posts FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s";
+        $posts = $wpdb->get_results( $wpdb->prepare($query, $type, 'publish'));
+    }
+
     $response = array();
     foreach ($posts as $post) {
         $response[$post->post_status] = $post->num_posts;
@@ -915,13 +878,13 @@ function mailchimp_flush_database_tables() {
 
 function mailchimp_delete_as_jobs() {
 
-    $existing_as_actions = as_get_scheduled_actions(
+    $existing_as_actions = function_exists('as_get_scheduled_actions') ? as_get_scheduled_actions(
         array(
             'status' => ActionScheduler_Store::STATUS_PENDING,  
             'group' => 'mc-woocommerce',
             'per_page' => -1,
         )
-    );
+    ) : null;
     
     if (!empty($existing_as_actions)) {
         foreach ($existing_as_actions as $as_action) {
@@ -956,10 +919,12 @@ function mailchimp_clean_database() {
     delete_option('mailchimp-woocommerce-sync.syncing');
     delete_option('mailchimp-woocommerce-sync.started_at');
     delete_option('mailchimp-woocommerce-sync.completed_at');
+    delete_option('mailchimp-woocommerce-sync.initial_sync');
     delete_option('mailchimp-woocommerce-validation.api.ping');
     delete_option('mailchimp-woocommerce-cached-api-lists');
     delete_option('mailchimp-woocommerce-cached-api-ping-check');
     delete_option('mailchimp-woocommerce-errors.store_info');
+    delete_option('mailchimp-woocommerce-empty_line_item_placeholder');
 }
 
 /**
@@ -984,6 +949,9 @@ function run_mailchimp_woocommerce() {
     $env = mailchimp_environment_variables();
     $plugin = new MailChimp_WooCommerce($env->environment, $env->version);
     $plugin->run();
+    if (isset($_GET['restart_order_sync']) && $_GET['restart_order_sync'] === '1') {
+        mailchimp_as_push(new MailChimp_WooCommerce_Process_Orders());
+    }
 }
 
 function mailchimp_woocommerce_add_meta_tags() {
@@ -997,3 +965,104 @@ function mailchimp_on_all_plugins_loaded() {
     }
 }
 
+function mailchimp_get_allowed_capability() {
+    if (current_user_can('manage_woocommerce') && mailchimp_get_option('mailchimp_permission_cap') == 'manage_woocommerce') {
+        return 'manage_woocommerce';
+    }
+    return 'manage_options';
+}
+
+/**
+ * @param MailChimp_WooCommerce_Order $order
+ * @param null|boolean $subscribed
+ */
+function mailchimp_update_member_with_double_opt_in(MailChimp_WooCommerce_Order $order, $subscribed = null)
+{
+    if (!mailchimp_is_configured()) return;
+
+    $api = mailchimp_get_api();
+
+    // if the customer has a flag to double opt in - we need to push this data over to MailChimp as pending
+    // before the order is submitted.
+    if ($subscribed) {
+        if ($order->getCustomer()->requiresDoubleOptIn()) {
+            try {
+                $list_id = mailchimp_get_list_id();
+                $merge_fields = $order->getCustomer()->getMergeFields();
+                $email = $order->getCustomer()->getEmailAddress();
+
+                try {
+                    $member = $api->member($list_id, $email);
+                    if ($member['status'] === 'transactional') {
+                        $api->update($list_id, $email, 'pending', $merge_fields);
+                        mailchimp_tell_system_about_user_submit($email, mailchimp_get_subscriber_status_options('pending'), 60);
+                        mailchimp_log('double_opt_in', "Updated {$email} Using Double Opt In - previous status was '{$member['status']}'", $merge_fields);
+                    }
+                } catch (\Exception $e) {
+                    // if the error code is 404 - need to subscribe them because it means they were not on the list.
+                    if ($e->getCode() == 404) {
+                        $api->subscribe($list_id, $email, false, $merge_fields);
+                        mailchimp_tell_system_about_user_submit($email, mailchimp_get_subscriber_status_options(false), 60);
+                        mailchimp_log('double_opt_in', "Subscribed {$email} Using Double Opt In", $merge_fields);
+                    } else {
+                        mailchimp_error('double_opt_in.update', $e->getMessage());
+                    }
+                }
+            } catch (\Exception $e) {
+                mailchimp_error('double_opt_in.create', $e->getMessage());
+            }
+        } else {
+            // if we've set the wordpress user correctly on the customer
+            if (($wordpress_user = $order->getCustomer()->getWordpressUser())) {
+                $user_submit = new MailChimp_WooCommerce_User_Submit($wordpress_user->ID, true, null, substr( get_locale(), 0, 2 ));
+                $user_submit->handle();
+            }
+        }
+    }
+}
+
+// Add WP CLI commands
+if (defined( 'WP_CLI' ) && WP_CLI) {
+    try {
+        /**
+         * Service push to MailChimp
+         *
+         * <type>
+         * : product_sync order_sync order product
+         */
+        function mailchimp_cli_push_command( $args, $assoc_args ) {
+            if (is_array($args) && isset($args[0])) {
+                switch($args[0]) {
+
+                    case 'product_sync':
+                        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Process_Products());
+                        WP_CLI::success("queued up the product sync!");
+                        break;
+
+                    case 'order_sync':
+                        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Process_Orders());
+                        WP_CLI::success("queued up the order sync!");
+                        break;
+
+                    case 'order':
+                        if (!isset($args[1])) {
+                            wp_die('You must specify an order id as the 2nd parameter.');
+                        }
+                        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Order($args[1]));
+                        WP_CLI::success("queued up the order {$args[1]}!");
+                        break;
+
+                    case 'product':
+                        if (!isset($args[1])) {
+                            wp_die('You must specify a product id as the 2nd parameter.');
+                        }
+                        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($args[1]));
+                        WP_CLI::success("queued up the product {$args[1]}!");
+                        break;
+                }
+            }
+        };
+        WP_CLI::add_command( 'mailchimp_push', 'mailchimp_cli_push_command');
+        WP_CLI::add_command( 'queue', 'Mailchimp_Wocoomerce_CLI' );
+    } catch (\Exception $e) {}
+}

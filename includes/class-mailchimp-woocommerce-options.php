@@ -25,7 +25,7 @@ abstract class MailChimp_WooCommerce_Options
      */
     public function adminReady()
     {
-        $this->is_admin = current_user_can('administrator');
+        $this->is_admin = current_user_can(mailchimp_get_allowed_capability());
         if (get_option('mailchimp_woocommerce_plugin_do_activation_redirect', false)) {
             delete_option('mailchimp_woocommerce_plugin_do_activation_redirect');
 

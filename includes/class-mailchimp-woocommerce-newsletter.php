@@ -40,7 +40,7 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
             }
 
             // allow the user to specify the text in the newsletter label.
-            $label = $this->getOption('newsletter_label', __('Subscribe to our newsletter', 'mc-woocommerce'));
+            $label = $this->getOption('newsletter_label', __('Subscribe to our newsletter', 'mailchimp-for-woocommerce'));
 
             // if the user chose 'check' or nothing at all, we default to true.
             $default_checked = $default_setting === 'check';

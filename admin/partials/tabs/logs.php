@@ -35,11 +35,11 @@ $handle = !empty($viewed_log) ? substr($viewed_log, 0, strlen($viewed_log) > 37 
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span><?php esc_html_e('Logging Preference', 'mc-woocommerce');?></span>
+        <span><?php esc_html_e('Logging Preference', 'mailchimp-for-woocommerce');?></span>
     </legend>
     
     <div class="box fieldset-header" >
-        <label for="<?php echo $this->plugin_name; ?>-logging"><h2 style="padding-top: 1em;"><?php esc_html_e('Logging Preferences', 'mc-woocommerce');?></h2></label>
+        <label for="<?php echo $this->plugin_name; ?>-logging"><h2 style="padding-top: 1em;"><?php esc_html_e('Logging Preferences', 'mailchimp-for-woocommerce');?></h2></label>
     </div>
 
     <div class="box box-half">
@@ -47,7 +47,7 @@ $handle = !empty($viewed_log) ? substr($viewed_log, 0, strlen($viewed_log) > 37 
             <?php esc_html_e('Advanced troubleshooting can be conducted with the logging capability turned on.
             By default, it’s set to “standard” and you may toggle to either “debug” or “none” as needed.
             With standard logging, you can see basic information about the data submission to Mailchimp including any errors.
-            “Debug” gives a much deeper insight that is useful to share with support if problems arise.', 'mc-woocommerce');
+            “Debug” gives a much deeper insight that is useful to share with support if problems arise.', 'mailchimp-for-woocommerce');
             ?>
         </p>
     </div>
@@ -56,7 +56,7 @@ $handle = !empty($viewed_log) ? substr($viewed_log, 0, strlen($viewed_log) > 37 
             <select name="<?php echo $this->plugin_name; ?>[mailchimp_logging]" required>
                 <?php $logging_preference = mailchimp_environment_variables()->logging; ?>
                 <?php
-                foreach(array('none' => esc_html__('None', 'mc-woocommerce'), 'debug' => esc_html__('Debug', 'mc-woocommerce'), 'standard' => esc_html__('Standard', 'mc-woocommerce')) as $log_value => $log_label) {
+                foreach(array('none' => esc_html__('None', 'mailchimp-for-woocommerce'), 'debug' => esc_html__('Debug', 'mailchimp-for-woocommerce'), 'standard' => esc_html__('Standard', 'mailchimp-for-woocommerce')) as $log_value => $log_label) {
                     echo '<option value="'.esc_attr($log_value).'" '.selected($log_value === $logging_preference, true, false ) . '>' . esc_html($log_label) . '</option>';
                 }
                 ?>
@@ -68,7 +68,7 @@ $handle = !empty($viewed_log) ? substr($viewed_log, 0, strlen($viewed_log) > 37 
 <fieldset>
     <div class="box fieldset-header" >
         <h2>
-            <?php esc_html_e('Recent Logs', 'mc-woocommerce'); ?>
+            <?php esc_html_e('Recent Logs', 'mailchimp-for-woocommerce'); ?>
         </h2>
     </div>
     
@@ -94,11 +94,11 @@ $handle = !empty($viewed_log) ? substr($viewed_log, 0, strlen($viewed_log) > 37 
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M14 1.41L12.59 0L7 5.59L1.41 0L0 1.41L5.59 7L0 12.59L1.41 14L7 8.41L12.59 14L14 12.59L8.41 7L14 1.41Z" fill="#3C3C3C"/>
                         </svg>
-                        <?php esc_html_e('Delete log', 'mc-woocommerce'); ?>
+                        <?php esc_html_e('Delete log', 'mailchimp-for-woocommerce'); ?>
                         
                     </a>
                     <a style="display:inline-block" class="mc-woocommerce-copy-log-button" href="#">
-                        <?php esc_html_e('Copy log', 'mc-woocommerce'); ?>
+                        <?php esc_html_e('Copy log', 'mailchimp-for-woocommerce'); ?>
                     </a>
                 <?php endif; ?>
             </div>

@@ -85,7 +85,16 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
         // set the campaign ID
         $job->campaign_id = $this->campaign_id;
 
-        $call = ($api_response = $api->getStoreOrder($store_id, $woo_order_number)) ? 'updateStoreOrder' : 'addStoreOrder';
+        try {
+            $call = ($api_response = $api->getStoreOrder($store_id, $woo_order_number, true)) ? 'updateStoreOrder' : 'addStoreOrder';
+        } catch (\Exception $e) {
+            if ($e instanceof MailChimp_WooCommerce_RateLimitError) {
+                sleep(2);
+                mailchimp_error('order_submit.error', mailchimp_error_trace($e, "RateLimited :: #{$this->id}"));
+                $this->retry();
+            }
+            $call = 'addStoreOrder';
+        }
 
         $new_order = $call === 'addStoreOrder';
 
@@ -110,6 +119,13 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
             // transform the order
             $order = $job->transform($order_post);
+
+            // if the order is new, and has been flagged as a status that should not be pushed over to
+            // Mailchimp - just ignore it and log it.
+            if ($new_order && $order->shouldIgnoreIfNotInMailchimp()) {
+                mailchimp_log('system.debug', "order {$order->getId()} is in {$order->getOriginalWooStatus()} status, and is being skipped for now.");
+                return false;
+            }
 
             // will be the same as the customer id. an md5'd hash of a lowercased email.
             $this->cart_session_id = $order->getCustomer()->getId();
@@ -139,7 +155,10 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             }
 
             // if the order is in failed or cancelled status - and it's brand new, we shouldn't submit it.
-            if ($new_order && in_array($order->getFinancialStatus(), array('failed', 'cancelled'))) {
+            // if the original woocommerce status is actually pending, we need to skip these on new orders because
+            // it is probably happening due to 3rd party payment processing and it's still pending. These orders
+            // don't always make it over because someone could be cancelling out of the payment there.
+            if ($new_order && (in_array($order->getFinancialStatus(), array('failed', 'cancelled')) || $order->getOriginalWooStatus() === 'pending')) {
                 return false;
             }
 
@@ -212,41 +231,13 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             mailchimp_log('order_submit.success', $log);
 
             // if the customer has a flag to double opt in - we need to push this data over to MailChimp as pending
-            // before the order is submitted.
-            if ($order->getCustomer()->requiresDoubleOptIn() && $order->getCustomer()->getOriginalSubscriberStatus()) {
-                try {
-                    $list_id = mailchimp_get_list_id();
-                    $merge_fields = $order->getCustomer()->getMergeFields();
-                    $email = $order->getCustomer()->getEmailAddress();
-
-                    try {
-                        $member = $api->member($list_id, $email);
-                        if ($member['status'] === 'transactional') {
-
-                            $api->update($list_id, $email, 'pending', $merge_fields);
-                            mailchimp_tell_system_about_user_submit($email, mailchimp_get_subscriber_status_options('pending'), 60);
-                            mailchimp_log('double_opt_in', "Updated {$email} Using Double Opt In - previous status was '{$member['status']}'", $merge_fields);
-                        }
-                    } catch (\Exception $e) {
-                        // if the error code is 404 - need to subscribe them becausce it means they were not on the list.
-                        if ($e->getCode() == 404) {
-                            $api->subscribe($list_id, $email, false, $merge_fields);
-                            mailchimp_tell_system_about_user_submit($email, mailchimp_get_subscriber_status_options(false), 60);
-                            mailchimp_log('double_opt_in', "Subscribed {$email} Using Double Opt In", $merge_fields);
-                        } else {
-                            mailchimp_error('double_opt_in.update', $e->getMessage());
-                        }
-                    }
-                } catch (\Exception $e) {
-                    mailchimp_error('double_opt_in.create', $e->getMessage());
-                }
-            }
+            mailchimp_update_member_with_double_opt_in($order, $order->getCustomer()->getOriginalSubscriberStatus());
 
             return $api_response;
         } catch (MailChimp_WooCommerce_RateLimitError $e) {
             sleep(3);
-            $this->release();
             mailchimp_error('order_submit.error', mailchimp_error_trace($e, "RateLimited :: #{$this->id}"));
+            $this->retry();
         } catch (\Exception $e) {
             $message = strtolower($e->getMessage());
             mailchimp_error('order_submit.tracing_error', $e);
@@ -291,7 +282,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             if (empty($this->id) || !($order_post = get_post($this->id))) {
                 return false;
             }
-            $woo = new WC_Order($order_post);
+            $woo = wc_get_order($order_post);
             return $this->woo_order_number = $woo->get_order_number();
         } catch (\Exception $e) {
             $this->woo_order_number = false;
@@ -309,7 +300,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             if (empty($this->id) || !($order_post = get_post($this->id))) {
                 return false;
             }
-            $woo = new WC_Order($order_post);
+            $woo = wc_get_order($order_post);
             $email = $woo->get_billing_email();
 
             // just skip these altogether because we can't submit any amazon orders anyway.

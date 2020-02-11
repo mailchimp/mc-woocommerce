@@ -1,24 +1,23 @@
 <?php
 
 /**
- * Created by Vextras.
- *
- * Name: Ryan Hungate
- * Email: ryan@vextras.com
- * Date: 7/13/16
- * Time: 8:29 AM
+ * Class MailChimp_WooCommerce_Transform_Orders
  */
 class MailChimp_WooCommerce_Transform_Orders
 {
     public $campaign_id = null;
+    protected $is_syncing = false;
 
     /**
      * @param int $page
      * @param int $limit
-     * @return \stdClass
+     * @return object
+     * @throws Exception
      */
     public function compile($page = 1, $limit = 5)
     {
+        $this->is_syncing = true;
+
         $response = (object) array(
             'endpoint' => 'orders',
             'page' => $page ? $page : 1,
@@ -39,15 +38,20 @@ class MailChimp_WooCommerce_Transform_Orders
                     continue;
                 }
 
-                $order = $this->transform($post);
-                if (!$order->isFlaggedAsAmazonOrder()) {
-                    $response->valid++;
-                    $response->items[] = $order;
+                try {
+                    $order = $this->transform($post);
+                    if (!$order->isFlaggedAsAmazonOrder()) {
+                        $response->valid++;
+                        $response->items[] = $order;
+                    }
+                } catch (\Exception $e) {
+                    mailchimp_error('initial_sync', $e->getMessage(), array('post' => $post));
                 }
             }
         }
 
         $response->stuffed = ($response->count > 0 && (int) $response->count === (int) $limit) ? true : false;
+        $this->is_syncing = false;
 
         return $response;
     }
@@ -55,12 +59,30 @@ class MailChimp_WooCommerce_Transform_Orders
     /**
      * @param WP_Post $post
      * @return MailChimp_WooCommerce_Order
+     * @throws Exception
      */
     public function transform(WP_Post $post)
     {
-        $woo = new WC_Order($post);
+        $woo = wc_get_order($post);
 
         $order = new MailChimp_WooCommerce_Order();
+
+        // if the woo get order returns an empty value, we need to skip the whole thing.
+        if (empty($woo)) {
+            mailchimp_error('sync', 'get woo post was not found for order '.$post->ID);
+            return $order;
+        }
+
+        // if the woo object does not have a "get_billing_email" method, then we need to skip this until
+        // we know how to resolve these types of things.
+        if (!method_exists($woo, 'get_billing_email')) {
+            $message = "Post ID {$post->ID} was an order refund. Skipping this.";
+            if ($this->is_syncing) {
+                throw new MailChimp_WooCommerce_Error($message);
+            }
+            mailchimp_error('initial_sync', $message, array('post' => $post, 'order_class' => get_class($woo)));
+            return $order;
+        }
 
         $customer = $this->buildCustomerFromOrder($woo);
 
@@ -91,8 +113,15 @@ class MailChimp_WooCommerce_Transform_Orders
         // grab the current statuses - this will end up being custom at some point.
         $statuses = $this->getOrderStatuses();
 
-        // grab the order status
-        $status = $woo->get_status();
+        // grab the order status and set it into the object for future comparison.
+        $order->setOriginalWooStatus(($status = $woo->get_status()));
+
+        // if the order is "on-hold" status, and is not currently in Mailchimp, we need to ignore it
+        // because the payment gateways are putting this on hold while they navigate to the payment processor
+        // and they technically haven't paid yet.
+        if (in_array($status, array('on-hold', 'failed'))) {
+            $order->flagAsIgnoreIfNotInMailchimp(true);
+        }
 
         // map the fulfillment and financial statuses based on the map above.
         $fulfillment_status = array_key_exists($status, $statuses) ? $statuses[$status]->fulfillment : null;
@@ -156,13 +185,27 @@ class MailChimp_WooCommerce_Transform_Orders
             // add it into the order item container.
             $item = $this->transformLineItem($key, $order_detail);
 
+            $product = $order_detail->get_product();
+
+            // if we can't find the product, we need to populate this
+            if (empty($product)) {
+                if (($empty_order_item = MailChimp_WooCommerce_Transform_Products::missing_order_item($order_detail))) {
+                    $item->setFallbackTitle($empty_order_item->getTitle());
+                    $item->setProductId($empty_order_item->getId());
+                    $item->setProductVariantId($empty_order_item->getId());
+                    $order->addItem($item);
+                    continue;
+                }
+            }
+
             // if we don't have a product post with this id, we need to add a deleted product to the MC side
-            if (!($product = $order_detail->get_product()) || 'trash' === $product->get_status()) {
+            if (!$product || ($trashed = 'trash' === $product->get_status())) {
 
                 $pid = $order_detail->get_product_id();
-
+                $title = $order_detail->get_name();
+                
                 try {
-                    $deleted_product = MailChimp_WooCommerce_Transform_Products::deleted($pid);
+                    $deleted_product = MailChimp_WooCommerce_Transform_Products::deleted($pid, $title);
                 } catch (\Exception $e) {
                     mailchimp_log('order.items.error', "Order #{$woo->get_id()} :: Product {$pid} does not exist!");
                     continue;
@@ -173,7 +216,7 @@ class MailChimp_WooCommerce_Transform_Orders
                     // swap out the old item id and product variant id with the deleted version.
                     $item->setProductId("deleted_{$pid}");
                     $item->setProductVariantId("deleted_{$pid}");
-
+                    
                     // add the item and continue on the loop.
                     $order->addItem($item);
                     continue;
@@ -190,12 +233,16 @@ class MailChimp_WooCommerce_Transform_Orders
     }
 
     /**
-     * @param WC_Order $order
+     * @param WC_Abstract_Order $order
      * @return MailChimp_WooCommerce_Customer
+     * @throws Exception
      */
-    public function buildCustomerFromOrder(WC_Order $order)
+    public function buildCustomerFromOrder($order)
     {
         $customer = new MailChimp_WooCommerce_Customer();
+
+        // attach the wordpress user to the Mailchimp customer object.
+        $customer->setWordpressUser($order->get_user());
 
         $customer->setId(mailchimp_hash_trim_lower($order->get_billing_email()));
         $customer->setCompany($order->get_billing_company());
@@ -264,6 +311,10 @@ class MailChimp_WooCommerce_Transform_Orders
         $item = new MailChimp_WooCommerce_LineItem();
         $item->setId($key);
 
+        // set the fallback title for the order detail name just in case we need to create a product
+        // from this order item.
+        $item->setFallbackTitle($order_detail->get_name());
+
         $item->setPrice($order_detail->get_total());
         $item->setProductId($order_detail->get_product_id());
         $variation_id = $order_detail->get_variation_id();
@@ -281,10 +332,10 @@ class MailChimp_WooCommerce_Transform_Orders
     }
 
     /**
-     * @param WC_Order $order
+     * @param WC_Abstract_Order $order
      * @return MailChimp_WooCommerce_Address
      */
-    public function transformBillingAddress(WC_Order $order)
+    public function transformBillingAddress(WC_Abstract_Order $order)
     {
         // use the info from the order to compile an address.
         $address = new MailChimp_WooCommerce_Address();
@@ -308,10 +359,10 @@ class MailChimp_WooCommerce_Transform_Orders
     }
 
     /**
-     * @param WC_Order $order
+     * @param WC_Abstract_Order $order
      * @return MailChimp_WooCommerce_Address
      */
-    public function transformShippingAddress(WC_Order $order)
+    public function transformShippingAddress(WC_Abstract_Order $order)
     {
         $address = new MailChimp_WooCommerce_Address();
 
@@ -343,11 +394,17 @@ class MailChimp_WooCommerce_Transform_Orders
      */
     public function getOrderPosts($page = 1, $posts = 5)
     {
+        $offset = 0;
+        if ($page > 1) {
+            $offset = (($page-1) * $posts);
+        }
+
         $params = array(
             'post_type' => wc_get_order_types(),
-            'post_status' => array_keys(wc_get_order_statuses()),
+            //'post_status' => array_keys(wc_get_order_statuses()),
+            'post_status' => 'wc-completed',
             'posts_per_page' => $posts,
-            'paged' => $page,
+            'offset' => $offset,
             'orderby' => 'id',
             'order' => 'ASC',
         );
@@ -362,10 +419,9 @@ class MailChimp_WooCommerce_Transform_Orders
     }
 
     /**
-     * returns an object with a 'total' and a 'count'.
-     *
-     * @param WC_Order $order
+     * @param WC_Abstract_Order $order
      * @return object
+     * @throws Exception
      */
     public function getCustomerOrderTotals($order)
     {
@@ -380,9 +436,9 @@ class MailChimp_WooCommerce_Transform_Orders
         $stats = (object) array('count' => 0, 'total' => 0);
 
         foreach ($orders as $order) {
-            $order = new WC_Order($order);
+            $order = wc_get_order($order);
 
-            if ($order->get_status() !== 'cancelled' && $order->is_paid()) {
+            if ($order->get_status() !== 'cancelled' && (method_exists($order, 'is_paid') && $order->is_paid())) {
                 $stats->total += $order->get_total();
                 $stats->count ++;
             }
@@ -392,10 +448,9 @@ class MailChimp_WooCommerce_Transform_Orders
     }
 
     /**
-     * returns an object with a 'total' and a 'count'.
-     *
      * @param $user_id
      * @return object
+     * @throws Exception
      */
     protected function getSingleCustomerOrderTotals($user_id)
     {

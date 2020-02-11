@@ -3,11 +3,11 @@ Contributors: ryanhungate, Mailchimp
 Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.9
-Tested up to: 5.2.5
+Tested up to: 5.3.2
 Stable tag: 2.3
 Requires PHP: 7.0
 WC requires at least: 3.5
-WC tested up to: 3.7.1
+WC tested up to: 3.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your Mailchimp audience to track sales, create targeted emails, send abandoned cart emails, and more.
@@ -63,6 +63,17 @@ The Mailchimp for WooCommerce supports Wordpress Multi Sites and below are a few
 - Deleting removes the connection between Mailchimp and WooCommerce, and uninstalls the plugin from your site.
 Refer to the Wordpress Codex for more information about [Multisite Network Administration](https://codex.wordpress.org/Multisite_Network_Administration)
 == Changelog ==
+= 2.3.1 =
+* adds fallback for mb_strpos if extension is not installed 
+* implements communications box on sync page
+* adds account create for Mailchimp 
+* fixes Pending Payment and On-hold status orders passed to Mailchimp
+* fixes for WooCommerce Fatal-errors
+* support for WooCommerce vendor feature
+* support for Shop Manager role by Woocommerce
+* update to Text Domain for wp translation
+* adds banner to review plugin after audience is synced
+* support for user language based on wp get_locale() at order placement
 = 2.3 =
 * adds action scheduler queue system 
 * documentation for Custom Merge Tags 

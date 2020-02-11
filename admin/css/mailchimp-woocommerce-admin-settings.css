@@ -225,7 +225,7 @@
 	font-family: proxima-nova, Arial, Helvetica, sans-serif !important;
 	font-size: 14px !important;
 	line-height: 16px !important;
-	padding: 15px 35px 27px 35px !important;
+	padding: 15px 35px 15px 35px !important;
 	
 	/* identical to box height */
 	text-transform: uppercase !important;
@@ -357,6 +357,40 @@
 .sync-content-wrapper {
 	display: table;
 	width: 100%;
+}
+
+.sync-comm-wrapper {
+	position:relative;
+	background-color: white;
+	padding: 4px 2em;
+	margin-top: 26px;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	height: 164px;
+}
+
+.sync-comm-wrapper .comm_box_status {
+	font-weight: 700;
+}
+
+.el-switch > input[type="checkbox"]:checked + .el-switch-style {
+	background-color: #4DD463;
+}
+
+.comm_box_wrapper fieldset {
+	border: 2px solid #E0E0E0;
+	padding: 0 1em 0 1em;
+	margin: 1em 0;
+}
+
+.comm_box_wrapper .el-switch, 
+.comm_box_wrapper .mc-comm-save{
+	float: right;
+}
+
+.comm_box_wrapper .mc-comm-save {
+	margin-right: 10px;
 }
 
 .sync-content-wrapper .sync-stats-wrapper {
@@ -511,6 +545,11 @@
 	clear:both;
 }
 
+.sync-comm-wrapper .box {
+	padding: 0.5rem 0rem;
+	margin: 0;
+}
+
 .tab-content-wrapper .box.box-half,
 .sync-content-wrapper .box.box-half {
 	float: left;
@@ -548,7 +587,7 @@
 	border: 1px solid #E6E6E6;
 	box-sizing: border-box;
 	border-radius: 4px;
-	padding: 1em 1.5em;
+	padding: 0.6em 1.5em;
 	width: 100%;
 	font-family: "Proxima Nova Alt Light", Arial, Helvetica, sans-serif
 	
@@ -564,16 +603,20 @@
 }
 
 .tab-content-wrapper .mailchimp-select-wrapper select {
-	padding: 0;
-	background: transparent;	
+	padding: 3px 24px 3px 0px;
 	font-size: 14px;
 	font-family: "Proxima Nova Alt Light", Arial, Helvetica, sans-serif;
 	border: none;
 	-webkit-appearance: none;
 	box-shadow: none;
 	outline: none;
-	width: 100%;
-	background: no-repeat right center url("data:image/svg+xml;charset=UTF-8,%3csvg width='13' height='8' viewBox='0 0 13 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M11.34 0.590027L6.75 5.17003L2.16 0.590027L0.75 2.00003L6.75 8.00003L12.75 2.00003L11.34 0.590027Z' fill='%23212121'/%3e%3c/svg%3e ");
+	width: 100% !important;
+	max-width: 10000px;
+	color: #32373c;
+}
+
+.tab-content-wrapper .mailchimp-select-wrapper select option{
+	outline: none;
 }
 
 .tab-content-wrapper .mailchimp-select-wrapper select:disabled {
@@ -593,20 +636,22 @@
 }
 .tab-content-wrapper fieldset input[type='checkbox']:checked::before {
 	color: #7FAD45;
-	margin: -3px 0px 0px 5px;
+	margin: 0.6em 0px 0px 0.2em;
 	content: url("data:image/svg+xml;charset=UTF-8,%3csvg width='13' height='9' viewBox='0 0 13 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M10.75 0.5L12.25 2L5.26 9L0.75 4.5L2.25 3L5.26 6L10.75 0.5Z' fill='%237FAD45'/%3e%3c/svg%3e ");
 
 }
 
 
-.tab-content-wrapper fieldset input[type='radio'] {
+.tab-content-wrapper fieldset input[type='radio'],
+.sync-content-wrapper fieldset input[type='radio'] {
 	width: 2em;
 	height: 2em;
 	border: 1px solid #E6E6E6;
 	margin-right: 10px;
 }
 
-.tab-content-wrapper fieldset input[type='radio']:checked::before {
+.tab-content-wrapper fieldset input[type='radio']:checked::before,
+.sync-content-wrapper fieldset input[type='radio']:checked::before {
 	background: url("data:image/svg+xml;charset=UTF-8,%3csvg width='13' height='9' viewBox='0 0 13 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M10.75 0.5L12.25 2L5.26 9L0.75 4.5L2.25 3L5.26 6L10.75 0.5Z' fill='%237FAD45'/%3e%3c/svg%3e ");
 	background-repeat: none; 
 	width: 13px;
@@ -614,8 +659,15 @@
 	margin: 8px 0 0 7px;
 }
 
-.tab-content-wrapper fieldset .radio-label {
+.tab-content-wrapper fieldset .radio-label,
+.sync-content-wrapper fieldset .radio-label {
 	margin-bottom: 10px;
+}
+
+.mc-comm-save {
+	display:none;
+	color: #628735;
+	margin-left: 10px;
 }
 
 .tab-content-wrapper fieldset textarea {
@@ -682,6 +734,160 @@
 }
 
 
+/* account create modal */
+#mc-woocommerce-create-account-link {
+	padding-top: 20px;
+}
+
+#mc-woocommerce-create-account {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: absolute;
+	top: 0;
+	left: 0;
+	visibility: hidden;
+	display: none;
+	padding-top: 20px;
+	/* background: red;
+	opacity: 0.5; */
+}
+
+#mc-woocommerce-create-account .terms {
+	padding-top: 20px;
+	padding-bottom: 20px;
+}
+
+#mc-woocommerce-create-account .terms a {
+	color: #7FAD45 !important;
+}
+
+#mc-woocommerce-create-account h2 {
+	padding-bottom: 20px;
+}
+
+#mc-woocommerce-create-account .notices {
+	background:#fff;
+	border-left: 4px solid#fff;
+	border-left-color: rgb(255, 255, 255);
+	box-shadow: 0 1px 1px 0 rgba(0,0,0,.1);
+	margin: 5px 15px 2px;
+	padding: 1px 12px;
+    padding-right: 12px;
+}
+
+#mc-woocommerce-create-account:target {
+	visibility: visible;
+	display: block;
+}
+
+#mc-woocommerce-create-account .reveal-modal {
+	position: relative;
+	margin: 0 auto;
+	width: 70%;
+	max-width: 580px;
+	background-color: #ffffff;
+	box-shadow: 5px 10px 40px rgba(0, 0, 0, 0.1);
+	font-family: proxima-nova, Arial, Helvetica, sans-serif;
+	line-height: 17px;
+}
+
+#mc-woocommerce-create-account .close-modal {
+	position: absolute;
+	left: 10px;
+	top: 10px;
+}
+
+.mc-woocommerce-create-account-modal-header {
+	text-align: center;
+	padding-top: 30px;
+}
+
+.mc-woocommerce-create-account-modal-header h2{
+	text-align: center;
+	padding-top: 30px;
+	font-size: 2em;
+}
+
+.mc-woocommerce-create-account-modal-footer {
+	padding: 35px;
+	bottom: 0px;
+	color: #B0B4BD;
+	font-size: 10px;
+}
+
+.mc-woocommerce-create-account-step {
+	padding: 5px 35px 10px 35px;
+}
+
+#mc-woocommerce-create-account-step-2 {
+	display: none;
+}
+
+.mc-woocommerce-create-account-step .spinner{
+	float:right;
+	background-size: 16px 16px;
+	width: 16px;
+	height: 16px;
+	margin: 15px 10px;
+}
+
+.mc-woocommerce-create-account-step-error p{
+	display: none;
+
+	background:#fff;
+	border-left: 4px solid#fff;
+	border-left-color: red;
+	box-shadow: 1px 1px 1px 1px rgba(0,0,0,.1);
+	margin: 5px 15px 2px;
+	padding: 4px 12px;
+    padding-right: 12px;
+}
+
+.mc-woocommerce-create-account-step-error #connecting{
+	border-left-color: #7FAD45;
+}
+
+.mc-woocommerce-create-account-step #username_suggestion {
+	visibility: hidden;
+}
+
+.mc-woocommerce-create-account-step #username_suggestion span{
+	color: #7FAD45;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.mc-woocommerce-create-account-step #username_suggestion span:hover{
+	text-decoration: underline;
+}
+
+.mc-woocommerce-create-account-step .whitebtn{
+	color: #3C3C3C !important;
+	background: white !important;
+	box-shadow: 0 1px 0 #E6E6E6 !important;
+	text-shadow: 0 -1px 1px	#E6E6E6,1px 0 1px #E6E6E6,0 1px 1px #E6E6E6,-1px 0 1px #E6E6E6 !important;
+	border: 1px solid #E6E6E6 !important;
+}
+
+#mc-woocommerce-create-account-next {
+}
+
+#mc-woocommerce-create-account-prev {
+	float: none;
+}
+
+#mc-woocommerce-create-account-step-1 .tab-content-submit:hover{
+	background: #F7F7F7;
+}
+
+#mc-woocommerce-create-account-step-1 ul{
+	list-style: disc !important;
+	margin-left: 13px;
+}
+
+
 @media screen and (max-width: 782px) {
 	.tab-content-submit,
 	.mc-woocommerce-resync-button,
@@ -702,7 +908,8 @@
 	}
 
 	.tab-content-wrapper .box.box-half,
-	.tab-content-wrapper .box.box-third {
+	.tab-content-wrapper .box.box-third,
+	.sync-comm-wrapper .box.box-half {
 		width: 100%;
 	}
 
@@ -739,11 +946,22 @@
 		margin: -3px 10px 0 5px;
 	}
 
+	.sync-comm-wrapper {
+		padding-bottom: 20px;
+	}
+	
 	.view-log-select,
 	.view-log-submit {
 		width: 100%;
 		display: block;
 		margin-bottom: 1em;
+	}
+
+	#mc-woocommerce-create-account {
+		padding-top: 60px;
+	}
+	#mc-woocommerce-create-account .reveal-modal{
+		width: 80%;
 	}
 
 }
@@ -774,6 +992,12 @@
 	.disconnect-button {
 		margin: 0.5em 0em !important;
 	}
-}
 
- 
+	#mc-woocommerce-create-account .reveal-modal{
+		width: 100%;
+	}
+	
+	.mc-woocommerce-create-account-step {
+		padding: 5px 5px 10px 5px;
+	}
+}

@@ -15,6 +15,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
     public $id;
     public $subscribed;
     public $updated_data;
+    public $language;
     public $should_ignore = false;
 
     /**
@@ -23,7 +24,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
      * @param null $subscribed
      * @param WP_User|null $updated_data
      */
-    public function __construct($id = null, $subscribed = null, $updated_data = null)
+    public function __construct($id = null, $subscribed = null, $updated_data = null, $language = null)
     {
         if (!empty($id)) {
             // if we're passing in another user with the same id during the same php process we need to ignore it.
@@ -40,6 +41,10 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 
         if (!empty($updated_data)) {
             $this->updated_data = $updated_data->to_array();
+        }
+
+        if (!empty($language)) {
+            $this->language = $language;
         }
     }
 
@@ -140,7 +145,10 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
             mailchimp_error("custom.merge_fields", "The filter for mailchimp_sync_user_mergetags needs to return an array, using the default setup instead.");
             $merge_fields = $merge_fields_system;
         }
+        // language
 
+        $language = $this->language;
+        
         // pull the transient key for this job.
         $transient_id = mailchimp_get_transient_email_key($email);
         $status_meta = mailchimp_get_subscriber_status_options($this->subscribed);
@@ -163,7 +171,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
                     // delete the old
                     $api->deleteMember($list_id, $this->updated_data['user_email']);
                     // subscribe the new
-                    $api->subscribe($list_id, $email, $status_meta['created'], $merge_fields);
+                    $api->subscribe($list_id, $email, $status_meta['created'], $merge_fields, null, $language);
                     mailchimp_tell_system_about_user_submit($email, $status_meta, 60);
 
                     if ($status_meta['created']) {
@@ -192,7 +200,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
             // if the status is not === 'transactional' we can update them to subscribed or pending now.
             if (isset($member_data['status']) && $member_data['status'] === 'transactional' || $member_data['status'] === 'cleaned') {
                 // ok let's update this member
-                $api->update($list_id, $email, $status_meta['updated'], $merge_fields);
+                $api->update($list_id, $email, $status_meta['updated'], $merge_fields, null, $language);
                 mailchimp_tell_system_about_user_submit($email, $status_meta, 60);
                 mailchimp_log('member.sync', "Updated Member {$email}", array(
                     'previous_status' => $member_data['status'],
@@ -205,7 +213,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 
             if (isset($member_data['status'])) {
                 // ok let's update this member
-                $api->update($list_id, $email, $member_data['status'], $merge_fields);
+                $api->update($list_id, $email, $member_data['status'], $merge_fields, null, $language);
                 mailchimp_tell_system_about_user_submit($email, $status_meta, 60);
                 mailchimp_log('member.sync', "Updated Member {$email} ( merge fields only )", array(
                     'merge_fields' => $merge_fields
@@ -217,14 +225,14 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
             static::$handling_for = null;
         } catch (MailChimp_WooCommerce_RateLimitError $e) {
             sleep(3);
-            $this->release();
             mailchimp_error('member.sync.error', mailchimp_error_trace($e, "RateLimited :: user #{$this->id}"));
+            $this->retry();
         } catch (\Exception $e) {
             // if we have a 404 not found, we can create the member
             if ($e->getCode() == 404) {
 
                 try {
-                    $api->subscribe($list_id, $user->user_email, $status_meta['created'], $merge_fields);
+                    $api->subscribe($list_id, $user->user_email, $status_meta['created'], $merge_fields, null, $language);
                     mailchimp_tell_system_about_user_submit($email, $status_meta, 60);
                     if ($status_meta['created']) {
                         mailchimp_log('member.sync', "Subscribed Member {$user->user_email}", array('status_if_new' => $status_meta['created'], 'merge_fields' => $merge_fields));

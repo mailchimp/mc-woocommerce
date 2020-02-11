@@ -11,18 +11,21 @@
 class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
 {
     public $id;
+    public $fallback_title;
     protected $store_id;
     protected $api;
     protected $service;
     protected $mode = 'update_or_create';
+    protected $order_item = null;
 
     /**
      * MailChimp_WooCommerce_Single_product constructor.
      * @param null|int $id
      */
-    public function __construct($id = null)
+    public function __construct($id = null, $fallback_title = null)
     {
         $this->setId($id);
+        $this->setFallbackTitle($fallback_title);
     }
 
     /**
@@ -34,6 +37,17 @@ class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
         if (!empty($id)) {
             $this->id = $id instanceof WP_Post ? $id->ID : $id;
         }
+    }
+
+    /**
+     * @param $title
+     * @return $this
+     */
+    public function setFallbackTitle($title)
+    {
+        $this->fallback_title = $title;
+
+        return $this;
     }
 
     /**
@@ -62,6 +76,16 @@ class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
     {
         $this->mode = 'update_or_create';
 
+        return $this;
+    }
+
+    /**
+     * @param MailChimp_WooCommerce_LineItem $item
+     * @return $this
+     */
+    public function fromOrderItem(MailChimp_WooCommerce_LineItem $item)
+    {
+        $this->order_item = $item;
         return $this;
     }
 
@@ -97,8 +121,15 @@ class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
                 return false;
             }
 
-            // pull the product from Mailchimp first to see what method we need to call next.
-            $mailchimp_product = $this->api()->getStoreProduct($this->store_id, $this->id);
+            try {
+                // pull the product from Mailchimp first to see what method we need to call next.
+                $mailchimp_product = $this->api()->getStoreProduct($this->store_id, $this->id, true);
+            } catch (\Exception $e) {
+                if ($e instanceof MailChimp_WooCommerce_RateLimitError) {
+                    throw $e;
+                }
+                $mailchimp_product = false;
+            }
 
             // depending on if it's existing or not - we change the method call
             $method = $mailchimp_product ? 'updateStoreProduct' : 'addStoreProduct';
@@ -113,9 +144,24 @@ class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
                 return false;
             }
 
-            $product = $this->transformer()->transform($product_post);
+            // if qe instructed this job to build from the order item, let's do that instead of the product post.
+            if ($this->order_item) {
+                mailchimp_debug('product_submit.debug', 'using order item', array('item' => $this->order_item));
+                $product = $this->transformer()->fromOrderItem($this->order_item);
+            } else {
+                $product = $this->transformer()->transform($product_post, $this->fallback_title);
+            }
+
+            if (empty($product->getTitle()) && !empty($this->fallback_title)) {
+                $product->setTitle($this->fallback_title);
+            }
 
             mailchimp_debug('product_submit.debug', "#{$this->id}", $product->toArray());
+
+            if (!$product->getId() || !$product->getTitle()) {
+                mailchimp_log('product_submit.warning', "{$method} :: post #{$this->id} was invalid.");
+                return false;
+            }
 
             // either updating or creating the product
             $this->api()->{$method}($this->store_id, $product, false);
@@ -128,8 +174,8 @@ class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
 
         } catch (MailChimp_WooCommerce_RateLimitError $e) {
             sleep(3);
-            $this->release();
-            mailchimp_error('product_submit.error', mailchimp_error_trace($e, "RateLimited :: #{$this->id}"));
+            mailchimp_error('product_submit.error', mailchimp_error_trace($e, "{$method} :: #{$this->id}"));
+            $this->retry();
         } catch (MailChimp_WooCommerce_ServerError $e) {
             mailchimp_error('product_submit.error', mailchimp_error_trace($e, "{$method} :: #{$this->id}"));
         } catch (MailChimp_WooCommerce_Error $e) {

@@ -190,6 +190,10 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
         $this->setData('sync.syncing', true);
         $this->setData('sync.started_at', time());
 
+        if (! $this->getData('sync.completed_at')) {
+            $this->setData('sync.initial_sync', 1);
+        } else $this->removeData('sync.initial_sync');
+
         global $wpdb;
         try {
             $wpdb->show_errors(false);

@@ -68,9 +68,16 @@ class MailChimp_WooCommerce_Public {
         // Enqueued script with localized data.
         wp_enqueue_script($this->plugin_name, '', array(), $this->version, true);
 
-		//if we have the connected_site script url saved, we need to inject it
-        if (($site = mailchimp_get_connected_site_script_url()) && !empty($site)) {
-           wp_enqueue_script($this->plugin_name.'_connected_site', $site, array(), $this->version, true);
-        }
+        // if we have the "fragment" we can just inject this vs. loading the file
+        // otherwise, if we have the connected_site script url saved, we need to inject it and load from the CDN.
+        //if (($site = mailchimp_get_connected_site_script_url()) && !empty($site)) {
+        //   wp_enqueue_script($this->plugin_name.'_connected_site', $site, array(), $this->version, true);
+        //}
 	}
+
+    public function add_inline_footer_script(){
+        if (($fragment = mailchimp_get_connected_site_script_fragment()) && !empty($fragment)) {
+            echo $fragment;
+        }
+    }
 }

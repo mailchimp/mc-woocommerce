@@ -64,8 +64,8 @@ The Mailchimp for WooCommerce supports Wordpress Multi Sites and below are a few
 Refer to the Wordpress Codex for more information about [Multisite Network Administration](https://codex.wordpress.org/Multisite_Network_Administration)
 == Changelog ==
 = 2.3.2 =
-* Update to Action Scheduler 3.0.1
-* Adds low-bandwidth setting on sync
+* update to action scheduler v3.0.1
+* adds low-bandwidth setting on sync
 * fixes audience defaults settings to Mailchimp not passed
 * tweaks to review banner behavior
 * required fields API update

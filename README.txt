@@ -4,7 +4,7 @@ Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.9
 Tested up to: 5.3.2
-Stable tag: 2.3.1
+Stable tag: 2.3.2
 Requires PHP: 7.0
 WC requires at least: 3.5
 WC tested up to: 3.9
@@ -65,10 +65,12 @@ Refer to the Wordpress Codex for more information about [Multisite Network Admin
 == Changelog ==
 = 2.3.2 =
 * Update to Action Scheduler 3.0.1
-* Adds "low-bandwidth" setting on sync
-* Fixes Audience Defaults settings for Woo to Mailchimp not passed
-* Tweaks to review banner behavior
-* Required fields API update
+* Adds low-bandwidth setting on sync
+* fixes audience defaults settings to Mailchimp not passed
+* tweaks to review banner behavior
+* required fields API update
+* fix for orders with deleted products
+* support for orders with 0 line items
 = 2.3.1 =
 * adds fallback for mb_strpos if extension is not installed 
 * implements communications box on sync page

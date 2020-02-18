@@ -130,7 +130,9 @@ abstract class ActionScheduler {
 	 */
 	public static function init( $plugin_file ) {
 		self::$plugin_file = $plugin_file;
-		spl_autoload_register( array( __CLASS__, 'autoload' ) );
+		if ( ! AS_COMPOSER_AUTOLOADING ) {
+			spl_autoload_register( array( __CLASS__, 'autoload' ) );
+		}
 
 		/**
 		 * Fires in the early stages of Action Scheduler init hook.
@@ -151,6 +153,14 @@ abstract class ActionScheduler {
 
 		$admin_view = self::admin_view();
 		add_action( 'init', array( $admin_view, 'init' ), 0, 0 ); // run before $store::init()
+
+		// Ensure initialization on plugin activation.
+		if ( did_action( 'init' ) ) {
+			$store->init();
+			$logger->init();
+			$runner->init();
+			$admin_view->init();
+		}
 
 		if ( apply_filters( 'action_scheduler_load_deprecated_functions', true ) ) {
 			require_once( self::plugin_path('deprecated/functions.php') );

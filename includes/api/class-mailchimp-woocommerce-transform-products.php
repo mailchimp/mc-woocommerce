@@ -256,25 +256,21 @@ class MailChimp_WooCommerce_Transform_Products
         return $variants;
     }
 
-    /**
-     * @param $post_id
-     * @return false|string
-     */
     public function getProductImage($post)
     {
+        $meta = get_post_meta($post->ID);
+        $key = '_thumbnail_id';
         $image_key = $this->getProductImageKey();
-        $id = $post->ID ? $post->ID : $post->id;
-
-        $thumbnail = get_the_post_thumbnail_url($id, $image_key);
-        $thumbnail = $thumbnail ?: wc_placeholder_img_src($image_key);
-        
-        if (!empty($thumbnail)) {
-            if (substr($thumbnail, 0, 4) !== 'http') {
-                return rtrim(get_option('siteurl'), '/').'/'.ltrim($thumbnail, '/');
+        if ($meta && is_array($meta) && array_key_exists($key, $meta) && isset($meta[$key][0])) {
+            $img = wp_get_attachment_image_src($meta[$key][0], $image_key);
+            if (!empty($img[0])) {
+                if (substr($img[0], 0, 4) !== 'http') {
+                    return rtrim(get_option('siteurl'), '/').'/'.ltrim($img[0], '/');
+                }
+                return $img[0];
             }
         }
-        
-        return $thumbnail;
+        return get_the_post_thumbnail_url($post->ID, $image_key);
     }
 
     /**

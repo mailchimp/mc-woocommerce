@@ -263,14 +263,17 @@ class MailChimp_WooCommerce_Transform_Products
     public function getProductImage($post)
     {
         $image_key = $this->getProductImageKey();
-        $thumbnail = get_the_post_thumbnail_url($post->ID, $image_key);
+        $id = $post->ID ? $post->ID : $post->id;
+
+        $thumbnail = get_the_post_thumbnail_url($id, $image_key);
+        $thumbnail = $thumbnail ?: wc_placeholder_img_src($image_key);
         
-        $thumbnail = $thumbnail ? $thumbnail : wc_placeholder_img_src( $image_key );
         if (!empty($thumbnail)) {
             if (substr($thumbnail, 0, 4) !== 'http') {
                 return rtrim(get_option('siteurl'), '/').'/'.ltrim($thumbnail, '/');
             }
         }
+        
         return $thumbnail;
     }
 

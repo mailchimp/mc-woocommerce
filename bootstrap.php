@@ -90,7 +90,7 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production', // staging or production
-        'version' => '2.3.2',
+        'version' => '2.3.4',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => function_exists('WC') ? WC()->version : null,
@@ -240,12 +240,27 @@ function mailchimp_get_list_id() {
  */
 function mailchimp_get_store_id() {
     $store_id = mailchimp_get_data('store_id', false);
+
+    // if the store ID is not empty, let's check the last time the store id's have been verified correctly
+    if (!empty($store_id)) {
+        // see if we have a record of the last verification set for this job.
+        $last_verification = mailchimp_get_data('store-id-last-verified');
+        // if it's less than 300 seconds, we don't need to beat up on Mailchimp's API to do this so often.
+        // just return the store ID that was in memory.
+        if ((!empty($last_verification) && is_numeric($last_verification)) && ((time() - $last_verification) < 600)) {
+            //mailchimp_log('debug.performance', 'prevented store endpoint api call');
+            return $store_id;
+        }
+    }
+
     $api = mailchimp_get_api();
     if (mailchimp_is_configured()) {
+        //mailchimp_log('debug.performance', 'get_store_id - calling STORE endpoint.');
         // let's retrieve the store for this domain, through the API
         $store = $api->getStore($store_id, false);
         // if there's no store, try to fetch from mc a store related to the current domain
         if (!$store) {
+            //mailchimp_log('debug.performance', 'get_store_id - no store found - calling STORES endpoint to update site id.');
             $stores = $api->stores();
             //iterate thru stores, find correct store ID and save it to db
             foreach ($stores as $mc_store) {
@@ -260,6 +275,11 @@ function mailchimp_get_store_id() {
     if (empty($store_id)) {
         mailchimp_set_data('store_id', $store_id = uniqid(), 'yes');
     }
+
+    // tell the system the last time we verified this store ID is valid with a timestamp.
+    mailchimp_set_data('store-id-last-verified', time(), 'yes');
+    //mailchimp_log('debug.performance', 'setting store id in memory for 300 seconds.');
+
     return $store_id;
 }
 
@@ -962,6 +982,17 @@ function mailchimp_on_all_plugins_loaded() {
     if (mailchimp_check_woocommerce_plugin_status()) {
         add_action('wp_head', 'mailchimp_woocommerce_add_meta_tags');
         run_mailchimp_woocommerce();
+        if(isset($_GET['ryan']) && $_GET['ryan'] === 'verify') {
+            $time = time();
+            $store_id = mailchimp_get_store_id();
+            $last_verified = mailchimp_get_data('store-id-last-verified');
+            wp_die(print_r(array(
+                'store-id' => $store_id,
+                'last-verified' => $last_verified,
+                'time' => $time,
+                'result' => $time - $last_verified,
+            )));
+        }
     }
 }
 

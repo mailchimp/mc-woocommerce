@@ -262,11 +262,13 @@ function mailchimp_get_store_id() {
         if (!$store) {
             //mailchimp_log('debug.performance', 'get_store_id - no store found - calling STORES endpoint to update site id.');
             $stores = $api->stores();
-            //iterate thru stores, find correct store ID and save it to db
-            foreach ($stores as $mc_store) {
-                if ($mc_store->getDomain() === get_option('siteurl')) {
-                    update_option('mailchimp-woocommerce-store_id', $mc_store->getId(), 'yes');
-                    $store_id = $mc_store->getId();
+            if (!empty($stores)) {
+                //iterate thru stores, find correct store ID and save it to db
+                foreach ($stores as $mc_store) {
+                    if ($mc_store->getDomain() === get_option('siteurl')) {
+                        update_option('mailchimp-woocommerce-store_id', $mc_store->getId(), 'yes');
+                        $store_id = $mc_store->getId();
+                    }
                 }
             }
         }
@@ -982,17 +984,6 @@ function mailchimp_on_all_plugins_loaded() {
     if (mailchimp_check_woocommerce_plugin_status()) {
         add_action('wp_head', 'mailchimp_woocommerce_add_meta_tags');
         run_mailchimp_woocommerce();
-        if(isset($_GET['ryan']) && $_GET['ryan'] === 'verify') {
-            $time = time();
-            $store_id = mailchimp_get_store_id();
-            $last_verified = mailchimp_get_data('store-id-last-verified');
-            wp_die(print_r(array(
-                'store-id' => $store_id,
-                'last-verified' => $last_verified,
-                'time' => $time,
-                'result' => $time - $last_verified,
-            )));
-        }
     }
 }
 

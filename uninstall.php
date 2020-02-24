@@ -50,6 +50,7 @@ function mailchimp_woocommerce_uninstall() {
         error_log($e->getMessage().' on '.$e->getLine().' in '.$e->getFile());
     }
     mailchimp_clean_database();
+    mailchimp_remove_marketing_status();
 }
 
 if (!is_multisite()) {

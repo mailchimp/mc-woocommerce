@@ -1054,7 +1054,7 @@ function mailchimp_update_communication_status() {
 }
 
 // call server to update comm status
-function mailchimp_remove_marketing_status() {
+function mailchimp_remove_communication_status() {
     $plugin_admin = MailChimp_WooCommerce_Admin::instance();
     $original_opt = $plugin_admin->getData('comm.opt',0);
     $admin_email = $plugin_admin->getOptions()['admin_email'];

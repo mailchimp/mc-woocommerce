@@ -57,7 +57,9 @@
 			}
 
 			e.preventDefault();
-		
+
+			var me = $(e.target);
+
 			const swalWithBootstrapButtons = Swal.mixin({
 				customClass: {
 				  confirmButton: 'button button-primary tab-content-submit disconnect-button',
@@ -81,8 +83,12 @@
 						history.replaceState({}, "", query[1]);
 						$('input[name=_wp_http_referer]').val(query[1]);
 					}
-					mailchimp_woocommerce_disconnect_done = true;
-					e.target.click();
+					try {
+						me.click();
+						mailchimp_woocommerce_disconnect_done = true;
+					} catch (e) {
+						console.error('clicking event for disconnect failed', e);
+					}
 				} 
 			})	
 		});

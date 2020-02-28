@@ -227,6 +227,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	public function update_db_check() {
 		// grab the current version set in the plugin variables
 		global $wpdb;
+		global $pagenow;
 
 		$version = mailchimp_environment_variables()->version;
 
@@ -297,10 +298,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			implode(' | ', $constants_used).'<br/>'.
 			__('These constants are deprecated since Mailchimp for Woocommerce version 2.3. Please refer to the <a href="https://github.com/mailchimp/mc-woocommerce/wiki/">plugin official wiki</a> for further details.' ,'mailchimp-for-woocommerce').'</p>';
 			
-			add_settings_error('mailchimp-woocommerce_notice', $this->plugin_name, $text, 'notice-info');
-			
-			if (!isset($_GET['page']) || $_GET['page'] != 'mailchimp-woocommerce') {
-				settings_errors();
+			// only print notice for deprecated constants, on mailchimp woocoomerce pages
+			if ($pagenow == 'admin.php' && 'mailchimp-woocommerce' === $_GET['page']) {
+				add_settings_error('mailchimp-woocommerce_notice', $this->plugin_name, $text, 'info');
 			}
 		}
 		
@@ -455,11 +455,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				if ($this->is_disconnecting()) { 
 					// Disconnect store!
 					if ($data = $this->disconnect_store()) {
-						add_settings_error('mailchimp_store_settings', '', __('Store Disconnected', 'mailchimp-for-woocommerce'),'notice-info');
+						add_settings_error('mailchimp_store_settings', '', __('Store Disconnected', 'mailchimp-for-woocommerce'), 'info');
 					}
 					else {
 						$data['active_tab'] = 'sync';
-						add_settings_error('mailchimp_store_settings', '', __('Store Disconnect Failed', 'mailchimp-for-woocommerce'),'notice-warning');
+						add_settings_error('mailchimp_store_settings', '', __('Store Disconnect Failed', 'mailchimp-for-woocommerce'), 'warning');
 					}	
 				}
 				//case sync
@@ -1468,13 +1468,13 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	private function showSyncStartedMessage()
 	{
-		$text = __('Starting the sync process...', 'mailchimp-for-woocommerce').'<br/>'.
+		$text = '<b>' . __('Starting the sync process...', 'mailchimp-for-woocommerce').'</b><br/>'.
 			'<p id="sync-status-message">'.
 			__('The plugin has started the initial sync with your store, and the process will work in the background automatically.', 'mailchimp-for-woocommerce') .
 			' ' .
             __('Sometimes the sync can take a while, especially on sites with lots of orders and/or products. It is safe to navigate away from this screen while it is running.', 'mailchimp-for-woocommerce') .
             '</p>';
-		add_settings_error('mailchimp-woocommerce_notice', $this->plugin_name, $text, 'updated');
+		add_settings_error('mailchimp-woocommerce_notice', $this->plugin_name, $text, 'success');
 	}
 
 	/**
@@ -1488,7 +1488,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	        $order_count = mailchimp_get_order_count();
         }
 
-		$text = __('Your store is synced with Mailchimp!', 'mailchimp-for-woocommerce').'</br>'.
+		$text = '<b>' . __('Your store is synced with Mailchimp!', 'mailchimp-for-woocommerce').'</b></br>'.
 		'<p id="sync-status-message">'.
 			/* translators: %1$s: Number of synced orders %2$s: Audience name */	
 			sprintf(__('We\'ve successfully synced %1$s orders to your Audience %2$s, that\'s awesome!', 'mailchimp-for-woocommerce'),
@@ -1505,7 +1505,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			esc_html__('Leave a Review', 'mailchimp-for-woocommerce').
         '</a>';
 		
-		add_settings_error('mailchimp-woocommerce_notice', $this->plugin_name.'-initial-sync-end', $text, 'updated');
+		add_settings_error('mailchimp-woocommerce_notice', $this->plugin_name.'-initial-sync-end', $text, 'success');
 	}
 
 	/**

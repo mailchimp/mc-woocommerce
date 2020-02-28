@@ -1043,6 +1043,16 @@ function mailchimp_update_member_with_double_opt_in(MailChimp_WooCommerce_Order 
     }
 }
 
+// Print notices outside woocommerce admin bar
+function mailchimp_settings_errors() {
+    $settings_errors = get_settings_errors();
+    $notices_html = '';
+    foreach ($settings_errors as $notices) {
+        $notices_html .= '<div id="setting-error-'. $notices['code'].'" class="notice notice-'. $notices['type'].' inline is-dismissible"><p>' . $notices['message'] . '</p></div>';    
+    }
+    return $notices_html;
+}
+
 // Add WP CLI commands
 if (defined( 'WP_CLI' ) && WP_CLI) {
     try {

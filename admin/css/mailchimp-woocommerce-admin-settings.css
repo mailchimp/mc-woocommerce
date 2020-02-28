@@ -12,7 +12,7 @@
 
 .mc-woocommerce-settings {
 	width:90%;
-	margin: 4em auto 0 auto;
+	margin: 4em auto 0 auto !important;
 	font-family: "proxima-nova", Arial, Helvetica, sans-serif;
 
 }

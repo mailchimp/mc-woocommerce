@@ -72,13 +72,6 @@ else {
     </div>
 <?php endif; ?>
 
-<?php
-    $settings_errors = get_settings_errors();
-    if (!$show_wizard || ($show_wizard && isset($settings_errors[0]) && $settings_errors[0]['type'] != 'updated' )) {
-        settings_errors();
-    }
-?>
-
 <!-- Create a header in the default WordPress 'wrap' container -->
 <div class="mc-woocommerce-settings wrap">
     
@@ -190,7 +183,12 @@ else {
         </div> 
     <?php endif; ?>
     <h2><!-- Needed to show the notifications on the right spot --></h2>
-    
+    <?php
+        $settings_errors = get_settings_errors();
+        if (!$show_wizard || ($show_wizard && isset($settings_errors[0]) && $settings_errors[0]['type'] != 'updated' )) {
+            echo mailchimp_settings_errors();
+        }
+    ?>
     <?php if ($active_tab != 'sync'): ?>
     <div class="tab-content-wrapper">
     <?php endif; ?>

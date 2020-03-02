@@ -258,7 +258,8 @@ class MailChimp_WooCommerce_Transform_Products
 
     public function getProductImage($post)
     {
-        $meta = get_post_meta($post->ID);
+        $id = is_a($post, 'WC_Product') ? $post->get_id() : $post->ID;
+        $meta = get_post_meta($id);
         $key = '_thumbnail_id';
         $image_key = $this->getProductImageKey();
         if ($meta && is_array($meta) && array_key_exists($key, $meta) && isset($meta[$key][0])) {
@@ -270,7 +271,7 @@ class MailChimp_WooCommerce_Transform_Products
                 return $img[0];
             }
         }
-        return get_the_post_thumbnail_url($post->ID, $image_key);
+        return get_the_post_thumbnail_url($id, $image_key);
     }
 
     /**

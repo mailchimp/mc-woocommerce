@@ -1043,6 +1043,27 @@ function mailchimp_update_member_with_double_opt_in(MailChimp_WooCommerce_Order 
     }
 }
 
+
+// call server to update comm status
+function mailchimp_update_communication_status() {
+    $plugin_admin = MailChimp_WooCommerce_Admin::instance();
+    $original_opt = $plugin_admin->getData('comm.opt',0);
+    $admin_email = $plugin_admin->getOptions()['admin_email'];
+    
+    $plugin_admin->mailchimp_set_communications_status_on_server($original_opt, $admin_email);
+
+}
+
+// call server to update comm status
+function mailchimp_remove_communication_status() {
+    $plugin_admin = MailChimp_WooCommerce_Admin::instance();
+    $original_opt = $plugin_admin->getData('comm.opt',0);
+    $admin_email = $plugin_admin->getOptions()['admin_email'];
+    $remove = true;
+    
+    $plugin_admin->mailchimp_set_communications_status_on_server($original_opt, $admin_email, $remove);
+}
+
 // Print notices outside woocommerce admin bar
 function mailchimp_settings_errors() {
     $settings_errors = get_settings_errors();

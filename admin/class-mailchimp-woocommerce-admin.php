@@ -67,6 +67,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		update_option('mailchimp-woocommerce-sync.completed_at', false);
 		update_option('mailchimp-woocommerce-resource-last-updated', false);
 		update_option('mailchimp-woocommerce-empty_line_item_placeholder', false);
+		
+		// remove user from our marketing status audience
+		mailchimp_remove_communication_status();
 
 		if (($store_id = mailchimp_get_store_id()) && ($mc = mailchimp_get_api()))  {
             if ($mc->deleteStore($store_id)) {
@@ -1541,16 +1544,24 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	/**
 	 * set Communications box status.
 	 */
-	public function mailchimp_set_communications_status_on_server($opt, $admin_email) {
+	public function mailchimp_set_communications_status_on_server($opt, $admin_email, $remove = false) {
 		$env = mailchimp_environment_variables();
-
+		$audience = !empty(mailchimp_get_list_id()) ? 1 : 0;
+		$synced = get_option('mailchimp-woocommerce-sync.completed_at') > 0 ? 1 : 0;
+		
 		$post_data = array(
 			'store_id' => mailchimp_get_store_id(),
 			'email' => $admin_email,
 			'domain' => site_url(),
 			'marketing_status' => $opt,
-			'plugin_version' => "MailChimp for WooCommerce/{$env->version}; PHP/{$env->php_version}; WordPress/{$env->wp_version}; Woo/{$env->wc_version};"
+			'audience' => $audience,
+			'synced' => $synced,
+			'plugin_version' => "MailChimp for WooCommerce/{$env->version}; PHP/{$env->php_version}; WordPress/{$env->wp_version}; Woo/{$env->wc_version};",
+			
 		);
+		if ($remove) {
+			$post_data['remove_email'] = true;
+		}
 
 		$route = "https://woocommerce.mailchimpapp.com/api/opt_in_status";
 		

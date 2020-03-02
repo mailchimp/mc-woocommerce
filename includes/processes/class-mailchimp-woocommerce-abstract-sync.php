@@ -227,6 +227,8 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
 
         // flag the store as sync_finished
         mailchimp_get_api()->flagStoreSync(mailchimp_get_store_id(), false);
+        
+        mailchimp_update_communication_status();
 
         return $this;
     }

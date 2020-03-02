@@ -272,8 +272,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             if ('product' == $post->post_type) {
                 mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
             } elseif ('shop_order' == $post->post_type) {
-                $tracking = $update ? null : $this->onNewOrder($post_id);
-                $this->onOrderSave($post_id, $tracking, !$update);
+                $this->onOrderSave($post_id);
             }
         }
     }

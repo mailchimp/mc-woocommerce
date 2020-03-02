@@ -136,6 +136,21 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	}
 
 	/**
+	 * Include the new Navigation Bar the Admin page.
+	 */
+	public function add_woocommerce_navigation_bar() {
+		if ( function_exists( 'wc_admin_connect_page' ) ) {
+			wc_admin_connect_page(
+				array(
+					'id'        => $this->plugin_name,
+					'screen_id' => 'toplevel_page_mailchimp-woocommerce',
+					'title'     => __( 'Mailchimp for WooCommerce', 'mailchimp-for-woocommerce' ),
+				)
+			);
+		}
+	}
+
+	/**
 	 * check if current user can view options pages/ save plugin options
 	 */
 	public function mailchimp_woocommerce_option_page_capability() {

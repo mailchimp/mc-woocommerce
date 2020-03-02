@@ -118,7 +118,9 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             $tracking = $this->onNewOrder($order_id);
             $newOrder = true;
         }
-        
+
+        mailchimp_log('debug', "Order ID {$order_id} was {$old_status} and is now {$new_status}", array('new_order' => $newOrder, 'tracking' => $tracking));
+
         $this->onOrderSave($order_id, $tracking, $newOrder);
     }
 
@@ -270,7 +272,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             if ('product' == $post->post_type) {
                 mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
             } elseif ('shop_order' == $post->post_type) {
-                $this->onOrderSave($post_id);
+                $tracking = $update ? null : $this->onNewOrder($post_id);
+                $this->onOrderSave($post_id, $tracking, !$update);
             }
         }
     }
@@ -456,12 +459,12 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             }
         }
 
-        if (isset($_REQUEST['mc_cid'])) {
-            $this->setCampaignTrackingID($_REQUEST['mc_cid'], $cookie_duration);
+        if (isset($_GET['mc_cid'])) {
+            $this->setCampaignTrackingID($_GET['mc_cid'], $cookie_duration);
         }
 
-        if (isset($_REQUEST['mc_eid'])) {
-            @setcookie('mailchimp_email_id', trim($_REQUEST['mc_eid']), $cookie_duration, '/' );
+        if (isset($_GET['mc_eid'])) {
+            @setcookie('mailchimp_email_id', trim($_GET['mc_eid']), $cookie_duration, '/' );
         }
     }
 

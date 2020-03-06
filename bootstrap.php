@@ -170,12 +170,11 @@ function mailchimp_handle_or_queue(Mailchimp_Woocommerce_Job $job, $delay = 0)
 {   
     if ($job instanceof \MailChimp_WooCommerce_Single_Order && isset($job->id)) {
         // if this is a order process already queued - just skip this
-        $job_serialized_args = "{$job->id}_{$job->cart_session_id}_{$job->campaign_id}_{$job->landing_site}";
-        if (get_site_transient("mailchimp_order_being_processed_{$job_serialized_args}") == true) {
+        if (get_site_transient("mailchimp_order_being_processed_{$job->id}") == true) {
             return;
         }
         // tell the system the order is already queued for processing in this saving process - and we don't need to process it again.
-        set_site_transient( "mailchimp_order_being_processed_{$job_serialized_args}", true, 30);
+        set_site_transient( "mailchimp_order_being_processed_{$job->id}", true, 30);
     }
     
     $as_job_id = mailchimp_as_push($job, $delay);

@@ -41,7 +41,7 @@ Here are some things to know before you begin this process.
 You’ll need to do a few things to connect your WooCommerce store to Mailchimp.
 - Download the plugin.
 - Install the plugin on your WordPress Admin site.
-- Connect the plugin with your Mailchimp API Key.
+- Connect securely to your Mailchimp account via secure OAuth pop-up window.
 - Configure your audience settings to complete the data sync process.
 ###Advanced Queue Setup In CLI mode
 To optimize the performance of your Mailchimp integration - it is recommended that you run the queue in CLI mode.

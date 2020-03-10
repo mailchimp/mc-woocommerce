@@ -35,6 +35,9 @@ if (!defined( 'WPINC')) {
 }
 
 if (!isset($mailchimp_woocommerce_spl_autoloader) || $mailchimp_woocommerce_spl_autoloader === false) {
+    // require Action Scheduler
+    include_once "includes/vendor/action-scheduler/action-scheduler.php";
+    // bootstrapper
     include_once "bootstrap.php";
 }
 

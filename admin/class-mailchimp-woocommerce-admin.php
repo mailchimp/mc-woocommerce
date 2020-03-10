@@ -880,6 +880,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			'mailchimp_user_tags' => isset($input['mailchimp_user_tags']) ? implode(",",$sanitized_tags) : $this->getOption('mailchimp_user_tags'),
             'mailchimp_product_image_key' => isset($input['mailchimp_product_image_key']) ? $input['mailchimp_product_image_key'] : 'medium',
         );
+		
+		//if we don't have any audience on the account, create one
+		if ((!mailchimp_get_list_id() || mailchimp_get_list_id() == 'create_new') && $data['mailchimp_list'] === 'create_new') {
+			$data['mailchimp_list'] = $this->updateMailChimpList(array_merge($this->getOptions(), $data));
+		}
 
 		// as long as we have a list set, and it's currently in MC as a valid list, let's sync the store.
 		if (!empty($data['mailchimp_list']) && $this->api()->hasList($data['mailchimp_list'])) {
@@ -914,7 +919,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             return $data;
 		}
 
-        $this->setData('validation.newsletter_settings', false);
+		$this->setData('validation.newsletter_settings', false);
+		
+		add_settings_error('mailchimp_newsletter_settings', '', __('One or more fields were not updated', 'mailchimp-for-woocommerce'));
 
         $data['active_tab'] = 'newsletter_settings';
 

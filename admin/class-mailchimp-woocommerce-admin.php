@@ -882,7 +882,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         );
 		
 		//if we don't have any audience on the account, create one
-		if ((!mailchimp_get_list_id() || mailchimp_get_list_id() == 'create_new') && $data['mailchimp_list'] === 'create_new') {
+		if ($data['mailchimp_list'] === 'create_new') {
 			$data['mailchimp_list'] = $this->updateMailChimpList(array_merge($this->getOptions(), $data));
 		}
 

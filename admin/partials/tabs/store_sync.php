@@ -75,7 +75,7 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
         <div class="box sync-stats-card promo_rules" >
             <div class="sync-stats-card-content">
                 <span class="card_label"><strong><?php esc_html_e('Coupons', 'mailchimp-for-woocommerce');?></strong></span>
-                <span class="card_count" id="mailchimp_promo_rules_count"><?php echo $mailchimp_total_promo_rules; ?></span>
+                <span class="card_count" id="mailchimp_promo_rules_count"><?php echo number_format($mailchimp_total_promo_rules); ?></span>
                 <div class="progress-bar-wrapper">
                     <span class="card_count_label mailchimp_promo_rules_count_partial"></span>
                     <div class="progress-bar"></div>
@@ -85,7 +85,7 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
         <div class="box sync-stats-card products" >
             <div class="sync-stats-card-content">
                 <span class="card_label"><strong><?php esc_html_e('Products', 'mailchimp-for-woocommerce');?></strong></span>
-                <span class="card_count" id="mailchimp_product_count"><?php echo $mailchimp_total_products; ?></span>
+                <span class="card_count" id="mailchimp_product_count"><?php echo number_format($mailchimp_total_products ); ?></span>
                 <div class="progress-bar-wrapper">
                     <span class="card_count_label mailchimp_product_count_partial"></span>
                     <div class="progress-bar"></div>
@@ -95,7 +95,7 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
         <div class="box sync-stats-card orders" >
             <div class="sync-stats-card-content">
                 <span class="card_label"><strong><?php esc_html_e('Orders', 'mailchimp-for-woocommerce');?></strong></span>
-                <span class="card_count" id="mailchimp_order_count"><?php echo $mailchimp_total_orders; ?></span>
+                <span class="card_count" id="mailchimp_order_count"><?php echo number_format($mailchimp_total_orders); ?></span>
                 <div class="progress-bar-wrapper">
                     <div class="progress-bar"></div>
                     <span class="card_count_label mailchimp_order_count_partial"></span>
@@ -108,21 +108,21 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
         <div class="box sync-stats-card subscribers" >
             <div class="sync-stats-card-content">
                 <span class="card_label"><strong><?php esc_html_e('Subscribers', 'mailchimp-for-woocommerce');?></strong></span>
-                <span class="card_count" id="mailchimp_subscriber_count"><?php echo $mailchimp_total_subscribers; ?></span>
+                <span class="card_count" id="mailchimp_subscriber_count"><?php echo number_format($mailchimp_total_subscribers); ?></span>
                 <img class="sync-loader" src="<?php echo plugin_dir_url( __FILE__ ) . "images/3dotpurple.gif"; ?>"/>
             </div>
         </div>
         <div class="box sync-stats-card transactional" >
             <div class="sync-stats-card-content">
                 <span class="card_label"><strong><?php esc_html_e('Transactional', 'mailchimp-for-woocommerce');?></strong></span>
-                <span class="card_count" id="mailchimp_transactional_count"><?php echo $mailchimp_total_transactional; ?></span>
+                <span class="card_count" id="mailchimp_transactional_count"><?php echo number_format($mailchimp_total_transactional); ?></span>
                 <img class="sync-loader" src="<?php echo plugin_dir_url( __FILE__ ) . "images/3dotpurple.gif"; ?>"/>
             </div>
         </div>
         <div class="box sync-stats-card unsubscribed" >
             <div class="sync-stats-card-content">
                 <span class="card_label"><strong><?php esc_html_e('Unsubscribed', 'mailchimp-for-woocommerce');?></strong></span>
-                <span class="card_count" id="mailchimp_unsubscribed_count"><?php echo $mailchimp_total_unsubscribed; ?></span>
+                <span class="card_count" id="mailchimp_unsubscribed_count"><?php echo number_format($mailchimp_total_unsubscribed); ?></span>
                 <img class="sync-loader" src="<?php echo plugin_dir_url( __FILE__ ) . "images/3dotpurple.gif"; ?>"/>
             </div>
         </div>

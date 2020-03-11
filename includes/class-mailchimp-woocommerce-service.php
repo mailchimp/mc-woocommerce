@@ -474,7 +474,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     {
         $cookie = $this->cookie('mailchimp_campaign_id', false);
         if (empty($cookie)) {
-            $cookie = $this->getWooSession('mailchimp_tracking_id', false);
+            $cookie = $this->getWooSession('mailchimp_campaign_id', false);
         }
 
         return $cookie;

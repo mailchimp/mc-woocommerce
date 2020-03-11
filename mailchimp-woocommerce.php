@@ -16,7 +16,7 @@
  * Plugin Name:       Mailchimp for WooCommerce
  * Plugin URI:        https://mailchimp.com/connect-your-store/
  * Description:       Connects WooCommerce to Mailchimp to sync your store data, send targeted campaigns to your customers, and sell more stuff. 
- * Version:           2.3.4
+ * Version:           2.3.5
  * Author:            Mailchimp
  * Author URI:        https://mailchimp.com
  * License:           GPL-2.0+
@@ -35,6 +35,9 @@ if (!defined( 'WPINC')) {
 }
 
 if (!isset($mailchimp_woocommerce_spl_autoloader) || $mailchimp_woocommerce_spl_autoloader === false) {
+    // require Action Scheduler
+    include_once "includes/vendor/action-scheduler/action-scheduler.php";
+    // bootstrapper
     include_once "bootstrap.php";
 }
 

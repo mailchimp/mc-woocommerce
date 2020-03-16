@@ -49,6 +49,7 @@ function mailchimp_woocommerce_uninstall() {
     } catch (\Exception $e) {
         error_log($e->getMessage().' on '.$e->getLine().' in '.$e->getFile());
     }
+    mailchimp_remove_communication_status();
     mailchimp_clean_database();
 }
 

@@ -49,7 +49,10 @@ class MailChimp_WooCommerce_Activator {
         if (class_exists('MailChimp_WooCommerce_MailChimpApi')) {
             // try this now for existing stores on an update.
             mailchimp_update_connected_site_script();
-        }
+		}
+		
+		// set initial comm status
+		mailchimp_update_communication_status();
 	}
 
 	/**

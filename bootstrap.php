@@ -237,35 +237,18 @@ function mailchimp_get_list_id() {
  */
 function mailchimp_get_store_id() {
     $store_id = mailchimp_get_data('store_id', false);
-
-    // if the store ID is not empty, let's check the last time the store id's have been verified correctly
-    if (!empty($store_id)) {
-        // see if we have a record of the last verification set for this job.
-        $last_verification = mailchimp_get_data('store-id-last-verified');
-        // if it's less than 300 seconds, we don't need to beat up on Mailchimp's API to do this so often.
-        // just return the store ID that was in memory.
-        if ((!empty($last_verification) && is_numeric($last_verification)) && ((time() - $last_verification) < 600)) {
-            //mailchimp_log('debug.performance', 'prevented store endpoint api call');
-            return $store_id;
-        }
-    }
-
     $api = mailchimp_get_api();
     if (mailchimp_is_configured()) {
-        //mailchimp_log('debug.performance', 'get_store_id - calling STORE endpoint.');
         // let's retrieve the store for this domain, through the API
         $store = $api->getStore($store_id, false);
         // if there's no store, try to fetch from mc a store related to the current domain
         if (!$store) {
-            //mailchimp_log('debug.performance', 'get_store_id - no store found - calling STORES endpoint to update site id.');
             $stores = $api->stores();
-            if (!empty($stores)) {
-                //iterate thru stores, find correct store ID and save it to db
-                foreach ($stores as $mc_store) {
-                    if ($mc_store->getDomain() === get_option('siteurl')) {
-                        update_option('mailchimp-woocommerce-store_id', $mc_store->getId(), 'yes');
-                        $store_id = $mc_store->getId();
-                    }
+            //iterate thru stores, find correct store ID and save it to db
+            foreach ($stores as $mc_store) {
+                if ($mc_store->getDomain() === get_option('siteurl')) {
+                    update_option('mailchimp-woocommerce-store_id', $mc_store->getId(), 'yes');
+                    $store_id = $mc_store->getId();
                 }
             }
         }
@@ -274,11 +257,6 @@ function mailchimp_get_store_id() {
     if (empty($store_id)) {
         mailchimp_set_data('store_id', $store_id = uniqid(), 'yes');
     }
-
-    // tell the system the last time we verified this store ID is valid with a timestamp.
-    mailchimp_set_data('store-id-last-verified', time(), 'yes');
-    //mailchimp_log('debug.performance', 'setting store id in memory for 300 seconds.');
-
     return $store_id;
 }
 
@@ -1038,37 +1016,6 @@ function mailchimp_update_member_with_double_opt_in(MailChimp_WooCommerce_Order 
             }
         }
     }
-}
-
-
-// call server to update comm status
-function mailchimp_update_communication_status() {
-    $plugin_admin = MailChimp_WooCommerce_Admin::instance();
-    $original_opt = $plugin_admin->getData('comm.opt',0);
-    $admin_email = $plugin_admin->getOptions()['admin_email'];
-    
-    $plugin_admin->mailchimp_set_communications_status_on_server($original_opt, $admin_email);
-
-}
-
-// call server to update comm status
-function mailchimp_remove_communication_status() {
-    $plugin_admin = MailChimp_WooCommerce_Admin::instance();
-    $original_opt = $plugin_admin->getData('comm.opt',0);
-    $admin_email = $plugin_admin->getOptions()['admin_email'];
-    $remove = true;
-    
-    $plugin_admin->mailchimp_set_communications_status_on_server($original_opt, $admin_email, $remove);
-}
-
-// Print notices outside woocommerce admin bar
-function mailchimp_settings_errors() {
-    $settings_errors = get_settings_errors();
-    $notices_html = '';
-    foreach ($settings_errors as $notices) {
-        $notices_html .= '<div id="setting-error-'. $notices['code'].'" class="notice notice-'. $notices['type'].' inline is-dismissible"><p>' . $notices['message'] . '</p></div>';    
-    }
-    return $notices_html;
 }
 
 // Add WP CLI commands

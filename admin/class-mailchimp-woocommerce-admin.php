@@ -231,7 +231,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		// grab the current version set in the plugin variables
 		global $wpdb;
 		global $pagenow;
-		$options = $this->getOptions();
 
 		$version = mailchimp_environment_variables()->version;
 
@@ -242,6 +241,13 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		if (version_compare($version, $saved_version) > 0) {
 			// resave the site option so this only fires once.
 			update_site_option('mailchimp_woocommerce_version', $version);
+
+			$options = $this->getOptions();
+			
+			if (!isset($options['mailchimp_permission_cap']) || empty($options['mailchimp_permission_cap']) ) {
+				$options['mailchimp_permission_cap'] = 'manage_options';
+				update_option($this->plugin_name, $options);
+			}
 		}
 
 		if (!get_option( $this->plugin_name.'_cart_table_add_index_update')) {
@@ -269,11 +275,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			} 
 		}
 		
-		if (!isset($options['mailchimp_permission_cap']) || empty($options['mailchimp_permission_cap']) ) {
-			$options['mailchimp_permission_cap'] = 'manage_options';
-			update_option($this->plugin_name, $options);
-		}
-
 		if($wpdb->get_var("SHOW TABLES LIKE '{$wpdb->prefix}mailchimp_jobs';") != $wpdb->prefix.'mailchimp_jobs') {
 			MailChimp_WooCommerce_Activator::create_queue_tables();
 			MailChimp_WooCommerce_Activator::migrate_jobs();

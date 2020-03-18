@@ -231,6 +231,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		// grab the current version set in the plugin variables
 		global $wpdb;
 		global $pagenow;
+		$options = $this->getOptions();
 
 		$version = mailchimp_environment_variables()->version;
 
@@ -266,6 +267,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			if ($this->mailchimp_update_woo_settings()) {
 				update_option( $this->plugin_name.'_woo_currency_update', true);
 			} 
+		}
+		
+		if (!isset($options['mailchimp_permission_cap']) || empty($options['mailchimp_permission_cap']) ) {
+			$options['mailchimp_permission_cap'] = 'manage_options';
+			update_option($this->plugin_name, $options);
 		}
 
 		if($wpdb->get_var("SHOW TABLES LIKE '{$wpdb->prefix}mailchimp_jobs';") != $wpdb->prefix.'mailchimp_jobs') {

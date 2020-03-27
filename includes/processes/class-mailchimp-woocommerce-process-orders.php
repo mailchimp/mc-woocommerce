@@ -42,14 +42,17 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abstrac
             }
 
             // see if this store has the auto subscribe setting enabled on initial sync
-            $should_auto_subscribe = (bool) $this->getOption('mailchimp_auto_subscribe', true);
+            $should_auto_subscribe = (bool) $this->getOption('mailchimp_auto_subscribe', false);
 
             // since we're syncing the customer for the first time, this is where we need to add the override
             // for subscriber status. We don't get the checkbox until this plugin is actually installed and working!
             if (!($status = $item->getCustomer()->getOptInStatus())) {
                 try {
                     $subscriber = $this->mailchimp()->member(mailchimp_get_list_id(), $item->getCustomer()->getEmailAddress());
-                    $status = !in_array($subscriber['status'], array('unsubscribed', 'transactional'));
+                    if ($subscriber['status'] != 'archived') {
+                        $status = !in_array($subscriber['status'], array('unsubscribed', 'transactional'));
+                        $item->getCustomer()->setOptInStatus($status);
+                    }
                 } catch (\Exception $e) {
                     if ($e instanceof MailChimp_WooCommerce_RateLimitError) {
                         mailchimp_error('order_sync.error', mailchimp_error_trace($e, "GET subscriber :: {$item->getId()}"));
@@ -57,10 +60,10 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abstrac
                     }
                     // if they are using double opt in, we need to pass this in as false here so it doesn't auto subscribe.
                     $status = mailchimp_list_has_double_optin() ? false : $should_auto_subscribe;
+                    $item->getCustomer()->setOptInStatus($status);
                 }
-                $item->getCustomer()->setOptInStatus($status);
             }
-
+            
             try {
                 $type = $this->mailchimp()->getStoreOrder($this->store_id, $item->getId(), true) ? 'update' : 'create';
             } catch (MailChimp_WooCommerce_Error $e) {

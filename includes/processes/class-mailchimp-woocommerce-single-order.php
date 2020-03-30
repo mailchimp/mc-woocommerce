@@ -226,7 +226,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 return $api_response;
             }
 
-            if ($deleted_abandoned_cart) {
+            if (isset($deleted_abandoned_cart) && $deleted_abandoned_cart) {
                 $log .= " :: abandoned cart deleted [{$this->cart_session_id}]";
             }
 

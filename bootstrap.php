@@ -1033,7 +1033,7 @@ function mailchimp_update_member_with_double_opt_in(MailChimp_WooCommerce_Order 
         } else {
             // if we've set the wordpress user correctly on the customer
             if (($wordpress_user = $order->getCustomer()->getWordpressUser())) {
-                $user_submit = new MailChimp_WooCommerce_User_Submit($wordpress_user->ID, true, null, substr( get_locale(), 0, 2 ));
+                $user_submit = new MailChimp_WooCommerce_User_Submit($wordpress_user->ID, true, null);
                 $user_submit->handle();
             }
         }

@@ -144,6 +144,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         // queue up the single order to be processed.
         $campaign_id = isset($tracking) && isset($tracking['campaign_id']) ? $tracking['campaign_id'] : null;
         $landing_site = isset($tracking) && isset($tracking['landing_site']) ? $tracking['landing_site'] : null;
+        $language = $newOrder ? substr( get_locale(), 0, 2 ) : null;
 
         if (isset($tracking)) {
             // update the post meta with campaing tracking details for future sync
@@ -151,7 +152,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             update_post_meta($order_id, 'mailchimp_woocommerce_landing_site', $landing_site);
         }
 
-        $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $campaign_id, $landing_site);
+        $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $campaign_id, $landing_site, $language);
         $handler->is_update = $newOrder ? !$newOrder : null;
         $handler->is_admin_save = is_admin();
         

@@ -12,6 +12,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 {
     protected $user_email = null;
     protected $previous_email = null;
+    protected $user_language = null;
     protected $force_cart_post = false;
     protected $cart_was_submitted = false;
     protected $cart = array();
@@ -229,9 +230,12 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
                 // grab the cookie data that could play important roles in the submission
                 $campaign = $this->getCampaignTrackingID();
-
+                
+                // get user language or default to admin main language
+                $language = $this->user_language ?: substr( get_locale(), 0, 2 ); 
+                
                 // fire up the job handler
-                $handler = new MailChimp_WooCommerce_Cart_Update($uid, $user_email, $campaign, $this->cart);
+                $handler = new MailChimp_WooCommerce_Cart_Update($uid, $user_email, $campaign, $this->cart, $language);
                 mailchimp_handle_or_queue($handler);
             }
 
@@ -694,6 +698,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             @setcookie('mailchimp_user_email', $this->user_email, $cookie_duration, '/' );
 
             $this->getCartItems();
+
+            if (isset($_GET['language'])) {
+                $this->user_language = $_GET['language'];
+            }
 
             $this->handleCartUpdated();
 

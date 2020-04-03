@@ -233,32 +233,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             }
 
             // Maybe sync subscriber to set correct member.language
-            $user_email = $order->getCustomer()->getEmailAddress();
-            $hash = md5(strtolower(trim($user_email)));
-            $tra = mailchimp_get_transient("order.member.{$hash}");
-            if ($this->user_language && !mailchimp_get_transient("order.member.{$hash}")) {
-                $list_id = mailchimp_get_list_id();
-                try {
-                    // try to get the member to update if already synced
-                    $member = $api->member($list_id, $user_email);
-                    // update member with new language
-                    $api->update($list_id, $user_email, $member['status'], null, null, $this->user_language);
-                    // set transient to prevent too many calls to update language
-                    mailchimp_set_transient("order.member.{$hash}", true, 3600);
-                    mailchimp_debug('order.member.updated', "Updated {$user_email} language to {$this->user_language}");
-                } catch (\Exception $e) {
-                    if ($e->getCode() == 404) {
-                        // member doesn't exist yet, create
-                        $api->subscribe($list_id, $user_email, false, array(), array(), $this->user_language);
-                        // set transient to prevent too many calls to update language
-                        mailchimp_set_transient("order.member.{$hash}", true, 3600);
-                        mailchimp_debug('order.member.created', "Subscribed {$user_email}, setting language to {$this->user_language}", $merge_fields);
-                    } else {
-                        mailchimp_error('order.member.sync.error', $e->getMessage(), $user_email);
-                        
-                    }
-                }
-            }
+            mailchimp_member_language_update($order->getCustomer()->getEmailAddress(), $this->user_language, 'order');
 
             mailchimp_log('order_submit.success', $log);
 

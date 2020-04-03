@@ -1070,6 +1070,36 @@ function mailchimp_settings_errors() {
     return $notices_html;
 }
 
+function mailchimp_member_language_update($user_email = null, $language = null, $caller = '') {
+    if (!$user_email || !$language) return;
+
+    $hash = md5(strtolower(trim($user_email)));
+    if (!mailchimp_get_transient($caller . ".member.{$hash}")) {
+        $list_id = mailchimp_get_list_id();
+        try {
+            // try to get the member to update if already synced
+            $member = mailchimp_get_api()->member($list_id, $user_email);
+            // update member with new language
+            mailchimp_get_api()->update($list_id, $user_email, $member['status'], null, null, $language);
+            // set transient to prevent too many calls to update language
+            mailchimp_set_transient($caller . ".member.{$hash}", true, 3600);
+            mailchimp_log($caller . '.member.updated', "Updated {$user_email} language to {$language}");
+        } catch (\Exception $e) {
+            if ($e->getCode() == 404) {
+                // member doesn't exist yet, create
+                mailchimp_get_api()->subscribe($list_id, $user_email, false, array(), array(), $language);
+                // set transient to prevent too many calls to update language
+                mailchimp_set_transient($caller . ".member.{$hash}", true, 3600);
+                mailchimp_log($caller . '.member.created', "Subscribed {$user_email}, setting language to [{$language}]");
+            } else {
+                mailchimp_error($caller . '.member.sync.error', $e->getMessage(), $user_email);
+                
+            }
+        }
+    }
+}
+
+
 // Add WP CLI commands
 if (defined( 'WP_CLI' ) && WP_CLI) {
     try {

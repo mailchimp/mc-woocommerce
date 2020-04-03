@@ -177,30 +177,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
             }
 
             // Maybe sync subscriber to set correct member.language
-            $hash = md5(strtolower(trim($this->email)));
-            if ($this->user_language && !mailchimp_get_transient("cart.member.{$hash}")) {
-                $list_id = mailchimp_get_list_id();
-                try {
-                    // try to get the member to update if already synced
-                    $member = $api->member($list_id, $this->email);
-                    // update member with new language
-                    $api->update($list_id, $this->email, $member['status'], null, null, $this->user_language);
-                    // set transient to prevent too many calls to update language
-                    mailchimp_set_transient("cart.member.{$hash}", true, 3600);
-                    mailchimp_debug('cart.member.updated', "Updated {$this->email} language to {$this->user_language}");
-                } catch (\Exception $e) {
-                    if ($e->getCode() == 404) {
-                        // member doesn't exist yet, create
-                        $api->subscribe($list_id, $this->email, false, array(), array(), $this->user_language);
-                        // set transient to prevent too many calls to update language
-                        mailchimp_set_transient("cart.member.{$hash}", true, 3600);
-                        mailchimp_debug('cart.member.created', "Subscribed {$this->email}, setting language to {$this->user_language}", $merge_fields);
-                    } else {
-                        mailchimp_error('cart.member.sync.error', $e->getMessage(), $this->email);
-                        
-                    }
-                }
-            }
+            mailchimp_member_language_update($this->email, $this->user_language, 'cart');
 
         } catch (MailChimp_WooCommerce_RateLimitError $e) {
             sleep(3);

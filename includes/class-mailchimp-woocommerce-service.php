@@ -842,4 +842,9 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         }
         return false;
     }
+
+    public function mailchimp_process_sync_manager () {
+        $sync_stats_manager = new MailChimp_WooCommerce_Process_Full_Sync_Manager();
+        $sync_stats_manager->handle();
+    }
 }

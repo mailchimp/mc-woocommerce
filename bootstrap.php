@@ -64,6 +64,7 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_Single_Order' => 'includes/processes/class-mailchimp-woocommerce-single-order.php',
         'MailChimp_WooCommerce_Single_Product' => 'includes/processes/class-mailchimp-woocommerce-single-product.php',
         'MailChimp_WooCommerce_User_Submit' => 'includes/processes/class-mailchimp-woocommerce-user-submit.php',
+        'MailChimp_WooCommerce_Process_Full_Sync_Manager' => 'includes/processes/class-mailchimp-woocommerce-full-sync-manager.php',
         
         'MailChimp_WooCommerce_Public' => 'public/class-mailchimp-woocommerce-public.php',
         'MailChimp_WooCommerce_Admin' => 'admin/class-mailchimp-woocommerce-admin.php',
@@ -197,6 +198,39 @@ function mailchimp_handle_or_queue(Mailchimp_Woocommerce_Job $job, $delay = 0)
     if (!is_int($as_job_id)) {
         mailchimp_log('action_scheduler.queue_fail', get_class($job) .' FAILED :: as_job_id: '.$as_job_id);
     }
+}
+
+/**
+ * 
+ */
+function mailchimp_flag_stop_sync()
+{
+    // this is the last thing we're doing so it's complete as of now.
+    mailchimp_set_data('sync.syncing', false);
+    mailchimp_set_data('sync.completed_at', time());
+
+    // set the current sync pages back to 1 if the user hits resync.
+    mailchimp_set_data('sync.orders.current_page', 1);
+    mailchimp_set_data('sync.products.current_page', 1);
+    mailchimp_set_data('sync.coupons.current_page', 1);
+
+    mailchimp_set_data('sync.coupons.items', 0);
+    mailchimp_set_data('sync.products.items', 0);
+    mailchimp_set_data('sync.orders.items', 0);
+
+    $sync_started_at = get_option('mailchimp-woocommerce-sync.started_at');
+    $sync_completed_at = get_option('mailchimp-woocommerce-sync.completed_at');
+
+    $sync_total_time = $sync_completed_at - $sync_started_at;
+    $time = gmdate("d H:i:s",$sync_total_time);
+
+    mailchimp_log('sync.completed', "Finished Sync :: ".date('D, M j, Y g:i A'). " (total time: ".$time.")");
+
+    // flag the store as sync_finished
+    mailchimp_get_api()->flagStoreSync(mailchimp_get_store_id(), false);
+    
+    mailchimp_update_communication_status();
+
 }
 
 /**

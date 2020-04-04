@@ -1158,9 +1158,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 										if (response.promo_rules_in_mailchimp == 0) {
 											promo_rulesProgress = 0;
 											promo_rulesPartial = "0 / " + response.promo_rules_in_store;
-										} else if (response.promo_rules_in_mailchimp == response.promo_rules_in_store) {
-											promo_rulesProgress =  (100 / Math.ceil(response.promo_rules_in_store / 5) + 1) * (response.promo_rules_page - 1) ;
-											promo_rulesPartial = (((response.promo_rules_page - 1) * 5) < response.promo_rules_in_mailchimp ? (response.promo_rules_page - 1) * 5 : response.promo_rules_in_mailchimp)  + " / " + response.promo_rules_in_store;
 										} else {
 											promo_rulesProgress = response.promo_rules_in_mailchimp / response.promo_rules_in_store * 100
 											promo_rulesPartial = response.promo_rules_in_mailchimp + " / " + response.promo_rules_in_store;
@@ -1178,9 +1175,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 										if (response.products_in_mailchimp == 0) {
 											productsProgress = 0;
 											productsPartial = "0 / " + response.products_in_store;
-										} else if (response.products_in_mailchimp == response.products_in_store) {
-											productsProgress =  (100 / Math.ceil(response.products_in_store / 5) + 1) * (response.products_page - 1) ;
-											productsPartial = (((response.products_page - 1) * 5) < response.products_in_mailchimp ? (response.products_page - 1) * 5 : response.products_in_mailchimp)  + " / " + response.products_in_store;
 										} else {
 											productsProgress = response.products_in_mailchimp / response.products_in_store * 100
 											productsPartial = response.products_in_mailchimp + " / " + response.products_in_store;
@@ -1198,9 +1192,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 										if (response.orders_in_mailchimp == 0) {
 											ordersProgress = 0;
 											ordersPartial = "0 / " + response.orders_in_store;
-										} else if (response.orders_in_mailchimp == response.orders_in_store) {
-											ordersProgress =  (100 / Math.ceil(response.orders_in_store / 5) + 1) * (response.orders_page - 1) ;
-											ordersPartial = (((response.orders_page - 1) * 5) < response.orders_in_mailchimp ? (response.orders_page - 1) * 5 : response.orders_in_mailchimp)  + " / " + response.orders_in_store;
 										} else {
 											ordersProgress = response.orders_in_mailchimp / response.orders_in_store * 100
 											ordersPartial = response.orders_in_mailchimp + " / " + response.orders_in_store;

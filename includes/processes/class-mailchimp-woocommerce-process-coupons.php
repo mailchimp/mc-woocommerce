@@ -24,42 +24,6 @@ class MailChimp_WooCommerce_Process_Coupons extends MailChimp_WooCommerce_Abstra
     }
 
     /**
-     * @param WC_Coupon $item
-     *
-     * @return mixed
-     */
-    protected function iterate($item)
-    {
-        if ($item instanceof MailChimp_WooCommerce_PromoCode) {
-
-            mailchimp_debug('promo_code_sync', "#{$item->getId()}", $item->toArray());
-
-            try {
-                $this->mailchimp()->addPromoRule($this->store_id, $item->getAttachedPromoRule(), true);
-                $response = $this->mailchimp()->addPromoCodeForRule($this->store_id, $item->getAttachedPromoRule(), $item, true);
-                mailchimp_log('coupon_sync.success', "update promo rule :: #{$item->getCode()}");
-                return $response;
-            } catch (MailChimp_WooCommerce_RateLimitError $e) {
-                mailchimp_error('coupons.error', mailchimp_error_trace($e, "update promo rule :: {$item->getCode()}"));
-                throw $e;
-            } catch (MailChimp_WooCommerce_ServerError $e) {
-                mailchimp_error('coupons.error', mailchimp_error_trace($e, "update promo rule :: {$item->getCode()}"));
-                return false;
-            } catch (MailChimp_WooCommerce_Error $e) {
-                mailchimp_error('coupons.error', mailchimp_error_trace($e, "update promo rule :: {$item->getCode()}"));
-                return false;
-            } catch (Exception $e) {
-                mailchimp_error('coupons.error', mailchimp_error_trace($e, "update promo rule :: {$item->getCode()}"));
-                return false;
-            }
-        }
-
-        mailchimp_debug('coupon_sync', 'no coupon found', $item);
-
-        return false;
-    }
-
-    /**
      * After the resources have been loaded and pushed
      */
     protected function complete()

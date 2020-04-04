@@ -105,7 +105,8 @@ function mailchimp_environment_variables() {
  */
 function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {			
     global $wpdb;
-    $job_id = isset($job->id) ? $job->id : get_class($job);
+    $current_page = isset($job->current_page) && $job->current_page >= 0 ? $job->current_page : false;
+    $job_id = isset($job->id) ? $job->id : ($current_page ? get_class($job) . '.' . $job->current_page : get_class($job));
 
     $message = ($job_id != get_class($job)) ? ' :: obj_id '.$job_id : '';
     $attempts = $job->get_attempts() > 0 ? ' attempt:' . $job->get_attempts() : '';
@@ -147,8 +148,16 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
                 }
             }
         }
-    
-        $action = as_schedule_single_action( strtotime( '+'.$delay.' seconds' ), get_class($job), array('obj_id' => $job_id), "mc-woocommerce");
+        
+        $action_args = array(
+            'obj_id' => $job_id,
+        );
+
+        if ($current_page !== false) {
+            $action_args['page'] = $current_page;
+        }
+
+        $action = as_schedule_single_action( strtotime( '+'.$delay.' seconds' ), get_class($job), $action_args, "mc-woocommerce");
       
         if (!empty($existing_actions)) {
             mailchimp_debug('action_scheduler.reschedule_job', get_class($job) . ($delay > 0 ? ' restarts in '.$delay. ' seconds' : ' restarts in the next minute' ) . $message . $attempts);
@@ -590,6 +599,18 @@ function mailchimp_string_contains($haystack, $needles) {
     return false;
 }
 
+/**
+ * @return int
+ */
+function mailchimp_get_coupons_count() {
+    $posts = mailchimp_count_posts('shop_coupon');
+    unset($posts['auto-draft'], $posts['trash']);
+    $total = 0;
+    foreach ($posts as $status => $count) {
+        $total += $count;
+    }
+    return $total;
+}
 
 /**
  * @return int
@@ -900,6 +921,17 @@ function mailchimp_flush_database_tables() {
         mailchimp_delete_as_jobs();
         
         $wpdb->query("TRUNCATE `{$wpdb->prefix}mailchimp_carts`");
+        $wpdb->query("TRUNCATE `{$wpdb->prefix}mailchimp_jobs`");
+    } catch (\Exception $e) {}
+}
+
+function mailchimp_flush_sync_job_tables() {
+    try {
+        /** @var \ */
+        global $wpdb;
+        
+        mailchimp_delete_as_jobs();
+        
         $wpdb->query("TRUNCATE `{$wpdb->prefix}mailchimp_jobs`");
     } catch (\Exception $e) {}
 }

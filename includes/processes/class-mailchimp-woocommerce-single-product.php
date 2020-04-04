@@ -175,13 +175,21 @@ class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
         } catch (MailChimp_WooCommerce_RateLimitError $e) {
             sleep(3);
             mailchimp_error('product_submit.error', mailchimp_error_trace($e, "{$method} :: #{$this->id}"));
-            $this->retry();
+            $this->applyRateLimitedScenario();
+            throw $e;
         } catch (MailChimp_WooCommerce_ServerError $e) {
             mailchimp_error('product_submit.error', mailchimp_error_trace($e, "{$method} :: #{$this->id}"));
+            throw $e;
         } catch (MailChimp_WooCommerce_Error $e) {
             mailchimp_log('product_submit.error', mailchimp_error_trace($e, "{$method} :: #{$this->id}"));
+            throw $e;
         } catch (Exception $e) {
             mailchimp_log('product_submit.error', mailchimp_error_trace($e, "{$method} :: #{$this->id}"));
+            throw $e;
+        }
+        catch (\Error $e) {
+            mailchimp_log('product_submit.error', mailchimp_error_trace($e, "{$method} :: #{$this->id}"));
+            throw $e;
         }
 
         return false;

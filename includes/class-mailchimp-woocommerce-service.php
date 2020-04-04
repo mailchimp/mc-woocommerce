@@ -840,6 +840,6 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             $message = !empty($e->getMessage()) ? ' - ' . $e->getMessage() :'';
             mailchimp_debug('action_scheduler.process_job.fail', get_class($job) . ' :: obj_id '.$obj_id . ' :: ' .get_class($e) . $message);
         }
-        return true;
+        return false;
     }
 }

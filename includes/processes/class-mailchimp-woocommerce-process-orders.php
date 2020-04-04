@@ -165,9 +165,6 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abstrac
 
         // add a timestamp for the orders sync completion
         $this->setResourceCompleteTime();
-
-        // this is the last thing we're doing so it's complete as of now.
-        $this->flagStopSync();
     }
 
     /**

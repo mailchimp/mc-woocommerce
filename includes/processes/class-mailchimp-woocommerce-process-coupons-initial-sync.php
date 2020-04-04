@@ -15,7 +15,13 @@ class MailChimp_WooCommerce_Process_Coupons_Initial_Sync extends MailChimp_WooCo
         // add a timestamp for the orders sync completion
         $this->setResourceCompleteTime();
 
+        //create Product Sync object
         $product_sync = new MailChimp_WooCommerce_Process_Products();
+        
+        // queue first job
         mailchimp_handle_or_queue($product_sync, 0);
+        
+        //trigger subsequent jobs creation
+        $product_sync->createSyncManagers();
     }
 }

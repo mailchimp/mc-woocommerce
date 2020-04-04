@@ -239,7 +239,14 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
         } catch (MailChimp_WooCommerce_RateLimitError $e) {
             sleep(3);
             mailchimp_error('order_submit.error', mailchimp_error_trace($e, "RateLimited :: #{$this->id}"));
-            $this->retry();
+            $this->applyRateLimitedScenario();
+            throw $e;
+        } catch (MailChimp_WooCommerce_ServerError $e) {
+            mailchimp_error('order_submit.error', mailchimp_error_trace($e, "{$call} :: #{$this->id}"));
+            throw $e;
+        } catch (MailChimp_WooCommerce_Error $e) {
+            mailchimp_error('order_submit.error', mailchimp_error_trace($e, "{$call} :: #{$this->id}"));
+            throw $e;
         } catch (\Exception $e) {
             $message = strtolower($e->getMessage());
             mailchimp_error('order_submit.tracing_error', $e);
@@ -270,8 +277,11 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                     mailchimp_error('order_submit.error', mailchimp_error_trace($e, 'deleting-customer-re-add :: #'.$this->id));
                 }
             }
+            throw $e;
+        } catch (MailChimp_WooCommerce_Error $e) {
+            mailchimp_error('order_submit.error', mailchimp_error_trace($e, "{$call} :: #{$this->id}"));
+            throw $e;
         }
-
         return false;
     }
 

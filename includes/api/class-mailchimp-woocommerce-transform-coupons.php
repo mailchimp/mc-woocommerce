@@ -27,8 +27,8 @@ class MailChimp_WooCommerce_Transform_Coupons
         );
 
         if ((($coupons = $this->getCouponPosts($page, $limit)) && !empty($coupons))) {
-            foreach ($coupons as $post) {
-                $response->items[] = $this->transform($post->ID);
+            foreach ($coupons as $post_id) {
+                $response->items[] = $post_id;
                 $response->count++;
             }
         }
@@ -110,29 +110,25 @@ class MailChimp_WooCommerce_Transform_Coupons
     {
         $offset = 0;
         if ($page > 1) {
-            $offset = ($page * $posts);
+            $offset = (($page - 1) * $posts);
         }
 
-        $coupons = get_posts(array(
+        $args = array(
             'post_type' => array_merge(array_keys(wc_get_product_types()), array('shop_coupon')),
             'posts_per_page' => $posts,
             'offset' => $offset,
             'orderby' => 'ID',
             'order' => 'ASC',
-        ));
+            'fields' => 'ids'
+        );
+
+        $coupons = get_posts($args);
 
         if (empty($coupons)) {
 
             sleep(2);
 
-            $coupons = get_posts(array(
-                'post_type' => array_merge(array_keys(wc_get_product_types()), array('shop_coupon')),
-                'posts_per_page' => $posts,
-                'offset' => $offset,
-                'orderby' => 'ID',
-                'order' => 'ASC',
-            ));
-
+            $coupons = get_posts($args);
             if (empty($coupons)) {
                 return false;
             }

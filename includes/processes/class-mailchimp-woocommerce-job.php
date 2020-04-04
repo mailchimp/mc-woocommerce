@@ -30,6 +30,18 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Job' ) ) {
 		}
 
 		/**
+		 * @return $this
+		 */
+		protected function applyRateLimitedScenario()
+		{
+			mailchimp_set_transient('api-rate-limited', true, 60);
+
+			$this->retry();
+
+			return $this;
+		}
+		
+		/**
 		 * Handle the job.
 		 */
 		abstract public function handle();

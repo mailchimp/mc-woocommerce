@@ -42,11 +42,14 @@ class MailChimp_WooCommerce_Transform_Orders
                     $order = $this->transform($post);
                     if (!$order->isFlaggedAsAmazonOrder()) {
                         $response->valid++;
-                        $response->items[] = $order;
+                        $response->items[] = $order->getId();
                     }
+                } catch (MailChimp_WooCommerce_Error $e) {
+                    mailchimp_log('initial_sync', $e->getMessage());
                 } catch (\Exception $e) {
                     mailchimp_error('initial_sync', $e->getMessage(), array('post' => $post));
                 }
+                
             }
         }
 
@@ -75,6 +78,7 @@ class MailChimp_WooCommerce_Transform_Orders
 
         // if the woo object does not have a "get_billing_email" method, then we need to skip this until
         // we know how to resolve these types of things.
+        //mailchimp_log('get_billing_mail', method_exists($woo, 'get_billing_email'), array($order->toArray(), $woo));
         if (!method_exists($woo, 'get_billing_email')) {
             $message = "Post ID {$post->ID} was an order refund. Skipping this.";
             if ($this->is_syncing) {
@@ -396,11 +400,11 @@ class MailChimp_WooCommerce_Transform_Orders
     {
         $offset = 0;
         if ($page > 1) {
-            $offset = (($page-1) * $posts);
+            $offset = ($page - 1) * $posts;
         }
 
         $params = array(
-            'post_type' => wc_get_order_types(),
+            'post_type' => 'shop_order',
             //'post_status' => array_keys(wc_get_order_statuses()),
             'post_status' => 'wc-completed',
             'posts_per_page' => $posts,

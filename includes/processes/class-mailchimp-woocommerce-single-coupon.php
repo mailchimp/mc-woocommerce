@@ -38,11 +38,6 @@ class MailChimp_WooCommerce_SingleCoupon extends Mailchimp_Woocommerce_Job
      */
     public function handle()
     {
-        $item_count = get_option('mailchimp-woocommerce-sync.coupons.items', 0); 
-        if ($item_count > 0) {
-            update_option('mailchimp-woocommerce-sync.coupons.items', $item_count -1);
-        }
-
         try {
 
             if (!mailchimp_is_configured()) {

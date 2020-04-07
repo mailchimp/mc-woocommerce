@@ -115,11 +115,6 @@ class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
 
         $method = "no action";
 
-        $item_count = get_option('mailchimp-woocommerce-sync.products.items', 0); 
-        if ($item_count > 0) {
-            update_option('mailchimp-woocommerce-sync.products.items', $item_count - 1);
-        }
-
         try {
 
             if (!($product_post = get_post($this->id))) {

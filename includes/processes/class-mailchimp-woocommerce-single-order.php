@@ -58,11 +58,6 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
     public function process()
     {
-        $item_count = get_option('mailchimp-woocommerce-sync.orders.items', 0); 
-        if ($item_count > 0) {
-            update_option('mailchimp-woocommerce-sync.orders.items', $item_count - 1);
-        }
-
         if (!mailchimp_is_configured() || !($api = mailchimp_get_api())) {
             mailchimp_debug(get_called_class(), 'Mailchimp is not configured properly');
             return false;

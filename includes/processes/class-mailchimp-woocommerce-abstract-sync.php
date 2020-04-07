@@ -213,9 +213,6 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
         $this->setData('sync.products.current_page', 1);
         $this->setData('sync.coupons.current_page', 1);
 
-        $this->setData('sync.coupons.items', mailchimp_get_coupons_count());
-        $this->setData('sync.products.items', mailchimp_get_product_count());
-        $this->setData('sync.orders.items', mailchimp_get_order_count());
 
         $this->setData('sync.syncing', true);
         $this->setData('sync.started_at', time());

@@ -151,14 +151,8 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
             }
         }
 
-        // don't let recursion happen.
-        if ($this->getResourceType() === 'orders' && $this->getResourceCompleteTime()) {
-            mailchimp_log('sync.stop', "halting the sync for :: {$this->getResourceType()}");
-            return false;
-        }
-
         $page = $this->getResources();
-
+        
         if (empty($page)) {
             mailchimp_debug(get_called_class().'@handle', 'could not find any more '.$this->getResourceType().' records ending on page '.$this->getResourcePagePointer());
             // call the completed event to process further
@@ -180,7 +174,6 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
 
             // call the completed event to process further
             $this->complete();
-
 
             return false;
         }

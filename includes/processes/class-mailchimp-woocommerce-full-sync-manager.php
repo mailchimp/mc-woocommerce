@@ -1,4 +1,11 @@
 <?php
+/**
+ * Created by Vextras.
+ *
+ * Name: Pedro Germani
+ * Email: pedro.germani@gmail.com
+ * Date: 04/07/2020
+ */
 
 if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 	class MailChimp_WooCommerce_Process_Full_Sync_Manager {
@@ -8,7 +15,7 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 		private $plugin_name = 'mailchimp-woocommerce';
 		
 		/**
-		 * @return $this
+		 * Start the full sync process
 		 */
 		public function start_sync() {
 			
@@ -87,43 +94,39 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 		}
 
 		public function handle(){
-			//mailchimp_handle_or_queue(new static(), 10);
+			// Trigger respawn
 			$this->recreate();
+			
+			// get started queueing processes
 			$started = array(
 				'coupons' => get_option('mailchimp-woocommerce-sync.coupons.started_at'),
 				'products' => get_option('mailchimp-woocommerce-sync.products.started_at'),
 				'orders' => get_option('mailchimp-woocommerce-sync.orders.started_at')
 			);
 
-			$cur_page = array(
-				'coupons' => get_option('mailchimp-woocommerce-sync.coupons.current_page'),
-				'products' => get_option('mailchimp-woocommerce-sync.products.current_page'),
-				'orders' => get_option('mailchimp-woocommerce-sync.orders.current_page')
-			);
-
+			// get completed queueing processes
 			$completed = array(
 				'coupons' => get_option('mailchimp-woocommerce-sync.coupons.completed_at'),
 				'products' => get_option('mailchimp-woocommerce-sync.products.completed_at'),
 				'orders' => get_option('mailchimp-woocommerce-sync.orders.completed_at')
 			);
 
-			//mailchimp_log('sync.full_sync_manager.queue', 'FULL SYNC ', array($completed));
-			
+			// allow products and coupons to be synced simultaneously
 			if ($started['coupons'] && !$started['products']) {
-					mailchimp_log('sync.full_sync_manager.queue', 'Starting PRODUCTS queueing.');
-					//create Product Sync object
-					$product_sync = new MailChimp_WooCommerce_Process_Products();
-		
-					// queue first job
-					//mailchimp_handle_or_queue($product_sync);
-					
-					//trigger subsequent jobs creation
-					$product_sync->createSyncManagers();			
+				mailchimp_log('sync.full_sync_manager.queue', 'Starting PRODUCTS queueing.');
+				//create Product Sync object
+				$product_sync = new MailChimp_WooCommerce_Process_Products();
+	
+				// queue first job
+				//mailchimp_handle_or_queue($product_sync);
+				
+				//trigger subsequent jobs creation
+				$product_sync->createSyncManagers();			
 			}
 
-			//mailchimp_log('sync.full_sync_manager.queue', 'checking ORDERS queueing.', array($completed['products'],$completed['orders'],$cur_page['orders']));
+			// Only start orders when product jobs are all finished
 			if ($completed['products'] && !$started['orders'] ) {
-				
+				// check if we have products still to be synced
 				if (mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Single_Product') == 0) {
 					
 					$prevent_order_sync = get_option('mailchimp-woocommerce-sync.orders.prevent', false);

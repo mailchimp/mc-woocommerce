@@ -2,28 +2,162 @@
 
 if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 	class MailChimp_WooCommerce_Process_Full_Sync_Manager {
-		public function handle(){
-			$item_count = get_option('mailchimp-woocommerce-sync.orders.items', 0); 
-			error_log('checking status. orders left:'.$item_count);
+		/**
+		 * @var string
+		 */
+		private $plugin_name = 'mailchimp-woocommerce';
+		
+		/**
+		 * @return $this
+		 */
+		public function start_sync() {
 			
-			if ($item_count == 0) {
-				mailchimp_flag_stop_sync();
+			$this->flag_start_sync();
+			
+			$coupons_sync = new MailChimp_WooCommerce_Process_Coupons_Initial_Sync();
+		
+			// start sync processes creation
+			$coupons_sync->createSyncManagers();
+
+		}
+
+		/**
+		 * @return $this
+		 */
+		public function flag_start_sync() {
+			$job = new MailChimp_Service();
+
+			$job->removeSyncPointers();
+
+			update_option("{$this->plugin_name}-sync.config.resync", false);
+			update_option("{$this->plugin_name}-sync.orders.current_page", 1);
+			update_option("{$this->plugin_name}-sync.products.current_page", 1);
+			update_option("{$this->plugin_name}-sync.coupons.current_page", 1);
+
+			update_option("{$this->plugin_name}-sync.syncing", true);
+			update_option("{$this->plugin_name}-sync.started_at", time());
+
+			if (! get_option("{$this->plugin_name}-sync.completed_at")) {
+				update_option("{$this->plugin_name}-sync.initial_sync", 1);
+			} else delete_option("{$this->plugin_name}-sync.initial_sync");
+
+			global $wpdb;
+			try {
+				$wpdb->show_errors(false);
+				mailchimp_delete_as_jobs();
+				mailchimp_flush_sync_job_tables();
+				$wpdb->show_errors(true);
+			} catch (\Exception $e) {}
+
+			mailchimp_log("{$this->plugin_name}-sync.started", "Starting Sync :: ".date('D, M j, Y g:i A'));
+
+			// flag the store as syncing
+			mailchimp_get_api()->flagStoreSync(mailchimp_get_store_id(), true);
+
+			return $this;
+		}
+
+		/**
+		 * 
+		 */
+		function flag_stop_sync()
+		{
+			// this is the last thing we're doing so it's complete as of now.
+			mailchimp_set_data('sync.syncing', false);
+			mailchimp_set_data('sync.completed_at', time());
+
+			// set the current sync pages back to 1 if the user hits resync.
+			mailchimp_set_data('sync.orders.current_page', 1);
+			mailchimp_set_data('sync.products.current_page', 1);
+			mailchimp_set_data('sync.coupons.current_page', 1);
+
+			$sync_started_at = get_option('mailchimp-woocommerce-sync.started_at');
+			$sync_completed_at = get_option('mailchimp-woocommerce-sync.completed_at');
+
+			$sync_total_time = $sync_completed_at - $sync_started_at;
+			$time = gmdate("d H:i:s",$sync_total_time);
+
+			mailchimp_log('sync.completed', "Finished Sync :: ".date('D, M j, Y g:i A'). " (total time: ".$time.")");
+
+			// flag the store as sync_finished
+			mailchimp_get_api()->flagStoreSync(mailchimp_get_store_id(), false);
+			
+			mailchimp_update_communication_status();
+
+		}
+
+		public function handle(){
+			//mailchimp_handle_or_queue(new static(), 10);
+			$this->recreate();
+			$started = array(
+				'coupons' => get_option('mailchimp-woocommerce-sync.coupons.started_at'),
+				'products' => get_option('mailchimp-woocommerce-sync.products.started_at'),
+				'orders' => get_option('mailchimp-woocommerce-sync.orders.started_at')
+			);
+
+			$cur_page = array(
+				'coupons' => get_option('mailchimp-woocommerce-sync.coupons.current_page'),
+				'products' => get_option('mailchimp-woocommerce-sync.products.current_page'),
+				'orders' => get_option('mailchimp-woocommerce-sync.orders.current_page')
+			);
+
+			$completed = array(
+				'coupons' => get_option('mailchimp-woocommerce-sync.coupons.completed_at'),
+				'products' => get_option('mailchimp-woocommerce-sync.products.completed_at'),
+				'orders' => get_option('mailchimp-woocommerce-sync.orders.completed_at')
+			);
+
+			//mailchimp_log('sync.full_sync_manager.queue', 'FULL SYNC ', array($completed));
+			
+			if ($started['coupons'] && !$started['products']) {
+					mailchimp_log('sync.full_sync_manager.queue', 'Starting PRODUCTS queueing.');
+					//create Product Sync object
+					$product_sync = new MailChimp_WooCommerce_Process_Products();
+		
+					// queue first job
+					//mailchimp_handle_or_queue($product_sync);
+					
+					//trigger subsequent jobs creation
+					$product_sync->createSyncManagers();			
 			}
-			else {
-				$this->next();
+
+			//mailchimp_log('sync.full_sync_manager.queue', 'checking ORDERS queueing.', array($completed['products'],$completed['orders'],$cur_page['orders']));
+			if ($completed['products'] && !$started['orders'] ) {
+				
+				if (mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Single_Product') == 0) {
+					
+					$prevent_order_sync = get_option('mailchimp-woocommerce-sync.orders.prevent', false);
+
+					// only do this if we're not strictly syncing products ( which is the default ).
+					if (!$prevent_order_sync) {
+						// since the products are all good, let's sync up the orders now.
+						$order_sync = new MailChimp_WooCommerce_Process_Orders();
+						// // queue first job
+						//mailchimp_handle_or_queue($order_sync);
+						// //trigger subsequent jobs creation
+						$order_sync->createSyncManagers();
+					}
+
+					// since we skipped the orders feed we can delete this option.
+					delete_option('mailchimp-woocommerce-sync.orders.prevent');	
+				}
+				
+			}
+
+			if ($completed['orders']) {
+				if (mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Single_Order') <= 0) {
+					$this->flag_stop_sync();
+					as_unschedule_action('MailChimp_WooCommerce_Process_Full_Sync_Manager', array(), 'mc-woocommerce' );		
+				}	
 			}
 		}
 
 		/**
 		 *
 		 */
-		protected function next()
+		protected function recreate()
 		{
-			// this will paginate through all records for the resource type until they return no records.
-			as_enqueue_async_action( 'MailChimp_WooCommerce_Process_Full_Sync_Manager', array(), 'mc-woocommerce' );
-
-			//mailchimp_handle_or_queue(new static(), 10);
-			mailchimp_log(get_called_class().'@handle', 'queuing up the next job');
+			as_schedule_single_action(strtotime( '+10 seconds' ), 'MailChimp_WooCommerce_Process_Full_Sync_Manager', array(), 'mc-woocommerce' );	
 		}
 	}
 }

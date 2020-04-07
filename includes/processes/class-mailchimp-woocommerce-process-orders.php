@@ -161,7 +161,7 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abstrac
      */
     protected function complete()
     {
-        mailchimp_log('order_submit.completed', 'Done with the order sync.');
+        mailchimp_log('order_submit.completed', 'Done with the order queueing.');
 
         // add a timestamp for the orders sync completion
         $this->setResourceCompleteTime();

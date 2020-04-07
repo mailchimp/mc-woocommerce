@@ -89,13 +89,20 @@ class MailChimp_WooCommerce_Rest_Api
         }
 
         $store_id = mailchimp_get_store_id();
+        
+        $complete = array(
+            'coupons' => get_option('mailchimp-woocommerce-sync.coupons.completed_at'),
+            'products' => get_option('mailchimp-woocommerce-sync.products.completed_at'),
+            'orders' => get_option('mailchimp-woocommerce-sync.orders.completed_at')
+        );
+
         $promo_rules_count = mailchimp_get_coupons_count();
         $product_count = mailchimp_get_product_count();
         $order_count = mailchimp_get_order_count();
 
-        $mailchimp_total_promo_rules = $promo_rules_count - get_option('mailchimp-woocommerce-sync.coupons.items', 0);
-        $mailchimp_total_products = $product_count - get_option('mailchimp-woocommerce-sync.products.items', 0);
-        $mailchimp_total_orders = $order_count - get_option('mailchimp-woocommerce-sync.orders.items', 0);
+        $mailchimp_total_promo_rules = $complete['coupons'] ? $promo_rules_count - mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_SingleCoupon') : 0;
+        $mailchimp_total_products = $complete['products'] ? $product_count - mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Single_Product') : 0;
+        $mailchimp_total_orders = $complete['orders'] ? $order_count - mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Single_Order') : 0;
         // try {
         //     $promo_rules = $api->getPromoRules($store_id, 1, 1, 1);
         //     $mailchimp_total_promo_rules = $promo_rules['total_items'];

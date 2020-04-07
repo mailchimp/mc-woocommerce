@@ -1462,21 +1462,14 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	    // delete the transient so this only happens one time.
 	    delete_site_transient('mailchimp_woocommerce_start_sync');
 
-		$full_sync = new MailChimp_WooCommerce_Process_Coupons_Initial_Sync();
+		$full_sync = new MailChimp_WooCommerce_Process_Full_Sync_Manager();
 		
         // tell Mailchimp that we're syncing
-		$full_sync->flagStartSync();
+		$full_sync->start_sync();
 		
-        // queue up the jobs
-		mailchimp_handle_or_queue($full_sync, 0);
-		
-		// start sync process creation
-		$full_sync->createSyncManagers();
-
-		// enqueue sync manager
+        // enqueue sync manager
 		as_enqueue_async_action( 'MailChimp_WooCommerce_Process_Full_Sync_Manager', array(), 'mc-woocommerce' );
 	
-
 	}
 
 	/**

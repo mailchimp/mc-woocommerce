@@ -107,9 +107,11 @@ function mailchimp_environment_variables() {
 function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {			
     global $wpdb;
     $current_page = isset($job->current_page) && $job->current_page >= 0 ? $job->current_page : false;
-    $job_id = isset($job->id) ? $job->id : ($current_page ? get_class($job) . '.' . $job->current_page : get_class($job));
+    $job_id = isset($job->id) ? $job->id : ($current_page ? $job->current_page : get_class($job));
 
-    $message = ($job_id != get_class($job)) ? ' :: obj_id '.$job_id : '';
+
+    $message = ($job_id != get_class($job)) ? ' :: '. (isset($job->current_page) ? 'page ' : 'obj_id ') . $job_id : '';
+    
     $attempts = $job->get_attempts() > 0 ? ' attempt:' . $job->get_attempts() : '';
 
     if ($job->get_attempts() <= 5) {
@@ -161,7 +163,7 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
         $action = as_schedule_single_action( strtotime( '+'.$delay.' seconds' ), get_class($job), $action_args, "mc-woocommerce");
       
         if (!empty($existing_actions)) {
-            mailchimp_debug('action_scheduler.reschedule_job', get_class($job) . ($delay > 0 ? ' restarts in '.$delay. ' seconds' : ' re-queued' ) . $message . $attempts);
+            mailchimp_log('action_scheduler.reschedule_job', get_class($job) . ($delay > 0 ? ' restarts in '.$delay. ' seconds' : ' re-queued' ) . $message . $attempts);
         } 
         else {
             mailchimp_log('action_scheduler.queue_job', get_class($job) . ($delay > 0 ? ' starts in '.$delay. ' seconds' : ' queued' ) . $message . $attempts);
@@ -200,37 +202,17 @@ function mailchimp_handle_or_queue(Mailchimp_Woocommerce_Job $job, $delay = 0)
     }
 }
 
-/**
- * 
- */
-function mailchimp_flag_stop_sync()
-{
-    // this is the last thing we're doing so it's complete as of now.
-    mailchimp_set_data('sync.syncing', false);
-    mailchimp_set_data('sync.completed_at', time());
-
-    // set the current sync pages back to 1 if the user hits resync.
-    mailchimp_set_data('sync.orders.current_page', 1);
-    mailchimp_set_data('sync.products.current_page', 1);
-    mailchimp_set_data('sync.coupons.current_page', 1);
-
-    mailchimp_set_data('sync.coupons.items', 0);
-    mailchimp_set_data('sync.products.items', 0);
-    mailchimp_set_data('sync.orders.items', 0);
-
-    $sync_started_at = get_option('mailchimp-woocommerce-sync.started_at');
-    $sync_completed_at = get_option('mailchimp-woocommerce-sync.completed_at');
-
-    $sync_total_time = $sync_completed_at - $sync_started_at;
-    $time = gmdate("d H:i:s",$sync_total_time);
-
-    mailchimp_log('sync.completed', "Finished Sync :: ".date('D, M j, Y g:i A'). " (total time: ".$time.")");
-
-    // flag the store as sync_finished
-    mailchimp_get_api()->flagStoreSync(mailchimp_get_store_id(), false);
-    
-    mailchimp_update_communication_status();
-
+function mailchimp_get_remaining_jobs_count($job_hook) {
+    $existing_actions =  function_exists('as_get_scheduled_actions') ? as_get_scheduled_actions(
+        array(
+            'hook' => $job_hook, 
+            'status' => ActionScheduler_Store::STATUS_PENDING,  
+            'group' => 'mc-woocommerce', 
+            'per_page' => -1,
+        ), 'ids'
+    ) : null;
+    // mailchimp_log('sync.full_sync_manager.queue', "counting {$job_hook} actions:", array($existing_actions));		
+    return count($existing_actions);
 }
 
 /**
@@ -994,6 +976,7 @@ function mailchimp_flush_sync_pointers() {
     foreach (array('orders', 'products', 'coupons') as $resource_type) {
         delete_option("mailchimp-woocommerce-sync.{$resource_type}.started_at");
         delete_option("mailchimp-woocommerce-sync.{$resource_type}.completed_at");
+        delete_option("mailchimp-woocommerce-sync.{$resource_type}.started_at");
         delete_option("mailchimp-woocommerce-sync.{$resource_type}.current_page");
     }
 }

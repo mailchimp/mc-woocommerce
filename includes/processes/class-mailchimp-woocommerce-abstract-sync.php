@@ -30,10 +30,15 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
      */
     protected $store_id = '';
 
+     /**
+     * @var int
+     */
+    public $current_page = null;
+
     /**
      * @var int
      */
-    protected $items_per_page = 100;
+    public $items_per_page = 100;
 
     /**
      * MailChimp_WooCommerce_Abstract_Sync constructor.
@@ -73,13 +78,15 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
                 mailchimp_log('sync.error', $this->getResourceType().' is not a valid resource.');
                break;
         }
+        
+        $this->setData('sync.'.$this->getResourceType().'.started_at', time());
 
         $page = $this->getCurrentPage();
-        
-        while ($page <= ceil((int)$post_count / $this->items_per_page)) {
-            $page++;
+
+        while ($page - 1 <= ceil((int)$post_count / $this->items_per_page)) {
             $next = new static($page);
-            mailchimp_handle_or_queue($next, 0);
+            mailchimp_handle_or_queue($next);
+            $page++;
         }
     }
 
@@ -197,44 +204,6 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
         }
 
         return false;
-    }
-
-    /**
-     * @return $this
-     */
-    public function flagStartSync()
-    {
-        $job = new MailChimp_Service();
-
-        $job->removeSyncPointers();
-
-        $this->setData('sync.config.resync', false);
-        $this->setData('sync.orders.current_page', 1);
-        $this->setData('sync.products.current_page', 1);
-        $this->setData('sync.coupons.current_page', 1);
-
-
-        $this->setData('sync.syncing', true);
-        $this->setData('sync.started_at', time());
-
-        if (! $this->getData('sync.completed_at')) {
-            $this->setData('sync.initial_sync', 1);
-        } else $this->removeData('sync.initial_sync');
-
-        global $wpdb;
-        try {
-            $wpdb->show_errors(false);
-            mailchimp_delete_as_jobs();
-            mailchimp_flush_sync_job_tables();
-            $wpdb->show_errors(true);
-        } catch (\Exception $e) {}
-
-        mailchimp_log('sync.started', "Starting Sync :: ".date('D, M j, Y g:i A'));
-
-        // flag the store as syncing
-        mailchimp_get_api()->flagStoreSync(mailchimp_get_store_id(), true);
-
-        return $this;
     }
 
     /**

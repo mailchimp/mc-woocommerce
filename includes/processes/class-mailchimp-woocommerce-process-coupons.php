@@ -28,7 +28,7 @@ class MailChimp_WooCommerce_Process_Coupons extends MailChimp_WooCommerce_Abstra
      */
     protected function complete()
     {
-        mailchimp_log('coupon_sync.completed', 'Done with the coupon sync.');
+        mailchimp_log('coupon_sync.completed', 'Done with the coupon queueing.');
 
         // add a timestamp for the orders sync completion
         $this->setResourceCompleteTime();

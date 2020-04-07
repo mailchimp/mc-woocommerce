@@ -836,6 +836,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             $sql = $wpdb->prepare("DELETE FROM {$wpdb->prefix}mailchimp_jobs WHERE id = %s AND obj_id = %s", array($job_id, $obj_id));
             $wpdb->query($sql);
             
+            return true;
         } catch (\Exception $e) {
             $message = !empty($e->getMessage()) ? ' - ' . $e->getMessage() :'';
             mailchimp_debug('action_scheduler.process_job.fail', get_class($job) . ' :: obj_id '.$obj_id . ' :: ' .get_class($e) . $message);

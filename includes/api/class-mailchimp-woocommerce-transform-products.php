@@ -26,9 +26,9 @@ class MailChimp_WooCommerce_Transform_Products
             'items' => array(),
         );
 
-        if ((($products = $this->getProductPosts($page, $limit)) && !empty($products))) {
-            foreach ($products as $post) {
-                $response->items[] = $this->transform($post);
+        if ((($products = $this->getProductPostsIds($page, $limit)) && !empty($products))) {
+            foreach ($products as $post_id) {
+                $response->items[] = $post_id;
                 $response->count++;
             }
         }
@@ -206,7 +206,7 @@ class MailChimp_WooCommerce_Transform_Products
      * @param int $posts
      * @return array|bool
      */
-    public function getProductPosts($page = 1, $posts = 5)
+    public function getProductPostsIds($page = 1, $posts = 5)
     {
         $offset = 0;
 
@@ -221,6 +221,7 @@ class MailChimp_WooCommerce_Transform_Products
             'offset' => $offset,
             'orderby' => 'ID',
             'order' => 'ASC',
+            'fields' => 'ids'
         );
 
         $products = get_posts($params);

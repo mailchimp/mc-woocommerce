@@ -10,12 +10,9 @@ class MailChimp_WooCommerce_Process_Coupons_Initial_Sync extends MailChimp_WooCo
      */
     protected function complete()
     {
-        mailchimp_log('coupon_sync.completed', 'Done with the coupon sync, queuing up products.');
+        mailchimp_debug('coupon_sync.completed', 'Done with the coupon queueing');
 
         // add a timestamp for the orders sync completion
         $this->setResourceCompleteTime();
-
-        $product_sync = new MailChimp_WooCommerce_Process_Products();
-        mailchimp_handle_or_queue($product_sync, 0);
     }
 }

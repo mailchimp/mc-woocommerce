@@ -89,43 +89,57 @@ class MailChimp_WooCommerce_Rest_Api
         }
 
         $store_id = mailchimp_get_store_id();
-        $promo_rules_count = mailchimp_count_posts('shop_coupon');
+        
+        $complete = array(
+            'coupons' => get_option('mailchimp-woocommerce-sync.coupons.completed_at'),
+            'products' => get_option('mailchimp-woocommerce-sync.products.completed_at'),
+            'orders' => get_option('mailchimp-woocommerce-sync.orders.completed_at')
+        );
+
+        $promo_rules_count = mailchimp_get_coupons_count();
         $product_count = mailchimp_get_product_count();
         $order_count = mailchimp_get_order_count();
 
-        try {
-            $promo_rules = $api->getPromoRules($store_id, 1, 1, 1);
-            $mailchimp_total_promo_rules = $promo_rules['total_items'];
-            if (isset($promo_rules_count['publish']) && $mailchimp_total_promo_rules > $promo_rules_count['publish']) $mailchimp_total_promo_rules = $promo_rules_count['publish'];
-        } catch (\Exception $e) { $mailchimp_total_promo_rules = 0; }
-        try {
-            $products = $api->products($store_id, 1, 1);
-            $mailchimp_total_products = $products['total_items'];
-            if ($mailchimp_total_products > $product_count) $mailchimp_total_products = $product_count;
-        } catch (\Exception $e) { $mailchimp_total_products = 0; }
-        try {
-            $orders = $api->orders($store_id, 1, 1);
-            $mailchimp_total_orders = $orders['total_items'];
-            if ($mailchimp_total_orders > $order_count) $mailchimp_total_orders = $order_count;
-        } catch (\Exception $e) { $mailchimp_total_orders = 0; }
+        $mailchimp_total_promo_rules = $complete['coupons'] ? $promo_rules_count - mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_SingleCoupon') : 0;
+        $mailchimp_total_products = $complete['products'] ? $product_count - mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Single_Product') : 0;
+        $mailchimp_total_orders = $complete['orders'] ? $order_count - mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Single_Order') : 0;
+        // try {
+        //     $promo_rules = $api->getPromoRules($store_id, 1, 1, 1);
+        //     $mailchimp_total_promo_rules = $promo_rules['total_items'];
+        //     if (isset($promo_rules_count['publish']) && $mailchimp_total_promo_rules > $promo_rules_count['publish']) $mailchimp_total_promo_rules = $promo_rules_count['publish'];
+        // } catch (\Exception $e) { $mailchimp_total_promo_rules = 0; }
+        // try {
+        //     $products = $api->products($store_id, 1, 1);
+        //     $mailchimp_total_products = $products['total_items'];
+        //     if ($mailchimp_total_products > $product_count) $mailchimp_total_products = $product_count;
+        // } catch (\Exception $e) { $mailchimp_total_products = 0; }
+        // try {
+        //     $orders = $api->orders($store_id, 1, 1);
+        //     $mailchimp_total_orders = $orders['total_items'];
+        //     if ($mailchimp_total_orders > $order_count) $mailchimp_total_orders = $order_count;
+        // } catch (\Exception $e) { $mailchimp_total_orders = 0; }
 
         $date = mailchimp_date_local('now');
 
         // but we need to do it just in case.
         return $this->mailchimp_rest_response(array(
             'success' => true,
-            'promo_rules_in_store' => isset($promo_rules_count['publish']) ? (int) $promo_rules_count['publish'] : 0,
+            'promo_rules_in_store' => $promo_rules_count,
             'promo_rules_in_mailchimp' => $mailchimp_total_promo_rules,
+            
             'products_in_store' => $product_count,
             'products_in_mailchimp' => $mailchimp_total_products,
+            
             'orders_in_store' => $order_count,
             'orders_in_mailchimp' => $mailchimp_total_orders,
-            'promo_rules_page' => get_option('mailchimp-woocommerce-sync.coupons.current_page'),
-            'products_page' => get_option('mailchimp-woocommerce-sync.products.current_page'),
-            'orders_page' => get_option('mailchimp-woocommerce-sync.orders.current_page'),
+            
+            // 'promo_rules_page' => get_option('mailchimp-woocommerce-sync.coupons.current_page'),
+            // 'products_page' => get_option('mailchimp-woocommerce-sync.products.current_page'),
+            // 'orders_page' => get_option('mailchimp-woocommerce-sync.orders.current_page'),
+            
             'date' => $date->format( __('D, M j, Y g:i A', 'mailchimp-for-woocommerce')),
-            'has_started' => mailchimp_has_started_syncing(),
-            'has_finished' => mailchimp_is_done_syncing(),
+            'has_started' => mailchimp_has_started_syncing() || ($order_count != $mailchimp_total_orders),
+            'has_finished' => mailchimp_is_done_syncing() && ($order_count == $mailchimp_total_orders),
         ));
     }
     

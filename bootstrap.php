@@ -64,6 +64,7 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_Single_Order' => 'includes/processes/class-mailchimp-woocommerce-single-order.php',
         'MailChimp_WooCommerce_Single_Product' => 'includes/processes/class-mailchimp-woocommerce-single-product.php',
         'MailChimp_WooCommerce_User_Submit' => 'includes/processes/class-mailchimp-woocommerce-user-submit.php',
+        'MailChimp_WooCommerce_Process_Full_Sync_Manager' => 'includes/processes/class-mailchimp-woocommerce-full-sync-manager.php',
         
         'MailChimp_WooCommerce_Public' => 'public/class-mailchimp-woocommerce-public.php',
         'MailChimp_WooCommerce_Admin' => 'admin/class-mailchimp-woocommerce-admin.php',
@@ -105,56 +106,76 @@ function mailchimp_environment_variables() {
  */
 function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {			
     global $wpdb;
-    $job_id = isset($job->id) ? $job->id : get_class($job);
+    $current_page = isset($job->current_page) && $job->current_page >= 0 ? $job->current_page : false;
+    $job_id = isset($job->id) ? $job->id : ($current_page ? $job->current_page : get_class($job));
+
+
+    $message = ($job_id != get_class($job)) ? ' :: '. (isset($job->current_page) ? 'page ' : 'obj_id ') . $job_id : '';
     
-    $args = array(
-        'job' => maybe_serialize($job),
-        'obj_id' => $job_id,
-        'created_at'   => gmdate( 'Y-m-d H:i:s', time() )
-    );
-    
-    $existing_actions =  function_exists('as_get_scheduled_actions') ? as_get_scheduled_actions(array(
-        'hook' => get_class($job), 
-        'status' => ActionScheduler_Store::STATUS_PENDING,  
-        'args' => array(
-            'obj_id' => isset($job->id) ? $job->id : null), 
-            'group' => 'mc-woocommerce'
-        )
-    ) : null;
-    
-    if (!empty($existing_actions)) {
-        as_unschedule_action(get_class($job), array('obj_id' => $job->id), 'mc-woocommerce');
-    }
-    else {
-        $inserted = $wpdb->insert($wpdb->prefix."mailchimp_jobs", $args);
-        if (!$inserted) {
-            try {
-                if (mailchimp_string_contains($wpdb->last_error, 'Table')) {
-                    mailchimp_debug('DB Issue: `mailchimp_job` table was not found!', 'Creating Tables');
-                    install_mailchimp_queue();
-                    $inserted = $wpdb->insert($wpdb->prefix."mailchimp_jobs", $args);
-                    if (!$inserted) {
-                        mailchimp_debug('Queue Job '.get_class($job), $wpdb->last_error);
+    $attempts = $job->get_attempts() > 0 ? ' attempt:' . $job->get_attempts() : '';
+
+    if ($job->get_attempts() <= 5) {
+        
+        $args = array(
+            'job' => maybe_serialize($job),
+            'obj_id' => $job_id,
+            'created_at'   => gmdate( 'Y-m-d H:i:s', time() )
+        );
+        
+        $existing_actions =  function_exists('as_get_scheduled_actions') ? as_get_scheduled_actions(array(
+            'hook' => get_class($job), 
+            'status' => ActionScheduler_Store::STATUS_PENDING,  
+            'args' => array(
+                'obj_id' => isset($job->id) ? $job->id : null), 
+                'group' => 'mc-woocommerce'
+            )
+        ) : null;
+        
+        if (!empty($existing_actions)) {
+            as_unschedule_action(get_class($job), array('obj_id' => $job->id), 'mc-woocommerce');
+        }
+        else {
+            $inserted = $wpdb->insert($wpdb->prefix."mailchimp_jobs", $args);
+            if (!$inserted) {
+                try {
+                    if (mailchimp_string_contains($wpdb->last_error, 'Table')) {
+                        mailchimp_debug('DB Issue: `mailchimp_job` table was not found!', 'Creating Tables');
+                        install_mailchimp_queue();
+                        $inserted = $wpdb->insert($wpdb->prefix."mailchimp_jobs", $args);
+                        if (!$inserted) {
+                            mailchimp_debug('Queue Job '.get_class($job), $wpdb->last_error);
+                        }
                     }
+                } catch (\Exception $e) {
+                    mailchimp_error_trace($e, 'trying to create queue tables');
                 }
-            } catch (\Exception $e) {
-                mailchimp_error_trace($e, 'trying to create queue tables');
             }
         }
-    }
+        
+        $action_args = array(
+            'obj_id' => $job_id,
+        );
 
-    $action = as_schedule_single_action( strtotime( '+'.$delay.' seconds' ), get_class($job), array('obj_id' => $job_id), "mc-woocommerce");
+        if ($current_page !== false) {
+            $action_args['page'] = $current_page;
+        }
+
+        $action = as_schedule_single_action( strtotime( '+'.$delay.' seconds' ), get_class($job), $action_args, "mc-woocommerce");
+      
+        if (!empty($existing_actions)) {
+            mailchimp_debug('action_scheduler.reschedule_job', get_class($job) . ($delay > 0 ? ' restarts in '.$delay. ' seconds' : ' re-queued' ) . $message . $attempts);
+        } 
+        else {
+            mailchimp_log('action_scheduler.queue_job', get_class($job) . ($delay > 0 ? ' starts in '.$delay. ' seconds' : ' queued' ) . $message . $attempts);
+        }
     
-    $message = ($job_id != get_class($job)) ? ' :: obj_id '.$job_id : '';
-    $attempts = $job->get_attempts() > 0 ? ' attempt:' . $job->get_attempts() : '';
-    if (!empty($existing_actions)) {
-        mailchimp_debug('action_scheduler.reschedule_job', get_class($job) . ($delay > 0 ? ' restarts in '.$delay. ' seconds' : ' restarts in the next minute' ) . $message . $attempts);
-    } 
-    else {
-        mailchimp_log('action_scheduler.queue_job', get_class($job) . ($delay > 0 ? ' starts in '.$delay. ' seconds' : ' starts in the next minute' ) . $message . $attempts);
+        return $action;	
     }
-
-    return $action;	
+    else {
+        $job->set_attempts(0);
+        mailchimp_log('action_scheduler.fail_job', get_class($job) . ' cancelled. Too many attempts' . $message . $attempts);
+        return false;
+    }
 }
 
 
@@ -179,6 +200,19 @@ function mailchimp_handle_or_queue(Mailchimp_Woocommerce_Job $job, $delay = 0)
     if (!is_int($as_job_id)) {
         mailchimp_log('action_scheduler.queue_fail', get_class($job) .' FAILED :: as_job_id: '.$as_job_id);
     }
+}
+
+function mailchimp_get_remaining_jobs_count($job_hook) {
+    $existing_actions =  function_exists('as_get_scheduled_actions') ? as_get_scheduled_actions(
+        array(
+            'hook' => $job_hook, 
+            'status' => ActionScheduler_Store::STATUS_PENDING,  
+            'group' => 'mc-woocommerce', 
+            'per_page' => -1,
+        ), 'ids'
+    ) : null;
+    // mailchimp_log('sync.full_sync_manager.queue', "counting {$job_hook} actions:", array($existing_actions));		
+    return count($existing_actions);
 }
 
 /**
@@ -555,7 +589,7 @@ function mailchimp_error($action, $message, $data = array()) {
  * @param string $wrap
  * @return string
  */
-function mailchimp_error_trace(\Exception $e, $wrap = "") {
+function mailchimp_error_trace($e, $wrap = "") {
     $error = "Error Code {$e->getCode()} :: {$e->getMessage()} on {$e->getLine()} in {$e->getFile()}";
     if (empty($wrap)) return $error;
     return "{$wrap} :: {$error}";
@@ -581,6 +615,18 @@ function mailchimp_string_contains($haystack, $needles) {
     return false;
 }
 
+/**
+ * @return int
+ */
+function mailchimp_get_coupons_count() {
+    $posts = mailchimp_count_posts('shop_coupon');
+    unset($posts['auto-draft'], $posts['trash']);
+    $total = 0;
+    foreach ($posts as $status => $count) {
+        $total += $count;
+    }
+    return $total;
+}
 
 /**
  * @return int
@@ -895,6 +941,17 @@ function mailchimp_flush_database_tables() {
     } catch (\Exception $e) {}
 }
 
+function mailchimp_flush_sync_job_tables() {
+    try {
+        /** @var \ */
+        global $wpdb;
+        
+        mailchimp_delete_as_jobs();
+        
+        $wpdb->query("TRUNCATE `{$wpdb->prefix}mailchimp_jobs`");
+    } catch (\Exception $e) {}
+}
+
 function mailchimp_delete_as_jobs() {
 
     $existing_as_actions = function_exists('as_get_scheduled_actions') ? as_get_scheduled_actions(
@@ -919,6 +976,7 @@ function mailchimp_flush_sync_pointers() {
     foreach (array('orders', 'products', 'coupons') as $resource_type) {
         delete_option("mailchimp-woocommerce-sync.{$resource_type}.started_at");
         delete_option("mailchimp-woocommerce-sync.{$resource_type}.completed_at");
+        delete_option("mailchimp-woocommerce-sync.{$resource_type}.started_at");
         delete_option("mailchimp-woocommerce-sync.{$resource_type}.current_page");
     }
 }

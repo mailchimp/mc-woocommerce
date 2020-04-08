@@ -381,6 +381,8 @@ class MailChimp_WooCommerce
             foreach ($jobs_classes as $job_class) {
                 $this->loader->add_action($job_class, $service, 'mailchimp_process_single_job', 10, 1);
             }
+            // sync stats manager
+            $this->loader->add_action('MailChimp_WooCommerce_Process_Full_Sync_Manager', $service, 'mailchimp_process_sync_manager', 10, 1);
 		}
 	}
 

@@ -3,22 +3,7 @@
 if ( ! class_exists( 'Mailchimp_Woocommerce_Job' ) ) {
 	abstract class Mailchimp_Woocommerce_Job {
 
-	    public $should_kill_queue_listener = false;
 		private $attempts = 0;
-
-		/**
-		 * @var stdClass
-		 */
-		private $job;
-
-		/**
-		 * Set job
-		 *
-		 * @param $job
-		 */
-		public function set_job( $job ) {
-			$this->job = $job;
-		}
 
 		/**
 		 * Set attempts
@@ -44,6 +29,18 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Job' ) ) {
 			mailchimp_as_push($job, $delay);
 		}
 
+		/**
+		 * @return $this
+		 */
+		protected function applyRateLimitedScenario()
+		{
+			mailchimp_set_transient('api-rate-limited', true, 60);
+
+			$this->retry();
+
+			return $this;
+		}
+		
 		/**
 		 * Handle the job.
 		 */

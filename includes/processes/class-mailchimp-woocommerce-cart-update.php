@@ -16,6 +16,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
     public $campaign_id;
     public $cart_data;
     public $ip_address;
+    public $user_language;
 
 
     /**
@@ -25,7 +26,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
      * @param null $campaign_id
      * @param array $cart_data
      */
-    public function __construct($uid = null, $email = null, $campaign_id = null, array $cart_data = array())
+    public function __construct($uid = null, $email = null, $campaign_id = null, array $cart_data = array(), $user_language = null)
     {
         if ($uid) {
             $this->id = $uid;
@@ -39,6 +40,10 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
 
         if ($campaign_id) {
             $this->campaign_id = $campaign_id;
+        }
+        
+        if ($user_language) {
+            $this->user_language = $user_language;
         }
 
         $this->assignIP();
@@ -170,6 +175,9 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
 
                 mailchimp_log('abandoned_cart.success', "email: {$customer->getEmailAddress()}");
             }
+
+            // Maybe sync subscriber to set correct member.language
+            mailchimp_member_language_update($this->email, $this->user_language, 'cart');
 
         } catch (MailChimp_WooCommerce_RateLimitError $e) {
             sleep(3);

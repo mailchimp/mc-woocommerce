@@ -14,6 +14,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
     public $cart_session_id;
     public $campaign_id;
     public $landing_site;
+    public $user_language;
     public $is_update = false;
     public $is_admin_save = false;
     public $partially_refunded = false;
@@ -28,12 +29,13 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
      * @param null $campaign_id
      * @param null $landing_site
      */
-    public function __construct($id = null, $cart_session_id = null, $campaign_id = null, $landing_site = null)
+    public function __construct($id = null, $cart_session_id = null, $campaign_id = null, $landing_site = null, $user_language = null)
     {
         if (!empty($id)) $this->id = $id;
         if (!empty($cart_session_id)) $this->cart_session_id = $cart_session_id;
         if (!empty($campaign_id)) $this->campaign_id = $campaign_id;
         if (!empty($landing_site)) $this->landing_site = $landing_site;
+        if (!empty($user_language)) $this->user_language = $user_language;
     }
 
     /**
@@ -230,7 +232,11 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 $log .= " :: abandoned cart deleted [{$this->cart_session_id}]";
             }
 
+            // Maybe sync subscriber to set correct member.language
+            mailchimp_member_language_update($order->getCustomer()->getEmailAddress(), $this->user_language, 'order');
+
             mailchimp_log('order_submit.success', $log);
+
 
             // if the customer has a flag to double opt in - we need to push this data over to MailChimp as pending
             mailchimp_update_member_with_double_opt_in($order, $order->getCustomer()->getOriginalSubscriberStatus());

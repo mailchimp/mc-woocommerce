@@ -12,6 +12,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 {
     protected $user_email = null;
     protected $previous_email = null;
+    protected $user_language = null;
     protected $force_cart_post = false;
     protected $cart_was_submitted = false;
     protected $cart = array();
@@ -143,6 +144,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         // queue up the single order to be processed.
         $campaign_id = isset($tracking) && isset($tracking['campaign_id']) ? $tracking['campaign_id'] : null;
         $landing_site = isset($tracking) && isset($tracking['landing_site']) ? $tracking['landing_site'] : null;
+        $language = $newOrder ? substr( get_locale(), 0, 2 ) : null;
 
         if (isset($tracking)) {
             // update the post meta with campaing tracking details for future sync
@@ -150,7 +152,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             update_post_meta($order_id, 'mailchimp_woocommerce_landing_site', $landing_site);
         }
 
-        $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $campaign_id, $landing_site);
+        $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $campaign_id, $landing_site, $language);
         $handler->is_update = $newOrder ? !$newOrder : null;
         $handler->is_admin_save = is_admin();
         
@@ -229,9 +231,12 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
                 // grab the cookie data that could play important roles in the submission
                 $campaign = $this->getCampaignTrackingID();
-
+                
+                // get user language or default to admin main language
+                $language = $this->user_language ?: substr( get_locale(), 0, 2 ); 
+                
                 // fire up the job handler
-                $handler = new MailChimp_WooCommerce_Cart_Update($uid, $user_email, $campaign, $this->cart);
+                $handler = new MailChimp_WooCommerce_Cart_Update($uid, $user_email, $campaign, $this->cart, $language);
                 mailchimp_handle_or_queue($handler);
             }
 
@@ -358,7 +363,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         update_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', $subscribed);
 
         if ($subscribed) {
-            mailchimp_handle_or_queue(new MailChimp_WooCommerce_User_Submit($user_id, $subscribed, null, substr( get_locale(), 0, 2 )));
+            mailchimp_handle_or_queue(new MailChimp_WooCommerce_User_Submit($user_id, $subscribed, null));
         }
     }
 
@@ -377,7 +382,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         if ($is_subscribed === '' || $is_subscribed === null) return;
 
         // only send this update if the user actually has a boolean value.
-        mailchimp_handle_or_queue(new MailChimp_WooCommerce_User_Submit($user_id, (bool) $is_subscribed, $old_user_data, substr( get_locale(), 0, 2 )));
+        mailchimp_handle_or_queue(new MailChimp_WooCommerce_User_Submit($user_id, (bool) $is_subscribed, $old_user_data));
     }
 
     /**
@@ -694,6 +699,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             @setcookie('mailchimp_user_email', $this->user_email, $cookie_duration, '/' );
 
             $this->getCartItems();
+
+            if (isset($_GET['language'])) {
+                $this->user_language = $_GET['language'];
+            }
 
             $this->handleCartUpdated();
 

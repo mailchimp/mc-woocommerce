@@ -17,6 +17,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
     public $user_language;
     public $is_update = false;
     public $is_admin_save = false;
+    public $is_full_sync = false;
     public $partially_refunded = false;
     protected $woo_order_number = false;
     protected $is_amazon_order = false;
@@ -50,6 +51,17 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
     }
 
     /**
+     * @param null $id
+     * @return MailChimp_WooCommerce_Single_Order
+     */
+    public function set_full_sync($is_full_sync)
+    {
+        $this->is_full_sync = $is_full_sync;
+
+        return $this;
+    }
+
+    /**
      * @return bool
      */
     public function handle()
@@ -69,16 +81,6 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
         if (!($woo_order_number = $this->getRealOrderNumber())) {
             mailchimp_log('order_submit.failure', "There is no real order number to use.");
-            return false;
-        }
-
-        // see if we need to prevent this order from being submitted.
-        if ($this->shouldPreventSubmission()) {
-            if ($this->is_amazon_order) {
-                mailchimp_log('validation.amazon', "Order #{$woo_order_number} was placed through Amazon. Skipping!");
-            } elseif ($this->is_privacy_restricted) {
-                mailchimp_log('validation.gdpr', "Order #{$woo_order_number} is GDPR restricted. Skipping!");
-            }
             return false;
         }
 
@@ -128,7 +130,41 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 mailchimp_log('system.debug', "order {$order->getId()} is in {$order->getOriginalWooStatus()} status, and is being skipped for now.");
                 return false;
             }
+            
+            // see if we need to prevent this order from being submitted.
+            $email = $order->getCustomer()->getEmailAddress();
+            // see if we have a bad email
 
+            if ($this->shouldSkipOrder($email, $order->getId())) {
+                return false;
+            }
+
+            if ($this->is_full_sync) {
+                // see if this store has the auto subscribe setting enabled on initial sync
+                $plugin_options = get_option('mailchimp-woocommerce');
+                $should_auto_subscribe = (bool) $plugin_options['mailchimp_auto_subscribe'];
+
+                // since we're syncing the customer for the first time, this is where we need to add the override
+                // for subscriber status. We don't get the checkbox until this plugin is actually installed and working!
+                if (!($status = $order->getCustomer()->getOptInStatus())) {
+                    try {
+                        $subscriber = $api->member(mailchimp_get_list_id(), $order->getCustomer()->getEmailAddress());
+                        if ($subscriber['status'] != 'archived') {
+                            $status = !in_array($subscriber['status'], array('unsubscribed', 'transactional'));
+                            $order->getCustomer()->setOptInStatus($status);
+                        }
+                    } catch (\Exception $e) {
+                        if ($e instanceof MailChimp_WooCommerce_RateLimitError) {
+                            mailchimp_error('order_sync.error', mailchimp_error_trace($e, "GET subscriber :: {$order->getId()}"));
+                            throw $e;
+                        }
+                        // if they are using double opt in, we need to pass this in as false here so it doesn't auto subscribe.
+                        $status = mailchimp_list_has_double_optin() ? false : $should_auto_subscribe;
+                        $order->getCustomer()->setOptInStatus($status);
+                    }
+                }
+            }
+            
             // will be the same as the customer id. an md5'd hash of a lowercased email.
             $this->cart_session_id = $order->getCustomer()->getId();
 
@@ -157,13 +193,23 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 mailchimp_log('validation.gdpr', "Order #{$woo_order_number} is GDPR restricted. Skipping!");
                 return false;
             }
+            
+            if ( $new_order) {
+                // if single sync and
+                // if the order is in failed or cancelled status - and it's brand new, we shouldn't submit it.
+                if (!$this->is_full_sync && in_array($order->getFinancialStatus(), array('failed', 'cancelled')) || $order->getOriginalWooStatus() === 'pending') {
+                    mailchimp_log('order_sumbit', "#{$order->getId()} has a financial status of {$order->getFinancialStatus()} and was skipped.");
+                    return false;
+                }
+                // if full sync and
+                // if the original woocommerce status is actually pending, we need to skip these on new orders because
+                // it is probably happening due to 3rd party payment processing and it's still pending. These orders
+                // don't always make it over because someone could be cancelling out of the payment there.
+                if ($this->is_full_sync && !in_array(strtolower($order->getFinancialStatus()), array('processing', 'completed', 'paid'))) {
+                    mailchimp_log('order_sumbit', "#{$order->getId()} has a financial status of {$order->getFinancialStatus()} and was skipped.");
+                    return false;
+                }
 
-            // if the order is in failed or cancelled status - and it's brand new, we shouldn't submit it.
-            // if the original woocommerce status is actually pending, we need to skip these on new orders because
-            // it is probably happening due to 3rd party payment processing and it's still pending. These orders
-            // don't always make it over because someone could be cancelling out of the payment there.
-            if ($new_order && (in_array($order->getFinancialStatus(), array('failed', 'cancelled')) || $order->getOriginalWooStatus() === 'pending')) {
-                return false;
             }
 
             // if the order is brand new, and we already have a paid status,
@@ -173,14 +219,12 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 $order->confirmAndPay(true);
             }
 
-            mailchimp_debug('order_submit', "#{$woo_order_number}", $order->toArray());
-
             // if we're overriding this we need to set it here.
             if ($this->partially_refunded) {
                 $order->setFinancialStatus('partially_refunded');
             }
 
-            $log = "$call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}";
+            $log = "$call :: #{$order->getId()} :: email: {$email}";
 
             // only do this stuff on new orders
             if ($new_order) {
@@ -201,6 +245,32 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                     $order->setLandingSite($this->landing_site);
                 }
             }
+
+            if ($this->is_full_sync) {
+                $line_items = $order->items();
+                
+                // if we don't have any line items, we need to create the mailchimp product
+                // with a price of 1.00 and we'll use the inventory quantity to adjust correctly.
+                if (empty($line_items) || !count($line_items)) {
+                    
+                    // this will create an empty product placeholder, or return the pre populated version if already
+                    // sent to Mailchimp.
+                    $product = $api->createEmptyLineItemProductPlaceholder();
+                    
+                    $line_item = new MailChimp_WooCommerce_LineItem();
+                    $line_item->setId($product->getId());
+                    $line_item->setPrice(1);
+                    $line_item->setProductId($product->getId());
+                    $line_item->setProductVariantId($product->getId());
+                    $line_item->setQuantity((int) $order->getOrderTotal());
+                    
+                    $order->addItem($line_item);
+                    
+                    mailchimp_log('order_sumbit.error', "Order {$order->getId()} does not have any line items, so we are using 'empty_line_item_placeholder' instead.");
+                }
+            }
+            
+            mailchimp_debug('order_submit', "#{$woo_order_number}", $order->toArray());
 
             try {
                 // update or create
@@ -224,7 +294,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             }
 
             if (empty($api_response)) {
-                mailchimp_error('order_submit.failure', "$call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()} produced a blank response from MailChimp");
+                mailchimp_error('order_submit.failure', "$call :: #{$order->getId()} :: email: {$email} produced a blank response from MailChimp");
                 return $api_response;
             }
 
@@ -233,13 +303,16 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             }
 
             // Maybe sync subscriber to set correct member.language
-            mailchimp_member_language_update($order->getCustomer()->getEmailAddress(), $this->user_language, 'order');
+            mailchimp_member_language_update($email, $this->user_language, 'order');
 
             mailchimp_log('order_submit.success', $log);
 
-
-            // if the customer has a flag to double opt in - we need to push this data over to MailChimp as pending
-            mailchimp_update_member_with_double_opt_in($order, $order->getCustomer()->getOriginalSubscriberStatus());
+            if ($this->is_full_sync && $new_order) {
+                // if the customer has a flag to double opt in - we need to push this data over to MailChimp as pending
+                //TODO: RYAN: this is the only place getOriginalSubscriberStatus() is called, but the iterate method uses another way. 
+                // mailchimp_update_member_with_double_opt_in($order, ($should_auto_subscribe || $status));
+                mailchimp_update_member_with_double_opt_in($order, ($should_auto_subscribe || $order->getCustomer()->getOriginalSubscriberStatus()));
+            }
 
             return $api_response;
         } catch (MailChimp_WooCommerce_RateLimitError $e) {
@@ -264,12 +337,12 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             // this can happen when a customer changes their email.
             if (isset($order) && strpos($message, 'not be changed')) {
                 try {
-                    mailchimp_log('order_submit.deleting_customer', "#{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}");
+                    mailchimp_log('order_submit.deleting_customer', "#{$order->getId()} :: email: {$email}");
                     // delete the customer before adding it again.
                     $api->deleteCustomer($store_id, $order->getCustomer()->getId());
                     // update or create
                     $api_response = $api->$call($store_id, $order, false);
-                    $log = "Deleted Customer :: $call :: #{$order->getId()} :: email: {$order->getCustomer()->getEmailAddress()}";
+                    $log = "Deleted Customer :: $call :: #{$order->getId()} :: email: {$email}";
                     if (!empty($job->campaign_id)) {
                         $log .= ' :: campaign id '.$job->campaign_id;
                     }
@@ -288,6 +361,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             mailchimp_error('order_submit.error', mailchimp_error_trace($e, "{$call} :: #{$this->id}"));
             throw $e;
         }
+        mailchimp_debug('order_submit', 'no order found', $order);
         return false;
     }
 
@@ -310,27 +384,29 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
     }
 
     /**
+     * @param $email
+     * @param $order_id
      * @return bool
      */
-    public function shouldPreventSubmission()
+    protected function shouldSkipOrder($email, $order_id)
     {
-        try {
-            if (empty($this->id) || !($order_post = get_post($this->id))) {
-                return false;
-            }
-            $woo = wc_get_order($order_post);
-            $email = $woo->get_billing_email();
-
-            // just skip these altogether because we can't submit any amazon orders anyway.
-            $this->is_amazon_order = mailchimp_email_is_amazon($email);
-
-            // see if this is a privacy restricted email address.
-            $this->is_privacy_restricted = mailchimp_email_is_privacy_protected($email);
-
-            return $this->is_amazon_order || $this->is_privacy_restricted;
-        } catch (\Exception $e) {
-            return false;
+        if (!is_email($email)) {
+            mailchimp_log('validation.bad_email', "Order #{$order_id} has an invalid email address. Skipping!");
+            return true;
         }
+
+        // make sure we can submit this order to MailChimp or skip it.
+        if (mailchimp_email_is_amazon($email)) {
+            mailchimp_log('validation.amazon', "Order #{$order_id} was placed through Amazon. Skipping!");
+            return true;
+        }
+
+        if (mailchimp_email_is_privacy_protected($email)) {
+            mailchimp_log('validation.gdpr', "Order #{$order_id} is GDPR restricted. Skipping!");
+            return true;
+        }
+
+        return false;
     }
 }
 

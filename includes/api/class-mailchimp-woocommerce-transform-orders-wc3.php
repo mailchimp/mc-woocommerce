@@ -30,26 +30,9 @@ class MailChimp_WooCommerce_Transform_Orders
         );
 
         if ((($orders = $this->getOrderPosts($page, $limit)) && !empty($orders))) {
-            foreach ($orders as $post) {
+            foreach ($orders as $post_id) {
+                $response->items[] = $post_id;
                 $response->count++;
-
-                if ($post->post_status === 'auto-draft') {
-                    $response->drafts++;
-                    continue;
-                }
-
-                try {
-                    $order = $this->transform($post);
-                    if (!$order->isFlaggedAsAmazonOrder()) {
-                        $response->valid++;
-                        $response->items[] = $order->getId();
-                    }
-                } catch (MailChimp_WooCommerce_Error $e) {
-                    mailchimp_log('initial_sync', $e->getMessage());
-                } catch (\Exception $e) {
-                    mailchimp_error('initial_sync', $e->getMessage(), array('post' => $post));
-                }
-                
             }
         }
 
@@ -411,6 +394,7 @@ class MailChimp_WooCommerce_Transform_Orders
             'offset' => $offset,
             'orderby' => 'id',
             'order' => 'ASC',
+            'fields' => 'ids'
         );
 
         $orders = get_posts($params);

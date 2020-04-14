@@ -188,7 +188,9 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
                     mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($resource));
                    break;
                 case 'orders':
-                    mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Order($resource));
+                    $order = new MailChimp_WooCommerce_Single_Order($resource);
+                    $order->set_full_sync(true);
+                    mailchimp_handle_or_queue($order);
                    break;
                default:
                     mailchimp_log('sync.error', $this->getResourceType().' is not a valid resource.');

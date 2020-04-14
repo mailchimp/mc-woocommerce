@@ -375,7 +375,6 @@ class MailChimp_WooCommerce
                 "MailChimp_WooCommerce_Cart_Update",
                 "MailChimp_WooCommerce_User_Submit",
                 "MailChimp_WooCommerce_Process_Coupons",
-                "MailChimp_WooCommerce_Process_Coupons_Initial_Sync",
                 "MailChimp_WooCommerce_Process_Orders",
                 "MailChimp_WooCommerce_Process_Products"
             );

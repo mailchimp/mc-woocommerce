@@ -21,7 +21,7 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 			
 			$this->flag_start_sync();
 			
-			$coupons_sync = new MailChimp_WooCommerce_Process_Coupons_Initial_Sync();
+			$coupons_sync = new MailChimp_WooCommerce_Process_Coupons();
 		
 			// start sync processes creation
 			$coupons_sync->createSyncManagers();

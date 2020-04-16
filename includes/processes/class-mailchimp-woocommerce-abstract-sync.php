@@ -86,6 +86,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
         while ($page - 1 <= ceil((int)$post_count / $this->items_per_page)) {
             $next = new static($page);
             mailchimp_handle_or_queue($next);
+            $this->setResourcePagePointer(($page), $this->getResourceType());
             $page++;
         }
     }
@@ -162,7 +163,6 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
             return false;
         }
 
-        $this->setResourcePagePointer(($page->page + 1), $this->getResourceType());
 
         // if we've got a 0 count, that means we're done.
         if ($page->count <= 0) {

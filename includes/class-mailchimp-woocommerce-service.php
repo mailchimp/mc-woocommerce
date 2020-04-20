@@ -90,7 +90,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $campaign_id = $this->getCampaignTrackingID();
         if (empty($campaign_id)) {
             $campaign_id =  get_post_meta($order_id, 'mailchimp_woocommerce_campaign_id', true);
-            if (!$campaign_id) $campaign = null;
+            // make sure this campaign ID has a valid format before we submit something
+            if (!$this->campaignIdMatchesFormat($campaign_id)) {
+                $campaign = null;
+            }
         }
 
         // grab the landing site cookie if we have one here.
@@ -499,7 +502,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         }
 
         // we must follow a pattern at minimum in order to think this is possibly a valid campaign ID.
-        if (!preg_match("/^[a-zA-Z0-9]{10,12}$/", $cookie, $matches)) {
+        if (!$this->campaignIdMatchesFormat($cookie)) {
             return false;
         }
 
@@ -517,8 +520,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             return $this;
         }
 
+        $cid = trim($id);
+
         // we must follow a pattern at minimum in order to think this is possibly a valid campaign ID.
-        if (!preg_match("/^[a-zA-Z0-9]{10,12}$/", ($cid = trim($id)), $matches)) {
+        if (!$this->campaignIdMatchesFormat($cid)) {
             return $this;
         }
 
@@ -531,6 +536,16 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $this->setWooSession('mailchimp_campaign_id', $cid);
 
         return $this;
+    }
+
+    /**
+     * @param $cid
+     * @return bool
+     */
+    public function campaignIdMatchesFormat($cid)
+    {
+        if (!is_string($cid) || empty($cid)) return false;
+        return (bool) preg_match("/^[a-zA-Z0-9]{10,12}$/", $cid, $matches);
     }
 
     /**

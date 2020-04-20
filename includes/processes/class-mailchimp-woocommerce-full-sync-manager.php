@@ -82,7 +82,7 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 			$sync_completed_at = get_option('mailchimp-woocommerce-sync.completed_at');
 
 			$sync_total_time = $sync_completed_at - $sync_started_at;
-			$time = gmdate("d H:i:s",$sync_total_time);
+			$time = gmdate("H:i:s",$sync_total_time);
 
 			mailchimp_log('sync.completed', "Finished Sync :: ".date('D, M j, Y g:i A'). " (total time: ".$time.")");
 

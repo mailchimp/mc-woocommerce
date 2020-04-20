@@ -148,7 +148,7 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 			}
 
 			if ($completed['orders']) {
-				if (mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Single_Order') <= 0) {
+				if (mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Single_Order') <= 0 && mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Process_Orders') <= 0) {
 					$this->flag_stop_sync();
 					as_unschedule_action('MailChimp_WooCommerce_Process_Full_Sync_Manager', array(), 'mc-woocommerce' );		
 				}	

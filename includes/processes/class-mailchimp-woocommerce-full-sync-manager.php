@@ -127,7 +127,7 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 			// Only start orders when product jobs are all finished
 			if ($completed['products'] && !$started['orders'] ) {
 				// check if we have products still to be synced
-				if (mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Single_Product') == 0) {
+				if (mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Single_Product') == 0 && mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Process_Products') <= 0) {
 					
 					$prevent_order_sync = get_option('mailchimp-woocommerce-sync.orders.prevent', false);
 

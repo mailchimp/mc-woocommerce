@@ -82,7 +82,7 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 			$sync_completed_at = get_option('mailchimp-woocommerce-sync.completed_at');
 
 			$sync_total_time = $sync_completed_at - $sync_started_at;
-			$time = gmdate("d H:i:s",$sync_total_time);
+			$time = gmdate("H:i:s",$sync_total_time);
 
 			mailchimp_log('sync.completed', "Finished Sync :: ".date('D, M j, Y g:i A'). " (total time: ".$time.")");
 
@@ -127,7 +127,7 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 			// Only start orders when product jobs are all finished
 			if ($completed['products'] && !$started['orders'] ) {
 				// check if we have products still to be synced
-				if (mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Single_Product') == 0) {
+				if (mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Single_Product') == 0 && mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Process_Products') <= 0) {
 					
 					$prevent_order_sync = get_option('mailchimp-woocommerce-sync.orders.prevent', false);
 
@@ -148,7 +148,7 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 			}
 
 			if ($completed['orders']) {
-				if (mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Single_Order') <= 0) {
+				if (mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Single_Order') <= 0 && mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Process_Orders') <= 0) {
 					$this->flag_stop_sync();
 					as_unschedule_action('MailChimp_WooCommerce_Process_Full_Sync_Manager', array(), 'mc-woocommerce' );		
 				}	

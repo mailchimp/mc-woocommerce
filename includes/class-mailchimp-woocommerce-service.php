@@ -493,8 +493,14 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     public function getCampaignTrackingID()
     {
         $cookie = $this->cookie('mailchimp_campaign_id', false);
+
         if (empty($cookie)) {
             $cookie = $this->getWooSession('mailchimp_campaign_id', false);
+        }
+
+        // we must follow a pattern at minimum in order to think this is possibly a valid campaign ID.
+        if (!preg_match("/^[a-zA-Z0-9]{10,12}$/", $cookie, $matches)) {
+            return false;
         }
 
         return $cookie;
@@ -511,7 +517,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             return $this;
         }
 
-        $cid = trim($id);
+        // we must follow a pattern at minimum in order to think this is possibly a valid campaign ID.
+        if (!preg_match("/^[a-zA-Z0-9]{10,12}$/", ($cid = trim($id)), $matches)) {
+            return $this;
+        }
 
         // don't throw the error if it's not found.
         if (!$this->api()->getCampaign($cid, false)) {

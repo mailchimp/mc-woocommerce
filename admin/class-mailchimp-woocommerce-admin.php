@@ -1257,6 +1257,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         // set the store name if the list id is not set.
 		if (empty($list_id)) {
             $submission->setName($data['store_name']);
+			if (isset($data['admin_email']) && !empty($data['admin_email'])) {
+				$submission->setNotifyOnSubscribe($data['admin_email']);
+				$submission->setNotifyOnUnSubscribe($data['admin_email']);
+			}
         }
 
 		// set the campaign defaults
@@ -1269,11 +1273,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		// set the permission reminder message.
 		$submission->setPermissionReminder($data['campaign_permission_reminder']);
-
-		if (isset($data['admin_email']) && !empty($data['admin_email'])) {
-			$submission->setNotifyOnSubscribe($data['admin_email']);
-			$submission->setNotifyOnUnSubscribe($data['admin_email']);
-		}
 
 		$submission->setContact($this->address($data));
 

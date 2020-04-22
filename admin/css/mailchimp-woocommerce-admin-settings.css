@@ -725,12 +725,33 @@
 	background: #fff;
 	border: 1px solid #e5e5e5;
 	box-shadow: 0 1px 1px rgba(0,0,0,.04);
-	padding: 15px 20px;
 }
 
 #log-viewer pre {
 	font-family: monospace;
 	white-space: pre-wrap;
+}
+
+#log-viewer #log-header {
+	border-bottom: 1px solid #e5e5e5;
+	padding: 15px 20px;
+}
+
+#log-viewer #log-content {
+	height: 500px;
+	padding: 15px 20px;
+	width: 100%;
+	background-color: white;
+	color: #444;
+	font-family: monospace;
+	white-space: pre-wrap;
+	font-size: 1em;
+	
+}
+
+#log-viewer #log-content:focus {
+	outline: none;
+	box-shadow: none !important;
 }
 
 

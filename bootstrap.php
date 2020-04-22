@@ -984,26 +984,20 @@ function mailchimp_flush_sync_pointers() {
 }
 
 /**
- * To be used when running clean up for uninstalls or re-installs.
+ * To be used when running clean up for uninstalls or store disconnection.
  */
 function mailchimp_clean_database() {
+    global $wpdb;
+    
     // delete custom tables data
     mailchimp_flush_database_tables();
 
-    // clean up the initial sync pointers
-    mailchimp_flush_sync_pointers();
+    // delete plugin options
+    $plugin_options = $wpdb->get_results( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE 'mailchimp%woocommerce%'" );
 
-    delete_option('mailchimp-woocommerce');
-    delete_option('mailchimp-woocommerce-store_id');
-    delete_option('mailchimp-woocommerce-sync.syncing');
-    delete_option('mailchimp-woocommerce-sync.started_at');
-    delete_option('mailchimp-woocommerce-sync.completed_at');
-    delete_option('mailchimp-woocommerce-sync.initial_sync');
-    delete_option('mailchimp-woocommerce-validation.api.ping');
-    delete_option('mailchimp-woocommerce-cached-api-lists');
-    delete_option('mailchimp-woocommerce-cached-api-ping-check');
-    delete_option('mailchimp-woocommerce-errors.store_info');
-    delete_option('mailchimp-woocommerce-empty_line_item_placeholder');
+    foreach( $plugin_options as $option ) {
+        delete_option( $option->option_name );
+    }
 }
 
 /**

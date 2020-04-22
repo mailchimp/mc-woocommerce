@@ -129,13 +129,13 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @since    1.0.0
 	 */
 	public function add_plugin_admin_menu() {
-        add_menu_page(
-            __('Mailchimp - WooCommerce Setup', 'mailchimp-for-woocommerce'),
-            'Mailchimp',
-            mailchimp_get_allowed_capability(),
-            $this->plugin_name,
-            array($this, 'display_plugin_setup_page'), 'data:image/svg+xml;base64,'.$this->mailchimp_svg()
-        );
+		add_menu_page(
+			__('Mailchimp - WooCommerce Setup', 'mailchimp-for-woocommerce'),
+			'Mailchimp',
+			mailchimp_get_allowed_capability(),
+			$this->plugin_name,
+			array($this, 'display_plugin_setup_page'), 'data:image/svg+xml;base64,'.$this->mailchimp_svg()
+		);
 	}
 
 	/**

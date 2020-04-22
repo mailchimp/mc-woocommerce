@@ -1,7 +1,5 @@
 == Changelog ==
-= 2.4.1 =
-* add sub menu items on admin area
-= 2.4 =
+= 2.4.0 =
 * update for latest Action Scheduler v3.1.4
 * adds customer language on Cart and Order sync
 * adds batch processing for queues

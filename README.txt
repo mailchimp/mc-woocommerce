@@ -64,13 +64,14 @@ The Mailchimp for WooCommerce supports Wordpress Multi Sites and below are a few
 Refer to the Wordpress Codex for more information about [Multisite Network Administration](https://codex.wordpress.org/Multisite_Network_Administration)
 
 == Changelog ==
-= 2.4.1 =
-* add sub menu items on admin area
-
-= 2.4 =
+= 2.4.0 =
 * update for latest Action Scheduler v3.1.4
 * adds customer language on Cart and Order sync
 * adds batch processing for queues
 * support for Brazilian Portuguese pt_BR Language
+= 2.3.6 =
+* fix for Audience Defaults and Settings not visible
+* improved campaign tracking on external payment gateways and API endpoints
+* fix for transactionals being subscribed after force resync
 
 [See changelog for all versions](https://raw.githubusercontent.com/mailchimp/mc-woocommerce/master/CHANGELOG.txt).

@@ -331,6 +331,7 @@
 	transition: background-color 0.3s ease-out,
 		text-shadow 0.3s ease-out,
 		box-shadow 0.3s ease-out;
+	text-decoration: none !important;
 }
 
 .tab-content-submit:focus,.tab-content-submit:hover{
@@ -531,6 +532,7 @@
 	-moz-transition: background-color 0.3s ease-out;
 	-o-transition: background-color 0.3s ease-out;
 	transition: background-color 0.3s ease-out;
+	text-decoration: none !important;
 }
 
 .sync-content-wrapper .mc-woocommerce-disconnect-button svg,
@@ -922,6 +924,10 @@
 		width: 100%;
 		padding: 15px 35px 15px 35px !important;
 		text-align: center;
+	}
+
+	.mc-woocommerce-delete-log-button {
+		display: none;
 	}
 
 	.tab-content-wrapper form{

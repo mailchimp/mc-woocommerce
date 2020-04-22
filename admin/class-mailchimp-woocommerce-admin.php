@@ -60,13 +60,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$options['active_tab'] = 'api_key';
 		$options['mailchimp_list'] = null;
 
-		update_option('mailchimp-woocommerce-validation.store_info', false);
-		update_option('mailchimp-woocommerce-validation.campaign_defaults', false);
-		update_option('mailchimp-woocommerce-validation.newsletter_settings', false);
-		update_option('mailchimp-woocommerce-sync.started_at', false);
-		update_option('mailchimp-woocommerce-sync.completed_at', false);
-		update_option('mailchimp-woocommerce-resource-last-updated', false);
-		update_option('mailchimp-woocommerce-empty_line_item_placeholder', false);
+		// clean database
+		mailchimp_clean_database();
 		
 		// remove user from our marketing status audience
 		mailchimp_remove_communication_status();

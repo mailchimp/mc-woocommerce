@@ -129,6 +129,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @since    1.0.0
 	 */
 	public function add_plugin_admin_menu() {
+		// Add top level menu item
 		add_menu_page(
 			__('Mailchimp - WooCommerce Setup', 'mailchimp-for-woocommerce'),
 			'Mailchimp',
@@ -136,6 +137,79 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			$this->plugin_name,
 			array($this, 'display_plugin_setup_page'), 'data:image/svg+xml;base64,'.$this->mailchimp_svg()
 		);
+		
+		// only shows submenus if initial wizard is complete
+		$show_submenus = ($this->getData('validation.store_info', false) && $this->getData('validation.campaign_defaults', false) && $this->getData('validation.newsletter_settings', false));
+		if ($show_submenus) {
+			// Add submenu items		
+			add_submenu_page( 
+				$this->plugin_name,
+				esc_html__('Overview', 'mailchimp-for-woocommerce'),
+				esc_html__('Overview', 'mailchimp-for-woocommerce'),
+				mailchimp_get_allowed_capability(),
+				$this->plugin_name . '&amp;tab=sync',
+				array($this, 'display_plugin_setup_page')
+			);
+			
+			add_submenu_page( 
+				$this->plugin_name,
+				esc_html__('Store Settings', 'mailchimp-for-woocommerce'),
+				esc_html__('Store Settings', 'mailchimp-for-woocommerce'),
+				mailchimp_get_allowed_capability(),
+				$this->plugin_name . '&amp;tab=store_info',
+				array($this, 'display_plugin_setup_page')
+			);
+			
+			add_submenu_page( 
+				$this->plugin_name,
+				esc_html__('Audience Defaults', 'mailchimp-for-woocommerce'),
+				esc_html__('Audience Defaults', 'mailchimp-for-woocommerce'),
+				mailchimp_get_allowed_capability(),
+				$this->plugin_name . '&amp;tab=campaign_defaults',
+				array($this, 'display_plugin_setup_page')
+			);
+			
+			add_submenu_page( 
+				$this->plugin_name,
+				esc_html__('Audience Settings', 'mailchimp-for-woocommerce'),
+				esc_html__('Audience Settings', 'mailchimp-for-woocommerce'),
+				mailchimp_get_allowed_capability(),
+				$this->plugin_name . '&amp;tab=newsletter_settings',
+				array($this, 'display_plugin_setup_page')
+			);
+			
+			add_submenu_page( 
+				$this->plugin_name,
+				esc_html__('Logs', 'mailchimp-for-woocommerce'),
+				esc_html__('Logs', 'mailchimp-for-woocommerce'),
+				mailchimp_get_allowed_capability(),
+				$this->plugin_name . '&amp;tab=logs',
+				array($this, 'display_plugin_setup_page')
+			);
+			
+			// Remove submenu duplicate of top level menu item
+			remove_submenu_page( $this->plugin_name, $this->plugin_name );
+
+		}
+	}
+	
+	/**
+	 * Highlight correct item on admin plugin's submenu
+	 * 
+	 * because of the nature of our settings pages being all the same url as opposed to separate php files, 
+	 * we need to force highlight on correct item based on the $_GET[tab] param.
+	 * 
+	 * @since    2.4.1
+	 */
+	function highlight_admin_menu($parent_file){
+		global $current_screen;
+		global $submenu_file;
+
+		if( $current_screen->base == 'toplevel_page_mailchimp-woocommerce' ) :
+			$submenu_file = $parent_file . (isset($_GET['tab']) ? "&amp;tab=" . $_GET['tab'] : "&amp;tab=sync");
+		endif;
+		
+		return $parent_file;
 	}
 
 	/**

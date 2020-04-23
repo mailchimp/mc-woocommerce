@@ -1027,13 +1027,8 @@ function run_mailchimp_woocommerce() {
     }
 }
 
-function mailchimp_woocommerce_add_meta_tags() {
-    echo '<meta name="referrer" content="always"/>';
-}
-
 function mailchimp_on_all_plugins_loaded() {
     if (mailchimp_check_woocommerce_plugin_status()) {
-        add_action('wp_head', 'mailchimp_woocommerce_add_meta_tags');
         run_mailchimp_woocommerce();
     }
 }

@@ -642,8 +642,11 @@ class MailChimp_WooCommerce_MailChimpApi
      */
     public function getCampaign($campaign_id, $throw_if_invalid = true)
     {
+        // don't let an empty campaign ID do anything
+        if (empty($campaign_id)) return false;
+
         // if we found the campaign ID already and it's been stored in the cache, return it from the cache instead.
-        if (($data = get_site_transient('mailchimp-woocommerce-has-campaign-id-'.$campaign_id))) {
+        if (($data = get_site_transient('mailchimp-woocommerce-has-campaign-id-'.$campaign_id)) && !empty($data)) {
             return $data;
         }
         if (get_site_transient('mailchimp-woocommerce-no-campaign-id-'.$campaign_id)) {

@@ -279,6 +279,22 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     }
 
     /**
+     * @param WC_Data          $object   The deleted or trashed object.
+	 * @param WP_REST_Response $response The response data.
+     * @param WP_REST_Request  $request  The request sent to the API.
+     */
+    public function handleAPICouponTrashed($object, $response, $request)
+    {
+        try {
+            $deleted = mailchimp_get_api()->deletePromoRule(mailchimp_get_store_id(), $request['id']);
+            if ($deleted) mailchimp_log('api.promo_code.deleted', "deleted promo code {$request['id']}");
+            else mailchimp_log('api.promo_code.delete_fail', "Unable to delete promo code {$request['id']}");
+        } catch (\Exception $e) {
+            mailchimp_error('delete promo code', $e->getMessage());
+        }
+    }
+
+    /**
      * Save post metadata when a post is saved.
      *
      * @param int $post_id The post ID.

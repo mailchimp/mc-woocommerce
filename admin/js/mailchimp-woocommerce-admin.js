@@ -35,7 +35,7 @@
 		// copy log button
 		$('.mc-woocommerce-copy-log-button').click(function (e) {
 			e.preventDefault();
-			var copyText = $('#log-text');
+			var copyText = $('#log-content');
 			var $temp = $("<textarea>");
 			$("body").append($temp);
 			$temp.val($(copyText).text()).select();

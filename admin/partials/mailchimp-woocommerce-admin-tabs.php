@@ -182,10 +182,10 @@ else {
             <?php endif; ?>
         </div> 
     <?php endif; ?>
-    <h2><!-- Needed to show the notifications on the right spot --></h2>
+    
     <?php
         $settings_errors = get_settings_errors();
-        if (!$show_wizard || ($show_wizard && isset($settings_errors[0]) && $settings_errors[0]['type'] != 'updated' )) {
+        if (!$show_wizard ) {
             echo mailchimp_settings_errors();
         }
     ?>

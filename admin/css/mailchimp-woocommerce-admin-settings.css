@@ -768,7 +768,7 @@
 	align-items: center;
 	justify-content: center;
 	position: absolute;
-	top: 0;
+	top: 50px;
 	left: 0;
 	visibility: hidden;
 	display: none;
@@ -786,7 +786,7 @@
 	color: #7FAD45 !important;
 }
 
-#mc-woocommerce-create-account h2 {
+#mc-woocommerce-create-account h3 {
 	padding-bottom: 20px;
 }
 
@@ -827,7 +827,7 @@
 	padding-top: 30px;
 }
 
-.mc-woocommerce-create-account-modal-header h2{
+.mc-woocommerce-create-account-modal-header h3{
 	text-align: center;
 	padding-top: 30px;
 	font-size: 2em;

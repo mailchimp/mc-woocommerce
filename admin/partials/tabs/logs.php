@@ -39,7 +39,7 @@ $handle = !empty($viewed_log) ? substr($viewed_log, 0, strlen($viewed_log) > 37 
     </legend>
     
     <div class="box fieldset-header" >
-        <label for="<?php echo $this->plugin_name; ?>-logging"><h2 style="padding-top: 1em;"><?php esc_html_e('Logging Preferences', 'mailchimp-for-woocommerce');?></h2></label>
+        <label for="<?php echo $this->plugin_name; ?>-logging"><h3 style="padding-top: 1em;"><?php esc_html_e('Logging Preferences', 'mailchimp-for-woocommerce');?></h3></label>
     </div>
 
     <div class="box box-half">
@@ -67,9 +67,9 @@ $handle = !empty($viewed_log) ? substr($viewed_log, 0, strlen($viewed_log) > 37 
 
 <fieldset>
     <div class="box fieldset-header" >
-        <h2>
+        <h3>
             <?php esc_html_e('Recent Logs', 'mailchimp-for-woocommerce'); ?>
-        </h2>
+        </h3>
     </div>
     
     <div class="box">

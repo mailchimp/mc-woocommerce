@@ -83,7 +83,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
 
     <div class="optional-settings-content">
         <div class="box fieldset-header" >
-            <h2><?php esc_html_e('Opt-in Settings', 'mailchimp-for-woocommerce');?></h2>
+            <h3><?php esc_html_e('Opt-in Settings', 'mailchimp-for-woocommerce');?></h3>
         </div>
 
         <div class="box box-half">
@@ -133,7 +133,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
         </div>
 
         <div class="box fieldset-header" >
-            <h2><?php esc_html_e('Subscriber Tags', 'mailchimp-for-woocommerce');?></h2>
+            <h3><?php esc_html_e('Subscriber Tags', 'mailchimp-for-woocommerce');?></h3>
         </div>
 
         <div class="box box-half" >
@@ -148,7 +148,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
         </div>
 
         <div class="box fieldset-header" >
-            <h2><?php esc_html_e('Product Settings', 'mailchimp-for-woocommerce');?></h2>
+            <h3><?php esc_html_e('Product Settings', 'mailchimp-for-woocommerce');?></h3>
         </div>
 
 

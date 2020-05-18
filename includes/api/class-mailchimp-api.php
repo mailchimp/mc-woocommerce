@@ -323,7 +323,7 @@ class MailChimp_WooCommerce_MailChimpApi
     public function updateMemberTags($list_id, $email, $fail_silently = false)
     {
         $hash = md5(strtolower(trim($email)));
-        $tags = mailchimp_get_user_tags_to_update();
+        $tags = mailchimp_get_user_tags_to_update($email);
 
         if (empty($tags)) return false;
 

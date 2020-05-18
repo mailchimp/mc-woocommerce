@@ -311,11 +311,24 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			// resave the site option so this only fires once.
 			update_site_option('mailchimp_woocommerce_version', $version);
 
+			// get plugin options
 			$options = $this->getOptions();
 			
+			// set permission_cap in case there's none set.
 			if (!isset($options['mailchimp_permission_cap']) || empty($options['mailchimp_permission_cap']) ) {
 				$options['mailchimp_permission_cap'] = 'manage_options';
 				update_option($this->plugin_name, $options);
+			}
+
+			// resend marketing status to update latest changes
+			if (!empty($options['admin_email'])) {
+				try {
+					// send the post to the mailchimp server
+					$comm_opt = get_option('mailchimp-woocommerce-comm.opt', 0);
+					$this->mailchimp_set_communications_status_on_server($comm_opt, $options['admin_email']);
+				} catch (\Exception $e) {
+					mailchimp_error("marketing_status_update", $e->getMessage());
+				}
 			}
 		}
 

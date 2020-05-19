@@ -185,10 +185,11 @@ else {
     
     <?php
         $settings_errors = get_settings_errors();
-        if (!$show_wizard ) {
+        if (!$show_wizard || ($show_wizard && isset($settings_errors[0]) && $settings_errors[0]['type'] != 'updated' )) {
             echo mailchimp_settings_errors();
         }
     ?>
+
     <?php if ($active_tab != 'sync'): ?>
     <div class="tab-content-wrapper">
     <?php endif; ?>

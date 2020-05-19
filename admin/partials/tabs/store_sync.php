@@ -33,7 +33,7 @@ if (!empty($last_updated_time)) {
 
 // if we have a transient set to start the sync on this page view, initiate it now that the values have been saved.
 if ((bool) get_site_transient('mailchimp_woocommerce_start_sync', false)) {
-    MailChimp_WooCommerce_Admin::startSync();
+    MailChimp_WooCommerce_Admin::connect()->startSync();
 }
 
 if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore($store_id))) {

@@ -688,11 +688,6 @@ function mailchimp_update_connected_site_script() {
     if ($store_id && ($api = mailchimp_get_api())) {
         // if we have a store
         if (($store = $api->getStore($store_id))) {
-            // handle the coupon sync if we don't have a flag that says otherwise.
-            $job = new MailChimp_WooCommerce_Process_Coupons();
-            if ($job->getData('sync.coupons.completed_at', false) === false) {
-                mailchimp_handle_or_queue($job);
-            }
             return mailchimpi_refresh_connected_site_script($store);
         }
     }

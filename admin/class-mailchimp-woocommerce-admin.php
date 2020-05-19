@@ -432,7 +432,17 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 		
 		$data = $this->mailchimp_set_store_currency_code($new_currency_code);
-		return $this->syncStore($data);
+		
+		// sync the store with MC
+		try {
+			$store_created = $this->syncStore($data);
+		}
+		catch (Exception $e){
+			mailchimp_log('store.sync@woo.update', 'Store cannot be synced', $e->getMessage());
+			return false;
+		}
+		
+		return $store_created;
 	}
 
     /**
@@ -519,7 +529,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		$active_tab = isset($input['mailchimp_active_tab']) ? $input['mailchimp_active_tab'] : null;
 
-		if (empty($active_tab) && $input['woocommerce_settings_save_general']) {
+		if (empty($active_tab) && isset($input['woocommerce_settings_save_general']) && $input['woocommerce_settings_save_general']) {
 			unset($input['woocommerce_settings_save_general']);
 			$data['store_currency_code'] = (string) $input['store_currency_code'];
 		}
@@ -559,7 +569,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 					// remove all the pointers to be sure
 					$service = new MailChimp_Service();
 					$service->removePointers(true, true);
-					static::startSync();
+					$this->startSync();
 					$this->showSyncStartedMessage();
 					$this->setData('sync.config.resync', true);
 				}
@@ -801,13 +811,22 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		$this->setData('validation.store_info', true);
 
-        $data['active_tab'] = 'campaign_defaults';
-		$data['store_currency_code'] = get_woocommerce_currency();
-
 		if ($this->hasValidMailChimpList()) {
-			$this->syncStore(array_merge($this->getOptions(), $data));
+			// sync the store with MC
+			try {
+				$this->syncStore(array_merge($this->getOptions(), $data));
+			}
+			catch (Exception $e){
+				$this->setData('validation.store_info', false);
+				mailchimp_log('errors.store_info', 'Store cannot be synced :: ' . $e->getMessage());
+				add_settings_error('mailchimp_store_info', '', __('Cannot create or update Store at Mailchimp.', 'mailchimp-for-woocommerce') . ' Mailchimp says: ' . $e->getMessage());
+				return $data;
+			}
 		}
-
+		
+		$data['active_tab'] = 'campaign_defaults';
+		$data['store_currency_code'] = get_woocommerce_currency();
+		
 		return $data;
 	}
 
@@ -999,7 +1018,16 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             $this->setData('validation.newsletter_settings', true);
 
 			// sync the store with MC
-			$this->syncStore(array_merge($this->getOptions(), $data));
+			try {
+				$store_created = $this->syncStore(array_merge($this->getOptions(), $data));
+			}
+			catch (Exception $e){
+				$this->setData('validation.newsletter_settings', false);
+				mailchimp_log('errors.newsletter_settings', 'Store cannot be synced :: ' . $e->getMessage());
+				add_settings_error('mailchimp_newsletter_settings', '', __('Cannot create or update Store at Mailchimp.', 'mailchimp-for-woocommerce') . ' Mailchimp says: ' . $e->getMessage());
+				$data['active_tab'] = 'newsletter_settings';
+				return $data;
+			}
 
 			// if there was already a store in Mailchimp, use the list ID from Mailchimp
 			if ($this->swapped_list_id) {
@@ -1007,20 +1035,13 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			}
 
 			// start the sync automatically if the sync is false
-			if ((bool) $this->getData('sync.started_at', false) === false) {
-                // tell the next page view to start the sync with a transient since the data isn't available yet
-                set_site_transient('mailchimp_woocommerce_start_sync', microtime(), 30);
-
-                $this->setData('sync.config.resync', false);
-                $this->setData('sync.orders.current_page', 1);
-                $this->setData('sync.products.current_page', 1);
-				$this->setData('sync.coupons.current_page', 1);
-                $this->setData('sync.syncing', true);
-                $this->setData('sync.started_at', time());
+			if ($store_created && ((bool) $this->getData('sync.started_at', false) === false)) {
+				// tell the next page view to start the sync with a transient since the data isn't available yet
+                set_site_transient('mailchimp_woocommerce_start_sync', microtime(), 300);
 
                 $this->showSyncStartedMessage();
 			}
-
+			
             $data['active_tab'] = 'sync';
 
             return $data;
@@ -1470,6 +1491,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				}
 			}
 			$this->setData('errors.store_info', $e->getMessage());
+			throw($e);
 		}
 
 		return false;
@@ -1538,19 +1560,28 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
     /**
      * Start the sync
      */
-	public static function startSync()
+	public function startSync()
 	{
 	    // delete the transient so this only happens one time.
 	    delete_site_transient('mailchimp_woocommerce_start_sync');
 
 		$full_sync = new MailChimp_WooCommerce_Process_Full_Sync_Manager();
 		
+		// make sure the storeeId saved on DB is the same on Mailchimp
+		try {
+			$this->syncStore();
+		}
+		catch (\Exception $e) {
+			mailchimp_log('error.sync', 'Store cannot be synced :: ' . $e->getMessage());
+			add_settings_error('mailchimp_sync_error', '', __('Cannot create or update Store at Mailchimp.', 'mailchimp-for-woocommerce') . ' Mailchimp says: ' . $e->getMessage());
+			return false;
+		}
+
         // tell Mailchimp that we're syncing
 		$full_sync->start_sync();
 		
         // enqueue sync manager
 		as_enqueue_async_action( 'MailChimp_WooCommerce_Process_Full_Sync_Manager', array(), 'mc-woocommerce' );
-	
 	}
 
 	/**

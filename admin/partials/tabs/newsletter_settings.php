@@ -89,7 +89,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
         <div class="box box-half">
             <label for="<?php echo $this->plugin_name; ?>-newsletter-checkbox-label">
                 <h4><?php esc_html_e('Message for the opt-in checkbox', 'mailchimp-for-woocommerce'); ?></h4>
-                <p><?php _e('Add text to go along with the other opt-in checkboxes. <br/>Customers can click a box at checkout to opt in to your newsletter.', 'mailchimp-for-woocommerce');?> </p>
+                <p><?php _e('The call-to-action text that prompts customers to subscribe to your newsletter at checkout.', 'mailchimp-for-woocommerce');?> </p>
             </label>
         </div>
 
@@ -101,7 +101,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
         <div class="box box-half margin-large">
             <label>
                 <h4><?php esc_html_e('Checkbox Display Options', 'mailchimp-for-woocommerce');?></h4>
-                <p><?php _e('Add text to go along with the other opt-in checkboxes. <br/>Customers can click a box at checkout to opt in to your newsletter.', 'mailchimp-for-woocommerce');?> </p>
+                <p><?php _e('Choose how you want the opt-in to your newsletter checkbox to render at checkout', 'mailchimp-for-woocommerce');?> </p>
             </label>
         </div>
 
@@ -133,18 +133,18 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
         </div>
 
         <div class="box fieldset-header" >
-            <h3><?php esc_html_e('Subscriber Tags', 'mailchimp-for-woocommerce');?></h3>
+            <h3><?php esc_html_e('Subscriber Settings', 'mailchimp-for-woocommerce');?></h3>
         </div>
 
         <div class="box box-half" >
             <label for="<?php echo $this->plugin_name; ?>-user-tags">
-                <h4><?php esc_html_e('Subscriber Tags', 'mailchimp-for-woocommerce');?></h4>
+                <h4><?php esc_html_e('Tags', 'mailchimp-for-woocommerce');?></h4>
+                <p class="description"><?= __( 'Add a comma-separated list of tags to apply to a subscriber in Mailchimp after a transaction occurs', 'mailchimp-for-woocommerce' ); ?></p>
             </label>
         </div>
 
         <div class="box box-half" >
-            <input type="text" id="<?php echo $this->plugin_name; ?>-user-tags" name="<?php echo $this->plugin_name; ?>[mailchimp_user_tags]" value="<?php echo isset($options['mailchimp_user_tags']) ? str_replace(',',', ',$options['mailchimp_user_tags']) : '' ?>" />
-            <p class="description"><?= __( 'Add a comma separated list of tags to add to the subscriber at Mailchimp', 'mailchimp-for-woocommerce' ); ?></p>
+            <input type="text" id="<?php echo $this->plugin_name; ?>-user-tags" name="<?php echo $this->plugin_name; ?>[mailchimp_user_tags]" value="<?php echo isset($options['mailchimp_user_tags']) ? str_replace(',',', ',$options['mailchimp_user_tags']) : '' ?>" />   
         </div>
 
         <div class="box fieldset-header" >

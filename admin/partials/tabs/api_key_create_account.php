@@ -158,7 +158,7 @@
                                 'br' => array()
                             );
                         ?>
-                        <?= sprintf(/* translators: %s - Mailchimp legal pages */wp_kses( __( 'By clicking the "Get Started!" button, you are creating a Mailchimp account, and you agree to Mailchimp\'s <a href=%s target=_blank>Terms of Use</a> and <a href=%s target=_blank>Privacy Policy</a>.', 'mailchimp-for-woocommerce' ), array(  'a' => array( 'href' => array(), 'target'=> '_blank' ) ) ), esc_url( 'https://mailchimp.com/legal/terms/' ), esc_url( 'https://mailchimp.com/legal/privacy/' ) );?>
+                        <?= sprintf(/* translators: %s - Mailchimp legal pages */wp_kses( __( 'By clicking the "Get Started!" button, you are creating a Mailchimp account, and you agree to Mailchimp\'s <a href=%1$s target=_blank>Terms of Use</a> and <a href=%2$s target=_blank>Privacy Policy</a>.', 'mailchimp-for-woocommerce' ), array(  'a' => array( 'href' => array(), 'target'=> '_blank' ) ) ), esc_url( 'https://mailchimp.com/legal/terms' ), esc_url( 'https://mailchimp.com/legal/privacy' ) );?>
                             
                     </p>
                 </div>
@@ -188,7 +188,7 @@
         
 
         <div class="mc-woocommerce-create-account-modal-footer">
-            ©2001–2019 All Rights Reserved. Mailchimp® is a registered trademark of The Rocket Science Group. Cookie Preferences, Privacy, and Terms.
+            ©2001–<?= date('Y') ?> All Rights Reserved. Mailchimp® is a registered trademark of The Rocket Science Group. Cookie Preferences, Privacy, and Terms.
         </div>
 
     </div>

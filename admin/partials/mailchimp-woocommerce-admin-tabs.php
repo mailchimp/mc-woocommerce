@@ -108,7 +108,12 @@ else {
             wp_kses(_e('Please apply your audience settings. If you don’t<br/>have an audience, you can choose to create one', 'mailchimp-for-woocommerce'), $allowed_html);
         }
         if ($active_tab == 'sync' && $show_sync_tab) {
-            wp_kses(_e('Connect your WooCommerce store to a<br/>Mailchimp audience in less than 60 seconds', 'mailchimp-for-woocommerce'), $allowed_html);
+            if (mailchimp_is_done_syncing()) {
+                wp_kses(_e('Sweet! You\'re connected with<br/>Mailchimp and syncing data', 'mailchimp-for-woocommerce'), $allowed_html);
+            }
+            else {
+                wp_kses(_e('Connect your WooCommerce store to a<br/>Mailchimp audience in less than 60 seconds', 'mailchimp-for-woocommerce'), $allowed_html);
+            }
         }
  
         if ($active_tab == 'logs' && $show_sync_tab) {

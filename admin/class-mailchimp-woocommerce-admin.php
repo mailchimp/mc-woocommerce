@@ -516,7 +516,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		$active_tab = isset($input['mailchimp_active_tab']) ? $input['mailchimp_active_tab'] : null;
 
-		if (empty($active_tab) && $input['woocommerce_settings_save_general']) {
+		if (empty($active_tab) && isset($input['woocommerce_settings_save_general']) && $input['woocommerce_settings_save_general']) {
 			unset($input['woocommerce_settings_save_general']);
 			$data['store_currency_code'] = (string) $input['store_currency_code'];
 		}

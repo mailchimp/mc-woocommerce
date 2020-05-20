@@ -320,20 +320,23 @@ function mailchimp_get_store_id() {
  */
 function mailchimp_get_user_tags_to_update($email = null) {
     $tags = mailchimp_get_option('mailchimp_user_tags');
+    $formatted_tags = array();
+    
+    if (!empty($tags)) {
+        $tags = explode(',', $tags);
 
-    if (empty($tags)) {
-        return false;
-    }
-
-    $tags = explode(',', $tags);
-
-    foreach ($tags as $tag) {
-        $formatted_tags[] = array("name" => $tag, "status" => 'active');
+        foreach ($tags as $tag) {
+            $formatted_tags[] = array("name" => $tag, "status" => 'active');
+        }
     }
 
     // apply filter to user custom tags addition/removal
     $formatted_tags = apply_filters('mailchimp_user_tags', $formatted_tags, $email);
     
+    if (empty($formatted_tags)){
+        return false;
+    }
+
     return $formatted_tags;
 }
 

@@ -139,7 +139,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
         <div class="box box-half" >
             <label for="<?php echo $this->plugin_name; ?>-user-tags">
                 <h4><?php esc_html_e('Tags', 'mailchimp-for-woocommerce');?></h4>
-                <p class="description"><?= __( 'Add a comma-separated list of tags to apply to a subscriber in Mailchimp after a transaction occurs', 'mailchimp-for-woocommerce' ); ?></p>
+                <p><?= __( 'Add a comma-separated list of tags to apply to a subscriber in Mailchimp after a transaction occurs', 'mailchimp-for-woocommerce' ); ?></p>
             </label>
         </div>
 
@@ -160,9 +160,6 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
         </div>
 
         <div class="box box-half" >
-            <label for="<?php echo $this->plugin_name; ?>-mailchimp-product_image_key">
-                <span><?php esc_html_e('Size', 'mailchimp-for-woocommerce'); ?></span>
-            </label>
             <div class="mailchimp-select-wrapper">
                 <select name="<?php echo $this->plugin_name; ?>[mailchimp_product_image_key]">
                     <?php

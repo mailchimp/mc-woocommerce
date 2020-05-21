@@ -16,6 +16,7 @@ Connect your store to your Mailchimp audience to track sales, create targeted em
 Join the 17 million customers who use Mailchimp, the world's largest marketing automation platform, to develop their e-commerce marketing strategy. With the official Mailchimp for WooCommerce integration, your customers and their purchase data are automatically synced with your Mailchimp account, making it easy to send targeted campaigns, automatically follow up with customers post-purchase, recommend products, recover abandoned carts, and measure the ROI of your marketing efforts. And it's completely free.
 ###What you can do with this plugin
 - Sync to your Audience in Mailchimp with purchase data.
+- Sync new subscribers to your Audience when they create an account and opt-in.
 - Set up marketing automations to remind customers about items they left in their cart or viewed on your site, win back lapsed customers, and follow up post-purchase. (Now available for free accounts!)
 - Showcase product recommendations.
 - Track and segment customers based on purchase history and purchase frequency.
@@ -48,6 +49,12 @@ You’ll need to do a few things to connect your WooCommerce store to Mailchimp.
 - If you have more advanced configuration needs, please refer to our [GitHub wiki](https://github.com/mailchimp/mc-woocommerce/wiki)
 
 == Frequently Asked Questions ==
+
+= Who is subscribed to my Audience with this plugin? =
+
+- Customers are subscribed to your Audience when they opt-in at checkout or when an account is created. If an account is created through the standard WooCommerce `My Account` page, they must opt-in to be added.
+- Customers are sent to your Audience as `Transactional` if they do not opt-in. This is done so you can send [abandoned carts](https://mailchimp.com/help/create-an-abandoned-cart-email/) or [order notifications](https://mailchimp.com/help/create-order-notifications/).
+- If double opt-in is enabled, customers will only be subscribed to your Audience if they approve the subscription from the confirmation email that is sent.
 
 = What is the recommended way to sync larger stores? =
 

@@ -17,6 +17,7 @@ if (!$handler->hasValidApiKey()) {
     <div class="box box-half" >
         <label for="<?php echo $this->plugin_name; ?>-store-name-label">
             <span> <?php esc_html_e('Name', 'mailchimp-for-woocommerce'); ?></span>
+            <span class="required-field-mark">*</span>
         </label>
         <input required type="text" id="<?php echo $this->plugin_name; ?>-store-name-label" name="<?php echo $this->plugin_name; ?>[store_name]" value="<?php echo isset($options['store_name']) ? $options['store_name'] : get_option('blogname') ?>" />
     </div>
@@ -24,6 +25,7 @@ if (!$handler->hasValidApiKey()) {
     <div class="box box-half" >
         <label for="<?php echo $this->plugin_name; ?>-admin-email-label">
                 <span> <?php esc_html_e('Email', 'mailchimp-for-woocommerce'); ?></span>
+                <span class="required-field-mark">*</span>
         </label>
         <input required type="email" id="<?php echo $this->plugin_name; ?>-admin-email-label" name="<?php echo $this->plugin_name; ?>[admin_email]" value="<?php echo isset($options['admin_email']) ? $options['admin_email'] : get_option('admin_email') ?>" />
     </div>
@@ -31,6 +33,7 @@ if (!$handler->hasValidApiKey()) {
     <div class="box box-half" >
         <label for="<?php echo $this->plugin_name; ?>-store-address-label">
                 <span> <?php esc_html_e('Street address', 'mailchimp-for-woocommerce'); ?></span>
+                <span class="required-field-mark">*</span>
         </label>
         <input required type="text" id="<?php echo $this->plugin_name; ?>-store-address-label" name="<?php echo $this->plugin_name; ?>[store_street]" value="<?php echo isset($options['store_street']) ? $options['store_street'] : WC()->countries->get_base_address(); ?>" />
     </div>
@@ -38,6 +41,7 @@ if (!$handler->hasValidApiKey()) {
     <div class="box box-half" >
         <label for="<?php echo $this->plugin_name; ?>-store-city-label">
                 <span> <?php esc_html_e('City', 'mailchimp-for-woocommerce'); ?></span>
+                <span class="required-field-mark">*</span>
         </label>
         <input required type="text" id="<?php echo $this->plugin_name; ?>-store-city-label" name="<?php echo $this->plugin_name; ?>[store_city]" value="<?php echo isset($options['store_city']) ? $options['store_city'] : WC()->countries->get_base_city(); ?>" />
     </div>
@@ -45,6 +49,7 @@ if (!$handler->hasValidApiKey()) {
     <div class="box box-half" >
         <label for="<?php echo $this->plugin_name; ?>-store-state-label">
                 <span> <?php esc_html_e('State', 'mailchimp-for-woocommerce'); ?></span>
+                <span class="required-field-mark">*</span>
         </label>
         <input required type="text" id="<?php echo $this->plugin_name; ?>-store-state-label" name="<?php echo $this->plugin_name; ?>[store_state]" value="<?php echo isset($options['store_state']) ? $options['store_state'] : WC()->countries->get_base_state(); ?>" />
     </div>
@@ -52,6 +57,7 @@ if (!$handler->hasValidApiKey()) {
     <div class="box box-half" >
         <label for="<?php echo $this->plugin_name; ?>-store-postal-code-label">
                 <span> <?php esc_html_e('Postal Code', 'mailchimp-for-woocommerce'); ?></span>
+                <span class="required-field-mark">*</span>
         </label>
         <input required type="text" id="<?php echo $this->plugin_name; ?>-store-postal-code-label" name="<?php echo $this->plugin_name; ?>[store_postal_code]" value="<?php echo isset($options['store_postal_code']) ? $options['store_postal_code'] : WC()->countries->get_base_postcode(); ?>" />
     </div>
@@ -59,6 +65,7 @@ if (!$handler->hasValidApiKey()) {
     <div class="box box-half" >
         <label for="<?php echo $this->plugin_name; ?>-store-country-label">
                 <span> <?php esc_html_e('Country', 'mailchimp-for-woocommerce'); ?></span>
+                <span class="required-field-mark">*</span>
         </label>
         
         <?php global $woocommerce;
@@ -85,6 +92,7 @@ if (!$handler->hasValidApiKey()) {
     <div class="box box-half" >
         <label for="<?php echo $this->plugin_name; ?>-store-phone-label">
                 <span> <?php esc_html_e('Phone Number', 'mailchimp-for-woocommerce'); ?></span>
+                <span class="required-field-mark">*</span>
         </label>
         <input required type="text" id="<?php echo $this->plugin_name; ?>-store-phone-label" name="<?php echo $this->plugin_name; ?>[store_phone]" value="<?php echo isset($options['store_phone']) ? $options['store_phone'] : '' ?>" />
     </div>
@@ -98,6 +106,7 @@ if (!$handler->hasValidApiKey()) {
     <div class="box box-half" >
         <label for="<?php echo $this->plugin_name; ?>-store-locale-label">
             <span><?php esc_html_e('Locale', 'mailchimp-for-woocommerce'); ?></span>
+            <span class="required-field-mark">*</span>
         </label>
         <div class="mailchimp-select-wrapper">
             <select name="<?php echo $this->plugin_name; ?>[store_locale]" required>
@@ -124,6 +133,7 @@ if (!$handler->hasValidApiKey()) {
     <div class="box" >
         <label for="<?php echo $this->plugin_name; ?>-store-timezone-label">
             <span><?php esc_html_e('Timezone', 'mailchimp-for-woocommerce'); ?></span>
+            <span class="required-field-mark">*</span>
         </label>
         <div class="mailchimp-select-wrapper">
             <select name="<?php echo $this->plugin_name; ?>[store_timezone]" required>

@@ -35,29 +35,6 @@
 	line-height: 16px  !important;
 	color: #B3B3B3 !important;
 }
-/* .notice {
-	background: rgba(127, 173, 69, 0.1) !important;
-	mix-blend-mode: normal !important;
-	border: 1px solid rgba(127, 173, 69, 0.5) !important;
-	box-sizing: border-box !important;
-	border-radius: 4px !important;
-}
-
-.notice.notice-error {
-	background: rgba(250, 50, 50, 0.1) !important;
-	border: 1px solid rgba(250, 50, 50, 0.5) !important;
-}
-
-.notice.notice-info {
-	background: rgba(0, 160, 210, 0.1) !important;
-	border: 1px solid rgba(0, 160, 210, 0.5) !important;
-}
-
-.notice.notice-warning {
-	background: rgba(255, 185, 0, 0.1) !important;
-	border: 1px solid rgba(255, 185, 0, 0.5) !important;
-} */
-
 
 .nav-wizard-wrapper {
 	cursor: default;
@@ -217,6 +194,10 @@
 
 .tab-content-wrapper p.submit:focus {
 	margin-top: 10px !important;
+}
+
+.tab-content-wrapper .required-field-mark {
+	color: red;
 }
 
 .tab-content-submit,
@@ -597,7 +578,7 @@
 
 .tab-content-wrapper .mailchimp-select-wrapper {
 	border: 1px solid #E6E6E6;
-	padding: 9px 20px 8px 20px;
+	padding: 6px 20px 4px 20px;
 	-webkit-border-radius: 4px;
 	-moz-border-radius: 4px;
 	border-radius: 4px;

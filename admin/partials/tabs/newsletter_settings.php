@@ -53,9 +53,10 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
 
                 <?php
                 if (is_array($mailchimp_lists)) {
+                    $only_one_list = count($mailchimp_lists) === 1;
                     $selected_list = isset($options['mailchimp_list']) ? $options['mailchimp_list'] : null;
                     foreach ($mailchimp_lists as $key => $value ) {
-                        echo '<option value="' . esc_attr( $key ) . '" ' . selected(((string) $key === (string) $selected_list), true, false) . '>' . esc_html( $value ) . '</option>';
+                        echo '<option value="' . esc_attr( $key ) . '" ' . selected(((string) $key === (string) $selected_list || $only_one_list), true, false) . '>' . esc_html( $value ) . '</option>';
                     }
                 }
                 ?>

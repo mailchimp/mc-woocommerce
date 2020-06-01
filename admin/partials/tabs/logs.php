@@ -9,7 +9,7 @@ if (!empty( $_REQUEST['handle'])) {
 $files  = defined('WC_LOG_DIR') ? @scandir( WC_LOG_DIR ) : array();
 $logs = array();
 if (!empty($files)) {
-    foreach ($files as $key => $value) {
+    foreach (array_reverse($files) as $key => $value) {
         if (!in_array( $value, array( '.', '..' ))) {
             if (!is_dir($value) && mailchimp_string_contains($value, 'mailchimp_woocommerce')) {
                 $logs[sanitize_title($value)] = $value;
@@ -85,7 +85,6 @@ $handle = !empty($viewed_log) ? substr($viewed_log, 0, strlen($viewed_log) > 37 
                 <?php endforeach; ?>
             </select>
         </div>
-        <input type="submit" class="button tab-content-submit view-log-submit" value="<?php esc_attr_e( 'View', 'woocommerce' ); ?>" />
     </div>
 
 </fieldset>

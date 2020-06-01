@@ -32,6 +32,12 @@
 
 		});
 
+		// load new log file on log select change
+		$('#log_file').change(function (e) {
+			e.preventDefault();
+			$('#mailchimp_woocommerce_options').submit();
+		});
+
 		// copy log button
 		$('.mc-woocommerce-copy-log-button').click(function (e) {
 			e.preventDefault();

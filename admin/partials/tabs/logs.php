@@ -35,11 +35,11 @@ $handle = !empty($viewed_log) ? substr($viewed_log, 0, strlen($viewed_log) > 37 
 
 <fieldset>
     <legend class="screen-reader-text">
-        <span><?php esc_html_e('Logging Preference', 'mailchimp-for-woocommerce');?></span>
+        <span><?php esc_html_e('Logging Preferences', 'mailchimp-for-woocommerce');?></span>
     </legend>
     
-    <div class="box fieldset-header" >
-        <label for="<?php echo $this->plugin_name; ?>-logging"><h3 style="padding-top: 1em;"><?php esc_html_e('Logging Preferences', 'mailchimp-for-woocommerce');?></h3></label>
+    <div class="box" >
+        <label for="<?php echo $this->plugin_name; ?>-logging"><h3><?php esc_html_e('Logging Preferences', 'mailchimp-for-woocommerce');?></h3></label>
     </div>
 
     <div class="box box-half">
@@ -52,8 +52,8 @@ $handle = !empty($viewed_log) ? substr($viewed_log, 0, strlen($viewed_log) > 37 
         </p>
     </div>
     <div class="box box-half">
-        <div class="mailchimp-select-wrapper">
-            <select name="<?php echo $this->plugin_name; ?>[mailchimp_logging]" required>
+        <div class="log-select mailchimp-select-wrapper">
+            <select id="mailchimp-log-pref" name="<?php echo $this->plugin_name; ?>[mailchimp_logging]" required>
                 <?php $logging_preference = mailchimp_environment_variables()->logging; ?>
                 <?php
                 foreach(array('none' => esc_html__('None', 'mailchimp-for-woocommerce'), 'debug' => esc_html__('Debug', 'mailchimp-for-woocommerce'), 'standard' => esc_html__('Standard', 'mailchimp-for-woocommerce')) as $log_value => $log_label) {
@@ -61,6 +61,10 @@ $handle = !empty($viewed_log) ? substr($viewed_log, 0, strlen($viewed_log) > 37 
                 }
                 ?>
             </select>
+            
+        </div>
+        <div class="log-submit">
+            <?php submit_button(__('Save'), 'primary tab-content-submit','mailchimp_submit', TRUE);?>
         </div>
     </div>
 </fieldset>

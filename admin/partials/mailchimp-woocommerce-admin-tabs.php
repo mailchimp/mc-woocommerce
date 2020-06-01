@@ -200,16 +200,6 @@ else {
     <?php endif; ?>
         <form id="mailchimp_woocommerce_options" method="post" name="cleanup_options" action="options.php">
             <div class="box">
-                <?php 
-                    if ($active_tab !== 'api_key' && $active_tab !== 'sync') {
-                        if ($active_tab == 'newsletter_settings' && !mailchimp_is_configured()) {
-                            $submit_button_label = __('Start sync','mailchimp-for-woocommerce');
-                        }
-                        else $submit_button_label = !$show_wizard ? __('Save all changes') : __('Next');
-                        submit_button($submit_button_label, 'primary tab-content-submit','mailchimp_submit', TRUE);
-                    }
-                ?>
-                
                 <?php if ($show_wizard) : ?>
                     <input type="hidden" name="mailchimp_woocommerce_wizard_on" value=1>
                 <?php endif; ?>
@@ -251,7 +241,15 @@ else {
             <?php if ($active_tab == 'logs' && $show_sync_tab): ?>
                 <?php include_once 'tabs/logs.php'; ?>
             <?php endif; ?>
-
+            <?php 
+                if ($active_tab !== 'api_key' && $active_tab !== 'sync' && $active_tab !== 'logs') {
+                    if ($active_tab == 'newsletter_settings' && !mailchimp_is_configured()) {
+                        $submit_button_label = __('Start sync','mailchimp-for-woocommerce');
+                    }
+                    else $submit_button_label = !$show_wizard ? __('Save all changes') : __('Next');
+                    submit_button($submit_button_label, 'primary tab-content-submit','mailchimp_submit', TRUE);
+                }
+            ?>
         </form>
         
         <?php if ($active_tab == 'api_key'): ?>

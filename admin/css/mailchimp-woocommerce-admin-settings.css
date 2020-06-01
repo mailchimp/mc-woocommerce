@@ -210,7 +210,7 @@
 
 .tab-content-wrapper p.submit {
 	margin-top: 0 !important;
-	padding-top: 0 !important;
+	padding-top: 35px !important;
 	margin-bottom: 45px !important;
 	font-weight: 600;
 }
@@ -714,7 +714,7 @@
 }
 
 .view-log-select {
-	width: 80%;
+	width: 100%;
 	display: inline-block;
 }
 

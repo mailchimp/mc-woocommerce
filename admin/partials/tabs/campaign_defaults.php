@@ -21,7 +21,7 @@ if (!$handler->hasValidStoreInfo()) {
     </legend>
     <div class="box box-half">
         <label for="<?php echo $this->plugin_name; ?>-campaign-from-name-label"> 
-            <?php esc_html_e('Default from name', 'mailchimp-for-woocommerce'); ?>
+            <?php esc_html_e('From Name', 'mailchimp-for-woocommerce'); ?>
             <span class="required-field-mark">*</span>
         </label>
         <input type="text" id="<?php echo $this->plugin_name; ?>-campaign-from-name-label" name="<?php echo $this->plugin_name; ?>[campaign_from_name]" value="<?php echo isset($options['campaign_from_name']) ? $options['campaign_from_name'] : get_option('blogname') ?>" required/>
@@ -29,7 +29,7 @@ if (!$handler->hasValidStoreInfo()) {
 
     <div class="box box-half">
         <label for="<?php echo $this->plugin_name; ?>-campaign-from-email-label">
-            <?php esc_html_e('Default from email', 'mailchimp-for-woocommerce'); ?>
+            <?php esc_html_e('From Email', 'mailchimp-for-woocommerce'); ?>
             <span class="required-field-mark">*</span>
         </label>
         <input type="email" id="<?php echo $this->plugin_name; ?>-campaign-from-email-label" name="<?php echo $this->plugin_name; ?>[campaign_from_email]" value="<?php echo isset($options['campaign_from_email']) ? $options['campaign_from_email'] : get_option('admin_email') ?>" required/>
@@ -37,7 +37,7 @@ if (!$handler->hasValidStoreInfo()) {
 
     <div class="box box-half">
         <label for="<?php echo $this->plugin_name; ?>-campaign-subject-label">
-            <?php esc_html_e('Default subject', 'mailchimp-for-woocommerce'); ?>
+            <?php esc_html_e('Subject', 'mailchimp-for-woocommerce'); ?>
             <span class="required-field-mark">*</span>
         </label>
         <input type="text" id="<?php echo $this->plugin_name; ?>-campaign-subject-label" name="<?php echo $this->plugin_name; ?>[campaign_subject]" value="<?php echo isset($options['campaign_subject']) ? $options['campaign_subject'] : esc_html__('Store Newsletter', 'mailchimp-for-woocommerce'); ?>" required/>
@@ -45,7 +45,7 @@ if (!$handler->hasValidStoreInfo()) {
 
     <div class="box box-half">
         <label for="<?php echo $this->plugin_name; ?>-campaign-language-label">
-            <?php esc_html_e('Default language', 'mailchimp-for-woocommerce'); ?>
+            <?php esc_html_e('Language', 'mailchimp-for-woocommerce'); ?>
             <span class="required-field-mark">*</span>
         </label>
         

@@ -101,7 +101,7 @@ else {
         }
  
         if ($active_tab == 'campaign_defaults' ) {
-            wp_kses(_e('Please fill out the audience default<br/>campaign information', 'mailchimp-for-woocommerce'), $allowed_html);
+            wp_kses(_e('Please review the audience default<br/>campaign information', 'mailchimp-for-woocommerce'), $allowed_html);
         }
  
         if ($active_tab == 'newsletter_settings' ) {

@@ -158,8 +158,15 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                             mailchimp_error('order_sync.error', mailchimp_error_trace($e, "GET subscriber :: {$order->getId()}"));
                             throw $e;
                         }
+                        
                         // if they are using double opt in, we need to pass this in as false here so it doesn't auto subscribe.
-                        $status = mailchimp_list_has_double_optin() ? false : $should_auto_subscribe;
+                        try {
+                            $doi = mailchimp_list_has_double_optin(true);
+                        } catch (\Exception $e_doi) {
+                            throw $e_doi;
+                        }
+                        
+                        $status = $doi ? false : $should_auto_subscribe;
                         $order->getCustomer()->setOptInStatus($status);
                     }
                 }

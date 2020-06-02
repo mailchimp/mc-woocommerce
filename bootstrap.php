@@ -223,9 +223,9 @@ function mailchimp_list_has_double_optin($force = false) {
         return false;
     }
 
-    $key = 'mailchimp_double_optin';
+    $key = 'double_optin';
 
-    $double_optin = get_site_transient($key);
+    $double_optin = mailchimp_get_transient($key);
 
     if (!$force && ($double_optin === 'yes' || $double_optin === 'no')) {
         return $double_optin === 'yes';
@@ -234,10 +234,11 @@ function mailchimp_list_has_double_optin($force = false) {
     try {
         $data = mailchimp_get_api()->getList(mailchimp_get_list_id());
         $double_optin = array_key_exists('double_optin', $data) ? ($data['double_optin'] ? 'yes' : 'no') : 'no';
-        set_site_transient($key, $double_optin, 600);
+        mailchimp_set_transient($key, $double_optin, 600);
         return $double_optin === 'yes';
     } catch (\Exception $e) {
-        set_site_transient($key, 'no', 600);
+        mailchimp_error('api.list', __('Error retrieving list for double_optin check', 'mailchimp-for-woocommerce'));
+        throw $e;
     }
 
     return $double_optin === 'yes';
@@ -900,7 +901,11 @@ function mailchimp_tell_system_about_user_submit($email, $status_meta, $seconds 
  * @return array
  */
 function mailchimp_get_subscriber_status_options($subscribed) {
-    $requires = mailchimp_list_has_double_optin();
+    try {
+        $requires = mailchimp_list_has_double_optin();
+    } catch (\Exception $e) {
+        return false;
+    }
 
     // if it's true - we set this value to NULL so that we do a 'pending' association on the member.
     $status_if_new = $requires ? null : $subscribed;

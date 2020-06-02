@@ -232,7 +232,6 @@ function mailchimp_list_has_double_optin($force = false) {
     }
 
     try {
-        throw new Exception('PEDRO');
         $data = mailchimp_get_api()->getList(mailchimp_get_list_id());
         $double_optin = array_key_exists('double_optin', $data) ? ($data['double_optin'] ? 'yes' : 'no') : 'no';
         mailchimp_set_transient($key, $double_optin, 600);

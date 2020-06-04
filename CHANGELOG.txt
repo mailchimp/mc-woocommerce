@@ -11,6 +11,7 @@
 * use denormalized order items values in initial sync 
 * adds function allowing tags for specific users  
 * adds include/exclude Mailchimp script
+* fix for double opt-in
 = 2.4.0 =
 * update for latest Action Scheduler v3.1.4
 * adds customer language on Cart and Order sync

@@ -1123,7 +1123,15 @@ function mailchimp_settings_errors() {
     return $notices_html;
 }
 
-function mailchimp_member_language_update($user_email = null, $language = null, $caller = '') {
+/**
+ * @param null $user_email
+ * @param null $language
+ * @param string $caller
+ * @param string $status_if_new
+ * @throws MailChimp_WooCommerce_Error
+ * @throws MailChimp_WooCommerce_ServerError
+ */
+function mailchimp_member_language_update($user_email = null, $language = null, $caller = '', $status_if_new = 'transactional') {
     if (!$user_email || !$language) return;
 
     $hash = md5(strtolower(trim($user_email)));
@@ -1139,11 +1147,11 @@ function mailchimp_member_language_update($user_email = null, $language = null, 
             mailchimp_log($caller . '.member.updated', "Updated {$user_email} language to {$language}");
         } catch (\Exception $e) {
             if ($e->getCode() == 404) {
-                // member doesn't exist yet, create
-                mailchimp_get_api()->subscribe($list_id, $user_email, false, array(), array(), $language);
+                // member doesn't exist yet, create as transactional ( or what was passed in the function args )
+                mailchimp_get_api()->subscribe($list_id, $user_email, $status_if_new, array(), array(), $language);
                 // set transient to prevent too many calls to update language
                 mailchimp_set_transient($caller . ".member.{$hash}", true, 3600);
-                mailchimp_log($caller . '.member.created', "Subscribed {$user_email}, setting language to [{$language}]");
+                mailchimp_log($caller . '.member.created', "Added {$user_email} as transactional, setting language to [{$language}]");
             } else {
                 mailchimp_error($caller . '.member.sync.error', $e->getMessage(), $user_email);
                 

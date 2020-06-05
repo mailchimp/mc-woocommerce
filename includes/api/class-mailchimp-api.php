@@ -198,10 +198,17 @@ class MailChimp_WooCommerce_MailChimpApi
      */
     public function subscribe($list_id, $email, $subscribed = true, $merge_fields = array(), $list_interests = array(), $language = null)
     {
+        if ($subscribed === true) {
+            $status = 'subscribed';
+        } elseif ($subscribed === false) {
+            $status = 'pending';
+        } else {
+            $status = 'transactional';
+        }
         $data = array(
             'email_type' => 'html',
             'email_address' => $email,
-            'status' => ($subscribed === true ? 'subscribed' : 'pending'),
+            'status' => $status,
             'merge_fields' => $merge_fields,
             'interests' => $list_interests,
             'language' => $language

@@ -231,6 +231,7 @@ class MailChimp_WooCommerce_Customer
         $this->requires_double_optin = (bool) $bool;
 
         if ($this->requires_double_optin) {
+            $this->original_subscriber_status = $this->opt_in_status;
             $this->opt_in_status = false;
         }
 

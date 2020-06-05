@@ -309,8 +309,19 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 $log .= " :: abandoned cart deleted [{$this->cart_session_id}]";
             }
 
+            // if we require double opt in on the list, and the customer requires double opt in,
+            // we should mark them as pending so they get the opt in email now.
+            if (mailchimp_list_has_double_optin() && $order->getCustomer()->requiresDoubleOptIn()) {
+                // if they were subscribed on the order, this will be true - so we mark them as pending
+                // otherwise we will use transactional as a fallback.
+                $status_if_new = $order->getCustomer()->getOriginalSubscriberStatus() ? 'pending' : 'transactional';
+            } else {
+                // if true, subscribed - otherwise transactional
+                $status_if_new = $order->getCustomer()->getOptInStatus() ? 'subscribed' : 'transactional';
+            }
+
             // Maybe sync subscriber to set correct member.language
-            mailchimp_member_language_update($email, $this->user_language, 'order');
+            mailchimp_member_language_update($email, $this->user_language, 'order', $status_if_new);
 
             mailchimp_log('order_submit.success', $log);
 

@@ -311,9 +311,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
             // if we require double opt in on the list, and the customer requires double opt in,
             // we should mark them as pending so they get the opt in email now.
-            if (mailchimp_list_has_double_optin() && ($order->getCustomer()->getOriginalSubscriberStatus() || $order->getCustomer()->getOptInStatus())) {
-                // if they were subscribed on the order, this will be true - so we mark them as pending
-                // otherwise we will use transactional as a fallback.
+            if (mailchimp_list_has_double_optin()) {
                 $status_if_new = $order->getCustomer()->getOriginalSubscriberStatus() ? 'pending' : 'transactional';
             } else {
                 // if true, subscribed - otherwise transactional

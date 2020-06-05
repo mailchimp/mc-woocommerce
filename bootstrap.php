@@ -1132,19 +1132,29 @@ function mailchimp_settings_errors() {
  * @throws MailChimp_WooCommerce_ServerError
  */
 function mailchimp_member_language_update($user_email = null, $language = null, $caller = '', $status_if_new = 'transactional') {
-    if (!$user_email || !$language) return;
-
+    mailchimp_debug('debug', "mailchimp_member_language_update", array(
+        'user_email' => $user_email,
+        'user_language' => $language,
+        'caller' => $caller,
+        'status_if_new' => $status_if_new,
+    ));
+    if (!$user_email) return;
     $hash = md5(strtolower(trim($user_email)));
-    if (!mailchimp_get_transient($caller . ".member.{$hash}")) {
+    if ($caller !== 'cart' || !mailchimp_get_transient($caller . ".member.{$hash}")) {
         $list_id = mailchimp_get_list_id();
         try {
             // try to get the member to update if already synced
             $member = mailchimp_get_api()->member($list_id, $user_email);
             // update member with new language
+            // if the member's subscriber status was transactional - and if we're passing in either one of these options below,
+            // we can attach the new status to the member.
+            if ($member['status'] === 'transactional' && in_array($status_if_new, array('subscribed', 'pending'))) {
+                $member['status'] = $status_if_new;
+            }
             mailchimp_get_api()->update($list_id, $user_email, $member['status'], null, null, $language);
             // set transient to prevent too many calls to update language
             mailchimp_set_transient($caller . ".member.{$hash}", true, 3600);
-            mailchimp_log($caller . '.member.updated', "Updated {$user_email} language to {$language}");
+            mailchimp_log($caller . '.member.updated', "Updated {$user_email} subscriber status to {$member['status']} and language to {$language}");
         } catch (\Exception $e) {
             if ($e->getCode() == 404) {
                 // member doesn't exist yet, create as transactional ( or what was passed in the function args )
@@ -1154,7 +1164,6 @@ function mailchimp_member_language_update($user_email = null, $language = null, 
                 mailchimp_log($caller . '.member.created', "Added {$user_email} as transactional, setting language to [{$language}]");
             } else {
                 mailchimp_error($caller . '.member.sync.error', $e->getMessage(), $user_email);
-                
             }
         }
     }

@@ -1132,7 +1132,7 @@ function mailchimp_settings_errors() {
  * @throws MailChimp_WooCommerce_ServerError
  */
 function mailchimp_member_language_update($user_email = null, $language = null, $caller = '', $status_if_new = 'transactional') {
-    mailchimp_log('debug', "mailchimp_member_language_update", array(
+    mailchimp_debug('debug', "mailchimp_member_language_update", array(
         'user_email' => $user_email,
         'user_language' => $language,
         'caller' => $caller,

@@ -47,19 +47,31 @@
 	height: 13px;
 	width: 57px;
 	margin-right: 0.5em;
-	border-bottom: 3px solid #E6E6E6;
 	position: relative;
 	align-items: center;
 	text-align: center;
 	text-transform: uppercase;
 }
 
-.nav-wizard-wrapper .wizard-tab-active,
-.nav-wizard-wrapper a.wizard-tab:hover {
+.nav-wizard-wrapper .wizard-tab .marker{
+	display: block;
+	height: 13px;
+	width: 57px;
+	border-bottom: 3px solid #E6E6E6;
+}
+
+.nav-wizard-wrapper .wizard-tab .marker-disabled{
+	display: block;
+	height: 13px;
+	width: 57px;
+	border-bottom: 3px solid #E6E6E6;
+}
+
+.nav-wizard-wrapper .wizard-tab .marker:hover{
 	border-bottom: 3px solid #212121;
 }
 
-.nav-wizard-wrapper .wizard-tab .wizard-tab-tooltip{
+.nav-wizard-wrapper .wizard-tab-tooltip{
 	display: none;
 }
 
@@ -67,7 +79,7 @@
 	display: block;
 }
 
-.nav-wizard-wrapper .wizard-tab .wizard-tab-tooltip {
+.nav-wizard-wrapper .wizard-tab-tooltip {
 	position: absolute;
 	left: 0;
 	top: 40px;
@@ -79,9 +91,10 @@
 	font-size: 14px;
 	line-height: 17px;
 	color: #3C3C3C;
+	cursor: default;
 }
 
-.nav-wizard-wrapper .wizard-tab .wizard-tab-tooltip svg{
+.nav-wizard-wrapper .wizard-tab-tooltip svg{
 	position: absolute;
 	left: 13px;
 	top: -13px;

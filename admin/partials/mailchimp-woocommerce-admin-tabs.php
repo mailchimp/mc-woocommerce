@@ -123,48 +123,58 @@ else {
     </p>
     <?php if($show_wizard): ?>  
         <div class="nav-wizard-wrapper">
-            <a href="?page=mailchimp-woocommerce&tab=api_key" class="wizard-tab <?php echo $active_tab == 'api_key' ? 'wizard-tab-active' : ''; ?>">
+            <div class="wizard-tab <?php echo $active_tab == 'api_key' ? 'wizard-tab-active' : ''; ?>" >
+                <a href="?page=mailchimp-woocommerce&tab=api_key" class="marker"></a>
                 <div class="wizard-tab-tooltip wizard-tab-tooltip-api-key "><?= esc_html_e('Connect', 'mailchimp-for-woocommerce');?>
                     <svg width="29" height="29" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect x="14.498" width="20" height="20" transform="rotate(45 14.498 0)" fill="white"/>
                     </svg>
                 </div>
-            </a>
-            
+            </div>
+
             <?php if ($has_valid_api_key) : ?>    
-                <a href="?page=mailchimp-woocommerce&tab=store_info" class="wizard-tab <?php echo $active_tab == 'store_info' ? 'wizard-tab-active' : ''; ?>">
+                <div class="wizard-tab <?php echo $active_tab == 'store_info' ? 'wizard-tab-active' : ''; ?>">
+                    <a href="?page=mailchimp-woocommerce&tab=store_info" class="marker"></a>
                     <div class="wizard-tab-tooltip wizard-tab-tooltip-store-info "><?= esc_html_e('Store Settings', 'mailchimp-for-woocommerce');?>
                         <svg width="29" height="29" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect x="14.498" width="20" height="20" transform="rotate(45 14.498 0)" fill="white"/>
                         </svg>
                     </div>
-                </a>
+                </div>
             <?php else: ?>
-                <span class="wizard-tab"></span>    
+                <div class="wizard-tab">
+                    <span class="marker-disabled"></span>
+                </div>      
             <?php endif; ?>
 
             <?php if ($handler->hasValidStoreInfo() && $show_campaign_defaults && $this->getData('validation.store_info', false)) : ?>  
-                <a href="?page=mailchimp-woocommerce&tab=campaign_defaults" class="wizard-tab <?php echo $active_tab == 'campaign_defaults' ? 'wizard-tab-active' : ''; ?>">
+                <div class="wizard-tab <?php echo $active_tab == 'campaign_defaults' ? 'wizard-tab-active' : ''; ?>">
+                    <a href="?page=mailchimp-woocommerce&tab=campaign_defaults" class="marker"></a>
                     <div class="wizard-tab-tooltip wizard-tab-tooltip-store-info "><?= esc_html_e('Audience Defaults', 'mailchimp-for-woocommerce');?>
                         <svg width="29" height="29" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect x="14.498" width="20" height="20" transform="rotate(45 14.498 0)" fill="white"/>
                         </svg>
                     </div>
-                </a>
+                </div>
             <?php else: ?>
-                <span class="wizard-tab"></span>    
+                <div class="wizard-tab">
+                    <span class="marker-disabled"></span>
+                </div>  
             <?php endif; ?>
 
             <?php if ($handler->hasValidCampaignDefaults() && $this->getData('validation.campaign_defaults', false)) : ?>  
-                <a href="?page=mailchimp-woocommerce&tab=newsletter_settings" class="wizard-tab <?php echo $active_tab == 'newsletter_settings' ? 'wizard-tab-active' : ''; ?>">
+                <div class="wizard-tab <?php echo $active_tab == 'newsletter_settings' ? 'wizard-tab-active' : ''; ?>">
+                    <a href="?page=mailchimp-woocommerce&tab=newsletter_settings" class="marker"></a>
                     <div class="wizard-tab-tooltip wizard-tab-tooltip-store-info "><?= esc_html_e('Audience Settings', 'mailchimp-for-woocommerce');?>
                         <svg width="29" height="29" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect x="14.498" width="20" height="20" transform="rotate(45 14.498 0)" fill="white"/>
                         </svg>
                     </div>
-                </a>
+                </div>
             <?php else: ?>
-                <span class="wizard-tab"></span>    
+                <div class="wizard-tab">
+                    <span class="marker-disabled"></span>
+                </div>    
             <?php endif; ?>
         </div>     
     <?php else: ?>

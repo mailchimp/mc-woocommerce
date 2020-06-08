@@ -3,14 +3,13 @@
 
 	$( window ).load(function() {
 		// show/hide wizard tabs tooltips
-		$('a.wizard-tab').hover(function (e) {
+		$('.wizard-tab a').hover(function (e) {
 			e.stopPropagation();
 			$('.wizard-tab-tooltip').hide();
-			$(this).find('.wizard-tab-tooltip').show();
-
+			$(this).next('.wizard-tab-tooltip').show();
 		});
 
-		$('a.wizard-tab').mouseleave(function (e) {
+		$('.wizard-tab a').mouseleave(function (e) {
 			e.stopPropagation();
 			$('.wizard-tab-tooltip').hide();
 			$('.wizard-tab-active .wizard-tab-tooltip').show();

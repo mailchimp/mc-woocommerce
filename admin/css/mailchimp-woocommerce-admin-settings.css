@@ -352,6 +352,12 @@
 	height: 164px;
 }
 
+.sync-more-wrapper {
+	position:relative;
+	padding: 4px 0em;
+	height: 264px;
+}
+
 .sync-comm-wrapper .comm_box_status {
 	font-weight: 700;
 }
@@ -528,17 +534,30 @@
 	clear:both;
 }
 
-.sync-comm-wrapper .box {
+.sync-comm-wrapper .box,
+.sync-more-wrapper .box {
 	padding: 0.5rem 0rem;
 	margin: 0;
 }
 
+.sync-more-wrapper .box {
+	height: 200px !important;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+}
+
 .tab-content-wrapper .box.box-half,
-.sync-content-wrapper .box.box-half {
+.sync-content-wrapper .box.box-half,
+.sync-more-wrapper .box.box-half {
 	float: left;
 	clear: none;
 	width: 50%;
 	
+}
+
+.sync-more-wrapper .box.box-half .content{
+	padding: 0 2em;
 }
 
 .sync-content-wrapper .box.box-half {
@@ -917,15 +936,20 @@
 
 	.tab-content-wrapper .box.box-half,
 	.tab-content-wrapper .box.box-third,
-	.sync-comm-wrapper .box.box-half {
+	.sync-comm-wrapper .box.box-half,
+	.sync-more-wrapper .box.box-half {
 		width: 100%;
+	}
+
+	.sync-more-wrapper .box.box-half:last-child {
+		margin-top: 26px;
 	}
 
 	.sync-content-wrapper .sync-stats-wrapper {
 		display: block;
-		width: 90%;
 		position:relative;
 		margin-bottom: 2em;
+		margin-right: 0;
 	}
 
 	.sync-content-wrapper .sync-stats-content-wrapper {

@@ -204,19 +204,34 @@ $comm_enabled = $opt != null ? $opt : '0';
     
 </div>
 
-<?php if($mailchimp_api && (!$store_syncing || isset($_GET['resync']) && $_GET['resync'] === '1')): ?>
-<h3 style="padding-top: 1em;"><?php esc_html_e('Advanced', 'mailchimp-for-woocommerce');?></h3>
-<p id="resync_data_help_text">
-    <?php esc_html_e('You can resync your audience at any time without losing any of your e-commerce data.', 'mailchimp-for-woocommerce');?>
-</p>
-<?php submit_button(__('Force Resync', 'mailchimp-for-woocommerce'), 'primary mc-woocommerce-resync-button','submit', TRUE); ?>
-<?php endif; ?>
+<?php $show_resync = $mailchimp_api && (!$store_syncing || isset($_GET['resync']) && $_GET['resync'] === '1'); ?>
+<div class="sync-content-wrapper sync-more-wrapper">
+    <div class="box box-half">
+        <div class="content">
+            <h3 style="padding-top: 1em;"><?php esc_html_e('Synchronization', 'mailchimp-for-woocommerce');?></h3>
+            <p id="resync_data_help_text">
+                <?php esc_html_e('You can resync your audience at any time without losing any of your e-commerce data.', 'mailchimp-for-woocommerce');?>
+            </p>
+            <?php if ($show_resync) : ?>
+                <?php submit_button(__('Resync now', 'mailchimp-for-woocommerce'), 'primary mc-woocommerce-resync-button','submit', TRUE); ?>
+            <?php else : ?>
+                <?php submit_button(__('Resync now', 'mailchimp-for-woocommerce'), 'mc-woocommerce-resync-button','submit', TRUE, ['disabled' => true]); ?>
+                <p class="description"><?php _e('Sync is running. Please wait until it finishes.', 'mailchimp-for-woocommerce') ?></p>
+            <?php endif;?>
+        </div>
+    </div>
+    
+    <div class="box box-half">
+        <div class="content">
+        <h3 style="padding-top: 1em;"><?php esc_html_e('More Information', 'mailchimp-for-woocommerce'); ?></h3>
+            <ul>
+                <li><?= sprintf(/* translators: %s - Plugin review URL. */wp_kses( __( 'Is this plugin helping your e-commerce business? <a href=%s target=_blank>Please leave us a ★★★★★ review!</a>.', 'mailchimp-for-woocommerce' ), array(  'a' => array( 'href' => array(), 'target'=> '_blank' ) ) ), esc_url( 'https://wordpress.org/support/plugin/mailchimp-for-woocommerce/reviews/' ) );?></li>
+                <li><?= sprintf(/* translators: %s - WP-CLI URL. */wp_kses( __( 'Have a larger store or having issues syncing? Consider using <a href=%s target=_blank>WP-CLI</a>.', 'mailchimp-for-woocommerce' ), array(  'a' => array( 'href' => array(), 'target'=> '_blank' ) ) ), esc_url( 'https://github.com/mailchimp/mc-woocommerce/wiki/Advanced-Queue-Setup-In-CLI-mode' ) );?></li>
+                <li><?= esc_html__('Order and customer information will not sync if they contain an Amazon or generic email address.', 'mailchimp-for-woocommerce');?></li>
+                <li><?= sprintf(/* translators: %s - Mailchimp Support URL. */wp_kses( __( 'Need help? Visit Mailchimp <a href=%s target=_blank>support</a>.', 'mailchimp-for-woocommerce' ), array(  'a' => array( 'href' => array(), 'target'=> '_blank' ) ) ), esc_url( 'https://us1.admin.mailchimp.com/support?support_key=woo_forum' ) );?></li>
+                <li><?= sprintf(/* translators: %s - Mailchimp Privacy Policy URL. */wp_kses( __( 'By using this plugin, Mailchimp will process customer information in accordance with their <a href=%s target=_blank>Privacy Policy</a>.', 'mailchimp-for-woocommerce' ), array(  'a' => array( 'href' => array(), 'target'=> '_blank' ) ) ), esc_url( 'https://mailchimp.com/legal/privacy/' ) );?></li>
+            </ul>
+        </div>
+    </div>
 
-<h3 style="padding-top: 1em;"><?php esc_html_e('More Information', 'mailchimp-for-woocommerce'); ?></h3>
-<ul>
-    <li><?= sprintf(/* translators: %s - Plugin review URL. */wp_kses( __( 'Is this plugin helping your e-commerce business? <a href=%s target=_blank>Please leave us a ★★★★★ review!</a>.', 'mailchimp-for-woocommerce' ), array(  'a' => array( 'href' => array(), 'target'=> '_blank' ) ) ), esc_url( 'https://wordpress.org/support/plugin/mailchimp-for-woocommerce/reviews/' ) );?></li>
-    <li><?= sprintf(/* translators: %s - WP-CLI URL. */wp_kses( __( 'Have a larger store or having issues syncing? Consider using <a href=%s target=_blank>WP-CLI</a>.', 'mailchimp-for-woocommerce' ), array(  'a' => array( 'href' => array(), 'target'=> '_blank' ) ) ), esc_url( 'https://github.com/mailchimp/mc-woocommerce/wiki/Advanced-Queue-Setup-In-CLI-mode' ) );?></li>
-    <li><?= esc_html__('Order and customer information will not sync if they contain an Amazon or generic email address.', 'mailchimp-for-woocommerce');?></li>
-    <li><?= sprintf(/* translators: %s - Mailchimp Support URL. */wp_kses( __( 'Need help? Visit Mailchimp <a href=%s target=_blank>support</a>.', 'mailchimp-for-woocommerce' ), array(  'a' => array( 'href' => array(), 'target'=> '_blank' ) ) ), esc_url( 'https://us1.admin.mailchimp.com/support?support_key=woo_forum' ) );?></li>
-    <li><?= sprintf(/* translators: %s - Mailchimp Privacy Policy URL. */wp_kses( __( 'By using this plugin, Mailchimp will process customer information in accordance with their <a href=%s target=_blank>Privacy Policy</a>.', 'mailchimp-for-woocommerce' ), array(  'a' => array( 'href' => array(), 'target'=> '_blank' ) ) ), esc_url( 'https://mailchimp.com/legal/privacy/' ) );?></li>
-</ul>
+</div>

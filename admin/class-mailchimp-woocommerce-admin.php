@@ -1378,6 +1378,15 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		$submission->setContact($this->address($data));
 
+		try {
+			$submission->setDoi(mailchimp_list_has_double_optin(true));
+		}
+		catch (\Exception $e) {
+			add_settings_error('list_sync_error', '', __('Cannot create or update List at Mailchimp.', 'mailchimp-for-woocommerce') . ' ' . $e->getMessage() . ' ' . __('Please retry.', 'mailchimp-for-woocommerce'));
+			$this->setData('errors.mailchimp_list', $e->getMessage());
+			return false;
+		}
+		
 		// let's turn this on for debugging purposes.
 		mailchimp_debug('admin', 'list info submission', array('submission' => print_r($submission->getSubmission(), true)));
 

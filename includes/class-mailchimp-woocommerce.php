@@ -141,7 +141,12 @@ class MailChimp_WooCommerce
     {
         // if we need to refresh the double opt in for any reason - just do it here.
         if ($this->queryStringEquals('mc_doi_refresh', '1')) {
-            $enabled_doi = mailchimp_list_has_double_optin(true);
+            try {
+                $enabled_doi = mailchimp_list_has_double_optin(true);
+            } catch (\Exception $e) {
+                mailchimp_error('mc.utils.doi_refresh', 'failed updating doi transient');
+                return false;
+            }
             mailchimp_log('mc.utils.doi_refresh', ($enabled_doi ? 'turned ON' : 'turned OFF'));
         }
     }

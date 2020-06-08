@@ -92,6 +92,17 @@ class MailChimp_WooCommerce_CreateListSubmission
         return $this;
     }
 
+     /**
+     * @param bool $public
+     * @return $this
+     */
+    public function setDoi($doi = false)
+    {
+        $this->props['double_optin'] = (bool) $doi;
+
+        return $this;
+    }
+
     /**
      * @param $name
      * @param $email

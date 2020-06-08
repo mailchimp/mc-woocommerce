@@ -223,9 +223,9 @@ function mailchimp_list_has_double_optin($force = false) {
         return false;
     }
 
-    $key = 'mailchimp_double_optin';
+    $key = 'double_optin';
 
-    $double_optin = get_site_transient($key);
+    $double_optin = mailchimp_get_transient($key);
 
     if (!$force && ($double_optin === 'yes' || $double_optin === 'no')) {
         return $double_optin === 'yes';
@@ -234,10 +234,11 @@ function mailchimp_list_has_double_optin($force = false) {
     try {
         $data = mailchimp_get_api()->getList(mailchimp_get_list_id());
         $double_optin = array_key_exists('double_optin', $data) ? ($data['double_optin'] ? 'yes' : 'no') : 'no';
-        set_site_transient($key, $double_optin, 600);
+        mailchimp_set_transient($key, $double_optin, 600);
         return $double_optin === 'yes';
     } catch (\Exception $e) {
-        set_site_transient($key, 'no', 600);
+        mailchimp_error('api.list', __('Error retrieving list for double_optin check', 'mailchimp-for-woocommerce'));
+        throw $e;
     }
 
     return $double_optin === 'yes';
@@ -900,7 +901,11 @@ function mailchimp_tell_system_about_user_submit($email, $status_meta, $seconds 
  * @return array
  */
 function mailchimp_get_subscriber_status_options($subscribed) {
-    $requires = mailchimp_list_has_double_optin();
+    try {
+        $requires = mailchimp_list_has_double_optin();
+    } catch (\Exception $e) {
+        return false;
+    }
 
     // if it's true - we set this value to NULL so that we do a 'pending' association on the member.
     $status_if_new = $requires ? null : $subscribed;
@@ -1118,30 +1123,47 @@ function mailchimp_settings_errors() {
     return $notices_html;
 }
 
-function mailchimp_member_language_update($user_email = null, $language = null, $caller = '') {
-    if (!$user_email || !$language) return;
-
+/**
+ * @param null $user_email
+ * @param null $language
+ * @param string $caller
+ * @param string $status_if_new
+ * @throws MailChimp_WooCommerce_Error
+ * @throws MailChimp_WooCommerce_ServerError
+ */
+function mailchimp_member_language_update($user_email = null, $language = null, $caller = '', $status_if_new = 'transactional') {
+    mailchimp_debug('debug', "mailchimp_member_language_update", array(
+        'user_email' => $user_email,
+        'user_language' => $language,
+        'caller' => $caller,
+        'status_if_new' => $status_if_new,
+    ));
+    if (!$user_email) return;
     $hash = md5(strtolower(trim($user_email)));
-    if (!mailchimp_get_transient($caller . ".member.{$hash}")) {
+    if ($caller !== 'cart' || !mailchimp_get_transient($caller . ".member.{$hash}")) {
         $list_id = mailchimp_get_list_id();
         try {
             // try to get the member to update if already synced
             $member = mailchimp_get_api()->member($list_id, $user_email);
             // update member with new language
+            // if the member's subscriber status was transactional - and if we're passing in either one of these options below,
+            // we can attach the new status to the member.
+            if ($member['status'] === 'transactional' && in_array($status_if_new, array('subscribed', 'pending'))) {
+                $member['status'] = $status_if_new;
+            }
             mailchimp_get_api()->update($list_id, $user_email, $member['status'], null, null, $language);
             // set transient to prevent too many calls to update language
             mailchimp_set_transient($caller . ".member.{$hash}", true, 3600);
-            mailchimp_log($caller . '.member.updated', "Updated {$user_email} language to {$language}");
+            mailchimp_log($caller . '.member.updated', "Updated {$user_email} subscriber status to {$member['status']} and language to {$language}");
         } catch (\Exception $e) {
             if ($e->getCode() == 404) {
-                // member doesn't exist yet, create
-                mailchimp_get_api()->subscribe($list_id, $user_email, false, array(), array(), $language);
+                // member doesn't exist yet, create as transactional ( or what was passed in the function args )
+                mailchimp_get_api()->subscribe($list_id, $user_email, $status_if_new, array(), array(), $language);
                 // set transient to prevent too many calls to update language
                 mailchimp_set_transient($caller . ".member.{$hash}", true, 3600);
-                mailchimp_log($caller . '.member.created', "Subscribed {$user_email}, setting language to [{$language}]");
+                mailchimp_log($caller . '.member.created', "Added {$user_email} as transactional, setting language to [{$language}]");
             } else {
                 mailchimp_error($caller . '.member.sync.error', $e->getMessage(), $user_email);
-                
             }
         }
     }

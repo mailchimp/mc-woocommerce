@@ -244,14 +244,17 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
             if ($e->getCode() == 404) {
 
                 try {
-                    $api->subscribe($list_id, $user->user_email, $status_meta['created'], $merge_fields, null, $language);
+                    $uses_doi = isset($status_meta['requires_double_optin']) && $status_meta['requires_double_optin'];
+                    $status_if_new = $uses_doi ? 'pending' : true;
+
+                    $api->subscribe($list_id, $user->user_email, $status_if_new, $merge_fields, null, $language);
                     
                     // update the member tags but fail silently just in case.
                     $api->updateMemberTags(mailchimp_get_list_id(), $email, true);
 
                     mailchimp_tell_system_about_user_submit($email, $status_meta, 60);
                     if ($status_meta['created']) {
-                        mailchimp_log('member.sync', "Subscribed Member {$user->user_email}", array('status_if_new' => $status_meta['created'], 'merge_fields' => $merge_fields));
+                        mailchimp_log('member.sync', "Subscribed Member {$user->user_email}", array('status_if_new' => $status_if_new, 'merge_fields' => $merge_fields));
                     } else {
                         mailchimp_log('member.sync', "{$user->user_email} is Pending Double OptIn");
                     }

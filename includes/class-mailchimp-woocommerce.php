@@ -361,7 +361,7 @@ class MailChimp_WooCommerce
             $this->loader->add_action('woocommerce_rest_delete_shop_coupon_object', $service, 'handleAPICouponTrashed', 10, 3);
 
 			// handle the user registration hook
-			$this->loader->add_action('user_register', $service, 'handleUserRegistration');
+			$this->loader->add_action('user_register', $service, 'handleUserRegistration', 10, 1);
 			// handle the user updated profile hook
 			$this->loader->add_action('profile_update', $service, 'handleUserUpdated', 10, 2);
 

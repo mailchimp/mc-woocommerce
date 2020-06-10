@@ -27,8 +27,11 @@
 				$(this).find('span').addClass('active');
 				optionalSettings = true;
 			}
-			
-
+		});
+		
+		// re-enable disable select input on audience settings submit
+		$('#mailchimp_woocommerce_options').on('submit', function() {
+			$('select[name="mailchimp-woocommerce[mailchimp_list]"]').prop('disabled', false);
 		});
 
 		// load new log file on log select change

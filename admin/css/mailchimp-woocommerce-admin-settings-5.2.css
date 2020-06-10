@@ -683,6 +683,7 @@
 .tab-content-wrapper .optional-settings-button:hover span {
 	color: #628735;
 }
+.tab-content-wrapper .optional-settings-label span
 .tab-content-wrapper .optional-settings-button span {
 	text-transform: uppercase;
 	color: #7FAD45 ;
@@ -697,7 +698,7 @@
 }
 
 .tab-content-wrapper .optional-settings-content {
-	display: none;
+	display: block;
 }
 
 /* Old styles from tabs.php */

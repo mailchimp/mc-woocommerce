@@ -24,6 +24,7 @@ if (!$show_sync_tab && (bool) get_site_transient('mailchimp_woocommerce_start_sy
 $show_campaign_defaults = true;
 $has_valid_api_key = false;
 $allow_new_list = true;
+$only_one_list = false;
 $show_wizard = true;
 $clicked_sync_button = $is_mailchimp_post && $active_tab == 'sync';
 $has_api_error = isset($options['api_ping_error']) && !empty($options['api_ping_error']) ? $options['api_ping_error'] : null;
@@ -37,6 +38,8 @@ if (isset($options['mailchimp_api_key'])) {
             if (($mailchimp_lists = $handler->getMailChimpLists()) && is_array($mailchimp_lists)) {
                 $show_campaign_defaults = true;
                 $allow_new_list = false;
+                $only_one_list = count($mailchimp_lists) === 1;
+
             }
 
             // only display this button if the data is not syncing and we have a valid api key
@@ -105,7 +108,13 @@ else {
         }
  
         if ($active_tab == 'newsletter_settings' ) {
-            wp_kses(_e('Please apply your audience settings. If you don’t<br/>have an audience, you can choose to create one', 'mailchimp-for-woocommerce'), $allowed_html);
+            if ($only_one_list) {
+                wp_kses(_e('Please apply your <br/>audience settings.', 'mailchimp-for-woocommerce'), $allowed_html);
+            }
+            else {
+                wp_kses(_e('Please apply your audience settings. ', 'mailchimp-for-woocommerce'), $allowed_html);
+                wp_kses(_e('If you don’t<br/>have an audience, you can choose to create one', 'mailchimp-for-woocommerce'), $allowed_html);    
+            }
         }
         if ($active_tab == 'sync' && $show_sync_tab) {
             if (mailchimp_is_done_syncing()) {

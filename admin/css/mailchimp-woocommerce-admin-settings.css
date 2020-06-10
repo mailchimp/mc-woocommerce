@@ -694,6 +694,7 @@
 	
 }
 
+.tab-content-wrapper .optional-settings-label,
 .tab-content-wrapper .optional-settings-button {
 	margin-top: 3em;
 	font-weight: 600;
@@ -702,12 +703,18 @@
 .tab-content-wrapper .optional-settings-button:hover span {
 	color: #628735;
 }
+
+.tab-content-wrapper .optional-settings-label span,
 .tab-content-wrapper .optional-settings-button span {
 	text-transform: uppercase;
 	color: #7FAD45 ;
-	padding-left: 2em;
-	background: no-repeat left center url("data:image/svg+xml;charset=UTF-8,%3csvg width='13' height='8' viewBox='0 0 13 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M11.34 0.590027L6.75 5.17003L2.16 0.590027L0.75 2.00003L6.75 8.00003L12.75 2.00003L11.34 0.590027Z' fill='%23212121'/%3e%3c/svg%3e ");
 	font-size: 14px;
+	cursor: default;
+}
+
+.tab-content-wrapper .optional-settings-button span {
+	background: no-repeat left center url("data:image/svg+xml;charset=UTF-8,%3csvg width='13' height='8' viewBox='0 0 13 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M11.34 0.590027L6.75 5.17003L2.16 0.590027L0.75 2.00003L6.75 8.00003L12.75 2.00003L11.34 0.590027Z' fill='%23212121'/%3e%3c/svg%3e ");
+	padding-left: 2em;
 	cursor: pointer;
 }
 
@@ -716,7 +723,7 @@
 }
 
 .tab-content-wrapper .optional-settings-content {
-	display: none;
+	display: block;
 }
 
 /* Old styles from tabs.php */

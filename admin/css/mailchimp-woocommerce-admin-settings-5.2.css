@@ -221,7 +221,7 @@
 
 .tab-content-submit,
 .mc-woocommerce-resync-button,
-.mc-woocommerce-copy-log-button {
+.mc-woocommerce-log-button {
 	font-family: proxima-nova, Arial, Helvetica, sans-serif !important;
 	font-size: 14px !important;
 	line-height: 16px !important;
@@ -243,9 +243,11 @@
 	color: #7FAD45;
 }
 
-.mc-woocommerce-copy-log-button {
-	padding-bottom: 15px !important;
+.mc-woocommerce-log-button {
+	padding: 15px !important;
 	text-decoration: none;
+	display:inline-block;
+	background-color: #FFFF;
 }
 
 .tab-content-submit {
@@ -293,7 +295,7 @@
 }
 
 .mc-woocommerce-resync-button,
-.mc-woocommerce-copy-log-button {
+.mc-woocommerce-log-button {
 	color: #3C3C3C !important;
 	background: #E6E6E6 !important;
 	box-shadow:0 1px 0 #E6E6E6 !important;
@@ -314,7 +316,7 @@
 }
 
 .mc-woocommerce-resync-button:hover,
-.mc-woocommerce-copy-log-button:hover {
+.mc-woocommerce-log-button:hover {
 	color: #3C3C3C !important;
 	background: #DADADA !important;
 	box-shadow:0 1px 0 #DADADA !important;
@@ -332,6 +334,17 @@
 		text-shadow 0.3s ease-out,
 		box-shadow 0.3s ease-out;
 }
+
+.mc-woocommerce-log-button {
+	background: #fff !important;
+	box-shadow:none !important;
+	text-shadow: 0 -1px 1px #DADADA,1px 0 1px #DADADA,0 1px 1px #DADADA,-1px 0 1px #DADADA !important;
+}
+
+.mc-woocommerce-log-button:hover {
+	background: #eee !important;
+}
+
 
 .tab-content-submit:focus,.tab-content-submit:hover{
 	background: rgb(149, 189, 101);
@@ -492,8 +505,7 @@
 	margin-top: 14em;
 }
 
-.sync-content-wrapper .mc-woocommerce-disconnect-button,
-.mc-woocommerce-delete-log-button {
+.sync-content-wrapper .mc-woocommerce-disconnect-button {
 	cursor: pointer;
 	padding-top: 1em;
 	font-family: proxima-nova, Arial, Helvetica, sans-serif;
@@ -519,12 +531,7 @@
 	float: right;
 }
 
-.mc-woocommerce-delete-log-button {
-	float: right;
-	background: white;
-}
-.sync-content-wrapper .mc-woocommerce-disconnect-button:hover,
-.mc-woocommerce-delete-log-button:hover {
+.sync-content-wrapper .mc-woocommerce-disconnect-button:hover {
 	color: #3C3C3C;
 	background-color: #DADADA;
 	-webkit-transition: background-color 0.3s ease-out;
@@ -533,8 +540,7 @@
 	transition: background-color 0.3s ease-out;
 }
 
-.sync-content-wrapper .mc-woocommerce-disconnect-button svg,
-.mc-woocommerce-delete-log-button svg {
+.sync-content-wrapper .mc-woocommerce-disconnect-button svg {
 	margin-right: 2em;
 }
 
@@ -713,6 +719,18 @@
 	display: inline-block;
 }
 
+.log-file-actions {
+	display: flex;
+    justify-content: space-around;
+	align-items: stretch;
+}
+
+#log-actions {
+	float: right;
+	flex: 0 0 120px;
+	margin-left: 20px;
+}
+
 .view-log-submit {
 	width: 15%;
 	display: inline-block;
@@ -888,18 +906,24 @@
 @media screen and (max-width: 782px) {
 	.tab-content-submit,
 	.mc-woocommerce-resync-button,
-	.mc-woocommerce-copy-log-button,
-	.mc-woocommerce-delete-log-button {
+	.mc-woocommerce-log-button {
 		padding: 15px 35px 15px 35px !important;
 	}
 
-	.mc-woocommerce-copy-log-button,
-	.mc-woocommerce-delete-log-button {
+	.mc-woocommerce-log-button {
 		width: 100%;
 		padding: 15px 35px 15px 35px !important;
 		text-align: center;
 	}
 
+	.log-file-actions {
+		display: block;
+	}
+
+	#log-actions {
+		float: left;
+	}
+	
 	.tab-content-wrapper form{
 		padding: 1em;
 	}

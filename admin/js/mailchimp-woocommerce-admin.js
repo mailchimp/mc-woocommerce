@@ -39,6 +39,10 @@
 			e.preventDefault();
 			$('#mailchimp_woocommerce_options').submit();
 		});
+		$('#mailchimp-log-pref').change(function (e) {
+			e.preventDefault();
+			$('#mailchimp_woocommerce_options').submit();
+		});
 
 		// copy log button
 		$('.mc-woocommerce-copy-log-button').click(function (e) {

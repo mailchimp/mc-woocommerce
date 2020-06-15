@@ -63,9 +63,6 @@ $handle = !empty($viewed_log) ? substr($viewed_log, 0, strlen($viewed_log) > 37 
             </select>
             
         </div>
-        <div class="log-submit">
-            <?php submit_button(__('Save'), 'primary tab-content-submit','mailchimp_submit', TRUE);?>
-        </div>
     </div>
 </fieldset>
 
@@ -76,7 +73,7 @@ $handle = !empty($viewed_log) ? substr($viewed_log, 0, strlen($viewed_log) > 37 
         </h3>
     </div>
     
-    <div class="box">
+    <div class="box log-file-actions">
         <input type="hidden" name="<?php echo $this->plugin_name; ?>[mailchimp_active_tab]" value="logs"/>
         <div class="mailchimp-select-wrapper view-log-select">
             <select id="log_file" name="log_file">
@@ -85,26 +82,22 @@ $handle = !empty($viewed_log) ? substr($viewed_log, 0, strlen($viewed_log) > 37 
                 <?php endforeach; ?>
             </select>
         </div>
+        <div id="log-actions">
+            <?php if ( ! empty( $handle ) ) : ?>
+                <a class="mc-woocommerce-log-button mc-woocommerce-copy-log-button" title="<?= __('Copy Log to clipboard', 'mailchimp-for-woocommerce');?>" href="#">
+                    <span class="dashicons dashicons-clipboard" style="transform: rotate(-45deg) translateY(2px) translateX(-2px);"></span>
+                </a>
+                <a class="mc-woocommerce-log-button delete-log-button" title="<?= __('Delete Log', 'mailchimp-for-woocommerce');?>" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'handle' => sanitize_title($viewed_log) ), admin_url( 'admin.php?page=mailchimp-woocommerce&tab=logs&mc_action=remove_log' ) ), 'remove_log' ) ); ?>">
+                    <span class="dashicons dashicons-trash"></span>
+                </a>
+            <?php endif; ?>
+        </div>
     </div>
 
 </fieldset>
 <div class="box">
     <?php if (isset($logs) && isset($viewed_log)) : ?>
         <div id="log-viewer">
-            <div id="log-header">
-                <?php if ( ! empty( $handle ) ) : ?>
-                    <a style="display:inline-block" class="mc-woocommerce-copy-log-button" href="#">
-                        <?php esc_html_e('Copy log', 'mailchimp-for-woocommerce'); ?>
-                    </a>
-                    <a class="mc-woocommerce-delete-log-button" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'handle' => sanitize_title($viewed_log) ), admin_url( 'admin.php?page=mailchimp-woocommerce&tab=logs&mc_action=remove_log' ) ), 'remove_log' ) ); ?>">
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M14 1.41L12.59 0L7 5.59L1.41 0L0 1.41L5.59 7L0 12.59L1.41 14L7 8.41L12.59 14L14 12.59L8.41 7L14 1.41Z" fill="#3C3C3C"/>
-                        </svg>
-                        <?php esc_html_e('Delete log', 'mailchimp-for-woocommerce'); ?>
-                        
-                    </a>
-                <?php endif; ?>
-            </div>
             <textarea id="log-content" readonly><?php echo esc_html( file_get_contents( WC_LOG_DIR . $viewed_log ) ); ?></textarea>
             
         </div>

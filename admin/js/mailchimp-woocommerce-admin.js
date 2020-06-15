@@ -56,6 +56,38 @@
 			$temp.remove();
 		});
 
+		// copy log button
+		var mailchimp_woocommerce_delete_log = false;
+		$('.delete-log-button').click(function (e) {
+			if (mailchimp_woocommerce_delete_log) {
+				mailchimp_woocommerce_delete_log = false; // reset flag
+				return; // let the event bubble away
+			}
+			e.preventDefault();
+			var me = $(e.target);
+
+			Swal.fire({
+				title: 'Are you sure?',
+				text: "You won't be able to revert this!",
+				type: 'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#3085d6',
+				cancelButtonColor: '#d33',
+				confirmButtonText: 'Yes, delete it!',
+				customClass: {
+					confirmButton: 'button button-primary tab-content-submit disconnect-button',
+					cancelButton: 'button button-default mc-woocommerce-resync-button disconnect-button'
+				},
+				buttonsStyling: false,
+
+			}).then((result) => {
+				if (result.value) {
+					mailchimp_woocommerce_delete_log = true;
+					me.click();
+				}
+			})
+		});
+
 		/*
 		* Shows dialog on store disconnect
 		* Change wp_http_referer URL in case of store disconnect

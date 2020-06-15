@@ -913,6 +913,7 @@ function mailchimp_get_subscriber_status_options($subscribed) {
 
     // set an array of status meta that we will use for comparison below to the transient data
     return array(
+        'requires_double_optin' => $requires,
         'created' => $status_if_new,
         'updated' => $status_if_update
     );

@@ -152,7 +152,7 @@ if (!$handler->hasValidApiKey()) {
         // Only admins should see mailchimp_permission_cap radio buttons
         if (current_user_can('manage_options')) : ?>
         
-        <div class="box optional-settings-button" >
+        <div class="box optional-settings-label" >
             <span><?php esc_html_e('Optional Store Settings', 'mailchimp-for-woocommerce');?></span>
         </div>
 

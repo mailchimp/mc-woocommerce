@@ -90,7 +90,7 @@ if (!$handler->hasValidApiKey()) {
     </div>
 
     <div class="box fieldset-header" >
-        <h2 style="padding-top: 1em;"><?= __('Locale Settings', 'mailchimp-for-woocommerce');?></h2>
+        <h3 style="padding-top: 1em;"><?= __('Locale Settings', 'mailchimp-for-woocommerce');?></h3>
         <br/>
         <p><?= __('Please apply your locale settings. If you\'re unsure about these, use the defaults.', 'mailchimp-for-woocommerce');?></p>
     </div>

@@ -33,7 +33,7 @@ if (!empty($last_updated_time)) {
 
 // if we have a transient set to start the sync on this page view, initiate it now that the values have been saved.
 if ((bool) get_site_transient('mailchimp_woocommerce_start_sync', false)) {
-    MailChimp_WooCommerce_Admin::startSync();
+    MailChimp_WooCommerce_Admin::connect()->startSync();
 }
 
 if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore($store_id))) {
@@ -205,14 +205,14 @@ $comm_enabled = $opt != null ? $opt : '0';
 </div>
 
 <?php if($mailchimp_api && (!$store_syncing || isset($_GET['resync']) && $_GET['resync'] === '1')): ?>
-<h2 style="padding-top: 1em;"><?php esc_html_e('Advanced', 'mailchimp-for-woocommerce');?></h2>
+<h3 style="padding-top: 1em;"><?php esc_html_e('Advanced', 'mailchimp-for-woocommerce');?></h3>
 <p id="resync_data_help_text">
     <?php esc_html_e('You can resync your audience at any time without losing any of your e-commerce data.', 'mailchimp-for-woocommerce');?>
 </p>
 <?php submit_button(__('Force Resync', 'mailchimp-for-woocommerce'), 'primary mc-woocommerce-resync-button','submit', TRUE); ?>
 <?php endif; ?>
 
-<h2 style="padding-top: 1em;"><?php esc_html_e('More Information', 'mailchimp-for-woocommerce'); ?></h2>
+<h3 style="padding-top: 1em;"><?php esc_html_e('More Information', 'mailchimp-for-woocommerce'); ?></h3>
 <ul>
     <li><?= sprintf(/* translators: %s - Plugin review URL. */wp_kses( __( 'Is this plugin helping your e-commerce business? <a href=%s target=_blank>Please leave us a ★★★★★ review!</a>.', 'mailchimp-for-woocommerce' ), array(  'a' => array( 'href' => array(), 'target'=> '_blank' ) ) ), esc_url( 'https://wordpress.org/support/plugin/mailchimp-for-woocommerce/reviews/' ) );?></li>
     <li><?= sprintf(/* translators: %s - WP-CLI URL. */wp_kses( __( 'Have a larger store or having issues syncing? Consider using <a href=%s target=_blank>WP-CLI</a>.', 'mailchimp-for-woocommerce' ), array(  'a' => array( 'href' => array(), 'target'=> '_blank' ) ) ), esc_url( 'https://github.com/mailchimp/mc-woocommerce/wiki/Advanced-Queue-Setup-In-CLI-mode' ) );?></li>

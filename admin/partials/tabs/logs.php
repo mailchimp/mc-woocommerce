@@ -39,7 +39,7 @@ $handle = !empty($viewed_log) ? substr($viewed_log, 0, strlen($viewed_log) > 37 
     </legend>
     
     <div class="box fieldset-header" >
-        <label for="<?php echo $this->plugin_name; ?>-logging"><h2 style="padding-top: 1em;"><?php esc_html_e('Logging Preferences', 'mailchimp-for-woocommerce');?></h2></label>
+        <label for="<?php echo $this->plugin_name; ?>-logging"><h3 style="padding-top: 1em;"><?php esc_html_e('Logging Preferences', 'mailchimp-for-woocommerce');?></h3></label>
     </div>
 
     <div class="box box-half">
@@ -67,9 +67,9 @@ $handle = !empty($viewed_log) ? substr($viewed_log, 0, strlen($viewed_log) > 37 
 
 <fieldset>
     <div class="box fieldset-header" >
-        <h2>
+        <h3>
             <?php esc_html_e('Recent Logs', 'mailchimp-for-woocommerce'); ?>
-        </h2>
+        </h3>
     </div>
     
     <div class="box">
@@ -88,23 +88,22 @@ $handle = !empty($viewed_log) ? substr($viewed_log, 0, strlen($viewed_log) > 37 
 <div class="box">
     <?php if (isset($logs) && isset($viewed_log)) : ?>
         <div id="log-viewer">
-            <div style="height: 100px;">
+            <div id="log-header">
                 <?php if ( ! empty( $handle ) ) : ?>
-                    <a style="display:inline-block" class="mc-woocommerce-delete-log-button" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'handle' => sanitize_title($viewed_log) ), admin_url( 'admin.php?page=mailchimp-woocommerce&tab=logs&mc_action=remove_log' ) ), 'remove_log' ) ); ?>">
+                    <a style="display:inline-block" class="mc-woocommerce-copy-log-button" href="#">
+                        <?php esc_html_e('Copy log', 'mailchimp-for-woocommerce'); ?>
+                    </a>
+                    <a class="mc-woocommerce-delete-log-button" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'handle' => sanitize_title($viewed_log) ), admin_url( 'admin.php?page=mailchimp-woocommerce&tab=logs&mc_action=remove_log' ) ), 'remove_log' ) ); ?>">
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M14 1.41L12.59 0L7 5.59L1.41 0L0 1.41L5.59 7L0 12.59L1.41 14L7 8.41L12.59 14L14 12.59L8.41 7L14 1.41Z" fill="#3C3C3C"/>
                         </svg>
                         <?php esc_html_e('Delete log', 'mailchimp-for-woocommerce'); ?>
                         
                     </a>
-                    <a style="display:inline-block" class="mc-woocommerce-copy-log-button" href="#">
-                        <?php esc_html_e('Copy log', 'mailchimp-for-woocommerce'); ?>
-                    </a>
                 <?php endif; ?>
             </div>
-            <div>
-                <pre id="log-text"><?php echo esc_html( file_get_contents( WC_LOG_DIR . $viewed_log ) ); ?></pre>
-            </div>
+            <textarea id="log-content" readonly><?php echo esc_html( file_get_contents( WC_LOG_DIR . $viewed_log ) ); ?></textarea>
+            
         </div>
     <?php else : ?>
         <div class="updated woocommerce-message inline"><p><?php _e( 'There are currently no logs to view.', 'woocommerce' ); ?></p></div>

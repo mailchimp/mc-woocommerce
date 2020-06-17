@@ -172,6 +172,10 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
                     $api->deleteMember($list_id, $this->updated_data['user_email']);
                     // subscribe the new
                     $api->subscribe($list_id, $email, $status_meta['created'], $merge_fields, null, $language);
+
+                    // update the member tags but fail silently just in case.
+                    $api->updateMemberTags(mailchimp_get_list_id(), $email, true);
+
                     mailchimp_tell_system_about_user_submit($email, $status_meta, 60);
 
                     if ($status_meta['created']) {
@@ -201,6 +205,10 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
             if (isset($member_data['status']) && $member_data['status'] === 'transactional' || $member_data['status'] === 'cleaned') {
                 // ok let's update this member
                 $api->update($list_id, $email, $status_meta['updated'], $merge_fields, null, $language);
+                
+                // update the member tags but fail silently just in case.
+                $api->updateMemberTags(mailchimp_get_list_id(), $email, true);
+
                 mailchimp_tell_system_about_user_submit($email, $status_meta, 60);
                 mailchimp_log('member.sync', "Updated Member {$email}", array(
                     'previous_status' => $member_data['status'],
@@ -214,6 +222,10 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
             if (isset($member_data['status'])) {
                 // ok let's update this member
                 $api->update($list_id, $email, $member_data['status'], $merge_fields, null, $language);
+
+                // update the member tags but fail silently just in case.
+                $api->updateMemberTags(mailchimp_get_list_id(), $email, true);
+
                 mailchimp_tell_system_about_user_submit($email, $status_meta, 60);
                 mailchimp_log('member.sync', "Updated Member {$email} ( merge fields only )", array(
                     'merge_fields' => $merge_fields
@@ -232,10 +244,17 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
             if ($e->getCode() == 404) {
 
                 try {
-                    $api->subscribe($list_id, $user->user_email, $status_meta['created'], $merge_fields, null, $language);
+                    $uses_doi = isset($status_meta['requires_double_optin']) && $status_meta['requires_double_optin'];
+                    $status_if_new = $uses_doi ? 'pending' : true;
+
+                    $api->subscribe($list_id, $user->user_email, $status_if_new, $merge_fields, null, $language);
+                    
+                    // update the member tags but fail silently just in case.
+                    $api->updateMemberTags(mailchimp_get_list_id(), $email, true);
+
                     mailchimp_tell_system_about_user_submit($email, $status_meta, 60);
                     if ($status_meta['created']) {
-                        mailchimp_log('member.sync', "Subscribed Member {$user->user_email}", array('status_if_new' => $status_meta['created'], 'merge_fields' => $merge_fields));
+                        mailchimp_log('member.sync', "Subscribed Member {$user->user_email}", array('status_if_new' => $status_if_new, 'merge_fields' => $merge_fields));
                     } else {
                         mailchimp_log('member.sync', "{$user->user_email} is Pending Double OptIn");
                     }

@@ -158,8 +158,15 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                             mailchimp_error('order_sync.error', mailchimp_error_trace($e, "GET subscriber :: {$order->getId()}"));
                             throw $e;
                         }
+                        
                         // if they are using double opt in, we need to pass this in as false here so it doesn't auto subscribe.
-                        $status = mailchimp_list_has_double_optin() ? false : $should_auto_subscribe;
+                        try {
+                            $doi = mailchimp_list_has_double_optin(true);
+                        } catch (\Exception $e_doi) {
+                            throw $e_doi;
+                        }
+                        
+                        $status = $doi ? false : $should_auto_subscribe;
                         $order->getCustomer()->setOptInStatus($status);
                     }
                 }
@@ -302,8 +309,17 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 $log .= " :: abandoned cart deleted [{$this->cart_session_id}]";
             }
 
+            // if we require double opt in on the list, and the customer requires double opt in,
+            // we should mark them as pending so they get the opt in email now.
+            if (mailchimp_list_has_double_optin()) {
+                $status_if_new = $order->getCustomer()->getOriginalSubscriberStatus() ? 'pending' : 'transactional';
+            } else {
+                // if true, subscribed - otherwise transactional
+                $status_if_new = $order->getCustomer()->getOptInStatus() ? 'subscribed' : 'transactional';
+            }
+
             // Maybe sync subscriber to set correct member.language
-            mailchimp_member_language_update($email, $this->user_language, 'order');
+            mailchimp_member_language_update($email, $this->user_language, 'order', $status_if_new);
 
             mailchimp_log('order_submit.success', $log);
 

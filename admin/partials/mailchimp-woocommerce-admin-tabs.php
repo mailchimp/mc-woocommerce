@@ -108,7 +108,12 @@ else {
             wp_kses(_e('Please apply your audience settings. If you don’t<br/>have an audience, you can choose to create one', 'mailchimp-for-woocommerce'), $allowed_html);
         }
         if ($active_tab == 'sync' && $show_sync_tab) {
-            wp_kses(_e('Connect your WooCommerce store to a<br/>Mailchimp audience in less than 60 seconds', 'mailchimp-for-woocommerce'), $allowed_html);
+            if (mailchimp_is_done_syncing()) {
+                wp_kses(_e('Sweet! You\'re connected with<br/>Mailchimp and syncing data', 'mailchimp-for-woocommerce'), $allowed_html);
+            }
+            else {
+                wp_kses(_e('Connect your WooCommerce store to a<br/>Mailchimp audience in less than 60 seconds', 'mailchimp-for-woocommerce'), $allowed_html);
+            }
         }
  
         if ($active_tab == 'logs' && $show_sync_tab) {
@@ -182,13 +187,14 @@ else {
             <?php endif; ?>
         </div> 
     <?php endif; ?>
-    <h2><!-- Needed to show the notifications on the right spot --></h2>
+    
     <?php
         $settings_errors = get_settings_errors();
         if (!$show_wizard || ($show_wizard && isset($settings_errors[0]) && $settings_errors[0]['type'] != 'updated' )) {
             echo mailchimp_settings_errors();
         }
     ?>
+
     <?php if ($active_tab != 'sync'): ?>
     <div class="tab-content-wrapper">
     <?php endif; ?>

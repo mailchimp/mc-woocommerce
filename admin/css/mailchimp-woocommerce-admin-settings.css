@@ -331,6 +331,7 @@
 	transition: background-color 0.3s ease-out,
 		text-shadow 0.3s ease-out,
 		box-shadow 0.3s ease-out;
+	text-decoration: none !important;
 }
 
 .tab-content-submit:focus,.tab-content-submit:hover{
@@ -531,6 +532,7 @@
 	-moz-transition: background-color 0.3s ease-out;
 	-o-transition: background-color 0.3s ease-out;
 	transition: background-color 0.3s ease-out;
+	text-decoration: none !important;
 }
 
 .sync-content-wrapper .mc-woocommerce-disconnect-button svg,
@@ -725,12 +727,33 @@
 	background: #fff;
 	border: 1px solid #e5e5e5;
 	box-shadow: 0 1px 1px rgba(0,0,0,.04);
-	padding: 15px 20px;
 }
 
 #log-viewer pre {
 	font-family: monospace;
 	white-space: pre-wrap;
+}
+
+#log-viewer #log-header {
+	border-bottom: 1px solid #e5e5e5;
+	padding: 15px 20px;
+}
+
+#log-viewer #log-content {
+	height: 500px;
+	padding: 15px 20px;
+	width: 100%;
+	background-color: white;
+	color: #444;
+	font-family: monospace;
+	white-space: pre-wrap;
+	font-size: 1em;
+	
+}
+
+#log-viewer #log-content:focus {
+	outline: none;
+	box-shadow: none !important;
 }
 
 
@@ -745,7 +768,7 @@
 	align-items: center;
 	justify-content: center;
 	position: absolute;
-	top: 0;
+	top: 50px;
 	left: 0;
 	visibility: hidden;
 	display: none;
@@ -763,7 +786,7 @@
 	color: #7FAD45 !important;
 }
 
-#mc-woocommerce-create-account h2 {
+#mc-woocommerce-create-account h3 {
 	padding-bottom: 20px;
 }
 
@@ -804,7 +827,7 @@
 	padding-top: 30px;
 }
 
-.mc-woocommerce-create-account-modal-header h2{
+.mc-woocommerce-create-account-modal-header h3{
 	text-align: center;
 	padding-top: 30px;
 	font-size: 2em;
@@ -901,6 +924,10 @@
 		width: 100%;
 		padding: 15px 35px 15px 35px !important;
 		text-align: center;
+	}
+
+	.mc-woocommerce-delete-log-button {
+		display: none;
 	}
 
 	.tab-content-wrapper form{

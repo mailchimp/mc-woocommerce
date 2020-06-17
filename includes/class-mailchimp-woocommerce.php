@@ -141,7 +141,12 @@ class MailChimp_WooCommerce
     {
         // if we need to refresh the double opt in for any reason - just do it here.
         if ($this->queryStringEquals('mc_doi_refresh', '1')) {
-            $enabled_doi = mailchimp_list_has_double_optin(true);
+            try {
+                $enabled_doi = mailchimp_list_has_double_optin(true);
+            } catch (\Exception $e) {
+                mailchimp_error('mc.utils.doi_refresh', 'failed updating doi transient');
+                return false;
+            }
             mailchimp_log('mc.utils.doi_refresh', ($enabled_doi ? 'turned ON' : 'turned OFF'));
         }
     }
@@ -278,9 +283,7 @@ class MailChimp_WooCommerce
 
 		$plugin_public = new MailChimp_WooCommerce_Public( $this->get_plugin_name(), $this->get_version() );
 		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_scripts');
-		if ( apply_filters( 'mailchimp_add_inline_footer_script', true ) ) {
-        		$this->loader->add_action('wp_footer', $plugin_public, 'add_inline_footer_script');
-		}
+        $this->loader->add_action('wp_footer', $plugin_public, 'add_inline_footer_script');
 	}
 
 	/**
@@ -344,20 +347,21 @@ class MailChimp_WooCommerce
 
 			// save post hooks
 			$this->loader->add_action('save_post', $service, 'handlePostSaved', 10, 3);
-            $this->loader->add_action('wp_trash_post', $service, 'handlePostTrashed', 10);
-            $this->loader->add_action('untrashed_post', $service, 'handlePostRestored', 10);
+            $this->loader->add_action('wp_trash_post', $service, 'handlePostTrashed', 10, 1);
+            $this->loader->add_action('untrashed_post', $service, 'handlePostRestored', 10, 1);
 
 			//coupons
-            $this->loader->add_action('woocommerce_new_coupon', $service, 'handleNewCoupon', 10);
+            $this->loader->add_action('woocommerce_new_coupon', $service, 'handleNewCoupon', 10, 1);
             $this->loader->add_action('woocommerce_coupon_options_save', $service, 'handleCouponSaved', 10, 2);
             $this->loader->add_action('woocommerce_api_create_coupon', $service, 'handleCouponSaved', 9, 2);
 
-            $this->loader->add_action('woocommerce_delete_coupon', $service, 'handleCouponTrashed', 10);
-            $this->loader->add_action('woocommerce_trash_coupon', $service, 'handleCouponTrashed', 10);
-            $this->loader->add_action('woocommerce_api_delete_coupon', $service, 'handleCouponTrashed', 9);
+            $this->loader->add_action('woocommerce_delete_coupon', $service, 'handlePostTrashed', 10, 1);
+            $this->loader->add_action('woocommerce_trash_coupon', $service, 'handlePostTrashed', 10, 1);
+            
+            $this->loader->add_action('woocommerce_rest_delete_shop_coupon_object', $service, 'handleAPICouponTrashed', 10, 3);
 
 			// handle the user registration hook
-			$this->loader->add_action('user_register', $service, 'handleUserRegistration');
+			$this->loader->add_action('user_register', $service, 'handleUserRegistration', 10, 1);
 			// handle the user updated profile hook
 			$this->loader->add_action('profile_update', $service, 'handleUserUpdated', 10, 2);
 

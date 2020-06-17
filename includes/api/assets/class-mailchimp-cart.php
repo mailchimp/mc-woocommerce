@@ -87,15 +87,26 @@ class MailChimp_WooCommerce_Cart
 
     /**
      * @param $id
+     * @param bool $throw_if_invalid
      * @return $this
+     * @throws Exception
      */
-    public function setCampaignID($id)
+    public function setCampaignID($id, $throw_if_invalid = false)
     {   
         $api = MailChimp_WooCommerce_MailChimpApi::getInstance();
         $cid = trim($id);
-        if (($campaign = $api->getCampaign($cid, false))) {
+        if (!empty($cid) && ($campaign = $api->getCampaign($cid, $throw_if_invalid))) {
             $this->campaign_id = $campaign['id'];
         }
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function removeCampaignID()
+    {
+        $this->campaign_id = null;
         return $this;
     }
 

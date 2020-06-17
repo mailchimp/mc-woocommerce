@@ -1,4 +1,18 @@
 == Changelog ==
+= 2.4.1 =
+* adds scrolling frame for logs
+* fix for Coupon Deletion via WooCommerce API
+* removes all non-Mailchimp notices
+* update for latest version of Action Scheduler v3.1.4
+* documentation updates
+* fix for errors on activation following deactivation
+* fix for PHP notice on Woocommerce Import Tax rate page 
+* adds error handling on store add/update 
+* use denormalized order items values in initial sync 
+* adds function allowing tags for specific users  
+* adds include/exclude Mailchimp script
+* fix for double opt-in issues on saved settings
+* fixes transactionals on guest checkout
 = 2.4.0 =
 * update for latest Action Scheduler v3.1.4
 * adds customer language on Cart and Order sync

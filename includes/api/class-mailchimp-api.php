@@ -198,10 +198,21 @@ class MailChimp_WooCommerce_MailChimpApi
      */
     public function subscribe($list_id, $email, $subscribed = true, $merge_fields = array(), $list_interests = array(), $language = null)
     {
+        if (is_string($subscribed)) {
+            $status = $subscribed;
+        } else {
+            if ($subscribed === true) {
+                $status = 'subscribed';
+            } elseif ($subscribed === false) {
+                $status = 'pending';
+            } else {
+                $status = 'transactional';
+            }
+        }
         $data = array(
             'email_type' => 'html',
             'email_address' => $email,
-            'status' => ($subscribed === true ? 'subscribed' : 'pending'),
+            'status' => $status,
             'merge_fields' => $merge_fields,
             'interests' => $list_interests,
             'language' => $language
@@ -323,7 +334,7 @@ class MailChimp_WooCommerce_MailChimpApi
     public function updateMemberTags($list_id, $email, $fail_silently = false)
     {
         $hash = md5(strtolower(trim($email)));
-        $tags = mailchimp_get_user_tags_to_update();
+        $tags = mailchimp_get_user_tags_to_update($email);
 
         if (empty($tags)) return false;
 
@@ -642,8 +653,11 @@ class MailChimp_WooCommerce_MailChimpApi
      */
     public function getCampaign($campaign_id, $throw_if_invalid = true)
     {
+        // don't let an empty campaign ID do anything
+        if (empty($campaign_id)) return false;
+
         // if we found the campaign ID already and it's been stored in the cache, return it from the cache instead.
-        if (($data = get_site_transient('mailchimp-woocommerce-has-campaign-id-'.$campaign_id))) {
+        if (($data = get_site_transient('mailchimp-woocommerce-has-campaign-id-'.$campaign_id)) && !empty($data)) {
             return $data;
         }
         if (get_site_transient('mailchimp-woocommerce-no-campaign-id-'.$campaign_id)) {

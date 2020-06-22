@@ -138,7 +138,10 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
                 try {
                     $line = $this->transformLineItem($hash, $item);
                     $cart->addItem($line);
-                    $order_total += ($item['quantity'] * $line->getPrice());
+                    $qty = isset($item['quantity']) && is_numeric($item['quantity']) ? $item['quantity'] : 1;
+                    if (($price = $line->getPrice()) && is_numeric($price)) {
+                        $order_total += ($qty * $price);
+                    }
                     $products[] = $line;
                 } catch (\Exception $e) {}
             }

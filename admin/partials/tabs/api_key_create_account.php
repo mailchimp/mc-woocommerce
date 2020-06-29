@@ -1,11 +1,11 @@
 <p id="mc-woocommerce-create-account-link" class="create-account-link alignright">Don’t have a Mailchimp account yet? <a style="font-weight:bold !important;" href='#mc-woocommerce-create-account'>Create one here</a></p>
-<div id="mc-woocommerce-create-account">
+<div id="mc-woocommerce-create-account" class="mc-woocommerce-modal">
     <div id="exampleModal" class="reveal-modal">
         <a href="#" class="close-modal"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M14 1.41L12.59 0L7 5.59L1.41 0L0 1.41L5.59 7L0 12.59L1.41 14L7 8.41L12.59 14L14 12.59L8.41 7L14 1.41Z" fill="black"/>
             </svg>
         </a>    
-        <div class="mc-woocommerce-create-account-modal-header">
+        <div class="modal-header">
             <svg width="100px" height="100px" viewBox="0 0 46 49" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M34.5458 23.5193C34.8988 23.4778 35.2361 23.4759 35.5457 23.5193C35.7252 23.107 35.7568 22.397 35.5951 21.6239C35.3544 20.4741 35.029 19.7778 34.3584 19.8863C33.6859 19.9948 33.6622 20.8271 33.9028 21.9769C34.037 22.6238 34.2776 23.1761 34.5458 23.5193Z" fill="black"/>
                 <path d="M28.7763 24.4284C29.2575 24.6394 29.5534 24.7795 29.6678 24.6572C29.7427 24.5803 29.719 24.4363 29.6046 24.2489C29.368 23.8624 28.8788 23.4679 28.3621 23.249C27.303 22.7934 26.0407 22.9453 25.0664 23.6454C24.745 23.8801 24.4393 24.2075 24.4826 24.4047C24.4965 24.4698 24.5458 24.5172 24.6582 24.5329C24.9225 24.5625 25.8494 24.0951 26.9164 24.03C27.6718 23.9827 28.295 24.2174 28.7763 24.4284Z" fill="black"/>
@@ -187,7 +187,7 @@
         </div>
         
 
-        <div class="mc-woocommerce-create-account-modal-footer">
+        <div class="modal-footer">
             ©2001–<?= date('Y') ?> All Rights Reserved. Mailchimp® is a registered trademark of The Rocket Science Group. Cookie Preferences, Privacy, and Terms.
         </div>
 

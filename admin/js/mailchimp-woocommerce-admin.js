@@ -66,6 +66,13 @@
 			/* Copy the text inside the text field */
 			document.execCommand("copy");
 			$temp.remove();
+			$('.mc-woocommerce-copy-log-button span.clipboard').hide();
+			$('.mc-woocommerce-copy-log-button span.yes').show();
+		});
+
+		$('.mc-woocommerce-copy-log-button').mouseleave(function (e) {
+			$('.mc-woocommerce-copy-log-button span.clipboard').show();
+			$('.mc-woocommerce-copy-log-button span.yes').hide();
 		});
 
 		// delete log button

@@ -248,6 +248,11 @@
 	color: red;
 }
 
+.mc-woocommerce-log-button.mc-woocommerce-copy-log-button span.yes {
+	color: green;
+	display:none;
+}
+
 .tab-content-submit {
 	float:right;
 	background: #7FAD45 !important;

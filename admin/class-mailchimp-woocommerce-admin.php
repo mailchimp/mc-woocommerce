@@ -237,6 +237,29 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         }
 	}
 
+
+	/**
+	 * Displays notice when plugin is installed but not yet configured / connected to Mailchimp.
+	 */
+	public function initial_notice() {
+		if (!mailchimp_is_configured()) {
+			$class = 'notice notice-warning is-dismissible';
+			$message = sprintf(
+				/* translators: Placeholders %1$s - opening strong HTML tag, %2$s - closing strong HTML tag, %3$s - opening link HTML tag, %4$s - closing link HTML tag */
+				esc_html__(
+					'%1$sMailchimp for Woocommerce%2$s is not yet connected to a Mailchimp account. To complete the connection, %3$svisit the plugin settings page%4$s.',
+					'facebook-for-woocommerce'
+				),
+				'<strong>',
+				'</strong>',
+				'<a href="' . admin_url( 'admin.php?page=') . $this->plugin_name . '">',
+				'</a>'
+			);
+			printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message ); 
+		}
+	}
+
+
 	/**
 	 * Depending on the version we're on we may need to run some sort of migrations.
 	 */

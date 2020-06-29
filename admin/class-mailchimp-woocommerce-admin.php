@@ -112,7 +112,21 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	public function enqueue_scripts($hook) {
 		if ( $hook === 'toplevel_page_mailchimp-woocommerce' ) {
 			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version, false );
-			wp_localize_script( $this->plugin_name, 'phpVars', array( 'removeReviewBannerRestUrl' => MailChimp_WooCommerce_Rest_Api::url('review-banner')) );
+			wp_localize_script( 
+				$this->plugin_name,
+				'phpVars',
+				array( 
+					'removeReviewBannerRestUrl' => MailChimp_WooCommerce_Rest_Api::url('review-banner'),
+					'l10n' => array(
+						'are_you_sure' => __('Are you sure?', 'mailchimp-for-woocommerce'),
+						'log_delete_subtitle' => __('You will not be able to revert.', 'mailchimp-for-woocommerce'),
+						'log_delete_confirm' => __('Yes, delete it!', 'mailchimp-for-woocommerce'),
+						'no_cancel' => __('No, cancel!', 'mailchimp-for-woocommerce'),
+						'store_disconnect_subtitle' => __('You are about to disconnect your store from Mailchimp.', 'mailchimp-for-woocommerce'),
+						'store_disconnect_confirm' => __('Yes, disconnect.', 'mailchimp-for-woocommerce'),
+					),
+				)
+			);
 			wp_enqueue_script( $this->plugin_name);
 			wp_enqueue_script('swal', "//cdn.jsdelivr.net/npm/sweetalert2@8", '', $this->version, false);
 		}

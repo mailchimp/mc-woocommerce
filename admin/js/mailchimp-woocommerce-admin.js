@@ -86,18 +86,20 @@
 			var me = $(e.target);
 
 			Swal.fire({
-				title: 'Are you sure?',
-				text: "You won't be able to revert this!",
+				title: phpVars.l10n.are_you_sure,
+				text: phpVars.l10n.log_delete_subtitle,
 				type: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
 				cancelButtonColor: '#d33',
-				confirmButtonText: 'Yes, delete it!',
+				confirmButtonText: phpVars.l10n.log_delete_confirm,
+				cancelButtonText: phpVars.l10n.no_cancel,
 				customClass: {
 					confirmButton: 'button button-primary tab-content-submit disconnect-button',
 					cancelButton: 'button button-default mc-woocommerce-resync-button disconnect-button'
 				},
 				buttonsStyling: false,
+				reverseButtons: true,
 
 			}).then((result) => {
 				if (result.value) {
@@ -132,12 +134,12 @@
 			})
 			
 			swalWithBootstrapButtons.fire({
-				title: 'Are you sure?',
-				text: "You are about to disconnect your store from Mailchimp.",
+				title: phpVars.l10n.are_you_sure,
+				text: phpVars.l10n.store_disconnect_subtitle,
 				type: 'warning',
 				showCancelButton: true,
-				confirmButtonText: 'Yes, disconnect.',
-				cancelButtonText: 'No, cancel!',
+				confirmButtonText: phpVars.l10n.store_disconnect_confirm,
+				cancelButtonText: phpVars.l10n.no_cancel,
 				reverseButtons: true
 			}).then((result) => {
 				if (result.value) {

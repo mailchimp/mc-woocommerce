@@ -665,6 +665,12 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         if (!($woo = WC()) || empty($woo->session)) {
             return $default;
         }
+
+        // not really sure why this would be the case, but if there is no session we can't get it anyway.
+        if (!is_object($woo->session) || !method_exists($woo->session, 'get')) {
+            return $default;
+        }
+
         return $woo->session->get($key, $default);
     }
 

@@ -4,10 +4,10 @@ Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.9
 Tested up to: 5.4
-Stable tag: 2.4.0
+Stable tag: 2.4.1
 Requires PHP: 7.0
 WC requires at least: 3.5
-WC tested up to: 4.1
+WC tested up to: 4.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your Mailchimp audience to track sales, create targeted emails, send abandoned cart emails, and more.
@@ -75,3 +75,19 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 
 = My question is not listed =
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
+
+== Changelog ==
+= 2.4.1 =
+* adds scrolling frame for logs
+* fix for Coupon Deletion via WooCommerce API
+* removes all non-Mailchimp notices
+* update for latest version of Action Scheduler v3.1.4
+* documentation updates
+* fix for errors on activation following deactivation
+* fix for PHP notice on Woocommerce Import Tax rate page
+* adds error handling on store add/update
+* use denormalized order items values in initial sync
+* adds function allowing tags for specific users
+* adds include/exclude Mailchimp script
+* fix for double opt-in issues on saved settings
+* fixes transactionals on guest checkout

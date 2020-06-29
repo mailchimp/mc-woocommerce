@@ -289,6 +289,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             if (get_option('mailchimp-woocommerce-sync.initial_sync') == 1 && get_option('mailchimp-woocommerce-sync.completed_at') > 0 ) {
                 $this->mailchimp_show_initial_sync_message();
             }
+			if (isset($_GET['log_removed']) && $_GET['log_removed'] == "1") {
+				add_settings_error('mailchimp_log_settings', '', __('Log file deleted.', 'mailchimp-for-woocommerce'), 'info');
+			}
         }
 	}
 

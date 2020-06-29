@@ -37,12 +37,24 @@
 		// load new log file on log select change
 		$('#log_file').change(function (e) {
 			e.preventDefault();
+			// prevents Log Deleted notification to show up
+			removeLogDeletedParamFromFormHttpRef();
+
 			$('#mailchimp_woocommerce_options').submit();
 		});
 		$('#mailchimp-log-pref').change(function (e) {
 			e.preventDefault();
+			// prevents Log Deleted notification to show up
+			removeLogDeletedParamFromFormHttpRef();
+
 			$('#mailchimp_woocommerce_options').submit();
 		});
+
+		// Remove log_deleted param from _wp_http_referer hidden input
+		function removeLogDeletedParamFromFormHttpRef() {
+			var currentFormRefererUrl = $('input[name="_wp_http_referer"]').val();
+			$('input[name="_wp_http_referer"]').val(currentFormRefererUrl.replace('&log_removed=1', ''))
+		}
 
 		// copy log button
 		$('.mc-woocommerce-copy-log-button').click(function (e) {
@@ -56,7 +68,7 @@
 			$temp.remove();
 		});
 
-		// copy log button
+		// delete log button
 		var mailchimp_woocommerce_delete_log = false;
 		$('.delete-log-button').click(function (e) {
 			if (mailchimp_woocommerce_delete_log) {

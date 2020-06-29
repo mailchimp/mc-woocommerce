@@ -3,14 +3,13 @@
 
 	$( window ).load(function() {
 		// show/hide wizard tabs tooltips
-		$('a.wizard-tab').hover(function (e) {
+		$('.wizard-tab a').hover(function (e) {
 			e.stopPropagation();
 			$('.wizard-tab-tooltip').hide();
-			$(this).find('.wizard-tab-tooltip').show();
-
+			$(this).next('.wizard-tab-tooltip').show();
 		});
 
-		$('a.wizard-tab').mouseleave(function (e) {
+		$('.wizard-tab a').mouseleave(function (e) {
 			e.stopPropagation();
 			$('.wizard-tab-tooltip').hide();
 			$('.wizard-tab-active .wizard-tab-tooltip').show();
@@ -28,9 +27,34 @@
 				$(this).find('span').addClass('active');
 				optionalSettings = true;
 			}
-			
-
 		});
+		
+		// re-enable disable select input on audience settings submit
+		$('#mailchimp_woocommerce_options').on('submit', function() {
+			$('select[name="mailchimp-woocommerce[mailchimp_list]"]').prop('disabled', false);
+		});
+
+		// load new log file on log select change
+		$('#log_file').change(function (e) {
+			e.preventDefault();
+			// prevents Log Deleted notification to show up
+			removeLogDeletedParamFromFormHttpRef();
+
+			$('#mailchimp_woocommerce_options').submit();
+		});
+		$('#mailchimp-log-pref').change(function (e) {
+			e.preventDefault();
+			// prevents Log Deleted notification to show up
+			removeLogDeletedParamFromFormHttpRef();
+
+			$('#mailchimp_woocommerce_options').submit();
+		});
+
+		// Remove log_deleted param from _wp_http_referer hidden input
+		function removeLogDeletedParamFromFormHttpRef() {
+			var currentFormRefererUrl = $('input[name="_wp_http_referer"]').val();
+			$('input[name="_wp_http_referer"]').val(currentFormRefererUrl.replace('&log_removed=1', ''))
+		}
 
 		// copy log button
 		$('.mc-woocommerce-copy-log-button').click(function (e) {
@@ -42,6 +66,47 @@
 			/* Copy the text inside the text field */
 			document.execCommand("copy");
 			$temp.remove();
+			$('.mc-woocommerce-copy-log-button span.clipboard').hide();
+			$('.mc-woocommerce-copy-log-button span.yes').show();
+		});
+
+		$('.mc-woocommerce-copy-log-button').mouseleave(function (e) {
+			$('.mc-woocommerce-copy-log-button span.clipboard').show();
+			$('.mc-woocommerce-copy-log-button span.yes').hide();
+		});
+
+		// delete log button
+		var mailchimp_woocommerce_delete_log = false;
+		$('.delete-log-button').click(function (e) {
+			if (mailchimp_woocommerce_delete_log) {
+				mailchimp_woocommerce_delete_log = false; // reset flag
+				return; // let the event bubble away
+			}
+			e.preventDefault();
+			var me = $(e.target);
+
+			Swal.fire({
+				title: phpVars.l10n.are_you_sure,
+				text: phpVars.l10n.log_delete_subtitle,
+				type: 'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#3085d6',
+				cancelButtonColor: '#d33',
+				confirmButtonText: phpVars.l10n.log_delete_confirm,
+				cancelButtonText: phpVars.l10n.no_cancel,
+				customClass: {
+					confirmButton: 'button button-primary tab-content-submit disconnect-button',
+					cancelButton: 'button button-default mc-woocommerce-resync-button disconnect-button'
+				},
+				buttonsStyling: false,
+				reverseButtons: true,
+
+			}).then((result) => {
+				if (result.value) {
+					mailchimp_woocommerce_delete_log = true;
+					me.click();
+				}
+			})
 		});
 
 		/*
@@ -69,12 +134,12 @@
 			})
 			
 			swalWithBootstrapButtons.fire({
-				title: 'Are you sure?',
-				text: "You are about to disconnect your store from Mailchimp.",
+				title: phpVars.l10n.are_you_sure,
+				text: phpVars.l10n.store_disconnect_subtitle,
 				type: 'warning',
 				showCancelButton: true,
-				confirmButtonText: 'Yes, disconnect.',
-				cancelButtonText: 'No, cancel!',
+				confirmButtonText: phpVars.l10n.store_disconnect_confirm,
+				cancelButtonText: phpVars.l10n.no_cancel,
 				reverseButtons: true
 			}).then((result) => {
 				if (result.value) {

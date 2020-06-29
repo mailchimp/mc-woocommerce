@@ -96,7 +96,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin.css', array(), $this->version, 'all' );
 		wp_enqueue_style( $this->plugin_name . 'checkbox', plugin_dir_url( __FILE__ ) . 'css/checkbox.min.css', array(), $this->version, 'all' );
 
-		if ( $hook === 'toplevel_page_mailchimp-woocommerce' ) {
+		if ( $hook === 'woocommerce_page_mailchimp-woocommerce' ) {
 			if ( get_bloginfo( 'version' ) < '5.3') {
 				wp_enqueue_style( $this->plugin_name."-settings", plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin-settings-5.2.css', array(), $this->version, 'all' );
 			}	
@@ -110,9 +110,23 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @since    1.0.0
 	 */
 	public function enqueue_scripts($hook) {
-		if ( $hook === 'toplevel_page_mailchimp-woocommerce' ) {
+		if ( $hook === 'woocommerce_page_mailchimp-woocommerce' ) {
 			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version, false );
-			wp_localize_script( $this->plugin_name, 'phpVars', array( 'removeReviewBannerRestUrl' => MailChimp_WooCommerce_Rest_Api::url('review-banner')) );
+			wp_localize_script( 
+				$this->plugin_name,
+				'phpVars',
+				array( 
+					'removeReviewBannerRestUrl' => MailChimp_WooCommerce_Rest_Api::url('review-banner'),
+					'l10n' => array(
+						'are_you_sure' => __('Are you sure?', 'mailchimp-for-woocommerce'),
+						'log_delete_subtitle' => __('You will not be able to revert.', 'mailchimp-for-woocommerce'),
+						'log_delete_confirm' => __('Yes, delete it!', 'mailchimp-for-woocommerce'),
+						'no_cancel' => __('No, cancel!', 'mailchimp-for-woocommerce'),
+						'store_disconnect_subtitle' => __('You are about to disconnect your store from Mailchimp.', 'mailchimp-for-woocommerce'),
+						'store_disconnect_confirm' => __('Yes, disconnect.', 'mailchimp-for-woocommerce'),
+					),
+				)
+			);
 			wp_enqueue_script( $this->plugin_name);
 			wp_enqueue_script('swal', "//cdn.jsdelivr.net/npm/sweetalert2@8", '', $this->version, false);
 		}
@@ -124,87 +138,15 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @since    1.0.0
 	 */
 	public function add_plugin_admin_menu() {
-		// Add top level menu item
-		add_menu_page(
-			__('Mailchimp - WooCommerce Setup', 'mailchimp-for-woocommerce'),
-			'Mailchimp',
+		// Add woocommerce menu subitem
+		add_submenu_page( 
+			'woocommerce', 
+			__( 'Mailchimp for WooCommerce', 'mailchimp-for-woocommerce'), 
+			__( 'Mailchimp', 'mailchimp-for-woocommerce' ),
 			mailchimp_get_allowed_capability(),
 			$this->plugin_name,
-			array($this, 'display_plugin_setup_page'), 'data:image/svg+xml;base64,'.$this->mailchimp_svg()
+			array($this, 'display_plugin_setup_page')
 		);
-		
-		// only shows submenus if initial wizard is complete
-		$show_submenus = ($this->getData('validation.store_info', false) && $this->getData('validation.campaign_defaults', false) && $this->getData('validation.newsletter_settings', false));
-		if ($show_submenus) {
-			// Add submenu items		
-			add_submenu_page( 
-				$this->plugin_name,
-				esc_html__('Overview', 'mailchimp-for-woocommerce'),
-				esc_html__('Overview', 'mailchimp-for-woocommerce'),
-				mailchimp_get_allowed_capability(),
-				$this->plugin_name . '&amp;tab=sync',
-				array($this, 'display_plugin_setup_page')
-			);
-			
-			add_submenu_page( 
-				$this->plugin_name,
-				esc_html__('Store Settings', 'mailchimp-for-woocommerce'),
-				esc_html__('Store Settings', 'mailchimp-for-woocommerce'),
-				mailchimp_get_allowed_capability(),
-				$this->plugin_name . '&amp;tab=store_info',
-				array($this, 'display_plugin_setup_page')
-			);
-			
-			add_submenu_page( 
-				$this->plugin_name,
-				esc_html__('Audience Defaults', 'mailchimp-for-woocommerce'),
-				esc_html__('Audience Defaults', 'mailchimp-for-woocommerce'),
-				mailchimp_get_allowed_capability(),
-				$this->plugin_name . '&amp;tab=campaign_defaults',
-				array($this, 'display_plugin_setup_page')
-			);
-			
-			add_submenu_page( 
-				$this->plugin_name,
-				esc_html__('Audience Settings', 'mailchimp-for-woocommerce'),
-				esc_html__('Audience Settings', 'mailchimp-for-woocommerce'),
-				mailchimp_get_allowed_capability(),
-				$this->plugin_name . '&amp;tab=newsletter_settings',
-				array($this, 'display_plugin_setup_page')
-			);
-			
-			add_submenu_page( 
-				$this->plugin_name,
-				esc_html__('Logs', 'mailchimp-for-woocommerce'),
-				esc_html__('Logs', 'mailchimp-for-woocommerce'),
-				mailchimp_get_allowed_capability(),
-				$this->plugin_name . '&amp;tab=logs',
-				array($this, 'display_plugin_setup_page')
-			);
-			
-			// Remove submenu duplicate of top level menu item
-			remove_submenu_page( $this->plugin_name, $this->plugin_name );
-
-		}
-	}
-	
-	/**
-	 * Highlight correct item on admin plugin's submenu
-	 * 
-	 * because of the nature of our settings pages being all the same url as opposed to separate php files, 
-	 * we need to force highlight on correct item based on the $_GET[tab] param.
-	 * 
-	 * @since    2.4.1
-	 */
-	function highlight_admin_menu($parent_file){
-		global $current_screen;
-		global $submenu_file;
-
-		if( $current_screen->base == 'toplevel_page_mailchimp-woocommerce' ) :
-			$submenu_file = $parent_file . (isset($_GET['tab']) ? "&amp;tab=" . $_GET['tab'] : "&amp;tab=sync");
-		endif;
-		
-		return $parent_file;
 	}
 
 	/**
@@ -215,7 +157,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			wc_admin_connect_page(
 				array(
 					'id'        => $this->plugin_name,
-					'screen_id' => 'toplevel_page_mailchimp-woocommerce',
+					'screen_id' => 'woocommerce_page_mailchimp-woocommerce',
 					'title'     => __( 'Mailchimp for WooCommerce', 'mailchimp-for-woocommerce' ),
 				)
 			);
@@ -289,8 +231,34 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             if (get_option('mailchimp-woocommerce-sync.initial_sync') == 1 && get_option('mailchimp-woocommerce-sync.completed_at') > 0 ) {
                 $this->mailchimp_show_initial_sync_message();
             }
+			if (isset($_GET['log_removed']) && $_GET['log_removed'] == "1") {
+				add_settings_error('mailchimp_log_settings', '', __('Log file deleted.', 'mailchimp-for-woocommerce'), 'info');
+			}
         }
 	}
+
+
+	/**
+	 * Displays notice when plugin is installed but not yet configured / connected to Mailchimp.
+	 */
+	public function initial_notice() {
+		if (!mailchimp_is_configured()) {
+			$class = 'notice notice-warning is-dismissible';
+			$message = sprintf(
+				/* translators: Placeholders %1$s - opening strong HTML tag, %2$s - closing strong HTML tag, %3$s - opening link HTML tag, %4$s - closing link HTML tag */
+				esc_html__(
+					'%1$sMailchimp for Woocommerce%2$s is not yet connected to a Mailchimp account. To complete the connection, %3$svisit the plugin settings page%4$s.',
+					'facebook-for-woocommerce'
+				),
+				'<strong>',
+				'</strong>',
+				'<a href="' . admin_url( 'admin.php?page=') . $this->plugin_name . '">',
+				'</a>'
+			);
+			printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message ); 
+		}
+	}
+
 
 	/**
 	 * Depending on the version we're on we may need to run some sort of migrations.

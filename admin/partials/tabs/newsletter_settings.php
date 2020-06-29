@@ -41,7 +41,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
             <strong><?php esc_html_e('Sync audience with your store', 'mailchimp-for-woocommerce'); ?></strong>
         </label>
         <div class="mailchimp-select-wrapper">
-            <select name="<?php echo $this->plugin_name; ?>[mailchimp_list]" required <?php if($list_is_configured): ?> disabled <?php endif; ?>>
+            <select name="<?php echo $this->plugin_name; ?>[mailchimp_list]" required <?php echo ($list_is_configured || $only_one_list) ? 'disabled' : '' ?>>
 
                 <?php if(!isset($allow_new_list) || $allow_new_list === true): ?>
                     <option value="create_new"><?php esc_html_e('Create New Audience', 'mailchimp-for-woocommerce');?></option>
@@ -55,7 +55,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
                 if (is_array($mailchimp_lists)) {
                     $selected_list = isset($options['mailchimp_list']) ? $options['mailchimp_list'] : null;
                     foreach ($mailchimp_lists as $key => $value ) {
-                        echo '<option value="' . esc_attr( $key ) . '" ' . selected(((string) $key === (string) $selected_list), true, false) . '>' . esc_html( $value ) . '</option>';
+                        echo '<option value="' . esc_attr( $key ) . '" ' . selected(((string) $key === (string) $selected_list || $only_one_list), true, false) . '>' . esc_html( $value ) . '</option>';
                     }
                 }
                 ?>
@@ -77,7 +77,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
         </label>
     </div>
 
-    <div class="box optional-settings-button" >
+    <div class="box optional-settings-label" >
         <span><?php esc_html_e('Optional Audience Settings', 'mailchimp-for-woocommerce');?></span>
     </div>
 

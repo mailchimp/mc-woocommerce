@@ -778,7 +778,7 @@
 
 #mc-woocommerce-support-form {
 	bottom:0px;
-	padding-bottom: 120px;
+	padding-bottom: 20px;
 }
 
 #mc-woocommerce-create-account {
@@ -836,6 +836,17 @@
 	padding-top: 30px;
 }
 
+#mc-woocommerce-support-form .modal-header svg{
+	display: inline;
+}
+
+#mc-woocommerce-support-form .modal-header h3{
+	text-align: center;
+	padding: 0px 0 20px 30px;
+	font-size: 2em;
+	display: inline-block;
+}
+
 .mc-woocommerce-modal .modal-header h3{
 	text-align: center;
 	padding-top: 30px;
@@ -881,7 +892,8 @@
     padding-right: 12px;
 }
 
-.mc-woocommerce-create-account-step-error #connecting{
+.mc-woocommerce-create-account-step-error #connecting,
+.mc-woocommerce-create-account-step-error #success{
 	border-left-color: #7FAD45;
 }
 

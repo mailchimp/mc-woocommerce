@@ -727,6 +727,41 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			));
 		}
 	}
+	
+	public function mailchimp_woocommerce_ajax_support_form() {
+		$data = $_POST['data'];
+		
+		// try to figure out user IP address
+		if ($_SERVER['REMOTE_ADDR'] == '::1' || $_SERVER['REMOTE_ADDR'] == '127.0.0.1' ) {
+			$data['ip_address'] = '127.0.0.1';
+		}
+		else {
+			$data['ip_address'] = isset($_SERVER['HTTP_CLIENT_IP']) ? $_SERVER['HTTP_CLIENT_IP'] : (isset($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR']);
+		}
+
+		$pload = array(
+            'headers' => array( 
+                'Content-type' => 'application/json',
+            ),
+			'body' => json_encode($data),
+			'timeout'     => 30,
+        );
+
+		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/support-form/', $pload);
+		$response_body = json_decode($response['body']);
+		if ($response['response']['code'] == 200 && $response_body->success == true ){
+			
+			wp_send_json_success($response_body);
+		}
+		
+		else if ($response['response']['code'] == 404 ){
+			wp_send_json_error(array(
+				'success' => false,
+				'error' => $response
+			));
+		}
+
+	}
 
 	public function mailchimp_woocommerce_ajax_create_account_signup() {
 		$data = $_POST['data'];

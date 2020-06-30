@@ -264,6 +264,7 @@ class MailChimp_WooCommerce
         // Create new mailchimp Account methods
         $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_create_account_check_username', $plugin_admin, 'mailchimp_woocommerce_ajax_create_account_check_username' );
         $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_create_account_signup', $plugin_admin, 'mailchimp_woocommerce_ajax_create_account_signup' );
+        $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_support_form', $plugin_admin, 'mailchimp_woocommerce_ajax_support_form' );
 
         // add Shop Manager capability to save options
         $this->loader->add_action('option_page_capability_mailchimp-woocommerce', $plugin_admin, 'mailchimp_woocommerce_option_page_capability');

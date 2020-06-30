@@ -246,8 +246,6 @@ $comm_enabled = $opt != null ? $opt : '0';
             <fieldset >
                 <?php $user_id = get_current_user_id(); ?>
 
-                <input id="first_name" name="first_name" type="hidden" value="<?= $account_details['first_name']?>">    
-                <input id="last_name" name="last_name" type="hidden" value="<?= $account_details['last_name']?>">
                 <input id="account_id" name="account_id" type="hidden" value="<?= $account_details['account_id']?>">
                 <input id="org" name="org" type="hidden" value="<?= get_bloginfo( 'name' );?>">
                 
@@ -273,6 +271,13 @@ $comm_enabled = $opt != null ? $opt : '0';
                 </div>
 
                 <div class="box" >
+                    <label for="subject">
+                        <span> <?php esc_html_e('Subject', 'mailchimp-for-woocommerce'); ?></span>
+                    </label>
+                    <input required type="text" id="subject" name="subject"/>
+                </div>
+
+                <div class="box" >
                     <label for="message">
                         <span> <?php esc_html_e('Message', 'mailchimp-for-woocommerce'); ?></span>
                     </label>
@@ -280,12 +285,18 @@ $comm_enabled = $opt != null ? $opt : '0';
                 </div>
                 
                 <div class="box">
-                    <a id="mc-woocommerce-create-account-next" class="button button-primary whitebtn tab-content-submit"><?php esc_html_e('Send', 'mailchimp-for-woocommerce'); ?></a>
+                    <a id="mc-woocommerce-support-form-submit" class="button button-primary whitebtn tab-content-submit"><?php esc_html_e('Send', 'mailchimp-for-woocommerce'); ?></a>
                     <span class="spinner"></span>
                 </div>
 
                 <div class="box mc-woocommerce-create-account-step-error alignright" >
                     <p id ="email_error"><?= esc_html__( 'Invalid Email. Please double check.', 'mailchimp-for-woocommerce' ); ?></p>
+                    <p id ="first_name_error"><?= esc_html__( 'Invalid First Name. Please double check.', 'mailchimp-for-woocommerce' ); ?></p>
+                    <p id ="last_name_error"><?= esc_html__( 'Invalid Last Name. Please double check.', 'mailchimp-for-woocommerce' ); ?></p>
+                    <p id ="subject_error"><?= esc_html__( 'Invalid Subject. Please double check.', 'mailchimp-for-woocommerce' ); ?></p>
+                    <p id ="message_error"><?= esc_html__( 'Invalid Message. Please double check.', 'mailchimp-for-woocommerce' ); ?></p>
+                    <p id ="success"><?= esc_html__( 'Message sent...', 'mailchimp-for-woocommerce' ); ?></p>
+                    <p id ="error"><?= esc_html__( 'Error: Message not sent...', 'mailchimp-for-woocommerce' ); ?></p>
                 </div>
 
             </fieldset>

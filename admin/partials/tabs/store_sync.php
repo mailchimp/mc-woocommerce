@@ -262,6 +262,7 @@ $comm_enabled = $opt != null ? $opt : '0';
             <fieldset >
                 <?php $user_id = get_current_user_id(); ?>
 
+                <input id="store_id" name="store_id" type="hidden" value="<?= mailchimp_get_store_id(); ?>">
                 <input id="account_id" name="account_id" type="hidden" value="<?= $account_details['account_id']?>">
                 <input id="org" name="org" type="hidden" value="<?= get_bloginfo( 'name' );?>">
                 

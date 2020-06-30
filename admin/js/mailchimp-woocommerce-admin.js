@@ -589,12 +589,13 @@
 		});
 
 		$('a#mc-woocommerce-support-form-submit').click(function (e) {
+			var accountId = $('input#account_id');
+			var storeId = $('input#store_id');
 			var email = $('input#email');
 			var firstName = $('input#first_name');
 			var lastName = $('input#last_name');
 			var subject = $('input#subject');
 			var message = $('textarea#message');
-			var accountId = $('input#account_id');
 		
 			var isValid = true;
 			
@@ -652,7 +653,8 @@
 						last_name: lastName.val(),
 						subject: subject.val(),
 						message: message.val(),
-						accountId: accountId.val(),
+						account_id: accountId.val(),
+						store_id: storeId.val(),
 					},
 				};
 

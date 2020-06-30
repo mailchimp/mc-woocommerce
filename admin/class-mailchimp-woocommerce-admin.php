@@ -715,7 +715,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			'timeout'     => 30,
         );
 
-		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/support-form/', $pload);
+		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/support', $pload);
 		$response_body = json_decode($response['body']);
 		if ($response['response']['code'] == 200 && $response_body->success == true ){
 			

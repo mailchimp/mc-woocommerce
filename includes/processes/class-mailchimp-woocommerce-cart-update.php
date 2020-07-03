@@ -136,8 +136,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
 
             foreach ($this->cart_data as $hash => $item) {
                 try {
-                    $line = $this->transformLineItem($hash, $item);
-                    $cart->addItem($line);
+                    $cart->addItem(($line = $this->transformLineItem($hash, $item)));
                     $qty = isset($item['quantity']) && is_numeric($item['quantity']) ? $item['quantity'] : 1;
                     if (($price = $line->getPrice()) && is_numeric($price)) {
                         $order_total += ($qty * $price);
@@ -214,22 +213,26 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
      */
     protected function transformLineItem($hash, $item)
     {
-        $product = wc_get_product($item['product_id']);
-        $price = $product ? $product->get_price() : 0;
+        $variant_id = isset($item['variation_id']) && $item['variation_id'] > 0 ? $item['variation_id'] : null;
+        $product_id = $item['product_id'];
 
-        $line = new MailChimp_WooCommerce_LineItem();
-        $line->setId($hash);
-        $line->setProductId($item['product_id']);
-
-        if (isset($item['variation_id']) && $item['variation_id'] > 0) {
-            $line->setProductVariantId($item['variation_id']);
+        // if the cart contains a variant id with no parent id, we need to use this instead of the main product id.
+        if ($variant_id) {
+            $product = wc_get_product($variant_id);
+            $product_id = $product->get_parent_id();
         } else {
-            $line->setProductVariantId($item['product_id']);
+            $product = wc_get_product($product_id);
         }
 
+        $price = $product ? $product->get_price() : 0;
+        $line = new MailChimp_WooCommerce_LineItem();
+        $line->setId($hash);
+        $line->setProductId($product_id);
+        if (!empty($variant_id)) {
+            $line->setProductVariantId($variant_id);
+        }
         $line->setQuantity($item['quantity']);
         $line->setPrice($price);
-
         return $line;
     }
 }

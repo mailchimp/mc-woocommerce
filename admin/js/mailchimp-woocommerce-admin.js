@@ -162,7 +162,7 @@
 		* Change wp_http_referer URL in case of in-wizard tab change
 		*/ 
 		var mailchimp_woocommerce_submit_done = false;
-		$('#mailchimp_woocommerce_options .tab-content-submit:not(.oauth-connect)').click(function(e){
+		$('#mailchimp_woocommerce_options .tab-content-submit:not(.oauth-connect):not(#mc-woocommerce-support-form-submit)').click(function(e){
 			// this is to trigger the event even after preventDefault() is issued.
 			if (mailchimp_woocommerce_submit_done) {
 				mailchimp_woocommerce_submit_done = false; // reset flag
@@ -587,6 +587,98 @@
 				$("#mc-woocommerce-create-account-go").click(); 				
 			}
 		});
+
+		$('a#mc-woocommerce-support-form-submit').click(function (e) {
+			var accountId = $('input#account_id');
+			var storeId = $('input#store_id');
+			var email = $('input#email');
+			var firstName = $('input#first_name');
+			var lastName = $('input#last_name');
+			var subject = $('input#subject');
+			var message = $('textarea#message');
+		
+			var isValid = true;
+			
+			var spinner = $(this).next('.spinner');
+			spinner.css('visibility', 'visible');
+			$('#success').hide();
+			$('#error').hide();
+
+			if (! email[0].checkValidity()) {
+				$('#email_error').show();
+				isValid= false;
+			}
+			else {
+				$('#email_error').hide();
+			}
+
+			if (! firstName[0].checkValidity()) {
+				$('#first_name_error').show();
+				isValid= false;
+			}
+			else {
+				$('#first_name_error').hide();
+			}
+
+			if (! lastName[0].checkValidity()) {
+				$('#last_name_error').show();
+				isValid= false;
+			}
+			else {
+				$('#last_name_error').hide();
+			}
+
+			if (! subject[0].checkValidity()) {
+				$('#subject_error').show();
+				isValid= false;
+			}
+			else {
+				$('#subject_error').hide();
+			}
+
+			if (! message[0].checkValidity()) {
+				$('#message_error').show();
+				isValid= false;
+			}
+			else {
+				$('#message_error').hide();
+			}
+
+			if (isValid) {
+				var data = {
+					action:'mailchimp_woocommerce_support_form',
+					data: {
+						email: email.val(),
+						first_name: firstName.val(),
+						last_name: lastName.val(),
+						subject: subject.val(),
+						message: message.val(),
+						account_id: accountId.val(),
+						store_id: storeId.val(),
+					},
+				};
+
+				$.post(ajaxurl, data, function(response) {
+					console.log(response);
+					if (response.success) {
+						$('#success').show();
+						subject.val('');
+						message.val('');
+						spinner.css('visibility', 'hidden');
+
+					} else if (response.data.error) {
+						$('#error').show();
+						spinner.css('visibility', 'hidden');
+					}
+				}).fail(function (err) {
+					console.log('FAIL:' , err);
+				});
+			}
+			else {
+				spinner.css('visibility', 'hidden')
+			}
+		});
+
 	});
 })( jQuery );
 

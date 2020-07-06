@@ -39,9 +39,30 @@
 			e.preventDefault();
 			// prevents Log Deleted notification to show up
 			removeLogDeletedParamFromFormHttpRef();
+			
+			var data = {
+				action:'mailchimp_woocommerce_load_log_file',
+				log_file: $('#log_file').val()
+			};
+			
+			$('#log-viewer #log-content').css("visibility", "hidden");
+			$('#log-viewer .spinner').show().css("visibility", "visible");
 
-			$('#mailchimp_woocommerce_options').submit();
+			$.post(ajaxurl, data, function(response) {
+				if (response.success) {
+					$('#log-content').html(response.data)
+				}
+				else {
+					$('#log-content').html('Error: ' + response.data)
+				}		
+
+				$('#log-viewer .spinner').hide().css("visibility", "hidden");
+				$('#log-viewer #log-content').css("visibility", "visible");
+			});
+			
+			
 		});
+
 		$('#mailchimp-log-pref').change(function (e) {
 			e.preventDefault();
 			// prevents Log Deleted notification to show up

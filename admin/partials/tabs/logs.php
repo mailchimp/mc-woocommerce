@@ -99,6 +99,7 @@ $handle = !empty($viewed_log) ? substr($viewed_log, 0, strlen($viewed_log) > 37 
 <div class="box">
     <?php if (isset($logs) && isset($viewed_log)) : ?>
         <div id="log-viewer">
+            <span class="spinner" style="display:none;"></span>
             <textarea id="log-content" readonly><?php echo esc_html( file_get_contents( WC_LOG_DIR . $viewed_log ) ); ?></textarea>
             
         </div>

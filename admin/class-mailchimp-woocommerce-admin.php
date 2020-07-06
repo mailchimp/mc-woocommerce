@@ -1670,4 +1670,35 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		));
 	}
 
+	public function mailchimp_woocommerce_ajax_load_log_file() {
+		if (isset($_POST['log_file']) && !empty($_POST['log_file'])) {
+			$requested_log_file = $_POST['log_file'];
+		}
+		else {
+			return wp_send_json_error(  __('No log file provided', 'mailchimp-for-woocommerce'));
+		}
+		
+		$files  = defined('WC_LOG_DIR') ? @scandir( WC_LOG_DIR ) : array();
+
+		$logs = array();
+		if (!empty($files)) {
+			foreach (array_reverse($files) as $key => $value) {
+				if (!in_array( $value, array( '.', '..' ))) {
+					if (!is_dir($value) && mailchimp_string_contains($value, 'mailchimp_woocommerce')) {
+						$logs[sanitize_title($value)] = $value;
+					}
+				}
+			}
+		}
+
+		if (!empty($requested_log_file) && isset($logs[sanitize_title($requested_log_file)])) {
+			$viewed_log = $logs[sanitize_title($requested_log_file)];
+		} else {
+			return wp_send_json_error( __('Error loading log file contents', 'mailchimp-for-woocommerce'));
+		}
+
+		return wp_send_json_success( esc_html( file_get_contents( WC_LOG_DIR . $viewed_log ) ) );
+		
+	}
+
 }

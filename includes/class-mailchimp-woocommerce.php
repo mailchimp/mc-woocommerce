@@ -271,6 +271,9 @@ class MailChimp_WooCommerce
 
         // set communications box status
         $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_communication_status', $plugin_admin, 'mailchimp_woocommerce_communication_status' );
+
+        // Load log file via ajax
+        $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_load_log_file', $plugin_admin, 'mailchimp_woocommerce_ajax_load_log_file' );
     }
 
 	/**

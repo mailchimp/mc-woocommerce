@@ -773,6 +773,7 @@
 	background: #fff;
 	border: 1px solid #e5e5e5;
 	box-shadow: 0 1px 1px rgba(0,0,0,.04);
+	text-align: center;
 }
 
 #log-viewer pre {
@@ -802,6 +803,13 @@
 	box-shadow: none !important;
 }
 
+#log-viewer .spinner {
+	float:none;
+	background-size: 16px 16px;
+	width: 16px;
+	height: 16px;
+	margin: 30px 10px		
+}
 
 /* account create modal */
 #mc-woocommerce-create-account-link {

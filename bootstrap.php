@@ -1129,10 +1129,11 @@ function mailchimp_settings_errors() {
  * @param null $language
  * @param string $caller
  * @param string $status_if_new
+ * @param MailChimp_WooCommerce_Order|null $order
  * @throws MailChimp_WooCommerce_Error
  * @throws MailChimp_WooCommerce_ServerError
  */
-function mailchimp_member_language_update($user_email = null, $language = null, $caller = '', $status_if_new = 'transactional') {
+function mailchimp_member_language_update($user_email = null, $language = null, $caller = '', $status_if_new = 'transactional', $order = null) {
     mailchimp_debug('debug', "mailchimp_member_language_update", array(
         'user_email' => $user_email,
         'user_language' => $language,
@@ -1152,14 +1153,18 @@ function mailchimp_member_language_update($user_email = null, $language = null, 
             if ($member['status'] === 'transactional' && in_array($status_if_new, array('subscribed', 'pending'))) {
                 $member['status'] = $status_if_new;
             }
-            mailchimp_get_api()->update($list_id, $user_email, $member['status'], null, null, $language);
+            $merge_fields = $order ? apply_filters('mailchimp_get_ecommerce_merge_tags', array(), $order) : array();
+            if (!is_array($merge_fields)) $merge_fields = array();
+            mailchimp_get_api()->update($list_id, $user_email, $member['status'], $merge_fields, null, $language);
             // set transient to prevent too many calls to update language
             mailchimp_set_transient($caller . ".member.{$hash}", true, 3600);
             mailchimp_log($caller . '.member.updated', "Updated {$user_email} subscriber status to {$member['status']} and language to {$language}");
         } catch (\Exception $e) {
             if ($e->getCode() == 404) {
+                $merge_fields = $order ? apply_filters('mailchimp_get_ecommerce_merge_tags', array(), $order) : array();
+                if (!is_array($merge_fields)) $merge_fields = array();
                 // member doesn't exist yet, create as transactional ( or what was passed in the function args )
-                mailchimp_get_api()->subscribe($list_id, $user_email, $status_if_new, array(), array(), $language);
+                mailchimp_get_api()->subscribe($list_id, $user_email, $status_if_new, $merge_fields, array(), $language);
                 // set transient to prevent too many calls to update language
                 mailchimp_set_transient($caller . ".member.{$hash}", true, 3600);
                 mailchimp_log($caller . '.member.created', "Added {$user_email} as transactional, setting language to [{$language}]");

@@ -319,7 +319,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             }
 
             // Maybe sync subscriber to set correct member.language
-            mailchimp_member_language_update($email, $this->user_language, 'order', $status_if_new);
+            mailchimp_member_language_update($email, $this->user_language, 'order', $status_if_new, $order);
 
             mailchimp_log('order_submit.success', $log);
 

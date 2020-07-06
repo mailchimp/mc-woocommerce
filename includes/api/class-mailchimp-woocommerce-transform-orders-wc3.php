@@ -216,7 +216,8 @@ class MailChimp_WooCommerce_Transform_Orders
             $order->addItem($item);
         }
 
-        return $order;
+        // let the store owner alter this if they need to use on-hold orders
+        return apply_filters('mailchimp_filter_ecommerce_order', $order, $woo);
     }
 
     /**

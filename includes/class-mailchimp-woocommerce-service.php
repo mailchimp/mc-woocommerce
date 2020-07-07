@@ -746,8 +746,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
             $this->getCartItems();
 
-            if (isset($_GET['language'])) {
-                $this->user_language = $_GET['language'];
+            if (isset($_GET['mc_language'])) {
+                $this->user_language = $_GET['mc_language'];
             }
 
             $this->handleCartUpdated();

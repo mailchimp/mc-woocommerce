@@ -112,7 +112,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	public function enqueue_scripts($hook) {
 		if ( $hook === 'woocommerce_page_mailchimp-woocommerce' ) {
 			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version, false );
-			wp_localize_script( 
+			wp_localize_script(
 				$this->plugin_name,
 				'phpVars',
 				array( 

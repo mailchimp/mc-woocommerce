@@ -136,6 +136,8 @@
 		*/ 
 		var mailchimp_woocommerce_disconnect_done = false;
 		$('#mailchimp_woocommerce_disconnect').click(function (e){
+			var me = $(this);
+
 			// this is to trigger the event even after preventDefault() is issued.
 			if (mailchimp_woocommerce_disconnect_done) {
 				mailchimp_woocommerce_disconnect_done = false; // reset flag
@@ -143,8 +145,6 @@
 			}
 
 			e.preventDefault();
-
-			var me = $(e.target);
 
 			const swalWithBootstrapButtons = Swal.mixin({
 				customClass: {
@@ -161,7 +161,7 @@
 				showCancelButton: true,
 				confirmButtonText: phpVars.l10n.store_disconnect_confirm,
 				cancelButtonText: phpVars.l10n.no_cancel,
-				reverseButtons: true
+				reverseButtons: true,
 			}).then((result) => {
 				if (result.value) {
 					var query = window.location.href.match(/^(.*)\&/);
@@ -171,7 +171,21 @@
 					}
 					try {
 						mailchimp_woocommerce_disconnect_done = true;
-						me.click();
+						var form = $('#mailchimp_woocommerce_options');
+						var data = form.serialize();
+						data+="&mailchimp_woocommerce_disconnect_store=1"
+
+						Swal.showLoading();
+
+						return $.ajax({
+							type: "POST",
+							url: form.attr('action'),
+							data: data,
+						}).done(function(data) {
+							window.location.reload();
+						}).fail(function(xhr) {
+							Swal.showValidationMessage("Could not delete store.");
+						});
 					} catch (e) {
 						console.error('clicking event for disconnect failed', e);
 					}

@@ -132,14 +132,20 @@
 
 		$('.mc-woocommerce-resync-button').click(function(e) {
 			e.preventDefault();
-			Swal.showLoading();
+			Swal.fire({
+				title: 'Resync Request In Progress',
+				onBeforeOpen: () => {
+					Swal.showLoading()
+				}
+			});
 			var form = $('#mailchimp_woocommerce_options');
 			var data = form.serialize();
 			data+="&mailchimp_woocommerce_resync=1"
 			return $.ajax({type: "POST", url: form.attr('action'), data: data}).done(function(data) {
 				window.location.reload();
 			}).fail(function(xhr) {
-				Swal.showValidationMessage("Could not delete store.");
+				Swal.hideLoading();
+				Swal.showValidationMessage("Could not resync orders, please try again.");
 			});
 		});
 
@@ -188,11 +194,17 @@
 						var data = form.serialize();
 						data+="&mailchimp_woocommerce_disconnect_store=1"
 
-						Swal.showLoading();
+						Swal.fire({
+							title: 'Disconnecting Store In Progress',
+							onBeforeOpen: () => {
+								Swal.showLoading()
+							}
+						});
 
 						return $.ajax({type: "POST", url: form.attr('action'), data: data }).done(function(data) {
 							window.location.reload();
 						}).fail(function(xhr) {
+							Swal.hideLoading();
 							Swal.showValidationMessage("Could not delete store.");
 						});
 					} catch (e) {

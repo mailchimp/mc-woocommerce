@@ -130,6 +130,19 @@
 			})
 		});
 
+		$('.mc-woocommerce-resync-button').click(function(e) {
+			e.preventDefault();
+			Swal.showLoading();
+			var form = $('#mailchimp_woocommerce_options');
+			var data = form.serialize();
+			data+="&mailchimp_woocommerce_resync=1"
+			return $.ajax({type: "POST", url: form.attr('action'), data: data}).done(function(data) {
+				window.location.reload();
+			}).fail(function(xhr) {
+				Swal.showValidationMessage("Could not delete store.");
+			});
+		});
+
 		/*
 		* Shows dialog on store disconnect
 		* Change wp_http_referer URL in case of store disconnect
@@ -177,11 +190,7 @@
 
 						Swal.showLoading();
 
-						return $.ajax({
-							type: "POST",
-							url: form.attr('action'),
-							data: data,
-						}).done(function(data) {
+						return $.ajax({type: "POST", url: form.attr('action'), data: data }).done(function(data) {
 							window.location.reload();
 						}).fail(function(xhr) {
 							Swal.showValidationMessage("Could not delete store.");

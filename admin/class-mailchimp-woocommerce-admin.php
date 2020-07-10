@@ -86,6 +86,18 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			   && isset($_REQUEST['_disconnect-nonce']) 
 			   && wp_verify_nonce($_REQUEST['_disconnect-nonce'], '_disconnect-nonce-'.mailchimp_get_store_id());
 	}
+
+    /**
+     * Tests admin permissions, disconnect action and nonce
+     * @return bool
+     */
+    private function is_resyncing() {
+        return isset($_REQUEST['mailchimp_woocommerce_resync'])
+            && current_user_can( 'manage_options' )
+            && $_REQUEST['mailchimp_woocommerce_resync'] == 1
+            && isset($_REQUEST['_resync-nonce'])
+            && wp_verify_nonce($_REQUEST['_resync-nonce'], '_resync-nonce-'.mailchimp_get_store_id());
+    }
 		
 	/**
 	 * Register the stylesheets for the admin area.
@@ -111,7 +123,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function enqueue_scripts($hook) {
 		if ( $hook === 'woocommerce_page_mailchimp-woocommerce' ) {
-			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version, false );
+			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version.'.20', false );
 			wp_localize_script(
 				$this->plugin_name,
 				'phpVars',
@@ -532,7 +544,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 					}	
 				}
 				//case sync
-				else {
+				elseif ($this->is_resyncing()) {
 					// remove all the pointers to be sure
 					$service = new MailChimp_Service();
 					$service->removePointers(true, true);

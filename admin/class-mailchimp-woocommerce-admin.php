@@ -699,7 +699,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 
         else {
-			$suggestion = wp_remote_get( 'https://woocommerce.mailchimpapp.com/api/usernames/suggestions/' . $_POST['username']);
+			$suggestion = wp_remote_get( 'https://woocommerce.mailchimpapp.com/api/usernames/suggestions/' . preg_replace('/[^A-Za-z0-9\-\@\.]/', '', $_POST['username']));
 			$suggested_username = json_decode($suggestion['body'])->data;
 			wp_send_json_error( array(
 				'success' => false,

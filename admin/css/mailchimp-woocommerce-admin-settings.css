@@ -10,6 +10,10 @@
 	src: local('Proxima Nova Alt Light'), url('../fonts/Mark Simonson - Proxima Nova Alt Light.woff') format('woff');
 	}
 
+html {
+	scroll-padding-top: 8em;
+}
+
 .mc-woocommerce-settings {
 	width:90%;
 	margin: 4em auto 0 auto !important;

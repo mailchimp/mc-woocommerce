@@ -105,7 +105,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @since    1.0.0
 	 */
 	public function enqueue_styles($hook) {
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin.css', array(), $this->version, 'all' );
+		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin.css', array(), $this->version.'.21', 'all' );
 		wp_enqueue_style( $this->plugin_name . 'checkbox', plugin_dir_url( __FILE__ ) . 'css/checkbox.min.css', array(), $this->version, 'all' );
 
 		if ( $hook === 'woocommerce_page_mailchimp-woocommerce' ) {
@@ -123,7 +123,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function enqueue_scripts($hook) {
 		if ( $hook === 'woocommerce_page_mailchimp-woocommerce' ) {
-			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version.'.20', false );
+			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version.'.21', false );
 			wp_localize_script(
 				$this->plugin_name,
 				'phpVars',

@@ -714,20 +714,38 @@
 					},
 				};
 
-				$.post(ajaxurl, data, function(response) {
-					console.log(response);
-					if (response.success) {
-						$('#success').show();
-						subject.val('');
-						message.val('');
-						spinner.css('visibility', 'hidden');
-
-					} else if (response.data.error) {
-						$('#error').show();
-						spinner.css('visibility', 'hidden');
-					}
-				}).fail(function (err) {
-					console.log('FAIL:' , err);
+				Swal.fire({
+					title: 'Sending Support Request',
+					html: 'please wait',
+					onBeforeOpen: () => {
+						Swal.showLoading();
+						$.post(ajaxurl, data, function(response) {
+							Swal.hideLoading();
+							if (response.success) {
+								location.hash = '#mc-woocommerce-support-form-button';
+								$('#success').show();
+								subject.val('');
+								message.val('');
+								spinner.css('visibility', 'hidden');
+								Swal.fire({
+									icon: 'success',
+									timer: 2000,
+									title: 'Message Received',
+									html: 'Thanks, your message has been received.',
+								});
+							} else if (response.data.error) {
+								$('#error').show();
+								spinner.css('visibility', 'hidden');
+							}
+						}).fail(function (err) {
+							Swal.fire({
+								icon: 'error',
+								timer: 2000,
+								title: 'Oops, something went wrong!',
+								html: err,
+							});
+						});
+					},
 				});
 			}
 			else {

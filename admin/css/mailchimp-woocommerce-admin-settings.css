@@ -37,7 +37,11 @@ html {
 	font-family: proxima-nova, Arial, Helvetica, sans-serif;
 	font-size: 12px !important;
 	line-height: 16px  !important;
-	color: #B3B3B3 !important;
+	color: #b3b3b3 !important;
+}
+
+.description.support-form {
+	color: #444 !important;
 }
 
 .nav-wizard-wrapper {

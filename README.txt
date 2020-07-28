@@ -77,17 +77,20 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
 == Changelog ==
-= 2.4.1 =
-* adds scrolling frame for logs
-* fix for Coupon Deletion via WooCommerce API
-* removes all non-Mailchimp notices
-* update for latest version of Action Scheduler v3.1.4
-* documentation updates
-* fix for errors on activation following deactivation
-* fix for PHP notice on Woocommerce Import Tax rate page
-* adds error handling on store add/update
-* use denormalized order items values in initial sync
-* adds function allowing tags for specific users
-* adds include/exclude Mailchimp script
-* fix for double opt-in issues on saved settings
-* fixes transactionals on guest checkout
+= 2.4.3 =
+* WooCommerce Version 4.3 tested
+* adds Mailchimp support form
+* moves navigation to WooCommerce nav as a sub-item
+* removes bubble h1 title element
+* log tab ui enhancements
+* next button for setup wizard moved to bottom of page
+* required field ui enhancement
+* adds a banner for setup completion in Wordpress
+* overview tab ui enhancements
+* audience settings tab ux improvements
+* fix for cart non-numeric error
+* fix for woocommerce setup wizard redirect
+* fix for abandoned cart on product variations
+* fix for invalid session object
+* adds customer filter for on-hold orders
+* fix cart posts with product variations

@@ -228,9 +228,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
         $line = new MailChimp_WooCommerce_LineItem();
         $line->setId($hash);
         $line->setProductId($product_id);
-        if (!empty($variant_id)) {
-            $line->setProductVariantId($variant_id);
-        }
+        $line->setProductVariantId((!empty($variant_id) ? $variant_id : $product_id));
         $line->setQuantity($item['quantity']);
         $line->setPrice($price);
         return $line;

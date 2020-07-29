@@ -79,3 +79,6 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 == Changelog ==
 = 2.4.4 =
 * add filter for managing woocommerce plugins
+
+[Historical Changelog](https://raw.githubusercontent.com/mailchimp/mc-woocommerce/master/CHANGELOG.txt)
+

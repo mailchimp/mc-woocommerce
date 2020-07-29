@@ -87,7 +87,7 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production', // staging or production
-        'version' => '2.4.2',
+        'version' => '2.4.4',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => function_exists('WC') ? WC()->version : null,
@@ -1038,10 +1038,11 @@ function mailchimp_on_all_plugins_loaded() {
 }
 
 function mailchimp_get_allowed_capability() {
+    $capability = 'manage_options';
     if (current_user_can('manage_woocommerce') && mailchimp_get_option('mailchimp_permission_cap') == 'manage_woocommerce') {
         return 'manage_woocommerce';
     }
-    return 'manage_options';
+    return apply_filters('mailchimp_allowed_capability', $capability);
 }
 
 /**

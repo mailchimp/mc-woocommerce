@@ -4,7 +4,7 @@ Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.9
 Tested up to: 5.4
-Stable tag: 2.4.2
+Stable tag: 2.4.4
 Requires PHP: 7.0
 WC requires at least: 3.5
 WC tested up to: 4.3
@@ -77,20 +77,5 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
 == Changelog ==
-= 2.4.3 =
-* WooCommerce Version 4.3 tested
-* adds Mailchimp support form
-* moves navigation to WooCommerce nav as a sub-item
-* removes bubble h1 title element
-* log tab ui enhancements
-* next button for setup wizard moved to bottom of page
-* required field ui enhancement
-* adds a banner for setup completion in Wordpress
-* overview tab ui enhancements
-* audience settings tab ux improvements
-* fix for cart non-numeric error
-* fix for woocommerce setup wizard redirect
-* fix for abandoned cart on product variations
-* fix for invalid session object
-* adds customer filter for on-hold orders
-* fix cart posts with product variations
+= 2.4.4 =
+* add filter for managing woocommerce plugins

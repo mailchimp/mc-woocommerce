@@ -23,8 +23,8 @@ class MailChimp_WooCommerce_Activator {
 		// Create the queue tables
 		static::create_queue_tables();
 
-		// Remove legacy queue tables
-		static::migrate_jobs();
+		// we shouldn't have to do this anymore.
+		//static::migrate_jobs();
 
 		// update the settings so we have them for use.
         $saved_options = get_option('mailchimp-woocommerce', false);

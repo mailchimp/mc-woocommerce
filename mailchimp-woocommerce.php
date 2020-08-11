@@ -24,9 +24,9 @@
  * Text Domain:       mailchimp-for-woocommerce
  * Domain Path:       /languages
  * Requires at least: 4.9
- * Tested up to: 5.4
+ * Tested up to: 5.5
  * WC requires at least: 3.5
- * WC tested up to: 4.3
+ * WC tested up to: 4.4
  */
 
 // If this file is called directly, abort.

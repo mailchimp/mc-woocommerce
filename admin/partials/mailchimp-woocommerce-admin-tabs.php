@@ -6,8 +6,9 @@ $handler = MailChimp_WooCommerce_Admin::connect();
 $options = get_option($this->plugin_name, array());
 
 $active_tab = isset($_GET['tab']) ? $_GET['tab'] : (isset($options['active_tab']) ? $options['active_tab'] : 'api_key');
+$mc_configured = mailchimp_is_configured();
 
-if (!mailchimp_is_configured()) {
+if (!$mc_configured) {
     if ($active_tab == 'sync' || $active_tab == 'logs' ) isset($options['active_tab']) ? $options['active_tab'] : 'api_key';
 }
 
@@ -16,7 +17,7 @@ $is_mailchimp_post = isset($_POST['mailchimp_woocommerce_settings_hidden']) && $
 $show_sync_tab = isset($_GET['resync']) ? $_GET['resync'] === '1' : false;
 
 // if we have a transient set to start the sync on this page view, initiate it now that the values have been saved.
-if (!$show_sync_tab && (bool) get_site_transient('mailchimp_woocommerce_start_sync', false)) {
+if ($mc_configured && !$show_sync_tab && (bool) get_site_transient('mailchimp_woocommerce_start_sync', false)) {
     $show_sync_tab = true;
     $active_tab = 'sync';
 }
@@ -26,7 +27,7 @@ $has_valid_api_key = false;
 $allow_new_list = true;
 $only_one_list = false;
 $show_wizard = true;
-$clicked_sync_button = $is_mailchimp_post && $active_tab == 'sync';
+$clicked_sync_button = $mc_configured && $is_mailchimp_post && $active_tab == 'sync';
 $has_api_error = isset($options['api_ping_error']) && !empty($options['api_ping_error']) ? $options['api_ping_error'] : null;
 
 if (isset($options['mailchimp_api_key'])) {
@@ -60,6 +61,9 @@ if (isset($options['mailchimp_api_key'])) {
 else {
     $active_tab = 'api_key';
 }
+
+
+//var_dump(array('jordan' => array('active' => $active_tab, 'configured' => $mc_configured, 'api_key' => mailchimp_get_api_key()))); die();
 
 ?>
 

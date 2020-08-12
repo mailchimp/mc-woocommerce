@@ -808,8 +808,10 @@ class MailChimp_WooCommerce_MailChimpApi
         try {
             return (bool) $this->delete("ecommerce/stores/$store_id");
         } catch (MailChimp_WooCommerce_Error $e) {
+            mailchimp_error("delete_store {$store_id}", $e->getMessage());
             return false;
         } catch (\Exception $e) {
+            mailchimp_error("delete_store {$store_id}", $e->getMessage());
             return false;
         }
     }

@@ -50,27 +50,29 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		return static::instance();
 	}
 
-	/**
-	 * @return bool 
-	 */
+    /**
+     * @return array
+     */
 	private function disconnect_store()
 	{
-		$options = array();
-		$options['mailchimp_api_key'] = null;
-		$options['active_tab'] = 'api_key';
-		$options['mailchimp_list'] = null;
-
-		// clean database
-		mailchimp_clean_database();
-		
 		// remove user from our marketing status audience
-		mailchimp_remove_communication_status();
+		try {
+            mailchimp_remove_communication_status();
+        } catch (\Exception $e) {}
 
 		if (($store_id = mailchimp_get_store_id()) && ($mc = mailchimp_get_api()))  {
+		    set_site_transient('mailchimp_disconnecting_store', true, 15);
             if ($mc->deleteStore($store_id)) {
                 mailchimp_log('store.disconnected', 'Store id ' . mailchimp_get_store_id() . ' has been disconnected');
+            } else {
+                mailchimp_log('store.NOT DISCONNECTED', 'Store id ' . mailchimp_get_store_id() . ' has NOT been disconnected');
             }
         }
+
+        // clean database
+        mailchimp_clean_database();
+
+        $options = array();
 
 		return $options;
 	}
@@ -513,6 +515,14 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			$data['store_currency_code'] = (string) $input['store_currency_code'];
 		}
 
+		if (get_site_transient('mailchimp_disconnecting_store')) {
+            return array(
+                'active_tab' => 'api_key',
+                'mailchimp_api_key' => null,
+                'mailchimp_list' => null,
+            );
+        }
+
 		switch ($active_tab) {
 
 			case 'api_key':
@@ -533,18 +543,23 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 			case 'sync':
 				// case disconnect
-				if ($this->is_disconnecting()) { 
+				if ($this->is_disconnecting()) {
 					// Disconnect store!
-					if ($data = $this->disconnect_store()) {
+					if ($this->disconnect_store()) {
+					    return array(
+                            'active_tab' => 'api_key',
+                            'mailchimp_api_key' => null,
+                            'mailchimp_list' => null,
+                        );
 						add_settings_error('mailchimp_store_settings', '', __('Store Disconnected', 'mailchimp-for-woocommerce'), 'info');
-					}
-					else {
+					} else {
 						$data['active_tab'] = 'sync';
 						add_settings_error('mailchimp_store_settings', '', __('Store Disconnect Failed', 'mailchimp-for-woocommerce'), 'warning');
 					}	
 				}
 				//case sync
 				elseif ($this->is_resyncing()) {
+
 					// remove all the pointers to be sure
 					$service = new MailChimp_Service();
 					$service->removePointers(true, true);
@@ -1474,6 +1489,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$store->setListId($list_id);
 
 		try {
+            mailchimp_log('sync_store', 'posting data', array(
+                'store_post' => $store->toArray(),
+            ));
+
 			// let's create a new store for this user through the API
 			$this->api()->$call($store, false);
 
@@ -1491,7 +1510,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		} catch (\Exception $e) {
 			if (mailchimp_string_contains($e->getMessage(),'woocommerce already exists in the account' )) {
-				// retrieve Mailchimp store using domain
+			    // retrieve Mailchimp store using domain
 				$stores = $this->api()->stores();
 				//iterate thru stores, find correct store ID and save it to db
 				foreach ($stores as $mc_store) {

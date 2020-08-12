@@ -1,4 +1,26 @@
 == Changelog ==
+= 2.4.5 =
+* fixed disconnect/reconnect list issue
+* fixed rest api doing it wrong alert
+= 2.4.4 =
+* add filter for managing woocommerce plugins
+= 2.4.3 =
+* WooCommerce Version 4.3 tested
+* adds Mailchimp support form
+* moves navigation to WooCommerce nav as a sub-item
+* removes bubble h1 title element
+* log tab ui enhancements
+* next button for setup wizard moved to bottom of page
+* required field ui enhancement
+* adds a banner for setup completion in Wordpress
+* overview tab ui enhancements
+* audience settings tab ux improvements
+* fix for cart non-numeric error
+* fix for woocommerce setup wizard redirect
+* fix for abandoned cart on product variations
+* fix for invalid session object
+* adds customer filter for on-hold orders
+* fix cart posts with product variations
 = 2.4.2 =
 * WooCommerce Version 4.3 tested
 * adds Mailchimp support form

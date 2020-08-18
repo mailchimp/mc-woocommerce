@@ -28,24 +28,30 @@ class MailChimp_WooCommerce_Rest_Api
         register_rest_route(static::$namespace, "/survey/disconnect", array(
             'methods' => 'POST',
             'callback' => array($this, 'post_disconnect_survey'),
-            'permission_callback' => '__return_true',
+            'permission_callback' => array($this, 'permission_callback'),
         ));
 
         // Sync Stats
-        if (mailchimp_get_allowed_capability()) {
-            register_rest_route(static::$namespace, '/sync/stats', array(
-                'methods' => 'GET',
-                'callback' => array($this, 'get_sync_stats'),
-                'permission_callback' => '__return_true',
-            ));
-        }
+        register_rest_route(static::$namespace, '/sync/stats', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'get_sync_stats'),
+            'permission_callback' => array($this, 'permission_callback'),
+        ));
 
         // remove review banner
         register_rest_route(static::$namespace, "/review-banner", array(
             'methods' => 'GET',
             'callback' => array($this, 'dismiss_review_banner'),
-            'permission_callback' => '__return_true',
+            'permission_callback' => array($this, 'permission_callback'),
         ));
+    }
+
+    /**
+     * @return bool
+     */
+    public function permission_callback()
+    {
+        return mailchimp_get_allowed_capability() === 'manage_woocommerce';
     }
 
     /**

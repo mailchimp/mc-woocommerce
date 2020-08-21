@@ -882,7 +882,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             'store_phone' => isset($input['store_phone']) ? $input['store_phone'] : false,
             // locale info
             'store_locale' => isset($input['store_locale']) ? $input['store_locale'] : false,
-			'store_timezone' => isset($input['store_timezone']) ? $input['store_timezone'] : false,
+			'store_timezone' => mailchimp_get_timezone(),
             'admin_email' => isset($input['admin_email']) && is_email($input['admin_email']) ? $input['admin_email'] : $this->getOption('admin_email', false),
 			'mailchimp_permission_cap' => $checkbox,
         );
@@ -1096,7 +1096,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		return $this->validateOptions(array(
 			'store_name', 'store_street', 'store_city', 'store_state',
 			'store_postal_code', 'store_country', 'store_phone',
-			'store_locale', 'store_timezone',
+			'store_locale',
 			'store_phone','mailchimp_permission_cap',
 		), $data);
 	}
@@ -1472,7 +1472,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		// set the locale data
 		$store->setPrimaryLocale($this->array_get($data, 'store_locale', 'en'));
-		$store->setTimezone($this->array_get($data, 'store_timezone', 'America\New_York'));
+		$store->setTimezone(mailchimp_get_timezone());
 		$store->setCurrencyCode($this->array_get($data, 'store_currency_code', 'USD'));
 		$store->setMoneyFormat($store->getCurrencyCode());
 

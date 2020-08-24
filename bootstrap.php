@@ -464,6 +464,33 @@ function mailchimp_get_timezone_list() {
 }
 
 /**
+ * Gets the current tomezone from wordpress settings
+ * 
+ * @return String timezone 
+ */
+function mailchimp_get_timezone($showOffset = false) {
+    // get timezone data from options
+    $timezone_string = get_option( 'timezone_string' );
+    $offset  = get_option( 'gmt_offset' );
+    
+    // transform offset float into human readable
+    $hours   = (int) $offset;
+    $minutes = abs( ( $offset - (int) $offset ) * 60 );
+    $offset  = sprintf( 'UTC/GMT %+03d:%02d', $hours, $minutes );
+    
+    // shows timezone name + offset in hours and minutes, or only the timezone name. If no timezone string is set, show only offset
+    if (!$showOffset && $timezone_string) {
+        $timezone = $timezone_string;
+    }
+    else if ($showOffset && $timezone_string) {
+        $timezone = $offset .' '. $timezone_string;
+    }
+    else if (!$timezone_string) $timezone = $offset;
+    
+    return $timezone;
+}
+
+/**
  * @return bool
  */
 function mailchimp_check_woocommerce_plugin_status()

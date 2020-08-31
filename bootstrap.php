@@ -1161,8 +1161,8 @@ function mailchimp_settings_errors() {
  * @throws MailChimp_WooCommerce_Error
  * @throws MailChimp_WooCommerce_ServerError
  */
-function mailchimp_member_language_update($user_email = null, $language = null, $caller = '', $status_if_new = 'transactional', $order = null) {
-    mailchimp_debug('debug', "mailchimp_member_language_update", array(
+function mailchimp_member_data_update($user_email = null, $language = null, $caller = '', $status_if_new = 'transactional', $order = null, $gdpr_fields = null) {
+    mailchimp_debug('debug', "mailchimp_member_data_update", array(
         'user_email' => $user_email,
         'user_language' => $language,
         'caller' => $caller,
@@ -1183,7 +1183,17 @@ function mailchimp_member_language_update($user_email = null, $language = null, 
             }
             $merge_fields = $order ? apply_filters('mailchimp_get_ecommerce_merge_tags', array(), $order) : array();
             if (!is_array($merge_fields)) $merge_fields = array();
-            mailchimp_get_api()->update($list_id, $user_email, $member['status'], $merge_fields, null, $language);
+            
+            $gdpr_fields_to_save = null;
+            if (!empty($gdpr_fields)) {
+                $gdpr_fields_to_save = [];
+                foreach ($gdpr_fields as $id => $value) {
+                    $gdpr_field['marketing_permission_id'] = $id;
+                    $gdpr_field['enabled'] = (bool) $value;
+                    $gdpr_fields_to_save[] = $gdpr_field;
+                }
+            }
+            mailchimp_get_api()->update($list_id, $user_email, $member['status'], $merge_fields, null, $language, $gdpr_fields_to_save);
             // set transient to prevent too many calls to update language
             mailchimp_set_transient($caller . ".member.{$hash}", true, 3600);
             mailchimp_log($caller . '.member.updated', "Updated {$user_email} subscriber status to {$member['status']} and language to {$language}");

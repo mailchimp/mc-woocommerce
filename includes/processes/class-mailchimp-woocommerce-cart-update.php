@@ -192,7 +192,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
             }
 
             // Maybe sync subscriber to set correct member.language
-            mailchimp_member_language_update($this->email, $this->user_language, 'cart');
+            mailchimp_member_data_update($this->email, $this->user_language, 'cart');
 
         } catch (MailChimp_WooCommerce_RateLimitError $e) {
             sleep(3);

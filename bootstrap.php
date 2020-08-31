@@ -1169,30 +1169,34 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
         'status_if_new' => $status_if_new,
     ));
     if (!$user_email) return;
+    
     $hash = md5(strtolower(trim($user_email)));
+    $gdpr_fields_to_save = null;
+
     if ($caller !== 'cart' || !mailchimp_get_transient($caller . ".member.{$hash}")) {
         $list_id = mailchimp_get_list_id();
         try {
             // try to get the member to update if already synced
             $member = mailchimp_get_api()->member($list_id, $user_email);
-            // update member with new language
+            // update member with new data
             // if the member's subscriber status was transactional - and if we're passing in either one of these options below,
             // we can attach the new status to the member.
+            
+
             if ($member['status'] === 'transactional' && in_array($status_if_new, array('subscribed', 'pending'))) {
                 $member['status'] = $status_if_new;
+                
+                if (!empty($gdpr_fields)) {
+                    $gdpr_fields_to_save = [];
+                    foreach ($gdpr_fields as $id => $value) {
+                        $gdpr_field['marketing_permission_id'] = $id;
+                        $gdpr_field['enabled'] = (bool) $value;
+                        $gdpr_fields_to_save[] = $gdpr_field;
+                    }
+                }
             }
             $merge_fields = $order ? apply_filters('mailchimp_get_ecommerce_merge_tags', array(), $order) : array();
             if (!is_array($merge_fields)) $merge_fields = array();
-            
-            $gdpr_fields_to_save = null;
-            if (!empty($gdpr_fields)) {
-                $gdpr_fields_to_save = [];
-                foreach ($gdpr_fields as $id => $value) {
-                    $gdpr_field['marketing_permission_id'] = $id;
-                    $gdpr_field['enabled'] = (bool) $value;
-                    $gdpr_fields_to_save[] = $gdpr_field;
-                }
-            }
             mailchimp_get_api()->update($list_id, $user_email, $member['status'], $merge_fields, null, $language, $gdpr_fields_to_save);
             // set transient to prevent too many calls to update language
             mailchimp_set_transient($caller . ".member.{$hash}", true, 3600);

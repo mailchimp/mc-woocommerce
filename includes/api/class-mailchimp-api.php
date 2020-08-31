@@ -1575,6 +1575,22 @@ class MailChimp_WooCommerce_MailChimpApi
         return true;
     }
 
+     /**
+     * @param 
+     * @return 
+     */
+    public function getGDPRFields($list_id)
+    {
+        $one_member = $this->get("lists/$list_id/members?fields=members.marketing_permissions&count=1");
+        $fields = false;
+        
+        if (is_array($one_member) && isset($one_member['members'][0]['marketing_permissions'])) {
+            $fields = $one_member['members'][0]['marketing_permissions'];
+        }
+                
+        return $fields;
+    }
+
     /**
      * @param $url
      * @param null $params

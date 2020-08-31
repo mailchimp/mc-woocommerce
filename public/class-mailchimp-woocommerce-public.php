@@ -86,5 +86,15 @@ class MailChimp_WooCommerce_Public {
                 echo $fragment;
             }
         }
-    }
+	}
+
+	/**
+	 * Add GDPR script to the checkout page
+	 */
+	public function add_JS_checkout()
+	{
+		wp_enqueue_script($this->plugin_name. '_gdpr', plugin_dir_url( __FILE__ ) .'js/mailchimp-woocommerce-checkout-gdpr.min.js', array(), $this->version, true);
+	}
+	
+	
 }

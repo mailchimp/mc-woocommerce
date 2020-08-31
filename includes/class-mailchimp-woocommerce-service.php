@@ -495,6 +495,11 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                 // cookie the current email
                 @setcookie('mailchimp_user_email', $this->user_email, $cookie_duration, '/' );
 
+                mailchimp_debug('carts', "manually setting cart data for {$this->user_email}", array(
+                    'cart_id' => $_GET['mc_cart_id'],
+                    'cart' => $cart->cart,
+                ));
+
                 // set the cart data.
                 $this->setWooSession('cart', unserialize($cart->cart));
             }

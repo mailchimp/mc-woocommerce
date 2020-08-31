@@ -196,7 +196,7 @@ class MailChimp_WooCommerce_MailChimpApi
      * @throws MailChimp_WooCommerce_Error
      * @throws MailChimp_WooCommerce_ServerError
      */
-    public function subscribe($list_id, $email, $subscribed = true, $merge_fields = array(), $list_interests = array(), $language = null)
+    public function subscribe($list_id, $email, $subscribed = true, $merge_fields = array(), $list_interests = array(), $language = null, $gdpr_fields = null)
     {
         if (is_string($subscribed)) {
             $status = $subscribed;
@@ -215,7 +215,8 @@ class MailChimp_WooCommerce_MailChimpApi
             'status' => $status,
             'merge_fields' => $merge_fields,
             'interests' => $list_interests,
-            'language' => $language
+            'language' => $language,
+            'marketing_permissions' => $gdpr_fields,
         );
 
         if (empty($data['merge_fields'])) {
@@ -228,6 +229,10 @@ class MailChimp_WooCommerce_MailChimpApi
         
         if (empty($data['language'])) {
             unset($data['language']);
+        }
+        
+        if (empty($data['marketing_permissions'])) {
+            unset($data['marketing_permissions']);
         }
 
         mailchimp_debug('api.subscribe', "Subscribing {$email}", $data);
@@ -245,7 +250,7 @@ class MailChimp_WooCommerce_MailChimpApi
      * @throws Exception
      * @throws MailChimp_WooCommerce_Error
      */
-    public function update($list_id, $email, $subscribed = true, $merge_fields = array(), $list_interests = array(), $language = null)
+    public function update($list_id, $email, $subscribed = true, $merge_fields = array(), $list_interests = array(), $language = null, $gdpr_fields = null)
     {
         $hash = md5(strtolower(trim($email)));
 
@@ -264,7 +269,8 @@ class MailChimp_WooCommerce_MailChimpApi
             'status' => $status,
             'merge_fields' => $merge_fields,
             'interests' => $list_interests,
-            'language' => $language
+            'language' => $language,
+            'marketing_permissions' => $gdpr_fields,
         );
 
         if (empty($data['merge_fields'])) {
@@ -277,6 +283,10 @@ class MailChimp_WooCommerce_MailChimpApi
 
         if (empty($data['language'])) {
             unset($data['language']);
+        }
+
+        if (empty($data['marketing_permissions'])) {
+            unset($data['marketing_permissions']);
         }
 
         mailchimp_debug('api.update_member', "Updating {$email}", $data);
@@ -1573,6 +1583,22 @@ class MailChimp_WooCommerce_MailChimpApi
         }
 
         return true;
+    }
+
+     /**
+     * @param 
+     * @return 
+     */
+    public function getGDPRFields($list_id)
+    {
+        $one_member = $this->get("lists/$list_id/members?fields=members.marketing_permissions&count=1");
+        $fields = false;
+        
+        if (is_array($one_member) && isset($one_member['members'][0]['marketing_permissions'])) {
+            $fields = $one_member['members'][0]['marketing_permissions'];
+        }
+                
+        return $fields;
     }
 
     /**

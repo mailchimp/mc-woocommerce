@@ -415,7 +415,8 @@ function mailchimp_date_utc($date) {
  * @return DateTime
  */
 function mailchimp_date_local($date) {
-    $timezone = mailchimp_get_option('store_timezone', 'America/New_York');
+    $timezone = str_replace(':', '', mailchimp_get_timezone());
+    
     if (is_numeric($date)) {
         $stamp = $date;
         $date = new \DateTime('now', new DateTimeZone('UTC'));
@@ -468,24 +469,27 @@ function mailchimp_get_timezone_list() {
  * 
  * @return String timezone 
  */
-function mailchimp_get_timezone($showOffset = false) {
+function mailchimp_get_timezone($humanReadable = false) {
     // get timezone data from options
     $timezone_string = get_option( 'timezone_string' );
     $offset  = get_option( 'gmt_offset' );
     
-    // transform offset float into human readable
-    $hours   = (int) $offset;
-    $minutes = abs( ( $offset - (int) $offset ) * 60 );
-    $offset  = sprintf( 'UTC/GMT %+03d:%02d', $hours, $minutes );
+    $signal = ($offset <=> 0 ) < 0 ? "-" : "+";
+    $offset = sprintf('%1s%02d:%02d', $signal, abs((int) $offset), abs(fmod($offset, 1) * 60));
     
     // shows timezone name + offset in hours and minutes, or only the timezone name. If no timezone string is set, show only offset
-    if (!$showOffset && $timezone_string) {
+    if (!$humanReadable && $timezone_string) {
         $timezone = $timezone_string;
     }
-    else if ($showOffset && $timezone_string) {
-        $timezone = $offset .' '. $timezone_string;
+    else if ($humanReadable && $timezone_string) {
+        $timezone = "UTC" . $offset .' '. $timezone_string;
     }
-    else if (!$timezone_string) $timezone = $offset;
+    else if ($humanReadable && !$timezone_string) {
+         $timezone = "UTC" . $offset;
+    }
+    else if (!$timezone_string) {
+        $timezone = $offset;
+    }
     
     return $timezone;
 }

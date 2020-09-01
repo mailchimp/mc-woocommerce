@@ -378,14 +378,19 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     {
         if (!mailchimp_is_configured()) return;
 
-        $subscribed = (bool) isset($_POST['mailchimp_woocommerce_newsletter']) ?
-            $_POST['mailchimp_woocommerce_newsletter'] : false;
+        $subscribed = (bool) isset($_POST['mailchimp_woocommerce_newsletter']) && $_POST['mailchimp_woocommerce_newsletter'] ? true : false;
+
+        if (isset($_POST['mailchimp_woocommerce_newsletter']) && $_POST['mailchimp_woocommerce_newsletter']) {
+            $gdpr_fields = isset($_POST['mailchimp_woocommerce_gdpr']) ? 
+                $_POST['mailchimp_woocommerce_gdpr'] : false;
+        }
 
         // update the user meta with the 'is_subscribed' form element
         update_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', $subscribed);
 
         if ($subscribed) {
-            mailchimp_handle_or_queue(new MailChimp_WooCommerce_User_Submit($user_id, $subscribed, null));
+            $job = new MailChimp_WooCommerce_User_Submit($user_id, $subscribed, null, null, $gdpr_fields);
+            mailchimp_handle_or_queue($job);
         }
     }
 

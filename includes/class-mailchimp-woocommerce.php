@@ -290,6 +290,7 @@ class MailChimp_WooCommerce
         $this->loader->add_action('wp_footer', $plugin_public, 'add_inline_footer_script');
 
         $this->loader->add_action('woocommerce_after_checkout_form', $plugin_public, 'add_JS_checkout', 10);
+        $this->loader->add_action('woocommerce_register_form', $plugin_public, 'add_JS_checkout', 10);
 	}
 
 	/**

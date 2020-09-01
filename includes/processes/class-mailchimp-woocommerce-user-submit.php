@@ -14,6 +14,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 
     public $id;
     public $subscribed;
+    public $gdpr_fields;
     public $updated_data;
     public $language;
     public $should_ignore = false;
@@ -24,7 +25,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
      * @param null $subscribed
      * @param WP_User|null $updated_data
      */
-    public function __construct($id = null, $subscribed = null, $updated_data = null, $language = null)
+    public function __construct($id = null, $subscribed = null, $updated_data = null, $language = null, $gdpr_fields = null)
     {
         if (!empty($id)) {
             // if we're passing in another user with the same id during the same php process we need to ignore it.
@@ -37,7 +38,17 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 
         if (is_bool($subscribed)) {
             $this->subscribed = $subscribed;
+            
+            if ($subscribed && !empty($gdpr_fields)) {
+                foreach ($gdpr_fields as $id => $value) {
+                    $gdpr_field['marketing_permission_id'] = $id;
+                    $gdpr_field['enabled'] = (bool) $value;
+                    $this->gdpr_fields[] = $gdpr_field;
+                }
+            }
         }
+
+        
 
         if (!empty($updated_data)) {
             $this->updated_data = $updated_data->to_array();
@@ -146,9 +157,11 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
             $merge_fields = $merge_fields_system;
         }
         // language
-
         $language = $this->language;
         
+        // GDPR
+        $gdpr_fields = $this->gdpr_fields;
+
         // pull the transient key for this job.
         $transient_id = mailchimp_get_transient_email_key($email);
         $status_meta = mailchimp_get_subscriber_status_options($this->subscribed);
@@ -171,7 +184,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
                     // delete the old
                     $api->deleteMember($list_id, $this->updated_data['user_email']);
                     // subscribe the new
-                    $api->subscribe($list_id, $email, $status_meta['created'], $merge_fields, null, $language);
+                    $api->subscribe($list_id, $email, $status_meta['created'], $merge_fields, null, $language, $gdpr_fields);
 
                     // update the member tags but fail silently just in case.
                     $api->updateMemberTags(mailchimp_get_list_id(), $email, true);
@@ -204,7 +217,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
             // if the status is not === 'transactional' we can update them to subscribed or pending now.
             if (isset($member_data['status']) && $member_data['status'] === 'transactional' || $member_data['status'] === 'cleaned') {
                 // ok let's update this member
-                $api->update($list_id, $email, $status_meta['updated'], $merge_fields, null, $language);
+                $api->update($list_id, $email, $status_meta['updated'], $merge_fields, null, $language, $gdpr_fields);
                 
                 // update the member tags but fail silently just in case.
                 $api->updateMemberTags(mailchimp_get_list_id(), $email, true);
@@ -221,7 +234,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 
             if (isset($member_data['status'])) {
                 // ok let's update this member
-                $api->update($list_id, $email, $member_data['status'], $merge_fields, null, $language);
+                $api->update($list_id, $email, $member_data['status'], $merge_fields, null, $language, $gdpr_fields);
 
                 // update the member tags but fail silently just in case.
                 $api->updateMemberTags(mailchimp_get_list_id(), $email, true);
@@ -247,7 +260,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
                     $uses_doi = isset($status_meta['requires_double_optin']) && $status_meta['requires_double_optin'];
                     $status_if_new = $uses_doi ? 'pending' : true;
 
-                    $api->subscribe($list_id, $user->user_email, $status_if_new, $merge_fields, null, $language);
+                    $api->subscribe($list_id, $user->user_email, $status_if_new, $merge_fields, null, $language, $gdpr_fields);
                     
                     // update the member tags but fail silently just in case.
                     $api->updateMemberTags(mailchimp_get_list_id(), $email, true);

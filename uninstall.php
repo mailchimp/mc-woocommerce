@@ -51,6 +51,7 @@ function mailchimp_woocommerce_uninstall() {
     }
     mailchimp_remove_communication_status();
     mailchimp_clean_database();
+    mailchimp_remove_activity_panel_inbox_notes();
 }
 
 if (!is_multisite()) {

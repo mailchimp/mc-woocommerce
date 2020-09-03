@@ -1146,6 +1146,17 @@ function mailchimp_remove_communication_status() {
     }
 }
 
+/**
+ * Removes any Woocommece inbox notes this plugin created.
+ */
+function mailchimp_remove_activity_panel_inbox_notes() {
+    if ( ! class_exists( '\Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes' ) ) {
+        return;
+    }
+
+    \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes::delete_notes_with_name( 'mailchimp-for-woocommerce-incomplete-install' );
+}
+
 // Print notices outside woocommerce admin bar
 function mailchimp_settings_errors() {
     $settings_errors = get_settings_errors();

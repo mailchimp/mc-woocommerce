@@ -14,7 +14,7 @@
 
 	})
 	function showHideGDPR(mailchimp_woocommerce_newsletter, gdprFields) {
-		if (mailchimp_woocommerce_newsletter.attr('checked') == 'checked') {
+		if (mailchimp_woocommerce_newsletter.prop('checked') == true) {
 			gdprFields.slideDown();
 		}
 		else {

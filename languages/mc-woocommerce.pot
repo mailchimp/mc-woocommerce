@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the Mailchimp for WooCommerce plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Mailchimp for WooCommerce 2.4.5\n"
+"Project-Id-Version: Mailchimp for WooCommerce 2.4.6\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mailchimp-for-woocommerce\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2020-08-31T15:27:58+02:00\n"
+"POT-Creation-Date: 2020-09-04T10:17:41+02:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.1.0\n"
 "X-Domain: mailchimp-for-woocommerce\n"
@@ -371,7 +371,7 @@ msgstr ""
 
 #: admin/partials/tabs/api_key_create_account.php:33
 #: admin/partials/tabs/store_sync.php:282
-#: admin/partials/tabs/store_info.php:27
+#: admin/partials/tabs/store_info.php:33
 msgid "Email"
 msgstr ""
 
@@ -401,12 +401,12 @@ msgid "Address Line 2"
 msgstr ""
 
 #: admin/partials/tabs/api_key_create_account.php:82
-#: admin/partials/tabs/store_info.php:43
+#: admin/partials/tabs/store_info.php:49
 msgid "City"
 msgstr ""
 
 #: admin/partials/tabs/api_key_create_account.php:89
-#: admin/partials/tabs/store_info.php:51
+#: admin/partials/tabs/store_info.php:57
 msgid "State"
 msgstr ""
 
@@ -415,7 +415,7 @@ msgid "Zip"
 msgstr ""
 
 #: admin/partials/tabs/api_key_create_account.php:103
-#: admin/partials/tabs/store_info.php:67
+#: admin/partials/tabs/store_info.php:73
 msgid "Country"
 msgstr ""
 
@@ -424,7 +424,6 @@ msgid "Phone"
 msgstr ""
 
 #: admin/partials/tabs/api_key_create_account.php:135
-#: admin/partials/tabs/store_info.php:135
 msgid "Timezone"
 msgstr ""
 
@@ -762,65 +761,66 @@ msgstr ""
 msgid "Connected! Please wait while loading next step"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:15
+#: admin/partials/tabs/store_info.php:21
 #: admin/partials/mailchimp-woocommerce-admin-tabs.php:151
 #: admin/partials/mailchimp-woocommerce-admin-tabs.php:200
 msgid "Store Settings"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:19
+#: admin/partials/tabs/store_info.php:25
 msgid "Name"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:35
+#: admin/partials/tabs/store_info.php:41
 msgid "Street address"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:59
+#: admin/partials/tabs/store_info.php:65
 msgid "Postal Code"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:94
+#: admin/partials/tabs/store_info.php:100
 msgid "Phone Number"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:101
+#: admin/partials/tabs/store_info.php:107
 msgid "Locale Settings"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:103
-msgid "Please apply your locale settings. If you're unsure about these, use the defaults."
+#. translators: %1$s - The Currency name and format (ex: USD | US Dollar) %2$s - Timezone name or offset (ex: America/New_York or UTC-4:00) %3$s and %5$s- <a> tag open %4$s - </a> tag close
+#: admin/partials/tabs/store_info.php:116
+msgid "We've detected that your WooCommerce store's currency is <b>%1$s</b> (%3$schange%4$s), and the WordPress timezone is <b>%2$s</b> (%5$schange%4$s). <br/>."
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:108
+#: admin/partials/tabs/store_info.php:130
 msgid "Locale"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:113
+#: admin/partials/tabs/store_info.php:132
+msgid "Please apply your locale settings. If you're unsure about these, use the defaults."
+msgstr ""
+
+#: admin/partials/tabs/store_info.php:139
 msgid "Select store's locale"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:128
-msgid "Woocommerce Currency"
-msgstr ""
-
-#: admin/partials/tabs/store_info.php:145
+#: admin/partials/tabs/store_info.php:158
 msgid "Optional Store Settings"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:151
+#: admin/partials/tabs/store_info.php:164
 msgid "Plugin Permission Level"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:152
+#: admin/partials/tabs/store_info.php:165
 msgid "Select the minimum permission capability to manage Mailchimp for Woocommerce options"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:159
+#: admin/partials/tabs/store_info.php:172
 msgid "Administrators Only"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:162
+#: admin/partials/tabs/store_info.php:175
 msgid "Shop Managers and Administrators"
 msgstr ""
 

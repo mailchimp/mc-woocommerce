@@ -229,7 +229,7 @@ class MailChimp_WooCommerce
 		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
 
 		// Add menu item
-		$this->loader->add_action('admin_menu', $plugin_admin, 'add_plugin_admin_menu');
+		$this->loader->add_action('admin_menu', $plugin_admin, 'add_plugin_admin_menu', 71);
 
         // Add WooCommerce Navigation Bar
         $this->loader->add_action('admin_menu', $plugin_admin, 'add_woocommerce_navigation_bar');

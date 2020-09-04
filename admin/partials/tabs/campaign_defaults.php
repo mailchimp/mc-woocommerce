@@ -51,9 +51,9 @@ if (!$handler->hasValidStoreInfo()) {
         
         <div class="mailchimp-select-wrapper">
             <select id="<?php echo $this->plugin_name; ?>-campaign-language-label" name="<?php echo $this->plugin_name; ?>[campaign_language]" required>
-                <?php $selected_locale = isset($options['campaign_language']) && !empty($options['campaign_language']) ? $options['campaign_language'] : 'en'; ?>
+                <?php $selected_locale = isset($options['store_locale']) && !empty($options['store_locale']) ? $options['store_locale'] : get_locale(); ?> ?>
                 <?php
-                foreach(MailChimp_Api_Locales::simple() as $locale_key => $local_value) {
+                foreach(MailChimp_Api_Locales::all() as $locale_key => $local_value) {
                     echo '<option value="' . esc_attr( $locale_key ) . '" ' . selected($locale_key === $selected_locale, true, false ) . '>' . esc_html( $local_value ) . '</option>';
                 }
                 ?>

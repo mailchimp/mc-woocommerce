@@ -3,6 +3,7 @@
 * fix for errors on installs with RTL Site Languages
 * adds GDPR fields for GDPR enabled audiences
 * locale settings from WooCommerce or WP are now auto-selected
+* support for notices in the wc-admin inbox 
 = 2.4.5 =
 * fixed disconnect/reconnect list issue
 * fixed rest api doing it wrong alert

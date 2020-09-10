@@ -4,6 +4,7 @@
 * adds GDPR fields for GDPR enabled audiences
 * locale settings from WooCommerce or WP are now auto-selected
 * support for notices in the wc-admin inbox 
+* moves Mailchimp plugin link to bottom of Woocommerce sub navigation
 = 2.4.5 =
 * fixed disconnect/reconnect list issue
 * fixed rest api doing it wrong alert

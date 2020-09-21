@@ -1617,7 +1617,10 @@ class MailChimp_WooCommerce_MailChimpApi
         $one_member = $this->get("lists/$list_id/members?fields=members.marketing_permissions&count=1");
         $fields = false;
         
-        if (is_array($one_member) && isset($one_member['members'][0]['marketing_permissions'])) {
+        if (is_array($one_member) &&
+            isset($one_member['members']) &&
+            isset($one_member['members'][0]) &&
+            isset($one_member['members'][0]['marketing_permissions'])) {
             $fields = $one_member['members'][0]['marketing_permissions'];
         }
                 

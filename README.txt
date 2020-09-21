@@ -77,12 +77,8 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
 == Changelog ==
-= 2.4.6 =
-* fix for errors on installs with RTL Site Languages
-* adds GDPR fields for GDPR enabled audiences
-* locale settings from WooCommerce or WP are now auto-selected
-* support for notices in the wc-admin inbox 
-* moves Mailchimp plugin link to bottom of Woocommerce sub navigation
+= 2.4.7 =
+* fix cart items with no price on product
 
 [Historical Changelog](https://raw.githubusercontent.com/mailchimp/mc-woocommerce/master/CHANGELOG.txt)
 

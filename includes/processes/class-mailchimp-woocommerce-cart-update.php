@@ -216,15 +216,27 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
         $variant_id = isset($item['variation_id']) && $item['variation_id'] > 0 ? $item['variation_id'] : null;
         $product_id = $item['product_id'];
 
-        // if the cart contains a variant id with no parent id, we need to use this instead of the main product id.
-        if ($variant_id) {
-            $product = wc_get_product($variant_id);
-            $product_id = $product->get_parent_id();
-        } else {
-            $product = wc_get_product($product_id);
+        // if the line item has a total, and a quantity we can determine the proper price
+        // that was in the cart at that time.
+        if (isset($item['line_total']) && !empty($item['line_total'])) {
+            if ($item['line_total'] > 0 && $item['quantity'] > 0) {
+                $price = round($item['line_total'] / $item['quantity']);
+            }
         }
 
-        $price = $product ? $product->get_price() : 0;
+        // this is a fallback from now on.
+        if (!isset($price) || empty($price)) {
+            // if the cart contains a variant id with no parent id,
+            // we need to use this instead of the main product id.
+            if ($variant_id) {
+                $product = wc_get_product($variant_id);
+                $product_id = $product->get_parent_id();
+            } else {
+                $product = wc_get_product($product_id);
+            }
+            $price = $product ? $product->get_price() : 0;
+        }
+
         $line = new MailChimp_WooCommerce_LineItem();
         $line->setId($hash);
         $line->setProductId($product_id);

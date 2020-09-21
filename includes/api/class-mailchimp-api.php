@@ -1585,6 +1585,29 @@ class MailChimp_WooCommerce_MailChimpApi
         return true;
     }
 
+    /**
+     * @param string $list_id
+     * @param int $minutes
+     * @return false|mixed
+     */
+    public function getCachedGDPRFields($list_id, $minutes = 5)
+    {
+        $transient = "mailchimp-woocommerce-gdpr-fields.{$list_id}";
+        $GDPRfields = get_site_transient($transient);
+
+        // only return the values if it's a false - or an array
+        if ($GDPRfields === false || is_array($GDPRfields)) return $GDPRfields;
+
+        try {
+            $GDPRfields = $this->getGDPRFields($list_id);
+            set_site_transient($transient, $GDPRfields, 60 * $minutes);
+        } catch (\Exception $e) {
+            $GDPRfields = false;
+        }
+
+        return $GDPRfields;
+    }
+
      /**
      * @param 
      * @return 

@@ -34,7 +34,9 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
     {
         if (!is_admin()) {
             $api = mailchimp_get_api();
-            $GDPRfields = $api->getGDPRFields(mailchimp_get_list_id());
+
+            // get the gdpr fields from the cache - or call it again and save for 5 minutes.
+            $GDPRfields = $api->getCachedGDPRFields(mailchimp_get_list_id(), 5);
 
             // if the user has chosen to hide the checkbox, don't do anything.
             if (($default_setting = $this->getOption('mailchimp_checkbox_defaults', 'check')) === 'hide') {

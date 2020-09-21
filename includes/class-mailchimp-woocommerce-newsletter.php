@@ -70,7 +70,8 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
             $checkbox .= '</p>';
             $checkbox .= '<div class="clear"></div>';
 
-            if ($GDPRfields) {
+            // only render these fields if it's an array that has valid data.
+            if (!empty($GDPRfields) && is_array($GDPRfields)) {
                 $checkbox .= "<div id='mailchimp-gdpr-fields'><p>";
                     $checkbox .= __('Please select all the ways you would like to hear from us', 'mailchimp-for-woocommerce');
                     $checkbox .= "<div class='clear'></div>";

@@ -1596,13 +1596,13 @@ class MailChimp_WooCommerce_MailChimpApi
         $GDPRfields = get_site_transient($transient);
 
         // only return the values if it's a false - or an array
-        if ($GDPRfields === false || is_array($GDPRfields)) return $GDPRfields;
+        if (is_array($GDPRfields)) return $GDPRfields;
 
         try {
             $GDPRfields = $this->getGDPRFields($list_id);
             set_site_transient($transient, $GDPRfields, 60 * $minutes);
         } catch (\Exception $e) {
-            $GDPRfields = false;
+            $GDPRfields = array();
         }
 
         return $GDPRfields;

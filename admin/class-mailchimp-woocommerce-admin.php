@@ -265,7 +265,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 					/* translators: Placeholders %1$s - opening strong HTML tag, %2$s - closing strong HTML tag, %3$s - opening link HTML tag, %4$s - closing link HTML tag */
 					esc_html__(
 						'%1$sMailchimp for Woocommerce%2$s is not yet connected to a Mailchimp account. To complete the connection, %3$svisit the plugin settings page%4$s.',
-						'facebook-for-woocommerce'
+						'mailchimp-for-woocommerce'
 					),
 					'<strong>',
 					'</strong>',

@@ -220,7 +220,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
         // that was in the cart at that time.
         if (isset($item['line_total']) && !empty($item['line_total'])) {
             if ($item['line_total'] > 0 && $item['quantity'] > 0) {
-                $price = round($item['line_total'] / $item['quantity']);
+                $price = $item['line_total'] / $item['quantity'];
             }
         }
 

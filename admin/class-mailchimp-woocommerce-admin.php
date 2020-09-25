@@ -309,12 +309,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 					'activated_formatted' => $activated_time_formatted,
 				) );
 				$note->set_type( \Automattic\WooCommerce\Admin\Notes\WC_Admin_Note::E_WC_ADMIN_NOTE_WARNING );
-				$note->set_layout('plain');
-				$note->set_image('');
 				$note->set_name( 'mailchimp-for-woocommerce-incomplete-install' );
 				$note->set_source( 'mailchimp-for-woocommerce' );
-				$note->set_layout('plain');
-				$note->set_image('');
+				if (method_exists($note, 'set_layout')) $note->set_layout('plain');
+                if (method_exists($note, 'set_image')) $note->set_image('');
 				$note->add_action(
 					'settings',
 					__( 'Open Settings', 'mailchimp-for-woocommerce' ),

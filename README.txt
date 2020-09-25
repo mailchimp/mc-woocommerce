@@ -79,6 +79,7 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 == Changelog ==
 = 2.4.7 =
 * fix cart items with no price on product
+* fix admin note issue on login
 
 [Historical Changelog](https://raw.githubusercontent.com/mailchimp/mc-woocommerce/master/CHANGELOG.txt)
 

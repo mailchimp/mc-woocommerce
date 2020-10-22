@@ -2,7 +2,7 @@
 
 $handler = MailChimp_WooCommerce_Admin::connect();
 
-// if we don't have valid campaign defaults we need to redirect back to the 'campaign_defaults' tab.
+// if we don't have a valid api key we need to redirect back to the 'api_key' tab.
 if (!$handler->hasValidApiKey()) {
     wp_redirect('admin.php?page=mailchimp-woocommerce&tab=api_key&error_notice=missing_api_key');
 }

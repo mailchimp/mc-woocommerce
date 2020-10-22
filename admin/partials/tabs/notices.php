@@ -5,9 +5,6 @@
             case 'missing_api_key':
                 esc_html_e('Mailchimp says: You must enter in a valid API key.', 'mailchimp-for-woocommerce');
             break;
-            case 'missing_campaign_defaults':
-                esc_html_e('Mailchimp says: Sorry you must set up your campaign defaults before you proceed!', 'mailchimp-for-woocommerce');
-                break;
             case 'missing_list':
                 esc_html_e('Mailchimp says: You must select a marketing audience.', 'mailchimp-for-woocommerce');
                 break;

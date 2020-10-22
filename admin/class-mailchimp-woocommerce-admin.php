@@ -582,10 +582,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				$data = $this->validatePostStoreInfo($input);
 				break;
 
-			case 'campaign_defaults' :
-				$data = $this->validatePostCampaignDefaults($input);
-				break;
-
 			case 'newsletter_settings':
 				$data = $this->validatePostNewsletterSettings($input);
 				break;
@@ -902,7 +898,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			}
 		}
 		
-		$data['active_tab'] = 'campaign_defaults';
+		$data['active_tab'] = 'newsletter_settings';
 		$data['store_currency_code'] = get_woocommerce_currency();
 		
 		return $data;
@@ -1013,43 +1009,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	/**
 	 * STEP 3.
 	 *
-	 * Handle the 'campaign_defaults' tab post.
-	 *
-	 * @param $input
-	 * @return array
-	 */
-	protected function validatePostCampaignDefaults($input)
-	{
-		$data = array(
-			'campaign_from_name' => isset($input['campaign_from_name']) ? $input['campaign_from_name'] : false,
-			'campaign_from_email' => isset($input['campaign_from_email']) && is_email($input['campaign_from_email']) ? $input['campaign_from_email'] : false,
-			'campaign_subject' => isset($input['campaign_subject']) ? $input['campaign_subject'] : get_option('blogname'),
-			'campaign_language' => isset($input['campaign_language']) ? $input['campaign_language'] : 'en',
-			'campaign_permission_reminder' => isset($input['campaign_permission_reminder']) ? $input['campaign_permission_reminder'] : sprintf(/* translators: %s - plugin name. */esc_html__( 'You were subscribed to the newsletter from %s', 'mailchimp-for-woocommerce' ),get_option('blogname')),
-		);
-
-		if (!$this->hasValidCampaignDefaults($data)) {
-			$this->setData('validation.campaign_defaults', false);
-			add_settings_error('mailchimp_list_settings', '', __('One or more fields were not updated', 'mailchimp-for-woocommerce'));
-			return array('active_tab' => 'campaign_defaults');
-		}
-
-		$this->setData('validation.campaign_defaults', true);
-
-        $data['active_tab'] = 'newsletter_settings';
-
-        $list_id = mailchimp_get_list_id();
-
-        if (!empty($list_id)) {
-            $this->updateMailChimpList(array_merge($this->getOptions(), $data), $list_id);
-        }
-
-		return $data;
-	}
-
-	/**
-	 * STEP 4.
-	 *
 	 * Handle the 'newsletter_settings' tab post.
 	 *
 	 * @param $input
@@ -1082,8 +1041,27 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			'mailchimp_checkbox_defaults' => $checkbox,
 			'mailchimp_checkbox_action' => isset($input['mailchimp_checkbox_action']) ? $input['mailchimp_checkbox_action'] : $this->getOption('mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form'),
 			'mailchimp_user_tags' => isset($input['mailchimp_user_tags']) ? implode(",",$sanitized_tags) : $this->getOption('mailchimp_user_tags'),
-            'mailchimp_product_image_key' => isset($input['mailchimp_product_image_key']) ? $input['mailchimp_product_image_key'] : 'medium',
-        );
+			'mailchimp_product_image_key' => isset($input['mailchimp_product_image_key']) ? $input['mailchimp_product_image_key'] : 'medium',
+			'campaign_from_name' => isset($input['campaign_from_name']) ? $input['campaign_from_name'] : false,
+			'campaign_from_email' => isset($input['campaign_from_email']) && is_email($input['campaign_from_email']) ? $input['campaign_from_email'] : false,
+			'campaign_subject' => isset($input['campaign_subject']) ? $input['campaign_subject'] : get_option('blogname'),
+			'campaign_language' => isset($input['campaign_language']) ? $input['campaign_language'] : 'en',
+			'campaign_permission_reminder' => isset($input['campaign_permission_reminder']) ? $input['campaign_permission_reminder'] : sprintf(/* translators: %s - plugin name. */esc_html__( 'You were subscribed to the newsletter from %s', 'mailchimp-for-woocommerce' ),get_option('blogname')),
+		);
+
+		if (!$this->hasValidCampaignDefaults($data)) {
+			$this->setData('validation.newsletter_settings', false);
+			add_settings_error('mailchimp_list_settings', '', __('One or more fields were not updated', 'mailchimp-for-woocommerce'));
+			return array('active_tab' => 'newsletter_settings');
+		}
+		error_log($this->hasValidCampaignDefaults($data));
+		$this->setData('validation.newsletter_settings', true);
+
+		$list_id = mailchimp_get_list_id();
+
+		if (!empty($list_id)) {
+			$this->updateMailChimpList(array_merge($this->getOptions(), $data), $list_id);
+		}
 		
 		//if we don't have any audience on the account, create one
 		if ($data['mailchimp_list'] === 'create_new') {
@@ -1553,7 +1531,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             mailchimp_update_connected_site_script();
 
 			// we need to update the list again with the campaign defaults
-			$this->updateMailChimpList(null, $list_id);
+			$this->updateMailChimpList($data, $list_id);
 
 			return true;
 

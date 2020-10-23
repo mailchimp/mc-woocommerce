@@ -15,6 +15,22 @@ html {
 }
 
 .mc-woocommerce-settings {
+	width: 100%;
+	margin: 0 !important;
+	font-family: "proxima-nova", Arial, Helvetica, sans-serif;
+
+}
+
+.mc-woocommerce-settings-header-wrapper {
+	width:100%;
+	padding-top: 66px;
+}
+
+.mc-woocommerce-settings-header-wrapper.wiz-header {
+	background-color: white;
+}
+
+.mc-woocommerce-settings-header {
 	width:90%;
 	margin: 4em auto 0 auto !important;
 	font-family: "proxima-nova", Arial, Helvetica, sans-serif;
@@ -163,9 +179,10 @@ html {
 }
 
 .tab-content-wrapper {
+	width: 90%;
 	background: white;
 	padding: 0;
-	margin: 0;
+	margin: 0 auto 0 auto !important;
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;

@@ -314,22 +314,14 @@
 						$('#mailchimp-oauth-waiting').hide();
 						$('#mailchimp-oauth-connecting').show();
 
-						// grab a copy of the ajax settings default headers
-						var previous_default_headers = ($.ajaxSettings && $.ajaxSettings.headers) ?
-							$.ajaxSettings.headers : {};
+						var checkData = {
+							action:'mailchimp_woocommerce_oauth_status',
+							url: domain + '/api/status/' + token,
+						};
 
-						// set the default headers to NOTHING because the oauth server will block
-						// any non standard header that it was not expecting to receive and it was
-						// preventing folks from being able to connect.
-						$.ajaxSettings.headers = {};
-						
 						// ping status to check if auth was accepted
-						$.post(domain + '/api/status/' + token).done(function(statusData) {
-
-							// set the headers back to the previous defaults
-							$.ajaxSettings.headers = previous_default_headers;
-
-							if (statusData.status == "accepted") {
+						$.post(ajaxurl, checkData).done(function(statusData) {							
+							if (statusData.data.status == "accepted") {
 								// call for finish endpoint to retrieve access_token
 								var finishData = {
 									action: 'mailchimp_woocommerce_oauth_finish', 

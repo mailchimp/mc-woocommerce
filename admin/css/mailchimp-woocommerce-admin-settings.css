@@ -30,11 +30,55 @@ html {
 	background-color: white;
 }
 
+.mc-woocommerce-settings-header-wrapper.wiz-header .mc-woocommerce-settings-header{
+	padding-bottom: 69px;
+}
+
+
 .mc-woocommerce-settings-header {
-	width:90%;
+	width: 90%;
 	margin: 4em auto 0 auto !important;
 	font-family: "proxima-nova", Arial, Helvetica, sans-serif;
+	padding-bottom: 0px;
+	color: red;
+}
+.mc-woocommerce-settings-header svg{
+	padding-left: 1em;
+}
 
+.mc-woocommerce-header-steps {
+	display: block;
+	font-size: 12px;
+	line-height: 24px;
+	letter-spacing: 0.5px;
+	text-transform: uppercase;
+	margin-bottom: 15px;
+	color: #AFAFAF;
+}
+
+.mc-woocommerce-header-title {
+	display: block;
+	font-style: normal;
+	font-weight: 500;
+	font-size: 30px;
+	line-height: 28px;
+	color: #241C15;
+	margin-bottom: 15px;
+}
+
+
+.mc-woocommerce-header-subtitle {
+	display: inline-block;
+	font-style: normal;
+	font-weight: normal;
+	font-size: 20px;
+	line-height: 30px;
+
+	/* or 150% */
+	letter-spacing: -0.32px;
+
+	/* Functional / Tuna */
+	color: #8C8C8C;
 }
 
 .mc-woocommerce-settings p {
@@ -47,6 +91,18 @@ html {
 	font-size: 22px !important;	
 	line-height: 32px;
 	color: #3C3C3C;
+	display: inline-block;
+	padding-left: 58px;
+	max-width: 75%;
+}
+
+.connect-buttons {
+	padding-left: 151px;
+	margin-top: 38px;
+}
+
+.connect-buttons .connect-button {
+	display: inline;
 }
 
 .description {
@@ -81,14 +137,14 @@ html {
 	display: block;
 	height: 13px;
 	width: 57px;
-	border-bottom: 3px solid #E6E6E6;
+	border-bottom: 3px solid #DBD9D2;
 }
 
 .nav-wizard-wrapper .wizard-tab .marker-disabled{
 	display: block;
 	height: 13px;
 	width: 57px;
-	border-bottom: 3px solid #E6E6E6;
+	border-bottom: 3px solid #DBD9D2;
 }
 
 .nav-wizard-wrapper .wizard-tab .marker:hover{
@@ -178,15 +234,38 @@ html {
 	border-bottom: none;
 }
 
-.tab-content-wrapper {
+.tab-content-wrapper,
+.notices-content-wrapper {
 	width: 90%;
-	background: white;
+	background: transparent;
 	padding: 0;
 	margin: 0 auto 0 auto !important;
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 }
+
+.tab-content-wrapper #mailchimp_woocommerce_options {
+	background: transparent !important;
+}
+
+.tab-content-wrapper #mailchimp_woocommerce_options fieldset{
+	background: transparent !important;
+}
+
+.tab-content-wrapper #mailchimp_woocommerce_options fieldset input{
+	background: transparent !important;
+}
+
+.tab-content-wrapper #mailchimp_woocommerce_options textarea{
+	background: transparent !important;
+}
+
+.tab-content-wrapper #mailchimp_woocommerce_options fieldset select {
+	background: transparent url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23555%22%2F%3E%3C%2Fsvg%3E') no-repeat right 5px top 55%;
+    background-size: auto;
+
+} 
 
 .tab-content-wrapper *,
 .sync-content-wrapper {
@@ -208,11 +287,11 @@ html {
 
 .tab-content-wrapper form {
 	margin: 0 auto;
-	padding: 3em;
+	/* padding: 3em; */
 }
 
 .tab-content-wrapper fieldset{
-	background: white;
+	background: transparent;
 	width: 100%;
 }
 
@@ -238,6 +317,19 @@ html {
 	color: red;
 }
 
+a.button.create-account {
+	color: #7FAD45 !important;
+	background-color: white !important;
+	border: none !important;
+	font-family: proxima-nova, Arial, Helvetica, sans-serif !important;
+	font-size: 14px !important;
+	line-height: 16px !important;
+	padding: 15px 35px 15px 35px !important;
+	
+	/* identical to box height */
+	text-transform: uppercase !important;
+}
+
 .tab-content-submit,
 .mc-woocommerce-resync-button,
 .mc-woocommerce-log-button {
@@ -249,13 +341,13 @@ html {
 	/* identical to box height */
 	text-transform: uppercase !important;
 	color: #FFFFFF !important;
-	border-radius: 100px !important;
 	border: none !important;
 	
 }
 
 .oauth-description {
 	display: none;
+	color: #8C8C8C;
 }
 
 #mailchimp-oauth-connected {
@@ -278,8 +370,7 @@ html {
 	display:none;
 }
 
-.tab-content-submit {
-	float:right;
+.tab-content-submit:not(.create-account) {
 	background: #7FAD45 !important;
 	box-shadow:0 1px 0 #7FAD45 !important;
 	text-shadow: 0 -1px 1px #7FAD45,1px 0 1px #7FAD45,0 1px 1px #7FAD45,-1px 0 1px #7FAD45 !important;
@@ -303,7 +394,6 @@ html {
 }
 
 .tab-content-submit:hover {
-	float:right;
 	background: #9EC769 !important;
 	box-shadow:0 1px 0 #9EC769 !important;
 	text-shadow: 0 -1px 1px #9EC769,1px 0 1px #9EC769,0 1px 1px #9EC769,-1px 0 1px #9EC769 !important;
@@ -325,9 +415,9 @@ html {
 .mc-woocommerce-resync-button,
 .mc-woocommerce-log-button {
 	color: #3C3C3C !important;
-	background: #E6E6E6 !important;
-	box-shadow:0 1px 0 #E6E6E6 !important;
-	text-shadow: 0 -1px 1px #E6E6E6,1px 0 1px #E6E6E6,0 1px 1px #E6E6E6,-1px 0 1px #E6E6E6 !important;
+	background: #DBD9D2 !important;
+	box-shadow:0 1px 0 #DBD9D2 !important;
+	text-shadow: 0 -1px 1px #DBD9D2,1px 0 1px #DBD9D2,0 1px 1px #DBD9D2,-1px 0 1px #DBD9D2 !important;
 	-webkit-transition: background-color 0.3s ease-out,
 		text-shadow 0.3s ease-out,
 		box-shadow 0.3s ease-out;
@@ -397,7 +487,8 @@ html {
 
 .sync-content-wrapper {
 	display: table;
-	width: 100%;
+	width: 90%;
+	margin: auto;
 }
 
 .sync-comm-wrapper {
@@ -452,7 +543,7 @@ html {
 
 .sync-content-wrapper .sync-stats-card {
 	width: 100%;
-	border-bottom: 1px solid #E6E6E6;
+	border-bottom: 1px solid #DBD9D2;
 	padding: 2em 0;
 	min-height: 20px;
 }
@@ -488,7 +579,7 @@ html {
 	position: absolute;
 	top: -1.3em;
 	right: 0;
-	color: #E6E6E6;
+	color: #DBD9D2;
 }
 
 .sync-content-wrapper .sync-stats-card .sync-loader {
@@ -518,7 +609,7 @@ html {
 }
 
 .sync-content-wrapper .sync-controls-wrapper {
-	background-color: #E6E6E6;
+	background-color: #DBD9D2;
 	-webkit-border-radius: 4px;
 	-moz-border-radius: 4px;
 	border-radius: 4px;
@@ -554,7 +645,7 @@ html {
 	border: none;
 	border-radius: 100px;
 	padding: 1em 2em 1em 1em;
-	background: #E6E6E6;
+	background: #DBD9D2;
 	-webkit-transition: background-color 0.3s ease-out;
 	-moz-transition: background-color 0.3s ease-out;
 	-o-transition: background-color 0.3s ease-out;
@@ -638,7 +729,7 @@ html {
 .tab-content-wrapper fieldset input[type="password"],
 .tab-content-wrapper fieldset input[type="email"],
 .tab-content-wrapper fieldset textarea {
-	border: 1px solid #E6E6E6;
+	border: 1px solid #DBD9D2;
 	box-sizing: border-box;
 	border-radius: 4px;
 	padding: 0.6em 1.5em;
@@ -648,7 +739,7 @@ html {
 }
 
 .tab-content-wrapper .mailchimp-select-wrapper {
-	border: 1px solid #E6E6E6;
+	border: 1px solid #DBD9D2;
 	padding: 6px 6px 4px 20px;
 	-webkit-border-radius: 4px;
 	-moz-border-radius: 4px;
@@ -686,7 +777,7 @@ html {
 	width: 2em;
 	height: 2em;
 	border-radius: 4px;
-	border: 1px solid #E6E6E6;
+	border: 1px solid #DBD9D2;
 }
 .tab-content-wrapper fieldset input[type='checkbox']:checked::before {
 	color: #7FAD45;
@@ -700,7 +791,7 @@ html {
 .sync-content-wrapper fieldset input[type='radio'] {
 	width: 2em;
 	height: 2em;
-	border: 1px solid #E6E6E6;
+	border: 1px solid #DBD9D2;
 	margin-right: 10px;
 }
 
@@ -725,7 +816,7 @@ html {
 }
 
 .tab-content-wrapper fieldset textarea {
-	border: 1px solid #E6E6E6;
+	border: 1px solid #DBD9D2;
 	box-sizing: border-box;
 	border-radius: 4px;
 	padding: 15px 20px;
@@ -993,9 +1084,9 @@ html {
 .mc-woocommerce-create-account-step .whitebtn{
 	color: #3C3C3C !important;
 	background: white !important;
-	box-shadow: 0 1px 0 #E6E6E6 !important;
-	text-shadow: 0 -1px 1px	#E6E6E6,1px 0 1px #E6E6E6,0 1px 1px #E6E6E6,-1px 0 1px #E6E6E6 !important;
-	border: 1px solid #E6E6E6 !important;
+	box-shadow: 0 1px 0 #DBD9D2 !important;
+	text-shadow: 0 -1px 1px	#DBD9D2,1px 0 1px #DBD9D2,0 1px 1px #DBD9D2,-1px 0 1px #DBD9D2 !important;
+	border: 1px solid #DBD9D2 !important;
 }
 
 #mc-woocommerce-create-account-next {

@@ -70,6 +70,7 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
 }
 ?>
 <input type="hidden" name="mailchimp_active_settings_tab" value="store_sync"/>
+<div class="box">&nbsp;</div>
 
 <div class="sync-content-wrapper">
     <div class="sync-controls-wrapper">
@@ -82,7 +83,7 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M14 1.41L12.59 0L7 5.59L1.41 0L0 1.41L5.59 7L0 12.59L1.41 14L7 8.41L12.59 14L14 12.59L8.41 7L14 1.41Z" fill="#3C3C3C"/>
                         </svg>
-                        <?php esc_html_e('DISCONNECT STORE', 'mailchimp-for-woocommerce');?>
+                        <?php esc_html_e('', 'mailchimp-for-woocommerce');?>
                 </a>
                 <div class="sync-controls-item">
                     <p class="sync-controls-label"><strong><?php esc_html_e('Account Connected', 'mailchimp-for-woocommerce');?></strong></p>
@@ -178,7 +179,6 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
             <span class="spinner" style="float:none; background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px"></span>
         </p>
     </div>
-   
 </div>
 
 <div class="sync-content-wrapper sync-comm-wrapper">

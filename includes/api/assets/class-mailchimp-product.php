@@ -73,7 +73,7 @@ class MailChimp_WooCommerce_Product
      */
     public function setTitle($title)
     {
-        $this->title = $title;
+        $this->title = strip_tags($title);
 
         return $this;
     }

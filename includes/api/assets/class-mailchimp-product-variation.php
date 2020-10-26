@@ -71,7 +71,7 @@ class MailChimp_WooCommerce_ProductVariation
      */
     public function setTitle($title)
     {
-        $this->title = $title;
+        $this->title = strip_tags($title);
 
         return $this;
     }

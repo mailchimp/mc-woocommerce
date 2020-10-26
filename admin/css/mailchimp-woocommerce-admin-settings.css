@@ -487,8 +487,9 @@ a.button.create-account {
 
 .sync-content-wrapper {
 	display: table;
-	width: 90%;
+	width: 100%;
 	margin: auto;
+	width: 90%;
 }
 
 .sync-comm-wrapper {
@@ -534,18 +535,29 @@ a.button.create-account {
 .sync-content-wrapper .sync-stats-wrapper {
 	position:relative;
 	background-color: white;
-	padding: 4px 2em 0 2em;
-	margin-right: 2em;
+	padding: 4px 0em 0 0em;
 	-webkit-border-radius: 4px;
 	-moz-border-radius: 4px;
 	border-radius: 4px;
 }
 
+.sync-content-wrapper .sync-stats-wrapper.sync-stats-store{
+	margin-right: 13px;
+}
+
+.sync-content-wrapper .sync-stats-wrapper.sync-stats-audience{
+	margin-left: 13px;
+}
+
 .sync-content-wrapper .sync-stats-card {
-	width: 100%;
 	border-bottom: 1px solid #DBD9D2;
-	padding: 2em 0;
+	margin: 1em 2em;
+	padding: 2em 1em;
 	min-height: 20px;
+}
+
+.sync-content-wrapper .last-updated {
+	margin-left: 13px;
 }
 
 .sync-content-wrapper .sync-stats-card:last-child {
@@ -609,25 +621,60 @@ a.button.create-account {
 }
 
 .sync-content-wrapper .sync-controls-wrapper {
-	background-color: #DBD9D2;
+	background-color: white;
 	-webkit-border-radius: 4px;
 	-moz-border-radius: 4px;
 	border-radius: 4px;
-	display: table-cell;
-	width: 60%;
+	width: 100%;
 	font-family: proxima-nova, Arial, Helvetica, sans-serif;
 	font-size: 14px ;
 	line-height: 14px;
+	margin-bottom: 26px;
 }
 
 .sync-content-wrapper .sync-controls {
 	padding: 1em 1em 1em 3em;
 	font-size: 14px;
 	line-height: 14px;
+	min-height: 90px;
+	color: #B7A9A1;
+}
+.sync-content-wrapper .sync-controls .sync-controls-item {
+	display: inline;
+	float: left;
+	margin-right: 42px;
+	
+}
+
+.sync-content-wrapper .sync-controls p {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 300px;
+}
+
+
+.sync-content-wrapper .sync-controls .sync-controls-item .sync-controls-label{
+	font-size: 11px;
+	line-height: 20px;
+}
+
+.sync-content-wrapper .sync-controls #mailchimp_account_connected,
+.sync-content-wrapper .sync-controls #mailchimp_list_name {
+	font-size: 20px;
+	line-height: 28px;
 }
 
 .sync-content-wrapper .sync-controls .mc-woocommerce-last-sync{
-	margin-top: 14em;
+	display: table;
+	float: right;	
+	min-height:90px;
+	margin-right: 30px;
+}
+
+.sync-content-wrapper .sync-controls .mc-woocommerce-last-sync p{
+	display: table-cell;
+	vertical-align: middle;
 }
 
 .sync-content-wrapper .mc-woocommerce-disconnect-button {
@@ -701,6 +748,23 @@ a.button.create-account {
 
 .sync-more-wrapper .box.box-half .content{
 	padding: 0 2em;
+	background: white;
+	min-height: 240px;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+}
+
+.sync-more-wrapper .box.box-half .content.resync-container{
+	
+	margin-right: 13px;
+	
+}
+
+.sync-more-wrapper .box.box-half .content.support-container{
+	
+	margin-left: 13px;
+	
 }
 
 .sync-content-wrapper .box.box-half {
@@ -1132,7 +1196,8 @@ a.button.create-account {
 	.tab-content-wrapper .box.box-half,
 	.tab-content-wrapper .box.box-third,
 	.sync-comm-wrapper .box.box-half,
-	.sync-more-wrapper .box.box-half {
+	.sync-more-wrapper .box.box-half,
+	.sync-content-wrapper .box.box-half {
 		width: 100%;
 	}
 
@@ -1168,6 +1233,12 @@ a.button.create-account {
 		margin-top: 3em;
 	}
 	
+
+	.sync-content-wrapper .sync-controls .sync-controls-item {
+		display: inline;
+		float: left;
+		margin-right: 42px;
+	}
 
 	.sync-content-wrapper .sync-controls .spinner {
 		margin: -3px 10px 0 5px;

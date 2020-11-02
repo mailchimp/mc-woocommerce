@@ -565,7 +565,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 
 		if (get_site_transient('mailchimp_disconnecting_store')) {
-            return array(
+			delete_site_transient('mailchimp_disconnecting_store');
+			return array(
                 'active_tab' => 'api_key',
                 'mailchimp_api_key' => null,
                 'mailchimp_list' => null,
@@ -587,23 +588,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				break;
 
 			case 'sync':
-				// case disconnect
-				if ($this->is_disconnecting()) {
-					// Disconnect store!
-					if ($this->disconnect_store()) {
-					    return array(
-                            'active_tab' => 'api_key',
-                            'mailchimp_api_key' => null,
-                            'mailchimp_list' => null,
-                        );
-						add_settings_error('mailchimp_store_settings', '', __('Store Disconnected', 'mailchimp-for-woocommerce'), 'info');
-					} else {
-						$data['active_tab'] = 'sync';
-						add_settings_error('mailchimp_store_settings', '', __('Store Disconnect Failed', 'mailchimp-for-woocommerce'), 'warning');
-					}	
-				}
 				//case sync
-				elseif ($this->is_resyncing()) {
+				if ($this->is_resyncing()) {
 
 					// remove all the pointers to be sure
 					$service = new MailChimp_Service();
@@ -630,7 +616,25 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                     exit();
                 }
 
-                break;
+				break;
+			case 'plugin_settings':
+
+				// case disconnect
+				if ($this->is_disconnecting()) {
+					// Disconnect store!
+					if ($this->disconnect_store()) {
+					    return array(
+                            'active_tab' => 'api_key',
+                            'mailchimp_api_key' => null,
+                            'mailchimp_list' => null,
+                        );
+						add_settings_error('mailchimp_store_settings', '', __('Store Disconnected', 'mailchimp-for-woocommerce'), 'info');
+					} else {
+						$data['active_tab'] = 'plugin_settings';
+						add_settings_error('mailchimp_store_settings', '', __('Store Disconnect Failed', 'mailchimp-for-woocommerce'), 'warning');
+					}	
+				}
+				break;
 		}
 
 		// if no API is provided, check if the one saved on the database is still valid, ** only not if disconnect store is issued **.
@@ -1678,18 +1682,12 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	        $order_count = mailchimp_get_order_count();
         }
 
-		$text = '<b>' . __('Your store is synced with Mailchimp!', 'mailchimp-for-woocommerce').'</b></br>'.
-		'<p id="sync-status-message">'.
+		$text = '<p id="sync-status-message">'.
 			/* translators: %1$s: Number of synced orders %2$s: Audience name */	
-			sprintf(__('We\'ve successfully synced %1$s orders to your Audience %2$s, that\'s awesome!', 'mailchimp-for-woocommerce'),
+			sprintf(__('We successfully synced %1$s orders to your Audience, %2$s. If you’re happy with this integration, leave a 5-star review. It helps our community know we’re working hard to make it better each day.', 'mailchimp-for-woocommerce'),
                 $order_count,
 				$this->getListName()
 			).
-		'</p>'.
-
-		'<p id="sync-status-message">'.
-			/* translators: %s - Wordpress.org plugin review URL. */	
-			sprintf(wp_kses( __( 'Could you please do us a favor and leave the plugin a 5-star <a href=%s target=\'_blank\'>rating on Wordpress.org</a>? It helps our community know that we\'re working hard to make it better each day.', 'mailchimp-for-woocommerce' ), array(  'a' => array( 'href' => array(), 'target' => '_blank' ) ) ), esc_url( 'https://wordpress.org/support/plugin/mailchimp-for-woocommerce/reviews/' ) ).
 		'</p>'.
 		'<a style="display:inline align-right" class="button" href="https://wordpress.org/support/plugin/mailchimp-for-woocommerce/reviews/" target=_blank>'.
 			esc_html__('Leave a Review', 'mailchimp-for-woocommerce').

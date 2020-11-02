@@ -209,6 +209,7 @@ a.button.back-step {
 .nav-tab-wrapper {
 	border-bottom: 2px solid white !important;
 	margin-bottom: 25px !important;
+	margin: 0 1em;
 }
 
 .nav-tab-wrapper .nav-tab {
@@ -320,11 +321,15 @@ a.button.back-step {
 	width: 100%;
 }
 
-.tab-content-wrapper fieldset .fieldset-header{
+.tab-content-wrapper fieldset .fieldset-header {
 	float: left;
 	padding-top: 3em;
 	width: 100%;
-	font-size: 18px;
+	font-size: 18px !important;
+}
+
+.tab-content-wrapper fieldset .fieldset-header.no-padding {
+	padding-top: 0em;
 }
 
 .tab-content-wrapper p.submit {
@@ -395,7 +400,7 @@ a.button.create-account {
 	display:none;
 }
 
-.tab-content-submit:not(.create-account) {
+.tab-content-submit:not(.create-account):not(.mc-woocommerce-disconnect-button) {
 	background: #7FAD45 !important;
 	box-shadow:0 1px 0 #7FAD45 !important;
 	text-shadow: 0 -1px 1px #7FAD45,1px 0 1px #7FAD45,0 1px 1px #7FAD45,-1px 0 1px #7FAD45 !important;
@@ -418,7 +423,7 @@ a.button.create-account {
 	margin: 0 0.5em !important;
 }
 
-.tab-content-submit:hover {
+.tab-content-submit:not(.mc-woocommerce-disconnect-button):hover {
 	background: #9EC769 !important;
 	box-shadow:0 1px 0 #9EC769 !important;
 	text-shadow: 0 -1px 1px #9EC769,1px 0 1px #9EC769,0 1px 1px #9EC769,-1px 0 1px #9EC769 !important;
@@ -517,23 +522,12 @@ a.button.create-account {
 	padding: 0.5rem 1rem;
 }
 
-.sync-comm-wrapper {
-	position:relative;
-	background-color: white;
-	padding: 4px 2em;
-	margin-top: 26px;
-	-webkit-border-radius: 4px;
-	-moz-border-radius: 4px;
-	border-radius: 4px;
-	height: 164px;
-}
-
 .sync-more-wrapper {
 	position:relative;
 	height: 264px;
 }
 
-.sync-comm-wrapper .comm_box_status {
+.comm_box_wrapper .comm_box_status {
 	font-weight: 700;
 }
 
@@ -542,9 +536,13 @@ a.button.create-account {
 }
 
 .comm_box_wrapper fieldset {
-	border: 2px solid #E0E0E0;
 	padding: 0 1em 0 1em;
-	margin: 1em 0;
+	margin: 2.5em 0 0 0;
+}
+
+.comm_box_wrapper label {
+	display: inline;
+	width: 42px;
 }
 
 .comm_box_wrapper .el-switch, 
@@ -575,13 +573,16 @@ a.button.create-account {
 
 .sync-content-wrapper .sync-stats-card {
 	border-bottom: 1px solid #DBD9D2;
-	margin: 1em 2em;
+	margin: 1em 2em 0em 2em;
 	padding: 2em 1em;
 	min-height: 20px;
 }
 
 .sync-content-wrapper .last-updated {
-	margin-left: 13px;
+	position: absolute;
+	bottom: 0;
+	right: 5px;
+	font-size: 11px;
 }
 
 .sync-content-wrapper .sync-stats-card:last-child {
@@ -661,6 +662,7 @@ a.button.create-account {
 	font-size: 14px;
 	line-height: 14px;
 	min-height: 90px;
+	position:relative;
 }
 
 .sync-content-wrapper .sync-controls .sync-controls-item {
@@ -702,43 +704,27 @@ a.button.create-account {
 	vertical-align: middle;
 }
 
-.sync-content-wrapper .mc-woocommerce-disconnect-button {
-	cursor: pointer;
-	padding-top: 1em;
-	font-family: proxima-nova, Arial, Helvetica, sans-serif;
-	font-size: 14px;
-	line-height: 17px;
-	font-weight: 600;
-	display: flex;
-	align-items: center;
-	text-transform: uppercase;
-	text-decoration: none;
-	color: #3C3C3C;
-	border: none;
-	border-radius: 100px;
-	padding: 1em 2em 1em 1em;
-	background: #DBD9D2;
+.mc-woocommerce-disconnect-button {
+	float: right;
+	background: red !important;
+	box-shadow:0 1px 0 red !important;
+	text-shadow: 0 -1px 1px red,1px 0 1px red,0 1px 1px red,-1px 0 1px red !important;
 	-webkit-transition: background-color 0.3s ease-out;
 	-moz-transition: background-color 0.3s ease-out;
 	-o-transition: background-color 0.3s ease-out;
 	transition: background-color 0.3s ease-out;
-	
-}
-.sync-content-wrapper .mc-woocommerce-disconnect-button {
-	float: right;
 }
 
-.sync-content-wrapper .mc-woocommerce-disconnect-button:hover {
-	color: #3C3C3C;
-	background-color: #DADADA;
-	-webkit-transition: background-color 0.3s ease-out;
-	-moz-transition: background-color 0.3s ease-out;
-	-o-transition: background-color 0.3s ease-out;
-	transition: background-color 0.3s ease-out;
+.mc-woocommerce-disconnect-button span.dashicons{
+
+	margin: -3px auto;
+}
+
+.mc-woocommerce-disconnect-button:hover {
 	text-decoration: none !important;
 }
 
-.sync-content-wrapper .mc-woocommerce-disconnect-button svg {
+.mc-woocommerce-disconnect-button svg {
 	margin-right: 2em;
 }
 
@@ -776,9 +762,7 @@ a.button.create-account {
 	clear:both;
 }
 
-.sync-comm-wrapper .box,
 .sync-more-wrapper .box {
-	padding: 0.5rem 0rem;
 	margin: 0;
 }
 
@@ -800,22 +784,30 @@ a.button.create-account {
 .sync-more-wrapper .box.box-half .content{
 	padding: 0 2em;
 	background: white;
-	min-height: 240px;
+	min-height: 260px;
 	-webkit-border-radius: 4px;
 	-moz-border-radius: 4px;
 	border-radius: 4px;
 }
 
-.sync-more-wrapper .box.box-half .content.resync-container{
-	
-	margin-right: 13px;
-	
+.sync-more-wrapper .box.box-half.resync-container{
+	width: 30%;
 }
 
-.sync-more-wrapper .box.box-half .content.support-container {
-	
+.sync-more-wrapper .box.box-half.resync-container .content{	
 	margin-left: 13px;
-	
+}
+
+.sync-more-wrapper .box.box-half.support-container {
+	width: 70%;	
+}
+
+.sync-more-wrapper .box.box-half.support-container ul {
+	padding-bottom: 1em;
+}
+
+.sync-more-wrapper .box.box-half.support-container .content{	
+	margin-right: 13px;
 }
 
 .sync-content-wrapper .box.box-half {
@@ -1245,12 +1237,16 @@ a.button.create-account {
 		font-size: 16px;
 		line-height: 32px;
 	}
+
 	.tab-content-wrapper .box.box-half,
 	.tab-content-wrapper .box.box-third,
-	.sync-comm-wrapper .box.box-half,
 	.sync-more-wrapper .box.box-half,
 	.sync-content-wrapper .box.box-half {
 		width: 100%;
+	}
+
+	.sync-content-wrapper {
+		padding: 0 1rem;
 	}
 
 	.sync-more-wrapper .box.box-half:last-child {
@@ -1260,7 +1256,7 @@ a.button.create-account {
 	.sync-content-wrapper .sync-stats-wrapper {
 		display: block;
 		position:relative;
-		margin-bottom: 2em;
+		margin-bottom: 0;
 		margin-right: 0;
 	}
 
@@ -1275,31 +1271,49 @@ a.button.create-account {
 		margin-bottom: 0;
 	}
 
-	.sync-content-wrapper .sync-controls-wrapper {
+	.sync-content-wrapper .sync-controls-wrapper,
+	.sync-more-wrapper .box.box-half.support-container {
 		display: block;
-		width: 100%;
+		width: 60%;
 		position:relative;
+		margin: 0;
 	}
 
-	.sync-content-wrapper .sync-controls .mc-woocommerce-last-sync{
-		margin-top: 3em;
+	.sync-more-wrapper .box.box-half .content {
+		padding: 0 1em;
 	}
-	
 
 	.sync-content-wrapper .sync-controls .sync-controls-item {
 		display: inline;
 		float: left;
 		margin-right: 42px;
 	}
-
+	
 	.sync-content-wrapper .sync-controls .spinner {
 		margin: -3px 10px 0 5px;
 	}
-
-	.sync-comm-wrapper {
-		padding-bottom: 20px;
-	}
 	
+	.sync-content-wrapper .sync-stats-wrapper.sync-stats-store,
+	.sync-more-wrapper .box.box-half.support-container .content {
+		margin-right: 0px;
+	}
+
+	.sync-content-wrapper .sync-stats-wrapper.sync-stats-store {
+		margin-right: 0px;
+		margin-bottom: 26px;
+	}
+
+	.sync-content-wrapper .sync-stats-wrapper.sync-stats-audience,
+	.sync-more-wrapper .box.box-half.resync-container .content {
+		margin-left: 0;
+	}
+
+	.sync-more-wrapper .box.box-half.support-container,
+	.sync-more-wrapper .box.box-half.resync-container {
+		width: 100%;
+		
+	}
+
 	.view-log-select,
 	.view-log-submit {
 		width: 100%;
@@ -1349,5 +1363,9 @@ a.button.create-account {
 	
 	.mc-woocommerce-create-account-step {
 		padding: 5px 5px 10px 5px;
+	}
+
+	.sync-content-wrapper .sync-controls {
+		min-height: 280px;
 	}
 }

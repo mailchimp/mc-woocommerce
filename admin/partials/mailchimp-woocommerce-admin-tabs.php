@@ -108,7 +108,7 @@ else {
                         <?php if ($active_tab == 'store_info' && $has_valid_api_key) :?>
                             <span class="mc-woocommerce-header-steps">2 of 3 - Store</span>    
                             <span class="mc-woocommerce-header-title"> <?php wp_kses(_e('Add WooCommerce store settings', 'mailchimp-for-woocommerce'), $allowed_html);?> </span>
-                            <span class="mc-woocommerce-header-subtitle"> <?php wp_kses(_e('Please provide a bit of information about your WooCommerce <br/> store and location', 'mailchimp-for-woocommerce'), $allowed_html);?> </span>                      
+                            <span class="mc-woocommerce-header-subtitle"> <?php wp_kses(_e('Please provide a bit of information about your WooCommerce <br/> store and location.', 'mailchimp-for-woocommerce'), $allowed_html);?> </span>                      
                         <?php endif;?>
                 
                         <?php if ($active_tab == 'newsletter_settings' ) :?>
@@ -121,7 +121,7 @@ else {
                         <?php endif;?>    
                     </div>
                     <?php if ($active_tab == 'api_key' ): ?>
-                        <form id="mailchimp_woocommerce_options" method="post" name="cleanup_options" action="options.php">
+                        
                             <div class="box">
                                 <?php if ($show_wizard) : ?>
                                     <input type="hidden" name="mailchimp_woocommerce_wizard_on" value=1>
@@ -141,8 +141,6 @@ else {
                             <div class="connect-buttons">
                                 <?php include_once 'tabs/api_key.php'; ?>
                             </div>
-                            <input type="hidden" name="<?php echo $this->plugin_name; ?>[mailchimp_active_tab]" value="<?php echo esc_attr($active_tab); ?>"/>
-                        </form>
                     <?php endif; ?>
                     <div class="mc-woocommerce-wizard-btn">
                         <?php if ($active_tab == 'store_info' && $has_valid_api_key) : ?>
@@ -182,16 +180,24 @@ else {
                         }
                 
                         if ($active_tab == 'store_info' && $has_valid_api_key) {
-                            wp_kses(_e('Please provide a bit of information<br/>about your WooCommerce store', 'mailchimp-for-woocommerce'), $allowed_html);
+                            if ($show_sync_tab) {
+                                wp_kses(_e('WooCommerce<br/>store and location', 'mailchimp-for-woocommerce'), $allowed_html);
+                            }
+                            else wp_kses(_e('Please provide a bit of information<br/>about your WooCommerce store', 'mailchimp-for-woocommerce'), $allowed_html);
                         }
                 
                         if ($active_tab == 'newsletter_settings' ) {
-                            if ($only_one_list) {
-                                wp_kses(_e('Please apply your <br/>audience settings.', 'mailchimp-for-woocommerce'), $allowed_html);
+                            if ($show_sync_tab) {
+                                wp_kses(_e('Campaign and <br/>messaging settings', 'mailchimp-for-woocommerce'), $allowed_html);
                             }
                             else {
-                                wp_kses(_e('Please apply your audience settings. ', 'mailchimp-for-woocommerce'), $allowed_html);
-                                wp_kses(_e('If you don’t<br/>have an audience, you can choose to create one', 'mailchimp-for-woocommerce'), $allowed_html);    
+                                if ($only_one_list) {
+                                    wp_kses(_e('Please apply your <br/>audience settings.', 'mailchimp-for-woocommerce'), $allowed_html);
+                                }
+                                else {
+                                    wp_kses(_e('Please apply your audience settings. ', 'mailchimp-for-woocommerce'), $allowed_html);
+                                    wp_kses(_e('If you don’t<br/>have an audience, you can choose to create one', 'mailchimp-for-woocommerce'), $allowed_html);    
+                                }
                             }
                         }
                         if ($active_tab == 'sync' && $show_sync_tab) {
@@ -199,12 +205,19 @@ else {
                                 wp_kses(_e('Success!<br/>You are connected to Mailchimp', 'mailchimp-for-woocommerce'), $allowed_html);
                             }
                             else {
-                                wp_kses(_e('Your WooCommerce store<br/> is connecting to Mailchimp', 'mailchimp-for-woocommerce'), $allowed_html);
+                                wp_kses(_e('Your WooCommerce store<br/> is syncing to Mailchimp', 'mailchimp-for-woocommerce'), $allowed_html);
+                                ?>
+                                <span class="spinner" style="float:none; background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px; visibility: visible;"></span>
+                                <?php
                             }
                         }
                 
                         if ($active_tab == 'logs' && $show_sync_tab) {
                             wp_kses(_e('Log events from the <br/>Mailchimp plugin', 'mailchimp-for-woocommerce'), $allowed_html);
+                        }
+
+                        if ($active_tab == 'plugin_settings' && $show_sync_tab) {
+                            wp_kses(_e('Connection settings<br/>and support options', 'mailchimp-for-woocommerce'), $allowed_html);
                         }
                         ?>
                     </p>
@@ -220,7 +233,7 @@ else {
                                     <a href="?page=mailchimp-woocommerce&tab=newsletter_settings" class="nav-tab <?php echo $active_tab == 'newsletter_settings' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Audience', 'mailchimp-for-woocommerce');?></a>
                             <?php endif;?>
                             <a href="?page=mailchimp-woocommerce&tab=logs" class="nav-tab <?php echo $active_tab == 'logs' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Logs', 'mailchimp-for-woocommerce');?></a>
-                            <a href="?page=mailchimp-woocommerce&tab=settings" class="nav-tab <?php echo $active_tab == 'settings' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Settings', 'mailchimp-for-woocommerce');?></a>
+                            <a href="?page=mailchimp-woocommerce&tab=plugin_settings" class="nav-tab <?php echo $active_tab == 'plugin_settings' ? 'nav-tab-active' : ''; ?>"><?= esc_html_e('Settings', 'mailchimp-for-woocommerce');?></a>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -277,7 +290,7 @@ else {
                     <?php include_once 'tabs/logs.php'; ?>
                 <?php endif; ?>
 
-                <?php if ($active_tab == 'settings' && $show_sync_tab): ?>
+                <?php if ($active_tab == 'plugin_settings' && $show_sync_tab): ?>
                     <?php include_once 'tabs/plugin_settings.php'; ?>
                 <?php endif; ?>
 

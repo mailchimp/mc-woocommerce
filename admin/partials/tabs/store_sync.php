@@ -75,16 +75,6 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
 <div class="sync-content-wrapper">
     <div class="sync-controls-wrapper">
         <div class="box sync-controls">
-           
-                <?php wp_nonce_field( '_disconnect-nonce-'.$store_id, '_disconnect-nonce' ); ?>
-                <?php wp_nonce_field( '_resync-nonce-'.$store_id, '_resync-nonce' ); ?>
-
-                <a id="mailchimp_woocommerce_disconnect" class="mc-woocommerce-disconnect-button">
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M14 1.41L12.59 0L7 5.59L1.41 0L0 1.41L5.59 7L0 12.59L1.41 14L7 8.41L12.59 14L14 12.59L8.41 7L14 1.41Z" fill="#3C3C3C"/>
-                        </svg>
-                        <?php esc_html_e('', 'mailchimp-for-woocommerce');?>
-                </a>
                 <div class="sync-controls-item">
                     <p class="sync-controls-label"><strong><?php esc_html_e('Account Connected', 'mailchimp-for-woocommerce');?></strong></p>
                     <p id="mailchimp_account_connected"><?php echo $account_name; ?></p>
@@ -104,6 +94,18 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
                         <?php endif;?>
                     </p>
                 </div>
+
+                <p class="last-updated">
+                    <?php esc_html_e('Last Updated:', 'mailchimp-for-woocommerce');?>
+                    <i id="mailchimp_last_updated">
+                        <?php if ($last_updated_time): ?>
+                            <?php echo $last_updated_time->format( __('D, M j, Y g:i A', 'mailchimp-for-woocommerce')); ?>
+                        <?php else : ?>
+                        <?php esc_html_e('Starting...', 'mailchimp-for-woocommerce'); ?>
+                        <?php endif;?>
+                    </i>
+                    <span class="spinner" style="float:none; background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px"></span>
+                </p>
         </div>
     </div>
     
@@ -167,71 +169,13 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
                 </div>
             </div>
         </div>
-        <p class="last-updated">
-            <?php esc_html_e('Last Updated:', 'mailchimp-for-woocommerce');?>
-            <i id="mailchimp_last_updated">
-                <?php if ($last_updated_time): ?>
-                    <?php echo $last_updated_time->format( __('D, M j, Y g:i A', 'mailchimp-for-woocommerce')); ?>
-                <?php else : ?>
-                <?php esc_html_e('Starting...', 'mailchimp-for-woocommerce'); ?>
-                <?php endif;?>
-            </i>
-            <span class="spinner" style="float:none; background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px"></span>
-        </p>
     </div>
 </div>
-
-<div class="sync-content-wrapper sync-comm-wrapper">
-<?php
-$opt = get_option('mailchimp-woocommerce-comm.opt');
-$admin_email = mailchimp_get_option('admin_email', get_option('admin_email'));
-$comm_enabled = $opt != null ? $opt : '0';
-?>
-<h3>Communication</h3>
-        <div class="box box-half">    
-            <p>
-                Occasionally we may send you information about how-to's, updates, and other news to the store's admin email address. Choose whether or not you want to receive these messages at <?php echo $admin_email; ?>.
-            </p>
-        </div>
-
-        <div class="box box-half comm_box_wrapper">
-            <fieldset>    
-                <p>
-                    <span>Messaging is currently
-                        <span class="comm_box_status <?= $comm_enabled === '0' ? 'hidden' : '';?>" id="comm_box_status_1" <?php if($comm_enabled === '0') echo ' class="hidden" '; ?> > <?php esc_html_e('enabled', 'mailchimp-for-woocommerce');?></span>
-                        <span class="comm_box_status <?= $comm_enabled === '1' ? 'hidden' : '';?>" id="comm_box_status_0" <?php if($comm_enabled === '1') echo ' class="hidden" '; ?>> <?php esc_html_e('disabled', 'mailchimp-for-woocommerce');?></span>
-                    </span>
-                    <label class="el-switch el-checkbox-green">
-                        <input id="comm_box_switch" type="checkbox" name="switch" <?php if($comm_enabled === '1') echo ' checked="checked" '; ?> value="1">
-                        <span class="el-switch-style"></span>
-                    </label>
-                    <span class="mc-comm-save" id="mc-comm-save">Saved!</span>
-                </p>
-            </fieldset>
-        </div>
-    
-</div>
-
 
 <?php $show_resync = $mailchimp_api && (!$store_syncing || isset($_GET['resync']) && $_GET['resync'] === '1'); ?>
 <div class="sync-content-wrapper sync-more-wrapper">
-    <div class="box box-half">
-        <div class="content resync-container">
-            <h3 style="padding-top: 1em;"><?php esc_html_e('Synchronization', 'mailchimp-for-woocommerce');?></h3>
-            <p id="resync_data_help_text">
-                <?php esc_html_e('You can resync your audience at any time without losing any of your e-commerce data.', 'mailchimp-for-woocommerce');?>
-            </p>
-            <?php if ($show_resync) : ?>
-                <?php submit_button(__('Resync now', 'mailchimp-for-woocommerce'), 'primary mc-woocommerce-resync-button','submit', TRUE); ?>
-            <?php else : ?>
-                <?php submit_button(__('Resync now', 'mailchimp-for-woocommerce'), 'mc-woocommerce-resync-button','submit', TRUE, ['disabled' => true]); ?>
-                <p class="description"><?php _e('Sync is running. Please wait until it finishes.', 'mailchimp-for-woocommerce') ?></p>
-            <?php endif;?>
-        </div>
-    </div>
-    
-    <div class="box box-half">
-        <div class="content support-container">
+    <div class="box box-half support-container">
+        <div class="content ">
             <h3 style="padding-top: 1em;"><?php esc_html_e('More Information', 'mailchimp-for-woocommerce'); ?></h3>
             <ul>
                 <li><?= sprintf(/* translators: %s - Plugin review URL. */wp_kses( __( 'Is this plugin helping your e-commerce business? <a href=%s target=_blank>Please leave us a ★★★★★ review!</a>.', 'mailchimp-for-woocommerce' ), array(  'a' => array( 'href' => array(), 'target'=> '_blank' ) ) ), esc_url( 'https://wordpress.org/support/plugin/mailchimp-for-woocommerce/reviews/' ) );?></li>
@@ -242,7 +186,21 @@ $comm_enabled = $opt != null ? $opt : '0';
             </ul>
         </div>
     </div>
-
+    <div class="box box-half resync-container">
+        <div class="content ">
+            <h3 style="padding-top: 1em;"><?php esc_html_e('Synchronization', 'mailchimp-for-woocommerce');?></h3>
+            <?php wp_nonce_field( '_resync-nonce-'.$store_id, '_resync-nonce' ); ?>
+            <p id="resync_data_help_text">
+                <?php esc_html_e('You can safely resync your audience at any time without losing any of your e-commerce data.', 'mailchimp-for-woocommerce');?>
+            </p>
+            <?php if ($show_resync) : ?>
+                <?php submit_button(__('Resync now', 'mailchimp-for-woocommerce'), 'primary mc-woocommerce-resync-button','submit', TRUE); ?>
+            <?php else : ?>
+                <?php submit_button(__('Resync now', 'mailchimp-for-woocommerce'), 'mc-woocommerce-resync-button','submit', TRUE, ['disabled' => true]); ?>
+                <p class="description"><?php _e('Sync is running. Please wait until it finishes.', 'mailchimp-for-woocommerce') ?></p>
+            <?php endif;?>
+        </div>
+    </div>
 </div>
 
 <div id="mc-woocommerce-support-form" class="mc-woocommerce-modal">

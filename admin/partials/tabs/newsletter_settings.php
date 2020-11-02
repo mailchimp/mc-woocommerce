@@ -26,9 +26,13 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
         <span><?php esc_html_e('Audience Settings', 'mailchimp-for-woocommerce');?></span>
     </legend>
     
+    <div class="box fieldset-header no-padding" >
+        <h3><?php esc_html_e('Sync audience with your store', 'mailchimp-for-woocommerce');?></h3>
+    </div>
+
     <div class="box" >
         <label for="<?php echo $this->plugin_name; ?>-mailchimp-list-label">
-            <strong><?php esc_html_e('Sync audience with your store', 'mailchimp-for-woocommerce'); ?></strong>
+            <strong><?php esc_html_e('Audience name', 'mailchimp-for-woocommerce'); ?></strong>
         </label>
         <div class="mailchimp-select-wrapper">
             <select name="<?php echo $this->plugin_name; ?>[mailchimp_list]" required <?php echo ($list_is_configured || $only_one_list) ? 'disabled' : '' ?>>

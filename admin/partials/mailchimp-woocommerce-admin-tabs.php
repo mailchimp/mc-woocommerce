@@ -81,7 +81,7 @@ else {
         <?php if($show_wizard): ?>
             <div class="mc-woocommerce-settings-header-wrapper wiz-header">
                 <div class="mc-woocommerce-settings-header">
-                    <svg width="93" height="93" viewBox="0 0 46 49" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg class="mc-woocommerce-logo" width="93" height="93" viewBox="0 0 46 49" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M34.5458 23.5193C34.8988 23.4778 35.2361 23.4759 35.5457 23.5193C35.7252 23.107 35.7568 22.397 35.5951 21.6239C35.3544 20.4741 35.029 19.7778 34.3584 19.8863C33.6859 19.9948 33.6622 20.8271 33.9028 21.9769C34.037 22.6238 34.2776 23.1761 34.5458 23.5193Z" fill="black"/>
                         <path d="M28.7763 24.4284C29.2575 24.6394 29.5534 24.7795 29.6678 24.6572C29.7427 24.5803 29.719 24.4363 29.6046 24.2489C29.368 23.8624 28.8788 23.4679 28.3621 23.249C27.303 22.7934 26.0407 22.9453 25.0664 23.6454C24.745 23.8801 24.4393 24.2075 24.4826 24.4047C24.4965 24.4698 24.5458 24.5172 24.6582 24.5329C24.9225 24.5625 25.8494 24.0951 26.9164 24.03C27.6718 23.9827 28.295 24.2174 28.7763 24.4284Z" fill="black"/>
                         <path d="M27.8105 24.9806C27.1852 25.0793 26.8381 25.2863 26.6172 25.4777C26.4279 25.6433 26.3115 25.8267 26.3115 25.9549C26.3115 26.0161 26.3391 26.0516 26.3589 26.0693C26.3865 26.095 26.422 26.1088 26.4614 26.1088C26.6034 26.1088 26.919 25.9826 26.919 25.9826C27.7907 25.6709 28.3647 25.7084 28.9346 25.7735C29.2502 25.809 29.3981 25.8287 29.4672 25.7202C29.4869 25.6887 29.5125 25.6216 29.4494 25.521C29.3054 25.2804 28.6723 24.8781 27.8105 24.9806Z" fill="black"/>
@@ -293,17 +293,18 @@ else {
                 <?php if ($active_tab == 'plugin_settings' && $show_sync_tab): ?>
                     <?php include_once 'tabs/plugin_settings.php'; ?>
                 <?php endif; ?>
-
-                <?php 
-                    if ($active_tab !== 'api_key' && $active_tab !== 'sync' && $active_tab !== 'logs') {
-                        if ($active_tab == 'newsletter_settings' && !mailchimp_is_configured()) {
-                            $submit_button_label = __('Start sync','mailchimp-for-woocommerce');
+                <div class="box"> 
+                    <?php 
+                        if ($active_tab !== 'api_key' && $active_tab !== 'sync' && $active_tab !== 'logs') {
+                            if ($active_tab == 'newsletter_settings' && !mailchimp_is_configured()) {
+                                $submit_button_label = __('Start sync','mailchimp-for-woocommerce');
+                            }
+                            else $submit_button_label = !$show_wizard ? __('Save all changes') : __('Next Step');
+                            submit_button($submit_button_label, 'primary tab-content-submit','mailchimp_submit', TRUE);
                         }
-                        else $submit_button_label = !$show_wizard ? __('Save all changes') : __('Next');
-                        submit_button($submit_button_label, 'primary tab-content-submit','mailchimp_submit', TRUE);
-                    }
-                ?>
-            
+                    ?>
+                </div>
+                
         <?php if ($active_tab != 'sync'): ?>
         </div>
         <?php endif; ?>

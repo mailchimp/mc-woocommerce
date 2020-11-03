@@ -167,7 +167,7 @@
 
 			const swalWithBootstrapButtons = Swal.mixin({
 				customClass: {
-				  confirmButton: 'button button-primary tab-content-submit disconnect-button',
+				  confirmButton: 'button button-primary tab-content-submit disconnect-confirm',
 				  cancelButton: 'button button-default mc-woocommerce-resync-button disconnect-button'
 				},
 				buttonsStyling: false,
@@ -178,6 +178,8 @@
 				text: phpVars.l10n.store_disconnect_subtitle,
 				type: 'warning',
 				showCancelButton: true,
+				confirmButtonColor: '#3085d6',
+				cancelButtonColor: '#d33',
 				confirmButtonText: phpVars.l10n.store_disconnect_confirm,
 				cancelButtonText: phpVars.l10n.no_cancel,
 				reverseButtons: true,
@@ -432,7 +434,7 @@
 		});
 
 		// Account create functionality
-		$('#mc-woocommerce-create-account-next').click(function () {
+		$('#mc-woocommerce-create-account-next').unbind().click(function (e) {
 			var next_button = $(this);
 			var spinner = $(this).next('.spinner');
 			spinner.css('visibility', 'visible')
@@ -491,7 +493,7 @@
 			
 		});
 
-		$('#mc-woocommerce-create-account-go').click(function () {
+		$('#mc-woocommerce-create-account-go').unbind().click(function () {
 			var email = $('input#email');
 			var firstName = $('input#first_name');
 			var lastName = $('input#last_name');

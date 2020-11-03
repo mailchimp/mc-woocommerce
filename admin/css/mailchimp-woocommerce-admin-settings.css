@@ -40,10 +40,9 @@ html {
 	margin: 4em auto 0 auto !important;
 	font-family: "proxima-nova", Arial, Helvetica, sans-serif;
 	padding-bottom: 0px;
-	color: red;
 	display:table;
 }
-.mc-woocommerce-settings-header svg{
+.mc-woocommerce-settings-header svg.mc-woocommerce-logo{
 	padding-left: 1em;
 	display: table-cell;
 }
@@ -124,6 +123,8 @@ a.button.back-step {
 .connect-buttons {
 	padding-left: 151px;
 	margin-top: 38px;
+	z-index: 2;
+	position: relative;
 }
 
 .connect-buttons .connect-button {
@@ -329,14 +330,13 @@ a.button.back-step {
 }
 
 .tab-content-wrapper fieldset .fieldset-header.no-padding {
-	padding-top: 0em;
+	padding-top: 1em;
 }
 
 .tab-content-wrapper p.submit {
 	margin-top: 0 !important;
 	padding-top: 35px !important;
 	margin-bottom: 45px !important;
-	font-weight: 600;
 }
 
 .tab-content-wrapper p.submit:focus {
@@ -378,6 +378,7 @@ a.button.create-account {
 .oauth-description {
 	display: none;
 	color: #8C8C8C;
+	position: absolute;
 }
 
 #mailchimp-oauth-connected {
@@ -400,7 +401,7 @@ a.button.create-account {
 	display:none;
 }
 
-.tab-content-submit:not(.create-account):not(.mc-woocommerce-disconnect-button) {
+.tab-content-submit:not(.create-account):not(.mc-woocommerce-disconnect-button):not(.disconnect-confirm) {
 	background: #7FAD45 !important;
 	box-shadow:0 1px 0 #7FAD45 !important;
 	text-shadow: 0 -1px 1px #7FAD45,1px 0 1px #7FAD45,0 1px 1px #7FAD45,-1px 0 1px #7FAD45 !important;
@@ -418,12 +419,33 @@ a.button.create-account {
 		box-shadow 0.3s ease-out;
 }
 
-.disconnect-button {
+.disconnect-confirm {
 	width:180px;
 	margin: 0 0.5em !important;
+	background: #b83110 !important;
+	box-shadow:0 1px 0 #b83110 !important;
+	text-shadow: 0 -1px 1px #b83110,1px 0 1px #b83110,0 1px 1px #b83110,-1px 0 1px #b83110 !important;
+	-webkit-transition: background-color 0.3s ease-out,
+		text-shadow 0.3s ease-out,
+		box-shadow 0.3s ease-out;
+	-moz-transition: background-color 0.3s ease-out,
+		text-shadow 0.3s ease-out,
+		box-shadow 0.3s ease-out;
+	-o-transition: background-color 0.3s ease-out,
+		text-shadow 0.3s ease-out,
+		box-shadow 0.3s ease-out;
+	transition: background-color 0.3s ease-out,
+		text-shadow 0.3s ease-out,
+		box-shadow 0.3s ease-out;
 }
 
-.tab-content-submit:not(.mc-woocommerce-disconnect-button):hover {
+.disconnect-confirm:hover {
+	background: #F72E2E !important;
+	box-shadow:0 1px 0 #F72E2E !important;
+	text-shadow: 0 -1px 1px #F72E2E,1px 0 1px #F72E2E,0 1px 1px #F72E2E,-1px 0 1px #F72E2E !important;
+}
+
+.tab-content-submit:not(.mc-woocommerce-disconnect-button):not(.disconnect-confirm):hover {
 	background: #9EC769 !important;
 	box-shadow:0 1px 0 #9EC769 !important;
 	text-shadow: 0 -1px 1px #9EC769,1px 0 1px #9EC769,0 1px 1px #9EC769,-1px 0 1px #9EC769 !important;
@@ -706,9 +728,9 @@ a.button.create-account {
 
 .mc-woocommerce-disconnect-button {
 	float: right;
-	background: red !important;
-	box-shadow:0 1px 0 red !important;
-	text-shadow: 0 -1px 1px red,1px 0 1px red,0 1px 1px red,-1px 0 1px red !important;
+	background: #b83110 !important;
+	box-shadow:0 1px 0 #b83110 !important;
+	text-shadow: 0 -1px 1px #b83110,1px 0 1px #b83110,0 1px 1px #b83110,-1px 0 1px #b83110 !important;
 	-webkit-transition: background-color 0.3s ease-out;
 	-moz-transition: background-color 0.3s ease-out;
 	-o-transition: background-color 0.3s ease-out;
@@ -730,7 +752,7 @@ a.button.create-account {
 
 
 .tab-content-wrapper.overview-example {
-	position:relative;
+	position: absolute;
     z-index:1;
     width:200px;
     height:200px;
@@ -1040,6 +1062,14 @@ a.button.create-account {
 	padding-top: 20px;
 }
 
+#mc-woocommerce-create-account-go {
+	float:right;
+}
+
+#mc-woocommerce-create-account-go-spinner {
+	float:left;
+}
+
 .mc-woocommerce-modal {
 	width: 100%;
 	display: flex;
@@ -1060,7 +1090,7 @@ a.button.create-account {
 }
 
 #mc-woocommerce-create-account {
-	top:50px;
+	top:-235px;
 }
 
 .mc-woocommerce-modal .terms {
@@ -1190,14 +1220,13 @@ a.button.create-account {
 }
 
 .mc-woocommerce-create-account-step .whitebtn{
-	color: #3C3C3C !important;
 	background: white !important;
 	box-shadow: 0 1px 0 #DBD9D2 !important;
 	text-shadow: 0 -1px 1px	#DBD9D2,1px 0 1px #DBD9D2,0 1px 1px #DBD9D2,-1px 0 1px #DBD9D2 !important;
-	border: 1px solid #DBD9D2 !important;
 }
 
 #mc-woocommerce-create-account-next {
+	float: right;
 }
 
 #mc-woocommerce-create-account-prev {

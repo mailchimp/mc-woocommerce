@@ -728,6 +728,27 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         }
         else wp_send_json_error( $response );
         
+	}
+	
+	/**
+     * Mailchimp OAuth connection status
+     */
+    public function mailchimp_woocommerce_ajax_oauth_status()
+    {   
+		$url = $_POST['url'];
+		// set the default headers to NOTHING because the oauth server will block
+		// any non standard header that it was not expecting to receive and it was
+		// preventing folks from being able to connect.
+        $pload = array(
+            'headers' => array(),
+        );
+
+		$response = wp_remote_post($url, $pload);
+		
+        if ($response['response']['code'] == 200 && isset($response['body'])){
+			wp_send_json_success(json_decode($response['body']));
+        }
+        else wp_send_json_error( $response );
     }
 
 	/**

@@ -1058,7 +1058,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			add_settings_error('mailchimp_list_settings', '', __('One or more fields were not updated', 'mailchimp-for-woocommerce'));
 			return array('active_tab' => 'newsletter_settings');
 		}
-		error_log($this->hasValidCampaignDefaults($data));
 		$this->setData('validation.newsletter_settings', true);
 
 		$list_id = mailchimp_get_list_id();

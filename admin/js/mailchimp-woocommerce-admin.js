@@ -2,18 +2,6 @@
 	'use strict';
 
 	$( window ).load(function() {
-		// show/hide wizard tabs tooltips
-		$('.wizard-tab a').hover(function (e) {
-			e.stopPropagation();
-			$('.wizard-tab-tooltip').hide();
-			$(this).next('.wizard-tab-tooltip').show();
-		});
-
-		$('.wizard-tab a').mouseleave(function (e) {
-			e.stopPropagation();
-			$('.wizard-tab-tooltip').hide();
-			$('.wizard-tab-active .wizard-tab-tooltip').show();
-		});
 
 		// show/hide optional settings
 		var optionalSettings = false;

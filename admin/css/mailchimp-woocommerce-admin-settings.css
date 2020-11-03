@@ -1244,6 +1244,9 @@ a.button.create-account {
 
 
 @media screen and (max-width: 782px) {
+	.tab-content-wrapper, .notices-content-wrapper {
+		padding: 0 1em;
+	}
 	.tab-content-submit,
 	.mc-woocommerce-resync-button {
 		padding: 15px 35px 15px 35px !important;
@@ -1278,10 +1281,6 @@ a.button.create-account {
 		padding: 0 1rem;
 	}
 
-	.sync-more-wrapper .box.box-half:last-child {
-		margin-top: 26px;
-	}
-
 	.sync-content-wrapper .sync-stats-wrapper {
 		display: block;
 		position:relative;
@@ -1303,13 +1302,16 @@ a.button.create-account {
 	.sync-content-wrapper .sync-controls-wrapper,
 	.sync-more-wrapper .box.box-half.support-container {
 		display: block;
-		width: 60%;
+		width: 100%;
 		position:relative;
-		margin: 0;
 	}
 
 	.sync-more-wrapper .box.box-half .content {
 		padding: 0 1em;
+	}
+	
+	.sync-content-wrapper .sync-controls {
+		min-height: 150px;
 	}
 
 	.sync-content-wrapper .sync-controls .sync-controls-item {

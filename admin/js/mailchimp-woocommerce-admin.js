@@ -121,7 +121,7 @@
 		$('.mc-woocommerce-resync-button').click(function(e) {
 			e.preventDefault();
 			Swal.fire({
-				title: 'Resync Request In Progress',
+				title: phpVars.l10n.resync_in_progress,
 				onBeforeOpen: () => {
 					Swal.showLoading()
 				}
@@ -133,7 +133,7 @@
 				window.location.reload();
 			}).fail(function(xhr) {
 				Swal.hideLoading();
-				Swal.showValidationMessage("Could not resync orders, please try again.");
+				Swal.showValidationMessage(phpVars.l10n.resync_failed);
 			});
 		});
 
@@ -185,7 +185,7 @@
 						data+="&mailchimp_woocommerce_disconnect_store=1"
 
 						Swal.fire({
-							title: 'Disconnecting Store In Progress',
+							title: phpVars.l10n.store_disconnect_in_progress,
 							onBeforeOpen: () => {
 								Swal.showLoading()
 							}
@@ -278,14 +278,14 @@
 				
 				swalWithBootstrapButtons.fire({
 					type : 'error',
-					title: 'Login Popup is blocked!',
-					text: 'Please allow your browser to show popups for this page',
+					title: phpVars.l10n.login_popup_blocked,
+					text: phpVars.l10n.login_popup_blocked_desc,
 					footer: '<a href="https://mailchimp.com/help/enable-pop-ups-in-your-browser/">How to Enable Pop-ups in Your Browser</a>',
 					showCancelButton: true,
 					cancelButtonColor: '#d33',
 					confirmButtonColor: '#7fad45',
-					cancelButtonText: 'Cancel',
-					confirmButtonText: 'Try again',
+					cancelButtonText: phpVars.l10n.no_cancel,
+					confirmButtonText: phpVars.l10n.try_again,
 					reverseButtons: true
 				}).then((result) => {
 					if (result.value) {
@@ -705,8 +705,8 @@
 				};
 
 				Swal.fire({
-					title: 'Sending Support Request',
-					html: 'please wait',
+					title: phpVars.l10n.support_message_sending,
+					html: phpVars.l10n.please_wait,
 					onBeforeOpen: () => {
 						Swal.showLoading();
 						$.post(ajaxurl, data, function(response) {
@@ -720,8 +720,8 @@
 								Swal.fire({
 									icon: 'success',
 									timer: 2000,
-									title: 'Message Received',
-									html: 'Thanks, your message has been received.',
+									title: phpVars.l10n.support_message_ok,
+									html: phpVars.l10n.support_message_desc,
 								});
 							} else if (response.data.error) {
 								$('#error').show();

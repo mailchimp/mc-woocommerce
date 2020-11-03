@@ -137,8 +137,19 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 						'log_delete_subtitle' => __('You will not be able to revert.', 'mailchimp-for-woocommerce'),
 						'log_delete_confirm' => __('Yes, delete it!', 'mailchimp-for-woocommerce'),
 						'no_cancel' => __('No, cancel!', 'mailchimp-for-woocommerce'),
+						'please_wait' => __('Please wait', 'mailchimp-for-woocommerce'),
 						'store_disconnect_subtitle' => __('You are about to disconnect your store from Mailchimp.', 'mailchimp-for-woocommerce'),
 						'store_disconnect_confirm' => __('Yes, disconnect.', 'mailchimp-for-woocommerce'),
+						'try_again' => __('Try again', 'mailchimp-for-woocommerce'),
+						'resync_in_progress' => __('Resync request in progress', 'mailchimp-for-woocommerce'),
+						'resync_failed' => __('Could not resync orders, please try again.', 'mailchimp-for-woocommerce'),
+						'store_disconnect_in_progress' => __('Disconnecting store in progress', 'mailchimp-for-woocommerce'),
+						'login_popup_blocked' => __('Login Popup is blocked!', 'mailchimp-for-woocommerce'),
+						'login_popup_blocked_desc' => __('Please allow your browser to show popups for this page', 'mailchimp-for-woocommerce'),
+						'support_message_sending' => __('Sending support request', 'mailchimp-for-woocommerce'),
+						'support_message_ok' => __('Message received', 'mailchimp-for-woocommerce'),
+						'support_message_desc' => __('Thanks, your message has been received.', 'mailchimp-for-woocommerce'),
+						
 					),
 				)
 			);

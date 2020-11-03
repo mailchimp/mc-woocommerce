@@ -145,7 +145,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
 
         <div class="box box-half">
             <textarea rows="3" id="<?php echo $this->plugin_name; ?>-newsletter-checkbox-label" name="<?php echo $this->plugin_name; ?>[newsletter_label]"><?php echo isset($options['newsletter_label']) ? esc_html($options['newsletter_label']) : '' ?></textarea>
-            <p class="description"><?= esc_html(__('HTML tags allowed: <a href="" target="" title=""></a> and <br>', 'mailchimp-for-woocommerce')); ?><br/><?= esc_html(__('Leave it blank to use language translation files (.po / .mo)', 'mailchimp-for-woocommerce')); ?></p>
+            <p class="description"><?= esc_html(__('HTML tags allowed: <a href="" target="" title=""></a> and <br>', 'mailchimp-for-woocommerce')); ?><br/><?= esc_html(__('Leave it blank to use language translation files (.po / .mo), translating the string: "Subscribe to our newsletter".', 'mailchimp-for-woocommerce')); ?></p>
         </div>
 
         <div class="box box-half margin-large">

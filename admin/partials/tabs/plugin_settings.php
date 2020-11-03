@@ -22,8 +22,10 @@ $comm_enabled = $opt != null ? $opt : '0';
 		<label for="<?php echo $this->plugin_name; ?>-newsletter-checkbox-label">
 			<h4><?php esc_html_e('Communication', 'mailchimp-for-woocommerce'); ?></h4>
 			<p>
-				<?= 
-				sprintf(
+				<?php 
+				
+				echo sprintf(
+					/* translators: Placeholders %1$s - admin email address */
 					__('Occasionally we may send you information about how-to\'s, updates, and other news to the store\'s admin email address. Choose whether or not you want to receive these messages at %1$s ', 'mailchimp-for-woocommerce'),
 					$admin_email
 				);?>

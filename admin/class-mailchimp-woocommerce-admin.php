@@ -270,7 +270,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	public function initial_notice() {
 		if (!mailchimp_is_configured()) {
 			// If WC_Admin_Notes doesn't exist, show normal wordpress admin notice...
-			if ( ! class_exists( '\Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes' ) ) {
+			if ( ! WC()->is_wc_admin_active() || ! class_exists( '\Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes' ) ) {
 				$class = 'notice notice-warning is-dismissible';
 				$message = sprintf(
 					/* translators: Placeholders %1$s - opening strong HTML tag, %2$s - closing strong HTML tag, %3$s - opening link HTML tag, %4$s - closing link HTML tag */

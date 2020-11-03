@@ -2,18 +2,6 @@
 	'use strict';
 
 	$( window ).load(function() {
-		// show/hide wizard tabs tooltips
-		$('.wizard-tab a').hover(function (e) {
-			e.stopPropagation();
-			$('.wizard-tab-tooltip').hide();
-			$(this).next('.wizard-tab-tooltip').show();
-		});
-
-		$('.wizard-tab a').mouseleave(function (e) {
-			e.stopPropagation();
-			$('.wizard-tab-tooltip').hide();
-			$('.wizard-tab-active .wizard-tab-tooltip').show();
-		});
 
 		// show/hide optional settings
 		var optionalSettings = false;
@@ -133,7 +121,7 @@
 		$('.mc-woocommerce-resync-button').click(function(e) {
 			e.preventDefault();
 			Swal.fire({
-				title: 'Resync Request In Progress',
+				title: phpVars.l10n.resync_in_progress,
 				onBeforeOpen: () => {
 					Swal.showLoading()
 				}
@@ -145,7 +133,7 @@
 				window.location.reload();
 			}).fail(function(xhr) {
 				Swal.hideLoading();
-				Swal.showValidationMessage("Could not resync orders, please try again.");
+				Swal.showValidationMessage(phpVars.l10n.resync_failed);
 			});
 		});
 
@@ -167,7 +155,7 @@
 
 			const swalWithBootstrapButtons = Swal.mixin({
 				customClass: {
-				  confirmButton: 'button button-primary tab-content-submit disconnect-button',
+				  confirmButton: 'button button-primary tab-content-submit disconnect-confirm',
 				  cancelButton: 'button button-default mc-woocommerce-resync-button disconnect-button'
 				},
 				buttonsStyling: false,
@@ -178,6 +166,8 @@
 				text: phpVars.l10n.store_disconnect_subtitle,
 				type: 'warning',
 				showCancelButton: true,
+				confirmButtonColor: '#3085d6',
+				cancelButtonColor: '#d33',
 				confirmButtonText: phpVars.l10n.store_disconnect_confirm,
 				cancelButtonText: phpVars.l10n.no_cancel,
 				reverseButtons: true,
@@ -195,7 +185,7 @@
 						data+="&mailchimp_woocommerce_disconnect_store=1"
 
 						Swal.fire({
-							title: 'Disconnecting Store In Progress',
+							title: phpVars.l10n.store_disconnect_in_progress,
 							onBeforeOpen: () => {
 								Swal.showLoading()
 							}
@@ -288,14 +278,14 @@
 				
 				swalWithBootstrapButtons.fire({
 					type : 'error',
-					title: 'Login Popup is blocked!',
-					text: 'Please allow your browser to show popups for this page',
+					title: phpVars.l10n.login_popup_blocked,
+					text: phpVars.l10n.login_popup_blocked_desc,
 					footer: '<a href="https://mailchimp.com/help/enable-pop-ups-in-your-browser/">How to Enable Pop-ups in Your Browser</a>',
 					showCancelButton: true,
 					cancelButtonColor: '#d33',
 					confirmButtonColor: '#7fad45',
-					cancelButtonText: 'Cancel',
-					confirmButtonText: 'Try again',
+					cancelButtonText: phpVars.l10n.no_cancel,
+					confirmButtonText: phpVars.l10n.try_again,
 					reverseButtons: true
 				}).then((result) => {
 					if (result.value) {
@@ -424,7 +414,7 @@
 		});
 
 		// Account create functionality
-		$('#mc-woocommerce-create-account-next').click(function () {
+		$('#mc-woocommerce-create-account-next').unbind().click(function (e) {
 			var next_button = $(this);
 			var spinner = $(this).next('.spinner');
 			spinner.css('visibility', 'visible')
@@ -483,7 +473,7 @@
 			
 		});
 
-		$('#mc-woocommerce-create-account-go').click(function () {
+		$('#mc-woocommerce-create-account-go').unbind().click(function () {
 			var email = $('input#email');
 			var firstName = $('input#first_name');
 			var lastName = $('input#last_name');
@@ -707,8 +697,8 @@
 				};
 
 				Swal.fire({
-					title: 'Sending Support Request',
-					html: 'please wait',
+					title: phpVars.l10n.support_message_sending,
+					html: phpVars.l10n.please_wait,
 					onBeforeOpen: () => {
 						Swal.showLoading();
 						$.post(ajaxurl, data, function(response) {
@@ -722,8 +712,8 @@
 								Swal.fire({
 									icon: 'success',
 									timer: 2000,
-									title: 'Message Received',
-									html: 'Thanks, your message has been received.',
+									title: phpVars.l10n.support_message_ok,
+									html: phpVars.l10n.support_message_desc,
 								});
 							} else if (response.data.error) {
 								$('#error').show();

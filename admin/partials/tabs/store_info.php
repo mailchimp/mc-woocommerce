@@ -2,7 +2,7 @@
 
 $handler = MailChimp_WooCommerce_Admin::connect();
 
-// if we don't have valid campaign defaults we need to redirect back to the 'campaign_defaults' tab.
+// if we don't have a valid api key we need to redirect back to the 'api_key' tab.
 if (!$handler->hasValidApiKey()) {
     wp_redirect('admin.php?page=mailchimp-woocommerce&tab=api_key&error_notice=missing_api_key');
 }
@@ -153,11 +153,9 @@ if (!$handler->hasValidApiKey()) {
     <?php 
         // Only admins should see mailchimp_permission_cap radio buttons
         if (current_user_can('manage_options')) : ?>
-        
-        <div class="box optional-settings-label" >
-            <span><?php esc_html_e('Optional Store Settings', 'mailchimp-for-woocommerce');?></span>
+        <div class="box fieldset-header" >
+            <h3 style="padding-top: 1em;"><?= __('Permission Settings', 'mailchimp-for-woocommerce');?></h3>   
         </div>
-
         <div class="optional-settings-content">
             <div class="box box-half margin-large">
                 <label>

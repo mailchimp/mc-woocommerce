@@ -338,13 +338,14 @@ class MailChimp_WooCommerce_MailChimpApi
      * @param $list_id
      * @param $email
      * @param bool $fail_silently
+     * @param MailChimp_WooCommerce_Order $order
      * @return array|bool|mixed|object|null
      * @throws MailChimp_WooCommerce_Error|\Exception
      */
-    public function updateMemberTags($list_id, $email, $fail_silently = false)
+    public function updateMemberTags($list_id, $email, $fail_silently = false, $order = null)
     {
         $hash = md5(strtolower(trim($email)));
-        $tags = mailchimp_get_user_tags_to_update($email);
+        $tags = mailchimp_get_user_tags_to_update($email, $order);
 
         if (empty($tags)) return false;
 
@@ -1050,7 +1051,7 @@ class MailChimp_WooCommerce_MailChimpApi
             }
 
             // update the member tags but fail silently just in case.
-            $this->updateMemberTags(mailchimp_get_list_id(), $email_address, true);
+            $this->updateMemberTags(mailchimp_get_list_id(), $email_address, true, $order);
 
             update_option('mailchimp-woocommerce-resource-last-updated', time());
             $order = new MailChimp_WooCommerce_Order();
@@ -1097,7 +1098,7 @@ class MailChimp_WooCommerce_MailChimpApi
             }
 
             // update the member tags but fail silently just in case.
-            $this->updateMemberTags(mailchimp_get_list_id(), $email_address, true);
+            $this->updateMemberTags(mailchimp_get_list_id(), $email_address, true, $order);
 
             $order = new MailChimp_WooCommerce_Order();
             return $order->fromArray($data);

@@ -319,7 +319,7 @@ function mailchimp_get_store_id() {
 /**
  * @return array
  */
-function mailchimp_get_user_tags_to_update($email = null) {
+function mailchimp_get_user_tags_to_update($email = null, $order = null) {
     $tags = mailchimp_get_option('mailchimp_user_tags');
     $formatted_tags = array();
     
@@ -332,7 +332,7 @@ function mailchimp_get_user_tags_to_update($email = null) {
     }
 
     // apply filter to user custom tags addition/removal
-    $formatted_tags = apply_filters('mailchimp_user_tags', $formatted_tags, $email);
+    $formatted_tags = apply_filters('mailchimp_user_tags', $formatted_tags, $email, $order);
     
     if (empty($formatted_tags)){
         return false;

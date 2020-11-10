@@ -295,7 +295,7 @@ else {
                 <?php endif; ?>
                 <div class="box"> 
                     <?php 
-                        if ($active_tab !== 'api_key' && $active_tab !== 'sync' && $active_tab !== 'logs') {
+                        if ($active_tab !== 'api_key' && $active_tab !== 'sync' && $active_tab !== 'logs' && $active_tab != 'plugin_settings') {
                             if ($active_tab == 'newsletter_settings' && !mailchimp_is_configured()) {
                                 $submit_button_label = __('Start sync','mailchimp-for-woocommerce');
                             }

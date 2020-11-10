@@ -26,51 +26,59 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
         <span><?php esc_html_e('Audience Settings', 'mailchimp-for-woocommerce');?></span>
     </legend>
     
-    <div class="box fieldset-header no-padding" >
-        <h3><?php esc_html_e('Sync audience with your store', 'mailchimp-for-woocommerce');?></h3>
-    </div>
-
-    <div class="box" >
-        <label for="<?php echo $this->plugin_name; ?>-mailchimp-list-label">
-            <strong><?php esc_html_e('Audience name', 'mailchimp-for-woocommerce'); ?></strong>
-        </label>
-        <div class="mailchimp-select-wrapper">
-            <select name="<?php echo $this->plugin_name; ?>[mailchimp_list]" required <?php echo ($list_is_configured || $only_one_list) ? 'disabled' : '' ?>>
-
-                <?php if(!isset($allow_new_list) || $allow_new_list === true): ?>
-                    <option value="create_new"><?php esc_html_e('Create New Audience', 'mailchimp-for-woocommerce');?></option>
-                <?php endif ?>
-
-                <?php if(isset($allow_new_list) && $allow_new_list === false): ?>
-                    <option value="">-- <?php esc_html_e('Select Audience', 'mailchimp-for-woocommerce');?> --</option>
-                <?php endif; ?>
-
-                <?php
-                if (is_array($mailchimp_lists)) {
-                    $selected_list = isset($options['mailchimp_list']) ? $options['mailchimp_list'] : null;
-                    foreach ($mailchimp_lists as $key => $value ) {
-                        echo '<option value="' . esc_attr( $key ) . '" ' . selected(((string) $key === (string) $selected_list || $only_one_list), true, false) . '>' . esc_html( $value ) . '</option>';
-                    }
-                }
-                ?>
-            </select>
+    <?php if (!$list_is_configured): ?>
+        <div class="box fieldset-header no-padding" >
+            <h3><?php esc_html_e('Connect your store with an audience', 'mailchimp-for-woocommerce');?></h3>
         </div>
-    </div>
 
-    <div class="box" >
-        <?php $enable_auto_subscribe = (array_key_exists('mailchimp_auto_subscribe', $options) && !is_null($options['mailchimp_auto_subscribe'])) ? $options['mailchimp_auto_subscribe'] : '1'; ?>
-        <label>
-            <input
-                    type="checkbox"
-                    name="<?php echo $this->plugin_name; ?>[mailchimp_auto_subscribe]"
-                    id="<?php echo $this->plugin_name; ?>[mailchimp_auto_subscribe]"
-                <?= $list_is_configured ? 'disabled': '' ?>
-                    value=1
-                <?= $enable_auto_subscribe ? 'checked' : ''?>>
-            <strong><?php esc_html_e('During initial sync, auto subscribe the existing customers.', 'mailchimp-for-woocommerce'); ?></strong>
-        </label>
-    </div>
+        <div class="box" >
+            <label for="<?php echo $this->plugin_name; ?>-mailchimp-list-label">
+                <strong><?php esc_html_e('Audience name', 'mailchimp-for-woocommerce'); ?></strong>
+            </label>
+            <div class="mailchimp-select-wrapper">
+                <select name="<?php echo $this->plugin_name; ?>[mailchimp_list]" required <?php echo ($list_is_configured || $only_one_list) ? 'disabled' : '' ?>>
 
+                    <?php if(!isset($allow_new_list) || $allow_new_list === true): ?>
+                        <option value="create_new"><?php esc_html_e('Create New Audience', 'mailchimp-for-woocommerce');?></option>
+                    <?php endif ?>
+
+                    <?php if(isset($allow_new_list) && $allow_new_list === false): ?>
+                        <option value="">-- <?php esc_html_e('Select Audience', 'mailchimp-for-woocommerce');?> --</option>
+                    <?php endif; ?>
+
+                    <?php
+                    if (is_array($mailchimp_lists)) {
+                        $selected_list = isset($options['mailchimp_list']) ? $options['mailchimp_list'] : null;
+                        foreach ($mailchimp_lists as $key => $value ) {
+                            echo '<option value="' . esc_attr( $key ) . '" ' . selected(((string) $key === (string) $selected_list || $only_one_list), true, false) . '>' . esc_html( $value ) . '</option>';
+                        }
+                    }
+                    ?>
+                </select>
+            </div>
+        </div>
+        <div class="box" >
+            <?php $enable_auto_subscribe = (array_key_exists('mailchimp_auto_subscribe', $options) && !is_null($options['mailchimp_auto_subscribe'])) ? $options['mailchimp_auto_subscribe'] : '1'; ?>
+            <label>
+                <input
+                        type="checkbox"
+                        name="<?php echo $this->plugin_name; ?>[mailchimp_auto_subscribe]"
+                        id="<?php echo $this->plugin_name; ?>[mailchimp_auto_subscribe]"
+                    <?= $list_is_configured ? 'disabled': '' ?>
+                        value=1
+                    <?= $enable_auto_subscribe ? 'checked' : ''?>>
+                <strong><?php esc_html_e('During initial sync, auto subscribe the existing customers.', 'mailchimp-for-woocommerce'); ?></strong>
+            </label>
+        </div>
+    <?php else : ?>
+        <div class="box fieldset-header no-padding" >
+            <h3><?php esc_html_e('Your store is currently connected to:', 'mailchimp-for-woocommerce');?> <?= $handler->getListName() ?> </h3>
+        </div>
+        <div class="box" >
+            <p class="description"><?= __('To select another audience, you must first disconnect your store at Settings tab', 'mailchimp-for-woocommerce') ?></p>
+        </div>
+    <?php endif; ?>
+    
     <div class="box fieldset-header" >
         <h3><?php esc_html_e('Audience Defaults', 'mailchimp-for-woocommerce');?></h3>
     </div>

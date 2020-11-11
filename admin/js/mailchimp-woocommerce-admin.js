@@ -751,7 +751,6 @@
 		$('input[type="radio"]').change(function(event){
 			event.stopPropagation();
 			switchPreviewCheckbox(event.currentTarget.value);
-			console.log ( event.currentTarget.value);
 		});
 		
 		function switchPreviewCheckbox(currentState) {

@@ -149,23 +149,19 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
                 <h4><?php esc_html_e('Message for the opt-in checkbox', 'mailchimp-for-woocommerce'); ?></h4>
                 <p><?php _e('The call-to-action text that prompts customers to subscribe to your newsletter at checkout.', 'mailchimp-for-woocommerce');?> </p>
             </label>
-        </div>
-
-        <div class="box box-half">
+            <div class="box margin-large"></div>
             <textarea rows="3" id="<?php echo $this->plugin_name; ?>-newsletter-checkbox-label" name="<?php echo $this->plugin_name; ?>[newsletter_label]"><?php echo isset($options['newsletter_label']) ? esc_html($options['newsletter_label']) : '' ?></textarea>
             <p class="description"><?= esc_html(__('HTML tags allowed: <a href="" target="" title=""></a> and <br>', 'mailchimp-for-woocommerce')); ?><br/><?= esc_html(__('Leave it blank to use language translation files (.po / .mo), translating the string: "Subscribe to our newsletter".', 'mailchimp-for-woocommerce')); ?></p>
-        </div>
+            
+            <div class="box margin-large"></div>
 
-        <div class="box box-half margin-large">
             <label>
                 <h4><?php esc_html_e('Checkbox Display Options', 'mailchimp-for-woocommerce');?></h4>
                 <p><?php _e('Choose how you want the opt-in to your newsletter checkbox to render at checkout', 'mailchimp-for-woocommerce');?> </p>
             </label>
-        </div>
-
-
-        <div class="box box-half margin-large">
             <?php $checkbox_default_settings = (array_key_exists('mailchimp_checkbox_defaults', $options) && !is_null($options['mailchimp_checkbox_defaults'])) ? $options['mailchimp_checkbox_defaults'] : 'check'; ?>
+            <div class="box margin-large"></div>
+
             <label class="radio-label">
                 <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_checkbox_defaults]" value="check"<?php if($checkbox_default_settings === 'check') echo ' checked="checked" '; ?>><?php esc_html_e('Visible, checked by default', 'mailchimp-for-woocommerce');?><br>
             </label>
@@ -175,13 +171,56 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
             <label class="radio-label">
                 <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_checkbox_defaults]" value="hide"<?php if($checkbox_default_settings === 'hide') echo ' checked="checked" '; ?>><?php esc_html_e('Hidden, unchecked by default', 'mailchimp-for-woocommerce');?><br/>
             </label>
+
+            
         </div>
 
+        <div class="box box-half">
+            <h4><?php esc_html_e('Shop Checkout Preview', 'mailchimp-for-woocommerce');?></h4>
+            <p class="description"><?= esc_html(__('The box below is a preview of your checkout page. Styles and fields may not be exact.', 'mailchimp-for-woocommerce')); ?></p>
+            <div class="box margin-large"></div>
+            <div class="settings-sample-frame">
+                <div class="woocommerce-billing-fields__field-wrapper">
+                   
+                    <p class="form-row address-field validate-required validate-postcode form-row-wide" id="billing_postcode_field" data-priority="65" data-o_class="form-row form-row-wide address-field validate-required validate-postcode">
+                        <label for="billing_postcode" class="">Postcode / ZIP&nbsp;</label><span class="woocommerce-input-wrapper"><input type="text" class="input-text " name="billing_postcode" id="billing_postcode" placeholder="" value="" autocomplete="postal-code"></span>
+                    </p>
+                    <p class="form-row address-field validate-required form-row-wide" id="billing_city_field" data-priority="70" data-o_class="form-row form-row-wide address-field validate-required">
+                        <label for="billing_city" class="">Town / City&nbsp;</label><span class="woocommerce-input-wrapper"><input type="text" class="input-text " name="billing_city" id="billing_city" placeholder="" value="" autocomplete="address-level2"></span>
+                    </p>
+                    <p class="form-row address-field validate-state form-row-wide" id="billing_state_field" style="display: none" data-o_class="form-row form-row-wide address-field validate-state">
+                        <label for="billing_state" class="">State / County&nbsp;<span class="optional">(optional)</span></label><span class="woocommerce-input-wrapper"><input type="hidden" id="billing_state" name="billing_state" placeholder="" data-input-classes="" class="hidden"></span>
+                    </p>
+                    <p class="form-row form-row-wide validate-required validate-email" id="billing_email_field" data-priority="110">
+                        <label for="billing_email" class="">Email address&nbsp;</label><span class="woocommerce-input-wrapper"><input type="email" class="input-text " name="billing_email" id="billing_email" placeholder="" value="" autocomplete="email username"></span>
+                    </p>
+                </div>
+
+                <?php 
+                    $label = $this->getOption('newsletter_label');
+                    if ($label == '') $label = __('Subscribe to our newsletter', 'mailchimp-for-woocommerce');
+                ?>
+                <fieldset>
+                    <p class="form-row form-row-wide mailchimp-newsletter">
+                        <input class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" id="mailchimp_woocommerce_newsletter" type="checkbox" name="mailchimp_woocommerce_newsletter" value="1" checked="checked">
+                        <label id="preview-label" for="mailchimp_woocommerce_newsletter" class="inline"><?= $label?> </label>
+                    </p>
+
+                </fieldset>
+                <div class="overlay"></div>
+
+            </div>
+
+        </div>
+
+        <div class="box fieldset-header" >
+            <h3><?php esc_html_e('Advanced Opt-in Settings', 'mailchimp-for-woocommerce');?></h3>
+        </div>
 
         <div class="box box-half margin-large">
             <label for="<?php echo $this->plugin_name; ?>-newsletter-checkbox-action">
-                <h4><?php esc_html_e('Advanced Checkbox Settings', 'mailchimp-for-woocommerce');?></h4>
-                <p><?= sprintf(/* translators: %s - Woocommerce Actions documentation URL. */wp_kses( __( 'To change the location of the opt-in <br/>checkbox at checkout, input one of the <a href=%s target=_blank>available WooCommerce form actions</a>.', 'mailchimp-for-woocommerce' ), array(  'a' => array( 'href' => array(), 'target'=> '_blank' ) ) ), esc_url( 'https://docs.woocommerce.com/wc-apidocs/hook-docs.html' ) ); ?></p>
+                <h4><?php esc_html_e('Opt-in checkbox position', 'mailchimp-for-woocommerce');?></h4>
+                <p><?= sprintf(/* translators: %s - Woocommerce Actions documentation URL. */wp_kses( __( 'To change the position of the opt-in <br/>checkbox at checkout, input one of the <a href=%s target=_blank>available WooCommerce form actions</a>.', 'mailchimp-for-woocommerce' ), array(  'a' => array( 'href' => array(), 'target'=> '_blank' ) ) ), esc_url( 'https://docs.woocommerce.com/wc-apidocs/hook-docs.html' ) ); ?></p>
             </label>
         </div>
 

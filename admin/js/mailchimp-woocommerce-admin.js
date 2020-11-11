@@ -735,6 +735,42 @@
 			}
 		});
 
+		var checkbox_label = phpVars.l10n.subscribe_newsletter;
+		var label = checkbox_label;
+		$('#mailchimp-woocommerce-newsletter-checkbox-label').keyup(function(event){
+			event.stopPropagation();
+			if ($('#mailchimp-woocommerce-newsletter-checkbox-label').val() == "") {
+				label = checkbox_label;
+			}
+			else label = $('#mailchimp-woocommerce-newsletter-checkbox-label').val(); 
+			$('#preview-label').html(label);
+		});
+		
+		console.log('current: ',phpVars.current_optin_state);
+		switchPreviewCheckbox(phpVars.current_optin_state)
+		$('input[type="radio"]').change(function(event){
+			event.stopPropagation();
+			switchPreviewCheckbox(event.currentTarget.value);
+			console.log ( event.currentTarget.value);
+		});
+		
+		function switchPreviewCheckbox(currentState) {
+			switch (currentState) {
+				case 'check':
+					$('.mailchimp-newsletter').show();
+					$('.mailchimp-newsletter input').prop( "checked", true );
+					break;
+				case 'uncheck':
+					$('.mailchimp-newsletter').show();
+					$('.mailchimp-newsletter input').prop( "checked", false );
+					break;
+				case 'hide':
+					$('.mailchimp-newsletter').hide();
+					break;
+				default:
+					break;
+			}
+		}
 	});
 })( jQuery );
 

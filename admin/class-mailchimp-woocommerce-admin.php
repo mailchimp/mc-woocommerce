@@ -126,6 +126,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function enqueue_scripts($hook) {
 		if ( strpos($hook, 'page_mailchimp-woocommerce') !== false ) {
+			$label = $this->getOption('newsletter_label');
+            if ($label == '') $label = __('Subscribe to our newsletter', 'mailchimp-for-woocommerce');
+			$options = get_option($this->plugin_name, array());
+			$checkbox_default_settings = (array_key_exists('mailchimp_checkbox_defaults', $options) && !is_null($options['mailchimp_checkbox_defaults'])) ? $options['mailchimp_checkbox_defaults'] : 'check';
 			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version.'.21', false );
 			wp_localize_script(
 				$this->plugin_name,
@@ -149,8 +153,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 						'support_message_sending' => __('Sending support request', 'mailchimp-for-woocommerce'),
 						'support_message_ok' => __('Message received', 'mailchimp-for-woocommerce'),
 						'support_message_desc' => __('Thanks, your message has been received.', 'mailchimp-for-woocommerce'),
-						
+						'subscribe_newsletter' => $label
 					),
+					'current_optin_state' => $checkbox_default_settings,
 				)
 			);
 			wp_enqueue_script( $this->plugin_name);

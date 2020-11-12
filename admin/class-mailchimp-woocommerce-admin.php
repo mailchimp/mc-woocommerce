@@ -10,6 +10,8 @@
  * @subpackage MailChimp_WooCommerce/admin
  */
 
+use \Automattic\WooCommerce\Admin\Features\Navigation\Menu;
+
 /**
  * The admin-specific functionality of the plugin.
  *
@@ -161,6 +163,20 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			mailchimp_get_allowed_capability(),
 			$this->plugin_name,
 			array($this, 'display_plugin_setup_page')
+		);
+
+		// Add the WooCommerce navigation items if the feauture exists.
+		if ( ! class_exists( '\Automattic\WooCommerce\Admin\Features\Navigation\Menu' ) ) {
+			return;
+		}
+
+		Menu::add_plugin_item(
+			array(
+				'id'         => 'mailchimp-for-woocommerce',
+				'title'      => __( 'Mailchimp', 'mailchimp-for-woocommerce' ),
+				'capability' => mailchimp_get_allowed_capability(),
+				'url'        => $this->plugin_name,
+			)
 		);
 	}
 

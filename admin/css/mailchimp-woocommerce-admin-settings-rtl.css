@@ -21,6 +21,10 @@ html {
 
 }
 
+.woocommerce-layout .woocommerce-store-alerts{
+	display: none !important;
+}
+
 .mc-woocommerce-settings-header-wrapper {
 	width:100%;
 	padding-top: 56px;
@@ -37,7 +41,7 @@ html {
 
 .mc-woocommerce-settings-header {
 	width: 90%;
-	margin: 4em auto 0 auto !important;
+	margin: 2em auto 0 auto !important;
 	font-family: "proxima-nova", Arial, Helvetica, sans-serif;
 	padding-bottom: 0px;
 	display:table;
@@ -121,10 +125,16 @@ a.button.back-step {
 }
 
 .connect-buttons {
-	padding-left: 151px;
+	padding-left: 28px;
 	margin-top: 38px;
 	z-index: 2;
 	position: relative;
+}
+
+.mc-woocommerce-settings-subtitles {
+	padding-left: 28px;
+	margin-top: 28px;
+	
 }
 
 .connect-buttons .connect-button {
@@ -638,9 +648,8 @@ a.button.create-account {
 
 
 .sync-content-wrapper .sync-controls .sync-controls-item .sync-controls-label{
-	font-size: 11px;
+	font-size: 13px;
 	line-height: 20px;
-	color: #B7A9A1;
 }
 
 .sync-content-wrapper .sync-controls #mailchimp_account_connected,
@@ -1331,7 +1340,16 @@ a.button.create-account {
 		padding: 5px 5px 10px 5px;
 	}
 
+	.mc-woocommerce-settings-header {
+		margin-top: 0 !important;
+	}
+
 	.sync-content-wrapper .sync-controls {
 		min-height: 280px;
+	}
+
+	.mc-woocommerce-settings-subtitles {
+		padding-left: 28px;
+	
 	}
 }

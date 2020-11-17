@@ -70,7 +70,6 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
 }
 ?>
 <input type="hidden" name="mailchimp_active_settings_tab" value="store_sync"/>
-<div class="box">&nbsp;</div>
 
 <div class="sync-content-wrapper">
     <div class="sync-controls-wrapper">

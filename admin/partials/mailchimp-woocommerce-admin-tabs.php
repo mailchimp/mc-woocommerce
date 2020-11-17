@@ -64,18 +64,6 @@ else {
 
 ?>
 
-<?php if (!defined('PHP_VERSION_ID') || (PHP_VERSION_ID < 70000)): ?>
-    <div data-dismissible="notice-php-version" class="error notice notice-error">
-        <p><?php esc_html_e('Mailchimp says: Please upgrade your PHP version to a minimum of 7.0', 'mailchimp-for-woocommerce'); ?></p>
-    </div>
-<?php endif; ?>
-
-<?php if (!empty($has_api_error)): ?>
-    <div data-dismissible="notice-api-error" class="error notice notice-error is-dismissible">
-        <p><?php esc_html_e("Mailchimp says: API Request Error - ".$has_api_error, 'mailchimp-for-woocommerce'); ?></p>
-    </div>
-<?php endif; ?>
-
 <div class="mc-woocommerce-settings">
     <form id="mailchimp_woocommerce_options" method="post" name="cleanup_options" action="options.php">
         <?php if($show_wizard): ?>
@@ -248,9 +236,19 @@ else {
         ?>
         </div>
         <?php if ($active_tab != 'sync'): ?>
-        <div class="tab-content-wrapper <?= $active_tab == 'api_key'? 'overview-example' : ''?>">
+        <div class="tab-content-wrapper">
         <?php endif; ?>
-        
+                <?php if (!defined('PHP_VERSION_ID') || (PHP_VERSION_ID < 70000)): ?>
+                    <div data-dismissible="notice-php-version" class="error notice notice-error">
+                        <p><?php esc_html_e('Mailchimp says: Please upgrade your PHP version to a minimum of 7.0', 'mailchimp-for-woocommerce'); ?></p>
+                    </div>
+                <?php endif; ?>
+
+                <?php if (!empty($has_api_error)): ?>
+                    <div data-dismissible="notice-api-error" class="error notice notice-error is-dismissible">
+                        <p><?php esc_html_e("Mailchimp says: API Request Error - ".$has_api_error, 'mailchimp-for-woocommerce'); ?></p>
+                    </div>
+                <?php endif; ?>
                 <div class="box">
                     <?php if ($show_wizard) : ?>
                         <input type="hidden" name="mailchimp_woocommerce_wizard_on" value=1>
@@ -271,7 +269,7 @@ else {
                 <input type="hidden" name="<?php echo $this->plugin_name; ?>[mailchimp_active_tab]" value="<?php echo esc_attr($active_tab); ?>"/>
                 
                 <?php if ($active_tab == 'api_key'): ?>
-                    <?php include_once 'tabs/api_key_content.php'; ?>
+                    <?php //include_once 'tabs/api_key_content.php'; ?>
                 <?php endif; ?>
 
                 <?php if ($active_tab == 'store_info' && $has_valid_api_key): ?>

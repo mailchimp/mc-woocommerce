@@ -177,7 +177,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
 
         <div class="box box-half">
             <h4><?php esc_html_e('Shop Checkout Preview', 'mailchimp-for-woocommerce');?></h4>
-            <p class="description"><?= esc_html(__('The box below is a preview of your checkout page. Styles and fields may not be exact.', 'mailchimp-for-woocommerce')); ?></p>
+            <p><?= esc_html(__('The box below is a preview of your checkout page. Styles and fields may not be exact.', 'mailchimp-for-woocommerce')); ?></p>
             <div class="box margin-large"></div>
             <div class="settings-sample-frame">
                 <div class="woocommerce-billing-fields__field-wrapper">

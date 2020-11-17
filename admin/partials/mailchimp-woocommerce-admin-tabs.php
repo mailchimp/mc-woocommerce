@@ -227,7 +227,7 @@ else {
                 </div>
             </div>
         <?php endif; ?>
-        <div class="notices-content-wrapper">
+        <div class="notices-content-wrapper <?= $active_tab == 'sync' ? 'sync-notices' : '' ?>">
         <?php
             $settings_errors = get_settings_errors();
             if (!$show_wizard || ($show_wizard && isset($settings_errors[0]) && $settings_errors[0]['type'] != 'success' )) {

@@ -299,7 +299,6 @@
 	color: #3C3C3C !important;
 	background: #E6E6E6 !important;
 	box-shadow:0 1px 0 #E6E6E6 !important;
-	text-shadow: 0 -1px 1px #E6E6E6,1px 0 1px #E6E6E6,0 1px 1px #E6E6E6,-1px 0 1px #E6E6E6 !important;
 	-webkit-transition: background-color 0.3s ease-out,
 		text-shadow 0.3s ease-out,
 		box-shadow 0.3s ease-out;
@@ -320,7 +319,6 @@
 	color: #3C3C3C !important;
 	background: #DADADA !important;
 	box-shadow:0 1px 0 #DADADA !important;
-	text-shadow: 0 -1px 1px #DADADA,1px 0 1px #DADADA,0 1px 1px #DADADA,-1px 0 1px #DADADA !important;
 	-webkit-transition: background-color 0.3s ease-out,
 		text-shadow 0.3s ease-out,
 		box-shadow 0.3s ease-out;

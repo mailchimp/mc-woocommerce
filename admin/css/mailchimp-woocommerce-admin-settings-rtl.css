@@ -418,7 +418,6 @@ a.button.create-account {
 	color: #3C3C3C !important;
 	background: #DBD9D2 !important;
 	box-shadow:0 1px 0 #DBD9D2 !important;
-	text-shadow: 0 -1px 1px #DBD9D2,1px 0 1px #DBD9D2,0 1px 1px #DBD9D2,-1px 0 1px #DBD9D2 !important;
 	-webkit-transition: background-color 0.3s ease-out,
 		text-shadow 0.3s ease-out,
 		box-shadow 0.3s ease-out;
@@ -439,7 +438,6 @@ a.button.create-account {
 	color: #3C3C3C !important;
 	background: #DADADA !important;
 	box-shadow:0 1px 0 #DADADA !important;
-	text-shadow: 0 -1px 1px #DADADA,1px 0 1px #DADADA,0 1px 1px #DADADA,-1px 0 1px #DADADA !important;
 	-webkit-transition: background-color 0.3s ease-out,
 		text-shadow 0.3s ease-out,
 		box-shadow 0.3s ease-out;
@@ -458,7 +456,6 @@ a.button.create-account {
 .mc-woocommerce-log-button {
 	background: #fff !important;
 	box-shadow:none !important;
-	text-shadow: 0 -1px 1px #DADADA,1px 0 1px #DADADA,0 1px 1px #DADADA,-1px 0 1px #DADADA !important;
 }
 
 .mc-woocommerce-log-button:hover {

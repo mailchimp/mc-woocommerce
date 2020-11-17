@@ -1,4 +1,7 @@
 == Changelog ==
+= 2.5 =
+* interface reskin
+* fix for fatal error on disabled WoooCommerce admin
 = 2.4.7 =
 * fix cart items with no price on product
 * fix admin note issue on login

@@ -746,7 +746,6 @@
 			$('#preview-label').html(label);
 		});
 		
-		console.log('current: ',phpVars.current_optin_state);
 		switchPreviewCheckbox(phpVars.current_optin_state)
 		$('input[type="radio"]').change(function(event){
 			event.stopPropagation();

@@ -201,6 +201,10 @@ a.button.back-step {
 	border-bottom: none;
 }
 
+.notices-content-wrapper.sync-notices {
+	margin-bottom: 20px !important;
+}
+
 .tab-content-wrapper,
 .notices-content-wrapper {
 	width: 90%;

@@ -48,7 +48,7 @@ html {
 }
 .mc-woocommerce-settings-header svg.mc-woocommerce-logo{
 	padding-left: 1em;
-	display: table-cell;
+	display: inline-block;
 }
 
 .mc-woocommerce-settings-header .mc-woocommerce-wizard-btn {

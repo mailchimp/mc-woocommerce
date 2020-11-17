@@ -20,6 +20,9 @@ html {
 	font-family: "proxima-nova", Arial, Helvetica, sans-serif;
 
 }
+.woocommerce-layout {
+	display: none !important;
+}
 
 .mc-woocommerce-settings-header-wrapper {
 	width:100%;

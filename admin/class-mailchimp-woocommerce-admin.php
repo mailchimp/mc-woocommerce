@@ -259,7 +259,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         if ($pagenow == 'admin.php' && isset($_GET) && isset($_GET['page']) && 'mailchimp-woocommerce' === $_GET['page']) {
             $this->handle_abandoned_cart_table();
             $this->update_db_check();
-            if (get_option('mailchimp-woocommerce-sync.initial_sync') == 1 && get_option('mailchimp-woocommerce-sync.completed_at') > 0 ) {
+			$active_tab = isset($_GET['tab']) ? $_GET['tab'] : ($this->getOption('active_tab') ? $this->getOption('active_tab') : 'api_key');
+			if ($active_tab == 'sync' && get_option('mailchimp-woocommerce-sync.initial_sync') == 1 && get_option('mailchimp-woocommerce-sync.completed_at') > 0 ) {
                 $this->mailchimp_show_initial_sync_message();
             }
 			if (isset($_GET['log_removed']) && $_GET['log_removed'] == "1") {
@@ -1725,7 +1726,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				$this->getListName()
 			).
 		'</p>'.
-		'<a style="display:inline align-right" class="button" href="https://wordpress.org/support/plugin/mailchimp-for-woocommerce/reviews/" target=_blank>'.
+		'<a style="display:inline align-right" class="button mc-review-button" href="https://wordpress.org/support/plugin/mailchimp-for-woocommerce/reviews/" target=_blank>'.
 			esc_html__('Leave a Review', 'mailchimp-for-woocommerce').
         '</a>';
 		

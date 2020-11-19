@@ -214,6 +214,11 @@ a.button.back-step {
 	margin-bottom: 20px !important;
 }
 
+.mc-review-button {
+	border: 1px solid #b83110 !important;
+	color: #b83110 !important;
+}
+
 .tab-content-wrapper,
 .notices-content-wrapper {
 	width: 90%;

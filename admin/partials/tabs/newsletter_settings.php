@@ -146,7 +146,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
 
         <div class="box box-half margin-large">
             <label>
-                <h4><?php esc_html_e('Checkbox Display Options', 'mailchimp-for-woocommerce');?></h4>
+                <h4><?php esc_html_e('Checkbox display options', 'mailchimp-for-woocommerce');?></h4>
                 <p><?php _e('Choose how you want the opt-in to your newsletter checkbox to render at checkout', 'mailchimp-for-woocommerce');?> </p>
             </label>
             <?php $checkbox_default_settings = (array_key_exists('mailchimp_checkbox_defaults', $options) && !is_null($options['mailchimp_checkbox_defaults'])) ? $options['mailchimp_checkbox_defaults'] : 'check'; ?>
@@ -172,7 +172,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
         </div>
 
         <div class="box box-half margin-large">
-            <h4><?php esc_html_e('Shop Checkout Preview', 'mailchimp-for-woocommerce');?></h4>
+            <h4><?php esc_html_e('Shop checkout preview', 'mailchimp-for-woocommerce');?></h4>
             <p><?= esc_html(__('The box below is a preview of your checkout page. Styles and fields may not be exact.', 'mailchimp-for-woocommerce')); ?></p>
             <div class="box margin-large"></div>
             <div class="settings-sample-frame">

@@ -144,19 +144,9 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
             <h3><?php esc_html_e('Opt-in Settings', 'mailchimp-for-woocommerce');?></h3>
         </div>
 
-        <div class="box box-half">
-            <label for="<?php echo $this->plugin_name; ?>-newsletter-checkbox-label">
-                <h4><?php esc_html_e('Message for the opt-in checkbox', 'mailchimp-for-woocommerce'); ?></h4>
-                <p><?php _e('The call-to-action text that prompts customers to subscribe to your newsletter at checkout.', 'mailchimp-for-woocommerce');?> </p>
-            </label>
-            <div class="box margin-large"></div>
-            <textarea rows="3" id="<?php echo $this->plugin_name; ?>-newsletter-checkbox-label" name="<?php echo $this->plugin_name; ?>[newsletter_label]"><?php echo isset($options['newsletter_label']) ? esc_html($options['newsletter_label']) : '' ?></textarea>
-            <p class="description"><?= esc_html(__('HTML tags allowed: <a href="" target="" title=""></a> and <br>', 'mailchimp-for-woocommerce')); ?><br/><?= esc_html(__('Leave it blank to use language translation files (.po / .mo), translating the string: "Subscribe to our newsletter".', 'mailchimp-for-woocommerce')); ?></p>
-            
-            <div class="box margin-large"></div>
-
+        <div class="box box-half margin-large">
             <label>
-                <h4><?php esc_html_e('Checkbox Display Options', 'mailchimp-for-woocommerce');?></h4>
+                <h4><?php esc_html_e('Checkbox display options', 'mailchimp-for-woocommerce');?></h4>
                 <p><?php _e('Choose how you want the opt-in to your newsletter checkbox to render at checkout', 'mailchimp-for-woocommerce');?> </p>
             </label>
             <?php $checkbox_default_settings = (array_key_exists('mailchimp_checkbox_defaults', $options) && !is_null($options['mailchimp_checkbox_defaults'])) ? $options['mailchimp_checkbox_defaults'] : 'check'; ?>
@@ -171,12 +161,18 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
             <label class="radio-label">
                 <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_checkbox_defaults]" value="hide"<?php if($checkbox_default_settings === 'hide') echo ' checked="checked" '; ?>><?php esc_html_e('Hidden, unchecked by default', 'mailchimp-for-woocommerce');?><br/>
             </label>
-
-            
+            <div class="box margin-large"></div>
+            <label for="<?php echo $this->plugin_name; ?>-newsletter-checkbox-label">
+                <h4><?php esc_html_e('Message for the opt-in checkbox', 'mailchimp-for-woocommerce'); ?></h4>
+                <p><?php _e('The call-to-action text that prompts customers to subscribe to your newsletter at checkout.', 'mailchimp-for-woocommerce');?> </p>
+            </label>
+            <div class="box"></div>
+            <textarea rows="3" id="<?php echo $this->plugin_name; ?>-newsletter-checkbox-label" name="<?php echo $this->plugin_name; ?>[newsletter_label]"><?php echo isset($options['newsletter_label']) ? esc_html($options['newsletter_label']) : '' ?></textarea>
+            <p class="description"><?= esc_html(__('HTML tags allowed: <a href="" target="" title=""></a> and <br>', 'mailchimp-for-woocommerce')); ?><br/><?= esc_html(__('Leave it blank to use language translation files (.po / .mo), translating the string: "Subscribe to our newsletter".', 'mailchimp-for-woocommerce')); ?></p>
         </div>
 
-        <div class="box box-half">
-            <h4><?php esc_html_e('Shop Checkout Preview', 'mailchimp-for-woocommerce');?></h4>
+        <div class="box box-half margin-large">
+            <h4><?php esc_html_e('Shop checkout preview', 'mailchimp-for-woocommerce');?></h4>
             <p><?= esc_html(__('The box below is a preview of your checkout page. Styles and fields may not be exact.', 'mailchimp-for-woocommerce')); ?></p>
             <div class="box margin-large"></div>
             <div class="settings-sample-frame">

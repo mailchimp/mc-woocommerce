@@ -18,7 +18,7 @@ $comm_enabled = $opt != null ? $opt : '0';
 	$comm_enabled = $opt != null ? $opt : '0';
 	?>
 
-	<div class="box box-half">
+	<div class="box ">
 		<label for="<?php echo $this->plugin_name; ?>-newsletter-checkbox-label">
 			<h4><?php esc_html_e('Communication', 'mailchimp-for-woocommerce'); ?></h4>
 			<p>
@@ -31,11 +31,9 @@ $comm_enabled = $opt != null ? $opt : '0';
 				);?>
 			</p>
 		</label>
-	</div>
-
-	<div class="box box-half comm_box_wrapper">
+		<br/>
 		<fieldset>    
-			<p>
+			<p id="mc-comm-wrapper">
 				<span>Messaging is currently
 					<span class="comm_box_status <?= $comm_enabled === '0' ? 'hidden' : '';?>" id="comm_box_status_1" <?php if($comm_enabled === '0') echo ' class="hidden" '; ?> > <?php esc_html_e('enabled', 'mailchimp-for-woocommerce');?></span>
 					<span class="comm_box_status <?= $comm_enabled === '1' ? 'hidden' : '';?>" id="comm_box_status_0" <?php if($comm_enabled === '1') echo ' class="hidden" '; ?>> <?php esc_html_e('disabled', 'mailchimp-for-woocommerce');?></span>
@@ -48,12 +46,9 @@ $comm_enabled = $opt != null ? $opt : '0';
 			</p>
 		</fieldset>
 	</div>
-	
-	<div class="box fieldset-header" >
-		<h3><?php esc_html_e('Danger Zone', 'mailchimp-for-woocommerce');?></h3>
-	</div>
-		
-	<div class="box box-half">
+
+	<div class="box"></div>
+	<div class="box">
 		<label for="<?php echo $this->plugin_name; ?>-newsletter-checkbox-label">
 			<h4><?php esc_html_e('Disconnect Store', 'mailchimp-for-woocommerce'); ?></h4>
 			<p>
@@ -64,16 +59,16 @@ $comm_enabled = $opt != null ? $opt : '0';
 				);?>
 			</p>
 		</label>
-	</div>`
-
-	<div class="box box-half comm_box_wrapper">
 		<p>
 			<?php wp_nonce_field( '_disconnect-nonce-'.$store_id, '_disconnect-nonce' ); ?>
 
-			<a id="mailchimp_woocommerce_disconnect" class="mc-woocommerce-disconnect-button button tab-content-submit">
-				<span class="dashicons dashicons-trash"></span>
+			<a id="mailchimp_woocommerce_disconnect" class="mc-woocommerce-disconnect-button button button-default tab-content-submit">
 				<?php esc_html_e('Disconnect Store', 'mailchimp-for-woocommerce');?>
 			</a>
 		</p>
+	</div>
+
+	<div class="box box-half comm_box_wrapper">
+		
 	</div>
 </fieldset>

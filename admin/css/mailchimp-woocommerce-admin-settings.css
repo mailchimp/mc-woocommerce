@@ -214,6 +214,11 @@ a.button.back-step {
 	margin-bottom: 20px !important;
 }
 
+.mc-review-button {
+	border: 1px solid #b83110 !important;
+	color: #b83110 !important;
+}
+
 .tab-content-wrapper,
 .notices-content-wrapper {
 	width: 90%;
@@ -522,8 +527,14 @@ a.button.create-account {
 	float: right;
 }
 
-.comm_box_wrapper .mc-comm-save {
-	margin-right: 10px;
+#mc-comm-wrapper label {
+	display: inline !important;
+	padding-top: 0.7em;
+	margin-left: 1em;
+}
+
+#mc-comm-wrapper .mc-comm-save {
+	margin-left: 1em;
 }
 
 .sync-content-wrapper .sync-stats-wrapper {
@@ -676,10 +687,12 @@ a.button.create-account {
 }
 
 .mc-woocommerce-disconnect-button {
-	float: right;
-	background: #b83110 !important;
-	box-shadow:0 1px 0 #b83110 !important;
-	text-shadow: 0 -1px 1px #b83110,1px 0 1px #b83110,0 1px 1px #b83110,-1px 0 1px #b83110 !important;
+	margin-top: 1em !important;
+	border: 1px solid #b83110 !important;
+	color: #b83110 !important;
+	background: #F1F1F1 !important;
+	box-shadow:0 1px 0 #F1F1F1 !important;
+	text-shadow: 0 -1px 1px #F1F1F1,1px 0 1px #F1F1F1,0 1px 1px #F1F1F1,-1px 0 1px #F1F1F1 !important;
 	-webkit-transition: background-color 0.3s ease-out;
 	-moz-transition: background-color 0.3s ease-out;
 	-o-transition: background-color 0.3s ease-out;
@@ -693,6 +706,7 @@ a.button.create-account {
 
 .mc-woocommerce-disconnect-button:hover {
 	text-decoration: none !important;
+	background: #f0f0f0 !important;
 }
 
 .mc-woocommerce-disconnect-button svg {

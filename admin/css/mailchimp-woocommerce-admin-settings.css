@@ -215,8 +215,8 @@ a.button.back-step {
 }
 
 .mc-review-button {
-	border: 1px solid #b83110 !important;
-	color: #b83110 !important;
+	border: 1px solid #DBD9D2 !important;
+	color: #0073AA !important;
 }
 
 .tab-content-wrapper,
@@ -697,6 +697,7 @@ a.button.create-account {
 	-moz-transition: background-color 0.3s ease-out;
 	-o-transition: background-color 0.3s ease-out;
 	transition: background-color 0.3s ease-out;
+	padding:10px !important;
 }
 
 .mc-woocommerce-disconnect-button span.dashicons{
@@ -711,6 +712,7 @@ a.button.create-account {
 
 .mc-woocommerce-disconnect-button svg {
 	margin-right: 2em;
+	padding: 10px !important;
 }
 
 

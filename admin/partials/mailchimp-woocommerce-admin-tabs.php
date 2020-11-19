@@ -291,18 +291,15 @@ else {
                 <?php if ($active_tab == 'plugin_settings' && $show_sync_tab): ?>
                     <?php include_once 'tabs/plugin_settings.php'; ?>
                 <?php endif; ?>
-                <div class="box"> 
-                    <?php 
-                        if ($active_tab !== 'api_key' && $active_tab !== 'sync' && $active_tab !== 'logs' && $active_tab != 'plugin_settings') {
-                            if ($active_tab == 'newsletter_settings' && !mailchimp_is_configured()) {
-                                $submit_button_label = __('Start sync','mailchimp-for-woocommerce');
+                <?php if (mailchimp_is_configured()) : ?>
+                    <div class="box"> 
+                        <?php 
+                            if ($active_tab !== 'api_key' && $active_tab !== 'sync' && $active_tab !== 'logs' && $active_tab != 'plugin_settings') {
+                                submit_button(__('Save all changes'), 'primary tab-content-submit','mailchimp_submit', TRUE);
                             }
-                            else $submit_button_label = !$show_wizard ? __('Save all changes') : __('Next Step');
-                            submit_button($submit_button_label, 'primary tab-content-submit','mailchimp_submit', TRUE);
-                        }
-                    ?>
-                </div>
-                
+                        ?>
+                    </div>
+                <?php endif; ?>
         <?php if ($active_tab != 'sync'): ?>
         </div>
         <?php endif; ?>

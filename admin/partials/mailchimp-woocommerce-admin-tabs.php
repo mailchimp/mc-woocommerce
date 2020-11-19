@@ -205,7 +205,7 @@ else {
                         }
 
                         if ($active_tab == 'plugin_settings' && $show_sync_tab) {
-                            wp_kses(_e('Connection settings and support options', 'mailchimp-for-woocommerce'), $allowed_html);
+                            wp_kses(_e('Connection settings', 'mailchimp-for-woocommerce'), $allowed_html);
                         }
                         ?>
                     </p>

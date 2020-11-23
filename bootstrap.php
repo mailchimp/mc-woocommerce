@@ -1155,7 +1155,21 @@ function mailchimp_remove_activity_panel_inbox_notes() {
         return;
     }
 
-    \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes::delete_notes_with_name( 'mailchimp-for-woocommerce-incomplete-install' );
+    // if we can't use woocommerce for some reason - just return null
+    if (!function_exists('WC')) {
+        return;
+    }
+
+    // if we do not have the ability to use notes, just cancel out here.
+    if (!method_exists(WC(), 'is_wc_admin_active') || !WC()->is_wc_admin_active()) {
+        return;
+    }
+
+    try {
+        \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes::delete_notes_with_name( 'mailchimp-for-woocommerce-incomplete-install' );
+    } catch (\Exception $e) {
+        // do nothing.
+    }
 }
 
 // Print notices outside woocommerce admin bar

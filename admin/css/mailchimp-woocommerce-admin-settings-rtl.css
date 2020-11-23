@@ -563,11 +563,25 @@ a.button.create-account {
 	min-height: 20px;
 }
 
+.sync-content-wrapper .overview-stats-store {
+	margin-right: 13px; 
+	margin-bottom: 16px;
+	padding: 2em 1em;
+	min-height: 20px;
+}
+
 .sync-content-wrapper .last-updated {
-	position: absolute;
-	bottom: 0;
-	left: 5px;
-	font-size: 11px;
+	margin-left: 13px; 
+	margin-bottom: 16px;
+	padding: 2em 1em;
+	min-height: 20px;
+}
+
+.sync-content-wrapper .overview-stats-store .box,
+.sync-content-wrapper .last-updated .box {
+	margin: 0 2em;
+	padding: 1em 0 0 0;
+	min-height: 20px;
 }
 
 .sync-content-wrapper .sync-stats-card:last-child {
@@ -580,7 +594,6 @@ a.button.create-account {
 
 .sync-content-wrapper .sync-stats-card span.card_label,
 .sync-content-wrapper .sync-stats-card span.card_label{
-	padding-left: 0.7em;
 	font-family: proxima-nova, Arial, Helvetica, sans-serif;
 	font-size: 14px;
 	line-height: 14px;
@@ -1249,7 +1262,7 @@ a.button.create-account {
 	.sync-content-wrapper .sync-stats-wrapper {
 		display: block;
 		position:relative;
-		margin-bottom: 0;
+		margin-bottom: 14px;
 		margin-left: 0;
 	}
 
@@ -1269,6 +1282,7 @@ a.button.create-account {
 		display: block;
 		width: 100%;
 		position:relative;
+		margin-bottom: 14px;
 	}
 
 	.sync-more-wrapper .box.box-half .content {
@@ -1294,12 +1308,15 @@ a.button.create-account {
 		margin-right: 0px;
 	}
 
-	.sync-content-wrapper .sync-stats-wrapper.sync-stats-store {
+	.sync-content-wrapper .sync-stats-wrapper.sync-stats-store,
+	.sync-content-wrapper .sync-stats-wrapper.overview-stats-store,
+	.sync-content-wrapper .sync-stats-wrapper.last-updated {
 		margin-right: 0px;
 		margin-bottom: 26px;
 	}
 
 	.sync-content-wrapper .sync-stats-wrapper.sync-stats-audience,
+	.sync-content-wrapper .sync-stats-wrapper.last-updated,
 	.sync-more-wrapper .box.box-half.resync-container .content {
 		margin-left: 0;
 	}

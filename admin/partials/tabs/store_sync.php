@@ -70,43 +70,48 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
 }
 ?>
 <input type="hidden" name="mailchimp_active_settings_tab" value="store_sync"/>
-
 <div class="sync-content-wrapper">
-    <div class="sync-controls-wrapper">
-        <div class="box sync-controls">
-                <div class="sync-controls-item">
-                    <p class="sync-controls-label"><strong><?php esc_html_e('Account Connected', 'mailchimp-for-woocommerce');?></strong></p>
-                    <p id="mailchimp_account_connected"><?php echo $account_name; ?></p>
-                </div>
-                <div class="sync-controls-item">
-                    <p class="sync-controls-label"><strong><?php esc_html_e('Audience Connected', 'mailchimp-for-woocommerce');?></strong></p>
-                    <p id="mailchimp_list_name"><?php echo $mailchimp_list_name; ?></p>
-                </div>
-           
-                <div class="mc-woocommerce-last-sync">
-                    <p>
-                        <?php if ($last_updated_time): ?>
-                            <?php esc_html_e('Sync Status:', 'mailchimp-for-woocommerce');?>
-                            <?= mailchimp_is_done_syncing() ? esc_html_e('Completed', 'mailchimp-for-woocommerce') : esc_html_e('Running...', 'mailchimp-for-woocommerce'); ?>
-                        <?php elseif ($sync_started_at && !$sync_completed_at): ?>
-                            <?php esc_html_e('Initial sync in progress', 'mailchimp-for-woocommerce');?>
-                        <?php endif;?>
-                    </p>
-                </div>
-
-                <p class="last-updated">
-                    <?php esc_html_e('Last Updated:', 'mailchimp-for-woocommerce');?>
-                    <i id="mailchimp_last_updated">
-                        <?php if ($last_updated_time): ?>
-                            <?php echo $last_updated_time->format( __('D, M j, Y g:i A', 'mailchimp-for-woocommerce')); ?>
-                        <?php else : ?>
-                        <?php esc_html_e('Starting...', 'mailchimp-for-woocommerce'); ?>
-                        <?php endif;?>
-                    </i>
-                    <span class="spinner" style="float:none; background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px"></span>
-                </p>
+    
+    <div class="box box-half">
+        <div class="sync-stats-wrapper overview-stats-store">
+            <div class="box">
+                <strong><?php esc_html_e('Account Connected', 'mailchimp-for-woocommerce');?>:</strong> <?php echo $account_name; ?>
+            </div> 
+            <div class="box">
+                <strong><?php esc_html_e('Audience Connected', 'mailchimp-for-woocommerce');?>:</strong> <?php echo $mailchimp_list_name; ?>
+            </div> 
         </div>
     </div>
+
+    <div class="box box-half">
+        
+        
+        <div class="sync-stats-wrapper last-updated">
+            <div class="box" >
+                <?php if ($last_updated_time): ?>
+                    <strong><?php esc_html_e('Sync Status:', 'mailchimp-for-woocommerce');?></strong>
+                    <?= mailchimp_is_done_syncing() ? esc_html_e('Completed', 'mailchimp-for-woocommerce') : esc_html_e('Running...', 'mailchimp-for-woocommerce'); ?>
+                <?php elseif ($sync_started_at && !$sync_completed_at): ?>
+                    <?php esc_html_e('Initial sync in progress', 'mailchimp-for-woocommerce');?>
+                <?php endif;?>
+            </div>    
+            <div class="box" >   
+                <strong><?php esc_html_e('Last Updated:', 'mailchimp-for-woocommerce');?></strong>
+                <i id="mailchimp_last_updated">
+                    <?php if ($last_updated_time): ?>
+                        <?php echo $last_updated_time->format( __('D, M j, Y g:i A', 'mailchimp-for-woocommerce')); ?>
+                    <?php else : ?>
+                    <?php esc_html_e('Starting...', 'mailchimp-for-woocommerce'); ?>
+                    <?php endif;?>
+                </i>
+                <span class="spinner" style="float:none; background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px"></span> 
+            </div>
+        </div>
+    </div>
+</div>
+<div class="sync-content-wrapper">
+    
+   
     
     <div class="box box-half">
         <div class="sync-stats-wrapper sync-stats-store">

@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2020-11-19T17:32:26+01:00\n"
+"POT-Creation-Date: 2020-11-23T14:33:40+01:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.1.0\n"
 "X-Domain: mailchimp-for-woocommerce\n"
@@ -99,7 +99,7 @@ msgid "If you have a moment, please share why you are deactivating %s:"
 msgstr ""
 
 #: includes/class-mailchimp-woocommerce-deactivation-survey.php:379
-#: admin/class-mailchimp-woocommerce-admin.php:435
+#: admin/class-mailchimp-woocommerce-admin.php:436
 msgid "Mailchimp for Woocommerce"
 msgstr ""
 
@@ -126,7 +126,7 @@ msgstr ""
 
 #: includes/class-mailchimp-woocommerce-newsletter.php:48
 #: admin/class-mailchimp-woocommerce-admin.php:130
-#: admin/class-mailchimp-woocommerce-admin.php:1081
+#: admin/class-mailchimp-woocommerce-admin.php:1082
 #: admin/partials/tabs/newsletter_settings.php:197
 msgid "Subscribe to our newsletter"
 msgstr ""
@@ -136,7 +136,7 @@ msgid "Please select all the ways you would like to hear from us"
 msgstr ""
 
 #: includes/class-mailchimp-woocommerce-rest-api.php:151
-#: admin/partials/tabs/store_sync.php:101
+#: admin/partials/tabs/store_sync.php:102
 msgid "D, M j, Y g:i A"
 msgstr ""
 
@@ -209,113 +209,113 @@ msgid "Log file deleted."
 msgstr ""
 
 #. translators: Placeholders %1$s - opening strong HTML tag, %2$s - closing strong HTML tag, %3$s - opening link HTML tag, %4$s - closing link HTML tag
-#: admin/class-mailchimp-woocommerce-admin.php:283
+#: admin/class-mailchimp-woocommerce-admin.php:284
 msgid "%1$sMailchimp for Woocommerce%2$s is not yet connected to a Mailchimp account. To complete the connection, %3$svisit the plugin settings page%4$s."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:316
+#: admin/class-mailchimp-woocommerce-admin.php:317
 msgid "Mailchimp For WooCommerce"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:318
+#: admin/class-mailchimp-woocommerce-admin.php:319
 msgid "Plugin is not yet connected to a Mailchimp account. To complete the connection, open the settings page."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:335
+#: admin/class-mailchimp-woocommerce-admin.php:336
 msgid "Open Settings"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:436
+#: admin/class-mailchimp-woocommerce-admin.php:437
 msgid "We dectected that this site has the following constants defined, likely at wp-config.php file"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:438
+#: admin/class-mailchimp-woocommerce-admin.php:439
 msgid "These constants are deprecated since Mailchimp for Woocommerce version 2.3. Please refer to the <a href=\"https://github.com/mailchimp/mc-woocommerce/wiki/\">plugin official wiki</a> for further details."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:648
+#: admin/class-mailchimp-woocommerce-admin.php:649
 msgid "Store Disconnected"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:651
+#: admin/class-mailchimp-woocommerce-admin.php:652
 msgid "Store Disconnect Failed"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:938
-#: admin/class-mailchimp-woocommerce-admin.php:1124
-#: admin/class-mailchimp-woocommerce-admin.php:1686
+#: admin/class-mailchimp-woocommerce-admin.php:939
+#: admin/class-mailchimp-woocommerce-admin.php:1125
+#: admin/class-mailchimp-woocommerce-admin.php:1687
 msgid "Cannot create or update Store at Mailchimp."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1032
+#: admin/class-mailchimp-woocommerce-admin.php:1033
 msgid "As part of the Mailchimp Terms of Use, we require a contact email and a physical mailing address."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1040
+#: admin/class-mailchimp-woocommerce-admin.php:1041
 msgid "As part of the Mailchimp Terms of Use, we require a valid phone number for your store."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1048
+#: admin/class-mailchimp-woocommerce-admin.php:1049
 msgid "Mailchimp for WooCommerce requires a Store Name to connect your store."
 msgstr ""
 
 #. translators: %s - plugin name.
-#: admin/class-mailchimp-woocommerce-admin.php:1091
+#: admin/class-mailchimp-woocommerce-admin.php:1092
 #: admin/partials/tabs/newsletter_settings.php:136
 msgid "You were subscribed to the newsletter from %s"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1096
-#: admin/class-mailchimp-woocommerce-admin.php:1149
+#: admin/class-mailchimp-woocommerce-admin.php:1097
+#: admin/class-mailchimp-woocommerce-admin.php:1150
 msgid "One or more fields were not updated"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1214
+#: admin/class-mailchimp-woocommerce-admin.php:1215
 msgid "You must supply your Mailchimp API key to pull the audiences."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1483
+#: admin/class-mailchimp-woocommerce-admin.php:1484
 msgid "Cannot create or update List at Mailchimp."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1483
+#: admin/class-mailchimp-woocommerce-admin.php:1484
 msgid "Please retry."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1702
+#: admin/class-mailchimp-woocommerce-admin.php:1703
 msgid "Starting the sync process..."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1704
+#: admin/class-mailchimp-woocommerce-admin.php:1705
 msgid "The plugin has started the initial sync with your store, and the process will work in the background automatically."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1706
+#: admin/class-mailchimp-woocommerce-admin.php:1707
 msgid "Sometimes the sync can take a while, especially on sites with lots of orders and/or products. It is safe to navigate away from this screen while it is running."
 msgstr ""
 
 #. translators: %1$s: Number of synced orders %2$s: Audience name
-#: admin/class-mailchimp-woocommerce-admin.php:1724
+#: admin/class-mailchimp-woocommerce-admin.php:1725
 msgid "We successfully synced %1$s orders to your Audience, %2$s. If you’re happy with this integration, leave a 5-star review. It helps our community know we’re working hard to make it better each day."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1730
+#: admin/class-mailchimp-woocommerce-admin.php:1731
 msgid "Leave a Review"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1755
+#: admin/class-mailchimp-woocommerce-admin.php:1756
 msgid "Saved"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1760
+#: admin/class-mailchimp-woocommerce-admin.php:1761
 msgid "Error setting communications status"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1806
+#: admin/class-mailchimp-woocommerce-admin.php:1807
 msgid "No log file provided"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1825
+#: admin/class-mailchimp-woocommerce-admin.php:1826
 msgid "Error loading log file contents"
 msgstr ""
 
@@ -364,7 +364,7 @@ msgid "From Email"
 msgstr ""
 
 #: admin/partials/tabs/newsletter_settings.php:103
-#: admin/partials/tabs/store_sync.php:257
+#: admin/partials/tabs/store_sync.php:262
 msgid "Subject"
 msgstr ""
 
@@ -530,160 +530,160 @@ msgstr ""
 msgid "Account Connected"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:82
+#: admin/partials/tabs/store_sync.php:81
 msgid "Audience Connected"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:89
+#: admin/partials/tabs/store_sync.php:92
 msgid "Sync Status:"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:90
+#: admin/partials/tabs/store_sync.php:93
 msgid "Completed"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:90
+#: admin/partials/tabs/store_sync.php:93
 msgid "Running..."
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:92
+#: admin/partials/tabs/store_sync.php:95
 msgid "Initial sync in progress"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:98
+#: admin/partials/tabs/store_sync.php:99
 msgid "Last Updated:"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:103
+#: admin/partials/tabs/store_sync.php:104
 msgid "Starting..."
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:115
+#: admin/partials/tabs/store_sync.php:120
 msgid "Coupons"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:125
+#: admin/partials/tabs/store_sync.php:130
 msgid "Products"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:135
+#: admin/partials/tabs/store_sync.php:140
 msgid "Orders"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:151
+#: admin/partials/tabs/store_sync.php:156
 msgid "Subscribers"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:158
+#: admin/partials/tabs/store_sync.php:163
 msgid "Transactional"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:165
+#: admin/partials/tabs/store_sync.php:170
 msgid "Unsubscribed"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:178
+#: admin/partials/tabs/store_sync.php:183
 msgid "More Information"
 msgstr ""
 
 #. translators: %s - Plugin review URL.
-#: admin/partials/tabs/store_sync.php:180
+#: admin/partials/tabs/store_sync.php:185
 msgid "Is this plugin helping your e-commerce business? <a href=%s target=_blank>Please leave us a ★★★★★ review!</a>."
 msgstr ""
 
 #. translators: Placeholders %1$s - plugin wiki CLI URL, %2$s - plugin wiki WP caching issues url
-#: admin/partials/tabs/store_sync.php:181
+#: admin/partials/tabs/store_sync.php:186
 msgid "Have a larger store or having issues syncing? Consider using <a href=%1$s target=_blank>WP-CLI</a> or browse documentation around common <a href=%2$s target=_blank>caching problems</a>."
 msgstr ""
 
 #. translators: Placeholders %1$s - plugin wiki CLI URL, %2$s - plugin wiki WP caching issues url
-#: admin/partials/tabs/store_sync.php:182
+#: admin/partials/tabs/store_sync.php:187
 msgid "Order and customer information will not sync if they contain an Amazon or generic email address."
 msgstr ""
 
 #. translators: Placeholders %1$s - Mailchimp Support URL, %2$s - link element id, %3$s - popup element id
-#: admin/partials/tabs/store_sync.php:183
+#: admin/partials/tabs/store_sync.php:188
 msgid "Need help? Visit <a href=%1$s target=_blank>Mailchimp support</a> or <a id=%2$s href=%3$s>send us an email.</a> "
 msgstr ""
 
 #. translators: %s - Mailchimp Privacy Policy URL.
-#: admin/partials/tabs/store_sync.php:184
+#: admin/partials/tabs/store_sync.php:189
 msgid "By using this plugin, Mailchimp will process customer information in accordance with their <a href=%s target=_blank>Privacy Policy</a>."
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:190
+#: admin/partials/tabs/store_sync.php:195
 msgid "Synchronization"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:193
+#: admin/partials/tabs/store_sync.php:198
 msgid "You can safely resync your audience at any time without losing any of your e-commerce data."
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:196
-#: admin/partials/tabs/store_sync.php:198
+#: admin/partials/tabs/store_sync.php:201
+#: admin/partials/tabs/store_sync.php:203
 msgid "Resync now"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:199
+#: admin/partials/tabs/store_sync.php:204
 msgid "Sync is running. Please wait until it finishes."
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:221
+#: admin/partials/tabs/store_sync.php:226
 msgid "Send us a support ticket"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:222
+#: admin/partials/tabs/store_sync.php:227
 msgid "The best way to get in touch with us is by submitting a ticket in the form below. </br> We do our best to get back to you within 48 hours. We look forward to hear from you!"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:236
+#: admin/partials/tabs/store_sync.php:241
 msgid "First name"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:243
+#: admin/partials/tabs/store_sync.php:248
 msgid "Last name"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:250
+#: admin/partials/tabs/store_sync.php:255
 #: admin/partials/tabs/api_key.php:54
 #: admin/partials/tabs/store_info.php:33
 msgid "Email"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:264
+#: admin/partials/tabs/store_sync.php:269
 msgid "Message"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:270
+#: admin/partials/tabs/store_sync.php:275
 msgid "Send"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:275
+#: admin/partials/tabs/store_sync.php:280
 #: admin/partials/tabs/api_key.php:74
 msgid "Invalid Email. Please double check."
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:276
+#: admin/partials/tabs/store_sync.php:281
 msgid "Invalid First Name. Please double check."
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:277
+#: admin/partials/tabs/store_sync.php:282
 msgid "Invalid Last Name. Please double check."
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:278
+#: admin/partials/tabs/store_sync.php:283
 msgid "Invalid Subject. Please double check."
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:279
+#: admin/partials/tabs/store_sync.php:284
 msgid "Invalid Message. Please double check."
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:280
+#: admin/partials/tabs/store_sync.php:285
 msgid "Message sent..."
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:281
+#: admin/partials/tabs/store_sync.php:286
 msgid "Error: Message not sent..."
 msgstr ""
 
@@ -867,7 +867,7 @@ msgstr ""
 
 #. translators: %1$s - The Currency name and format (ex: USD | US Dollar) %2$s - Timezone name or offset (ex: America/New_York or UTC-4:00) %3$s and %5$s- <a> tag open %4$s - </a> tag close
 #: admin/partials/tabs/store_info.php:116
-msgid "We've detected that your WooCommerce store's currency is <b>%1$s</b> (%3$schange%4$s), and the WordPress timezone is <b>%2$s</b> (%5$schange%4$s). <br/>."
+msgid "We've detected that your WooCommerce store's currency is <b>%1$s</b> (%3$schange%4$s), and the WordPress timezone is <b>%2$s</b> (%5$schange%4$s)."
 msgstr ""
 
 #: admin/partials/tabs/store_info.php:130

@@ -113,7 +113,7 @@ if (!$handler->hasValidApiKey()) {
 
                 echo sprintf(
                     /* translators: %1$s - The Currency name and format (ex: USD | US Dollar) %2$s - Timezone name or offset (ex: America/New_York or UTC-4:00) %3$s and %5$s- <a> tag open %4$s - </a> tag close*/
-                    __('We\'ve detected that your WooCommerce store\'s currency is <b>%1$s</b> (%3$schange%4$s), and the WordPress timezone is <b>%2$s</b> (%5$schange%4$s). <br/>.', 'mailchimp-for-woocommerce'),
+                    __('We\'ve detected that your WooCommerce store\'s currency is <b>%1$s</b> (%3$schange%4$s), and the WordPress timezone is <b>%2$s</b> (%5$schange%4$s).', 'mailchimp-for-woocommerce'),
                     isset($current_currency_data) ? $current_currency . ' | ' .  $current_currency_data['name']: $current_currency,
                     mailchimp_get_timezone(true),
                     '<a href="' . admin_url( 'admin.php?page=wc-settings#woocommerce_currency') .'" title="'.__( 'General Settings' ).'">',

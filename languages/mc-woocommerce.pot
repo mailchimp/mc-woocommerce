@@ -9,14 +9,14 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2020-11-23T14:33:40+01:00\n"
+"POT-Creation-Date: 2020-11-25T09:38:38+01:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.1.0\n"
 "X-Domain: mailchimp-for-woocommerce\n"
 
 #. Plugin Name of the plugin
-#: admin/class-mailchimp-woocommerce-admin.php:175
-#: admin/class-mailchimp-woocommerce-admin.php:192
+#: admin/class-mailchimp-woocommerce-admin.php:174
+#: admin/class-mailchimp-woocommerce-admin.php:191
 msgid "Mailchimp for WooCommerce"
 msgstr ""
 
@@ -29,7 +29,7 @@ msgid "Connects WooCommerce to Mailchimp to sync your store data, send targeted 
 msgstr ""
 
 #. Author of the plugin
-#: admin/class-mailchimp-woocommerce-admin.php:176
+#: admin/class-mailchimp-woocommerce-admin.php:175
 msgid "Mailchimp"
 msgstr ""
 
@@ -99,7 +99,7 @@ msgid "If you have a moment, please share why you are deactivating %s:"
 msgstr ""
 
 #: includes/class-mailchimp-woocommerce-deactivation-survey.php:379
-#: admin/class-mailchimp-woocommerce-admin.php:436
+#: admin/class-mailchimp-woocommerce-admin.php:434
 msgid "Mailchimp for Woocommerce"
 msgstr ""
 
@@ -125,8 +125,8 @@ msgid "User ID"
 msgstr ""
 
 #: includes/class-mailchimp-woocommerce-newsletter.php:48
-#: admin/class-mailchimp-woocommerce-admin.php:130
-#: admin/class-mailchimp-woocommerce-admin.php:1082
+#: admin/class-mailchimp-woocommerce-admin.php:129
+#: admin/class-mailchimp-woocommerce-admin.php:1080
 #: admin/partials/tabs/newsletter_settings.php:197
 msgid "Subscribe to our newsletter"
 msgstr ""
@@ -140,182 +140,182 @@ msgstr ""
 msgid "D, M j, Y g:i A"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:140
+#: admin/class-mailchimp-woocommerce-admin.php:139
 msgid "Are you sure?"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:141
+#: admin/class-mailchimp-woocommerce-admin.php:140
 msgid "You will not be able to revert."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:142
+#: admin/class-mailchimp-woocommerce-admin.php:141
 msgid "Yes, delete it!"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:143
+#: admin/class-mailchimp-woocommerce-admin.php:142
 msgid "No, cancel!"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:144
+#: admin/class-mailchimp-woocommerce-admin.php:143
 msgid "Please wait"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:145
+#: admin/class-mailchimp-woocommerce-admin.php:144
 msgid "You are about to disconnect your store from Mailchimp."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:146
+#: admin/class-mailchimp-woocommerce-admin.php:145
 msgid "Yes, disconnect."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:147
+#: admin/class-mailchimp-woocommerce-admin.php:146
 msgid "Try again"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:148
+#: admin/class-mailchimp-woocommerce-admin.php:147
 msgid "Resync request in progress"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:149
+#: admin/class-mailchimp-woocommerce-admin.php:148
 msgid "Could not resync orders, please try again."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:150
+#: admin/class-mailchimp-woocommerce-admin.php:149
 msgid "Disconnecting store in progress"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:151
+#: admin/class-mailchimp-woocommerce-admin.php:150
 msgid "Login Popup is blocked!"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:152
+#: admin/class-mailchimp-woocommerce-admin.php:151
 msgid "Please allow your browser to show popups for this page"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:153
+#: admin/class-mailchimp-woocommerce-admin.php:152
 msgid "Sending support request"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:154
+#: admin/class-mailchimp-woocommerce-admin.php:153
 msgid "Message received"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:155
+#: admin/class-mailchimp-woocommerce-admin.php:154
 msgid "Thanks, your message has been received."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:267
+#: admin/class-mailchimp-woocommerce-admin.php:266
 msgid "Log file deleted."
 msgstr ""
 
 #. translators: Placeholders %1$s - opening strong HTML tag, %2$s - closing strong HTML tag, %3$s - opening link HTML tag, %4$s - closing link HTML tag
-#: admin/class-mailchimp-woocommerce-admin.php:284
+#: admin/class-mailchimp-woocommerce-admin.php:282
 msgid "%1$sMailchimp for Woocommerce%2$s is not yet connected to a Mailchimp account. To complete the connection, %3$svisit the plugin settings page%4$s."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:317
+#: admin/class-mailchimp-woocommerce-admin.php:315
 msgid "Mailchimp For WooCommerce"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:319
+#: admin/class-mailchimp-woocommerce-admin.php:317
 msgid "Plugin is not yet connected to a Mailchimp account. To complete the connection, open the settings page."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:336
+#: admin/class-mailchimp-woocommerce-admin.php:334
 msgid "Open Settings"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:437
+#: admin/class-mailchimp-woocommerce-admin.php:435
 msgid "We dectected that this site has the following constants defined, likely at wp-config.php file"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:439
+#: admin/class-mailchimp-woocommerce-admin.php:437
 msgid "These constants are deprecated since Mailchimp for Woocommerce version 2.3. Please refer to the <a href=\"https://github.com/mailchimp/mc-woocommerce/wiki/\">plugin official wiki</a> for further details."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:649
+#: admin/class-mailchimp-woocommerce-admin.php:647
 msgid "Store Disconnected"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:652
+#: admin/class-mailchimp-woocommerce-admin.php:650
 msgid "Store Disconnect Failed"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:939
-#: admin/class-mailchimp-woocommerce-admin.php:1125
-#: admin/class-mailchimp-woocommerce-admin.php:1687
+#: admin/class-mailchimp-woocommerce-admin.php:937
+#: admin/class-mailchimp-woocommerce-admin.php:1123
+#: admin/class-mailchimp-woocommerce-admin.php:1685
 msgid "Cannot create or update Store at Mailchimp."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1033
+#: admin/class-mailchimp-woocommerce-admin.php:1031
 msgid "As part of the Mailchimp Terms of Use, we require a contact email and a physical mailing address."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1041
+#: admin/class-mailchimp-woocommerce-admin.php:1039
 msgid "As part of the Mailchimp Terms of Use, we require a valid phone number for your store."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1049
+#: admin/class-mailchimp-woocommerce-admin.php:1047
 msgid "Mailchimp for WooCommerce requires a Store Name to connect your store."
 msgstr ""
 
 #. translators: %s - plugin name.
-#: admin/class-mailchimp-woocommerce-admin.php:1092
+#: admin/class-mailchimp-woocommerce-admin.php:1090
 #: admin/partials/tabs/newsletter_settings.php:136
 msgid "You were subscribed to the newsletter from %s"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1097
-#: admin/class-mailchimp-woocommerce-admin.php:1150
+#: admin/class-mailchimp-woocommerce-admin.php:1095
+#: admin/class-mailchimp-woocommerce-admin.php:1148
 msgid "One or more fields were not updated"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1215
+#: admin/class-mailchimp-woocommerce-admin.php:1213
 msgid "You must supply your Mailchimp API key to pull the audiences."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1484
+#: admin/class-mailchimp-woocommerce-admin.php:1482
 msgid "Cannot create or update List at Mailchimp."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1484
+#: admin/class-mailchimp-woocommerce-admin.php:1482
 msgid "Please retry."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1703
+#: admin/class-mailchimp-woocommerce-admin.php:1701
 msgid "Starting the sync process..."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1705
+#: admin/class-mailchimp-woocommerce-admin.php:1703
 msgid "The plugin has started the initial sync with your store, and the process will work in the background automatically."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1707
+#: admin/class-mailchimp-woocommerce-admin.php:1705
 msgid "Sometimes the sync can take a while, especially on sites with lots of orders and/or products. It is safe to navigate away from this screen while it is running."
 msgstr ""
 
 #. translators: %1$s: Number of synced orders %2$s: Audience name
-#: admin/class-mailchimp-woocommerce-admin.php:1725
+#: admin/class-mailchimp-woocommerce-admin.php:1723
 msgid "We successfully synced %1$s orders to your Audience, %2$s. If you’re happy with this integration, leave a 5-star review. It helps our community know we’re working hard to make it better each day."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1731
+#: admin/class-mailchimp-woocommerce-admin.php:1729
 msgid "Leave a Review"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1756
+#: admin/class-mailchimp-woocommerce-admin.php:1754
 msgid "Saved"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1761
+#: admin/class-mailchimp-woocommerce-admin.php:1759
 msgid "Error setting communications status"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1807
+#: admin/class-mailchimp-woocommerce-admin.php:1805
 msgid "No log file provided"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1826
+#: admin/class-mailchimp-woocommerce-admin.php:1824
 msgid "Error loading log file contents"
 msgstr ""
 
@@ -691,29 +691,25 @@ msgstr ""
 msgid "Plugin Settings"
 msgstr ""
 
-#: admin/partials/tabs/plugin_settings.php:23
+#: admin/partials/tabs/plugin_settings.php:17
 msgid "Communication"
 msgstr ""
 
 #. translators: Placeholders %1$s - admin email address
-#: admin/partials/tabs/plugin_settings.php:29
+#: admin/partials/tabs/plugin_settings.php:23
 msgid "Occasionally we may send you information about how-to's, updates, and other news to the store's admin email address. Choose whether or not you want to receive these messages at %1$s "
 msgstr ""
 
-#: admin/partials/tabs/plugin_settings.php:38
-msgid "enabled"
+#: admin/partials/tabs/plugin_settings.php:33
+msgid "Opt-in to our newsletter"
 msgstr ""
 
-#: admin/partials/tabs/plugin_settings.php:39
-msgid "disabled"
-msgstr ""
-
-#: admin/partials/tabs/plugin_settings.php:53
-#: admin/partials/tabs/plugin_settings.php:66
+#: admin/partials/tabs/plugin_settings.php:45
+#: admin/partials/tabs/plugin_settings.php:58
 msgid "Disconnect Store"
 msgstr ""
 
-#: admin/partials/tabs/plugin_settings.php:57
+#: admin/partials/tabs/plugin_settings.php:49
 msgid "Disconnect your store from MailChimp. This action will remove all entries from the database but you will be able to reconnect anytime."
 msgstr ""
 

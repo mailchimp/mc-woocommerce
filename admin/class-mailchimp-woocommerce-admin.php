@@ -108,7 +108,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function enqueue_styles($hook) {
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin.css', array(), $this->version.'.21', 'all' );
-		wp_enqueue_style( $this->plugin_name . 'checkbox', plugin_dir_url( __FILE__ ) . 'css/checkbox.min.css', array(), $this->version, 'all' );
 
 		if ( strpos($hook, 'page_mailchimp-woocommerce') !== false ) {
 			if ( get_bloginfo( 'version' ) < '5.3') {

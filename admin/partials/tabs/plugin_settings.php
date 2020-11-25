@@ -12,12 +12,6 @@ $comm_enabled = $opt != null ? $opt : '0';
         <span><?php esc_html_e('Plugin Settings', 'mailchimp-for-woocommerce');?></span>
 	</legend>
 
-	<?php
-	$opt = get_option('mailchimp-woocommerce-comm.opt');
-	$admin_email = mailchimp_get_option('admin_email', get_option('admin_email'));
-	$comm_enabled = $opt != null ? $opt : '0';
-	?>
-
 	<div class="box ">
 		<label for="<?php echo $this->plugin_name; ?>-newsletter-checkbox-label">
 			<h4><?php esc_html_e('Communication', 'mailchimp-for-woocommerce'); ?></h4>
@@ -34,15 +28,13 @@ $comm_enabled = $opt != null ? $opt : '0';
 		<br/>
 		<fieldset>    
 			<p id="mc-comm-wrapper">
-				<span>Messaging is currently
-					<span class="comm_box_status <?= $comm_enabled === '0' ? 'hidden' : '';?>" id="comm_box_status_1" <?php if($comm_enabled === '0') echo ' class="hidden" '; ?> > <?php esc_html_e('enabled', 'mailchimp-for-woocommerce');?></span>
-					<span class="comm_box_status <?= $comm_enabled === '1' ? 'hidden' : '';?>" id="comm_box_status_0" <?php if($comm_enabled === '1') echo ' class="hidden" '; ?>> <?php esc_html_e('disabled', 'mailchimp-for-woocommerce');?></span>
-				</span>
 				<label class="el-switch el-checkbox-green">
 					<input id="comm_box_switch" type="checkbox" name="switch" <?php if($comm_enabled === '1') echo ' checked="checked" '; ?> value="1">
-					<span class="el-switch-style"></span>
+					<span><?= __('Opt-in to our newsletter', 'mailchimp-for-woocommerce'); ?></span>
+					<br/>
+					<span class="mc-comm-save" id="mc-comm-save">Saved</span>
 				</label>
-				<span class="mc-comm-save" id="mc-comm-save">Saved!</span>
+				
 			</p>
 		</fieldset>
 	</div>

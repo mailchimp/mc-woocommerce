@@ -378,12 +378,12 @@
 			$.post(ajaxurl, data, function(response) {
 				if (response.success) {
 					$('#mc-comm-save').html(response.data);
-					$('#mc-comm-save').css('color', '#628735').show().fadeOut(5000);
+					$('#mc-comm-save').css('color', '#628735').show().fadeOut(3000);
 					switch_button.checked = opt;
 				}
 				else {
 					$('#mc-comm-save').html(response.data.error);
-					$('#mc-comm-save').css('color', 'red').show().fadeOut(5000);
+					$('#mc-comm-save').css('color', 'red').show().fadeOut(3000);
 					switch_button.checked = 1 - opt;
 					$('.comm_box_status').hide();
 					$('#comm_box_status_' + (1 - opt)).show();

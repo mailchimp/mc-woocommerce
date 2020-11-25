@@ -88,8 +88,8 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
         
         <div class="sync-stats-wrapper last-updated">
             <div class="box" >
+                <strong><?php esc_html_e('Sync Status:', 'mailchimp-for-woocommerce');?></strong>
                 <?php if ($last_updated_time): ?>
-                    <strong><?php esc_html_e('Sync Status:', 'mailchimp-for-woocommerce');?></strong>
                     <?= mailchimp_is_done_syncing() ? esc_html_e('Completed', 'mailchimp-for-woocommerce') : esc_html_e('Running...', 'mailchimp-for-woocommerce'); ?>
                 <?php elseif ($sync_started_at && !$sync_completed_at): ?>
                     <?php esc_html_e('Initial sync in progress', 'mailchimp-for-woocommerce');?>
@@ -104,7 +104,6 @@ if (($mailchimp_api = mailchimp_get_api()) && ($store = $mailchimp_api->getStore
                     <?php esc_html_e('Starting...', 'mailchimp-for-woocommerce'); ?>
                     <?php endif;?>
                 </i>
-                <span class="spinner" style="float:none; background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px"></span> 
             </div>
         </div>
     </div>

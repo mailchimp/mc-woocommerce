@@ -194,9 +194,6 @@ else {
                             }
                             else {
                                 wp_kses(_e('Your WooCommerce store is syncing to Mailchimp', 'mailchimp-for-woocommerce'), $allowed_html);
-                                ?>
-                                <span class="spinner" style="float:none; background-size: 16px 16px; width: 16px; height: 16px; margin: 0px 10px; visibility: visible;"></span>
-                                <?php
                             }
                         }
                 

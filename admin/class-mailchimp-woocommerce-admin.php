@@ -274,69 +274,20 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function initial_notice() {
 		if (!mailchimp_is_configured()) {
-			// If WC_Admin_Notes doesn't exist, show normal wordpress admin notice...
-			if ( ! method_exists(WC(), 'is_wc_admin_active') || (method_exists(WC(), 'is_wc_admin_active') && ! WC()->is_wc_admin_active()) || ! class_exists( '\Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes' ) ) {
-				$class = 'notice notice-warning is-dismissible';
-				$message = sprintf(
-					/* translators: Placeholders %1$s - opening strong HTML tag, %2$s - closing strong HTML tag, %3$s - opening link HTML tag, %4$s - closing link HTML tag */
-					esc_html__(
-						'%1$sMailchimp for Woocommerce%2$s is not yet connected to a Mailchimp account. To complete the connection, %3$svisit the plugin settings page%4$s.',
-						'mailchimp-for-woocommerce'
-					),
-					'<strong>',
-					'</strong>',
-					'<a href="' . admin_url( 'admin.php?page=') . $this->plugin_name . '">',
-					'</a>'
-				);
-				printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message ); 
-			}
-			// else show the WooCoomerce admin inbox note.
-			else {
-				if ( ! class_exists( 'WC_Data_Store' ) ) {
-					return;
-				}
-		
-				$data_store = WC_Data_Store::load( 'admin-note' );
-		
-				// First, see if we've already created this kind of note so we don't do it again.
-				$note_ids = $data_store->get_notes_with_name( 'mailchimp-for-woocommerce-incomplete-install' );
-				foreach( (array) $note_ids as $note_id ) {
-					$note         = \Automattic\WooCommerce\Admin\Notes\WC_Admin_Notes::get_note( $note_id );
-					$content_data = $note->get_content_data();
-					if ( property_exists( $content_data, 'getting_started' ) ) {
-						return;
-					}
-				}
-		
-				// Otherwise, add the note
-				$activated_time = current_time( 'timestamp', 0 );
-				$activated_time_formatted = date( 'F jS', $activated_time );
-				$note = new \Automattic\WooCommerce\Admin\Notes\WC_Admin_Note();
-				$note->set_title( __( 'Mailchimp For WooCommerce', 'mailchimp-for-woocommerce' ) );
-				$note->set_content(
-					esc_html__(
-						'Plugin is not yet connected to a Mailchimp account. To complete the connection, open the settings page.',
-						'mailchimp-for-woocommerce'
-					)
-				);
-				$note->set_content_data( (object) array(
-					'getting_started'     => true,
-					'activated'           => $activated_time,
-					'activated_formatted' => $activated_time_formatted,
-				) );
-				$note->set_type( \Automattic\WooCommerce\Admin\Notes\WC_Admin_Note::E_WC_ADMIN_NOTE_WARNING );
-				$note->set_name( 'mailchimp-for-woocommerce-incomplete-install' );
-				$note->set_source( 'mailchimp-for-woocommerce' );
-				if (method_exists($note, 'set_layout')) $note->set_layout('plain');
-                if (method_exists($note, 'set_image')) $note->set_image('');
-				$note->add_action(
-					'settings',
-					__( 'Open Settings', 'mailchimp-for-woocommerce' ),
-					admin_url( 'admin.php?page=') . $this->plugin_name
-				);
-				$note->save();
-			}
-		}
+            $class = 'notice notice-warning is-dismissible';
+            $message = sprintf(
+            /* translators: Placeholders %1$s - opening strong HTML tag, %2$s - closing strong HTML tag, %3$s - opening link HTML tag, %4$s - closing link HTML tag */
+                esc_html__(
+                    '%1$sMailchimp for Woocommerce%2$s is not yet connected to a Mailchimp account. To complete the connection, %3$svisit the plugin settings page%4$s.',
+                    'mailchimp-for-woocommerce'
+                ),
+                '<strong>',
+                '</strong>',
+                '<a href="' . admin_url( 'admin.php?page=') . $this->plugin_name . '">',
+                '</a>'
+            );
+            printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );
+        }
 	}
 
 	/**

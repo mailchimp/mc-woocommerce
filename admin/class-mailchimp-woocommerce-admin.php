@@ -1748,6 +1748,18 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		));
 	}
 
+    public function mailchimp_woocommerce_ajax_delete_log_file() {
+        if (isset($_POST['log_file']) && !empty($_POST['log_file'])) {
+            $requested_log_file = $_POST['log_file'];
+        }
+        else {
+            return wp_send_json_error(  __('No log file provided', 'mailchimp-for-woocommerce'));
+        }
+        $log_handler = new WC_Log_Handler_File();
+        $removed = $log_handler->remove(str_replace('-log', '.log', $requested_log_file));
+        wp_send_json_success(array('success' => $removed));
+    }
+
 	public function mailchimp_woocommerce_ajax_load_log_file() {
 		if (isset($_POST['log_file']) && !empty($_POST['log_file'])) {
 			$requested_log_file = $_POST['log_file'];

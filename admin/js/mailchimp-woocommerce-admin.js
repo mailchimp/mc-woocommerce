@@ -47,8 +47,6 @@
 				$('#log-viewer .spinner').hide().css("visibility", "hidden");
 				$('#log-viewer #log-content').css("visibility", "visible");
 			});
-			
-			
 		});
 
 		$('#mailchimp-log-pref').change(function (e) {
@@ -85,14 +83,8 @@
 		});
 
 		// delete log button
-		var mailchimp_woocommerce_delete_log = false;
 		$('.delete-log-button').click(function (e) {
-			if (mailchimp_woocommerce_delete_log) {
-				mailchimp_woocommerce_delete_log = false; // reset flag
-				return; // let the event bubble away
-			}
 			e.preventDefault();
-			var me = $(e.target);
 
 			Swal.fire({
 				title: phpVars.l10n.are_you_sure,
@@ -112,8 +104,22 @@
 
 			}).then((result) => {
 				if (result.value) {
-					mailchimp_woocommerce_delete_log = true;
-					me.click();
+					var data = {
+						action:'mailchimp_woocommerce_delete_log_file',
+						log_file: $('#log_file').val()
+					};
+
+					$('#log-viewer #log-content').css("visibility", "hidden");
+					$('#log-viewer .spinner').show().css("visibility", "visible");
+
+					$.post(ajaxurl, data, function(response) {
+						console.log('deleted log file', data.log_file);
+						if (response.success) {
+							window.location.reload();
+						}
+						$('#log-viewer .spinner').hide().css("visibility", "hidden");
+						$('#log-viewer #log-content').css("visibility", "visible");
+					});
 				}
 			})
 		});

@@ -1,11 +1,4 @@
 <?php
-if (!empty( $_REQUEST['handle'])) {
-    if (!empty($_REQUEST['_wpnonce']) && wp_verify_nonce($_REQUEST['_wpnonce'], 'remove_log')) {
-        $log_handler = new WC_Log_Handler_File();
-        $log_handler->remove($_REQUEST['handle']);
-        wp_redirect('admin.php?page=mailchimp-woocommerce&tab=logs&log_removed=1');
-    }
-}
 $files  = defined('WC_LOG_DIR') ? @scandir( WC_LOG_DIR ) : array();
 $logs = array();
 if (!empty($files)) {

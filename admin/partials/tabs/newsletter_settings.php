@@ -75,7 +75,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
             <h3><?php esc_html_e('Your store is currently connected to:', 'mailchimp-for-woocommerce');?> <?= $handler->getListName() ?> </h3>
         </div>
         <div class="box" >
-            <p class="description"><?= __('To select another audience, you must first disconnect your store at Settings tab', 'mailchimp-for-woocommerce') ?></p>
+            <p><?= __('To select another audience, you must first disconnect your store on the Settings tab.', 'mailchimp-for-woocommerce') ?></p>
         </div>
     <?php endif; ?>
     

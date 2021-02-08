@@ -134,12 +134,13 @@ function mailchimpHandleBillingEmail(selector) {
         };
         return c.get = function (b, d) {
             return a.cookie !== c._cacheString && c._populateCache(), void 0 == c._cache[b] ? d : c._cache[b]
-        }, c.defaults = {path: "/"}, c.set = function (d, e, f) {
+        }, c.defaults = {path: "/", secure: true, samesite: 'none'}, c.set = function (d, e, f) {
             switch (f = {
                 path: f && f.path || c.defaults.path,
                 domain: f && f.domain || c.defaults.domain,
                 expires: f && f.expires || c.defaults.expires,
-                secure: f && f.secure !== b ? f.secure : c.defaults.secure
+                secure: f && f.secure !== b ? f.secure : c.defaults.secure,
+                samesite: f && f.samesite || c.defaults.samesite,
             }, e === b && (f.expires = -1), typeof f.expires) {
                 case"number":
                     f.expires = new Date((new Date).getTime() + 1e3 * f.expires);
@@ -147,7 +148,7 @@ function mailchimpHandleBillingEmail(selector) {
                 case"string":
                     f.expires = new Date(f.expires)
             }
-            return d = encodeURIComponent(d) + "=" + (e + "").replace(/[^!#-+\--:<-\[\]-~]/g, encodeURIComponent), d += f.path ? ";path=" + f.path : "", d += f.domain ? ";domain=" + f.domain : "", d += f.expires ? ";expires=" + f.expires.toGMTString() : "", d += f.secure ? ";secure" : "", a.cookie = d, c
+            return d = encodeURIComponent(d) + "=" + (e + "").replace(/[^!#-+\--:<-\[\]-~]/g, encodeURIComponent), d += f.path ? ";path=" + f.path : "", d += f.domain ? ";domain=" + f.domain : "", d += f.expires ? ";expires=" + f.expires.toGMTString() : "", d += f.secure ? ";secure" : "", d += f.samesite ? (";samesite="+f.samesite) : '', a.cookie = d, c
         }, c.expire = function (a, d) {
             return c.set(a, b, d)
         }, c._populateCache = function () {

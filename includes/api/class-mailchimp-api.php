@@ -1821,7 +1821,7 @@ class MailChimp_WooCommerce_MailChimpApi
         curl_close($curl);
 
         if ($err) {
-            throw new MailChimp_WooCommerce_Error('CURL error :: '.$err, '500');
+            throw new MailChimp_WooCommerce_Error('CURL error :: '.$err, 500);
         }
 
         $data = json_decode($response, true);
@@ -1855,7 +1855,7 @@ class MailChimp_WooCommerce_MailChimpApi
                 throw new MailChimp_WooCommerce_RateLimitError();
             }
 
-            throw new MailChimp_WooCommerce_Error($data['title'] .' :: '.$data['detail'], $data['status']);
+            throw new MailChimp_WooCommerce_Error($data['title'] .' :: '.$data['detail'], (int) $data['status']);
         }
 
         if ($http_code >= 500) {
@@ -1883,7 +1883,7 @@ class MailChimp_WooCommerce_MailChimpApi
             foreach ($data['errors'] as $error) {
                 $message .= '<p>'.$error['field'].': '.$error['message'].'</p>';
             }
-            throw new MailChimp_WooCommerce_Error($message, $data['status']);
+            throw new MailChimp_WooCommerce_Error($message, (int) $data['status']);
         }
 
         // make sure the response is correct from the data in the response array
@@ -1891,7 +1891,7 @@ class MailChimp_WooCommerce_MailChimpApi
             if (isset($data['http_code']) && $data['http_code'] == 403) {
                 throw new MailChimp_WooCommerce_RateLimitError();
             }
-            throw new MailChimp_WooCommerce_Error($data['detail'], $data['status']);
+            throw new MailChimp_WooCommerce_Error($data['detail'], (int) $data['status']);
         }
 
         return false;

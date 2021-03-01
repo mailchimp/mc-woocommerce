@@ -267,7 +267,7 @@ class MailChimp_WooCommerce_Transform_Products
             $img = wp_get_attachment_image_src($meta[$key][0], $image_key);
             if (!empty($img[0])) {
                 if (substr($img[0], 0, 4) !== 'http') {
-                    return rtrim(get_option('siteurl'), '/').'/'.ltrim($img[0], '/');
+                    return rtrim(home_url(), '/').'/'.ltrim($img[0], '/');
                 }
                 return $img[0];
             }

@@ -868,15 +868,23 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         if (($saved_cart = $wpdb->get_row($sql)) && is_object($saved_cart)) {
             $statement = "UPDATE {$table} SET `cart` = '%s', `email` = '%s', `user_id` = %s WHERE `id` = '%s'";
             $sql = $wpdb->prepare($statement, array(maybe_serialize($this->cart), $email, $user_id, $uid));
-            $wpdb->query($sql);
+            try {
+                $wpdb->query($sql);
+            } catch (\Exception $e) {
+                return false;
+            }
         } else {
-            $wpdb->insert("{$wpdb->prefix}mailchimp_carts", array(
-                'id' => $uid,
-                'email' => $email,
-                'user_id' => (int) $user_id,
-                'cart'  => maybe_serialize($this->cart),
-                'created_at'   => gmdate('Y-m-d H:i:s', time()),
-            ));
+            try {
+                $wpdb->insert("{$wpdb->prefix}mailchimp_carts", array(
+                    'id' => $uid,
+                    'email' => $email,
+                    'user_id' => (int) $user_id,
+                    'cart'  => maybe_serialize($this->cart),
+                    'created_at'   => gmdate('Y-m-d H:i:s', time()),
+                ));
+            } catch (\Exception $e) {
+                return false;
+            }
         }
 
         return true;

@@ -131,7 +131,9 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
         ) : null;
         
         if (!empty($existing_actions)) {
-            as_unschedule_action(get_class($job), array('obj_id' => $job->id), 'mc-woocommerce');
+            try {
+                as_unschedule_action(get_class($job), array('obj_id' => $job->id), 'mc-woocommerce');
+            } catch (\Exception $e) {}
         }
         else {
             $inserted = $wpdb->insert($wpdb->prefix."mailchimp_jobs", $args);
@@ -1001,7 +1003,9 @@ function mailchimp_delete_as_jobs() {
     
     if (!empty($existing_as_actions)) {
         foreach ($existing_as_actions as $as_action) {
-            as_unschedule_action($as_action->get_hook(), $as_action->get_args(), 'mc-woocommerce');    # code...
+            try {
+                as_unschedule_action($as_action->get_hook(), $as_action->get_args(), 'mc-woocommerce');    # code...
+            } catch (\Exception $e) {}
         }
         return true;
     }

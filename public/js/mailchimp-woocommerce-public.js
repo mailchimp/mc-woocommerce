@@ -134,7 +134,7 @@ function mailchimpHandleBillingEmail(selector) {
         };
         return c.get = function (b, d) {
             return a.cookie !== c._cacheString && c._populateCache(), void 0 == c._cache[b] ? d : c._cache[b]
-        }, c.defaults = {path: "/", secure: true, samesite: 'none'}, c.set = function (d, e, f) {
+        }, c.defaults = {path: "/", secure: true, samesite: 'strict'}, c.set = function (d, e, f) {
             switch (f = {
                 path: f && f.path || c.defaults.path,
                 domain: f && f.domain || c.defaults.domain,

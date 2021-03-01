@@ -494,11 +494,11 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
                 if (($current_email = $this->getEmailFromSession()) && $current_email !== $this->user_email) {
                     $this->previous_email = $current_email;
-                    @setcookie('mailchimp_user_previous_email',$this->user_email, $cookie_duration, '/' );
+                    mailchimp_set_cookie('mailchimp_user_previous_email',$this->user_email, $cookie_duration, '/');
                 }
 
                 // cookie the current email
-                @setcookie('mailchimp_user_email', $this->user_email, $cookie_duration, '/' );
+                mailchimp_set_cookie('mailchimp_user_email', $this->user_email, $cookie_duration, '/' );
 
                 $cart_data = unserialize($cart->cart);
 
@@ -519,7 +519,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         }
 
         if (isset($_GET['mc_eid'])) {
-            @setcookie('mailchimp_email_id', trim($_GET['mc_eid']), $cookie_duration, '/' );
+            mailchimp_set_cookie('mailchimp_email_id', trim($_GET['mc_eid']), $cookie_duration, '/' );
         }
     }
 
@@ -565,7 +565,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             $cid = null;
         }
         
-        @setcookie('mailchimp_campaign_id', $cid, $cookie_duration, '/' );
+        mailchimp_set_cookie('mailchimp_campaign_id', $cid, $cookie_duration, '/' );
         $this->setWooSession('mailchimp_campaign_id', $cid);
 
         return $this;
@@ -618,7 +618,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             if (strpos($compare_local, $compare_refer) === 0) return $this;
 
             // set the cookie
-            @setcookie('mailchimp_landing_site', $landing_site, $this->getCookieDuration(), '/' );
+            mailchimp_set_cookie('mailchimp_landing_site', $landing_site, $this->getCookieDuration(), '/' );
 
             $this->setWooSession('mailchimp_landing_site', $landing_site);
         }
@@ -644,7 +644,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function expireLandingSiteCookie()
     {
-        @setcookie('mailchimp_landing_site', false, $this->getCookieDuration(), '/' );
+        mailchimp_set_cookie('mailchimp_landing_site', false, $this->getCookieDuration(), '/' );
         $this->setWooSession('mailchimp_landing_site', false);
 
         return $this;
@@ -756,10 +756,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             if (($current_email = $this->getEmailFromSession()) && $current_email !== $this->user_email) {
                 $this->previous_email = $current_email;
                 $this->force_cart_post = true;
-                @setcookie('mailchimp_user_previous_email',$this->user_email, $cookie_duration, '/' );
+                mailchimp_set_cookie('mailchimp_user_previous_email',$this->user_email, $cookie_duration, '/' );
             }
 
-            @setcookie('mailchimp_user_email', $this->user_email, $cookie_duration, '/' );
+            mailchimp_set_cookie('mailchimp_user_email', $this->user_email, $cookie_duration, '/' );
 
             $this->getCartItems();
 

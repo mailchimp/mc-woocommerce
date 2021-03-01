@@ -1249,6 +1249,32 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
     }
 }
 
+/**
+ * @param string $name
+ * @param string $value
+ * @param int $expire
+ * @param string $path
+ * @param string $domain
+ * @param bool $secure
+ * @param bool $httponly
+ * @param string $samesite
+ * @return void
+ */
+function mailchimp_set_cookie($name, $value, $expire, $path, $domain = '', $secure = true, $httponly = false, $samesite = 'Strict') {
+    if (PHP_VERSION_ID < 70300) {
+        @setcookie($name, $value, $expire, $path . '; samesite=' . $samesite, $domain, $secure, $httponly);
+        return;
+    }
+    @setcookie($name, $value, [
+        'expires' => $expire,
+        'path' => $path,
+        'domain' => $domain,
+        'samesite' => $samesite,
+        'secure' => $secure,
+        'httponly' => $httponly,
+    ]);
+}
+
 
 // Add WP CLI commands
 if (defined( 'WP_CLI' ) && WP_CLI) {

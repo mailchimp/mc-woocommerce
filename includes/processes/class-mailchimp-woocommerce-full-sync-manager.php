@@ -88,6 +88,9 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 
 			// flag the store as sync_finished
 			mailchimp_get_api()->flagStoreSync(mailchimp_get_store_id(), false);
+
+			// send the sync finished email.
+			MailChimp_WooCommerce_Admin::instance()->mailchimp_send_sync_finished_email();
 			
 			mailchimp_update_communication_status();
 

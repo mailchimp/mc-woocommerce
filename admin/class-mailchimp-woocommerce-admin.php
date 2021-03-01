@@ -785,19 +785,48 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/support', $pload);
 		$response_body = json_decode($response['body']);
-		if ($response['response']['code'] == 200 && $response_body->success == true ){
-			
+		if ($response['response']['code'] == 200 && $response_body->success == true ) {
 			wp_send_json_success($response_body);
+		} else if ($response['response']['code'] == 404 ) {
+			wp_send_json_error(array('success' => false, 'error' => $response));
 		}
-		
-		else if ($response['response']['code'] == 404 ){
-			wp_send_json_error(array(
-				'success' => false,
-				'error' => $response
-			));
-		}
-
 	}
+
+    /**
+     * @return mixed|null
+     */
+	public function mailchimp_send_sync_finished_email() {
+        try {
+            $order_count = mailchimp_get_api()->getOrderCount(mailchimp_get_store_id());
+            $list_name = $this->getListName();
+        } catch (\Exception $e) {
+            $list_name = mailchimp_get_list_id();
+            $order_count = mailchimp_get_order_count();
+        }
+
+        $admin_email = $this->getOption('admin_email');
+
+        if (empty($admin_email)) {
+            return null;
+        }
+
+        $pload = array(
+            'headers' => array(
+                'Content-type' => 'application/json',
+            ),
+            'body' => json_encode(array(
+                'sync_finished' => true,
+                'audience_name' => $list_name,
+                'total_orders' => $order_count,
+                'store_name' => get_option('blogname'),
+                'email' => $admin_email,
+            )),
+            'timeout'     => 30,
+        );
+        $response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/support', $pload);
+        $response_body = json_decode($response['body']);
+        return $response_body;
+    }
 
 	public function mailchimp_woocommerce_ajax_create_account_signup() {
 		$data = $_POST['data'];
@@ -817,22 +846,14 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			'body' => json_encode($data),
 			'timeout'     => 30,
         );
-		
 
 		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/signup/', $pload);
 		$response_body = json_decode($response['body']);
-		if ($response['response']['code'] == 200 && $response_body->success == true ){
-			
+		if ($response['response']['code'] == 200 && $response_body->success == true) {
 			wp_send_json_success($response_body);
-		}
-		
-		else if ($response['response']['code'] == 404 ){
-			wp_send_json_error(array(
-				'success' => false,
-			));
-		}
-
-        else {
+		} else if ($response['response']['code'] == 404 ) {
+			wp_send_json_error(array('success' => false));
+		} else {
 			$suggestion = wp_remote_get( 'https://woocommerce.mailchimpapp.com/api/usernames/suggestions/' . $_POST['username']);
 			$suggested_username = json_decode($suggestion['body'])->data;
 			wp_send_json_error( array(
@@ -1245,7 +1266,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 			return array_key_exists($list_id, $lists) ? $lists[$list_id] : false;
 		} catch (\Exception $e) {
-			return array();
+			return false;
 		}
 	}
 

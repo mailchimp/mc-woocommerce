@@ -341,9 +341,13 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				if ($wpdb->query($delete_sql) !== false) {
 					$sql = "ALTER TABLE {$wpdb->prefix}mailchimp_carts ADD PRIMARY KEY (email);";
 					// only update the option if the query returned sucessfully
-					if ($wpdb->query($sql) !== false) {
-						update_option( $this->plugin_name.'_cart_table_add_index_update', true);
-					}	
+					try {
+                        if ($wpdb->query($sql) !== false) {
+                            update_option( $this->plugin_name.'_cart_table_add_index_update', true);
+                        }
+                    } catch (\Exception $e) {
+                        update_option( $this->plugin_name.'_cart_table_add_index_update', true);
+                    }
 				}
 			}
 		}

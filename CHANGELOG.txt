@@ -1,4 +1,11 @@
 == Changelog ==
+= 2.5.1 =
+* tested for woocommerce v5.1
+* tested for wordpress v5.7
+* fix for cookies.js samesite error
+* adds sync completion email sent to admin
+* resolves php error for mailchimp_set_user_by_email on checkout page 
+* additional database error handling
 = 2.5 =
 * interface reskin
 * fix for fatal error on disabled WoooCommerce admin

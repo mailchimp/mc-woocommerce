@@ -32,7 +32,11 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
      */
     public function applyNewsletterField($checkout)
     {
-        if (!is_admin()) {
+        // some folks have asked to be able to check out on behalf of customers. I guess this makes sense
+        // if they want to do this, but it needs to be a constant and custom.
+        $allow_admin = defined('MAILCHIMP_ALLOW_ADMIN_NEWSLETTER') && MAILCHIMP_ALLOW_ADMIN_NEWSLETTER;
+
+        if ($allow_admin || !is_admin()) {
             $api = mailchimp_get_api();
 
             // get the gdpr fields from the cache - or call it again and save for 5 minutes.

@@ -62,7 +62,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     protected function cookie($key, $default = null)
     {
-        if ($this->is_admin) {
+        // if we're not allowed to use cookies, just return the default
+        if ($this->is_admin || !mailchimp_allowed_to_use_cookie($key)) {
             return $default;
         }
 
@@ -478,6 +479,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function handleCampaignTracking()
     {
+        if (!mailchimp_allowed_to_use_cookie('mailchimp_user_email')) {
+            return null;
+        }
+
         // set the landing site cookie if we don't have one.
         $this->setLandingSiteCookie();
 
@@ -600,6 +605,11 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function setLandingSiteCookie()
     {
+        // if we're not allowed to use this cookie, just return
+        if (!mailchimp_allowed_to_use_cookie('mailchimp_landing_site')) {
+            return $this;
+        }
+
         if (isset($_GET['expire_landing_site'])) $this->expireLandingSiteCookie();
 
         // if we already have a cookie here, we need to skip it.
@@ -644,6 +654,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function expireLandingSiteCookie()
     {
+        if (!mailchimp_allowed_to_use_cookie('mailchimp_landing_site')) {
+            return $this;
+        }
+
         mailchimp_set_cookie('mailchimp_landing_site', false, $this->getCookieDuration(), '/' );
         $this->setWooSession('mailchimp_landing_site', false);
 
@@ -745,6 +759,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     {
         if ($this->is_admin) {
             $this->respondJSON(array('success' => false));
+        }
+
+        if (!mailchimp_allowed_to_use_cookie('mailchimp_user_email')) {
+            $this->respondJSON(array('success' => false, 'email' => false));
         }
 
         if ($this->doingAjax() && isset($_GET['email'])) {

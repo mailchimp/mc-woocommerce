@@ -1279,6 +1279,14 @@ function mailchimp_set_cookie($name, $value, $expire, $path, $domain = '', $secu
     ]);
 }
 
+/**
+ * We will allow people to filter this value - turn it off if they would like.
+ * add_filter( 'mailchimp_allowed_to_use_cookie', 'custom_cookie_callback_function', 10, 1 );
+ * @return bool
+ */
+function mailchimp_allowed_to_use_cookie($cookie) {
+    return apply_filters('mailchimp_allowed_to_use_cookie', $cookie) !== $cookie;
+}
 
 // Add WP CLI commands
 if (defined( 'WP_CLI' ) && WP_CLI) {

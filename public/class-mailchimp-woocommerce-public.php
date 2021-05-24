@@ -63,7 +63,8 @@ class MailChimp_WooCommerce_Public {
 		wp_localize_script($this->plugin_name, 'mailchimp_public_data', array(
 			'site_url' => site_url(),
 			'ajax_url' => admin_url('admin-ajax.php'),
-			'language' => substr( get_locale(), 0, 2 )
+			'language' => substr( get_locale(), 0, 2 ),
+            'allowed_to_set_cookies' => mailchimp_allowed_to_use_cookie('mailchimp_user_email'),
 		));
 
         // Enqueued script with localized data.

@@ -258,6 +258,22 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         if ($pagenow == 'admin.php' && isset($_GET) && isset($_GET['page']) && 'mailchimp-woocommerce' === $_GET['page']) {
             $this->handle_abandoned_cart_table();
             $this->update_db_check();
+
+            /// this is where we need to cache this data for a longer period of time and only during admin page views.
+            /// https://wordpress.org/support/topic/the-plugin-slows-down-the-website-because-of-slow-api/#post-14339311
+            if (mailchimp_is_configured() && ($list_id = mailchimp_get_list_id())) {
+                $transient = "mailchimp-woocommerce-gdpr-fields.{$list_id}";
+                $GDPRfields = get_site_transient($transient);
+                if (!is_array($GDPRfields)) {
+                    try {
+                        $GDPRfields = mailchimp_get_api()->getGDPRFields($list_id);
+                        set_site_transient($transient, $GDPRfields, 0);
+                    } catch (\Exception $e) {
+                        set_site_transient($transient, array(), 60);
+                    }
+                }
+            }
+
 			$active_tab = isset($_GET['tab']) ? $_GET['tab'] : ($this->getOption('active_tab') ? $this->getOption('active_tab') : 'api_key');
 			if ($active_tab == 'sync' && get_option('mailchimp-woocommerce-sync.initial_sync') == 1 && get_option('mailchimp-woocommerce-sync.completed_at') > 0 ) {
                 $this->mailchimp_show_initial_sync_message();
@@ -1815,5 +1831,63 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		return wp_send_json_success( esc_html( file_get_contents( WC_LOG_DIR . $viewed_log ) ) );
 		
 	}
+
+    public function save()
+    {
+        if (MC_Flag::isOn(MC_FlagNames::FIX_ECOMMERCE_CUSTOMER_STATS)) {
+            $existing_order_record = null;
+            $is_existing_order = $this->existsInDatabase();
+            $no_customer_for_existing_order = false;
+            if ($is_existing_order) {
+                $existing_order_record = MC::userDB()->queryOne('from Ecommerce_Order where store_id = ? and order_id = ? limit 1', [$this->store_id, $this->order_id]);
+                $no_customer_for_existing_order = $existing_order_record ? $existing_order_record->getCustomer() === null : true;
+            }
+            $result = parent::save();
+            $customer = $this->getCustomer();
+            if ($customer !== null) {
+                // Did we just save a new line item record?
+                if (!$is_existing_order) {
+                    // Is this line item a completely new order or some addition to an existing order?
+                    $has_another_line_item = (bool)MC::userDB()->querySqlOne('select 1 from ecommerce_orders where store_id = ? and order_foreign_id = ? and order_id != ? and is_deleted = ? limit 1', [$this->store_id, $this->order_foreign_id, $this->order_id, 'N']);
+                    if (!$has_another_line_item) {
+                        $customer->incrementOrdersCount();
+                        $customer->addOrderToTotalSpent($this);
+                    }
+                    // Did we just make an update to an existing line item?
+                } elseif ($existing_order_record) {
+                    $is_order_total_mismatched_with_other_line_items = (bool)MC::userDB()->querySqlOne('select 1 from ecommerce_orders where store_id = ? and order_foreign_id = ? and order_total != ? and is_deleted = ? limit 1', [$this->store_id, $this->order_foreign_id, $this->order_total, 'N']);
+                    // Only update if all the line items say the same order_total
+                    if (!$is_order_total_mismatched_with_other_line_items) {
+                        $customer->total_spent = $customer->total_spent - $existing_order_record->order_total + $this->order_total;
+                    }
+                    if ($no_customer_for_existing_order) {
+                        $customer->incrementOrdersCount();
+                    }
+                }
+                $customer->save();
+                $this->customer = $customer;
+            }
+            return $result;
+        }
+        // Non-flagged behavior
+        return parent::save();
+    }
+
+    public function onDelete()
+    {
+        parent::onDelete();
+        if (MC_Flag::isOn(MC_FlagNames::FIX_ECOMMERCE_CUSTOMER_STATS)) {
+            $has_another_line_item = MC::userDB()->querySqlOne('select 1 from ecommerce_orders where store_id = ? and order_foreign_id != ? and is_deleted = ? limit 1', [$this->store_id, $this->order_foreign_id, 'N']);
+            if (!$has_another_line_item) {
+                $customer = $this->getCustomer();
+                if ($customer !== null) {
+                    $customer->total_spent -= $this->order_total;
+                    $customer->decrementOrdersCount();
+                    $customer->save();
+                    $this->customer = $customer;
+                }
+            }
+        }
+    }
 
 }

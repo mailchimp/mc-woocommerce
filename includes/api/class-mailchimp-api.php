@@ -1616,7 +1616,7 @@ class MailChimp_WooCommerce_MailChimpApi
     public function getGDPRFields($list_id)
     {
         $one_member = $this->get("lists/$list_id/members?fields=members.marketing_permissions&count=1");
-        $fields = false;
+        $fields = array();
         
         if (is_array($one_member) &&
             isset($one_member['members']) &&

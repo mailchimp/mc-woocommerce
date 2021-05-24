@@ -300,7 +300,7 @@ class MailChimp_WooCommerce_Order
      */
     public function getCurrencyCode()
     {
-        return $this->currency_code;
+        return !empty($this->currency_code) ? $this->currency_code : 'USD';
     }
 
     /**

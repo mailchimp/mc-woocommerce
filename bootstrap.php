@@ -1285,7 +1285,7 @@ function mailchimp_set_cookie($name, $value, $expire, $path, $domain = '', $secu
  * @return bool
  */
 function mailchimp_allowed_to_use_cookie($cookie) {
-    return apply_filters('mailchimp_allowed_to_use_cookie', $cookie) !== $cookie;
+    return apply_filters('mailchimp_allowed_to_use_cookie', $cookie) === $cookie;
 }
 
 // Add WP CLI commands

@@ -641,6 +641,9 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function getReferer()
     {
+        if (function_exists('wp_get_referer')) {
+            return wp_get_referer();
+        }
         if (!empty($_REQUEST['_wp_http_referer'])) {
             return wp_unslash($_REQUEST['_wp_http_referer']);
         } elseif (!empty($_SERVER['HTTP_REFERER'])) {

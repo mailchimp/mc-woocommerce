@@ -1285,8 +1285,16 @@ function mailchimp_set_cookie($name, $value, $expire, $path, $domain = '', $secu
  * @return bool
  */
 function mailchimp_allowed_to_use_cookie($cookie) {
-    return apply_filters('mailchimp_allowed_to_use_cookie', $cookie) === $cookie;
+    $result = apply_filters('mailchimp_allowed_to_use_cookie', $cookie);
+    if (is_bool($result)) return $result;
+    return $result === $cookie;
 }
+
+// the cookie name will be whatever we're trying to set, but the most simple
+// return the $cookie_name if you will allow it -
+// otherwise it is going to turn this feature off.
+
+
 
 // Add WP CLI commands
 if (defined( 'WP_CLI' ) && WP_CLI) {

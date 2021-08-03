@@ -1,4 +1,8 @@
 == Changelog ==
+= 2.5.2 =
+* cache gdpr fields for performance
+* force a currency code when not present
+* allow admins to see a newsletter checkbox if configured
 = 2.5.1 =
 * tested for woocommerce v5.1
 * tested for wordpress v5.7

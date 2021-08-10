@@ -1,4 +1,6 @@
 == Changelog ==
+= 2.5.3 =
+* remove order_total and total_spent from customer submission
 = 2.5.2 =
 * cache gdpr fields for performance
 * force a currency code when not present

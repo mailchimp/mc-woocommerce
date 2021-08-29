@@ -138,8 +138,8 @@ class MailChimp_WooCommerce_Order
      */
     public function setId($id)
     {
-        $this->id = preg_replace('/[^0-9]/i','', $id);
-
+        // old regex preg_replace('/[^0-9]/i','', $id);
+        $this->id = preg_replace('/[^a-zA-Z\d\-_]/', '', $id);
         return $this;
     }
 

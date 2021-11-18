@@ -1,4 +1,8 @@
 == Changelog ==
+= 2.5.4 =
+* enhanced api error parsing
+* adds site transient for tracking cart
+* tested for woocommerce v5.8
 = 2.5.3 =
 * remove order_total and total_spent from customer submission
 = 2.5.2 =

@@ -2,3 +2,4 @@
 .idea/
 _test.php
 /vendor/
+blocks/node_modules/*

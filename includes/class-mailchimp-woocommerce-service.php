@@ -755,6 +755,30 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $this->respondJSON(array('success' => false, 'email' => false));
     }
 
+    public function set_user_from_block_checkout($email)
+    {
+        if (!mailchimp_allowed_to_use_cookie('mailchimp_user_email')) {
+            return false;
+        }
+        if (!empty($email)) {
+            $cookie_duration = $this->getCookieDuration();
+            $this->user_email = trim(str_replace(' ','+', $email));
+            if (($current_email = $this->getEmailFromSession()) && $current_email !== $this->user_email) {
+                $this->previous_email = $current_email;
+                $this->force_cart_post = true;
+                mailchimp_set_cookie('mailchimp_user_previous_email',$this->user_email, $cookie_duration, '/' );
+            }
+            mailchimp_set_cookie('mailchimp_user_email', $this->user_email, $cookie_duration, '/' );
+            $this->getCartItems();
+//            if (isset($_GET['mc_language'])) {
+//                $this->user_language = $_GET['mc_language'];
+//            }
+            $this->handleCartUpdated();
+            return true;
+        }
+        return false;
+    }
+
     /**
      *
      */

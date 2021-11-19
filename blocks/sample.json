@@ -1,0 +1,45 @@
+{
+  "billing_address": {
+    "first_name": "Ryan",
+    "last_name": "Hungate",
+    "company": "",
+    "address_1": "10754 N CHAPIN CT",
+    "address_2": "",
+    "city": "ORO VALLEY",
+    "state": "AZ",
+    "postcode": "85737-6634",
+    "country": "US",
+    "email": "ryanhungate@icloud.com",
+    "phone": "15203057061"
+  },
+  "shipping_address": {
+    "first_name": "Ryan",
+    "last_name": "Hungate",
+    "company": "",
+    "address_1": "10754 N CHAPIN CT",
+    "address_2": "",
+    "city": "ORO VALLEY",
+    "state": "AZ",
+    "postcode": "85737-6634",
+    "country": "US",
+    "phone": "15203057061"
+  },
+  "customer_note": "",
+  "should_create_account": false,
+  "payment_method": "cod",
+  "payment_data": [
+    {
+      "key": "payment_method",
+      "value": ""
+    },
+    {
+      "key": "wc-cod-new-payment-method",
+      "value": false
+    }
+  ],
+  "extensions": {
+    "mailchimp-newsletter": {
+      "optin": true
+    }
+  }
+}

@@ -1850,16 +1850,20 @@ class MailChimp_WooCommerce_MailChimpApi
             return $data;
         }
 
+        $error_status = isset($data['status']) ? (int) $data['status'] : (int) $http_code;
+
         if ($http_code >= 400 && $http_code <= 500) {
             if ($http_code == 403) {
                 throw new MailChimp_WooCommerce_RateLimitError();
             }
-
-            throw new MailChimp_WooCommerce_Error($data['title'] .' :: '.$data['detail'], (int) $data['status']);
+            $error_message = isset($data['title']) ? $data['title'] : '';
+            $error_message .= isset($data['detail']) ? $data['detail'] : '';
+            throw new MailChimp_WooCommerce_Error($error_message, $error_status);
         }
 
         if ($http_code >= 500) {
-            throw new MailChimp_WooCommerce_ServerError($data['detail'], $data['status']);
+            $error_message = isset($data['detail']) ? $data['detail'] : '';
+            throw new MailChimp_WooCommerce_ServerError($error_message, $error_status);
         }
 
         if (!is_array($data)) {

@@ -877,6 +877,17 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     {
         if (!$this->validated_cart_db) return false;
 
+        $hash = md5(strtolower($email));
+        $transient_key = "mailchimp-woocommerce-cart-{$hash}";
+
+        // let's set a transient here to block dup inserts
+        if (get_site_transient($transient_key)) {
+            return false;
+        }
+
+        // insert the transient
+        set_site_transient($transient_key, true, 5);
+
         global $wpdb;
 
         $table = "{$wpdb->prefix}mailchimp_carts";
@@ -891,6 +902,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             $sql = $wpdb->prepare($statement, array(maybe_serialize($this->cart), $email, $user_id, $uid));
             try {
                 $wpdb->query($sql);
+                delete_site_transient($transient_key);
             } catch (\Exception $e) {
                 return false;
             }
@@ -903,6 +915,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                     'cart'  => maybe_serialize($this->cart),
                     'created_at'   => gmdate('Y-m-d H:i:s', time()),
                 ));
+                delete_site_transient($transient_key);
             } catch (\Exception $e) {
                 return false;
             }

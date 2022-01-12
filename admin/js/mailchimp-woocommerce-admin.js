@@ -1,7 +1,7 @@
 (function( $ ) {
 	'use strict';
 
-	$( window ).load(function() {
+	$(window).on('load', function() {
 
 		// show/hide optional settings
 		var optionalSettings = false;

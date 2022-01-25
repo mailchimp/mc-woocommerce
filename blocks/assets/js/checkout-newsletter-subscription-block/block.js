@@ -5,9 +5,6 @@ import { useEffect, useState } from '@wordpress/element';
 import { CheckboxControl } from '@woocommerce/blocks-checkout';
 
 const Block = ( { cart, extensions, text, checkoutExtensionData } ) => {
-	const { mailchimp } = extensions;
-	const { gdprFields } = mailchimp;
-	const { billingAddress, shippingAddress } = cart;
 	const [ checked, setChecked ] = useState( false );
 	const { setExtensionData } = checkoutExtensionData;
 

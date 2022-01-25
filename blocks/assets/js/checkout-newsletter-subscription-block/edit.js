@@ -16,8 +16,15 @@ import { CheckboxControl } from '@woocommerce/blocks-checkout';
 import './style.scss';
 
 export const Edit = ( { attributes, setAttributes } ) => {
-	const { text, gdprHeadline } = attributes;
+	const { text, gdprHeadline, gdpr } = attributes;
 	const blockProps = useBlockProps();
+
+	console.log('edit', {
+		text: text,
+		gdprHeadline: gdprHeadline,
+		gdpr: gdpr,
+	});
+
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
@@ -37,15 +44,41 @@ export const Edit = ( { attributes, setAttributes } ) => {
 					onChange={ ( value ) => setAttributes( { text: value } ) }
 				/>
 			</div>
-			<RichText
-				value={ gdprHeadline }
-				help={__( 'Set the GDPR headline.', 'mailchimp-for-woocommerce' )}
-				onChange={ ( value ) => setAttributes( { gdprHeadline: value } ) }
-			/>
+			{
+				gdpr && gdpr.length &&
+				(
+					<>
+						<div style={{display: 'flex', marginTop: '2rem'}}>
+							<RichText
+								value={ gdprHeadline }
+								help={__( 'Set the GDPR headline.', 'mailchimp-for-woocommerce' )}
+								onChange={ ( value ) => setAttributes( { gdprHeadline: value } ) }
+							/>
+						</div>
+						{gdpr.map((gdprItem, index) => {
+							return (
+								<div style={{display: 'flex', marginTop: '1rem'}}>
+									<CheckboxControl
+										id={'gdpr_'+gdprItem.marketing_permission_id}
+										checked={ gdpr[index].enabled }
+										onChange={ () => {
+											gdpr[index].enabled = !gdpr[index].enabled;
+											setAttributes({gdpr: gdpr});
+										}}
+									>
+										<span dangerouslySetInnerHTML={ {__html: gdprItem.text} }/>
+									</CheckboxControl>
+								</div>
+							)
+						})}
+					</>
+				)
+			}
 		</div>
 	);
 };
 
+// not sure
 export const Save = () => {
 	return <div { ...useBlockProps.save() } />;
 };

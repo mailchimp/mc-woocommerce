@@ -129,11 +129,15 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
 	 */
 	public function get_script_data()
     {
-		$data = array(
-			'optinDefaultText' => __( 'I want to receive updates about products and promotions.', 'mailchimp-newsletter' ),
-            'gdprHeadline' => __( 'Please select all the ways you would like to hear from us', 'mailchimp-newsletter' ),
-            'gdprFields' => $this->getGdprFields(),
-		);
+        $gdpr = $this->getGdprFields();
+        $data = array(
+            'optinDefaultText' => __( 'I want to receive updates about products and promotions.', 'mailchimp-newsletter' ),
+        );
+
+        if (!empty($gdpr)) {
+            $data['gdprHeadline'] = __( 'Please select all the ways you would like to hear from us', 'mailchimp-newsletter' );
+            $data['gdprFields'] = $gdpr;
+        }
 
 		return $data;
 	}
@@ -145,7 +149,7 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
     {
         register_block_type( dirname( __FILE__ ) . '/assets/js/checkout-newsletter-subscription-block', array(
             'editor_script' => 'mailchimp-newsletter-editor',
-        ) );
+        ));
 	}
 
 	/**
@@ -180,7 +184,7 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
 							'arg_options' => array(
 								'validate_callback' => function( $value ) {
 									if ( ! is_bool( $value ) ) {
-										return new \WP_Error( 'api-error', 'value of type ' . gettype( $value ) . ' was posted to the newslteer optin callback' );
+										return new \WP_Error( 'api-error', 'value of type ' . gettype( $value ) . ' was posted to the newsletter optin callback' );
 									}
 									return true;
 								},

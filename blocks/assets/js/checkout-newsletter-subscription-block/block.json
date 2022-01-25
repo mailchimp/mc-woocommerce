@@ -6,7 +6,7 @@
 	"category": "woocommerce",
 	"description": "Adds a newsletter subscription checkbox to the checkout.",
 	"supports": {
-		"html": false,
+		"html": true,
 		"align": false,
 		"multiple": false,
 		"reusable": false

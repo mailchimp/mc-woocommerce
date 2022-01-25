@@ -10,6 +10,12 @@ import { registerBlockType } from '@wordpress/blocks';
 import { Edit, Save } from './edit';
 import metadata from './block.json';
 import attributes from './attributes';
+
+console.log('index.js', {
+	metadata: metadata,
+	attributes: attributes,
+});
+
 registerBlockType( metadata, {
 	icon: {
 		src: (

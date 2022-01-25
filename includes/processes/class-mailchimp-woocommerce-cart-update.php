@@ -17,6 +17,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
     public $cart_data;
     public $ip_address;
     public $user_language;
+    public $status = false;
 
 
     /**
@@ -47,6 +48,13 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
         }
 
         $this->assignIP();
+    }
+
+    public function setStatus($status)
+    {
+        $this->status = (bool) $status;
+
+        return $this;
     }
 
     /**
@@ -112,7 +120,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
             $customer = new MailChimp_WooCommerce_Customer();
             $customer->setId($this->id);
             $customer->setEmailAddress($this->email);
-            $customer->setOptInStatus(false);
+            $customer->setOptInStatus($this->status);
 
             $cart = new MailChimp_WooCommerce_Cart();
             $cart->setId($this->id);

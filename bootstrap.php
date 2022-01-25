@@ -216,6 +216,36 @@ function mailchimp_get_remaining_jobs_count($job_hook) {
     return count($existing_actions);
 }
 
+function mailchimp_submit_subscribed_only() {
+    return (bool) mailchimp_get_option('mailchimp_ongoing_sync_status', '1');
+}
+
+/**
+ * @return bool
+ */
+function mailchimp_carts_disabled() {
+    return mailchimp_get_option('mailchimp_cart_tracking', 'all') === 'disabled';
+}
+
+/**
+ * @return bool
+ */
+function mailchimp_carts_subscribers_only() {
+    return mailchimp_get_option('mailchimp_cart_tracking', 'all') === 'subscribed';
+}
+
+/**
+ * @param $email
+ * @return string|null
+ */
+function mailchimp_get_subscriber_status($email) {
+    try {
+        return mailchimp_get_api()->member(mailchimp_get_list_id(), $email)['status'];
+    } catch (\Exception $e) {
+        return null;
+    }
+}
+
 /**
  * @param bool $force
  * @return bool
@@ -556,14 +586,33 @@ function mailchimp_woocommerce_get_all_image_sizes_list() {
  * This action is documented in includes/class-mailchimp-woocommerce-activator.php
  */
 function activate_mailchimp_woocommerce() {
-    // if we don't have woocommerce we need to display a horrible error message before the plugin is installed.
+
+    // if we don't have any of these dependencies,
+    // we need to display a horrible error message before the plugin is installed.
+    mailchimp_check_curl_is_installed();
+    mailchimp_check_woocommerce_is_installed();
+    // good to go - activate the plugin.
+    MailChimp_WooCommerce_Activator::activate();
+}
+
+function mailchimp_check_curl_is_installed() {
+    if (!function_exists('curl_exec')) {
+        // Deactivate the plugin
+        deactivate_plugins(__FILE__);
+        $error_message = __('The MailChimp For WooCommerce plugin requires <a href="https://www.php.net/manual/en/book.curl.php/">curl</a> to be enabled!', 'woocommerce');
+        wp_die($error_message);
+    }
+    return true;
+}
+
+function mailchimp_check_woocommerce_is_installed() {
     if (!mailchimp_check_woocommerce_plugin_status()) {
         // Deactivate the plugin
         deactivate_plugins(__FILE__);
         $error_message = __('The MailChimp For WooCommerce plugin requires the <a href="http://wordpress.org/extend/plugins/woocommerce/">WooCommerce</a> plugin to be active!', 'woocommerce');
         wp_die($error_message);
     }
-    MailChimp_WooCommerce_Activator::activate();
+    return true;
 }
 
 /**

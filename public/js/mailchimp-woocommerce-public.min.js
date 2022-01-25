@@ -30,12 +30,14 @@ function mailchimpGetCurrentUserByHash(a) {
 function mailchimpHandleBillingEmail(selector) {
     try {
         if (!mailchimp_public_data.allowed_to_set_cookies) return;
+        if (mailchimp_public_data.disable_carts) return;
+        var subscribed = document.querySelector('#mailchimp_woocommerce_newsletter');
         if (!selector) selector = "#billing_email";
         var a = document.querySelector(selector);
         var b = void 0 !== a ? a.value : "";
         if (!mailchimp_cart.valueEmail(b) || mailchimp_submitted_email === b) { return false; }
         mailchimp_cart.setEmail(b);
-        var c = mailchimp_public_data.ajax_url + "?action=mailchimp_set_user_by_email&email=" + b + "&mc_language=" + mailchimp_public_data.language;
+        var c = mailchimp_public_data.ajax_url + "?action=mailchimp_set_user_by_email&email=" + b + "&mc_language=" + mailchimp_public_data.language + "&subscribed=" + (subscribed && subscribed.checked ? '1' : '0');
         var d = new XMLHttpRequest;
         d.open("POST", c, !0);
         d.onload = function () {
@@ -184,6 +186,9 @@ mailchimpReady(function () {
     // if they've told us we can't do this - we have to honor it.
     if (!mailchimp_public_data.allowed_to_set_cookies) return;
 
+    // if we're not using carts - don't bother setting any of this.
+    if (!mailchimp_public_data.disable_carts) return;
+
     if (void 0 === a) {
         var a = { site_url: document.location.origin, defaulted: !0, ajax_url: document.location.origin + "/wp-admin?admin-ajax.php" };
     }
@@ -191,6 +196,15 @@ mailchimpReady(function () {
     try {
         var b = mailchimp.utils.getQueryStringVars();
         void 0 !== b.mc_cart_id && mailchimpGetCurrentUserByHash(b.mc_cart_id);
+
+        var subscribed = document.querySelector('#mailchimp_woocommerce_newsletter');
+
+        if (subscribed) {
+            subscribed.onchange = function() {
+                mailchimp_submitted_email = null;
+                mailchimpHandleBillingEmail('#billing_email');
+            }
+        }
 
         mailchimp_username_email = document.querySelector("#username");
         mailchimp_billing_email = document.querySelector("#billing_email");

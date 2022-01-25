@@ -13,6 +13,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     protected $user_email = null;
     protected $previous_email = null;
     protected $user_language = null;
+    protected $cart_subscribe = null;
     protected $force_cart_post = false;
     protected $cart_was_submitted = false;
     protected $cart = array();
@@ -194,6 +195,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function handleCartUpdated($updated = null)
     {
+        if (mailchimp_carts_disabled()) {
+            return false;
+        }
+
         if ($updated === false || $this->is_admin || $this->cart_was_submitted || !mailchimp_is_configured()) {
             return !is_null($updated) ? $updated : false;
         }
@@ -207,6 +212,21 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             // let's skip this right here - no need to go any further.
             if (mailchimp_email_is_privacy_protected($user_email)) {
                 return !is_null($updated) ? $updated : false;
+            }
+
+            // if the user chose to send to subscribers only we need to do a quick check
+            // to see if this email has already subscribed.
+            if (!$this->cart_subscribe && mailchimp_carts_subscribers_only()) {
+                $transient_key = mailchimp_hash_trim_lower($user_email).".mc.status";
+                $cached_status = mailchimp_get_transient($transient_key, null);
+                if ($cached_status === null) {
+                    $cached_status = mailchimp_get_subscriber_status($user_email);
+                    mailchimp_set_transient($transient_key, $cached_status ? $cached_status : false, 300);
+                }
+                if ($cached_status !== 'subscribed') {
+                    mailchimp_debug('cart_subscribers_only', "preventing {$user_email} from submitting cart data due to subscriber settings.");
+                    return false;
+                }
             }
 
             $previous = $this->getPreviousEmailFromSession();
@@ -240,10 +260,14 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                 $campaign = $this->getCampaignTrackingID();
                 
                 // get user language or default to admin main language
-                $language = $this->user_language ?: substr( get_locale(), 0, 2 ); 
+                $language = $this->user_language ?: substr(get_locale(), 0, 2);
                 
                 // fire up the job handler
                 $handler = new MailChimp_WooCommerce_Cart_Update($uid, $user_email, $campaign, $this->cart, $language);
+
+                // if they had the checkbox checked - go ahead and subscribe them if this is the first post.
+                $handler->setStatus($this->cart_subscribe);
+
                 mailchimp_handle_or_queue($handler);
             }
 
@@ -784,16 +808,19 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function set_user_by_email()
     {
+        if (mailchimp_carts_disabled()) {
+            $this->respondJSON(array('success' => false, 'message' => 'filter blocked due to carts being disabled'));
+        }
+
         if ($this->is_admin) {
-            $this->respondJSON(array('success' => false));
+            $this->respondJSON(array('success' => false, 'message' => 'admin carts are not tracked.'));
         }
 
         if (!mailchimp_allowed_to_use_cookie('mailchimp_user_email')) {
-            $this->respondJSON(array('success' => false, 'email' => false));
+            $this->respondJSON(array('success' => false, 'email' => false, 'message' => 'filter blocked due to cookie preferences'));
         }
 
         if ($this->doingAjax() && isset($_GET['email'])) {
-
             $cookie_duration = $this->getCookieDuration();
 
             $this->user_email = trim(str_replace(' ','+', $_GET['email']));
@@ -810,6 +837,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
             if (isset($_GET['mc_language'])) {
                 $this->user_language = $_GET['mc_language'];
+            }
+
+            if (isset($_GET['subscribed'])) {
+                $this->cart_subscribe = (bool) $_GET['subscribed'];
             }
 
             $this->handleCartUpdated();

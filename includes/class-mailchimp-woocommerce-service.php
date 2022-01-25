@@ -266,7 +266,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                 $handler = new MailChimp_WooCommerce_Cart_Update($uid, $user_email, $campaign, $this->cart, $language);
 
                 // if they had the checkbox checked - go ahead and subscribe them if this is the first post.
-                $handler->setStatus($this->cart_subscribe);
+                //$handler->setStatus($this->cart_subscribe);
 
                 mailchimp_handle_or_queue($handler);
             }

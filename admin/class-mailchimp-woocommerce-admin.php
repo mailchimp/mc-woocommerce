@@ -129,7 +129,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             if ($label == '') $label = __('Subscribe to our newsletter', 'mailchimp-for-woocommerce');
 			$options = get_option($this->plugin_name, array());
 			$checkbox_default_settings = (array_key_exists('mailchimp_checkbox_defaults', $options) && !is_null($options['mailchimp_checkbox_defaults'])) ? $options['mailchimp_checkbox_defaults'] : 'check';
-			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version.'.21', false );
+			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version.'.01', false );
 			wp_localize_script(
 				$this->plugin_name,
 				'phpVars',

@@ -129,7 +129,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             // if the order is new, and has been flagged as a status that should not be pushed over to
             // Mailchimp - just ignore it and log it.
             if ($new_order && $order->shouldIgnoreIfNotInMailchimp()) {
-                mailchimp_log('system.debug', "order {$order->getId()} is in {$order->getOriginalWooStatus()} status, and is being skipped for now.");
+                mailchimp_debug('filter', "order {$order->getId()} is in {$order->getOriginalWooStatus()} status, and is being skipped for now.");
                 return false;
             }
             
@@ -141,23 +141,25 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 return false;
             }
 
+            $user_email = $order->getCustomer()->getEmailAddress();
             $status = $order->getCustomer()->getOptInStatus();
+            $transient_key = mailchimp_hash_trim_lower($user_email).".mc.status";
             $current_status = null;
             $pulled_member = false;
 
             if (!$status && mailchimp_submit_subscribed_only()) {
                 try {
-                    $user_email = $order->getCustomer()->getEmailAddress();
                     $subscriber = $api->member(mailchimp_get_list_id(), $user_email);
                     $current_status = $subscriber['status'];
-                    $transient_key = mailchimp_hash_trim_lower($user_email).".mc.status";
-                    mailchimp_set_transient($transient_key, $current_status, 300);
+                    mailchimp_set_transient($transient_key, $current_status, 60);
                     if ($current_status != 'subscribed') {
-                        mailchimp_log('filter', "#{$woo_order_number} was blocked due to subscriber only settings");
+                        mailchimp_debug('filter', "#{$woo_order_number} was blocked due to subscriber only settings");
                         return false;
                     }
                 } catch (\Exception $e) {
-
+                    mailchimp_set_transient($transient_key, $current_status, 60);
+                    mailchimp_debug('filter', "#{$woo_order_number} was blocked due to subscriber only settings");
+                    return false;
                 }
                 $pulled_member = true;
             }

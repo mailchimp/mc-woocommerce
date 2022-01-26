@@ -129,8 +129,9 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
             <h3><?php esc_html_e('Sync Settings', 'mailchimp-for-woocommerce');?></h3>
         </div>
 
+        <?php $enable_auto_subscribe = (array_key_exists('mailchimp_auto_subscribe', $options) && !is_null($options['mailchimp_auto_subscribe'])) ? $options['mailchimp_auto_subscribe'] : '1'; ?>
+        <?php if(!$list_is_configured): ?>
         <div class="box" >
-            <?php $enable_auto_subscribe = (array_key_exists('mailchimp_auto_subscribe', $options) && !is_null($options['mailchimp_auto_subscribe'])) ? $options['mailchimp_auto_subscribe'] : '1'; ?>
             <label>
                 <h4><?php esc_html_e('Initial Sync', 'mailchimp-for-woocommerce');?></h4>
                 <p><?= __('WooCommerce does not keep a historical record of a customer\'s opt-in preferences. This plugin will add this functionality moving forward. Do you want to subscribe all customers to your Mailchimp Audience or only those moving forward?', 'mailchimp-for-woocommerce') ?></p>
@@ -143,6 +144,7 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
                 <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_auto_subscribe]" value="0"<?php if(!(bool) $enable_auto_subscribe) echo ' checked="checked" '; ?>><?php esc_html_e('Only sync customers in this store who are subscribed in my Mailchimp Audience', 'mailchimp-for-woocommerce');?><br/>
             </label>
         </div>
+        <?php endif; ?>
 
         <div class="box" >
             <?php $ongoing_sync_subscribe = (array_key_exists('mailchimp_ongoing_sync_status', $options) && !is_null($options['mailchimp_ongoing_sync_status'])) ? $options['mailchimp_ongoing_sync_status'] : '1'; ?>
@@ -152,10 +154,10 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
             </label>
             <div class="box margin-large"></div>
             <label class="radio-label">
-                <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_ongoing_sync_status]" value="1"<?php if((bool) $ongoing_sync_subscribe) echo ' checked="checked" '; ?>><?php esc_html_e('Send all data to your Mailchimp Audience, including subscribers and transactional customers', 'mailchimp-for-woocommerce');?><br>
+                <input type="radio" id="ongoing_sync_all" name="<?php echo $this->plugin_name; ?>[mailchimp_ongoing_sync_status]" value="1"<?php if((bool) $ongoing_sync_subscribe) echo ' checked="checked" '; ?>><?php esc_html_e('Send all data to your Mailchimp Audience, including subscribers and transactional customers', 'mailchimp-for-woocommerce');?><br>
             </label>
             <label class="radio-label">
-                <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_ongoing_sync_status]" value="0"<?php if(!(bool) $ongoing_sync_subscribe) echo ' checked="checked" '; ?>><?php esc_html_e('Only sync subscribers. No transactional customers will be sent to your Mailchimp Audience', 'mailchimp-for-woocommerce');?><br/>
+                <input type="radio" id="ongoing_sync_subscribed" name="<?php echo $this->plugin_name; ?>[mailchimp_ongoing_sync_status]" value="0"<?php if(!(bool) $ongoing_sync_subscribe) echo ' checked="checked" '; ?>><?php esc_html_e('Only sync subscribers. No transactional customers will be sent to your Mailchimp Audience', 'mailchimp-for-woocommerce');?><br/>
             </label>
         </div>
 
@@ -167,13 +169,13 @@ $list_is_configured = isset($options['mailchimp_list']) && (!empty($options['mai
             </label>
             <div class="box margin-large"></div>
             <label class="radio-label">
-                <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_cart_tracking]" value="all"<?php if($mailchimp_cart_tracking === 'all') echo ' checked="checked" '; ?>><?php esc_html_e('Track carts for all customers', 'mailchimp-for-woocommerce');?><br>
+                <input type="radio" id="cart_track_all" name="<?php echo $this->plugin_name; ?>[mailchimp_cart_tracking]" value="all"<?php if($mailchimp_cart_tracking === 'all') echo ' checked="checked" '; ?>><?php esc_html_e('Track carts for all customers', 'mailchimp-for-woocommerce');?><br>
             </label>
             <label class="radio-label">
-                <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_cart_tracking]" value="subscribed"<?php if($mailchimp_cart_tracking === 'subscribed') echo ' checked="checked" '; ?>><?php esc_html_e('Only track carts for subscribed customers', 'mailchimp-for-woocommerce');?><br/>
+                <input type="radio" id="cart_track_subscribed" name="<?php echo $this->plugin_name; ?>[mailchimp_cart_tracking]" value="subscribed"<?php if($mailchimp_cart_tracking === 'subscribed') echo ' checked="checked" '; ?>><?php esc_html_e('Only track carts for subscribed customers', 'mailchimp-for-woocommerce');?><br/>
             </label>
             <label class="radio-label">
-                <input type="radio" name="<?php echo $this->plugin_name; ?>[mailchimp_cart_tracking]" value="disabled"<?php if($mailchimp_cart_tracking === 'disabled') echo ' checked="checked" '; ?>><?php esc_html_e('Disable cart tracking', 'mailchimp-for-woocommerce');?><br/>
+                <input type="radio" id="cart_track_none" name="<?php echo $this->plugin_name; ?>[mailchimp_cart_tracking]" value="disabled"<?php if($mailchimp_cart_tracking === 'disabled') echo ' checked="checked" '; ?>><?php esc_html_e('Disable cart tracking', 'mailchimp-for-woocommerce');?><br/>
             </label>
         </div>
 

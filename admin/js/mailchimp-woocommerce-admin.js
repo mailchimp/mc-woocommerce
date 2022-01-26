@@ -670,6 +670,11 @@
 		var ongoing_all = $('#ongoing_sync_all');
 		var cart_track_all = $('#cart_track_all');
 
+		if (ongoing_subscribed.prop('checked')) {
+			cart_track_all.attr('disabled', true);
+			cart_track_all.parent().css({opacity: '.5'});
+		}
+
 		ongoing_subscribed.click(function() {
 			$('#cart_track_subscribed').prop('checked', true).trigger('click');
 			cart_track_all.attr('disabled', true);

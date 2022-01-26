@@ -1,7 +1,14 @@
 == Changelog ==
+<<<<<<< HEAD
 = 2.6 =
 * adds support for selectively syncing subscribers only 
 * updates to action scheduler dependency 
+=======
+= 2.5.4 =
+* enhanced api error parsing
+* adds site transient for tracking cart
+* tested for woocommerce v5.8
+>>>>>>> origin/feature/action-scheduler-upgrade
 = 2.5.3 =
 * remove order_total and total_spent from customer submission
 = 2.5.2 =

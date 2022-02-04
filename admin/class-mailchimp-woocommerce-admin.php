@@ -1493,12 +1493,14 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			$this->setData('errors.mailchimp_list', false);
 
             try {
-                $transient = "mailchimp-woocommerce-gdpr-fields.{$list_id}";
-                $GDPRfields = mailchimp_get_api()->getGDPRFields($list_id);
-                set_site_transient($transient, $GDPRfields, 0);
-                mailchimp_log('admin', 'updated GDPR fields', array(
-                    'fields' => $GDPRfields,
-                ));
+                if (!empty($list_id)) {
+                    $transient = "mailchimp-woocommerce-gdpr-fields.{$list_id}";
+                    $GDPRfields = mailchimp_get_api()->getGDPRFields($list_id);
+                    set_site_transient($transient, $GDPRfields, 0);
+                    mailchimp_log('admin', 'updated GDPR fields', array(
+                        'fields' => $GDPRfields,
+                    ));
+                }
             } catch (\Exception $e) {
                 set_site_transient($transient, array(), 60);
             }

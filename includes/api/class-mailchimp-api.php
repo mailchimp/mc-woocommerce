@@ -237,7 +237,17 @@ class MailChimp_WooCommerce_MailChimpApi
 
         mailchimp_debug('api.subscribe', "Subscribing {$email}", $data);
 
-        return $this->post("lists/$list_id/members?skip_merge_validation=true", $data);
+        try {
+            return $this->post("lists/$list_id/members?skip_merge_validation=true", $data);
+        } catch (\Exception $e) {
+            if ($data['status'] !== 'subscribed' || !mailchimp_string_contains($e->getMessage(), 'compliance state')) {
+                throw $e;
+            }
+            $data['status'] = 'pending';
+            $result = $this->post("lists/$list_id/members?skip_merge_validation=true", $data);
+            mailchimp_log('api', "{$email} was in compliance state, sending the double opt in message");
+            return $result;
+        }
     }
 
     /**
@@ -291,7 +301,17 @@ class MailChimp_WooCommerce_MailChimpApi
 
         mailchimp_debug('api.update_member', "Updating {$email}", $data);
 
-        return $this->patch("lists/$list_id/members/$hash?skip_merge_validation=true", $data);
+        try {
+            return $this->patch("lists/$list_id/members/$hash?skip_merge_validation=true", $data);
+        } catch (\Exception $e) {
+            if ($data['status'] !== 'subscribed' || !mailchimp_string_contains($e->getMessage(), 'compliance state')) {
+                throw $e;
+            }
+            $data['status'] = 'pending';
+            $result = $this->patch("lists/$list_id/members/$hash?skip_merge_validation=true", $data);
+            mailchimp_log('api', "{$email} was in compliance state, sending the double opt in message");
+            return $result;
+        }
     }
 
     /**

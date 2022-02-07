@@ -217,7 +217,7 @@ function mailchimp_get_remaining_jobs_count($job_hook) {
 }
 
 function mailchimp_submit_subscribed_only() {
-    return (bool) mailchimp_get_option('mailchimp_ongoing_sync_status', '1');
+    return !(bool) mailchimp_get_option('mailchimp_ongoing_sync_status', '1');
 }
 
 /**

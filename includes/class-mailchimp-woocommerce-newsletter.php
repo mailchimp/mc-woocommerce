@@ -59,9 +59,6 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
             if (is_user_logged_in()) {
                 $status = get_user_meta(get_current_user_id(), 'mailchimp_woocommerce_is_subscribed', true);
                 /// if the user is logged in - and is already subscribed - just ignore this checkbox.
-                if ((bool) $status) {
-                    return;
-                }
                 if ($status === '' || $status === null) {
                     $status = $default_checked;
                 }

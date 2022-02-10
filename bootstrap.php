@@ -217,7 +217,7 @@ function mailchimp_get_remaining_jobs_count($job_hook) {
 }
 
 function mailchimp_submit_subscribed_only() {
-    return (bool) mailchimp_get_option('mailchimp_ongoing_sync_status', '1');
+    return ! (bool) mailchimp_get_option('mailchimp_ongoing_sync_status', '1');
 }
 
 /**
@@ -1244,7 +1244,7 @@ function mailchimp_settings_errors() {
  * @throws MailChimp_WooCommerce_Error
  * @throws MailChimp_WooCommerce_ServerError
  */
-function mailchimp_member_data_update($user_email = null, $language = null, $caller = '', $status_if_new = 'transactional', $order = null, $gdpr_fields = null) {
+function mailchimp_member_data_update($user_email = null, $language = null, $caller = '', $status_if_new = 'transactional', $order = null, $gdpr_fields = null, $update_status = false) {
     mailchimp_debug('debug', "mailchimp_member_data_update", array(
         'user_email' => $user_email,
         'user_language' => $language,
@@ -1282,10 +1282,16 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
             }
             $merge_fields = $order ? apply_filters('mailchimp_get_ecommerce_merge_tags', array(), $order) : array();
             if (!is_array($merge_fields)) $merge_fields = array();
-            mailchimp_get_api()->update($list_id, $user_email, $member['status'], $merge_fields, null, $language, $gdpr_fields_to_save);
+
+            if ($update_status && in_array($member['status'], array('unsubscribed', 'cleaned'))) {
+                $member['status'] = $status_if_new;
+            }
+            
+            $result = mailchimp_get_api()->update($list_id, $user_email, $member['status'], $merge_fields, null, $language, $gdpr_fields_to_save);
             // set transient to prevent too many calls to update language
             mailchimp_set_transient($caller . ".member.{$hash}", true, 3600);
-            mailchimp_log($caller . '.member.updated', "Updated {$user_email} subscriber status to {$member['status']} and language to {$language}");
+
+            mailchimp_log($caller . '.member.updated', "Updated {$user_email} subscriber status to {$result['status']} and language to {$language}");
         } catch (\Exception $e) {
             if ($e->getCode() == 404) {
                 $merge_fields = $order ? apply_filters('mailchimp_get_ecommerce_merge_tags', array(), $order) : array();

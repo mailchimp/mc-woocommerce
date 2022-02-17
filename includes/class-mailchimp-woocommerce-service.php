@@ -640,8 +640,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         if ($this->getLandingSiteCookie() != false) return $this;
 
         $http_referer = $this->getReferer();
-
-        if (!empty($http_referer)) {
+        error_log("server". $_SERVER['REQUEST_URI'] );
+        if (!empty($http_referer) && !wp_doing_ajax() ) {
 
             // grab the current landing url since it's a referral.
             $landing_site = home_url() . wp_unslash($_SERVER['REQUEST_URI']);
@@ -649,11 +649,20 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             $compare_refer = str_replace(array('http://', 'https://'), '', $http_referer);
             $compare_local = str_replace(array('http://', 'https://'), '', $landing_site);
 
+            error_log("referer". $http_referer);
+            error_log("LandingSite". $landing_site);
+            error_log("compare_referer". $compare_refer);
+            error_log("compare_local". $compare_local);
+
             if (strpos($compare_local, $compare_refer) === 0) return $this;
 
             // set the cookie
+            if( strpos( $landing_site, 'favicon.ico' ) !== false ){
+                $landing_site = $http_referer;
+            }
             mailchimp_set_cookie('mailchimp_landing_site', $landing_site, $this->getCookieDuration(), '/' );
-
+            error_log("LandingReferer". $http_referer);
+            error_log("LandingSiteCookie". $landing_site);
             $this->setWooSession('mailchimp_landing_site', $landing_site);
         }
 

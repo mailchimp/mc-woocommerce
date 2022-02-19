@@ -1319,7 +1319,7 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
  * @param string $samesite
  * @return void
  */
-function mailchimp_set_cookie($name, $value, $expire, $path, $domain = '', $secure = false, $httponly = false, $samesite = 'Strict') {
+function mailchimp_set_cookie($name, $value, $expire, $path, $domain = '', $secure = true, $httponly = false, $samesite = 'Strict') {
     if (PHP_VERSION_ID < 70300) {
         @setcookie($name, $value, $expire, $path . '; samesite=' . $samesite, $domain, $secure, $httponly);
         return;

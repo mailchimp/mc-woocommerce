@@ -288,7 +288,7 @@ function mailchimp_is_configured() {
  * @return bool
  */
 function mailchimp_action_scheduler_exists() {
-    return class_exists( 'ActionScheduler', false );
+    return ( did_action( 'plugins_loaded' ) && ! doing_action( 'plugins_loaded' ) && class_exists( 'ActionScheduler', false ) );
 }
 
 /**

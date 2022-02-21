@@ -285,6 +285,13 @@ function mailchimp_is_configured() {
 }
 
 /**
+ * @return bool
+ */
+function mailchimp_action_scheduler_exists() {
+    return ( did_action( 'plugins_loaded' ) && ! doing_action( 'plugins_loaded' ) && class_exists( 'ActionScheduler', false ) );
+}
+
+/**
  * @return bool|int
  */
 function mailchimp_get_api_key() {

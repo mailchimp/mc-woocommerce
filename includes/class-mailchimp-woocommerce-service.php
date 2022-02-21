@@ -639,21 +639,16 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         // if we already have a cookie here, we need to skip it.
         if ($this->getLandingSiteCookie() != false) return $this;
 
-        $http_referer = $this->getReferer();
-
-        if (!empty($http_referer)) {
-
-            // grab the current landing url since it's a referral.
-            $landing_site = home_url() . wp_unslash($_SERVER['REQUEST_URI']);
-
-            $compare_refer = str_replace(array('http://', 'https://'), '', $http_referer);
-            $compare_local = str_replace(array('http://', 'https://'), '', $landing_site);
-
-            if (strpos($compare_local, $compare_refer) === 0) return $this;
-
-            // set the cookie
+        // grab the current landing url since it's a referral.
+        $landing_site = home_url() . wp_unslash($_SERVER['REQUEST_URI']);
+        
+        // Catch all possible file requests to avoid false positives
+        // We need to catch just real pages of the website
+        // Catching images, videos and fonts file types
+        preg_match("/^.*\.(ai|bmp|gif|ico|jpeg|jpg|png|ps|psd|svg|tif|tiff|fnt|fon|otf|ttf|3g2|3gp|avi|flv|h264|m4v|mkv|mov|mp4|mpg|mpeg|rm|swf|vob|wmv|aif|cda|mid|midi|mp3|mpa|ogg|wav|wma|wpl)$/i", $landing_site, $matches);
+        
+        if (!empty($landing_site) && !wp_doing_ajax() && ( count($matches) == 0 ) ) {
             mailchimp_set_cookie('mailchimp_landing_site', $landing_site, $this->getCookieDuration(), '/' );
-
             $this->setWooSession('mailchimp_landing_site', $landing_site);
         }
 

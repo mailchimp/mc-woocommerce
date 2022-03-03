@@ -1649,6 +1649,64 @@ class MailChimp_WooCommerce_MailChimpApi
     }
 
     /**
+     * @param $list_id
+     * @return array|bool
+     * @throws \Throwable
+     */
+    public function getWebHooks($list_id)
+    {
+        return $this->get("lists/{$list_id}/webhooks");
+    }
+
+    /**
+     * @param $list_id
+     * @param $url
+     * @return array|bool
+     * @throws \Throwable
+     */
+    public function webHookSubscribe($list_id, $url)
+    {
+        return $this->post("lists/{$list_id}/webhooks", [
+            'url' => $url,
+            'events' => [
+                'subscribe' => true,
+                'unsubscribe' => true,
+                'cleaned' => true,
+                'profile' => false,
+                'upemail' => false,
+                'campaign' => false,
+            ],
+            'sources' => [
+                'user' => true,
+                'admin' => true,
+                'api' => true,
+            ]
+        ]);
+    }
+
+    /**
+     * @param $list_id
+     * @param $url
+     * @return int
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_ServerError
+     * @throws Throwable
+     */
+    public function webHookDelete($list_id, $url)
+    {
+        $deleted = 0;
+        $hooks = $this->getWebHooks($list_id);
+        foreach ($hooks['webhooks'] as $hook) {
+            $href = $hook['href'] ?? $hook['url'] ?? null;
+            if ($href && $href === $url) {
+                $this->delete("lists/{$list_id}/webhooks/{$hook['id']}");
+                $deleted++;
+            }
+        }
+        return $deleted;
+    }
+
+    /**
      * @param $url
      * @param null $params
      * @return array|mixed|null|object

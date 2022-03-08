@@ -187,7 +187,7 @@ mailchimpReady(function () {
     if (!mailchimp_public_data.allowed_to_set_cookies) return;
 
     // if we're not using carts - don't bother setting any of this.
-    if (!mailchimp_public_data.disable_carts) return;
+    if (mailchimp_public_data.disable_carts) return;
 
     if (void 0 === a) {
         var a = { site_url: document.location.origin, defaulted: !0, ajax_url: document.location.origin + "/wp-admin?admin-ajax.php" };

@@ -153,7 +153,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                     $current_status = $subscriber['status'];
                     mailchimp_set_transient($transient_key, $current_status, 60);
                     if ($current_status != 'subscribed') {
-                        mailchimp_debug('filter', "#{$woo_order_number} was blocked due to subscriber only settings");
+                        mailchimp_debug('filter', "#{$woo_order_number} was blocked due to subscriber only settings and current mailchimp status was {$current_status}");
                         return false;
                     }
                 } catch (\Exception $e) {

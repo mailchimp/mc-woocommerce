@@ -304,13 +304,26 @@ class MailChimp_WooCommerce_MailChimpApi
         try {
             return $this->patch("lists/$list_id/members/$hash?skip_merge_validation=true", $data);
         } catch (\Exception $e) {
-            if ($data['status'] !== 'subscribed' || !mailchimp_string_contains($e->getMessage(), 'compliance state')) {
+            // If mailchimp says is already a member lets send the update by PUT
+            if( mailchimp_string_contains( $e->getMessage(), 'is already a list member') ){
+                try{
+                    mailchimp_log('api.update', "{$email} was already a list member sending the update by PUT");
+                    $result = $this->put("lists/$list_id/members/$hash?skip_merge_validation=true", $data);
+                    return $result;
+                }catch(\Exception $e){
+                    mailchimp_log('api.update', $e->getMessage());
+                    throw $e;
+                }
+            }elseif ($data['status'] !== 'subscribed' || !mailchimp_string_contains($e->getMessage(), 'compliance state')) {
                 throw $e;
-            }
+            } 
+            
             $data['status'] = 'pending';
             $result = $this->patch("lists/$list_id/members/$hash?skip_merge_validation=true", $data);
             mailchimp_log('api', "{$email} was in compliance state, sending the double opt in message");
-            return $result;
+            return $result;    
+            
+            
         }
     }
 

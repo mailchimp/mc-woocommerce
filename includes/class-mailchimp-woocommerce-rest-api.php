@@ -44,6 +44,18 @@ class MailChimp_WooCommerce_Rest_Api
             'callback' => array($this, 'dismiss_review_banner'),
             'permission_callback' => array($this, 'permission_callback'),
         ));
+
+        //Member Sync
+        register_rest_route(static::$namespace, "/member-sync", array(
+            'methods' => 'GET',
+            'callback' => array($this, 'member_sync_alive_signal'),
+            'permission_callback' => '__return_true',
+        ));
+        register_rest_route(static::$namespace, "/member-sync", array(
+            'methods' => 'POST',
+            'callback' => array($this, 'member_sync'),
+            'permission_callback' => '__return_true',
+        ));
     }
 
     /**
@@ -72,7 +84,7 @@ class MailChimp_WooCommerce_Rest_Api
     {
         // need to send a post request to
         $host = mailchimp_environment_variables()->environment === 'staging' ?
-            'https://staging.conduit.vextras.com' : 'https://conduit.mailchimpapp.com';
+        'https://staging.conduit.vextras.com' : 'https://conduit.mailchimpapp.com';
 
         $route = "{$host}/survey/woocommerce";
 
@@ -163,6 +175,34 @@ class MailChimp_WooCommerce_Rest_Api
         return $this->mailchimp_rest_response(array('success' => delete_option('mailchimp-woocommerce-sync.initial_sync')));
     }
 
+    /**
+     * Syncs members with updated statuses on Mailchimp panel
+     * @param WP_REST_Request $request
+     * @return WP_Error|WP_REST_Response
+     */
+    public function member_sync(WP_REST_Request $request)
+    {
+        $data = $request->get_params();
+
+        if( !empty($data['type']) && !empty($data['data']['list_id']) && mailchimp_get_list_id() == $data['data']['list_id'] ){
+            $job = new MailChimp_WooCommerce_Subscriber_Sync( $data );
+            mailchimp_handle_or_queue( $job );
+            return $this->mailchimp_rest_response(array('success' => true));    
+        }else{
+            return $this->mailchimp_rest_response(array('success' => false));    
+        }
+        
+
+    }  
+
+    /**
+     * Returns an alive signal to confirm url exists to mailchimp system
+     * @return WP_Error|WP_REST_Response
+     */
+    public function member_sync_alive_signal()
+    {
+        return $this->mailchimp_rest_response(array('success' => true));    
+    }   
 
     /**
      * @param array $data

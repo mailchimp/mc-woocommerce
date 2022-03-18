@@ -561,20 +561,23 @@ class MailChimp_WooCommerce_Order
     public function setTrackingUrl(){
         $tracking_url = '';
         //Taken from woocommercer-services plugin example
-        switch ( $this->tracking_carrier ) {
-            case 'fedex':
-                $tracking_url = 'https://www.fedex.com/apps/fedextrack/?action=track&tracknumbers=' . $this->tracking_number;
-            break;
-            case 'usps':
-                $tracking_url = 'https://tools.usps.com/go/TrackConfirmAction.action?tLabels=' . $this->tracking_number;
-            break;
-            case 'ups':
-                $tracking_url = 'https://www.ups.com/track?tracknum=' . $this->tracking_number;
-            break;
-            case 'dhlexpress':
-                $tracking_url = 'https://www.dhl.com/en/express/tracking.html?AWB=' . $this->tracking_number . '&brand=DHL';
-            break;
+        if( !empty($this->tracking_number) && !empty($this->tracking_carrier) ){
+            switch ( $this->tracking_carrier ) {
+                case 'fedex':
+                    $tracking_url = 'https://www.fedex.com/apps/fedextrack/?action=track&tracknumbers=' . $this->tracking_number;
+                break;
+                case 'usps':
+                    $tracking_url = 'https://tools.usps.com/go/TrackConfirmAction.action?tLabels=' . $this->tracking_number;
+                break;
+                case 'ups':
+                    $tracking_url = 'https://www.ups.com/track?tracknum=' . $this->tracking_number;
+                break;
+                case 'dhlexpress':
+                    $tracking_url = 'https://www.dhl.com/en/express/tracking.html?AWB=' . $this->tracking_number . '&brand=DHL';
+                break;
+            }    
         }
+        
         $this->tracking_url = $tracking_url;
     }
     /**
@@ -704,10 +707,14 @@ class MailChimp_WooCommerce_Order
                 $label_data = json_decode( $label_data, true );
             }
             // labels stored as an array, return.
-            if ( is_array( $label_data ) && !empty($label_data['tracking']) && !empty($label_data['carrier_id']) ){
-                $this->setTrackingNumber( $label_data['tracking'] );
-                $this->setTrackingCarrier( $label_data['carrier_id'] );
-                $this->setTrackingUrl();
+            if ( is_array( $label_data ) ){
+                foreach ($label_data as $label) {
+                    if (!empty($label['tracking']) && !empty($label['carrier_id']) ){
+                        $this->setTrackingNumber( $label['tracking'] );
+                        $this->setTrackingCarrier( $label['carrier_id'] );
+                        $this->setTrackingUrl();
+                    }
+                }
             }
 
         }

@@ -235,6 +235,8 @@ class MailChimp_WooCommerce_MailChimpApi
             unset($data['marketing_permissions']);
         }
 
+        $this->validateNaughtyListEmail($email);
+
         mailchimp_debug('api.subscribe', "Subscribing {$email}", $data);
 
         try {
@@ -298,6 +300,8 @@ class MailChimp_WooCommerce_MailChimpApi
         if (empty($data['marketing_permissions'])) {
             unset($data['marketing_permissions']);
         }
+
+        $this->validateNaughtyListEmail($email);
 
         mailchimp_debug('api.update_member', "Updating {$email}", $data);
 
@@ -433,7 +437,9 @@ class MailChimp_WooCommerce_MailChimpApi
         if (empty($data['language'])) {
             unset($data['language']);
         }
-        
+
+        $this->validateNaughtyListEmail($email);
+
         mailchimp_debug('api.update_or_create', "Update Or Create {$email}", $data);
 
         return $this->put("lists/$list_id/members/$hash", $data);
@@ -926,6 +932,8 @@ class MailChimp_WooCommerce_MailChimpApi
                 return false;
             }
 
+            $this->validateNaughtyList($cart->getCustomer());
+
             mailchimp_debug('api.addCart', "Adding Cart :: {$email}", $data = $cart->toArray());
 
             $data = $this->post("ecommerce/stores/$store_id/carts", $data);
@@ -957,6 +965,8 @@ class MailChimp_WooCommerce_MailChimpApi
             if (mailchimp_email_is_privacy_protected($email) || mailchimp_email_is_amazon($email)) {
                 return false;
             }
+
+            $this->validateNaughtyList($cart->getCustomer());
 
             mailchimp_debug('api.updateCart', "Updating Cart :: {$email}", $data = $cart->toArrayForUpdate());
 
@@ -1572,8 +1582,10 @@ class MailChimp_WooCommerce_MailChimpApi
     protected function validateStoreSubmission($target)
     {
         if ($target instanceof MailChimp_WooCommerce_Order) {
+            $this->validateNaughtyList($target->getCustomer());
             return $this->validateStoreOrder($target);
         } else if ($target instanceof MailChimp_WooCommerce_Customer) {
+            $this->validateNaughtyList($target);
             return $this->validateStoreCustomer($target);
         }
         return true;
@@ -1704,6 +1716,97 @@ class MailChimp_WooCommerce_MailChimpApi
             }
         }
         return $deleted;
+    }
+
+    /**
+     * @param MailChimp_WooCommerce_Customer $customer
+     * @return false
+     * @throws MailChimp_WooCommerce_Error
+     */
+    public function validateNaughtyList(MailChimp_WooCommerce_Customer $customer)
+    {
+        $this->validateNaughtyListEmail($customer->getEmailAddress());
+        $this->validateNaughtyListNames($customer->getFirstName(), $customer->getLastName());
+        return false;
+    }
+
+    /**
+     * @param $email
+     * @return false
+     * @throws MailChimp_WooCommerce_Error
+     */
+    public function validateNaughtyListEmail($email)
+    {
+        if (!empty($email) && mailchimp_string_contains($email, $this->getNaughtyList())) {
+            $this->reportSpamToTower($email);
+            throw new MailChimp_WooCommerce_Error("Email [{$email}] has been blocked due to spam reports.");
+        }
+        return false;
+    }
+
+    /**
+     * @return array|mixed
+     */
+    public function getNaughtyList()
+    {
+        try {
+            $domains = mailchimp_get_transient('naughty_list_domains');
+            if (is_array($domains)) return $domains;
+            $domains = json_decode(file_get_contents('https://tower.vextras.com/naughty-domains'), true);
+            mailchimp_set_transient('naughty_list_domains', $domains, 1440);
+            return $domains;
+        } catch (\Throwable $e) {
+            $domains = [];
+            mailchimp_set_transient('naughty_list_domains', $domains, 300);
+            return $domains;
+        }
+    }
+
+    /**
+     * @param $email
+     * @return mixed|null
+     */
+    private function reportSpamToTower($email)
+    {
+        try {
+            $payload = array(
+                'headers' => array(
+                    'Content-type' => 'application/json',
+                    'X-Store-Platform' => 'woocommerce',
+                    'X-List-Id' => mailchimp_get_list_id(),
+                    'X-Store-Key' => base64_encode(mailchimp_get_store_id().':'.mailchimp_get_api_key()),
+                ),
+                'body' => json_encode(array(
+                    'store_id' => mailchimp_get_store_id(),
+                    'list_id' => mailchimp_get_list_id(),
+                    'email' => $email
+                )),
+                'timeout'     => 30,
+            );
+            $response = wp_remote_post('https://tower.vextras.com/admin-api/woocommerce/report-spam', $payload);
+            return json_decode($response['body']);
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    /**
+     * @param $first_name
+     * @param $last_name
+     * @return false
+     * @throws MailChimp_WooCommerce_Error
+     */
+    public function validateNaughtyListNames($first_name, $last_name)
+    {
+        // add a list of naughty list customer names. Seems a little destructive though.
+        $naughty_list_names = [
+            'mark mustermann',
+        ];
+        $name = "{$first_name} {$last_name}";
+        if (mailchimp_string_contains(strtolower($name), $naughty_list_names)) {
+            throw new MailChimp_WooCommerce_Error("Name [{$name}] has been blocked due to spam reports.");
+        }
+        return false;
     }
 
     /**

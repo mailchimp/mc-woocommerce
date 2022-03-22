@@ -657,6 +657,36 @@ class MailChimp_WooCommerce_MailChimpApi
 
     /**
      * @param $store_id
+     * @return int|mixed
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_ServerError
+     */
+    public function getProductCount($store_id)
+    {
+        $data = $this->get("ecommerce/stores/{$store_id}/products?count=1");
+        if (!is_array($data)) {
+            return 0;
+        }
+        return $data['total_items'];
+    }
+
+    /**
+     * @param $store_id
+     * @return int|mixed
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_ServerError
+     */
+    public function getCustomerCount($store_id)
+    {
+        $data = $this->get("ecommerce/stores/{$store_id}/customers?count=1");
+        if (!is_array($data)) {
+            return 0;
+        }
+        return $data['total_items'];
+    }
+
+    /**
+     * @param $store_id
      * @param bool $throw
      * @return bool|MailChimp_WooCommerce_Store
      * @throws MailChimp_WooCommerce_Error
@@ -1751,7 +1781,9 @@ class MailChimp_WooCommerce_MailChimpApi
     {
         try {
             $domains = mailchimp_get_transient('naughty_list_domains');
-            if (is_array($domains)) return $domains;
+            if (is_array($domains) && isset($domains['value'])) {
+                return $domains['value'];
+            }
             $domains = json_decode(file_get_contents('https://tower.vextras.com/naughty-domains'), true);
             mailchimp_set_transient('naughty_list_domains', $domains, 1440);
             return $domains;

@@ -1804,6 +1804,7 @@ class MailChimp_WooCommerce_MailChimpApi
             $payload = array(
                 'headers' => array(
                     'Content-type' => 'application/json',
+                    'Accept' => 'application/json',
                     'X-Store-Platform' => 'woocommerce',
                     'X-List-Id' => mailchimp_get_list_id(),
                     'X-Store-Key' => base64_encode(mailchimp_get_store_id().':'.mailchimp_get_api_key()),

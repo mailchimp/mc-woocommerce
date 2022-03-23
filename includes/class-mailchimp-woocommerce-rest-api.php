@@ -44,6 +44,32 @@ class MailChimp_WooCommerce_Rest_Api
             'callback' => array($this, 'dismiss_review_banner'),
             'permission_callback' => array($this, 'permission_callback'),
         ));
+
+        //Member Sync
+        register_rest_route(static::$namespace, "/member-sync", array(
+            'methods' => 'GET',
+            'callback' => array($this, 'member_sync_alive_signal'),
+            'permission_callback' => '__return_true',
+        ));
+        register_rest_route(static::$namespace, "/member-sync", array(
+            'methods' => 'POST',
+            'callback' => array($this, 'member_sync'),
+            'permission_callback' => '__return_true',
+        ));
+
+        // Tower report
+        register_rest_route(static::$namespace, "/tower/report", array(
+            'methods' => 'POST',
+            'callback' => array($this, 'get_tower_report'),
+            'permission_callback' => '__return_true',
+        ));
+
+        // tower logs
+        register_rest_route(static::$namespace, "/tower/logs", array(
+            'methods' => 'POST',
+            'callback' => array($this, 'get_tower_logs'),
+            'permission_callback' => '__return_true',
+        ));
     }
 
     /**
@@ -163,16 +189,148 @@ class MailChimp_WooCommerce_Rest_Api
         return $this->mailchimp_rest_response(array('success' => delete_option('mailchimp-woocommerce-sync.initial_sync')));
     }
 
+    /**
+     * Syncs members with updated statuses on Mailchimp panel
+     * @param WP_REST_Request $request
+     * @return WP_Error|WP_REST_Response
+     */
+    public function member_sync(WP_REST_Request $request)
+    {
+        $this->authorize('webhook.token', $request);
+        $data = $request->get_params();
+        $list_id = mailchimp_get_list_id();
+        if (empty($data['type']) || empty($data['data']['list_id']) || $list_id !== $data['data']['list_id']) {
+            return $this->mailchimp_rest_response(array('success' => false));
+        }
+        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Subscriber_Sync($data));
+        return $this->mailchimp_rest_response(array('success' => true));
+    }
+
+    /**
+     * Returns an alive signal to confirm url exists to mailchimp system
+     * @param WP_REST_Request $request
+     * @return WP_Error|WP_REST_Response
+     */
+    public function member_sync_alive_signal(WP_REST_Request $request)
+    {
+        $this->authorize('webhook.token', $request);
+        return $this->mailchimp_rest_response(array('success' => true));
+    }
+
+    /**
+     * @param WP_REST_Request $request
+     * @return WP_Error|WP_REST_Response
+     */
+    public function get_tower_report(WP_REST_Request $request)
+    {
+        $this->authorize('tower.support_token', $request);
+        return $this->mailchimp_rest_response(
+            $this->tower($request->get_query_params())->handle()
+        );
+    }
+
+    /**
+     * @param WP_REST_Request $request
+     * @return WP_Error|WP_REST_Response
+     */
+    public function get_tower_logs(WP_REST_Request $request)
+    {
+        $this->authorize('tower.support_token', $request);
+        return $this->mailchimp_rest_response(
+            $this->tower($request->get_query_params())->logs()
+        );
+    }
+
+    /**
+     * @param null $params
+     * @return MailChimp_WooCommerce_Tower
+     */
+    private function tower($params = null)
+    {
+        if (!is_array($params)) $params = array();
+        $job = new MailChimp_WooCommerce_Tower(mailchimp_get_store_id());
+        $job->withLogFile(!empty($params['log_view']) ? $params['log_view'] : null);
+        $job->withLogSearch(!empty($params['search']) ? $params['search'] : null);
+        return $job;
+    }
 
     /**
      * @param array $data
      * @param int $status
      * @return WP_REST_Response
      */
-    private function mailchimp_rest_response($data, $status = 200) {
+    private function mailchimp_rest_response($data, $status = 200)
+    {
         if (!is_array($data)) $data = array();
         $response = new WP_REST_Response($data);
         $response->set_status($status);
         return $response;
+    }
+
+    /**
+     * @param $key
+     * @param WP_REST_Request $request
+     * @return bool
+     * @throws WC_REST_Exception
+     */
+    private function authorize($key, WP_REST_Request $request)
+    {
+        $allowed_keys = array(
+            'tower.token',
+            'webhook.token',
+        );
+        // this is just a safeguard against people trying to do wonky things.
+        if (!in_array($key, $allowed_keys, true)) {
+            throw new WC_REST_Exception(403, 'unauthorized token type', 403);
+        }
+        // get the auth token from either a header, or the query string
+        $token = $this->getAuthToken($request);
+        // pull the saved data
+        $saved = mailchimp_get_data($key);
+        // if we don't have a token - or we don't have the saved comparison
+        // or the token doesn't equal the saved token, throw an error.
+        if (empty($token) || empty($saved) || base64_decode($token) !== $saved) {
+            throw new WC_REST_Exception(403, 'unauthorized', 403);
+        }
+        return true;
+    }
+
+    /**
+     * @param WP_REST_Request $request
+     * @return false|mixed|string
+     */
+    private function getAuthToken(WP_REST_Request $request)
+    {
+        if (($token = $this->getBearerTokenHeader($request))) {
+            return $token;
+        }
+        return $this->getAuthQueryStringParam($request);
+    }
+
+    /**
+     * @param WP_REST_Request $request
+     * @return false|string
+     */
+    private function getBearerTokenHeader(WP_REST_Request $request)
+    {
+        $header = $request->get_header('Authorization');
+        $position = strrpos($header, 'Bearer ');
+        if ($position !== false) {
+            $header = substr($header, $position + 7);
+            return strpos($header, ',') !== false ?
+                strstr(',', $header, true) :
+                $header;
+        }
+        return false;
+    }
+
+    /**
+     * @param WP_REST_Request $request
+     * @return false|mixed
+     */
+    private function getAuthQueryStringParam(WP_REST_Request $request)
+    {
+        $params = $request->get_query_params();
+        return empty($params['auth']) ? false : $params['auth'];
     }
 }

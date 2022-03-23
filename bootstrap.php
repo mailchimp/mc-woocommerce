@@ -68,6 +68,10 @@ spl_autoload_register(function($class) {
 
         'MailChimp_WooCommerce_Public' => 'public/class-mailchimp-woocommerce-public.php',
         'MailChimp_WooCommerce_Admin' => 'admin/class-mailchimp-woocommerce-admin.php',
+
+        'MailChimp_WooCommerce_Logs' => 'includes/api/class-mailchimp-woocommerce-logs.php',
+        'MailChimp_WooCommerce_Tower' => 'includes/api/class-mailchimp-woocommerce-tower.php',
+        'MailChimp_WooCommerce_Log_Viewer' => 'includes/api/class-mailchimp-woocommerce-log-viewer.php',
     );
 
     // if the file exists, require it

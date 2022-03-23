@@ -1789,6 +1789,32 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		
 		wp_die();
 	}
+
+    /**
+     * set Communications status via sync page.
+     */
+    public function mailchimp_woocommerce_tower_status() {
+        $original_opt = $this->getData('tower.opt',0);
+        $opt = $_POST['opt'];
+
+        mailchimp_debug('tower_status', "setting to {$opt}");
+
+        // try to set the info on the server
+        // post to communications api
+        $job = new MailChimp_WooCommerce_Tower(mailchimp_get_store_id());
+        $response_body = $job->toggle($opt);
+
+        // if success, set internal option to check for opt and display on sync page
+        if ($response_body && $response_body->success == true) {
+            $this->setData('tower.opt', $opt);
+            wp_send_json_success(__('Saved', 'mailchimp-for-woocommerce'));
+        } else {
+            //if error, keep option to original value
+            wp_send_json_error(array('error' => __('Error setting tower support status', 'mailchimp-for-woocommerce'), 'opt' => $original_opt));
+        }
+
+        wp_die();
+    }
 	
 	/**
 	 * set Communications box status.

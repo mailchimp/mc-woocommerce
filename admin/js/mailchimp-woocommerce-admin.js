@@ -369,6 +369,34 @@
 			});
 		});
 
+		$('#tower_box_switch').change(function (e){
+			var switch_button = this;
+			var opt = this.checked ? 1 : 0;
+
+			var data = {
+				action: 'mailchimp_woocommerce_tower_status',
+				opt: opt
+			}
+
+			$('.tower_box_status').hide();
+			$('#tower_box_status_' + opt).show();
+
+			$.post(ajaxurl, data, function(response) {
+				if (response.success) {
+					$('#mc-tower-save').html(response.data);
+					$('#mc-tower-save').css('color', '#628735').show().fadeOut(3000);
+					switch_button.checked = opt;
+				}
+				else {
+					$('#mc-tower-save').html(response.data.error);
+					$('#mc-tower-save').css('color', 'red').show().fadeOut(3000);
+					switch_button.checked = 1 - opt;
+					$('.tower_box_status').hide();
+					$('#tower_box_status_' + (1 - opt)).show();
+				}
+			});
+		});
+
 		$('#comm_box_switch').change(function (e){
 			var switch_button = this;
 			var opt = this.checked ? 1 : 0;

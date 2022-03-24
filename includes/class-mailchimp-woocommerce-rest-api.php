@@ -223,7 +223,7 @@ class MailChimp_WooCommerce_Rest_Api
      */
     public function get_tower_report(WP_REST_Request $request)
     {
-        $this->authorize('tower.support_token', $request);
+        $this->authorize('tower.token', $request);
         return $this->mailchimp_rest_response(
             $this->tower($request->get_query_params())->handle()
         );
@@ -235,7 +235,7 @@ class MailChimp_WooCommerce_Rest_Api
      */
     public function get_tower_logs(WP_REST_Request $request)
     {
-        $this->authorize('tower.support_token', $request);
+        $this->authorize('tower.token', $request);
         return $this->mailchimp_rest_response(
             $this->tower($request->get_query_params())->logs()
         );

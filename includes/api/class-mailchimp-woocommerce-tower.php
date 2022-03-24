@@ -143,7 +143,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                     'zip' => isset($options['store_postal_code']) && $options['store_postal_code'] ? $options['store_postal_code'] : '',
                     'phone' => isset($options['store_phone']) && $options['store_phone'] ? $options['store_phone'] : '',
                 ),
-                'metrics' => (object) [
+                'metrics' => array_values([
                     'shopify_hooks' => (object) array('key' => 'shopify_hooks', 'value' => true),
                     'shop.products' => (object) array('key' => 'shop.products', 'value' => $product_count),
                     'shop.customers' => (object) array('key' => 'shop.customers', 'value' => $customer_count),
@@ -165,7 +165,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                     'customer_sync_completed' => (object) array('key' => 'customer_sync_completed', 'value' => get_option('mailchimp-woocommerce-sync.customers.completed_at')),
                     'order_sync_started' => (object) array('key' => 'order_sync_started', 'value' => get_option('mailchimp-woocommerce-sync.orders.started_at')),
                     'order_sync_completed' => (object) array('key' => 'order_sync_completed', 'value' => get_option('mailchimp-woocommerce-sync.orders.completed_at')),
-                ],
+                ]),
                 'meta' => $this->getMeta(),
             ),
             'meta' => [
@@ -302,6 +302,7 @@ LIKE 'mailchimp%woocommerce%'
         $command = (bool) $enable ? 'enable' : 'disable';
         $store_id = mailchimp_get_store_id();
         $key = mailchimp_get_api_key();
+        $list_id = mailchimp_get_list_id();
         $post_url = "https://tower.vextras.com/admin-api/woocommerce/{$command}/{$store_id}";
 
         if ((bool) $enable) {
@@ -317,16 +318,22 @@ LIKE 'mailchimp%woocommerce%'
                     'Content-type' => 'application/json',
                     'Accept' => 'application/json',
                     'X-Store-Platform' => 'woocommerce',
-                    'X-List-Id' => mailchimp_get_list_id(),
+                    'X-List-Id' => $list_id,
                     'X-Store-Key' => base64_encode("{$store_id}:{$key}"),
                 ),
                 'body' => json_encode(array(
                     'support_token' => $support_token,
                     'domain' => get_option('siteurl'),
+                    'data' => array(
+                        'list_id' => $list_id,
+                        'is_connected' => mailchimp_is_configured(),
+                        'rest_url' => MailChimp_WooCommerce_Rest_Api::url(''),
+                    ),
                 )),
                 'timeout'     => 30,
             );
             $response = wp_remote_post($post_url, $payload);
+            mailchimp_log('tower', 'trace', $response);
             return json_decode($response['body']);
         } catch (\Throwable $e) {
             return null;

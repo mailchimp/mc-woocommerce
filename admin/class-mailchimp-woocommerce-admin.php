@@ -1539,7 +1539,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @param null $data
 	 * @return bool
 	 */
-	private function syncStore($data = null)
+	public function syncStore($data = null)
 	{
 		if (empty($data)) {
 			$data = $this->getOptions();

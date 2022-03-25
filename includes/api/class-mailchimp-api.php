@@ -1547,6 +1547,34 @@ class MailChimp_WooCommerce_MailChimpApi
 
     /**
      * @param $store_id
+     * @param $rule_id
+     * @return object
+     * @throws \Exception
+     */
+    public function getPromoRuleWithCodes($store_id, $rule_id)
+    {
+        $rule = new MailChimp_WooCommerce_PromoCode();
+        $rule = $rule->fromArray($this->get("ecommerce/stores/{$store_id}/promo-rules/{$rule_id}"));
+        try {
+            $promo_codes = $this->getPromoCodesForRule($store_id, $rule->getId(), 1, 100);
+            $codes = array();
+            foreach ($promo_codes as $item) {
+                $codes[] = $item->toArray();
+            }
+            return (object) [
+                'rule' => $rule->toArray(),
+                'codes' => $codes,
+            ];
+        } catch (\Exception $e) {
+            return (object) [
+                'rule' => $rule,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * @param $store_id
      * @param MailChimp_WooCommerce_PromoRule $rule
      * @param MailChimp_WooCommerce_PromoCode $code
      * @param bool $throw

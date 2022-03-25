@@ -15,11 +15,14 @@ class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abstr
      */
     protected $action = 'mailchimp_woocommerce_process_products';
 
+    /**
+     * Resync the products
+     */
     public static function push()
     {
-        $job = new MailChimp_WooCommerce_Process_Products();
-        $job->flagStartSync();
-        mailchimp_handle_or_queue($job, 0);
+        $service = MailChimp_Service::instance();
+        $service->removePointers(true, false);
+        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Process_Products(), 0);
     }
 
 

@@ -70,6 +70,18 @@ class MailChimp_WooCommerce_Rest_Api
             'callback' => array($this, 'get_tower_logs'),
             'permission_callback' => '__return_true',
         ));
+
+        register_rest_route(static::$namespace, "/tower/resource", array(
+            'methods' => 'POST',
+            'callback' => array($this, 'get_tower_resource'),
+            'permission_callback' => '__return_true',
+        ));
+
+        register_rest_route(static::$namespace, "/tower/action", array(
+            'methods' => 'POST',
+            'callback' => array($this, 'handle_tower_action'),
+            'permission_callback' => '__return_true',
+        ));
     }
 
     /**
@@ -233,12 +245,221 @@ class MailChimp_WooCommerce_Rest_Api
      * @param WP_REST_Request $request
      * @return WP_Error|WP_REST_Response
      */
+    public function handle_tower_action(WP_REST_Request $request)
+    {
+        $this->authorize('tower.token', $request);
+        $body = $request->get_json_params();
+
+        $action = isset($body['action']) ? $body['action'] : null;
+        $data = isset($body['data']) ? $body['data'] : null;
+        $response = null;
+
+        if (empty($action)) {
+            return $this->mailchimp_rest_response(array(
+                'success' => false,
+                'message' => 'invalid action'
+            ));
+        }
+
+        switch ($action) {
+            case 'emergency_stop_syncing':
+                mailchimp_set_data('emergency_stop', true);
+                $response = [
+                    'title' => "Successfully stopped the sync.",
+                    'description' => "Please note you'll need to have them reconnect.",
+                    'type' => 'success',
+                ];
+                break;
+            case 'update_feature':
+                $response = [
+                    'title' => "Features are not available for WooCommerce",
+                    'type' => 'error',
+                ];
+                break;
+            case 'resync_orders':
+                MailChimp_WooCommerce_Process_Orders::push();
+                $response = [
+                    'title' => "Successfully initiated the order resync",
+                    'description' => "Please note that it will take a couple minutes to start this process. Check the store logs for details.",
+                    'type' => 'success',
+                ];
+                break;
+            case 'resync_products':
+                MailChimp_WooCommerce_Process_Products::push();
+                $response = [
+                    'title' => "Successfully initiated product resync",
+                    'description' => "Please note that it will take a couple minutes to start this process. Check the store logs for details.",
+                    'type' => 'success',
+                ];
+                break;
+            case 'resync_customers':
+                $response = [
+                    'title' => "Customer resync",
+                    'description' => "WooCommerce does not have customers to sync. Only orders.",
+                    'type' => 'error',
+                ];
+                break;
+            case 'resync_promo_codes':
+                break;
+            case 'resync_chimpstatic_script':
+                $response = [
+                    'title' => "Chimpstatic script",
+                    'description' => 'Scripts are automatically injected at runtime.',
+                    'type' => 'error',
+                ];
+                break;
+            case 'activate_webhooks':
+                $response = [
+                    'title' => "Store Webhooks",
+                    'description' => "No store webhooks to apply",
+                    'type' => 'error',
+                ];
+                break;
+            case 'resync_all':
+                $service = new MailChimp_Service();
+                $service->removePointers(true, true);
+                MailChimp_WooCommerce_Admin::instance()->startSync();
+                $service->setData('sync.config.resync', true);
+                $response = [
+                    'title' => "Successfully initiated the store resync",
+                    'description' => "Please note that it will take a couple minutes to start this process. Check the store logs for details.",
+                    'type' => 'success',
+                ];
+                break;
+            case 'resync_customer':
+                $response = [
+                    'title' => "Error syncing custome",
+                    'description' => "WooCommerce only works with orders.",
+                    'type' => 'error',
+                ];
+                break;
+            case 'resync_order':
+                $order = new WC_Order($data['id']);
+                if (!$order->get_date_created()) {
+                    $response = [
+                        'title' => "Error syncing order",
+                        'description' => "This order id does not exist.",
+                        'type' => 'error',
+                    ];
+                } else {
+                    $job = new MailChimp_WooCommerce_Single_Order($order);
+                    $data = $job->handle();
+                    $response = [
+                        'title' => "Executed order resync",
+                        'description' => "Check the store logs for details.",
+                        'type' => 'success',
+                    ];
+                }
+                break;
+            case 'resync_product':
+                $product = new WC_Product($data['id']);
+                if (!$product->get_date_created()) {
+                    $response = [
+                        'title' => "Error syncing product",
+                        'description' => "This product id does not exist.",
+                        'type' => 'error',
+                    ];
+                } else {
+                    $job = new MailChimp_WooCommerce_Single_Product($product);
+                    $data = $job->handle();
+                    $response = [
+                        'title' => "Executed product resync",
+                        'description' => "Check the store logs for details.",
+                        'type' => 'success',
+                    ];
+                }
+                break;
+            case 'resync_cart':
+                $response = [
+                    'title' => "Let's talk",
+                    'description' => "This isn't supported by our system yet. If you really need this, please say something.",
+                    'type' => 'error',
+                ];
+                break;
+            case 'fix_duplicate_store':
+                $job = new MailChimp_WooCommerce_Fix_Duplicate_Store(mailchimp_get_store_id(), true, false);
+                $job->handle();
+                $response = [
+                    'title' => "Successfully queued up store deletion.",
+                    'description' => "This process may take a couple minutes to complete. Please check back by reloading the page after a minute.",
+                    'type' => 'success',
+                ];
+                break;
+            case 'remove_legacy_app':
+                $response = [
+                    'title' => "Error removing legacy app",
+                    'description' => "WooCommerce doesn't have any legacy apps to delete.",
+                    'type' => 'error',
+                ];
+                break;
+        }
+
+        return $this->mailchimp_rest_response($response);
+    }
+
+    /**
+     * @param WP_REST_Request $request
+     * @return WP_Error|WP_REST_Response
+     */
     public function get_tower_logs(WP_REST_Request $request)
     {
         $this->authorize('tower.token', $request);
         return $this->mailchimp_rest_response(
             $this->tower($request->get_query_params())->logs()
         );
+    }
+
+    /**
+     * @param WP_REST_Request $request
+     * @return WP_Error|WP_REST_Response
+     */
+    public function get_tower_resource(WP_REST_Request $request)
+    {
+        $this->authorize('tower.token', $request);
+        $body = $request->get_json_params();
+
+
+        if (!isset($body['resource']) || !isset($body['id'])) {
+            throw new WC_REST_Exception(404, 'invalid json body', 404);
+        }
+
+        $store_id = mailchimp_get_store_id();
+
+        switch ($body['resource']) {
+            case 'order':
+                $platform = wc_get_order($body['id']);
+                $mc = mailchimp_get_api()->getStoreOrder($store_id, $platform->get_id());
+                break;
+            case 'customer':
+                $field = is_email($body['id']) ? 'email' : 'id';
+                $platform = get_user_by($field, $body['id']);
+                $hashed = mailchimp_hash_trim_lower($platform->user_email);
+                $mc = mailchimp_get_api()->getCustomer($store_id, $hashed);
+                break;
+            case 'product':
+                $platform = wc_get_product($body['id']);
+                $mc = mailchimp_get_api()->getStoreProduct($store_id, $body['id']);
+                break;
+            case 'cart':
+                global $wpdb;
+                $uid = mailchimp_hash_trim_lower($body['id']);
+                $table = "{$wpdb->prefix}mailchimp_carts";
+                $sql = $wpdb->prepare("SELECT * FROM $table WHERE id = %s", $uid);
+                $platform = $wpdb->get_row($sql);
+                $mc = mailchimp_get_api()->getCart($store_id, $uid);
+                break;
+            case 'promo_code':
+                $platform = new WC_Coupon($body['id']);
+                $mc = mailchimp_get_api()->getPromoRuleWithCodes($store_id, $body['id']);
+                break;
+        }
+
+        return $this->mailchimp_rest_response(array(
+            'resource' => $platform,
+            'resource_error' => empty($platform) ? 'Resource not found' : false,
+            'mailchimp' => $mc,
+            'mailchimp_error' => empty($mc) ? 'Resource not found' : false,
+        ));
     }
 
     /**

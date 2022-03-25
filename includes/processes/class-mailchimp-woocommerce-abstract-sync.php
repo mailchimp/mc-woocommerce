@@ -134,6 +134,14 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
             return false;
         }
 
+        /// if we set something for an emergency stop through our admin, honor this
+        if (mailchimp_get_data('emergency_stop')) {
+            mailchimp_log('tower', 'Emergency stop sync has been issued. Please contact support to re-enable', array(
+                'class' => get_called_class(),
+            ));
+            return false;
+        }
+
         if (!($this->store_id = $this->getStoreID())) {
             mailchimp_debug(get_called_class().'@handle', 'store id not loaded');
             return false;

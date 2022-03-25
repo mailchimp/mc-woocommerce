@@ -53,7 +53,7 @@ class MailChimp_WooCommerce_Logs
             $item['date'] = $date->format('D, M j, Y g:i A');
             $item['datetime'] = $date->format('Y-m-d H:i:s A');
             $item['text'] = strtolower(str_replace('[]', ' ', $item['text']));
-            if ($this->search_query && !mailchimp_string_contains($item['text'], $this->search_query)) {
+            if (!empty($this->search_query) && !mailchimp_string_contains($item['text'], $this->search_query)) {
                 continue;
             }
             $logs[] = $item;
@@ -73,11 +73,15 @@ class MailChimp_WooCommerce_Logs
             }
             $files[] = array(
                 'value' => base64_encode($file),
+                'filename' => $file,
                 'label' => $matches[1].' '.$matches[2],
             );
         }
 
         return $this->items = [
+            'view_file' => $this->view,
+            'search' => $this->search_query,
+            'dir' => MailChimp_WooCommerce_Log_Viewer::getLogDirectory(),
             'current' => base64_encode(MailChimp_WooCommerce_Log_Viewer::getFileName()),
             'files' => $files,
             'logs' => $logs,

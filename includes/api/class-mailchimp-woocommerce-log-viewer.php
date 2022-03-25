@@ -89,7 +89,6 @@ class MailChimp_WooCommerce_Log_Viewer
      */
     public static function all()
     {
-        // 2022-02-28T15:33:26+00:00
         $log = array();
         $directory = static::getLogDirectory();
         $pattern = '/\d{4}-\d{2}-\d{2}[T]\d{2}:\d{2}:\d{2}[+]\d\d[:]\d\d.*/';
@@ -102,8 +101,9 @@ class MailChimp_WooCommerce_Log_Viewer
             if (self::$file === 'test-log.log' && isset($log_file[1])) {
                 self::$file = $log_file[1];
             }
+            self::$file = $directory.'/'.self::$file;
         }
-        $file_path = $directory.'/'.self::$file;
+        $file_path = self::$file;
         if (filesize($file_path) > self::MAX_FILE_SIZE) return null;
         $file = file_get_contents($file_path);
         preg_match_all($pattern, $file, $headings);
@@ -164,7 +164,7 @@ class MailChimp_WooCommerce_Log_Viewer
      */
     public static function getLogDirectory()
     {
-        return !defined('WC_LOG_DIR') ? null : WC_LOG_DIR;
+        return !defined('WC_LOG_DIR') ? null : rtrim(WC_LOG_DIR, '/');
     }
 
     /**

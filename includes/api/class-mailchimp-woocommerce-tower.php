@@ -216,7 +216,8 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
 
                 ]
             ],
-            'logs' => static::logs($this->with_log_file),
+            'logs' => static::logs($this->with_log_file, $this->with_log_search),
+            'system_report' => $this->getSystemReport(),
         ];
     }
 
@@ -275,18 +276,35 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
         return apply_filters( 'woocommerce_reports_sales_overview_order_items', absint($result));
     }
 
+    public function getSystemReport()
+    {
+        global $wp_version;
+
+        return array(
+            array('key' => 'PhpVersion', 'value' => phpversion()),
+            array('key' => 'Curl Enabled', 'value' => function_exists('curl_init')),
+            array('key' => 'Wordpress Version', 'value' => $wp_version),
+            array('key' => 'WooCommerce Version', 'value' => defined('WC_VERSION') ? WC_VERSION : null),
+        );
+    }
+
     /**
      * @return array|object|null
      */
     public function getMeta()
     {
         global $wpdb;
-        return $wpdb->get_results("
-SELECT option_name as `key`, option_value as `value` 
-FROM $wpdb->options 
-WHERE `key` 
-LIKE 'mailchimp%woocommerce%'
-");
+        $results = $wpdb->get_results("SELECT * FROM $wpdb->options WHERE option_name LIKE 'mailchimp-woocommerce-%'");
+        $response = array();
+        $date = new \DateTime('now');
+        foreach ($results as $result) {
+            $response[] = array(
+                'key' => $result->option_name,
+                'value' => $result->option_value,
+                'updated_at' => $date->format('Y-m-d H:i:s'),
+            );
+        }
+        return $response;
     }
 
     /**

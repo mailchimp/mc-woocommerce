@@ -22,7 +22,8 @@ class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abstr
     {
         $service = MailChimp_Service::instance();
         $service->removePointers(true, false);
-        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Process_Products(), 0);
+        $sync = new MailChimp_WooCommerce_Process_Products();
+        $sync->createSyncManagers();
     }
 
 

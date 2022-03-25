@@ -300,6 +300,12 @@ class MailChimp_WooCommerce_Rest_Api
                 ];
                 break;
             case 'resync_promo_codes':
+                MailChimp_WooCommerce_Process_Coupons::push();
+                $response = [
+                    'title' => "Successfully initiated promo code resync",
+                    'description' => "Please note that it will take a couple minutes to start this process. Check the store logs for details.",
+                    'type' => 'success',
+                ];
                 break;
             case 'resync_chimpstatic_script':
                 $response = [

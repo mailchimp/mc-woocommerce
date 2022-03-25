@@ -23,7 +23,8 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abstrac
     {
         $service = MailChimp_Service::instance();
         $service->removePointers(false, true);
-        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Process_Orders());
+        $sync = new MailChimp_WooCommerce_Process_Orders();
+        $sync->createSyncManagers();
         $service->setData('sync.config.resync', true);
     }
 

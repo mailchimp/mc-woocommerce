@@ -16,6 +16,17 @@ class MailChimp_WooCommerce_Process_Coupons extends MailChimp_WooCommerce_Abstra
     protected $action = 'mailchimp_woocommerce_process_coupons';
 
     /**
+     * Resync the products
+     */
+    public static function push()
+    {
+        $service = MailChimp_Service::instance();
+        $service->removePointers(true, false);
+        $coupons_sync = new MailChimp_WooCommerce_Process_Coupons();
+        $coupons_sync->createSyncManagers();
+    }
+
+    /**
      * @return string
      */
     public function getResourceType()

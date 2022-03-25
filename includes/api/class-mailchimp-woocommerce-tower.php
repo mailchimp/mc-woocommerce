@@ -106,6 +106,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                         $syncing_mc = $mc_store->isSyncing();
                         $store_attached = true;
                         $list_is_valid = $mc_store->getListId() === $list_id;
+                        $has_mailchimp_script = (bool) $mc_store->getConnectedSiteScriptFragment();
                     }
                     if ($store_url === $compare_url) {
                         if (!$public_key_matched && $mc_store->getPlatform() === 'Woocommerce') {
@@ -348,7 +349,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
         $date = new \DateTime('now');
         foreach ($results as $result) {
             $response[] = array(
-                'key' => $result->option_name,
+                'key' => str_replace('mailchimp-woocommerce-', '', $result->option_name),
                 'value' => $result->option_value,
                 'updated_at' => $date->format('Y-m-d H:i:s'),
             );

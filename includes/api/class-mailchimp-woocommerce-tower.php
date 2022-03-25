@@ -130,6 +130,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
 
         return [
             'store' => (object) array(
+                'public_key' => $store_id,
                 'domain' => $url,
                 'secure_url' => $url,
                 'user' => (object) array(
@@ -280,12 +281,60 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
     {
         global $wp_version;
 
+        $actions = $this->getLastActions();
+
         return array(
             array('key' => 'PhpVersion', 'value' => phpversion()),
             array('key' => 'Curl Enabled', 'value' => function_exists('curl_init')),
+            array('key' => 'Curl Version', 'value' => $this->getCurlVersion()),
             array('key' => 'Wordpress Version', 'value' => $wp_version),
             array('key' => 'WooCommerce Version', 'value' => defined('WC_VERSION') ? WC_VERSION : null),
+            array('key' => 'Active Plugins', 'value' => $this->getActivePlugins()),
+            array('key' => 'Actions', 'value' => $actions),
         );
+    }
+
+    public function getCurlVersion()
+    {
+        $version = function_exists('curl_version') ? curl_version() : null;
+        return is_array($version) ? $version['version'] : null;
+    }
+
+    public function getActivePlugins()
+    {
+        $active_plugins = "<ul>";
+        $plugins = wp_get_active_and_valid_plugins();
+        foreach ($plugins as $plugin) {
+            $plugin_data = get_plugin_data($plugin);
+            $active_plugins .= '<li><span class="font-bold">'.$plugin_data['Name'].'</span>: '.$plugin_data['Version'].'</li>';
+        }
+        $active_plugins .= "</ul>";
+        return print_r($active_plugins, true);
+    }
+
+    public function getLastActions()
+    {
+        global $wpdb;
+        if (!class_exists('ActionScheduler') || !ActionScheduler::is_initialized( 'store' ) ) {
+            return array();
+        }
+        if (!ActionScheduler::store()) {
+            return array();
+        }
+        $oldest_and_newest = '<ul>';
+
+        foreach (array_keys(ActionScheduler::store()->get_status_labels()) as $status) {
+            if ('in-progress' === $status) {
+                continue;
+            }
+            $newest = $this->get_action_status_date($status, 'newest' );
+            $status = ucfirst($status);
+            $oldest_and_newest .= "<li><span class='font-bold'>{$status}</span>: {$newest}</li>";
+        }
+
+        $oldest_and_newest .= '</ul>';
+
+        return $oldest_and_newest;
     }
 
     /**
@@ -356,5 +405,33 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
         } catch (\Throwable $e) {
             return null;
         }
+    }
+
+    /**
+     * Get oldest or newest scheduled date for a given status.
+     *
+     * @param string $status Action status label/name string.
+     * @param string $date_type Oldest or Newest.
+     * @return DateTime
+     */
+    protected function get_action_status_date( $status, $date_type = 'oldest' )
+    {
+        $order = 'oldest' === $date_type ? 'ASC' : 'DESC';
+        $store = ActionScheduler::store();
+        $action = $store->query_actions(
+            array(
+                'claimed'  => false,
+                'status'   => $status,
+                'per_page' => 1,
+                'order'    => $order,
+            )
+        );
+        if ( ! empty( $action ) ) {
+            $date_object = $store->get_date( $action[0] );
+            $action_date = $date_object->format( 'Y-m-d H:i:s O' );
+        } else {
+            $action_date = '&ndash;';
+        }
+        return $action_date;
     }
 }

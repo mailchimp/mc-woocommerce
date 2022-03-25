@@ -416,41 +416,46 @@ class MailChimp_WooCommerce_Rest_Api
     public function get_tower_resource(WP_REST_Request $request)
     {
         $this->authorize('tower.token', $request);
-        $body = $request->get_json_params();
+        $body = json_decode($request->get_body(), true);
 
-
-        if (!isset($body['resource']) || !isset($body['id'])) {
-            throw new WC_REST_Exception(404, 'invalid json body', 404);
+        if (!isset($body['resource']) || !isset($body['resource_id'])) {
+            return $this->mailchimp_rest_response(array(
+                'resource' => null,
+                'resource_error' => 'Resource not found because post request was wrong',
+                'mailchimp' => null,
+                'mailchimp_error' => 'Resource not found because post request was wrong',
+            ));
         }
 
         $store_id = mailchimp_get_store_id();
 
         switch ($body['resource']) {
             case 'order':
-                $platform = wc_get_order($body['id']);
-                $mc = mailchimp_get_api()->getStoreOrder($store_id, $platform->get_id());
+                $platform = get_post($body['resource_id']);
+                $mc = !$platform->ID ? null : mailchimp_get_api()->getStoreOrder($store_id, $platform->ID);
                 break;
             case 'customer':
-                $field = is_email($body['id']) ? 'email' : 'id';
-                $platform = get_user_by($field, $body['id']);
+                $body['resource_id'] = urldecode($body['resource_id']);
+                $field = is_email($body['resource_id']) ? 'email' : 'id';
+                $platform = get_user_by($field, $body['resource_id']);
                 $hashed = mailchimp_hash_trim_lower($platform->user_email);
                 $mc = mailchimp_get_api()->getCustomer($store_id, $hashed);
                 break;
             case 'product':
-                $platform = wc_get_product($body['id']);
-                $mc = mailchimp_get_api()->getStoreProduct($store_id, $body['id']);
+                $platform = wc_get_product($body['resource_id']);
+                $mc = mailchimp_get_api()->getStoreProduct($store_id, $body['resource_id']);
                 break;
             case 'cart':
                 global $wpdb;
-                $uid = mailchimp_hash_trim_lower($body['id']);
+                $uid = mailchimp_hash_trim_lower($body['resource_id']);
                 $table = "{$wpdb->prefix}mailchimp_carts";
                 $sql = $wpdb->prepare("SELECT * FROM $table WHERE id = %s", $uid);
                 $platform = $wpdb->get_row($sql);
                 $mc = mailchimp_get_api()->getCart($store_id, $uid);
                 break;
             case 'promo_code':
-                $platform = new WC_Coupon($body['id']);
-                $mc = mailchimp_get_api()->getPromoRuleWithCodes($store_id, $body['id']);
+                $platform = new WC_Coupon($body['resource_id']);
+                $mc = mailchimp_get_api()->getPromoRuleWithCodes($store_id, $body['resource_id']);
                 break;
         }
 

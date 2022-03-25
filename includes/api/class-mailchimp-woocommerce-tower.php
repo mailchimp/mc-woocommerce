@@ -372,6 +372,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
         $key = mailchimp_get_api_key();
         $list_id = mailchimp_get_list_id();
         $post_url = "https://tower.vextras.com/admin-api/woocommerce/{$command}/{$store_id}";
+        $plugin_options = (array) get_option('mailchimp-woocommerce');
 
         if ((bool) $enable) {
             mailchimp_set_data('tower.token', $support_token = wp_generate_password());
@@ -390,6 +391,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                     'X-Store-Key' => base64_encode("{$store_id}:{$key}"),
                 ),
                 'body' => json_encode(array(
+                    'name' => !empty($plugin_options) && isset($plugin_options['store_name']) ? $plugin_options['store_name'] : get_option('blogname'),
                     'support_token' => $support_token,
                     'domain' => get_option('siteurl'),
                     'data' => array(

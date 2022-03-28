@@ -444,7 +444,6 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                 'timeout'     => 30,
             );
             $response = wp_remote_post($post_url, $payload);
-            mailchimp_log('tower', 'trace', $response);
             return json_decode($response['body']);
         } catch (\Throwable $e) {
             return null;

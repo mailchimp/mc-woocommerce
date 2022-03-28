@@ -137,6 +137,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                 'user' => (object) array(
                     'email' => isset($options['admin_email']) ? $options['admin_email'] : null,
                 ),
+                'average_monthly_sales' => $this->getShopSales(),
                 'address' => (object) array(
                     'street' => isset($options['store_street']) && $options['store_street'] ? $options['store_street'] : '',
                     'city' => isset($options['store_street']) && $options['store_street'] ? $options['store_street'] : '',
@@ -192,7 +193,6 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                     'shop' => [
                         'phone' => isset($options['store_phone']) && $options['store_phone'] ? $options['store_phone'] : '',
                     ],
-                    'shop_sales' => $this->getShopSales(),
                 ],
                 'mailchimp' => [
                     'shop' => $shop ? $shop->toArray() : false,
@@ -250,32 +250,69 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
         return $logs->handle();
     }
 
-    /**
-     * @return mixed
-     */
     public function getShopSales()
     {
-        global $wpdb;
-        $statuses = implode( "','", apply_filters('woocommerce_reports_order_statuses', array(
-            'completed',
-            'processing',
-            'on-hold'
-        )));
-        $result = $wpdb->get_var("
-	SELECT SUM( order_item_meta.meta_value )
-	FROM {$wpdb->prefix}woocommerce_order_items as order_items
-	LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
-	LEFT JOIN {$wpdb->posts} AS posts ON order_items.order_id = posts.ID
-	LEFT JOIN {$wpdb->term_relationships} AS rel ON posts.ID = rel.object_ID
-	LEFT JOIN {$wpdb->term_taxonomy} AS tax USING( term_taxonomy_id )
-	LEFT JOIN {$wpdb->terms} AS term USING( term_id )
-	WHERE 	term.slug IN ('" . $statuses . "')
-	AND 	posts.post_status 	= 'publish'
-	AND 	tax.taxonomy		= 'shop_order_status'
-	AND 	order_items.order_item_type = 'line_item'
-	AND 	order_item_meta.meta_key = '_qty'
-");
-        return apply_filters( 'woocommerce_reports_sales_overview_order_items', absint($result));
+        try {
+            global $woocommerce, $wpdb;
+            include_once($woocommerce->plugin_path() . '/includes/admin/reports/class-wc-admin-report.php');
+
+            // WooCommerce Admin Report
+            $wc_report = new WC_Admin_Report();
+
+            // Set date parameters for the current month
+            $start_date = strtotime(date('Y-m', current_time('timestamp')) . '-01 midnight');
+            $end_date = strtotime('+1month', $start_date) - 86400;
+            $wc_report->start_date = $start_date;
+            $wc_report->end_date = $end_date;
+
+            // Avoid max join size error
+            $wpdb->query('SET SQL_BIG_SELECTS=1');
+
+            // Get data for current month sold products
+            $sold_products = $wc_report->get_order_report_data(array(
+                'data' => array(
+                    '_product_id' => array(
+                        'type' => 'order_item_meta',
+                        'order_item_type' => 'line_item',
+                        'function' => '',
+                        'name' => 'product_id'
+                    ),
+                    '_qty' => array(
+                        'type' => 'order_item_meta',
+                        'order_item_type' => 'line_item',
+                        'function' => 'SUM',
+                        'name' => 'quantity'
+                    ),
+                    '_line_subtotal' => array(
+                        'type' => 'order_item_meta',
+                        'order_item_type' => 'line_item',
+                        'function' => 'SUM',
+                        'name' => 'gross'
+                    ),
+                    '_line_total' => array(
+                        'type' => 'order_item_meta',
+                        'order_item_type' => 'line_item',
+                        'function' => 'SUM',
+                        'name' => 'gross_after_discount'
+                    )
+                ),
+                'query_type' => 'get_results',
+                'group_by' => 'product_id',
+                'where_meta' => '',
+                'order_by' => 'quantity DESC',
+                'order_types' => wc_get_order_types('order_count'),
+                'filter_range' => TRUE,
+                'order_status' => array('completed', 'complete'),
+            ));
+            $total = 0;
+            foreach ($sold_products as $product) {
+                $total += $product->gross;
+            }
+            return $total;
+        } catch (\Throwable $e) {
+            mailchimp_log('tower', $e->getMessage());
+            return 0;
+        }
     }
 
     public function getSystemReport()
@@ -283,13 +320,17 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
         global $wp_version;
 
         $actions = $this->getLastActions();
+        $theme = wp_get_theme();
 
         return array(
             array('key' => 'PhpVersion', 'value' => phpversion()),
+            array('key' => 'Memory Limit', 'value' => ini_get('memory_limit')),
             array('key' => 'Curl Enabled', 'value' => function_exists('curl_init')),
             array('key' => 'Curl Version', 'value' => $this->getCurlVersion()),
             array('key' => 'Wordpress Version', 'value' => $wp_version),
             array('key' => 'WooCommerce Version', 'value' => defined('WC_VERSION') ? WC_VERSION : null),
+            array('key' => 'Theme Name', 'value' => esc_html($theme->get('Name'))),
+            array('key' => 'Theme URL', 'value' => esc_html($theme->get('ThemeURI'))),
             array('key' => 'Active Plugins', 'value' => $this->getActivePlugins()),
             array('key' => 'Actions', 'value' => $actions),
         );
@@ -415,7 +456,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
      *
      * @param string $status Action status label/name string.
      * @param string $date_type Oldest or Newest.
-     * @return DateTime
+     * @return string
      */
     protected function get_action_status_date( $status, $date_type = 'oldest' )
     {

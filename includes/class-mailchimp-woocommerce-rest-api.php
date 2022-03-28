@@ -513,16 +513,17 @@ class MailChimp_WooCommerce_Rest_Api
         );
         // this is just a safeguard against people trying to do wonky things.
         if (!in_array($key, $allowed_keys, true)) {
-            throw new WC_REST_Exception(403, 'unauthorized token type', 403);
+            wp_send_json_error(array('message' => 'unauthorized token type'), 403);
         }
         // get the auth token from either a header, or the query string
         $token = $this->getAuthToken($request);
         // pull the saved data
         $saved = mailchimp_get_data($key);
+
         // if we don't have a token - or we don't have the saved comparison
         // or the token doesn't equal the saved token, throw an error.
         if (empty($token) || empty($saved) || base64_decode($token) !== $saved) {
-            throw new WC_REST_Exception(403, 'unauthorized', 403);
+            wp_send_json_error(array('message' => 'unauthorized'), 403);
         }
         return true;
     }

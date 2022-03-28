@@ -1973,7 +1973,8 @@ class MailChimp_WooCommerce_MailChimpApi
             if (isset($data['http_code']) && $data['http_code'] == 403) {
                 throw new MailChimp_WooCommerce_RateLimitError();
             }
-            throw new MailChimp_WooCommerce_Error($data['detail'], (int) $data['status']);
+            $error = isset($data['detail']) ? $data['detail'] : ("Error code ".$data['status']);
+            throw new MailChimp_WooCommerce_Error($error, (int) $data['status']);
         }
 
         return false;

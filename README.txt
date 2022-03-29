@@ -4,7 +4,7 @@ Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.9
 Tested up to: 5.9
-Stable tag: 2.6.1
+Stable tag: 2.6.2
 Requires PHP: 7.0
 WC requires at least: 3.5
 WC tested up to: 6.3
@@ -78,10 +78,14 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
 == Changelog ==
-= 2.6 =
-* Adds support for selectively syncing subscribers only 
-* Updates to action scheduler dependency 
+= 2.6.2 =
+* compatibility for woocommerce 6.3
+* UI/UX updates for situations where Action Scheduler is missing during composer installs (via .gitignore)
+* trigger double opt-in messages for customers who previously unsubscribed
+* improved minification of mailchimp-woocommerce-public.min.js file
+* mailchimp_woocommerce_landing_site URL improvements to reflect which page the customer entered on for the first time
+* better error handling with Google Analytics
+* fixed bug related to Mailchimp API submission when someone was already a list member
 
 
 [Historical Changelog](https://raw.githubusercontent.com/mailchimp/mc-woocommerce/master/CHANGELOG.txt)
-

@@ -240,7 +240,10 @@ class MailChimp_WooCommerce_MailChimpApi
         try {
             return $this->post("lists/$list_id/members?skip_merge_validation=true", $data);
         } catch (\Exception $e) {
-            if ($data['status'] !== 'subscribed' || !mailchimp_string_contains($e->getMessage(), 'compliance state')) {
+            // If mailchimp says is already a member lets send the update by PUT
+            if (mailchimp_string_contains($e->getMessage(), 'is already a list member')) {
+                return $this->applyPutRequestOnSubscriber($list_id, $email, $data);
+            } elseif ($data['status'] !== 'subscribed' || !mailchimp_string_contains($e->getMessage(), 'compliance state')) {
                 throw $e;
             }
             $data['status'] = 'pending';
@@ -304,17 +307,11 @@ class MailChimp_WooCommerce_MailChimpApi
         try {
             return $this->patch("lists/$list_id/members/$hash?skip_merge_validation=true", $data);
         } catch (\Exception $e) {
+
             // If mailchimp says is already a member lets send the update by PUT
-            if( mailchimp_string_contains( $e->getMessage(), 'is already a list member') ){
-                try{
-                    mailchimp_log('api.update', "{$email} was already a list member sending the update by PUT");
-                    $result = $this->put("lists/$list_id/members/$hash?skip_merge_validation=true", $data);
-                    return $result;
-                }catch(\Exception $e){
-                    mailchimp_log('api.update', $e->getMessage());
-                    throw $e;
-                }
-            }elseif ($data['status'] !== 'subscribed' || !mailchimp_string_contains($e->getMessage(), 'compliance state')) {
+            if (mailchimp_string_contains($e->getMessage(), 'is already a list member')) {
+                return $this->applyPutRequestOnSubscriber($list_id, $email, $data);
+            } elseif ($data['status'] !== 'subscribed' || !mailchimp_string_contains($e->getMessage(), 'compliance state')) {
                 throw $e;
             } 
             
@@ -324,6 +321,26 @@ class MailChimp_WooCommerce_MailChimpApi
             return $result;    
             
             
+        }
+    }
+
+    /**
+     * @param $list_id
+     * @param $email
+     * @param $data
+     * @return array|bool|mixed|object|null
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_ServerError
+     */
+    protected function applyPutRequestOnSubscriber($list_id, $email, $data)
+    {
+        try {
+            $hash = md5(strtolower(trim($email)));
+            mailchimp_log('api.update', "{$email} was already a list member sending the update by PUT");
+            $result = $this->put("lists/$list_id/members/$hash?skip_merge_validation=true", $data);
+            return $result;
+        } catch(\Exception $e) {
+            throw $e;
         }
     }
 
@@ -1986,7 +2003,8 @@ class MailChimp_WooCommerce_MailChimpApi
             if (isset($data['http_code']) && $data['http_code'] == 403) {
                 throw new MailChimp_WooCommerce_RateLimitError();
             }
-            throw new MailChimp_WooCommerce_Error($data['detail'], (int) $data['status']);
+            $error = isset($data['detail']) ? $data['detail'] : ("Error code ".$data['status']);
+            throw new MailChimp_WooCommerce_Error($error, (int) $data['status']);
         }
 
         return false;

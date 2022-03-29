@@ -35,10 +35,10 @@ if (!defined( 'WPINC')) {
 }
 
 if (!isset($mailchimp_woocommerce_spl_autoloader) || $mailchimp_woocommerce_spl_autoloader === false) {
-    // Require Action Scheduler.
-    require_once __DIR__ . '/includes/vendor/action-scheduler/action-scheduler.php';
+    // Load Action Scheduler.
+    include_once __DIR__ . '/includes/vendor/action-scheduler/action-scheduler.php';
     // Load bootstrapper.
-    require_once __DIR__ . '/bootstrap.php';
+    include_once __DIR__ . '/bootstrap.php';
 }
 
 register_activation_hook(__FILE__, 'activate_mailchimp_woocommerce');

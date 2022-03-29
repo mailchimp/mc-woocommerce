@@ -129,7 +129,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             if ($label == '') $label = __('Subscribe to our newsletter', 'mailchimp-for-woocommerce');
 			$options = get_option($this->plugin_name, array());
 			$checkbox_default_settings = (array_key_exists('mailchimp_checkbox_defaults', $options) && !is_null($options['mailchimp_checkbox_defaults'])) ? $options['mailchimp_checkbox_defaults'] : 'check';
-			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version.'.05', false );
+			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version, false );
 			wp_localize_script(
 				$this->plugin_name,
 				'phpVars',
@@ -1539,7 +1539,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @param null $data
 	 * @return bool
 	 */
-	private function syncStore($data = null)
+	public function syncStore($data = null)
 	{
 		if (empty($data)) {
 			$data = $this->getOptions();
@@ -1789,6 +1789,32 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		
 		wp_die();
 	}
+
+    /**
+     * set Communications status via sync page.
+     */
+    public function mailchimp_woocommerce_tower_status() {
+        $original_opt = $this->getData('tower.opt',0);
+        $opt = $_POST['opt'];
+
+        mailchimp_debug('tower_status', "setting to {$opt}");
+
+        // try to set the info on the server
+        // post to communications api
+        $job = new MailChimp_WooCommerce_Tower(mailchimp_get_store_id());
+        $response_body = $job->toggle($opt);
+
+        // if success, set internal option to check for opt and display on sync page
+        if ($response_body && $response_body->success == true) {
+            $this->setData('tower.opt', $opt);
+            wp_send_json_success(__('Saved', 'mailchimp-for-woocommerce'));
+        } else {
+            //if error, keep option to original value
+            wp_send_json_error(array('error' => __('Error setting tower support status', 'mailchimp-for-woocommerce'), 'opt' => $original_opt));
+        }
+
+        wp_die();
+    }
 	
 	/**
 	 * set Communications box status.

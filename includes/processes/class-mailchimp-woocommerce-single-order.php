@@ -233,7 +233,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 // if single sync and
                 // if the order is in failed or cancelled status - and it's brand new, we shouldn't submit it.
                 if (!$this->is_full_sync && in_array($order->getFinancialStatus(), array('failed', 'cancelled')) || $order->getOriginalWooStatus() === 'pending') {
-                    mailchimp_log('order_sumbit', "#{$order->getId()} has a financial status of {$order->getFinancialStatus()} and was skipped.");
+                    mailchimp_log('order_submit', "#{$order->getId()} has a financial status of {$order->getFinancialStatus()} and was skipped.");
                     return false;
                 }
                 // if full sync and
@@ -241,7 +241,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 // it is probably happening due to 3rd party payment processing and it's still pending. These orders
                 // don't always make it over because someone could be cancelling out of the payment there.
                 if ($this->is_full_sync && !in_array(strtolower($order->getFinancialStatus()), array('processing', 'completed', 'paid'))) {
-                    mailchimp_log('order_sumbit', "#{$order->getId()} has a financial status of {$order->getFinancialStatus()} and was skipped.");
+                    mailchimp_log('order_submit', "#{$order->getId()} has a financial status of {$order->getFinancialStatus()} and was skipped.");
                     return false;
                 }
 
@@ -301,7 +301,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                     
                     $order->addItem($line_item);
                     
-                    mailchimp_log('order_sumbit.error', "Order {$order->getId()} does not have any line items, so we are using 'empty_line_item_placeholder' instead.");
+                    mailchimp_log('order_submit.error', "Order {$order->getId()} does not have any line items, so we are using 'empty_line_item_placeholder' instead.");
                 }
             }
             

@@ -235,6 +235,8 @@ class MailChimp_WooCommerce_MailChimpApi
             unset($data['marketing_permissions']);
         }
 
+        $this->validateNaughtyListEmail($email);
+
         mailchimp_debug('api.subscribe', "Subscribing {$email}", $data);
 
         try {
@@ -302,6 +304,8 @@ class MailChimp_WooCommerce_MailChimpApi
             unset($data['marketing_permissions']);
         }
 
+        $this->validateNaughtyListEmail($email);
+
         mailchimp_debug('api.update_member', "Updating {$email}", $data);
 
         try {
@@ -321,6 +325,26 @@ class MailChimp_WooCommerce_MailChimpApi
             return $result;    
             
             
+        }
+    }
+
+    /**
+     * @param $list_id
+     * @param $email
+     * @param $data
+     * @return array|bool|mixed|object|null
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_ServerError
+     */
+    protected function applyPutRequestOnSubscriber($list_id, $email, $data)
+    {
+        try {
+            $hash = md5(strtolower(trim($email)));
+            mailchimp_log('api.update', "{$email} was already a list member sending the update by PUT");
+            $result = $this->put("lists/$list_id/members/$hash?skip_merge_validation=true", $data);
+            return $result;
+        } catch(\Exception $e) {
+            throw $e;
         }
     }
 
@@ -463,7 +487,9 @@ class MailChimp_WooCommerce_MailChimpApi
         if (empty($data['language'])) {
             unset($data['language']);
         }
-        
+
+        $this->validateNaughtyListEmail($email);
+
         mailchimp_debug('api.update_or_create', "Update Or Create {$email}", $data);
 
         return $this->put("lists/$list_id/members/$hash", $data);
@@ -673,6 +699,36 @@ class MailChimp_WooCommerce_MailChimpApi
     public function getOrderCount($store_id)
     {
         $data = $this->get("ecommerce/stores/{$store_id}/orders?count=1");
+        if (!is_array($data)) {
+            return 0;
+        }
+        return $data['total_items'];
+    }
+
+    /**
+     * @param $store_id
+     * @return int|mixed
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_ServerError
+     */
+    public function getProductCount($store_id)
+    {
+        $data = $this->get("ecommerce/stores/{$store_id}/products?count=1");
+        if (!is_array($data)) {
+            return 0;
+        }
+        return $data['total_items'];
+    }
+
+    /**
+     * @param $store_id
+     * @return int|mixed
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_ServerError
+     */
+    public function getCustomerCount($store_id)
+    {
+        $data = $this->get("ecommerce/stores/{$store_id}/customers?count=1");
         if (!is_array($data)) {
             return 0;
         }
@@ -956,6 +1012,8 @@ class MailChimp_WooCommerce_MailChimpApi
                 return false;
             }
 
+            $this->validateNaughtyList($cart->getCustomer());
+
             mailchimp_debug('api.addCart', "Adding Cart :: {$email}", $data = $cart->toArray());
 
             $data = $this->post("ecommerce/stores/$store_id/carts", $data);
@@ -987,6 +1045,8 @@ class MailChimp_WooCommerce_MailChimpApi
             if (mailchimp_email_is_privacy_protected($email) || mailchimp_email_is_amazon($email)) {
                 return false;
             }
+
+            $this->validateNaughtyList($cart->getCustomer());
 
             mailchimp_debug('api.updateCart', "Updating Cart :: {$email}", $data = $cart->toArrayForUpdate());
 
@@ -1537,6 +1597,34 @@ class MailChimp_WooCommerce_MailChimpApi
 
     /**
      * @param $store_id
+     * @param $rule_id
+     * @return object
+     * @throws \Exception
+     */
+    public function getPromoRuleWithCodes($store_id, $rule_id)
+    {
+        $rule = new MailChimp_WooCommerce_PromoCode();
+        $rule = $rule->fromArray($this->get("ecommerce/stores/{$store_id}/promo-rules/{$rule_id}"));
+        try {
+            $promo_codes = $this->getPromoCodesForRule($store_id, $rule->getId(), 1, 100);
+            $codes = array();
+            foreach ($promo_codes as $item) {
+                $codes[] = $item->toArray();
+            }
+            return (object) [
+                'rule' => $rule->toArray(),
+                'codes' => $codes,
+            ];
+        } catch (\Exception $e) {
+            return (object) [
+                'rule' => $rule,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * @param $store_id
      * @param MailChimp_WooCommerce_PromoRule $rule
      * @param MailChimp_WooCommerce_PromoCode $code
      * @param bool $throw
@@ -1602,8 +1690,10 @@ class MailChimp_WooCommerce_MailChimpApi
     protected function validateStoreSubmission($target)
     {
         if ($target instanceof MailChimp_WooCommerce_Order) {
+            $this->validateNaughtyList($target->getCustomer());
             return $this->validateStoreOrder($target);
         } else if ($target instanceof MailChimp_WooCommerce_Customer) {
+            $this->validateNaughtyList($target);
             return $this->validateStoreCustomer($target);
         }
         return true;
@@ -1734,6 +1824,100 @@ class MailChimp_WooCommerce_MailChimpApi
             }
         }
         return $deleted;
+    }
+
+    /**
+     * @param MailChimp_WooCommerce_Customer $customer
+     * @return false
+     * @throws MailChimp_WooCommerce_Error
+     */
+    public function validateNaughtyList(MailChimp_WooCommerce_Customer $customer)
+    {
+        $this->validateNaughtyListEmail($customer->getEmailAddress());
+        $this->validateNaughtyListNames($customer->getFirstName(), $customer->getLastName());
+        return false;
+    }
+
+    /**
+     * @param $email
+     * @return false
+     * @throws MailChimp_WooCommerce_Error
+     */
+    public function validateNaughtyListEmail($email)
+    {
+        if (!empty($email) && mailchimp_string_contains($email, $this->getNaughtyList())) {
+            $this->reportSpamToTower($email);
+            throw new MailChimp_WooCommerce_Error("Email [{$email}] has been blocked due to spam reports.");
+        }
+        return false;
+    }
+
+    /**
+     * @return array|mixed
+     */
+    public function getNaughtyList()
+    {
+        try {
+            $domains = mailchimp_get_transient('naughty_list_domains');
+            if (is_array($domains) && isset($domains['value'])) {
+                return $domains['value'];
+            }
+            $domains = json_decode(file_get_contents('https://tower.vextras.com/naughty-domains'), true);
+            mailchimp_set_transient('naughty_list_domains', $domains, 1440);
+            return $domains;
+        } catch (\Throwable $e) {
+            $domains = [];
+            mailchimp_set_transient('naughty_list_domains', $domains, 300);
+            return $domains;
+        }
+    }
+
+    /**
+     * @param $email
+     * @return mixed|null
+     */
+    private function reportSpamToTower($email)
+    {
+        try {
+            $payload = array(
+                'headers' => array(
+                    'Content-type' => 'application/json',
+                    'Accept' => 'application/json',
+                    'X-Store-Platform' => 'woocommerce',
+                    'X-List-Id' => mailchimp_get_list_id(),
+                    'X-Store-Key' => base64_encode(mailchimp_get_store_id().':'.mailchimp_get_api_key()),
+                ),
+                'body' => json_encode(array(
+                    'store_id' => mailchimp_get_store_id(),
+                    'list_id' => mailchimp_get_list_id(),
+                    'email' => $email
+                )),
+                'timeout'     => 30,
+            );
+            $response = wp_remote_post('https://tower.vextras.com/admin-api/woocommerce/report-spam', $payload);
+            return json_decode($response['body']);
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    /**
+     * @param $first_name
+     * @param $last_name
+     * @return false
+     * @throws MailChimp_WooCommerce_Error
+     */
+    public function validateNaughtyListNames($first_name, $last_name)
+    {
+        // add a list of naughty list customer names. Seems a little destructive though.
+        $naughty_list_names = [
+            'mark mustermann',
+        ];
+        $name = "{$first_name} {$last_name}";
+        if (mailchimp_string_contains(strtolower($name), $naughty_list_names)) {
+            throw new MailChimp_WooCommerce_Error("Name [{$name}] has been blocked due to spam reports.");
+        }
+        return false;
     }
 
     /**

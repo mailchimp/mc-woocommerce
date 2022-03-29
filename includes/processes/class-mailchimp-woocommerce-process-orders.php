@@ -17,6 +17,18 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abstrac
     public $items = array();
 
     /**
+     * Resync just the orders
+     */
+    public static function push()
+    {
+        $service = MailChimp_Service::instance();
+        $service->removePointers(false, true);
+        $sync = new MailChimp_WooCommerce_Process_Orders();
+        $sync->createSyncManagers();
+        $service->setData('sync.config.resync', true);
+    }
+
+    /**
      * @return string
      */
     public function getResourceType()

@@ -422,6 +422,41 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
             delete_option('mailchimp-woocommerce-tower.support_token');
         }
 
+        if ($enable) {
+            $data = array(
+                'list_id' => $list_id,
+                'php_version' => phpversion(),
+                'curl_enabled' => function_exists('curl_init'),
+                'is_connected' => $is_connected = mailchimp_is_configured(),
+                'sync_complete' => mailchimp_is_done_syncing(),
+                'rest_url' => MailChimp_WooCommerce_Rest_Api::url(''),
+            );
+            if ($is_connected) {
+                try {
+                    $api = mailchimp_get_api();
+                    $account_info = $api->getProfile();
+                    $list_info = !empty($list_id) ? $api->getList($list_id) : null;
+                    $mc_store = $api->getStore($store_id);
+                    $syncing_mc = $mc_store ? $mc_store->isSyncing() : false;
+                    if (is_array($list_info)) {
+                        unset($list_info['_links']);
+                    }
+                    if (is_array($account_info)) {
+                        unset($account_info['_links']);
+                    }
+                } catch (\Throwable $e) {
+                    $list_info = false;
+                    $syncing_mc = false;
+                    $account_info = false;
+                }
+                $data['list_info'] = $list_info;
+                $data['is_syncing'] = $syncing_mc;
+                $data['account_info'] = $account_info;
+            }
+        } else {
+            $data = array();
+        }
+
         try {
             $payload = array(
                 'headers' => array(
@@ -435,11 +470,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                     'name' => !empty($plugin_options) && isset($plugin_options['store_name']) ? $plugin_options['store_name'] : get_option('blogname'),
                     'support_token' => $support_token,
                     'domain' => get_option('siteurl'),
-                    'data' => array(
-                        'list_id' => $list_id,
-                        'is_connected' => mailchimp_is_configured(),
-                        'rest_url' => MailChimp_WooCommerce_Rest_Api::url(''),
-                    ),
+                    'data' => $data,
                 )),
                 'timeout'     => 30,
             );

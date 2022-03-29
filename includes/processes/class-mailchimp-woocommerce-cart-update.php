@@ -238,7 +238,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
             // we need to use this instead of the main product id.
             if ($variant_id) {
                 $product = wc_get_product($variant_id);
-                if (!empty($product)) {
+                if ( is_object( $product ) && method_exists( $product, 'get_parent_id' ) ) {
                     $product_id = $product->get_parent_id();
                 } else {
                     $product = wc_get_product($product_id);

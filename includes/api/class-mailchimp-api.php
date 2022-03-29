@@ -237,7 +237,20 @@ class MailChimp_WooCommerce_MailChimpApi
 
         mailchimp_debug('api.subscribe', "Subscribing {$email}", $data);
 
-        return $this->post("lists/$list_id/members?skip_merge_validation=true", $data);
+        try {
+            return $this->post("lists/$list_id/members?skip_merge_validation=true", $data);
+        } catch (\Exception $e) {
+            // If mailchimp says is already a member lets send the update by PUT
+            if (mailchimp_string_contains($e->getMessage(), 'is already a list member')) {
+                return $this->applyPutRequestOnSubscriber($list_id, $email, $data);
+            } elseif ($data['status'] !== 'subscribed' || !mailchimp_string_contains($e->getMessage(), 'compliance state')) {
+                throw $e;
+            }
+            $data['status'] = 'pending';
+            $result = $this->post("lists/$list_id/members?skip_merge_validation=true", $data);
+            mailchimp_log('api', "{$email} was in compliance state, sending the double opt in message");
+            return $result;
+        }
     }
 
     /**
@@ -291,7 +304,40 @@ class MailChimp_WooCommerce_MailChimpApi
 
         mailchimp_debug('api.update_member', "Updating {$email}", $data);
 
-        return $this->patch("lists/$list_id/members/$hash?skip_merge_validation=true", $data);
+        try {
+            return $this->patch("lists/$list_id/members/$hash?skip_merge_validation=true", $data);
+        } catch (\Exception $e) {
+            // If mailchimp says is already a member lets send the update by PUT
+            if (mailchimp_string_contains($e->getMessage(), 'is already a list member')) {
+                return $this->applyPutRequestOnSubscriber($list_id, $email, $data);
+            } elseif ($data['status'] !== 'subscribed' || !mailchimp_string_contains($e->getMessage(), 'compliance state')) {
+                throw $e;
+            }
+            $data['status'] = 'pending';
+            $result = $this->patch("lists/$list_id/members/$hash?skip_merge_validation=true", $data);
+            mailchimp_log('api', "{$email} was in compliance state, sending the double opt in message");
+            return $result;
+        }
+    }
+
+    /**
+     * @param $list_id
+     * @param $email
+     * @param $data
+     * @return array|bool|mixed|object|null
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_ServerError
+     */
+    protected function applyPutRequestOnSubscriber($list_id, $email, $data)
+    {
+        try {
+            $hash = md5(strtolower(trim($email)));
+            mailchimp_log('api.update', "{$email} was already a list member sending the update by PUT");
+            $result = $this->put("lists/$list_id/members/$hash?skip_merge_validation=true", $data);
+            return $result;
+        } catch(\Exception $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -1629,6 +1675,64 @@ class MailChimp_WooCommerce_MailChimpApi
     }
 
     /**
+     * @param $list_id
+     * @return array|bool
+     * @throws \Throwable
+     */
+    public function getWebHooks($list_id)
+    {
+        return $this->get("lists/{$list_id}/webhooks");
+    }
+
+    /**
+     * @param $list_id
+     * @param $url
+     * @return array|bool
+     * @throws \Throwable
+     */
+    public function webHookSubscribe($list_id, $url)
+    {
+        return $this->post("lists/{$list_id}/webhooks", [
+            'url' => $url,
+            'events' => [
+                'subscribe' => true,
+                'unsubscribe' => true,
+                'cleaned' => true,
+                'profile' => false,
+                'upemail' => false,
+                'campaign' => false,
+            ],
+            'sources' => [
+                'user' => true,
+                'admin' => true,
+                'api' => true,
+            ]
+        ]);
+    }
+
+    /**
+     * @param $list_id
+     * @param $url
+     * @return int
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_ServerError
+     * @throws Throwable
+     */
+    public function webHookDelete($list_id, $url)
+    {
+        $deleted = 0;
+        $hooks = $this->getWebHooks($list_id);
+        foreach ($hooks['webhooks'] as $hook) {
+            $href = $hook['href'] ?? $hook['url'] ?? null;
+            if ($href && $href === $url) {
+                $this->delete("lists/{$list_id}/webhooks/{$hook['id']}");
+                $deleted++;
+            }
+        }
+        return $deleted;
+    }
+
+    /**
      * @param $url
      * @param null $params
      * @return array|mixed|null|object
@@ -1895,7 +1999,8 @@ class MailChimp_WooCommerce_MailChimpApi
             if (isset($data['http_code']) && $data['http_code'] == 403) {
                 throw new MailChimp_WooCommerce_RateLimitError();
             }
-            throw new MailChimp_WooCommerce_Error($data['detail'], (int) $data['status']);
+            $error = isset($data['detail']) ? $data['detail'] : ("Error code ".$data['status']);
+            throw new MailChimp_WooCommerce_Error($error, (int) $data['status']);
         }
 
         return false;

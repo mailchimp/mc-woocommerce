@@ -1,4 +1,12 @@
 == Changelog ==
+= 2.6.2 =
+* compatibility for woocommerce 6.3
+* UI/UX updates for situations where Action Scheduler is missing during composer installs (via .gitignore)
+* trigger double opt-in messages for customers who previously unsubscribed
+* improved minification of mailchimp-woocommerce-public.min.js file
+* mailchimp_woocommerce_landing_site URL improvements to reflect which page the customer entered on for the first time
+* better error handling with Google Analytics
+* fixed bug related to Mailchimp API submission when someone was already a list member
 = 2.6 =
 * adds support for selectively syncing subscribers only 
 * updates to action scheduler dependency 

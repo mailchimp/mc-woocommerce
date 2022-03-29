@@ -306,6 +306,27 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         }
 	}
 
+
+	/**
+	 * Displays notice when action scheduler does not exist on the system
+	 */
+	public function action_scheduler_notice() {
+		if (!mailchimp_action_scheduler_exists()) {
+            $class = 'notice notice-warning is-dismissible';
+            $message = sprintf(
+            /* translators: Placeholders %1$s - opening strong HTML tag, %2$s */
+                esc_html__(
+                    '%1$sMailchimp for Woocommerce%2$s needs Action Scheduler plugin to function correctly, please confirm is installed',
+                    'mailchimp-for-woocommerce'
+                ),
+                '<strong>',
+                '</strong>' 
+            );
+            printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );
+        }
+	}
+
+
 	/**
 	 * Depending on the version we're on we may need to run some sort of migrations.
 	 */

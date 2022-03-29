@@ -13,6 +13,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     protected $user_email = null;
     protected $previous_email = null;
     protected $user_language = null;
+    protected $cart_subscribe = null;
     protected $force_cart_post = false;
     protected $cart_was_submitted = false;
     protected $cart = array();
@@ -62,7 +63,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     protected function cookie($key, $default = null)
     {
-        if ($this->is_admin) {
+        // if we're not allowed to use cookies, just return the default
+        if ($this->is_admin || !mailchimp_allowed_to_use_cookie($key)) {
             return $default;
         }
 
@@ -193,6 +195,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function handleCartUpdated($updated = null)
     {
+        if (mailchimp_carts_disabled()) {
+            return false;
+        }
+
         if ($updated === false || $this->is_admin || $this->cart_was_submitted || !mailchimp_is_configured()) {
             return !is_null($updated) ? $updated : false;
         }
@@ -206,6 +212,21 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             // let's skip this right here - no need to go any further.
             if (mailchimp_email_is_privacy_protected($user_email)) {
                 return !is_null($updated) ? $updated : false;
+            }
+
+            // if the user chose to send to subscribers only we need to do a quick check
+            // to see if this email has already subscribed.
+            if (!$this->cart_subscribe && (mailchimp_carts_subscribers_only() || mailchimp_submit_subscribed_only())) {
+                $transient_key = mailchimp_hash_trim_lower($user_email).".mc.status";
+                $cached_status = mailchimp_get_transient($transient_key, null);
+                if ($cached_status === null) {
+                    $cached_status = mailchimp_get_subscriber_status($user_email);
+                    mailchimp_set_transient($transient_key, $cached_status ? $cached_status : false, 300);
+                }
+                if ($cached_status !== 'subscribed') {
+                    mailchimp_debug('filter', "preventing {$user_email} from submitting cart data due to subscriber settings.");
+                    return false;
+                }
             }
 
             $previous = $this->getPreviousEmailFromSession();
@@ -239,10 +260,14 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                 $campaign = $this->getCampaignTrackingID();
                 
                 // get user language or default to admin main language
-                $language = $this->user_language ?: substr( get_locale(), 0, 2 ); 
+                $language = $this->user_language ?: substr(get_locale(), 0, 2);
                 
                 // fire up the job handler
                 $handler = new MailChimp_WooCommerce_Cart_Update($uid, $user_email, $campaign, $this->cart, $language);
+
+                // if they had the checkbox checked - go ahead and subscribe them if this is the first post.
+                //$handler->setStatus($this->cart_subscribe);
+
                 mailchimp_handle_or_queue($handler);
             }
 
@@ -478,6 +503,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function handleCampaignTracking()
     {
+        if (!mailchimp_allowed_to_use_cookie('mailchimp_user_email')) {
+            return null;
+        }
+
         // set the landing site cookie if we don't have one.
         $this->setLandingSiteCookie();
 
@@ -600,26 +629,26 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function setLandingSiteCookie()
     {
+        // if we're not allowed to use this cookie, just return
+        if (!mailchimp_allowed_to_use_cookie('mailchimp_landing_site')) {
+            return $this;
+        }
+
         if (isset($_GET['expire_landing_site'])) $this->expireLandingSiteCookie();
 
         // if we already have a cookie here, we need to skip it.
         if ($this->getLandingSiteCookie() != false) return $this;
 
-        $http_referer = $this->getReferer();
-
-        if (!empty($http_referer)) {
-
-            // grab the current landing url since it's a referral.
-            $landing_site = home_url() . wp_unslash($_SERVER['REQUEST_URI']);
-
-            $compare_refer = str_replace(array('http://', 'https://'), '', $http_referer);
-            $compare_local = str_replace(array('http://', 'https://'), '', $landing_site);
-
-            if (strpos($compare_local, $compare_refer) === 0) return $this;
-
-            // set the cookie
+        // grab the current landing url since it's a referral.
+        $landing_site = home_url() . wp_unslash($_SERVER['REQUEST_URI']);
+        
+        // Catch all possible file requests to avoid false positives
+        // We need to catch just real pages of the website
+        // Catching images, videos and fonts file types
+        preg_match("/^.*\.(ai|bmp|gif|ico|jpeg|jpg|png|ps|psd|svg|tif|tiff|fnt|fon|otf|ttf|3g2|3gp|avi|flv|h264|m4v|mkv|mov|mp4|mpg|mpeg|rm|swf|vob|wmv|aif|cda|mid|midi|mp3|mpa|ogg|wav|wma|wpl)$/i", $landing_site, $matches);
+        
+        if (!empty($landing_site) && !wp_doing_ajax() && ( count($matches) == 0 ) ) {
             mailchimp_set_cookie('mailchimp_landing_site', $landing_site, $this->getCookieDuration(), '/' );
-
             $this->setWooSession('mailchimp_landing_site', $landing_site);
         }
 
@@ -631,6 +660,9 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function getReferer()
     {
+        if (function_exists('wp_get_referer')) {
+            return wp_get_referer();
+        }
         if (!empty($_REQUEST['_wp_http_referer'])) {
             return wp_unslash($_REQUEST['_wp_http_referer']);
         } elseif (!empty($_SERVER['HTTP_REFERER'])) {
@@ -644,6 +676,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function expireLandingSiteCookie()
     {
+        if (!mailchimp_allowed_to_use_cookie('mailchimp_landing_site')) {
+            return $this;
+        }
+
         mailchimp_set_cookie('mailchimp_landing_site', false, $this->getCookieDuration(), '/' );
         $this->setWooSession('mailchimp_landing_site', false);
 
@@ -738,17 +774,48 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $this->respondJSON(array('success' => false, 'email' => false));
     }
 
+    public function set_user_from_block_checkout($email)
+    {
+        if (!mailchimp_allowed_to_use_cookie('mailchimp_user_email')) {
+            return false;
+        }
+        if (!empty($email)) {
+            $cookie_duration = $this->getCookieDuration();
+            $this->user_email = trim(str_replace(' ','+', $email));
+            if (($current_email = $this->getEmailFromSession()) && $current_email !== $this->user_email) {
+                $this->previous_email = $current_email;
+                $this->force_cart_post = true;
+                mailchimp_set_cookie('mailchimp_user_previous_email',$this->user_email, $cookie_duration, '/' );
+            }
+            mailchimp_set_cookie('mailchimp_user_email', $this->user_email, $cookie_duration, '/' );
+            $this->getCartItems();
+//            if (isset($_GET['mc_language'])) {
+//                $this->user_language = $_GET['mc_language'];
+//            }
+            $this->handleCartUpdated();
+            return true;
+        }
+        return false;
+    }
+
     /**
      *
      */
     public function set_user_by_email()
     {
+        if (mailchimp_carts_disabled()) {
+            $this->respondJSON(array('success' => false, 'message' => 'filter blocked due to carts being disabled'));
+        }
+
         if ($this->is_admin) {
-            $this->respondJSON(array('success' => false));
+            $this->respondJSON(array('success' => false, 'message' => 'admin carts are not tracked.'));
+        }
+
+        if (!mailchimp_allowed_to_use_cookie('mailchimp_user_email')) {
+            $this->respondJSON(array('success' => false, 'email' => false, 'message' => 'filter blocked due to cookie preferences'));
         }
 
         if ($this->doingAjax() && isset($_GET['email'])) {
-
             $cookie_duration = $this->getCookieDuration();
 
             $this->user_email = trim(str_replace(' ','+', $_GET['email']));
@@ -765,6 +832,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
             if (isset($_GET['mc_language'])) {
                 $this->user_language = $_GET['mc_language'];
+            }
+
+            if (isset($_GET['subscribed'])) {
+                $this->cart_subscribe = (bool) $_GET['subscribed'];
             }
 
             $this->handleCartUpdated();
@@ -856,6 +927,17 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     {
         if (!$this->validated_cart_db) return false;
 
+        $hash = md5(strtolower($email));
+        $transient_key = "mailchimp-woocommerce-cart-{$hash}";
+
+        // let's set a transient here to block dup inserts
+        if (get_site_transient($transient_key)) {
+            return false;
+        }
+
+        // insert the transient
+        set_site_transient($transient_key, true, 5);
+
         global $wpdb;
 
         $table = "{$wpdb->prefix}mailchimp_carts";
@@ -870,6 +952,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             $sql = $wpdb->prepare($statement, array(maybe_serialize($this->cart), $email, $user_id, $uid));
             try {
                 $wpdb->query($sql);
+                delete_site_transient($transient_key);
             } catch (\Exception $e) {
                 return false;
             }
@@ -882,6 +965,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                     'cart'  => maybe_serialize($this->cart),
                     'created_at'   => gmdate('Y-m-d H:i:s', time()),
                 ));
+                delete_site_transient($transient_key);
             } catch (\Exception $e) {
                 return false;
             }

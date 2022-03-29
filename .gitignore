@@ -1,4 +1,5 @@
 .DS_Store
 .idea/
 _test.php
-vendor/
+/vendor/
+blocks/node_modules/*

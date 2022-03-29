@@ -35,8 +35,8 @@ class MailChimp_WooCommerce_Customer
             'company' => 'string',
             'first_name' => 'string',
             'last_name' => 'string',
-            'orders_count' => 'integer',
-            'total_spent' => 'integer',
+            //'orders_count' => 'integer',
+            //'total_spent' => 'integer',
         );
     }
 
@@ -306,8 +306,8 @@ class MailChimp_WooCommerce_Customer
             'company' => (string) $this->getCompany(),
             'first_name' => (string) $this->getFirstName(),
             'last_name' => (string) $this->getLastName(),
-            'orders_count' => (int) $this->getOrdersCount(),
-            'total_spent' => floatval(number_format($this->getTotalSpent(), 2, '.', '')),
+            //'orders_count' => (int) $this->getOrdersCount(),
+            //'total_spent' => floatval(number_format($this->getTotalSpent(), 2, '.', '')),
             'address' => (empty($address) ? null : $address),
         ));
     }

@@ -1,0 +1,19 @@
+{
+  "name": "opr/mailchimp-newsletter",
+  "description": "WooCommerce Newsletter Test",
+  "homepage": "https://github.com/opr/mailchimp-newsletter",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0+",
+  "require": {
+    "composer/installers": "~1.7"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "5.7.19",
+    "sirbrillig/spies": "^1.5"
+  },
+  "archive": {
+    "exclude": [
+      "!/build"
+    ]
+  }
+}

@@ -239,12 +239,13 @@ class MailChimp_WooCommerce_Transform_Orders
         $customer->setLastName($order->get_billing_last_name());
         $customer->setAddress($this->transformBillingAddress($order));
 
-        if (!($stats = $this->getCustomerOrderTotals($order))) {
-            $stats = (object) array('count' => 0, 'total' => 0);
-        }
-
-        $customer->setOrdersCount($stats->count);
-        $customer->setTotalSpent($stats->total);
+// removing this because it's causing issues with the order counts
+//        if (!($stats = $this->getCustomerOrderTotals($order))) {
+//            $stats = (object) array('count' => 0, 'total' => 0);
+//        }
+//
+//        $customer->setOrdersCount($stats->count);
+//        $customer->setTotalSpent($stats->total);
 
         // we now hold this data inside the customer object for usage in the order handler class
         // we only update the subscriber status on a member IF they were subscribed.

@@ -64,7 +64,7 @@ else {
 
 ?>
 
-<div class="mc-woocommerce-settings">
+<div class="mc-woocommerce-settings wrap woocommerce">
     <form id="mailchimp_woocommerce_options" method="post" name="cleanup_options" action="options.php">
         <?php if($show_wizard): ?>
             <div class="mc-woocommerce-settings-header-wrapper wiz-header">

@@ -129,7 +129,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             if ($label == '') $label = __('Subscribe to our newsletter', 'mailchimp-for-woocommerce');
 			$options = get_option($this->plugin_name, array());
 			$checkbox_default_settings = (array_key_exists('mailchimp_checkbox_defaults', $options) && !is_null($options['mailchimp_checkbox_defaults'])) ? $options['mailchimp_checkbox_defaults'] : 'check';
-			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version.'.21', false );
+			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version.'.05', false );
 			wp_localize_script(
 				$this->plugin_name,
 				'phpVars',
@@ -258,6 +258,22 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         if ($pagenow == 'admin.php' && isset($_GET) && isset($_GET['page']) && 'mailchimp-woocommerce' === $_GET['page']) {
             $this->handle_abandoned_cart_table();
             $this->update_db_check();
+
+            /// this is where we need to cache this data for a longer period of time and only during admin page views.
+            /// https://wordpress.org/support/topic/the-plugin-slows-down-the-website-because-of-slow-api/#post-14339311
+            if (mailchimp_is_configured() && ($list_id = mailchimp_get_list_id())) {
+                $transient = "mailchimp-woocommerce-gdpr-fields.{$list_id}";
+                $GDPRfields = get_site_transient($transient);
+                if (!is_array($GDPRfields)) {
+                    try {
+                        $GDPRfields = mailchimp_get_api()->getGDPRFields($list_id);
+                        set_site_transient($transient, $GDPRfields, 600);
+                    } catch (\Exception $e) {
+                        set_site_transient($transient, array(), 60);
+                    }
+                }
+            }
+
 			$active_tab = isset($_GET['tab']) ? $_GET['tab'] : ($this->getOption('active_tab') ? $this->getOption('active_tab') : 'api_key');
 			if ($active_tab == 'sync' && get_option('mailchimp-woocommerce-sync.initial_sync') == 1 && get_option('mailchimp-woocommerce-sync.completed_at') > 0 ) {
                 $this->mailchimp_show_initial_sync_message();
@@ -289,6 +305,27 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );
         }
 	}
+
+
+	/**
+	 * Displays notice when action scheduler does not exist on the system
+	 */
+	public function action_scheduler_notice() {
+		if (!mailchimp_action_scheduler_exists()) {
+            $class = 'notice notice-warning is-dismissible';
+            $message = sprintf(
+            /* translators: Placeholders %1$s - opening strong HTML tag, %2$s */
+                esc_html__(
+                    '%1$sMailchimp for Woocommerce%2$s needs Action Scheduler plugin to function correctly, please confirm is installed',
+                    'mailchimp-for-woocommerce'
+                ),
+                '<strong>',
+                '</strong>' 
+            );
+            printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );
+        }
+	}
+
 
 	/**
 	 * Depending on the version we're on we may need to run some sort of migrations.
@@ -1055,11 +1092,13 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			'mailchimp_list' => isset($input['mailchimp_list']) ? $input['mailchimp_list'] : $this->getOption('mailchimp_list', ''),
 			'newsletter_label' => (isset($input['newsletter_label'])) ? wp_kses($input['newsletter_label'], $allowed_html) : $this->getOption('newsletter_label', __('Subscribe to our newsletter', 'mailchimp-for-woocommerce')),
 			'mailchimp_auto_subscribe' => isset($input['mailchimp_auto_subscribe']) ? (bool) $input['mailchimp_auto_subscribe'] : false,
-			'mailchimp_checkbox_defaults' => $checkbox,
+			'mailchimp_ongoing_sync_status' => isset($input['mailchimp_ongoing_sync_status']) ? (bool) $input['mailchimp_ongoing_sync_status'] : false,
+            'mailchimp_checkbox_defaults' => $checkbox,
 			'mailchimp_checkbox_action' => isset($input['mailchimp_checkbox_action']) ? $input['mailchimp_checkbox_action'] : $this->getOption('mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form'),
 			'mailchimp_user_tags' => isset($input['mailchimp_user_tags']) ? implode(",",$sanitized_tags) : $this->getOption('mailchimp_user_tags'),
 			'mailchimp_product_image_key' => isset($input['mailchimp_product_image_key']) ? $input['mailchimp_product_image_key'] : 'medium',
-			'campaign_from_name' => isset($input['campaign_from_name']) ? $input['campaign_from_name'] : false,
+            'mailchimp_cart_tracking' => isset($input['mailchimp_cart_tracking']) ? $input['mailchimp_cart_tracking'] : 'all',
+            'campaign_from_name' => isset($input['campaign_from_name']) ? $input['campaign_from_name'] : false,
 			'campaign_from_email' => isset($input['campaign_from_email']) && is_email($input['campaign_from_email']) ? $input['campaign_from_email'] : false,
 			'campaign_subject' => isset($input['campaign_subject']) ? $input['campaign_subject'] : get_option('blogname'),
 			'campaign_language' => isset($input['campaign_language']) ? $input['campaign_language'] : 'en',
@@ -1474,6 +1513,19 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 			$this->setData('errors.mailchimp_list', false);
 
+            try {
+                if (!empty($list_id)) {
+                    $transient = "mailchimp-woocommerce-gdpr-fields.{$list_id}";
+                    $GDPRfields = mailchimp_get_api()->getGDPRFields($list_id);
+                    set_site_transient($transient, $GDPRfields, 0);
+                    mailchimp_log('admin', 'updated GDPR fields', array(
+                        'fields' => $GDPRfields,
+                    ));
+                }
+            } catch (\Exception $e) {
+                set_site_transient($transient, array(), 60);
+            }
+
 			return $list_id;
 
 		} catch (MailChimp_WooCommerce_Error $e) {
@@ -1815,5 +1867,63 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		return wp_send_json_success( esc_html( file_get_contents( WC_LOG_DIR . $viewed_log ) ) );
 		
 	}
+
+    public function save()
+    {
+        if (MC_Flag::isOn(MC_FlagNames::FIX_ECOMMERCE_CUSTOMER_STATS)) {
+            $existing_order_record = null;
+            $is_existing_order = $this->existsInDatabase();
+            $no_customer_for_existing_order = false;
+            if ($is_existing_order) {
+                $existing_order_record = MC::userDB()->queryOne('from Ecommerce_Order where store_id = ? and order_id = ? limit 1', [$this->store_id, $this->order_id]);
+                $no_customer_for_existing_order = $existing_order_record ? $existing_order_record->getCustomer() === null : true;
+            }
+            $result = parent::save();
+            $customer = $this->getCustomer();
+            if ($customer !== null) {
+                // Did we just save a new line item record?
+                if (!$is_existing_order) {
+                    // Is this line item a completely new order or some addition to an existing order?
+                    $has_another_line_item = (bool)MC::userDB()->querySqlOne('select 1 from ecommerce_orders where store_id = ? and order_foreign_id = ? and order_id != ? and is_deleted = ? limit 1', [$this->store_id, $this->order_foreign_id, $this->order_id, 'N']);
+                    if (!$has_another_line_item) {
+                        $customer->incrementOrdersCount();
+                        $customer->addOrderToTotalSpent($this);
+                    }
+                    // Did we just make an update to an existing line item?
+                } elseif ($existing_order_record) {
+                    $is_order_total_mismatched_with_other_line_items = (bool)MC::userDB()->querySqlOne('select 1 from ecommerce_orders where store_id = ? and order_foreign_id = ? and order_total != ? and is_deleted = ? limit 1', [$this->store_id, $this->order_foreign_id, $this->order_total, 'N']);
+                    // Only update if all the line items say the same order_total
+                    if (!$is_order_total_mismatched_with_other_line_items) {
+                        $customer->total_spent = $customer->total_spent - $existing_order_record->order_total + $this->order_total;
+                    }
+                    if ($no_customer_for_existing_order) {
+                        $customer->incrementOrdersCount();
+                    }
+                }
+                $customer->save();
+                $this->customer = $customer;
+            }
+            return $result;
+        }
+        // Non-flagged behavior
+        return parent::save();
+    }
+
+    public function onDelete()
+    {
+        parent::onDelete();
+        if (MC_Flag::isOn(MC_FlagNames::FIX_ECOMMERCE_CUSTOMER_STATS)) {
+            $has_another_line_item = MC::userDB()->querySqlOne('select 1 from ecommerce_orders where store_id = ? and order_foreign_id != ? and is_deleted = ? limit 1', [$this->store_id, $this->order_foreign_id, 'N']);
+            if (!$has_another_line_item) {
+                $customer = $this->getCustomer();
+                if ($customer !== null) {
+                    $customer->total_spent -= $this->order_total;
+                    $customer->decrementOrdersCount();
+                    $customer->save();
+                    $this->customer = $customer;
+                }
+            }
+        }
+    }
 
 }

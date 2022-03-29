@@ -129,7 +129,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             // if the order is new, and has been flagged as a status that should not be pushed over to
             // Mailchimp - just ignore it and log it.
             if ($new_order && $order->shouldIgnoreIfNotInMailchimp()) {
-                mailchimp_log('system.debug', "order {$order->getId()} is in {$order->getOriginalWooStatus()} status, and is being skipped for now.");
+                mailchimp_debug('filter', "order {$order->getId()} is in {$order->getOriginalWooStatus()} status, and is being skipped for now.");
                 return false;
             }
             
@@ -141,6 +141,29 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 return false;
             }
 
+            $user_email = $order->getCustomer()->getEmailAddress();
+            $status = $order->getCustomer()->getOptInStatus();
+            $transient_key = mailchimp_hash_trim_lower($user_email).".mc.status";
+            $current_status = null;
+            $pulled_member = false;
+
+            if (!$status && mailchimp_submit_subscribed_only()) {
+                try {
+                    $subscriber = $api->member(mailchimp_get_list_id(), $user_email);
+                    $current_status = $subscriber['status'];
+                    mailchimp_set_transient($transient_key, $current_status, 60);
+                    if ($current_status != 'subscribed') {
+                        mailchimp_debug('filter', "#{$woo_order_number} was blocked due to subscriber only settings");
+                        return false;
+                    }
+                } catch (\Exception $e) {
+                    mailchimp_set_transient($transient_key, $current_status, 60);
+                    mailchimp_debug('filter', "#{$woo_order_number} was blocked due to subscriber only settings");
+                    return false;
+                }
+                $pulled_member = true;
+            }
+
             if ($this->is_full_sync) {
                 // see if this store has the auto subscribe setting enabled on initial sync
                 $plugin_options = get_option('mailchimp-woocommerce');
@@ -148,10 +171,14 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
                 // since we're syncing the customer for the first time, this is where we need to add the override
                 // for subscriber status. We don't get the checkbox until this plugin is actually installed and working!
-                if (!($status = $order->getCustomer()->getOptInStatus())) {
+                if (!$status) {
                     try {
-                        $subscriber = $api->member(mailchimp_get_list_id(), $order->getCustomer()->getEmailAddress());
-                        if ($subscriber['status'] != 'archived') {
+                        if (!$pulled_member) {
+                            $subscriber = $api->member(mailchimp_get_list_id(), $order->getCustomer()->getEmailAddress());
+                            $current_status = $subscriber['status'];
+                            $pulled_member = true;
+                        }
+                        if ($pulled_member && $current_status != 'archived') {
                             $status = !in_array($subscriber['status'], array('unsubscribed', 'transactional'));
                             $order->getCustomer()->setOptInStatus($status);
                         }
@@ -160,7 +187,6 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                             mailchimp_error('order_sync.error', mailchimp_error_trace($e, "GET subscriber :: {$order->getId()}"));
                             throw $e;
                         }
-                        
                         // if they are using double opt in, we need to pass this in as false here so it doesn't auto subscribe.
                         try {
                             $doi = mailchimp_list_has_double_optin(true);
@@ -203,7 +229,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 return false;
             }
             
-            if ( $new_order) {
+            if ($new_order) {
                 // if single sync and
                 // if the order is in failed or cancelled status - and it's brand new, we shouldn't submit it.
                 if (!$this->is_full_sync && in_array($order->getFinancialStatus(), array('failed', 'cancelled')) || $order->getOriginalWooStatus() === 'pending') {
@@ -304,7 +330,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
             if (empty($api_response)) {
                 mailchimp_error('order_submit.failure', "$call :: #{$order->getId()} :: email: {$email} produced a blank response from MailChimp");
-                return $api_response;
+                return isset($api_response) ? $api_response : false;
             }
 
             if (isset($deleted_abandoned_cart) && $deleted_abandoned_cart) {
@@ -321,7 +347,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             }
 
             // Maybe sync subscriber to set correct member.language
-            mailchimp_member_data_update($email, $this->user_language, 'order', $status_if_new, $order, $this->gdpr_fields);
+            mailchimp_member_data_update($email, $this->user_language, 'order', $status_if_new, $order, $this->gdpr_fields, !$this->is_full_sync);
 
             mailchimp_log('order_submit.success', $log);
 

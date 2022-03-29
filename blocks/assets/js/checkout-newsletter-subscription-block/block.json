@@ -1,0 +1,28 @@
+{
+	"apiVersion": 2,
+	"name": "woocommerce/mailchimp-newsletter-subscription",
+	"version": "1.0.0",
+	"title": "Mailchimp Newsletter!",
+	"category": "woocommerce",
+	"description": "Adds a newsletter subscription checkbox to the checkout.",
+	"supports": {
+		"html": true,
+		"align": false,
+		"multiple": false,
+		"reusable": false
+	},
+	"parent": [
+		"woocommerce/checkout-contact-information-block"
+	],
+	"attributes": {
+		"lock": {
+			"type": "object",
+			"default": {
+				"remove": true,
+				"move": true
+			}
+		}
+	},
+	"textdomain": "mailchimp-woocommerce",
+	"editorStyle": "file:../../../build/style-newsletter-block.css"
+}

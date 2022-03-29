@@ -3,11 +3,11 @@ Contributors: ryanhungate, Mailchimp
 Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.9
-Tested up to: 5.7
-Stable tag: 2.5.1
+Tested up to: 5.9
+Stable tag: 2.5.3
 Requires PHP: 7.0
 WC requires at least: 3.5
-WC tested up to: 5.1
+WC tested up to: 6.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your Mailchimp audience to track sales, create targeted emails, send abandoned cart emails, and more.
@@ -25,6 +25,7 @@ Join the 17 million customers who use Mailchimp, the world's largest marketing a
 - Automatically embed a pop-up form that converts your website visitors to subscribers.
 - Add discount codes created in WooCommerce to your emails and automations with a Promo Code content block
 - Create beautiful landing pages that make it easy to highlight your products, promote a sale or giveaway, and grow your audience.
+- This plugin is [WPML compatible](https://wpml.org/plugin/mailchimp-for-woocommerce/)
 ###Important Notes
 This plugin supports our most powerful API 3.0 features, and is intended for users who have not yet integrated their WooCommerce stores with Mailchimp.
 You can run this new integration at the same time as your current WooCommerce integration for Mailchimp. However, data from the older integration will display separately in subscriber profiles, and can’t be used with e-commerce features that require API 3.0.
@@ -77,9 +78,10 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
 == Changelog ==
-= 2.5 =
-* interface reskin
-* fix for fatal error on disabled WoooCommerce admin
+= 2.6 =
+* Adds support for selectively syncing subscribers only 
+* Updates to action scheduler dependency 
+
 
 [Historical Changelog](https://raw.githubusercontent.com/mailchimp/mc-woocommerce/master/CHANGELOG.txt)
 

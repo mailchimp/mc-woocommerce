@@ -46,7 +46,7 @@ $comm_enabled = $opt != null ? $opt : '0';
 			<p>
 				<?= 
 				sprintf(
-					__('Disconnect your store from MailChimp. This action will remove all entries from the database but you will be able to reconnect anytime.', 'mailchimp-for-woocommerce'),
+					__('Disconnect your store from Mailchimp. This action will remove all entries from the database but you will be able to reconnect anytime.', 'mailchimp-for-woocommerce'),
 					$admin_email
 				);?>
 			</p>

@@ -237,7 +237,17 @@ class MailChimp_WooCommerce_MailChimpApi
 
         mailchimp_debug('api.subscribe', "Subscribing {$email}", $data);
 
-        return $this->post("lists/$list_id/members?skip_merge_validation=true", $data);
+        try {
+            return $this->post("lists/$list_id/members?skip_merge_validation=true", $data);
+        } catch (\Exception $e) {
+            if ($data['status'] !== 'subscribed' || !mailchimp_string_contains($e->getMessage(), 'compliance state')) {
+                throw $e;
+            }
+            $data['status'] = 'pending';
+            $result = $this->post("lists/$list_id/members?skip_merge_validation=true", $data);
+            mailchimp_log('api', "{$email} was in compliance state, sending the double opt in message");
+            return $result;
+        }
     }
 
     /**
@@ -291,7 +301,17 @@ class MailChimp_WooCommerce_MailChimpApi
 
         mailchimp_debug('api.update_member', "Updating {$email}", $data);
 
-        return $this->patch("lists/$list_id/members/$hash?skip_merge_validation=true", $data);
+        try {
+            return $this->patch("lists/$list_id/members/$hash?skip_merge_validation=true", $data);
+        } catch (\Exception $e) {
+            if ($data['status'] !== 'subscribed' || !mailchimp_string_contains($e->getMessage(), 'compliance state')) {
+                throw $e;
+            }
+            $data['status'] = 'pending';
+            $result = $this->patch("lists/$list_id/members/$hash?skip_merge_validation=true", $data);
+            mailchimp_log('api', "{$email} was in compliance state, sending the double opt in message");
+            return $result;
+        }
     }
 
     /**
@@ -1616,7 +1636,7 @@ class MailChimp_WooCommerce_MailChimpApi
     public function getGDPRFields($list_id)
     {
         $one_member = $this->get("lists/$list_id/members?fields=members.marketing_permissions&count=1");
-        $fields = false;
+        $fields = array();
         
         if (is_array($one_member) &&
             isset($one_member['members']) &&
@@ -1626,6 +1646,64 @@ class MailChimp_WooCommerce_MailChimpApi
         }
                 
         return $fields;
+    }
+
+    /**
+     * @param $list_id
+     * @return array|bool
+     * @throws \Throwable
+     */
+    public function getWebHooks($list_id)
+    {
+        return $this->get("lists/{$list_id}/webhooks");
+    }
+
+    /**
+     * @param $list_id
+     * @param $url
+     * @return array|bool
+     * @throws \Throwable
+     */
+    public function webHookSubscribe($list_id, $url)
+    {
+        return $this->post("lists/{$list_id}/webhooks", [
+            'url' => $url,
+            'events' => [
+                'subscribe' => true,
+                'unsubscribe' => true,
+                'cleaned' => true,
+                'profile' => false,
+                'upemail' => false,
+                'campaign' => false,
+            ],
+            'sources' => [
+                'user' => true,
+                'admin' => true,
+                'api' => true,
+            ]
+        ]);
+    }
+
+    /**
+     * @param $list_id
+     * @param $url
+     * @return int
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_ServerError
+     * @throws Throwable
+     */
+    public function webHookDelete($list_id, $url)
+    {
+        $deleted = 0;
+        $hooks = $this->getWebHooks($list_id);
+        foreach ($hooks['webhooks'] as $hook) {
+            $href = $hook['href'] ?? $hook['url'] ?? null;
+            if ($href && $href === $url) {
+                $this->delete("lists/{$list_id}/webhooks/{$hook['id']}");
+                $deleted++;
+            }
+        }
+        return $deleted;
     }
 
     /**
@@ -1850,16 +1928,20 @@ class MailChimp_WooCommerce_MailChimpApi
             return $data;
         }
 
+        $error_status = isset($data['status']) ? (int) $data['status'] : (int) $http_code;
+
         if ($http_code >= 400 && $http_code <= 500) {
             if ($http_code == 403) {
                 throw new MailChimp_WooCommerce_RateLimitError();
             }
-
-            throw new MailChimp_WooCommerce_Error($data['title'] .' :: '.$data['detail'], (int) $data['status']);
+            $error_message = isset($data['title']) ? $data['title'] : '';
+            $error_message .= isset($data['detail']) ? $data['detail'] : '';
+            throw new MailChimp_WooCommerce_Error($error_message, $error_status);
         }
 
         if ($http_code >= 500) {
-            throw new MailChimp_WooCommerce_ServerError($data['detail'], $data['status']);
+            $error_message = isset($data['detail']) ? $data['detail'] : '';
+            throw new MailChimp_WooCommerce_ServerError($error_message, $error_status);
         }
 
         if (!is_array($data)) {

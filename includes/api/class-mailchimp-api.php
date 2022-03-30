@@ -350,26 +350,6 @@ class MailChimp_WooCommerce_MailChimpApi
 
     /**
      * @param $list_id
-     * @param $email
-     * @param $data
-     * @return array|bool|mixed|object|null
-     * @throws MailChimp_WooCommerce_Error
-     * @throws MailChimp_WooCommerce_ServerError
-     */
-    protected function applyPutRequestOnSubscriber($list_id, $email, $data)
-    {
-        try {
-            $hash = md5(strtolower(trim($email)));
-            mailchimp_log('api.update', "{$email} was already a list member sending the update by PUT");
-            $result = $this->put("lists/$list_id/members/$hash?skip_merge_validation=true", $data);
-            return $result;
-        } catch(\Exception $e) {
-            throw $e;
-        }
-    }
-
-    /**
-     * @param $list_id
      * @return mixed
      * @throws \Throwable
      */

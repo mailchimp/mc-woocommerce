@@ -125,6 +125,27 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
             } catch (\Throwable $e) {
 
             }
+
+            $automations = array();
+            $merge_fields = array();
+            try {
+                foreach ($api->getAutomations($list_id) as $automation) {
+                    $created = new \DateTime($automation['create_time']);
+                    $started = new \DateTime($automation['start_time']);
+                    $automations[] = array(
+                        'created_at' => $created->format('Y-m-d H:i:s'),
+                        'start_at' => $started->format('Y-m-d H:i:s'),
+                        'status' => $automation['status'],
+                        'name' => $automation['settings']['title'],
+                        'type' => $automation['trigger_settings']['workflow_title'],
+                        'stats' => $automation['report_summary'],
+                    );
+                }
+                $merge_fields = $api->mergeFields($list_id);
+                $merge_fields = $merge_fields['merge_fields'];
+            } catch (\Throwable $e) {
+
+            }
         }
 
         $time = new \DateTime('now');
@@ -213,6 +234,8 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                         'valid' => $list_is_valid,
                     ],
                     'account_info' => $account_info,
+                    'automations' => $automations,
+                    'merge_fields' => (object) $merge_fields,
                 ],
                 'merge_tags' => [
 

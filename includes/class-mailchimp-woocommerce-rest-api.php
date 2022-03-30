@@ -225,23 +225,6 @@ class MailChimp_WooCommerce_Rest_Api
 
     /**
      * Returns an alive signal to confirm url exists to mailchimp system
-     * @return WP_Error|WP_REST_Response
-     */
-    public function member_sync_alive_signal()
-    {
-
-        $this->authorize('webhook.token', $request);
-        $data = $request->get_params();
-        $list_id = mailchimp_get_list_id();
-        if (empty($data['type']) || empty($data['data']['list_id']) || $list_id !== $data['data']['list_id']) {
-            return $this->mailchimp_rest_response(array('success' => false));
-        }
-        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Subscriber_Sync($data));
-        return $this->mailchimp_rest_response(array('success' => true));
-    }
-
-    /**
-     * Returns an alive signal to confirm url exists to mailchimp system
      * @param WP_REST_Request $request
      * @return WP_Error|WP_REST_Response
      */

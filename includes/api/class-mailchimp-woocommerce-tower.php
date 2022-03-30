@@ -435,6 +435,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
         $store_id = mailchimp_get_store_id();
         $key = mailchimp_get_api_key();
         $list_id = mailchimp_get_list_id();
+        $is_connected = mailchimp_is_configured();
         $post_url = "https://tower.vextras.com/admin-api/woocommerce/{$command}/{$store_id}";
         $plugin_options = (array) get_option('mailchimp-woocommerce');
 
@@ -450,7 +451,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                 'list_id' => $list_id,
                 'php_version' => phpversion(),
                 'curl_enabled' => function_exists('curl_init'),
-                'is_connected' => $is_connected = mailchimp_is_configured(),
+                'is_connected' => $is_connected,
                 'sync_complete' => mailchimp_is_done_syncing(),
                 'rest_url' => MailChimp_WooCommerce_Rest_Api::url(''),
             );
@@ -467,14 +468,19 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                     if (is_array($account_info)) {
                         unset($account_info['_links']);
                     }
+                    $job = new MailChimp_WooCommerce_Fix_Duplicate_Store($store_id, false, false);
+                    $job->handle();
+                    $dup_store = (bool) $job->hasDuplicateStoreProblem();
                 } catch (\Throwable $e) {
                     $list_info = false;
                     $syncing_mc = false;
                     $account_info = false;
+                    if (!isset($dup_store)) $dup_store = false;
                 }
                 $data['list_info'] = $list_info;
                 $data['is_syncing'] = $syncing_mc;
                 $data['account_info'] = $account_info;
+                $data['duplicate_mailchimp_store'] = $dup_store;
             }
         } else {
             $data = array();

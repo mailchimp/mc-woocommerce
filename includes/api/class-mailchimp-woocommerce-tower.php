@@ -367,7 +367,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
             array('key' => 'WooCommerce Version', 'value' => defined('WC_VERSION') ? WC_VERSION : null),
             array('key' => 'Theme Name', 'value' => esc_html($theme->get('Name'))),
             array('key' => 'Theme URL', 'value' => esc_html($theme->get('ThemeURI'))),
-            array('key' => 'IP Addresses', 'value' => $this->getIpAddresses()),
+            array('key' => 'Outbound IP Address', 'value' => mailchimp_get_outbound_ip()),
             array('key' => 'Active Plugins', 'value' => $this->getActivePlugins()),
             array('key' => 'Actions', 'value' => $actions),
         );
@@ -377,21 +377,6 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
     {
         $version = function_exists('curl_version') ? curl_version() : null;
         return is_array($version) ? $version['version'] : null;
-    }
-
-    /**
-     * @return string
-     */
-    public function getIpAddresses()
-    {
-        $ips = gethostbynamel(gethostname());
-        if (empty($ips)) return 'n/a';
-        $ip_addresses = "<ul/>";
-        foreach ($ips as $ip) {
-            $ip_addresses .= "<li>{$ip}</li>";
-        }
-        $ip_addresses .= "</ul>";
-        return $ip_addresses;
     }
 
     public function getActivePlugins()

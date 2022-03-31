@@ -85,9 +85,17 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
         $list_is_valid = false;
         $account_info = [];
         $shop = null;
+        $akamai_block = false;
 
         if ($authenticated) {
-            $account_info = $api->getProfile();
+            try {
+                $account_info = $api->getProfile();
+            } catch (\Exception $e) {
+                $account_info = array();
+                if ($e->getCode() === 503) {
+                    $akamai_block = true;
+                }
+            }
             if (is_array($account_info)) {
                 // don't need these
                 unset($account_info['_links']);
@@ -123,7 +131,9 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                     $mc_order_count = $api->getOrderCount($store_id);
                 }
             } catch (\Throwable $e) {
-
+                if ($e->getCode() === 503) {
+                    $akamai_block = true;
+                }
             }
 
             $automations = array();
@@ -144,7 +154,9 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                 $merge_fields = $api->mergeFields($list_id);
                 $merge_fields = $merge_fields['merge_fields'];
             } catch (\Throwable $e) {
-
+                if ($e->getCode() === 503) {
+                    $akamai_block = true;
+                }
             }
         }
 
@@ -222,6 +234,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                     'duplicate_store_problem' => $duplicate_store_problem,
                     'has_old_integration' => $has_old_integration,
                     'store_attached' => $store_attached,
+                    'akamai_block' => $akamai_block,
                     'ecomm_stats' => [
                         'products' => $mc_product_count,
                         'customers' => $mc_customer_count,
@@ -354,6 +367,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
             array('key' => 'WooCommerce Version', 'value' => defined('WC_VERSION') ? WC_VERSION : null),
             array('key' => 'Theme Name', 'value' => esc_html($theme->get('Name'))),
             array('key' => 'Theme URL', 'value' => esc_html($theme->get('ThemeURI'))),
+            array('key' => 'IP Addresses', 'value' => $this->getIpAddresses()),
             array('key' => 'Active Plugins', 'value' => $this->getActivePlugins()),
             array('key' => 'Actions', 'value' => $actions),
         );
@@ -363,6 +377,21 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
     {
         $version = function_exists('curl_version') ? curl_version() : null;
         return is_array($version) ? $version['version'] : null;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIpAddresses()
+    {
+        $ips = gethostbynamel(gethostname());
+        if (empty($ips)) return 'n/a';
+        $ip_addresses = "<ul/>";
+        foreach ($ips as $ip) {
+            $ip_addresses .= "<li>{$ip}</li>";
+        }
+        $ip_addresses .= "</ul>";
+        return $ip_addresses;
     }
 
     public function getActivePlugins()
@@ -438,6 +467,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
         $is_connected = mailchimp_is_configured();
         $post_url = "https://tower.vextras.com/admin-api/woocommerce/{$command}/{$store_id}";
         $plugin_options = (array) get_option('mailchimp-woocommerce');
+        $akamai_block = false;
 
         if ((bool) $enable) {
             mailchimp_set_data('tower.token', $support_token = wp_generate_password());
@@ -475,12 +505,16 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                     $list_info = false;
                     $syncing_mc = false;
                     $account_info = false;
+                    if ($e->getCode() === 503) {
+                        $akamai_block = true;
+                    }
                     if (!isset($dup_store)) $dup_store = false;
                 }
                 $data['list_info'] = $list_info;
                 $data['is_syncing'] = $syncing_mc;
                 $data['account_info'] = $account_info;
                 $data['duplicate_mailchimp_store'] = $dup_store;
+                $data['akamai_block'] = $akamai_block;
             }
         } else {
             $data = array();

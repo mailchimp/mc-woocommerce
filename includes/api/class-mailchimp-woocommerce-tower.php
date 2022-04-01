@@ -85,9 +85,17 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
         $list_is_valid = false;
         $account_info = [];
         $shop = null;
+        $akamai_block = false;
 
         if ($authenticated) {
-            $account_info = $api->getProfile();
+            try {
+                $account_info = $api->getProfile();
+            } catch (\Exception $e) {
+                $account_info = array();
+                if ($e->getCode() === 503) {
+                    $akamai_block = true;
+                }
+            }
             if (is_array($account_info)) {
                 // don't need these
                 unset($account_info['_links']);
@@ -123,7 +131,32 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                     $mc_order_count = $api->getOrderCount($store_id);
                 }
             } catch (\Throwable $e) {
+                if ($e->getCode() === 503) {
+                    $akamai_block = true;
+                }
+            }
 
+            $automations = array();
+            $merge_fields = array();
+            try {
+                foreach ($api->getAutomations($list_id) as $automation) {
+                    $created = new \DateTime($automation['create_time']);
+                    $started = new \DateTime($automation['start_time']);
+                    $automations[] = array(
+                        'created_at' => $created->format('Y-m-d H:i:s'),
+                        'start_at' => $started->format('Y-m-d H:i:s'),
+                        'status' => $automation['status'],
+                        'name' => $automation['settings']['title'],
+                        'type' => $automation['trigger_settings']['workflow_title'],
+                        'stats' => $automation['report_summary'],
+                    );
+                }
+                $merge_fields = $api->mergeFields($list_id);
+                $merge_fields = $merge_fields['merge_fields'];
+            } catch (\Throwable $e) {
+                if ($e->getCode() === 503) {
+                    $akamai_block = true;
+                }
             }
         }
 
@@ -201,6 +234,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                     'duplicate_store_problem' => $duplicate_store_problem,
                     'has_old_integration' => $has_old_integration,
                     'store_attached' => $store_attached,
+                    'akamai_block' => $akamai_block,
                     'ecomm_stats' => [
                         'products' => $mc_product_count,
                         'customers' => $mc_customer_count,
@@ -213,6 +247,8 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                         'valid' => $list_is_valid,
                     ],
                     'account_info' => $account_info,
+                    'automations' => $automations,
+                    'merge_fields' => (object) $merge_fields,
                 ],
                 'merge_tags' => [
 
@@ -331,6 +367,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
             array('key' => 'WooCommerce Version', 'value' => defined('WC_VERSION') ? WC_VERSION : null),
             array('key' => 'Theme Name', 'value' => esc_html($theme->get('Name'))),
             array('key' => 'Theme URL', 'value' => esc_html($theme->get('ThemeURI'))),
+            array('key' => 'Outbound IP Address', 'value' => mailchimp_get_outbound_ip()),
             array('key' => 'Active Plugins', 'value' => $this->getActivePlugins()),
             array('key' => 'Actions', 'value' => $actions),
         );
@@ -412,8 +449,10 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
         $store_id = mailchimp_get_store_id();
         $key = mailchimp_get_api_key();
         $list_id = mailchimp_get_list_id();
+        $is_connected = mailchimp_is_configured();
         $post_url = "https://tower.vextras.com/admin-api/woocommerce/{$command}/{$store_id}";
         $plugin_options = (array) get_option('mailchimp-woocommerce');
+        $akamai_block = false;
 
         if ((bool) $enable) {
             mailchimp_set_data('tower.token', $support_token = wp_generate_password());
@@ -427,7 +466,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                 'list_id' => $list_id,
                 'php_version' => phpversion(),
                 'curl_enabled' => function_exists('curl_init'),
-                'is_connected' => $is_connected = mailchimp_is_configured(),
+                'is_connected' => $is_connected,
                 'sync_complete' => mailchimp_is_done_syncing(),
                 'rest_url' => MailChimp_WooCommerce_Rest_Api::url(''),
             );
@@ -444,14 +483,23 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                     if (is_array($account_info)) {
                         unset($account_info['_links']);
                     }
+                    $job = new MailChimp_WooCommerce_Fix_Duplicate_Store($store_id, false, false);
+                    $job->handle();
+                    $dup_store = (bool) $job->hasDuplicateStoreProblem();
                 } catch (\Throwable $e) {
                     $list_info = false;
                     $syncing_mc = false;
                     $account_info = false;
+                    if ($e->getCode() === 503) {
+                        $akamai_block = true;
+                    }
+                    if (!isset($dup_store)) $dup_store = false;
                 }
                 $data['list_info'] = $list_info;
                 $data['is_syncing'] = $syncing_mc;
                 $data['account_info'] = $account_info;
+                $data['duplicate_mailchimp_store'] = $dup_store;
+                $data['akamai_block'] = $akamai_block;
             }
         } else {
             $data = array();

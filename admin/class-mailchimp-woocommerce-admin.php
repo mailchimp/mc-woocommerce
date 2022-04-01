@@ -274,6 +274,13 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             $this->handle_abandoned_cart_table();
             $this->update_db_check();
 
+            // if we don't have the server address set, let's save it to be used with curl requests
+            if (!mailchimp_get_data('SERVER_ADDR')) {
+                if (isset($_SERVER) && isset($_SERVER['SERVER_ADDR']) && !empty($_SERVER['SERVER_ADDR'])) {
+                    mailchimp_set_data('SERVER_ADDR', $_SERVER['SERVER_ADDR']);
+                }
+            }
+
             /// this is where we need to cache this data for a longer period of time and only during admin page views.
             /// https://wordpress.org/support/topic/the-plugin-slows-down-the-website-because-of-slow-api/#post-14339311
             if (mailchimp_is_configured() && ($list_id = mailchimp_get_list_id())) {

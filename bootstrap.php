@@ -1362,7 +1362,20 @@ function mailchimp_allowed_to_use_cookie($cookie) {
 // return the $cookie_name if you will allow it -
 // otherwise it is going to turn this feature off.
 
-
+/**
+ * @return mixed|null
+ */
+function mailchimp_get_outbound_ip() {
+    // if we have a dedicated IP address, and have set a configuration for it, we'll use it here.
+    if (defined('MAILCHIMP_USE_OUTBOUND_IP')) {
+        return MAILCHIMP_USE_OUTBOUND_IP;
+    } elseif (($server_address = mailchimp_get_data('SERVER_ADDR')) && !empty($server_address)) {
+        return $server_address;
+    } elseif (isset($_SERVER) && isset($_SERVER['SERVER_ADDR']) && !empty($_SERVER['SERVER_ADDR'])) {
+        return $_SERVER['SERVER_ADDR'];
+    }
+    return null;
+}
 
 // Add WP CLI commands
 if (defined( 'WP_CLI' ) && WP_CLI) {

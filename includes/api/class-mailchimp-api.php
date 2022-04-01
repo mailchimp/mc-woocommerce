@@ -1901,6 +1901,27 @@ class MailChimp_WooCommerce_MailChimpApi
     }
 
     /**
+     * @param $list_id
+     * @return array
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_ServerError
+     */
+    public function getAutomations($list_id)
+    {
+        $automations = $this->get('automations', array('limit' => 1000));
+        if (!is_array($automations) || !array_key_exists('automations', $automations)) {
+            return array();
+        }
+        $response = array();
+        foreach ($automations['automations'] as $automation) {
+            if ($list_id === $automation['recipients']['list_id']) {
+                $response[] = $automation;
+            }
+        }
+        return $response;
+    }
+
+    /**
      * @param $url
      * @param null $params
      * @return array|mixed|null|object
@@ -2064,9 +2085,9 @@ class MailChimp_WooCommerce_MailChimpApi
             ), $headers)
         );
 
-        // if we have a dedicated IP address, and have set a configuration for it, we'll use it here.
-        if (defined('MAILCHIMP_USE_OUTBOUND_IP')) {
-            $curl_options[CURLOPT_INTERFACE] = MAILCHIMP_USE_OUTBOUND_IP;
+        // automatically set the proper outbound IP address
+        if (($outbound_ip = mailchimp_get_outbound_ip())) {
+            $curl_options[CURLOPT_INTERFACE] = $outbound_ip;
         }
 
         // if we need to define a specific http version being used for curl requests, we can override this here.

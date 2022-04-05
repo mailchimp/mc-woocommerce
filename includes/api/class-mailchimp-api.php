@@ -1753,8 +1753,11 @@ class MailChimp_WooCommerce_MailChimpApi
      * @return array|bool
      * @throws \Throwable
      */
-    public function getWebHooks($list_id)
+    public function getWebHooks($list_id = false)
     {
+        if( empty($list_id) ){
+            $list_id = mailchimp_get_list_id();
+        }
         return $this->get("lists/{$list_id}/webhooks");
     }
 
@@ -2067,7 +2070,6 @@ class MailChimp_WooCommerce_MailChimpApi
     protected function applyCurlOptions($method, $url, $params = array(), $headers = array())
     {
         $env = mailchimp_environment_variables();
-
         $curl_options = array(
             CURLOPT_USERPWD => "mailchimp:{$this->api_key}",
             CURLOPT_CUSTOMREQUEST => strtoupper($method),
@@ -2086,7 +2088,7 @@ class MailChimp_WooCommerce_MailChimpApi
         );
 
         // automatically set the proper outbound IP address
-        if (($outbound_ip = mailchimp_get_outbound_ip())) {
+        if (($outbound_ip = mailchimp_get_outbound_ip()) && $outbound_ip !== '127.0.0.1') {
             $curl_options[CURLOPT_INTERFACE] = $outbound_ip;
         }
 

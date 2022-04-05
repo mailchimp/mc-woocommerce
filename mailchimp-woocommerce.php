@@ -36,7 +36,7 @@ if (!defined( 'WPINC')) {
 
 if (!isset($mailchimp_woocommerce_spl_autoloader) || $mailchimp_woocommerce_spl_autoloader === false) {
     // require Action Scheduler
-    if( file_exists( __DIR__ . "/includes/vendor/action-scheduler/action-scheduler.php") ){
+    if( file_exists( __DIR__ . "/includes/vendor/action-scheduler/action-scheduler.php" ) ){
     	include_once __DIR__ . "/includes/vendor/action-scheduler/action-scheduler.php";
     }
     // bootstrapper
@@ -50,6 +50,6 @@ add_action('plugins_loaded', 'mailchimp_on_all_plugins_loaded', 12);
 
 add_action('plugins_loaded', function() {
    // make this a one liner for testing and code separation
-   include_once __DIR__.'/blocks/newsletter-test.php';
+   include_once __DIR__ . '/blocks/newsletter-test.php';
 }, 1);
 

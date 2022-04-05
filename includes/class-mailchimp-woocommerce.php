@@ -281,6 +281,7 @@ class MailChimp_WooCommerce
 
         // delete log file via ajax
         $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_delete_log_file', $plugin_admin, 'mailchimp_woocommerce_ajax_delete_log_file' );
+
     }
 
 	/**
@@ -332,7 +333,7 @@ class MailChimp_WooCommerce
 	private function activateMailChimpService()
 	{
 		$service = MailChimp_Service::instance();
-
+        $webhook = new MailChimp_WooCommerce_WebHooks_Sync();
 		if ($service->isConfigured()) {
 
 			$service->setEnvironment($this->environment);
@@ -395,11 +396,13 @@ class MailChimp_WooCommerce
                 "MailChimp_WooCommerce_User_Submit",
                 "MailChimp_WooCommerce_Process_Coupons",
                 "MailChimp_WooCommerce_Process_Orders",
-                "MailChimp_WooCommerce_Process_Products"
+                "MailChimp_WooCommerce_Process_Products",
+                "MailChimp_WooCommerce_WebHooks_Sync"
             );
             foreach ($jobs_classes as $job_class) {
                 $this->loader->add_action($job_class, $service, 'mailchimp_process_single_job', 10, 1);
             }
+            
             // sync stats manager
             $this->loader->add_action('MailChimp_WooCommerce_Process_Full_Sync_Manager', $service, 'mailchimp_process_sync_manager', 10, 1);
 		}

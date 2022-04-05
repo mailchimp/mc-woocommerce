@@ -627,6 +627,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 					$this->startSync();
 					$this->showSyncStartedMessage();
 					$this->setData('sync.config.resync', true);
+					
+					// lets define the webooks on the account
+					$this->defineWebHooks();
 				}
 				break;
 
@@ -1972,6 +1975,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 }
             }
         }
+    }
+
+    private function defineWebHooks(){
+        $job = new MailChimp_WooCommerce_WebHooks_Sync();
+		mailchimp_handle_or_queue( $job, 60 );
     }
 
 }

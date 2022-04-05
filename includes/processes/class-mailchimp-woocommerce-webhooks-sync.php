@@ -10,12 +10,19 @@
  */
 class MailChimp_WooCommerce_WebHooks_Sync extends Mailchimp_Woocommerce_Job
 {
+    /**
+     * Handle job
+     * @return void
+     */
     public function handle()
     {
         $this->subscribeWebhook();
         // add_action('shutdown',array($this,'subscribeWebhook'));
     }
-
+    /**
+     * Subscribe mailchimp webhook
+     * @return void|bool 
+     */
     public function subscribeWebhook(){
         try {
             if( mailchimp_is_configured() && !mailchimp_get_webhook_url() ){

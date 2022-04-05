@@ -2088,7 +2088,7 @@ class MailChimp_WooCommerce_MailChimpApi
         );
 
         // automatically set the proper outbound IP address
-        if (($outbound_ip = mailchimp_get_outbound_ip()) && $outbound_ip !== '127.0.0.1') {
+        if ( ( $outbound_ip = mailchimp_get_outbound_ip() ) && !in_array( $outbound_ip, mailchimp_common_loopback_ips() ) ) {
             $curl_options[CURLOPT_INTERFACE] = $outbound_ip;
         }
 

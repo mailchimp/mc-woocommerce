@@ -209,9 +209,8 @@ class MailChimp_WooCommerce_Rest_Api
      */
     public function member_sync(WP_REST_Request $request)
     {
-
+        $this->authorize('webhook.token', $request);
         $data = $request->get_params();
-        return $this->mailchimp_rest_response(array('success' => true));    
         if( !empty($data['type']) && !empty($data['data']['list_id']) && mailchimp_get_list_id() == $data['data']['list_id'] ){
             $job = new MailChimp_WooCommerce_Subscriber_Sync( $data );
             mailchimp_handle_or_queue( $job );
@@ -219,8 +218,6 @@ class MailChimp_WooCommerce_Rest_Api
         }else{
             return $this->mailchimp_rest_response(array('success' => false));    
         }
-        
-
     }  
 
     /**

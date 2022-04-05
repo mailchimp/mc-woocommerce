@@ -261,6 +261,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		include_once( 'partials/mailchimp-woocommerce-admin-tabs.php' );
 	}
 
+	public function display_user_profile_info( $user ) {
+		include_once( 'user-profile/mailchimp-user-profile.php' );
+	}
 	/**
 	 *
 	 */

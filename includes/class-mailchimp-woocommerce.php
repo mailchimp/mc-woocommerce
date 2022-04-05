@@ -333,7 +333,6 @@ class MailChimp_WooCommerce
 	private function activateMailChimpService()
 	{
 		$service = MailChimp_Service::instance();
-        $webhook = new MailChimp_WooCommerce_WebHooks_Sync();
 		if ($service->isConfigured()) {
 
 			$service->setEnvironment($this->environment);
@@ -354,8 +353,13 @@ class MailChimp_WooCommerce
 
 			// refunds
             $this->loader->add_action('woocommerce_order_partially_refunded', $service, 'onPartiallyRefunded', 20, 1);
-
-			// cart hooks
+            
+            // set user profile info
+            $this->loader->add_action('show_user_profile', $service, 'user_subscribed_profile', 100);
+            $this->loader->add_action('edit_user_profile', $service, 'user_subscribed_profile', 100);
+            $this->loader->add_action('personal_options_update', $service, 'user_update_subscribe_status', 100);
+			
+            // cart hooks
             $this->loader->add_filter('woocommerce_update_cart_action_cart_updated', $service, 'handleCartUpdated');
 			$this->loader->add_action('woocommerce_add_to_cart', $service, 'handleCartUpdated');
 			$this->loader->add_action('woocommerce_cart_item_removed', $service, 'handleCartUpdated');
@@ -387,6 +391,8 @@ class MailChimp_WooCommerce
             // set user by email hash ( public and private )
             $this->loader->add_action('wp_ajax_mailchimp_set_user_by_email', $service, 'set_user_by_email');
             $this->loader->add_action('wp_ajax_nopriv_mailchimp_set_user_by_email', $service, 'set_user_by_email');
+
+
 
             $jobs_classes = array(
                 "MailChimp_WooCommerce_Single_Order",

@@ -1027,4 +1027,22 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $sync_stats_manager = new MailChimp_WooCommerce_Process_Full_Sync_Manager();
         $sync_stats_manager->handle();
     }
+    /**
+     * Display Mailchimp's User info
+     * @param  [type] $user [description]
+     * @return [type]       [description]
+     */
+    public function user_subscribed_profile( $user ){
+        $admin = MailChimp_WooCommerce_Admin::instance();
+        $admin->display_user_profile_info( $user );
+    }
+    public function user_update_subscribe_status( $user_id ) {
+        $subscribed = get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true);
+        if( isset($_POST['mailchimp_woocommerce_is_subscribed_checkbox']) && $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == 'on' ){
+            update_user_meta( $user_id, 'mailchimp_woocommerce_is_subscribed', true );    
+        }else{
+            update_user_meta( $user_id, 'mailchimp_woocommerce_is_subscribed', false );
+        }
+        
+    }
 }

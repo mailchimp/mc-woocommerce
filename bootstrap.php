@@ -65,6 +65,7 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_User_Submit' => 'includes/processes/class-mailchimp-woocommerce-user-submit.php',
         'MailChimp_WooCommerce_Process_Full_Sync_Manager' => 'includes/processes/class-mailchimp-woocommerce-full-sync-manager.php',
         'MailChimp_WooCommerce_Subscriber_Sync' => 'includes/processes/class-mailchimp-woocommerce-subscriber-sync.php',
+        'MailChimp_WooCommerce_WebHooks_Sync' => 'includes/processes/class-mailchimp-woocommerce-webhooks-sync.php',
 
         'MailChimp_WooCommerce_Public' => 'public/class-mailchimp-woocommerce-public.php',
         'MailChimp_WooCommerce_Admin' => 'admin/class-mailchimp-woocommerce-admin.php',
@@ -310,7 +311,51 @@ function mailchimp_get_api_key() {
 function mailchimp_get_list_id() {
     return mailchimp_get_option('mailchimp_list', false);
 }
+/**
+ * Build mailchimp webhook url
+ * @param  string $key Encripted randome script
+ * @return string $url Webhook url
+ */
+function mailchimp_build_webhook_url( $key ) {
+    $key = base64_encode($key);
+    $url = MailChimp_WooCommerce_Rest_Api::url('member-sync') . '?auth=' . $key;
+    return $url;
+}
+/**
+ * Generate random string
+ * @return string
+ */
+function mailchimp_create_webhook_token(){
+    return md5( trim( strtolower(get_bloginfo('url') . '|' . time() . '|' . mailchimp_get_list_id() . '|' . wp_salt() )  ) );
+}
+/**
+ * Updates webhookurl option
+ * @param  string $url Webhook url 
+ * @return void
+ */
+function mailchimp_set_webhook_url( $url ) {
+    update_option('mc-mailchimp_webhook_url', $url);
+}
+/**
+ * Returns webhookurl option
+ * @return string
+ */
+function mailchimp_get_webhook_url() {
+    return mailchimp_get_option('mc-mailchimp_webhook_url', false);
+}
+/**
+ * Returns webhook url
+ * @return array Common localhost ips
+ */
+function mailchimp_common_loopback_ips(){
+    $common_loopback_ips = array(
+        '127.0.0.1',
+        '0:0:0:0:0:0:0:1',
+        '::1'
+    );
 
+    return $common_loopback_ips;
+}
 /**
  * @return string
  */

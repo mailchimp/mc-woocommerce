@@ -9,7 +9,7 @@
  * @package    MailChimp_WooCommerce
  * @subpackage MailChimp_WooCommerce/admin
  */
-
+use \Automattic\WooCommerce\Admin\Features\Navigation\Menu;
 /**
  * The admin-specific functionality of the plugin.
  *
@@ -168,6 +168,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @since    1.0.0
 	 */
 	public function add_plugin_admin_menu() {
+
 		// Add woocommerce menu subitem
 		add_submenu_page( 
 			'woocommerce', 
@@ -176,6 +177,20 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			mailchimp_get_allowed_capability(),
 			$this->plugin_name,
 			array($this, 'display_plugin_setup_page')
+		);
+
+		// Add the WooCommerce navigation items if the feauture exists.
+		if ( ! class_exists( '\Automattic\WooCommerce\Admin\Features\Navigation\Menu' ) ) {
+			return;
+		}
+
+		Menu::add_plugin_item(
+			array(
+				'id'         => 'mailchimp-for-woocommerce',
+				'title'      => __( 'Mailchimp', 'mailchimp-for-woocommerce' ),
+				'capability' => mailchimp_get_allowed_capability(),
+				'url'        => $this->plugin_name,
+			)
 		);
 	}
 
@@ -246,6 +261,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		include_once( 'partials/mailchimp-woocommerce-admin-tabs.php' );
 	}
 
+	public function display_user_profile_info( $user ) {
+		include_once( 'user-profile/mailchimp-user-profile.php' );
+	}
 	/**
 	 *
 	 */
@@ -333,7 +351,27 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         }
 	}
 
-
+	/**
+	 * Displays notice when plugin is installed but not yet configured / connected to Mailchimp.
+	 */
+	public function webook_initial_notice() {
+		if( mailchimp_is_configured() && !mailchimp_get_webhook_url() ){
+            $class = 'notice notice-warning';
+            $message = sprintf(
+            /* translators: Placeholders %1$s - opening strong HTML tag, %2$s - closing strong HTML tag, %3$s - opening link HTML tag, %4$s - closing link HTML tag */
+                esc_html__(
+                    '%1$sMailchimp for Woocommerce%2$s has not added the webhook to Mailchimp, %3$svisit the plugin settings page and synchronize your store%4$s.',
+                    'mailchimp-for-woocommerce'
+                ),
+                '<strong>',
+                '</strong>',
+                '<a href="' . admin_url( 'admin.php?page=') . $this->plugin_name . '">',
+                '</a>'
+            );
+            printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );
+        }
+	}
+	
 	/**
 	 * Depending on the version we're on we may need to run some sort of migrations.
 	 */
@@ -612,6 +650,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 					$this->startSync();
 					$this->showSyncStartedMessage();
 					$this->setData('sync.config.resync', true);
+					
+					// lets define the webooks on the account
+					$this->defineWebHooks();
 				}
 				break;
 
@@ -1957,6 +1998,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 }
             }
         }
+    }
+
+    private function defineWebHooks(){
+        $job = new MailChimp_WooCommerce_WebHooks_Sync();
+		mailchimp_handle_or_queue( $job, 60 );
     }
 
 }

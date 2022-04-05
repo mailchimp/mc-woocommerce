@@ -311,16 +311,20 @@ class MailChimp_WooCommerce_MailChimpApi
         try {
             return $this->patch("lists/$list_id/members/$hash?skip_merge_validation=true", $data);
         } catch (\Exception $e) {
+
             // If mailchimp says is already a member lets send the update by PUT
             if (mailchimp_string_contains($e->getMessage(), 'is already a list member')) {
                 return $this->applyPutRequestOnSubscriber($list_id, $email, $data);
             } elseif ($data['status'] !== 'subscribed' || !mailchimp_string_contains($e->getMessage(), 'compliance state')) {
                 throw $e;
-            }
+            } 
+            
             $data['status'] = 'pending';
             $result = $this->patch("lists/$list_id/members/$hash?skip_merge_validation=true", $data);
             mailchimp_log('api', "{$email} was in compliance state, sending the double opt in message");
-            return $result;
+            return $result;    
+            
+            
         }
     }
 
@@ -1749,8 +1753,11 @@ class MailChimp_WooCommerce_MailChimpApi
      * @return array|bool
      * @throws \Throwable
      */
-    public function getWebHooks($list_id)
+    public function getWebHooks($list_id = false)
     {
+        if( empty($list_id) ){
+            $list_id = mailchimp_get_list_id();
+        }
         return $this->get("lists/{$list_id}/webhooks");
     }
 
@@ -2063,7 +2070,6 @@ class MailChimp_WooCommerce_MailChimpApi
     protected function applyCurlOptions($method, $url, $params = array(), $headers = array())
     {
         $env = mailchimp_environment_variables();
-
         $curl_options = array(
             CURLOPT_USERPWD => "mailchimp:{$this->api_key}",
             CURLOPT_CUSTOMREQUEST => strtoupper($method),
@@ -2082,7 +2088,7 @@ class MailChimp_WooCommerce_MailChimpApi
         );
 
         // automatically set the proper outbound IP address
-        if (($outbound_ip = mailchimp_get_outbound_ip())) {
+        if ( ( $outbound_ip = mailchimp_get_outbound_ip() ) && !in_array( $outbound_ip, mailchimp_common_loopback_ips() ) ) {
             $curl_options[CURLOPT_INTERFACE] = $outbound_ip;
         }
 

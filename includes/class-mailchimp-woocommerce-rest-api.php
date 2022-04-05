@@ -82,6 +82,7 @@ class MailChimp_WooCommerce_Rest_Api
             'callback' => array($this, 'handle_tower_action'),
             'permission_callback' => '__return_true',
         ));
+
     }
 
     /**
@@ -110,7 +111,7 @@ class MailChimp_WooCommerce_Rest_Api
     {
         // need to send a post request to
         $host = mailchimp_environment_variables()->environment === 'staging' ?
-            'https://staging.conduit.vextras.com' : 'https://conduit.mailchimpapp.com';
+        'https://staging.conduit.vextras.com' : 'https://conduit.mailchimpapp.com';
 
         $route = "{$host}/survey/woocommerce";
 
@@ -210,13 +211,14 @@ class MailChimp_WooCommerce_Rest_Api
     {
         $this->authorize('webhook.token', $request);
         $data = $request->get_params();
-        $list_id = mailchimp_get_list_id();
-        if (empty($data['type']) || empty($data['data']['list_id']) || $list_id !== $data['data']['list_id']) {
-            return $this->mailchimp_rest_response(array('success' => false));
+        if( !empty($data['type']) && !empty($data['data']['list_id']) && mailchimp_get_list_id() == $data['data']['list_id'] ){
+            $job = new MailChimp_WooCommerce_Subscriber_Sync( $data );
+            mailchimp_handle_or_queue( $job );
+            return $this->mailchimp_rest_response(array('success' => true));    
+        }else{
+            return $this->mailchimp_rest_response(array('success' => false));    
         }
-        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Subscriber_Sync($data));
-        return $this->mailchimp_rest_response(array('success' => true));
-    }
+    }  
 
     /**
      * Returns an alive signal to confirm url exists to mailchimp system
@@ -485,6 +487,7 @@ class MailChimp_WooCommerce_Rest_Api
         $job->withLogSearch(!empty($params['search']) ? $params['search'] : null);
         return $job;
     }
+
 
     /**
      * @param array $data

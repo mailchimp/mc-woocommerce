@@ -241,6 +241,8 @@ class MailChimp_WooCommerce
 		// make sure we're listening for the admin init
         $this->loader->add_action('admin_init', $plugin_admin, 'options_update');
         $this->loader->add_action('admin_notices', $plugin_admin, 'initial_notice');
+        $this->loader->add_action('admin_notices', $plugin_admin, 'webook_initial_notice');
+        $this->loader->add_action('admin_notices', $plugin_admin, 'action_scheduler_notice');
         
 		// put the menu on the admin top bar.
 		//$this->loader->add_action('admin_bar_menu', $plugin_admin, 'admin_bar', 100);

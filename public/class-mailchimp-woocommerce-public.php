@@ -99,5 +99,19 @@ class MailChimp_WooCommerce_Public {
 		wp_enqueue_script($this->plugin_name. '_gdpr', plugin_dir_url( __FILE__ ) .'js/mailchimp-woocommerce-checkout-gdpr.min.js', array(), $this->version, true);
 	}
 	
-	
+	public function user_my_account_opt_in()
+    {
+        include_once('partials/mailchimp-woocommerce-my-account.php');
+    }
+
+    public function user_my_account_opt_in_save($user_id)
+    {
+        $subscribed = get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true);
+        if( isset($_POST['mailchimp_woocommerce_is_subscribed_checkbox']) && $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == 'on' ){
+            update_user_meta( $user_id, 'mailchimp_woocommerce_is_subscribed', true );
+        }else{
+            update_user_meta( $user_id, 'mailchimp_woocommerce_is_subscribed', false );
+        }
+
+    }
 }

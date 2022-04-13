@@ -1023,7 +1023,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         return false;
     }
 
-    public function mailchimp_process_sync_manager () {
+    public function mailchimp_process_sync_manager ()
+    {
         $sync_stats_manager = new MailChimp_WooCommerce_Process_Full_Sync_Manager();
         $sync_stats_manager->handle();
     }
@@ -1032,11 +1033,14 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      * @param  [type] $user [description]
      * @return [type]       [description]
      */
-    public function user_subscribed_profile( $user ){
+    public function user_subscribed_profile( $user )
+    {
         $admin = MailChimp_WooCommerce_Admin::instance();
         $admin->display_user_profile_info( $user );
     }
-    public function user_update_subscribe_status( $user_id ) {
+
+    public function user_update_subscribe_status( $user_id )
+    {
         $subscribed = get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true);
         if( isset($_POST['mailchimp_woocommerce_is_subscribed_checkbox']) && $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == 'on' ){
             update_user_meta( $user_id, 'mailchimp_woocommerce_is_subscribed', true );    
@@ -1045,4 +1049,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         }
         
     }
+
+
+
 }

@@ -642,9 +642,9 @@ class MailChimp_WooCommerce_Order
             'shipping_address' => $this->getShippingAddress()->toArray(),
             'billing_address' => $this->getBillingAddress()->toArray(),
             'promos' => !empty($this->promos) ? $this->promos : null,
-            'tracking_number' => $this->tracking_number,
-            'tracking_url' => $this->tracking_url,
-            'tracking_carrier' => $this->tracking_carrier,
+            'tracking_number' => $this->getTrackingNumber(),
+            'tracking_url' => $this->getTrackingUrl(),
+            'tracking_carrier' => $this->getTrackingCarrier(),
             'lines' => array_map(function ($item) {
                 /** @var MailChimp_WooCommerce_LineItem $item */
                 return $item->toArray();
@@ -700,10 +700,34 @@ class MailChimp_WooCommerce_Order
     public function setTrackingInfo()
     {
 
-        if( class_exists( 'WC_Connect_Loader' ) && is_plugin_active( 'woocommerce-services/woocommerce-services.php' ) ){
+        if (function_exists('wc_st_add_tracking_number' )){
+            $trackings = get_post_meta( (int) $this->getId(), '_wc_shipment_tracking_items', true );
+
+            if ( empty($trackings) ) {
+                return ;
+            }
+            foreach($trackings as $tracking){
+                // carrier
+                if(!empty($tracking['custom_tracking_provider'])){
+                    $this->setTrackingCarrier($tracking['custom_tracking_provider']);
+                }elseif(!empty($tracking['tracking_provider'])){
+                    $this->setTrackingCarrier($tracking['tracking_provider']);
+                }
+
+                // tracking url
+                $ship = WC_Shipment_Tracking_Actions::get_instance();
+                $url = $ship->get_formatted_tracking_item($this->getId(), $tracking);
+                $this->setTrackingUrl($url['formatted_tracking_link']);
+
+                // tracking number
+                $this->setTrackingNumber($tracking['tracking_number']);
+
+            }
+        }
+        if( class_exists( 'WC_Connect_Loader' ) ){
             $label_data = get_post_meta( (int) $this->getId(), 'wc_connect_labels', true );
             // return an empty array if the data doesn't exist.
-            if ( ! $label_data ) {
+            if ( empty($label_data) ) {
                 return ;
             }
             if( !is_array($label_data) && is_string( $label_data ) ){
@@ -719,29 +743,8 @@ class MailChimp_WooCommerce_Order
                     }
                 }
             }
-
         }
 
-        if (class_exists('WC_Shipment_Tracking_Actions') && function_exists('wc_st_add_tracking_number' )){
-            $trackings = get_post_meta( (int) $this->getId(), '_wc_shipment_tracking_item', true );
-
-            foreach($trackings as $tracking){
-                // carrier
-                if(!emtpy($tracking['custom_tracking_provider'])){
-                    $this->setTrackingCarrier($tracking['custom_tracking_provider']);
-                }elseif(!emtpy($tracking['tracking_provider'])){
-                    $this->setTrackingCarrier($tracking['tracking_provider']);
-                }
-                // tracking url
-                if(!emtpy($tracking['custom_tracking_link'])){
-                    $this->setTrackingUrl($tracking['custom_tracking_link']);
-                }elseif(!emtpy($tracking['tracking_provider'])){
-                    $this->setTrackingUrl($tracking['tracking_provider']);
-                }
-                // tracking number
-                $this->setTrackingNumber($tracking['tracking_number']);
-            }
-        }
         
     }
 }

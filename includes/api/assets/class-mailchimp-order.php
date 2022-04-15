@@ -558,7 +558,10 @@ class MailChimp_WooCommerce_Order
     /**
      * Set Tracking url if exists
      */
-    public function setTrackingUrl(){
+    public function setTrackingUrl($url = ''){
+
+        if(!empty($url)){ return $this->tracking_url = $url; }
+
         $tracking_url = '';
         //Taken from woocommercer-services plugin example
         if( !empty($this->tracking_number) && !empty($this->tracking_carrier) ){
@@ -717,6 +720,27 @@ class MailChimp_WooCommerce_Order
                 }
             }
 
+        }
+
+        if (class_exists('WC_Shipment_Tracking_Actions') && function_exists('wc_st_add_tracking_number' )){
+            $trackings = get_post_meta( (int) $this->getId(), '_wc_shipment_tracking_item', true );
+
+            foreach($trackings as $tracking){
+                // carrier
+                if(!emtpy($tracking['custom_tracking_provider'])){
+                    $this->setTrackingCarrier($tracking['custom_tracking_provider']);
+                }elseif(!emtpy($tracking['tracking_provider'])){
+                    $this->setTrackingCarrier($tracking['tracking_provider']);
+                }
+                // tracking url
+                if(!emtpy($tracking['custom_tracking_link'])){
+                    $this->setTrackingUrl($tracking['custom_tracking_link']);
+                }elseif(!emtpy($tracking['tracking_provider'])){
+                    $this->setTrackingUrl($tracking['tracking_provider']);
+                }
+                // tracking number
+                $this->setTrackingNumber($tracking['tracking_number']);
+            }
         }
         
     }

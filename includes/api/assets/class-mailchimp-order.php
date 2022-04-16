@@ -699,7 +699,7 @@ class MailChimp_WooCommerce_Order
      */
     public function setTrackingInfo()
     {
-
+        // Support for woocomemrce shipment tracking plugin (https://woocommerce.com/products/shipment-tracking)
         if (function_exists('wc_st_add_tracking_number' )){
             $trackings = get_post_meta( (int) $this->getId(), '_wc_shipment_tracking_items', true );
 
@@ -721,9 +721,11 @@ class MailChimp_WooCommerce_Order
 
                 // tracking number
                 $this->setTrackingNumber($tracking['tracking_number']);
-
+                return;
             }
         }
+
+        // Support for woocoomerce shipping plugin (https://woocommerce.com/woocommerce-shipping/)
         if( class_exists( 'WC_Connect_Loader' ) ){
             $label_data = get_post_meta( (int) $this->getId(), 'wc_connect_labels', true );
             // return an empty array if the data doesn't exist.
@@ -743,6 +745,7 @@ class MailChimp_WooCommerce_Order
                     }
                 }
             }
+            return;
         }
 
         

@@ -24,7 +24,8 @@ class MailChimp_WooCommerce_WebHooks_Sync extends Mailchimp_Woocommerce_Job
      */
     public function subscribeWebhook(){
         try {
-            if( mailchimp_is_configured() && !mailchimp_get_webhook_url() ){
+            // for some reason the webhook url does not work with ?rest_route style, permalinks should be defined also 
+            if( mailchimp_is_configured() && !mailchimp_get_webhook_url() && get_option( 'permalink_structure' ) !== '' ){
                 
                     $key = mailchimp_get_data('webhook.token');
                     if( !$key ){

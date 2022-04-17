@@ -341,7 +341,7 @@ function mailchimp_set_webhook_url( $url ) {
  * @return string
  */
 function mailchimp_get_webhook_url() {
-    return mailchimp_get_option('mc-mailchimp_webhook_url', false);
+    return get_option('mc-mailchimp_webhook_url', false);
 }
 /**
  * Returns webhook url

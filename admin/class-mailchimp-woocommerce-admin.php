@@ -302,6 +302,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			$active_tab = isset($_GET['tab']) ? $_GET['tab'] : ($this->getOption('active_tab') ? $this->getOption('active_tab') : 'api_key');
 			if ($active_tab == 'sync' && get_option('mailchimp-woocommerce-sync.initial_sync') == 1 && get_option('mailchimp-woocommerce-sync.completed_at') > 0 ) {
                 $this->mailchimp_show_initial_sync_message();
+                // site is connected lets try define the webhooks
+                $this->defineWebHooks();
             }
 			if (isset($_GET['log_removed']) && $_GET['log_removed'] == "1") {
 				add_settings_error('mailchimp_log_settings', '', __('Log file deleted.', 'mailchimp-for-woocommerce'), 'info');
@@ -2000,9 +2002,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         }
     }
 
-    private function defineWebHooks(){
-        $job = new MailChimp_WooCommerce_WebHooks_Sync();
-		mailchimp_handle_or_queue( $job, 60 );
+    public function defineWebHooks(){
+        if( mailchimp_is_configured() && !mailchimp_get_webhook_url() ){
+            $job = new MailChimp_WooCommerce_WebHooks_Sync();
+    		mailchimp_handle_or_queue( $job );
+        }
     }
 
 }

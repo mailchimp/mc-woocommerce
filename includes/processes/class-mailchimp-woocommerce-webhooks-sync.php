@@ -17,7 +17,6 @@ class MailChimp_WooCommerce_WebHooks_Sync extends Mailchimp_Woocommerce_Job
     public function handle()
     {
         $this->subscribeWebhook();
-        // add_action('shutdown',array($this,'subscribeWebhook'));
     }
     /**
      * Subscribe mailchimp webhook
@@ -40,10 +39,10 @@ class MailChimp_WooCommerce_WebHooks_Sync extends Mailchimp_Woocommerce_Job
                     $webhook = $api->webHookSubscribe( mailchimp_get_list_id(), $url ) ;
                     
                     //if no errors let save the url 
-                    mailchimp_set_webhook_url($webhok['url']);
+                    mailchimp_set_webhook_url($webhook['url']);
             }
         } catch (\Throwable $e) {
-            mailchimp_error('webhook', $e->getMessage(), array('data' => $data ? json_encode($data) : null));
+            mailchimp_error('webhook', $e->getMessage());
         }
         return false;
     }

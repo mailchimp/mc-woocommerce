@@ -1244,6 +1244,8 @@ function mailchimp_update_communication_status() {
     $options = $plugin_admin->getOptions();
     if (is_array($options) && array_key_exists('admin_email', $options)) {
         $plugin_admin->mailchimp_set_communications_status_on_server($original_opt, $options['admin_email']);
+        // communication is ready lets define the webhooks
+        $plugin_admin->defineWebhooks();
     }
 }
 

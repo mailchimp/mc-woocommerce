@@ -132,6 +132,9 @@ class MailChimp_WooCommerce
         $this->activateMailChimpNewsletter();
         $this->activateMailChimpService();
         $this->applyQueryStringOverrides();
+
+        // load webhooks
+        $this->registerWebhooks();
     }
 
     /**
@@ -460,4 +463,12 @@ class MailChimp_WooCommerce
 		return $this->version;
 	}
 
+    private function registerWebhooks()
+    {
+        if(flotval($this->getVersion()) >= 2.7 ){
+            $admin = MailChimp_WooCommerce_Admin::instance();
+            $admin->defineWebhooks();    
+        }
+        
+    }
 }

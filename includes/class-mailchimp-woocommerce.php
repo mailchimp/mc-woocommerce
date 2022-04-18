@@ -465,10 +465,9 @@ class MailChimp_WooCommerce
 
     private function registerWebhooks()
     {
-        if(flotval($this->getVersion()) >= 2.7 ){
+        if (floatval($this->get_version()) >= 2.7) {
             $admin = MailChimp_WooCommerce_Admin::instance();
             $admin->defineWebhooks();    
         }
-        
     }
 }

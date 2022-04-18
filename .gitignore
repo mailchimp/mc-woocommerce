@@ -3,3 +3,4 @@
 _test.php
 /vendor/
 blocks/node_modules/*
+.editorconfig

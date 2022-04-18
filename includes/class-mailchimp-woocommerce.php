@@ -132,6 +132,9 @@ class MailChimp_WooCommerce
         $this->activateMailChimpNewsletter();
         $this->activateMailChimpService();
         $this->applyQueryStringOverrides();
+
+        // load webhooks
+        $this->registerWebhooks();
     }
 
     /**
@@ -301,6 +304,10 @@ class MailChimp_WooCommerce
 
         $this->loader->add_action('woocommerce_after_checkout_form', $plugin_public, 'add_JS_checkout', 10);
         $this->loader->add_action('woocommerce_register_form', $plugin_public, 'add_JS_checkout', 10);
+
+        // set my-account opt-in checkbox
+        $this->loader->add_action('woocommerce_edit_account_form', $plugin_public, 'user_my_account_opt_in', 100);
+        $this->loader->add_action('woocommerce_save_account_details', $plugin_public, 'user_my_account_opt_in_save', 100, 1);
 	}
 
 	/**
@@ -360,7 +367,7 @@ class MailChimp_WooCommerce
             $this->loader->add_action('show_user_profile', $service, 'user_subscribed_profile', 100);
             $this->loader->add_action('edit_user_profile', $service, 'user_subscribed_profile', 100);
             $this->loader->add_action('personal_options_update', $service, 'user_update_subscribe_status', 100);
-			
+
             // cart hooks
             $this->loader->add_filter('woocommerce_update_cart_action_cart_updated', $service, 'handleCartUpdated');
 			$this->loader->add_action('woocommerce_add_to_cart', $service, 'handleCartUpdated');
@@ -370,7 +377,7 @@ class MailChimp_WooCommerce
 			$this->loader->add_action('save_post', $service, 'handlePostSaved', 10, 3);
             $this->loader->add_action('wp_trash_post', $service, 'handlePostTrashed', 10, 1);
             $this->loader->add_action('untrashed_post', $service, 'handlePostRestored', 10, 1);
-
+            $this->loader->add_action('post_updated', $service, 'handlePostUpdated', 10, 3);
 			//coupons
             $this->loader->add_action('woocommerce_new_coupon', $service, 'handleNewCoupon', 10, 1);
             $this->loader->add_action('woocommerce_coupon_options_save', $service, 'handleCouponSaved', 10, 2);
@@ -455,4 +462,13 @@ class MailChimp_WooCommerce
 	public function get_version() {
 		return $this->version;
 	}
+
+    private function registerWebhooks()
+    {
+        if(flotval($this->getVersion()) >= 2.7 ){
+            $admin = MailChimp_WooCommerce_Admin::instance();
+            $admin->defineWebhooks();    
+        }
+        
+    }
 }

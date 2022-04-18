@@ -99,5 +99,59 @@ class MailChimp_WooCommerce_Public {
 		wp_enqueue_script($this->plugin_name. '_gdpr', plugin_dir_url( __FILE__ ) .'js/mailchimp-woocommerce-checkout-gdpr.min.js', array(), $this->version, true);
 	}
 	
-	
+	public function user_my_account_opt_in()
+    {
+        $gdpr_fields = $this->user_my_account_gdpr_fields();
+        include_once('partials/mailchimp-woocommerce-my-account.php');
+    }
+
+    public function user_my_account_opt_in_save($user_id)
+    {
+        $subscribed = get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true);
+        if( isset($_POST['mailchimp_woocommerce_is_subscribed_checkbox']) && $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == 'on' ){
+            update_user_meta( $user_id, 'mailchimp_woocommerce_is_subscribed', true );
+        }else{
+            update_user_meta( $user_id, 'mailchimp_woocommerce_is_subscribed', false );
+        }
+
+    }
+
+    public function user_my_account_gdpr_fields()
+    {
+        $api = mailchimp_get_api();
+        $GDPRfields = $api->getCachedGDPRFields(mailchimp_get_list_id(), 5);
+
+        $default_checked = $default_setting === 'check';
+        $status = $default_checked;
+
+        // if the user is logged in, we will pull the 'is_subscribed' property out of the meta for the value.
+        // otherwise we use the default settings.
+        $status = get_user_meta(get_current_user_id(), 'mailchimp_woocommerce_is_subscribed', true);
+        /// if the user is logged in - and is already subscribed - just ignore this checkbox.
+        if ($status === '' || $status === null) {
+            $status = $default_checked;
+        }
+
+        $checkbox = '';
+
+        if (!empty($GDPRfields) && is_array($GDPRfields)) {
+            $checkbox .= "<div id='mailchimp-gdpr-fields'><p>";
+            $checkbox .= __('Please select all the ways you would like to hear from us', 'mailchimp-for-woocommerce');
+            $checkbox .= "<div class='clear'></div>";
+
+            foreach ($GDPRfields as $key => $field) {
+                $marketing_permission_id = $field['marketing_permission_id'];
+                $text = $field['text'];
+
+                // Add to the checkbox output
+                $checkbox .= "<input type='hidden' value='0' name='mailchimp_woocommerce_gdpr[{$marketing_permission_id}]'>";
+                $checkbox .= "<input id='mailchimp_woocommerce_gdpr[{$marketing_permission_id}]' type='checkbox' name='mailchimp_woocommerce_gdpr[{$marketing_permission_id}]' value='1'".($status ? ' checked="checked"' : '').">";
+                $checkbox .= "<label for='mailchimp_woocommerce_gdpr[{$marketing_permission_id}]' ><span>{$text}</span></label>";
+                $checkbox .= "<div class='clear'></div>";
+            }
+            $checkbox .= "</p></div>";
+        }
+
+        return $checkbox;
+    }
 }

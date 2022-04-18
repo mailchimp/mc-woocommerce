@@ -335,7 +335,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
         // don't handle any of these statuses because they're not ready for the show
         if (!in_array($post->post_status, array('trash', 'auto-draft', 'draft', 'pending'))) {
-            if ('product' == $post->post_type) {
+            // for updated products we have another handler, handlePostUpdated
+            if ('product' == $post->post_type && !$update) {
                 mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
             } elseif ('shop_order' == $post->post_type) {
                 $tracking = $this->onNewOrder($post_id);
@@ -344,6 +345,27 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         }
     }
 
+    /**
+     * Update post metadata when a post is saved.
+     *
+     * @param int $post_id The post ID.
+     * @param WP_Post $post The post object.
+     * @param bool $update Whether this is an existing post being updated or not.
+     */
+    public function handlePostUpdated($post_id, $post_after, $post_before)
+    {
+        if (!mailchimp_is_configured()) return;
+
+        // don't handle any of these statuses because they're not ready for the show
+        if (!in_array($post->post_status, array('trash', 'auto-draft', 'draft', 'pending')) && ('product' == $post->post_type)) {
+            // if any of the following data was changed lets add it to the queue
+            // in variable products what changes is the post parent, which is the one that I think should be sent to mailchimp
+            // TODO: RYAN: we need to verify if the thumbnail url has changed
+            if($post_before->post_title !== $post_after->post_title || $post_before->post_name !== $post_after->post_name || $post_before->post_content !== $post_after->post_content){
+                mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
+            }
+        }
+    }
     /**
      * @param $post_id
      */
@@ -1023,7 +1045,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         return false;
     }
 
-    public function mailchimp_process_sync_manager () {
+    public function mailchimp_process_sync_manager ()
+    {
         $sync_stats_manager = new MailChimp_WooCommerce_Process_Full_Sync_Manager();
         $sync_stats_manager->handle();
     }
@@ -1032,11 +1055,14 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      * @param  [type] $user [description]
      * @return [type]       [description]
      */
-    public function user_subscribed_profile( $user ){
+    public function user_subscribed_profile( $user )
+    {
         $admin = MailChimp_WooCommerce_Admin::instance();
         $admin->display_user_profile_info( $user );
     }
-    public function user_update_subscribe_status( $user_id ) {
+
+    public function user_update_subscribe_status( $user_id )
+    {
         $subscribed = get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true);
         if( isset($_POST['mailchimp_woocommerce_is_subscribed_checkbox']) && $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == 'on' ){
             update_user_meta( $user_id, 'mailchimp_woocommerce_is_subscribed', true );    
@@ -1045,4 +1071,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         }
         
     }
+
+
+
 }

@@ -94,7 +94,7 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production', // staging or production
-        'version' => '2.6.2',
+        'version' => '2.7',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => function_exists('WC') ? WC()->version : null,
@@ -341,7 +341,7 @@ function mailchimp_set_webhook_url( $url ) {
  * @return string
  */
 function mailchimp_get_webhook_url() {
-    return mailchimp_get_option('mc-mailchimp_webhook_url', false);
+    return get_option('mc-mailchimp_webhook_url', false);
 }
 /**
  * Returns webhook url
@@ -1243,8 +1243,10 @@ function mailchimp_update_communication_status() {
     $original_opt = $plugin_admin->getData('comm.opt',0);
     $options = $plugin_admin->getOptions();
     if (is_array($options) && array_key_exists('admin_email', $options)) {
-        $plugin_admin->mailchimp_set_communications_status_on_server($original_opt, $options['admin_email']);
+        $plugin_admin->mailchimp_set_communications_status_on_server($original_opt, $options['admin_email']);    
     }
+    // communication is ready lets define the webhooks
+    $plugin_admin->defineWebhooks();
 }
 
 // call server to update comm status

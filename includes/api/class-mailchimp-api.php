@@ -200,15 +200,12 @@ class MailChimp_WooCommerce_MailChimpApi
     {
         if (is_string($subscribed)) {
             $status = $subscribed;
+        } else if ($subscribed === true) {
+            $status = 'subscribed';
         } else {
-            if ($subscribed === true) {
-                $status = 'subscribed';
-            } elseif ($subscribed === false) {
-                $status = 'pending';
-            } else {
-                $status = 'transactional';
-            }
+            $status = 'transactional';
         }
+
         $data = array(
             'email_type' => 'html',
             'email_address' => $email,
@@ -272,7 +269,7 @@ class MailChimp_WooCommerce_MailChimpApi
         if ($subscribed === true) {
             $status = 'subscribed';
         } elseif ($subscribed === false) {
-            $status = 'unsubscribed';
+            $status = 'transactional';
         } elseif ($subscribed === null) {
             $status = 'cleaned';
         } else {
@@ -437,7 +434,7 @@ class MailChimp_WooCommerce_MailChimpApi
             $status = 'subscribed';
             $status_if_new = 'subscribed';
         } elseif ($subscribed === false) {
-            $status = 'unsubscribed';
+            $status = 'transactional';
             $status_if_new = 'pending';
         } elseif ($subscribed === null) {
             $status = 'cleaned';
@@ -1758,7 +1755,7 @@ class MailChimp_WooCommerce_MailChimpApi
         if( empty($list_id) ){
             $list_id = mailchimp_get_list_id();
         }
-        return $this->get("lists/{$list_id}/webhooks");
+        return $this->get("lists/{$list_id}/webhooks", array('count' => 1000));
     }
 
     /**
@@ -1800,13 +1797,32 @@ class MailChimp_WooCommerce_MailChimpApi
         $deleted = 0;
         $hooks = $this->getWebHooks($list_id);
         foreach ($hooks['webhooks'] as $hook) {
-            $href = $hook['href'] ?? $hook['url'] ?? null;
-            if ($href && $href === $url) {
+            $href = isset($hook['url']) ? $hook['url'] : (isset($hook['href']) ? $hook['href'] : null);
+            if ($href && $href === $url || ($href && !empty($url) && mailchimp_string_contains($href, $url))) {
+                mailchimp_log('admin', "deleting webhook id {$hook['id']} - {$href}");
                 $this->delete("lists/{$list_id}/webhooks/{$hook['id']}");
                 $deleted++;
             }
         }
         return $deleted;
+    }
+
+    /**
+     * @param $list_id
+     * @param $url
+     * @return bool
+     * @throws Throwable
+     */
+    public function hasWebhook($list_id, $url)
+    {
+        $hooks = $this->getWebHooks($list_id);
+        foreach ($hooks['webhooks'] as $hook) {
+            $href = isset($hook['url']) ? $hook['url'] : (isset($hook['href']) ? $hook['href'] : null);
+            if ($href && $href === $url) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -1875,7 +1891,7 @@ class MailChimp_WooCommerce_MailChimpApi
         $status = $body ? $body->status : 'red';
 
         // set this for 5 minutes.
-        mailchimp_set_transient('tower', $status, 300);
+        mailchimp_set_transient('tower', $status, 120);
 
         return $status === 'green';
     }

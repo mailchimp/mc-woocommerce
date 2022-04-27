@@ -107,26 +107,37 @@ class MailChimp_WooCommerce_Public {
 
     public function user_my_account_opt_in_save($user_id)
     {
-        $subscribed = get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true);
-        if( isset($_POST['mailchimp_woocommerce_is_subscribed_checkbox']) && $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == 'on' ){
-            update_user_meta( $user_id, 'mailchimp_woocommerce_is_subscribed', true );
-        }else{
-            update_user_meta( $user_id, 'mailchimp_woocommerce_is_subscribed', false );
-        }
-
+        $subscribed = isset($_POST['mailchimp_woocommerce_is_subscribed_checkbox']) &&
+            $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == 'on';
+        update_user_meta( $user_id, 'mailchimp_woocommerce_is_subscribed', $subscribed);
     }
 
+    /**
+     * @return string
+     */
     public function user_my_account_gdpr_fields()
     {
+        return static::gdpr_fields();
+    }
+
+    /**
+     * @return string
+     */
+    public static function gdpr_fields()
+    {
+        if (!mailchimp_is_configured()) {
+            return "";
+        }
+
         $api = mailchimp_get_api();
         $GDPRfields = $api->getCachedGDPRFields(mailchimp_get_list_id(), 5);
-
+        $default_setting = mailchimp_get_option('mailchimp_checkbox_defaults', 'check') === 'hide';
         $default_checked = $default_setting === 'check';
-        $status = $default_checked;
 
         // if the user is logged in, we will pull the 'is_subscribed' property out of the meta for the value.
         // otherwise we use the default settings.
         $status = get_user_meta(get_current_user_id(), 'mailchimp_woocommerce_is_subscribed', true);
+
         /// if the user is logged in - and is already subscribed - just ignore this checkbox.
         if ($status === '' || $status === null) {
             $status = $default_checked;

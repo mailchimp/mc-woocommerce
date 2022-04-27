@@ -465,9 +465,11 @@ class MailChimp_WooCommerce
 
     private function registerWebhooks()
     {
-        if (floatval($this->get_version()) >= 2.7) {
-            $admin = MailChimp_WooCommerce_Admin::instance();
-            $admin->defineWebhooks();    
+        $defined = mailchimp_get_data('registered_webhooks');
+        if (empty($defined)) {
+            mailchimp_log('admin', 'syncing webhooks for existing plugin');
+            mailchimp_set_data('registered_webhooks', true);
+            MailChimp_WooCommerce_Admin::instance()->defineWebhooks();
         }
     }
 }

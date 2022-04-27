@@ -453,7 +453,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $is_subscribed = get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true);
 
         // if they don't have a meta set for is_subscribed, we will get a blank string, so just ignore this.
-        if ($is_subscribed === '' || $is_subscribed === null) return;
+        //if ($is_subscribed === '' || $is_subscribed === null) return;
 
         // only send this update if the user actually has a boolean value.
         mailchimp_handle_or_queue(new MailChimp_WooCommerce_User_Submit($user_id, (bool) $is_subscribed, $old_user_data));
@@ -1045,15 +1045,15 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         return false;
     }
 
-    public function mailchimp_process_sync_manager ()
+    public function mailchimp_process_sync_manager()
     {
         $sync_stats_manager = new MailChimp_WooCommerce_Process_Full_Sync_Manager();
         $sync_stats_manager->handle();
     }
+
     /**
-     * Display Mailchimp's User info
-     * @param  [type] $user [description]
-     * @return [type]       [description]
+     * Display the Mailchimp checkbox on the admin page
+     * @param $user
      */
     public function user_subscribed_profile( $user )
     {
@@ -1061,17 +1061,14 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $admin->display_user_profile_info( $user );
     }
 
+    /**
+     * Update the user meta from the admin page
+     * @param $user_id
+     */
     public function user_update_subscribe_status( $user_id )
     {
-        $subscribed = get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true);
-        if( isset($_POST['mailchimp_woocommerce_is_subscribed_checkbox']) && $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == 'on' ){
-            update_user_meta( $user_id, 'mailchimp_woocommerce_is_subscribed', true );    
-        }else{
-            update_user_meta( $user_id, 'mailchimp_woocommerce_is_subscribed', false );
-        }
-        
+        $subscribed = isset($_POST['mailchimp_woocommerce_is_subscribed_checkbox']) &&
+            $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == 'on';
+        update_user_meta( $user_id, 'mailchimp_woocommerce_is_subscribed', $subscribed );
     }
-
-
-
 }

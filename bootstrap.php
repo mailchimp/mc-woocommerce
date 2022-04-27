@@ -1217,7 +1217,7 @@ function mailchimp_update_member_with_double_opt_in(MailChimp_WooCommerce_Order 
                 } catch (\Exception $e) {
                     // if the error code is 404 - need to subscribe them because it means they were not on the list.
                     if ($e->getCode() == 404) {
-                        $api->subscribe($list_id, $email, false, $merge_fields);
+                        $api->subscribe($list_id, $email, 'pending', $merge_fields);
                         mailchimp_tell_system_about_user_submit($email, mailchimp_get_subscriber_status_options(false), 60);
                         mailchimp_log('double_opt_in', "Subscribed {$email} Using Double Opt In", $merge_fields);
                     } else {

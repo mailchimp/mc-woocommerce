@@ -1856,12 +1856,41 @@ class MailChimp_WooCommerce_MailChimpApi
     }
 
     /**
+     * @return bool
+     */
+    private function allowedToSubmitSpam()
+    {
+        // check to see if we've already set the transient.
+        $status = mailchimp_get_transient('tower');
+
+        // if we've got it - just return it now.
+        if (!empty($status)) {
+            return $status === 'green';
+        }
+
+        // call the API to see if we need to block traffic or not
+        // this only impacts reporting spam metrics, does not impact local site blocking
+        $response = wp_remote_get('https://tower.vextras.com/api/traffic');
+        $body = json_decode($response['body']);
+        $status = $body ? $body->status : 'red';
+
+        // set this for 5 minutes.
+        mailchimp_set_transient('tower', $status, 300);
+
+        return $status === 'green';
+    }
+
+    /**
      * @param $email
      * @return mixed|null
      */
     private function reportSpamToTower($email)
     {
         try {
+            if (!$this->allowedToSubmitSpam()) {
+                return null;
+            }
+
             $payload = array(
                 'headers' => array(
                     'Content-type' => 'application/json',

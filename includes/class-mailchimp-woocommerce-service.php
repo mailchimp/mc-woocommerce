@@ -196,7 +196,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     public function handleCartUpdated($updated = null)
     {
         if (mailchimp_carts_disabled()) {
-            return false;
+            return $updated;
         }
 
         if ($updated === false || $this->is_admin || $this->cart_was_submitted || !mailchimp_is_configured()) {
@@ -225,7 +225,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                 }
                 if ($cached_status !== 'subscribed') {
                     mailchimp_debug('filter', "preventing {$user_email} from submitting cart data due to subscriber settings.");
-                    return false;
+                    return $updated;
                 }
             }
 

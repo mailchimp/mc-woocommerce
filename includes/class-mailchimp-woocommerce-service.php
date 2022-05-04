@@ -1069,6 +1069,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     {
         $subscribed = isset($_POST['mailchimp_woocommerce_is_subscribed_checkbox']) &&
             $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == 'on';
-        update_user_meta( $user_id, 'mailchimp_woocommerce_is_subscribed', $subscribed );
+        mailchimp_log("profile", 'user_update_subscribe_status', array(
+            'subscribed' => $subscribed,
+            'user_id' => $user_id,
+        ));
+        update_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', $subscribed);
     }
 }

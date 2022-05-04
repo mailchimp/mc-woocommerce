@@ -367,7 +367,7 @@ class MailChimp_WooCommerce
             $this->loader->add_action('show_user_profile', $service, 'user_subscribed_profile', 100);
             $this->loader->add_action('edit_user_profile', $service, 'user_subscribed_profile', 100);
             $this->loader->add_action('personal_options_update', $service, 'user_update_subscribe_status', 100);
-
+            $this->loader->add_action('edit_user_profile_update', $service, 'user_update_subscribe_status', 100);
             // cart hooks
             $this->loader->add_filter('woocommerce_update_cart_action_cart_updated', $service, 'handleCartUpdated');
 			$this->loader->add_action('woocommerce_add_to_cart', $service, 'handleCartUpdated');

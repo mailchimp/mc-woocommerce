@@ -12,3 +12,6 @@
         </td>
     </tr>
 </table>
+<?php if (isset($gdpr_fields) && !empty($gdpr_fields)): ?>
+<?php echo $gdpr_fields ?>
+<?php endif; ?>

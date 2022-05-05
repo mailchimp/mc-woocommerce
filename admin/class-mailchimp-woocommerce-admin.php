@@ -262,7 +262,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	}
 
 	public function display_user_profile_info( $user ) {
-	    $gdpr_fields = MailChimp_WooCommerce_Public::gdpr_fields();
+	    $gdpr_fields = MailChimp_WooCommerce_Public::gdpr_fields($user);
 		include_once( 'user-profile/mailchimp-user-profile.php' );
 	}
 	/**

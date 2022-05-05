@@ -451,12 +451,17 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
         // only update this person if they were marked as subscribed before
         $is_subscribed = get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true);
+        $gdpr_fields = get_user_meta($user_id, 'mailchimp_woocommerce_gdpr_fields', true);
 
-        // if they don't have a meta set for is_subscribed, we will get a blank string, so just ignore this.
-        //if ($is_subscribed === '' || $is_subscribed === null) return;
-
+        $job = new MailChimp_WooCommerce_User_Submit(
+            $user_id,
+            (bool) $is_subscribed,
+            $old_user_data,
+            null,
+            !empty($gdpr_fields) ? $gdpr_fields : null
+        );
         // only send this update if the user actually has a boolean value.
-        mailchimp_handle_or_queue(new MailChimp_WooCommerce_User_Submit($user_id, (bool) $is_subscribed, $old_user_data));
+        mailchimp_handle_or_queue($job);
     }
 
     /**
@@ -1069,10 +1074,14 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     {
         $subscribed = isset($_POST['mailchimp_woocommerce_is_subscribed_checkbox']) &&
             $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == 'on';
+        $gdpr_fields = isset($_POST['mailchimp_woocommerce_gdpr']) ? $_POST['mailchimp_woocommerce_gdpr'] : null;
         mailchimp_log("profile", 'user_update_subscribe_status', array(
             'subscribed' => $subscribed,
             'user_id' => $user_id,
+            'gdpr_fields' => $gdpr_fields,
         ));
         update_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', $subscribed);
+        update_user_meta($user_id, 'mailchimp_woocommerce_gdpr_fields', $gdpr_fields);
+        mailchimp_set_transient("mailchimp_woocommerce_gdpr_fields_{$user_id}", $gdpr_fields, 300);
     }
 }

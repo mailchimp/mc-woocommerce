@@ -157,13 +157,11 @@ class MailChimp_WooCommerce_Public {
             }
             if (empty($cached_gdpr_fields) && !empty($user) && $user->user_email) {
                 try {
-                    $member = mailchimp_get_api()->member(
-                        mailchimp_get_list_id(),
-                        wp_get_current_user()->user_email
-                    );
-                    $current_gdpr_fields = isset($member['marketing_permissions']) ? $member['marketing_permissions'] : array();
+                    $member = mailchimp_get_api()->member(mailchimp_get_list_id(), $user->user_email);
+                    $current_gdpr_fields = isset($member['marketing_permissions']) ?
+                        $member['marketing_permissions'] : array();
                 } catch (\Exception $e) {
-                    var_dump("GDPR ERROR", $e->getMessage());
+                    //mailchimp_error("GDPR ERROR", $e->getMessage());
                 }
             }
 

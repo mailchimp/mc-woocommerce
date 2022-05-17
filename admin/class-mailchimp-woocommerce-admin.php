@@ -762,6 +762,12 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         );
 
         $response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/start', $pload);
+
+        // need to return the error message if this is the problem.
+        if ($response instanceof WP_Error) {
+            wp_send_json_error( $response );
+        }
+
         if ($response['response']['code'] == 201 ){
 			set_site_transient('mailchimp-woocommerce-oauth-secret', $secret, 60*60);
 			wp_send_json_success($response);
@@ -784,6 +790,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         );
 
 		$response = wp_remote_post($url, $pload);
+
+        // need to return the error message if this is the problem.
+        if ($response instanceof WP_Error) {
+            wp_send_json_error( $response );
+        }
 		
         if ($response['response']['code'] == 200 && isset($response['body'])){
 			wp_send_json_success(json_decode($response['body']));
@@ -810,6 +821,12 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         );
 
         $response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/finish', $pload);
+
+        // need to return the error message if this is the problem.
+        if ($response instanceof WP_Error) {
+            wp_send_json_error( $response );
+        }
+
         if ($response['response']['code'] == 200 ){
 			delete_site_transient('mailchimp-woocommerce-oauth-secret');
             // save api_key? If yes, we can skip api key validation for validatePostApiKey();
@@ -823,19 +840,23 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	public function mailchimp_woocommerce_ajax_create_account_check_username () {
 		$user = $_POST['username'];
 		$response = wp_remote_get( 'https://woocommerce.mailchimpapp.com/api/usernames/available/' . $_POST['username']);
+        // need to return the error message if this is the problem.
+        if ($response instanceof WP_Error) {
+            wp_send_json_error( $response );
+        }
 		$response_body = json_decode($response['body']);
 		if ($response['response']['code'] == 200 && $response_body->success == true ){
 			wp_send_json_success($response);
-		}
-		
-		else if ($response['response']['code'] == 404 ){
+		} else if ($response['response']['code'] == 404 ){
 			wp_send_json_error(array(
 				'success' => false,
 			));
-		}
-
-        else {
+		} else {
 			$suggestion = wp_remote_get( 'https://woocommerce.mailchimpapp.com/api/usernames/suggestions/' . preg_replace('/[^A-Za-z0-9\-\@\.]/', '', $_POST['username']));
+            // need to return the error message if this is the problem.
+            if ($suggestion instanceof WP_Error) {
+                wp_send_json_error( $suggestion );
+            }
 			$suggested_username = json_decode($suggestion['body'])->data;
 			wp_send_json_error( array(
 				'success' => false,
@@ -864,6 +885,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         );
 
 		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/support', $pload);
+        // need to return the error message if this is the problem.
+        if ($response instanceof WP_Error) {
+            wp_send_json_error( $response );
+        }
 		$response_body = json_decode($response['body']);
 		if ($response['response']['code'] == 200 && $response_body->success == true ) {
 			wp_send_json_success($response_body);
@@ -904,6 +929,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             'timeout'     => 30,
         );
         $response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/support', $pload);
+        // need to return the error message if this is the problem.
+        if ($response instanceof WP_Error) {
+            wp_send_json_error( $response );
+        }
         $response_body = json_decode($response['body']);
         return $response_body;
     }
@@ -928,6 +957,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         );
 
 		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/signup/', $pload);
+        // need to return the error message if this is the problem.
+        if ($response instanceof WP_Error) {
+            wp_send_json_error( $response );
+        }
 		$response_body = json_decode($response['body']);
 		if ($response['response']['code'] == 200 && $response_body->success == true) {
 			wp_send_json_success($response_body);

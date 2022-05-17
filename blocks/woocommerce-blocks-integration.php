@@ -190,6 +190,16 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
 								},
 							),
 						),
+                        'gdprFields' => array(
+                            'description' => __( 'GDPR marketing opt-in.', 'mailchimp-newsletter' ),
+                            'type'        => 'object',
+                            'context'     => array(),
+                            'arg_options' => array(
+                                'validate_callback' => function( $value ) {
+                                    return true;
+                                },
+                            ),
+                        ),
 					);
 				},
 			)
@@ -231,8 +241,15 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
     {
         $meta_key = 'mailchimp_woocommerce_is_subscribed';
         $optin = $request['extensions']['mailchimp-newsletter']['optin'];
-        //$email = $request['billing_address']['email'];
+        $gdpr_fields = isset($request['extensions']['mailchimp-newsletter']['gdprFields']) ?
+            (array) $request['extensions']['mailchimp-newsletter']['gdprFields'] : null;
 
+        mailchimp_log('blocks', 'order processed', array(
+            'email' => $order->get_billing_email(),
+            'order' => $order->get_id(),
+            'optin' => $optin,
+            'gdpr_fields' => $gdpr_fields,
+        ));
         // update the order meta for the subscription status to support legacy functions
         update_post_meta($order->get_id(), $meta_key, $optin);
 
@@ -244,7 +261,6 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
             if ((bool) $optin) {
                 // probably need to add the GDPR fields and language in to this submission next.
                 $language = null;
-                $gdpr_fields = null;
                 mailchimp_handle_or_queue(
                     new MailChimp_WooCommerce_User_Submit(
                         $user_id,

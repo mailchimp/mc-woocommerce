@@ -17,11 +17,6 @@ const Block = ( { cart, extensions, text, gdprHeadline, gdpr, checkoutExtensionD
 	const [ gdprFields ] = useState({});
 	const { setExtensionData } = checkoutExtensionData;
 
-	// console.log('text', text);
-	// console.log('gdprHeadline', gdprHeadline);
-	// console.log('gdpr', gdpr);
-	// console.log('defaultGdprFields', gdprFields);
-
 	useEffect( () => {
 		setExtensionData( 'mailchimp-newsletter', 'optin', checked );
 	}, [ checked, setExtensionData ] );
@@ -36,18 +31,18 @@ const Block = ( { cart, extensions, text, gdprHeadline, gdpr, checkoutExtensionD
 				<span dangerouslySetInnerHTML={ {__html: text} }/>
 			</CheckboxControl>
 			{gdpr && gdpr.length ? __(gdprHeadline, 'mailchimp-for-woocommerce') : ''}
-			{gdpr.map((gdprItem) => {
+			{gdpr && gdpr.length ? gdpr.map((gdprItem) => {
 				return (<CheckboxControl
 					id={'gdpr_'+gdprItem.marketing_permission_id}
 					checked={ gdprFields[gdprItem.marketing_permission_id] }
 					onChange={ (e) => {
-						gdprFields[gdprItem.marketing_permission_id] = !gdprFields[gdprItem.marketing_permission_id]
-						setExtensionData( 'mailchimp-newsletter', 'gdprFields', gdprFields );
+						gdprFields[gdprItem.marketing_permission_id] = !gdprFields[gdprItem.marketing_permission_id];
+						setExtensionData( 'mailchimp-newsletter', 'gdprFields', gdprFields);
 					}}
 				>
 					<span dangerouslySetInnerHTML={ {__html: gdprItem.text} }/>
 				</CheckboxControl>);
-			})}
+			}) : ''}
 		</>
 	);
 };

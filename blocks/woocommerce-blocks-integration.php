@@ -301,7 +301,8 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
         if (!($list_id = mailchimp_get_list_id())) {
             return array();
         }
-        return mailchimp_get_api()->getCachedGDPRFields($list_id);
+        $fields = mailchimp_get_api()->getCachedGDPRFields($list_id);
+        return is_array($fields) ? $fields : array();
     }
 
 	/**

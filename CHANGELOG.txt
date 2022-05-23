@@ -1,4 +1,14 @@
 == Changelog ==
+= 2.7 =
+* adds support for WooCommerce Checkout block
+* adds support for the tracking url from Mailchimp API
+* adds update function to register webhook for store 
+* support for new WooCommerce admin navigation
+* adds opt-in preference on My Account page
+* adds subscriber status to user(customer) in wordpress 
+* now assigns double-opt-in to all re-subscribers   
+* now support for loading plugin files from absolute path
+* adds two way sync check for webhooks on unsubscribes to and from Mailchimp
 = 2.6.2 =
 * compatibility for woocommerce 6.3
 * UI/UX updates for situations where Action Scheduler is missing during composer installs (via .gitignore)

@@ -79,7 +79,7 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 
 == Changelog ==
 = 2.7 =
-* adds support for WooCommerce payment block
+* adds support for WooCommerce Checkout block
 * adds support for the tracking url from Mailchimp API
 * adds update function to register webhook for store 
 * support for new WooCommerce admin navigation

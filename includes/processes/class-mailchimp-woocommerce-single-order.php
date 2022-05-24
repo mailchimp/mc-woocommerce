@@ -125,11 +125,17 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
             // transform the order
             $order = $job->transform($order_post);
+            
+            // don't allow this to happen.
+            if ($order->getOriginalWooStatus() === 'checkout-draft') {
+                mailchimp_debug('filter', "Order {$woo_order_number} is in draft status and can not be submitted");
+                return false;
+            }
 
             // if the order is new, and has been flagged as a status that should not be pushed over to
             // Mailchimp - just ignore it and log it.
             if ($new_order && $order->shouldIgnoreIfNotInMailchimp()) {
-                mailchimp_debug('filter', "order {$order->getId()} is in {$order->getOriginalWooStatus()} status, and is being skipped for now.");
+                mailchimp_debug('filter', "order {$woo_order_number} is in {$order->getOriginalWooStatus()} status, and is being skipped for now.");
                 return false;
             }
             

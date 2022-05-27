@@ -357,7 +357,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         if (!mailchimp_is_configured()) return;
 
         // don't handle any of these statuses because they're not ready for the show
-        if (!in_array($post->post_status, array('trash', 'auto-draft', 'draft', 'pending')) && ('product' == $post->post_type)) {
+        if (!in_array($post_after->post_status, array('trash', 'auto-draft', 'draft', 'pending')) && ('product' == $post_after->post_type)) {
             // if any of the following data was changed lets add it to the queue
             // in variable products what changes is the post parent, which is the one that I think should be sent to mailchimp
             // TODO: RYAN: we need to verify if the thumbnail url has changed

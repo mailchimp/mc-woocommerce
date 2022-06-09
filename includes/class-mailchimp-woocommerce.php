@@ -357,7 +357,10 @@ class MailChimp_WooCommerce
 			$this->loader->add_action('woocommerce_cart_item_removed', $service, 'handleCartUpdated');
 
 			// save post hooks
-			$this->loader->add_action('save_post', $service, 'handlePostSaved', 10, 3);
+			$this->loader->add_action('save_post_shop_order', $service, 'handleOrderSaved', 10, 3);
+			$this->loader->add_action('save_post_product', $service, 'handleProductCreated', 10, 3);
+			$this->loader->add_action('post_updated', $service, 'handleProductUpdated', 10, 3);
+			$this->loader->add_action('updated_post_meta', $service, 'handleProductStockUpdated', 10, 4);
             $this->loader->add_action('wp_trash_post', $service, 'handlePostTrashed', 10, 1);
             $this->loader->add_action('untrashed_post', $service, 'handlePostRestored', 10, 1);
 

@@ -692,6 +692,11 @@ class MailChimp_WooCommerce_Order
             }
         }
 
+        if (array_key_exists('customer', $data)) {
+            $customer_object = new MailChimp_WooCommerce_Customer();
+            $this->setCustomer($customer_object->fromArray($data['customer']));
+        }
+
         return $this;
     }
     /**

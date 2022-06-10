@@ -83,6 +83,12 @@ class MailChimp_WooCommerce_Rest_Api
             'permission_callback' => '__return_true',
         ));
 
+        register_rest_route(static::$namespace, "/tower/sync_stats", array(
+            'methods' => 'POST',
+            'callback' => array($this, 'get_tower_sync_stats'),
+            'permission_callback' => '__return_true',
+        ));
+
     }
 
     /**
@@ -438,19 +444,33 @@ class MailChimp_WooCommerce_Rest_Api
 
         switch ($body['resource']) {
             case 'order':
-                $platform = get_post($body['resource_id']);
-                $mc = !$platform->ID ? null : mailchimp_get_api()->getStoreOrder($store_id, $platform->ID);
+                $platform = null;
+                $order = get_post($body['resource_id']);
+                $mc = !$order->ID ? null : mailchimp_get_api()->getStoreOrder($store_id, $order->ID);
+                if ($order->ID) {
+                    $transformer = new MailChimp_WooCommerce_Transform_Orders();
+                    $platform = $transformer->transform($order)->toArray();
+                }
+                if ($mc) $mc = $mc->toArray();
                 break;
             case 'customer':
                 $body['resource_id'] = urldecode($body['resource_id']);
                 $field = is_email($body['resource_id']) ? 'email' : 'id';
                 $platform = get_user_by($field, $body['resource_id']);
                 $hashed = mailchimp_hash_trim_lower($platform->user_email);
-                $mc = mailchimp_get_api()->getCustomer($store_id, $hashed);
+                if ($mc = mailchimp_get_api()->getCustomer($store_id, $hashed)) {
+                    $mc = $mc->toArray();
+                }
                 break;
             case 'product':
-                $platform = wc_get_product($body['resource_id']);
-                $mc = mailchimp_get_api()->getStoreProduct($store_id, $body['resource_id']);
+                $platform = get_post($body['resource_id']);
+                if ($platform) {
+                    $transformer = new MailChimp_WooCommerce_Transform_Products();
+                    $platform = $transformer->transform($platform)->toArray();
+                }
+                if ($mc = mailchimp_get_api()->getStoreProduct($store_id, $body['resource_id'])) {
+                    $mc = $mc->toArray();
+                }
                 break;
             case 'cart':
                 global $wpdb;
@@ -458,11 +478,15 @@ class MailChimp_WooCommerce_Rest_Api
                 $table = "{$wpdb->prefix}mailchimp_carts";
                 $sql = $wpdb->prepare("SELECT * FROM $table WHERE id = %s", $uid);
                 $platform = $wpdb->get_row($sql);
-                $mc = mailchimp_get_api()->getCart($store_id, $uid);
+                if ($mc = mailchimp_get_api()->getCart($store_id, $uid)) {
+                    $mc = $mc->toArray();
+                }
                 break;
             case 'promo_code':
                 $platform = new WC_Coupon($body['resource_id']);
-                $mc = mailchimp_get_api()->getPromoRuleWithCodes($store_id, $body['resource_id']);
+                if ($mc = mailchimp_get_api()->getPromoRuleWithCodes($store_id, $body['resource_id'])) {
+                    //$mc = $mc->toArray();
+                }
                 break;
         }
 
@@ -471,6 +495,56 @@ class MailChimp_WooCommerce_Rest_Api
             'resource_error' => empty($platform) ? 'Resource not found' : false,
             'mailchimp' => $mc,
             'mailchimp_error' => empty($mc) ? 'Resource not found' : false,
+        ));
+    }
+
+    /**
+     * @param WP_REST_Request $request
+     * @return WP_REST_Response
+     */
+    public function get_tower_sync_stats(WP_REST_Request $request)
+    {
+        $this->authorize('tower.token', $request);
+
+        // if the queue is running in the console - we need to say tell the response why it's not going to fire this way.
+        if (!mailchimp_is_configured() || !($api = mailchimp_get_api())) {
+            return $this->mailchimp_rest_response(array('success' => false, 'reason' => 'not configured'));
+        }
+
+        $store_id = mailchimp_get_store_id();
+        $product_count = mailchimp_get_product_count();
+        $order_count = mailchimp_get_order_count();
+
+        try {
+            $products = $api->products($store_id, 1, 1);
+            $mailchimp_total_products = $products['total_items'];
+            if ($mailchimp_total_products > $product_count) {
+                $mailchimp_total_products = $product_count;
+            }
+        } catch (\Exception $e) { $mailchimp_total_products = 0; }
+        try {
+            $mailchimp_total_customers = $api->getCustomerCount($store_id);
+        } catch (\Exception $e) { $mailchimp_total_customers = 0; }
+        try {
+            $orders = $api->orders($store_id, 1, 1);
+            $mailchimp_total_orders = $orders['total_items'];
+            if ($mailchimp_total_orders > $order_count) {
+                $mailchimp_total_orders = $order_count;
+            }
+        } catch (\Exception $e) { $mailchimp_total_orders = 0; }
+
+        // but we need to do it just in case.
+        return $this->mailchimp_rest_response(array(
+            'platform' => array(
+                'products' => $product_count,
+                'customers' => 0,
+                'orders' => $order_count,
+            ),
+            'mailchimp' => array(
+                'products' => $mailchimp_total_products,
+                'customers' => $mailchimp_total_customers,
+                'orders' => $mailchimp_total_orders,
+            ),
         ));
     }
 

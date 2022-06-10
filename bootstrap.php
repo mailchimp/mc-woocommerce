@@ -1424,6 +1424,14 @@ function mailchimp_get_outbound_ip() {
     return null;
 }
 
+/**
+ * @return bool
+ */
+function mailchimp_render_gdpr_fields() {
+    return defined('MAILCHIMP_RENDER_GDPR_FIELDS') &&
+        MAILCHIMP_RENDER_GDPR_FIELDS;
+}
+
 // Add WP CLI commands
 if (defined( 'WP_CLI' ) && WP_CLI) {
     try {

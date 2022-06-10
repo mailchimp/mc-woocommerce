@@ -178,9 +178,9 @@ class MailChimp_WooCommerce_Public {
                 }
 
                 // Add to the checkbox output
-                $checkbox .= "<input type='hidden' value='0' name='mailchimp_woocommerce_gdpr[{$marketing_permission_id}]'>";
+                $checkbox .= "<input class='mailchimp_woocommerce_gdpr_option' type='hidden' value='0' name='mailchimp_woocommerce_gdpr[{$marketing_permission_id}]'>";
                 $checkbox .= "<input id='mailchimp_woocommerce_gdpr[{$marketing_permission_id}]' type='checkbox' name='mailchimp_woocommerce_gdpr[{$marketing_permission_id}]' value='1'".($status ? ' checked="checked"' : '').">";
-                $checkbox .= "<label for='mailchimp_woocommerce_gdpr[{$marketing_permission_id}]' ><span>{$text}</span></label>";
+                $checkbox .= "<label class='mailchimp_woocommerce_gdpr_label' for='mailchimp_woocommerce_gdpr[{$marketing_permission_id}]' ><span>{$text}</span></label>";
                 $checkbox .= "<div class='clear'></div>";
             }
             $checkbox .= "</p></div>";

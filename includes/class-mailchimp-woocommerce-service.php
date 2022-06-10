@@ -321,29 +321,96 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             mailchimp_error('delete promo code', $e->getMessage());
         }
     }
+  
+	/**
+	 * When a product post has been updated, handle or queue syncing when key fields have changed.
+	 *
+	 * @param int     $post_ID     The ID of the post/product being updated
+	 * @param WP_Post $post_after  The post object as it existed before the update
+	 * @param WP_Post $post_before The post object as it exists after the update
+	 * @return void
+	 */
+	public function handleProductUpdated( int $post_ID, WP_Post $post_after, WP_Post $post_before ): void {
+		// Only work with products that have certain statuses
+		if ( 'product' !== $post_after->post_type
+			|| in_array($post_after->post_status, array( 'trash', 'auto-draft', 'draft', 'pending' ) )
+			|| ! mailchimp_is_configured()
+		) {
+			return;
+		}
 
-    /**
-     * Save post metadata when a post is saved.
-     *
-     * @param int $post_id The post ID.
-     * @param WP_Post $post The post object.
-     * @param bool $update Whether this is an existing post being updated or not.
-     */
-    public function handlePostSaved($post_id, $post, $update)
-    {
-        if (!mailchimp_is_configured()) return;
+		// Check if product title or description has been altered
+		if (
+			$post_after->post_title !== $post_before->post_title
+			|| $post_after->post_content !== $post_before->post_content
+		) {
+			mailchimp_handle_or_queue( new MailChimp_WooCommerce_Single_Product( $post_ID ), 5 );
+		}
+	}
 
-        // don't handle any of these statuses because they're not ready for the show
-        if (!in_array($post->post_status, array('trash', 'auto-draft', 'draft', 'pending'))) {
-            // for updated products we have another handler, handlePostUpdated
-            if ('product' == $post->post_type && !$update) {
-                mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
-            } elseif ('shop_order' == $post->post_type) {
-                $tracking = $this->onNewOrder($post_id);
-                $this->onOrderSave($post_id, $tracking, !$update);
-            }
-        }
-    }
+	/**
+	 * When the _stock meta is updated for a product, handle or queue syncing updates.
+	 *
+	 * @param int    $meta_id     The ID of the post meta entry that was updated
+	 * @param int    $object_id   The ID of the object the post meta entry is attached to
+	 * @param string $meta_key    The key of the meta entry that was updated
+	 * @param mixed  $_meta_value The value of the meta entry that was updated
+	 * @return void
+	 */
+	public function handleProductStockUpdated( int $meta_id, int $object_id, string $meta_key, mixed $_meta_value ): void {
+		// If we're not working with the meta key used to store stock quantity, bail
+		if ( '_stock' !== $meta_key ) {
+			return;
+		}
+
+		// Confirm that we're working with an object that is a WooCommerce product with a certain status
+		$product = wc_get_product( $object_id );
+		if (
+			$product instanceof WC_Product
+			&& ! in_array($product->get_status(), array( 'trash', 'auto-draft', 'draft', 'pending' ) )
+		) {
+			mailchimp_handle_or_queue( new MailChimp_WooCommerce_Single_Product( $object_id ), 5 );
+		}
+	}
+
+	/**
+	 * If a product has been updated and isn't an existing post, handle or queue syncing updates.
+	 *
+	 * @param int     $post_ID           The ID of the post that was updated/created
+	 * @param WP_Post $post              The post object that was updated/created
+	 * @param bool    $is_existing_post  Whether the updated post existed before the update
+	 * @return void
+	 */
+	public function handleProductCreated( int $post_ID, WP_Post $post, bool $is_existing_post ): void {
+		// Since the handleProductUpdated() function above handles product updates, bail for existing posts/products.
+		if ( $is_existing_post || ! mailchimp_is_configured() ) {
+			return;
+		}
+
+		// If the product is of a certain status, process it.
+		if ( ! in_array($post->post_status, array( 'trash', 'auto-draft', 'draft', 'pending' ) ) ) {
+			mailchimp_handle_or_queue( new MailChimp_WooCommerce_Single_Product( $post_ID ), 5 );
+		}
+	}
+
+	/**
+	 * Fire new order and order save handling/queueing events when a shop_order post is saved.
+	 *
+	 * @param int     $post_ID          The ID of the order
+	 * @param WP_Post $post             The post object of the order
+	 * @param bool    $is_existing_post Whether the order existed before the update
+	 * @return void
+	 */
+	public function handleOrderSaved( int $post_ID, WP_Post $post, bool $is_existing_post ): void {
+		if ( ! mailchimp_is_configured() ) {
+			return;
+		}
+
+		if ( ! in_array($post->post_status, array( 'trash', 'auto-draft', 'draft', 'pending' ) ) ) {
+			$tracking = $this->onNewOrder( $post_ID );
+			$this->onOrderSave( $post_ID, $tracking, ! $is_existing_post );
+		}
+	}
 
     /**
      * Update post metadata when a post is saved.

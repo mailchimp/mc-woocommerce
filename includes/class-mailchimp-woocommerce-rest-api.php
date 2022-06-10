@@ -44,6 +44,45 @@ class MailChimp_WooCommerce_Rest_Api
             'callback' => array($this, 'dismiss_review_banner'),
             'permission_callback' => array($this, 'permission_callback'),
         ));
+
+        //Member Sync
+        register_rest_route(static::$namespace, "/member-sync", array(
+            'methods' => 'GET',
+            'callback' => array($this, 'member_sync_alive_signal'),
+            'permission_callback' => '__return_true',
+        ));
+        register_rest_route(static::$namespace, "/member-sync", array(
+            'methods' => 'POST',
+            'callback' => array($this, 'member_sync'),
+            'permission_callback' => '__return_true',
+        ));
+
+        // Tower report
+        register_rest_route(static::$namespace, "/tower/report", array(
+            'methods' => 'POST',
+            'callback' => array($this, 'get_tower_report'),
+            'permission_callback' => '__return_true',
+        ));
+
+        // tower logs
+        register_rest_route(static::$namespace, "/tower/logs", array(
+            'methods' => 'POST',
+            'callback' => array($this, 'get_tower_logs'),
+            'permission_callback' => '__return_true',
+        ));
+
+        register_rest_route(static::$namespace, "/tower/resource", array(
+            'methods' => 'POST',
+            'callback' => array($this, 'get_tower_resource'),
+            'permission_callback' => '__return_true',
+        ));
+
+        register_rest_route(static::$namespace, "/tower/action", array(
+            'methods' => 'POST',
+            'callback' => array($this, 'handle_tower_action'),
+            'permission_callback' => '__return_true',
+        ));
+
     }
 
     /**
@@ -72,7 +111,7 @@ class MailChimp_WooCommerce_Rest_Api
     {
         // need to send a post request to
         $host = mailchimp_environment_variables()->environment === 'staging' ?
-            'https://staging.conduit.vextras.com' : 'https://conduit.mailchimpapp.com';
+        'https://staging.conduit.vextras.com' : 'https://conduit.mailchimpapp.com';
 
         $route = "{$host}/survey/woocommerce";
 
@@ -163,16 +202,370 @@ class MailChimp_WooCommerce_Rest_Api
         return $this->mailchimp_rest_response(array('success' => delete_option('mailchimp-woocommerce-sync.initial_sync')));
     }
 
+    /**
+     * Syncs members with updated statuses on Mailchimp panel
+     * @param WP_REST_Request $request
+     * @return WP_Error|WP_REST_Response
+     */
+    public function member_sync(WP_REST_Request $request)
+    {
+        $this->authorize('webhook.token', $request);
+        $data = $request->get_params();
+        if (!empty($data['type']) && !empty($data['data']['list_id']) && mailchimp_get_list_id() == $data['data']['list_id'] ){
+            $job = new MailChimp_WooCommerce_Subscriber_Sync($data);
+            $job->handle();
+            return $this->mailchimp_rest_response(array('success' => true));
+        }
+        return $this->mailchimp_rest_response(array('success' => false));
+    }
+
+    /**
+     * Returns an alive signal to confirm url exists to mailchimp system
+     * @param WP_REST_Request $request
+     * @return WP_Error|WP_REST_Response
+     */
+    public function member_sync_alive_signal(WP_REST_Request $request)
+    {
+        $this->authorize('webhook.token', $request);
+        return $this->mailchimp_rest_response(array('success' => true));
+    }
+
+    /**
+     * @param WP_REST_Request $request
+     * @return WP_Error|WP_REST_Response
+     */
+    public function get_tower_report(WP_REST_Request $request)
+    {
+        $this->authorize('tower.token', $request);
+        return $this->mailchimp_rest_response(
+            $this->tower($request->get_query_params())->handle()
+        );
+    }
+
+    /**
+     * @param WP_REST_Request $request
+     * @return WP_Error|WP_REST_Response
+     */
+    public function handle_tower_action(WP_REST_Request $request)
+    {
+        $this->authorize('tower.token', $request);
+        $body = $request->get_json_params();
+
+        $action = isset($body['action']) ? $body['action'] : null;
+        $data = isset($body['data']) ? $body['data'] : null;
+        $response = null;
+
+        if (empty($action)) {
+            return $this->mailchimp_rest_response(array(
+                'success' => false,
+                'message' => 'invalid action'
+            ));
+        }
+
+        switch ($action) {
+            case 'emergency_stop_syncing':
+                mailchimp_set_data('emergency_stop', true);
+                $response = [
+                    'title' => "Successfully stopped the sync.",
+                    'description' => "Please note you'll need to have them reconnect.",
+                    'type' => 'success',
+                ];
+                break;
+            case 'update_feature':
+                $response = [
+                    'title' => "Features are not available for WooCommerce",
+                    'type' => 'error',
+                ];
+                break;
+            case 'resync_orders':
+                MailChimp_WooCommerce_Process_Orders::push();
+                $response = [
+                    'title' => "Successfully initiated the order resync",
+                    'description' => "Please note that it will take a couple minutes to start this process. Check the store logs for details.",
+                    'type' => 'success',
+                ];
+                break;
+            case 'resync_products':
+                MailChimp_WooCommerce_Process_Products::push();
+                $response = [
+                    'title' => "Successfully initiated product resync",
+                    'description' => "Please note that it will take a couple minutes to start this process. Check the store logs for details.",
+                    'type' => 'success',
+                ];
+                break;
+            case 'resync_customers':
+                $response = [
+                    'title' => "Customer resync",
+                    'description' => "WooCommerce does not have customers to sync. Only orders.",
+                    'type' => 'error',
+                ];
+                break;
+            case 'resync_promo_codes':
+                MailChimp_WooCommerce_Process_Coupons::push();
+                $response = [
+                    'title' => "Successfully initiated promo code resync",
+                    'description' => "Please note that it will take a couple minutes to start this process. Check the store logs for details.",
+                    'type' => 'success',
+                ];
+                break;
+            case 'resync_chimpstatic_script':
+                $response = [
+                    'title' => "Chimpstatic script",
+                    'description' => 'Scripts are automatically injected at runtime.',
+                    'type' => 'error',
+                ];
+                break;
+            case 'activate_webhooks':
+                $response = [
+                    'title' => "Store Webhooks",
+                    'description' => "No store webhooks to apply",
+                    'type' => 'error',
+                ];
+                break;
+            case 'resync_all':
+                $service = new MailChimp_Service();
+                $service->removePointers(true, true);
+                MailChimp_WooCommerce_Admin::instance()->startSync();
+                $service->setData('sync.config.resync', true);
+                $response = [
+                    'title' => "Successfully initiated the store resync",
+                    'description' => "Please note that it will take a couple minutes to start this process. Check the store logs for details.",
+                    'type' => 'success',
+                ];
+                break;
+            case 'resync_customer':
+                $response = [
+                    'title' => "Error syncing custome",
+                    'description' => "WooCommerce only works with orders.",
+                    'type' => 'error',
+                ];
+                break;
+            case 'resync_order':
+                $order = new WC_Order($data['id']);
+                if (!$order->get_date_created()) {
+                    $response = [
+                        'title' => "Error syncing order",
+                        'description' => "This order id does not exist.",
+                        'type' => 'error',
+                    ];
+                } else {
+                    $job = new MailChimp_WooCommerce_Single_Order($order);
+                    $data = $job->handle();
+                    $response = [
+                        'title' => "Executed order resync",
+                        'description' => "Check the store logs for details.",
+                        'type' => 'success',
+                    ];
+                }
+                break;
+            case 'resync_product':
+                $product = new WC_Product($data['id']);
+                if (!$product->get_date_created()) {
+                    $response = [
+                        'title' => "Error syncing product",
+                        'description' => "This product id does not exist.",
+                        'type' => 'error',
+                    ];
+                } else {
+                    $job = new MailChimp_WooCommerce_Single_Product($product);
+                    $data = $job->handle();
+                    $response = [
+                        'title' => "Executed product resync",
+                        'description' => "Check the store logs for details.",
+                        'type' => 'success',
+                    ];
+                }
+                break;
+            case 'resync_cart':
+                $response = [
+                    'title' => "Let's talk",
+                    'description' => "This isn't supported by our system yet. If you really need this, please say something.",
+                    'type' => 'error',
+                ];
+                break;
+            case 'fix_duplicate_store':
+                $job = new MailChimp_WooCommerce_Fix_Duplicate_Store(mailchimp_get_store_id(), true, false);
+                $job->handle();
+                $response = [
+                    'title' => "Successfully queued up store deletion.",
+                    'description' => "This process may take a couple minutes to complete. Please check back by reloading the page after a minute.",
+                    'type' => 'success',
+                ];
+                break;
+            case 'remove_legacy_app':
+                $response = [
+                    'title' => "Error removing legacy app",
+                    'description' => "WooCommerce doesn't have any legacy apps to delete.",
+                    'type' => 'error',
+                ];
+                break;
+        }
+
+        return $this->mailchimp_rest_response($response);
+    }
+
+    /**
+     * @param WP_REST_Request $request
+     * @return WP_Error|WP_REST_Response
+     */
+    public function get_tower_logs(WP_REST_Request $request)
+    {
+        $this->authorize('tower.token', $request);
+        return $this->mailchimp_rest_response(
+            $this->tower($request->get_query_params())->logs()
+        );
+    }
+
+    /**
+     * @param WP_REST_Request $request
+     * @return WP_Error|WP_REST_Response
+     */
+    public function get_tower_resource(WP_REST_Request $request)
+    {
+        $this->authorize('tower.token', $request);
+        $body = json_decode($request->get_body(), true);
+
+        if (!isset($body['resource']) || !isset($body['resource_id'])) {
+            return $this->mailchimp_rest_response(array(
+                'resource' => null,
+                'resource_error' => 'Resource not found because post request was wrong',
+                'mailchimp' => null,
+                'mailchimp_error' => 'Resource not found because post request was wrong',
+            ));
+        }
+
+        $store_id = mailchimp_get_store_id();
+
+        switch ($body['resource']) {
+            case 'order':
+                $platform = get_post($body['resource_id']);
+                $mc = !$platform->ID ? null : mailchimp_get_api()->getStoreOrder($store_id, $platform->ID);
+                break;
+            case 'customer':
+                $body['resource_id'] = urldecode($body['resource_id']);
+                $field = is_email($body['resource_id']) ? 'email' : 'id';
+                $platform = get_user_by($field, $body['resource_id']);
+                $hashed = mailchimp_hash_trim_lower($platform->user_email);
+                $mc = mailchimp_get_api()->getCustomer($store_id, $hashed);
+                break;
+            case 'product':
+                $platform = wc_get_product($body['resource_id']);
+                $mc = mailchimp_get_api()->getStoreProduct($store_id, $body['resource_id']);
+                break;
+            case 'cart':
+                global $wpdb;
+                $uid = mailchimp_hash_trim_lower($body['resource_id']);
+                $table = "{$wpdb->prefix}mailchimp_carts";
+                $sql = $wpdb->prepare("SELECT * FROM $table WHERE id = %s", $uid);
+                $platform = $wpdb->get_row($sql);
+                $mc = mailchimp_get_api()->getCart($store_id, $uid);
+                break;
+            case 'promo_code':
+                $platform = new WC_Coupon($body['resource_id']);
+                $mc = mailchimp_get_api()->getPromoRuleWithCodes($store_id, $body['resource_id']);
+                break;
+        }
+
+        return $this->mailchimp_rest_response(array(
+            'resource' => $platform,
+            'resource_error' => empty($platform) ? 'Resource not found' : false,
+            'mailchimp' => $mc,
+            'mailchimp_error' => empty($mc) ? 'Resource not found' : false,
+        ));
+    }
+
+    /**
+     * @param null $params
+     * @return MailChimp_WooCommerce_Tower
+     */
+    private function tower($params = null)
+    {
+        if (!is_array($params)) $params = array();
+        $job = new MailChimp_WooCommerce_Tower(mailchimp_get_store_id());
+        $job->withLogFile(!empty($params['log_view']) ? $params['log_view'] : null);
+        $job->withLogSearch(!empty($params['search']) ? $params['search'] : null);
+        return $job;
+    }
+
 
     /**
      * @param array $data
      * @param int $status
      * @return WP_REST_Response
      */
-    private function mailchimp_rest_response($data, $status = 200) {
+    private function mailchimp_rest_response($data, $status = 200)
+    {
         if (!is_array($data)) $data = array();
         $response = new WP_REST_Response($data);
         $response->set_status($status);
         return $response;
+    }
+
+    /**
+     * @param $key
+     * @param WP_REST_Request $request
+     * @return bool
+     * @throws WC_REST_Exception
+     */
+    private function authorize($key, WP_REST_Request $request)
+    {
+        $allowed_keys = array(
+            'tower.token',
+            'webhook.token',
+        );
+        // this is just a safeguard against people trying to do wonky things.
+        if (!in_array($key, $allowed_keys, true)) {
+            wp_send_json_error(array('message' => 'unauthorized token type'), 403);
+        }
+        // get the auth token from either a header, or the query string
+        $token = $this->getAuthToken($request);
+        // pull the saved data
+        $saved = mailchimp_get_data($key);
+
+        // if we don't have a token - or we don't have the saved comparison
+        // or the token doesn't equal the saved token, throw an error.
+        if (empty($token) || empty($saved) || base64_decode($token) !== $saved) {
+            wp_send_json_error(array('message' => 'unauthorized'), 403);
+        }
+        return true;
+    }
+
+    /**
+     * @param WP_REST_Request $request
+     * @return false|mixed|string
+     */
+    private function getAuthToken(WP_REST_Request $request)
+    {
+        if (($token = $this->getBearerTokenHeader($request))) {
+            return $token;
+        }
+        return $this->getAuthQueryStringParam($request);
+    }
+
+    /**
+     * @param WP_REST_Request $request
+     * @return false|string
+     */
+    private function getBearerTokenHeader(WP_REST_Request $request)
+    {
+        $header = $request->get_header('Authorization');
+        $position = strrpos($header, 'Bearer ');
+        if ($position !== false) {
+            $header = substr($header, $position + 7);
+            return strpos($header, ',') !== false ?
+                strstr(',', $header, true) :
+                $header;
+        }
+        return false;
+    }
+
+    /**
+     * @param WP_REST_Request $request
+     * @return false|mixed
+     */
+    private function getAuthQueryStringParam(WP_REST_Request $request)
+    {
+        $params = $request->get_query_params();
+        return empty($params['auth']) ? false : $params['auth'];
     }
 }

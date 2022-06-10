@@ -19,11 +19,6 @@ export const Edit = ( { attributes, setAttributes } ) => {
 	const { text, gdprHeadline, gdpr } = attributes;
 	const blockProps = useBlockProps();
 
-	console.log('edit', {
-		text: text,
-		gdprHeadline: gdprHeadline,
-		gdpr: gdpr,
-	});
 
 	return (
 		<div { ...blockProps }>

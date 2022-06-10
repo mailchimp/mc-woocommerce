@@ -1,11 +1,6 @@
 import {Header} from "@wordpress/components/build/box-control/styles/box-control-styles";
 import {__} from "@wordpress/i18n";
 
-console.log('gdpr.js', {
-    headline: gdprHeadline,
-    fields: gdpr,
-});
-
 {gdpr.length &&
 <div>
     <Header>

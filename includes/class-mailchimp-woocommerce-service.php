@@ -196,7 +196,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     public function handleCartUpdated($updated = null)
     {
         if (mailchimp_carts_disabled()) {
-            return false;
+            return $updated;
         }
 
         if ($updated === false || $this->is_admin || $this->cart_was_submitted || !mailchimp_is_configured()) {
@@ -225,7 +225,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                 }
                 if ($cached_status !== 'subscribed') {
                     mailchimp_debug('filter', "preventing {$user_email} from submitting cart data due to subscriber settings.");
-                    return false;
+                    return $updated;
                 }
             }
 
@@ -321,7 +321,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             mailchimp_error('delete promo code', $e->getMessage());
         }
     }
-
+  
 	/**
 	 * When a product post has been updated, handle or queue syncing when key fields have changed.
 	 *
@@ -413,6 +413,27 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 	}
 
     /**
+     * Update post metadata when a post is saved.
+     *
+     * @param int $post_id The post ID.
+     * @param WP_Post $post The post object.
+     * @param bool $update Whether this is an existing post being updated or not.
+     */
+    public function handlePostUpdated($post_id, $post_after, $post_before)
+    {
+        if (!mailchimp_is_configured()) return;
+
+        // don't handle any of these statuses because they're not ready for the show
+        if (!in_array($post_after->post_status, array('trash', 'auto-draft', 'draft', 'pending')) && ('product' == $post_after->post_type)) {
+            // if any of the following data was changed lets add it to the queue
+            // in variable products what changes is the post parent, which is the one that I think should be sent to mailchimp
+            // TODO: RYAN: we need to verify if the thumbnail url has changed
+            if($post_before->post_title !== $post_after->post_title || $post_before->post_name !== $post_after->post_name || $post_before->post_content !== $post_after->post_content){
+                mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
+            }
+        }
+    }
+    /**
      * @param $post_id
      */
     public function handlePostTrashed($post_id)
@@ -497,12 +518,17 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
         // only update this person if they were marked as subscribed before
         $is_subscribed = get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true);
+        $gdpr_fields = get_user_meta($user_id, 'mailchimp_woocommerce_gdpr_fields', true);
 
-        // if they don't have a meta set for is_subscribed, we will get a blank string, so just ignore this.
-        if ($is_subscribed === '' || $is_subscribed === null) return;
-
+        $job = new MailChimp_WooCommerce_User_Submit(
+            $user_id,
+            (bool) $is_subscribed,
+            $old_user_data,
+            null,
+            !empty($gdpr_fields) ? $gdpr_fields : null
+        );
         // only send this update if the user actually has a boolean value.
-        mailchimp_handle_or_queue(new MailChimp_WooCommerce_User_Submit($user_id, (bool) $is_subscribed, $old_user_data));
+        mailchimp_handle_or_queue($job);
     }
 
     /**
@@ -1091,8 +1117,38 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         return false;
     }
 
-    public function mailchimp_process_sync_manager () {
+    public function mailchimp_process_sync_manager()
+    {
         $sync_stats_manager = new MailChimp_WooCommerce_Process_Full_Sync_Manager();
         $sync_stats_manager->handle();
+    }
+
+    /**
+     * Display the Mailchimp checkbox on the admin page
+     * @param $user
+     */
+    public function user_subscribed_profile( $user )
+    {
+        $admin = MailChimp_WooCommerce_Admin::instance();
+        $admin->display_user_profile_info( $user );
+    }
+
+    /**
+     * Update the user meta from the admin page
+     * @param $user_id
+     */
+    public function user_update_subscribe_status( $user_id )
+    {
+        $subscribed = isset($_POST['mailchimp_woocommerce_is_subscribed_checkbox']) &&
+            $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == 'on';
+        $gdpr_fields = isset($_POST['mailchimp_woocommerce_gdpr']) ? $_POST['mailchimp_woocommerce_gdpr'] : null;
+        mailchimp_log("profile", 'user_update_subscribe_status', array(
+            'subscribed' => $subscribed,
+            'user_id' => $user_id,
+            'gdpr_fields' => $gdpr_fields,
+        ));
+        update_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', $subscribed);
+        update_user_meta($user_id, 'mailchimp_woocommerce_gdpr_fields', $gdpr_fields);
+        mailchimp_set_transient("mailchimp_woocommerce_gdpr_fields_{$user_id}", $gdpr_fields, 300);
     }
 }

@@ -59,6 +59,13 @@ class MailChimp_WooCommerce_Transform_Orders
             return $order;
         }
 
+        // this is a fallback safety check to make sure we're not submitting these orders.
+        if ($woo->get_status() === 'checkout-draft') {
+            $order->setOriginalWooStatus('checkout-draft');
+            $order->flagAsIgnoreIfNotInMailchimp(true);
+            return $order;
+        }
+
         // if the woo object does not have a "get_billing_email" method, then we need to skip this until
         // we know how to resolve these types of things.
         //mailchimp_log('get_billing_mail', method_exists($woo, 'get_billing_email'), array($order->toArray(), $woo));

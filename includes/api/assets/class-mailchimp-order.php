@@ -34,6 +34,9 @@ class MailChimp_WooCommerce_Order
     protected $is_privacy_protected = false;
     protected $original_woo_status = null;
     protected $ignore_if_new = false;
+    protected $tracking_url = '';
+    protected $tracking_number = '';
+    protected $tracking_carrier = '';
 
     /**
      * @param $bool
@@ -552,14 +555,73 @@ class MailChimp_WooCommerce_Order
         }
         return $this->billing_address;
     }
+    /**
+     * Set Tracking url if exists
+     */
+    public function setTrackingUrl($url = ''){
 
+        if(!empty($url)){ return $this->tracking_url = $url; }
+
+        $tracking_url = '';
+        //Taken from woocommercer-services plugin example
+        if( !empty($this->tracking_number) && !empty($this->tracking_carrier) ){
+            switch ( $this->tracking_carrier ) {
+                case 'fedex':
+                    $tracking_url = 'https://www.fedex.com/apps/fedextrack/?action=track&tracknumbers=' . $this->tracking_number;
+                break;
+                case 'usps':
+                    $tracking_url = 'https://tools.usps.com/go/TrackConfirmAction.action?tLabels=' . $this->tracking_number;
+                break;
+                case 'ups':
+                    $tracking_url = 'https://www.ups.com/track?tracknum=' . $this->tracking_number;
+                break;
+                case 'dhlexpress':
+                    $tracking_url = 'https://www.dhl.com/en/express/tracking.html?AWB=' . $this->tracking_number . '&brand=DHL';
+                break;
+            }    
+        }
+        
+        $this->tracking_url = $tracking_url;
+    }
+    /**
+     * @return string               Tracking url
+     */
+    public function getTrackingUrl(){
+        return $this->tracking_url;
+    }
+    /**
+     * Set Tracking number if exists
+     * @param string $tracking_number Tracking number from first-party plugin
+     */
+    public function setTrackingNumber( $tracking_number ){
+        $this->tracking_number = $tracking_number;
+    }
+    /**
+     * @return string               Tracking number
+     */
+    public function getTrackingNumber(){
+        return $this->tracking_number;
+    }
+    /**
+     * Set Tracking url if exists
+     * @param string $tracking_carrier Tracking carrier from first-party plugin
+     */
+    public function setTrackingCarrier( $tracking_carrier ){
+        $this->tracking_carrier = $tracking_carrier;
+    }
+    /**
+     * @return string               Tracking carrier
+     */
+    public function getTrackingCarrier(){
+        return $this->tracking_carrier;
+    }
     /**
      * @return array
      */
     public function toArray()
     {
         $campaign_id = (string) $this->getCampaignId();
-
+        $this->setTrackingInfo();
         return mailchimp_array_remove_empty(array(
             'id' => (string) $this->getId(),
             'landing_site' => (string) $this->getLandingSite(),
@@ -580,6 +642,9 @@ class MailChimp_WooCommerce_Order
             'shipping_address' => $this->getShippingAddress()->toArray(),
             'billing_address' => $this->getBillingAddress()->toArray(),
             'promos' => !empty($this->promos) ? $this->promos : null,
+            'tracking_number' => $this->getTrackingNumber(),
+            'tracking_url' => $this->getTrackingUrl(),
+            'tracking_carrier' => $this->getTrackingCarrier(),
             'lines' => array_map(function ($item) {
                 /** @var MailChimp_WooCommerce_LineItem $item */
                 return $item->toArray();
@@ -596,7 +661,7 @@ class MailChimp_WooCommerce_Order
         $singles = array(
             'id', 'landing_site', 'campaign_id', 'financial_status', 'fulfillment_status',
             'currency_code', 'order_total', 'order_url', 'tax_total', 'discount_total', 'processed_at_foreign',
-            'cancelled_at_foreign', 'updated_at_foreign'
+            'cancelled_at_foreign', 'updated_at_foreign', 'tracking_carrier', 'tracking_number', 'tracking_url'
         );
 
         foreach ($singles as $key) {
@@ -628,5 +693,61 @@ class MailChimp_WooCommerce_Order
         }
 
         return $this;
+    }
+    /**
+     * Set Tracking info before the job gets executed 
+     */
+    public function setTrackingInfo()
+    {
+        // Support for woocomemrce shipment tracking plugin (https://woocommerce.com/products/shipment-tracking)
+        if (function_exists('wc_st_add_tracking_number' )){
+            $trackings = get_post_meta( (int) $this->getId(), '_wc_shipment_tracking_items', true );
+
+            if ( empty($trackings) ) {
+                return ;
+            }
+            foreach($trackings as $tracking){
+                // carrier
+                if(!empty($tracking['custom_tracking_provider'])){
+                    $this->setTrackingCarrier($tracking['custom_tracking_provider']);
+                }elseif(!empty($tracking['tracking_provider'])){
+                    $this->setTrackingCarrier($tracking['tracking_provider']);
+                }
+
+                // tracking url
+                $ship = WC_Shipment_Tracking_Actions::get_instance();
+                $url = $ship->get_formatted_tracking_item($this->getId(), $tracking);
+                $this->setTrackingUrl($url['formatted_tracking_link']);
+
+                // tracking number
+                $this->setTrackingNumber($tracking['tracking_number']);
+                return;
+            }
+        }
+
+        // Support for woocoomerce shipping plugin (https://woocommerce.com/woocommerce-shipping/)
+        if( class_exists( 'WC_Connect_Loader' ) ){
+            $label_data = get_post_meta( (int) $this->getId(), 'wc_connect_labels', true );
+            // return an empty array if the data doesn't exist.
+            if ( empty($label_data) ) {
+                return ;
+            }
+            if( !is_array($label_data) && is_string( $label_data ) ){
+                $label_data = json_decode( $label_data, true );
+            }
+            // labels stored as an array, return.
+            if ( is_array( $label_data ) ){
+                foreach ($label_data as $label) {
+                    if (!empty($label['tracking']) && !empty($label['carrier_id']) ){
+                        $this->setTrackingNumber( $label['tracking'] );
+                        $this->setTrackingCarrier( $label['carrier_id'] );
+                        $this->setTrackingUrl();
+                    }
+                }
+            }
+            return;
+        }
+
+        
     }
 }

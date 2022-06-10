@@ -4,13 +4,40 @@
 $store_id = mailchimp_get_store_id();
 
 $opt = get_option('mailchimp-woocommerce-comm.opt');
+$tower_opt = get_option('mailchimp-woocommerce-tower.opt');
 $admin_email = mailchimp_get_option('admin_email', get_option('admin_email'));
 $comm_enabled = $opt != null ? $opt : '0';
+$tower_enabled = $tower_opt != null ? $tower_opt : '0';
 ?>
 <fieldset>
     <legend class="screen-reader-text">
         <span><?php esc_html_e('Plugin Settings', 'mailchimp-for-woocommerce');?></span>
 	</legend>
+
+    <div class="box ">
+        <label for="<?php echo $this->plugin_name; ?>-tower-support-checkbox-label">
+            <h4><?php esc_html_e('Remote Diagnostics', 'mailchimp-for-woocommerce'); ?></h4>
+            <p>
+                <?php
+                echo sprintf(
+                /* translators: Placeholders %1$s - admin email address */
+                    __('Remote diagnostics for the Mailchimp for WooCommerce plugin allows our development team to troubleshoot syncing issues.', 'mailchimp-for-woocommerce'),
+                    $admin_email
+                );?>
+            </p>
+        </label>
+        <br/>
+        <fieldset>
+            <p id="mc-comm-wrapper">
+                <label class="el-switch el-checkbox-green">
+                    <input id="tower_box_switch" type="checkbox" name="switch" <?php if($tower_enabled === '1') echo ' checked="checked" '; ?> value="1">
+                    <span><?= __('Enable support', 'mailchimp-for-woocommerce'); ?></span>
+                    <br/>
+                    <span class="mc-tower-save" id="mc-tower-save">Saved</span>
+                </label>
+            </p>
+        </fieldset>
+    </div>
 
 	<div class="box ">
 		<label for="<?php echo $this->plugin_name; ?>-newsletter-checkbox-label">

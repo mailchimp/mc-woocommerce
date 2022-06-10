@@ -18,6 +18,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
     public $updated_data;
     public $language;
     public $should_ignore = false;
+    public $submit_transactional = true;
 
     /**
      * MailChimp_WooCommerce_User_Submit constructor.
@@ -57,6 +58,16 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
         if (!empty($language)) {
             $this->language = $language;
         }
+    }
+
+    /**
+     * @param bool $bool
+     * @return $this
+     */
+    public function submittingTransactional($bool = true)
+    {
+        $this->submit_transactional = (bool) $bool;
+        return $this;
     }
 
     /**
@@ -133,7 +144,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 
         // don't let anyone be unsubscribed from the list - that should only happen on email campaigns
         // and someone clicking the unsubscribe linkage.
-        if (!$this->subscribed) {
+        if (!$this->subscribed && !$this->submit_transactional) {
             static::$handling_for = null;
             return false;
         }
@@ -209,9 +220,14 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 
             // if the member is unsubscribed or pending, we really can't do anything here.
             if (isset($member_data['status']) && in_array($member_data['status'], array('unsubscribed', 'pending'))) {
-                mailchimp_log('member.sync', "Skipped Member Sync For {$email} because the current status is {$member_data['status']}", $merge_fields);
-                static::$handling_for = null;
-                return false;
+                if ($this->subscribed && $member_data['status'] !== 'pending') {
+                    mailchimp_log('member.sync', "pushing {$email} status as pending because they were previously unsubscribed, and must use the double opt in to make it back on the list.");
+                    $member_data['status'] = 'pending';
+                } else {
+                    mailchimp_log('member.sync', "Skipped Member Sync For {$email} because the current status is {$member_data['status']}", $merge_fields);
+                    static::$handling_for = null;
+                    return false;
+                }
             }
 
             // if the status is not === 'transactional' we can update them to subscribed or pending now.
@@ -226,13 +242,18 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
                 mailchimp_log('member.sync', "Updated Member {$email}", array(
                     'previous_status' => $member_data['status'],
                     'status' => $status_meta['updated'],
-                    'merge_fields' => $merge_fields
+                    'language' => $language,
+                    'merge_fields' => $merge_fields,
+                    'gdpr_fields' => $gdpr_fields,
                 ));
                 static::$handling_for = null;
                 return true;
             }
 
             if (isset($member_data['status'])) {
+                if ($member_data['status'] === 'subscribed' && !$this->subscribed) {
+                    $member_data['status'] = 'transactional';
+                }
                 // ok let's update this member
                 $api->update($list_id, $email, $member_data['status'], $merge_fields, null, $language, $gdpr_fields);
 
@@ -240,8 +261,11 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
                 $api->updateMemberTags(mailchimp_get_list_id(), $email, true);
 
                 mailchimp_tell_system_about_user_submit($email, $status_meta, 60);
-                mailchimp_log('member.sync', "Updated Member {$email} ( merge fields only )", array(
-                    'merge_fields' => $merge_fields
+                mailchimp_log('member.sync', "Updated Member {$email}", array(
+                    'status' => $member_data['status'],
+                    'language' => $language,
+                    'merge_fields' => $merge_fields,
+                    'gdpr_fields' => $gdpr_fields,
                 ));
                 static::$handling_for = null;
                 return true;

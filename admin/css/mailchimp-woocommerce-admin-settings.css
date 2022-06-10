@@ -512,6 +512,14 @@ a.button.create-account {
 	color: #628735;
 }
 
+.mc-tower-save {
+	position: absolute;
+	display: none;
+	font-size: 0.8em;
+	font-weight: 100 !important;
+	color: #628735;
+}
+
 .sync-content-wrapper .sync-stats-wrapper {
 	position:relative;
 	background-color: white;

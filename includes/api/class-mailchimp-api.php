@@ -200,15 +200,12 @@ class MailChimp_WooCommerce_MailChimpApi
     {
         if (is_string($subscribed)) {
             $status = $subscribed;
+        } else if ($subscribed === true) {
+            $status = 'subscribed';
         } else {
-            if ($subscribed === true) {
-                $status = 'subscribed';
-            } elseif ($subscribed === false) {
-                $status = 'pending';
-            } else {
-                $status = 'transactional';
-            }
+            $status = 'transactional';
         }
+
         $data = array(
             'email_type' => 'html',
             'email_address' => $email,
@@ -234,6 +231,8 @@ class MailChimp_WooCommerce_MailChimpApi
         if (empty($data['marketing_permissions'])) {
             unset($data['marketing_permissions']);
         }
+
+        $this->validateNaughtyListEmail($email);
 
         mailchimp_debug('api.subscribe', "Subscribing {$email}", $data);
 
@@ -270,7 +269,7 @@ class MailChimp_WooCommerce_MailChimpApi
         if ($subscribed === true) {
             $status = 'subscribed';
         } elseif ($subscribed === false) {
-            $status = 'unsubscribed';
+            $status = 'transactional';
         } elseif ($subscribed === null) {
             $status = 'cleaned';
         } else {
@@ -302,21 +301,27 @@ class MailChimp_WooCommerce_MailChimpApi
             unset($data['marketing_permissions']);
         }
 
+        $this->validateNaughtyListEmail($email);
+
         mailchimp_debug('api.update_member', "Updating {$email}", $data);
 
         try {
             return $this->patch("lists/$list_id/members/$hash?skip_merge_validation=true", $data);
         } catch (\Exception $e) {
+
             // If mailchimp says is already a member lets send the update by PUT
             if (mailchimp_string_contains($e->getMessage(), 'is already a list member')) {
                 return $this->applyPutRequestOnSubscriber($list_id, $email, $data);
             } elseif ($data['status'] !== 'subscribed' || !mailchimp_string_contains($e->getMessage(), 'compliance state')) {
                 throw $e;
-            }
+            } 
+            
             $data['status'] = 'pending';
             $result = $this->patch("lists/$list_id/members/$hash?skip_merge_validation=true", $data);
             mailchimp_log('api', "{$email} was in compliance state, sending the double opt in message");
-            return $result;
+            return $result;    
+            
+            
         }
     }
 
@@ -429,7 +434,7 @@ class MailChimp_WooCommerce_MailChimpApi
             $status = 'subscribed';
             $status_if_new = 'subscribed';
         } elseif ($subscribed === false) {
-            $status = 'unsubscribed';
+            $status = 'transactional';
             $status_if_new = 'pending';
         } elseif ($subscribed === null) {
             $status = 'cleaned';
@@ -459,7 +464,9 @@ class MailChimp_WooCommerce_MailChimpApi
         if (empty($data['language'])) {
             unset($data['language']);
         }
-        
+
+        $this->validateNaughtyListEmail($email);
+
         mailchimp_debug('api.update_or_create', "Update Or Create {$email}", $data);
 
         return $this->put("lists/$list_id/members/$hash", $data);
@@ -669,6 +676,36 @@ class MailChimp_WooCommerce_MailChimpApi
     public function getOrderCount($store_id)
     {
         $data = $this->get("ecommerce/stores/{$store_id}/orders?count=1");
+        if (!is_array($data)) {
+            return 0;
+        }
+        return $data['total_items'];
+    }
+
+    /**
+     * @param $store_id
+     * @return int|mixed
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_ServerError
+     */
+    public function getProductCount($store_id)
+    {
+        $data = $this->get("ecommerce/stores/{$store_id}/products?count=1");
+        if (!is_array($data)) {
+            return 0;
+        }
+        return $data['total_items'];
+    }
+
+    /**
+     * @param $store_id
+     * @return int|mixed
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_ServerError
+     */
+    public function getCustomerCount($store_id)
+    {
+        $data = $this->get("ecommerce/stores/{$store_id}/customers?count=1");
         if (!is_array($data)) {
             return 0;
         }
@@ -952,6 +989,8 @@ class MailChimp_WooCommerce_MailChimpApi
                 return false;
             }
 
+            $this->validateNaughtyList($cart->getCustomer());
+
             mailchimp_debug('api.addCart', "Adding Cart :: {$email}", $data = $cart->toArray());
 
             $data = $this->post("ecommerce/stores/$store_id/carts", $data);
@@ -983,6 +1022,8 @@ class MailChimp_WooCommerce_MailChimpApi
             if (mailchimp_email_is_privacy_protected($email) || mailchimp_email_is_amazon($email)) {
                 return false;
             }
+
+            $this->validateNaughtyList($cart->getCustomer());
 
             mailchimp_debug('api.updateCart', "Updating Cart :: {$email}", $data = $cart->toArrayForUpdate());
 
@@ -1533,6 +1574,34 @@ class MailChimp_WooCommerce_MailChimpApi
 
     /**
      * @param $store_id
+     * @param $rule_id
+     * @return object
+     * @throws \Exception
+     */
+    public function getPromoRuleWithCodes($store_id, $rule_id)
+    {
+        $rule = new MailChimp_WooCommerce_PromoCode();
+        $rule = $rule->fromArray($this->get("ecommerce/stores/{$store_id}/promo-rules/{$rule_id}"));
+        try {
+            $promo_codes = $this->getPromoCodesForRule($store_id, $rule->getId(), 1, 100);
+            $codes = array();
+            foreach ($promo_codes as $item) {
+                $codes[] = $item->toArray();
+            }
+            return (object) [
+                'rule' => $rule->toArray(),
+                'codes' => $codes,
+            ];
+        } catch (\Exception $e) {
+            return (object) [
+                'rule' => $rule,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * @param $store_id
      * @param MailChimp_WooCommerce_PromoRule $rule
      * @param MailChimp_WooCommerce_PromoCode $code
      * @param bool $throw
@@ -1598,8 +1667,10 @@ class MailChimp_WooCommerce_MailChimpApi
     protected function validateStoreSubmission($target)
     {
         if ($target instanceof MailChimp_WooCommerce_Order) {
+            $this->validateNaughtyList($target->getCustomer());
             return $this->validateStoreOrder($target);
         } else if ($target instanceof MailChimp_WooCommerce_Customer) {
+            $this->validateNaughtyList($target);
             return $this->validateStoreCustomer($target);
         }
         return true;
@@ -1679,9 +1750,12 @@ class MailChimp_WooCommerce_MailChimpApi
      * @return array|bool
      * @throws \Throwable
      */
-    public function getWebHooks($list_id)
+    public function getWebHooks($list_id = false)
     {
-        return $this->get("lists/{$list_id}/webhooks");
+        if( empty($list_id) ){
+            $list_id = mailchimp_get_list_id();
+        }
+        return $this->get("lists/{$list_id}/webhooks", array('count' => 1000));
     }
 
     /**
@@ -1723,13 +1797,176 @@ class MailChimp_WooCommerce_MailChimpApi
         $deleted = 0;
         $hooks = $this->getWebHooks($list_id);
         foreach ($hooks['webhooks'] as $hook) {
-            $href = $hook['href'] ?? $hook['url'] ?? null;
-            if ($href && $href === $url) {
+            $href = isset($hook['url']) ? $hook['url'] : (isset($hook['href']) ? $hook['href'] : null);
+            if ($href && $href === $url || ($href && !empty($url) && mailchimp_string_contains($href, $url))) {
+                mailchimp_log('admin', "deleting webhook id {$hook['id']} - {$href}");
                 $this->delete("lists/{$list_id}/webhooks/{$hook['id']}");
                 $deleted++;
             }
         }
         return $deleted;
+    }
+
+    /**
+     * @param $list_id
+     * @param $url
+     * @return bool
+     * @throws Throwable
+     */
+    public function hasWebhook($list_id, $url)
+    {
+        $hooks = $this->getWebHooks($list_id);
+        foreach ($hooks['webhooks'] as $hook) {
+            $href = isset($hook['url']) ? $hook['url'] : (isset($hook['href']) ? $hook['href'] : null);
+            if ($href && $href === $url) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param MailChimp_WooCommerce_Customer $customer
+     * @return false
+     * @throws MailChimp_WooCommerce_Error
+     */
+    public function validateNaughtyList(MailChimp_WooCommerce_Customer $customer)
+    {
+        $this->validateNaughtyListEmail($customer->getEmailAddress());
+        $this->validateNaughtyListNames($customer->getFirstName(), $customer->getLastName());
+        return false;
+    }
+
+    /**
+     * @param $email
+     * @return false
+     * @throws MailChimp_WooCommerce_Error
+     */
+    public function validateNaughtyListEmail($email)
+    {
+        if (!empty($email) && mailchimp_string_contains($email, $this->getNaughtyList())) {
+            $this->reportSpamToTower($email);
+            throw new MailChimp_WooCommerce_Error("Email [{$email}] has been blocked due to spam reports.");
+        }
+        return false;
+    }
+
+    /**
+     * @return array|mixed
+     */
+    public function getNaughtyList()
+    {
+        try {
+            $domains = mailchimp_get_transient('naughty_list_domains');
+            if (is_array($domains) && isset($domains['value'])) {
+                return $domains['value'];
+            }
+            $domains = json_decode(file_get_contents('https://tower.vextras.com/naughty-domains'), true);
+            mailchimp_set_transient('naughty_list_domains', $domains, 1440);
+            return $domains;
+        } catch (\Throwable $e) {
+            $domains = [];
+            mailchimp_set_transient('naughty_list_domains', $domains, 300);
+            return $domains;
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    private function allowedToSubmitSpam()
+    {
+        // check to see if we've already set the transient.
+        $status = mailchimp_get_transient('tower');
+
+        // if we've got it - just return it now.
+        if (!empty($status)) {
+            return $status === 'green';
+        }
+
+        // call the API to see if we need to block traffic or not
+        // this only impacts reporting spam metrics, does not impact local site blocking
+        $response = wp_remote_get('https://tower.vextras.com/api/traffic');
+        $body = json_decode($response['body']);
+        $status = $body ? $body->status : 'red';
+
+        // set this for 5 minutes.
+        mailchimp_set_transient('tower', $status, 120);
+
+        return $status === 'green';
+    }
+
+    /**
+     * @param $email
+     * @return mixed|null
+     */
+    private function reportSpamToTower($email)
+    {
+        try {
+            if (!$this->allowedToSubmitSpam()) {
+                return null;
+            }
+
+            $payload = array(
+                'headers' => array(
+                    'Content-type' => 'application/json',
+                    'Accept' => 'application/json',
+                    'X-Store-Platform' => 'woocommerce',
+                    'X-List-Id' => mailchimp_get_list_id(),
+                    'X-Store-Key' => base64_encode(mailchimp_get_store_id().':'.mailchimp_get_api_key()),
+                ),
+                'body' => json_encode(array(
+                    'store_id' => mailchimp_get_store_id(),
+                    'list_id' => mailchimp_get_list_id(),
+                    'email' => $email
+                )),
+                'timeout'     => 30,
+            );
+            $response = wp_remote_post('https://tower.vextras.com/admin-api/woocommerce/report-spam', $payload);
+            return json_decode($response['body']);
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    /**
+     * @param $first_name
+     * @param $last_name
+     * @return false
+     * @throws MailChimp_WooCommerce_Error
+     */
+    public function validateNaughtyListNames($first_name, $last_name)
+    {
+        // add a list of naughty list customer names. Seems a little destructive though.
+        $naughty_list_names = [
+            'mark mustermann',
+        ];
+        $name = "{$first_name} {$last_name}";
+        if (mailchimp_string_contains(strtolower($name), $naughty_list_names)) {
+            throw new MailChimp_WooCommerce_Error("Name [{$name}] has been blocked due to spam reports.");
+        }
+        return false;
+    }
+
+    /**
+     * @param $list_id
+     * @return array
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_ServerError
+     */
+    public function getAutomations($list_id)
+    {
+        $automations = $this->get('automations', array('limit' => 1000));
+        if (!is_array($automations) || !array_key_exists('automations', $automations)) {
+            return array();
+        }
+        $response = array();
+        foreach ($automations['automations'] as $automation) {
+            if ($list_id === $automation['recipients']['list_id']) {
+                $response[] = $automation;
+            }
+        }
+        return $response;
     }
 
     /**
@@ -1878,7 +2115,6 @@ class MailChimp_WooCommerce_MailChimpApi
     protected function applyCurlOptions($method, $url, $params = array(), $headers = array())
     {
         $env = mailchimp_environment_variables();
-
         $curl_options = array(
             CURLOPT_USERPWD => "mailchimp:{$this->api_key}",
             CURLOPT_CUSTOMREQUEST => strtoupper($method),
@@ -1896,9 +2132,9 @@ class MailChimp_WooCommerce_MailChimpApi
             ), $headers)
         );
 
-        // if we have a dedicated IP address, and have set a configuration for it, we'll use it here.
-        if (defined('MAILCHIMP_USE_OUTBOUND_IP')) {
-            $curl_options[CURLOPT_INTERFACE] = MAILCHIMP_USE_OUTBOUND_IP;
+        // automatically set the proper outbound IP address
+        if ( ( $outbound_ip = mailchimp_get_outbound_ip() ) && !in_array( $outbound_ip, mailchimp_common_loopback_ips() ) ) {
+            $curl_options[CURLOPT_INTERFACE] = $outbound_ip;
         }
 
         // if we need to define a specific http version being used for curl requests, we can override this here.

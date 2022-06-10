@@ -65,9 +65,15 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_User_Submit' => 'includes/processes/class-mailchimp-woocommerce-user-submit.php',
         'MailChimp_WooCommerce_Process_Full_Sync_Manager' => 'includes/processes/class-mailchimp-woocommerce-full-sync-manager.php',
         'MailChimp_WooCommerce_Subscriber_Sync' => 'includes/processes/class-mailchimp-woocommerce-subscriber-sync.php',
+        'MailChimp_WooCommerce_WebHooks_Sync' => 'includes/processes/class-mailchimp-woocommerce-webhooks-sync.php',
 
         'MailChimp_WooCommerce_Public' => 'public/class-mailchimp-woocommerce-public.php',
         'MailChimp_WooCommerce_Admin' => 'admin/class-mailchimp-woocommerce-admin.php',
+
+        'MailChimp_WooCommerce_Fix_Duplicate_Store' => 'includes/api/class-mailchimp-woocommerce-fix-duplicate-store.php',
+        'MailChimp_WooCommerce_Logs' => 'includes/api/class-mailchimp-woocommerce-logs.php',
+        'MailChimp_WooCommerce_Tower' => 'includes/api/class-mailchimp-woocommerce-tower.php',
+        'MailChimp_WooCommerce_Log_Viewer' => 'includes/api/class-mailchimp-woocommerce-log-viewer.php',
     );
 
     // if the file exists, require it
@@ -88,7 +94,7 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production', // staging or production
-        'version' => '2.6.2',
+        'version' => '2.7',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => function_exists('WC') ? WC()->version : null,
@@ -305,7 +311,51 @@ function mailchimp_get_api_key() {
 function mailchimp_get_list_id() {
     return mailchimp_get_option('mailchimp_list', false);
 }
+/**
+ * Build mailchimp webhook url
+ * @param  string $key Encripted randome script
+ * @return string $url Webhook url
+ */
+function mailchimp_build_webhook_url( $key ) {
+    $key = base64_encode($key);
+    $url = MailChimp_WooCommerce_Rest_Api::url('member-sync') . '?auth=' . $key;
+    return $url;
+}
+/**
+ * Generate random string
+ * @return string
+ */
+function mailchimp_create_webhook_token(){
+    return md5( trim( strtolower(get_bloginfo('url') . '|' . time() . '|' . mailchimp_get_list_id() . '|' . wp_salt() )  ) );
+}
+/**
+ * Updates webhookurl option
+ * @param  string $url Webhook url 
+ * @return void
+ */
+function mailchimp_set_webhook_url( $url ) {
+    update_option('mc-mailchimp_webhook_url', $url);
+}
+/**
+ * Returns webhookurl option
+ * @return string
+ */
+function mailchimp_get_webhook_url() {
+    return get_option('mc-mailchimp_webhook_url', false);
+}
+/**
+ * Returns webhook url
+ * @return array Common localhost ips
+ */
+function mailchimp_common_loopback_ips(){
+    $common_loopback_ips = array(
+        '127.0.0.1',
+        '0:0:0:0:0:0:0:1',
+        '::1'
+    );
 
+    return $common_loopback_ips;
+}
 /**
  * @return string
  */
@@ -1167,7 +1217,7 @@ function mailchimp_update_member_with_double_opt_in(MailChimp_WooCommerce_Order 
                 } catch (\Exception $e) {
                     // if the error code is 404 - need to subscribe them because it means they were not on the list.
                     if ($e->getCode() == 404) {
-                        $api->subscribe($list_id, $email, false, $merge_fields);
+                        $api->subscribe($list_id, $email, 'pending', $merge_fields);
                         mailchimp_tell_system_about_user_submit($email, mailchimp_get_subscriber_status_options(false), 60);
                         mailchimp_log('double_opt_in', "Subscribed {$email} Using Double Opt In", $merge_fields);
                     } else {
@@ -1193,8 +1243,10 @@ function mailchimp_update_communication_status() {
     $original_opt = $plugin_admin->getData('comm.opt',0);
     $options = $plugin_admin->getOptions();
     if (is_array($options) && array_key_exists('admin_email', $options)) {
-        $plugin_admin->mailchimp_set_communications_status_on_server($original_opt, $options['admin_email']);
+        $plugin_admin->mailchimp_set_communications_status_on_server($original_opt, $options['admin_email']);    
     }
+    // communication is ready lets define the webhooks
+    $plugin_admin->defineWebhooks();
 }
 
 // call server to update comm status
@@ -1357,7 +1409,20 @@ function mailchimp_allowed_to_use_cookie($cookie) {
 // return the $cookie_name if you will allow it -
 // otherwise it is going to turn this feature off.
 
-
+/**
+ * @return mixed|null
+ */
+function mailchimp_get_outbound_ip() {
+    // if we have a dedicated IP address, and have set a configuration for it, we'll use it here.
+    if (defined('MAILCHIMP_USE_OUTBOUND_IP')) {
+        return MAILCHIMP_USE_OUTBOUND_IP;
+    } elseif (($server_address = mailchimp_get_data('SERVER_ADDR')) && !empty($server_address)) {
+        return $server_address;
+    } elseif (isset($_SERVER) && isset($_SERVER['SERVER_ADDR']) && !empty($_SERVER['SERVER_ADDR'])) {
+        return $_SERVER['SERVER_ADDR'];
+    }
+    return null;
+}
 
 // Add WP CLI commands
 if (defined( 'WP_CLI' ) && WP_CLI) {

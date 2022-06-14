@@ -1015,6 +1015,9 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
         global $wpdb;
 
+        // Some people don't want to see these logs when they're in debug mode
+        $wpdb->suppress_errors();
+
         $table = "{$wpdb->prefix}mailchimp_carts";
 
         $statement = "SELECT * FROM $table WHERE id = %s";

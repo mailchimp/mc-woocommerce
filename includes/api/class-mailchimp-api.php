@@ -1746,6 +1746,35 @@ class MailChimp_WooCommerce_MailChimpApi
     }
 
     /**
+     * @param string $list_id
+     * @param string $email
+     * @param int $minutes
+     * @return false|mixed
+     */
+    public function getCachedSubscriberStatusForAdminProfileView($list_id, $email, $minutes = 5)
+    {
+        if (!is_email($email) || !mailchimp_is_configured()) return null;
+        $email_hash = md5(strtolower(trim($email)));
+        $transient = "mailchimp-woocommerce-subscribed.{$list_id}.{$email_hash}";
+        $status = get_site_transient($transient);
+
+        if (!empty($status)) {
+            return $status;
+        }
+
+        try {
+            $member = mailchimp_get_api()->member($list_id, $email);
+            $status = $member['status'];
+        } catch (\Exception $e) {
+            $status = 'not_found';
+        }
+
+        set_site_transient($transient, $status, 60 * $minutes);
+
+        return $status;
+    }
+
+    /**
      * @param $list_id
      * @return array|bool
      * @throws \Throwable

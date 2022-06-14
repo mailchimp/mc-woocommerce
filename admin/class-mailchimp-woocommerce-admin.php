@@ -265,8 +265,32 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	    $gdpr_fields = mailchimp_render_gdpr_fields() ?
             MailChimp_WooCommerce_Public::gdpr_fields($user) :
             array();
+	    $this->syncUserStatus($user);
 		include_once( 'user-profile/mailchimp-user-profile.php' );
 	}
+
+    /**
+     * @param \WP_User $user
+     * @return bool
+     */
+	protected function syncUserStatus($user)
+    {
+        try {
+            if (empty($user) || !is_email($user->user_email) || !mailchimp_is_configured()) {
+                return false;
+            }
+            if (($status = mailchimp_get_api()->getCachedSubscriberStatusForAdminProfileView(mailchimp_get_list_id(), $user->user_email))) {
+                $subscribed = is_string($status) && in_array($status, array('subscribed', 'pending')) ? '1' : '0';
+                $saved = (bool) get_user_meta($user->ID, 'mailchimp_woocommerce_is_subscribed', true);
+                if ((bool) $subscribed !== $saved) {
+                    update_user_meta($user->ID, 'mailchimp_woocommerce_is_subscribed', $subscribed);
+                }
+            }
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
 	/**
 	 *
 	 */

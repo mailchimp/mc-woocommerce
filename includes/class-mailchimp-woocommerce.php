@@ -377,6 +377,9 @@ class MailChimp_WooCommerce
 			$this->loader->add_action('save_post_shop_order', $service, 'handleOrderSaved', 10, 3);
 			$this->loader->add_action('save_post_product', $service, 'handleProductCreated', 10, 3);
 
+			// this needs to listen for the title and the description updates.
+            $this->loader->add_action('post_updated', $service, 'handleProductUpdated', 10, 3);
+
 			// here's the hook we need to check for "relevant fields" where we can see which property was updated.
 			$this->loader->add_action('woocommerce_product_object_updated_props', $service, 'handleProcessProductMeta', 10, 2);
 

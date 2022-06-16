@@ -323,6 +323,32 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     }
 
     /**
+     * When a product post has been updated, handle or queue syncing when key fields have changed.
+     *
+     * @param int     $post_ID     The ID of the post/product being updated
+     * @param WP_Post $post_after  The post object as it existed before the update
+     * @param WP_Post $post_before The post object as it exists after the update
+     * @return void
+     */
+    public function handleProductUpdated( int $post_ID, WP_Post $post_after, WP_Post $post_before )
+    {
+        // Only work with products that have certain statuses
+        if ('product' !== $post_after->post_type
+            || in_array($post_after->post_status, array('trash', 'auto-draft', 'draft', 'pending'))
+            || ! mailchimp_is_configured()
+        ) {
+            return;
+        }
+
+        // Check if product title or description has been altered
+        if ($post_after->post_title !== $post_before->post_title
+            || $post_after->post_content !== $post_before->post_content
+        ) {
+            mailchimp_handle_or_queue( new MailChimp_WooCommerce_Single_Product($post_ID), 5);
+        }
+    }
+
+    /**
      * @param \WC_Product $product
      * @param $data
      */

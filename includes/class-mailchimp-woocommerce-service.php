@@ -334,6 +334,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
         $valid_keys = array(
             '_thumbnail_id',
+            'description',
             'image_id',
             'price',
             'sku',
@@ -345,6 +346,9 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             'stock_status',
             'manage_stock',
             'gallery_image_ids',
+            'name',
+            'status',
+            'slug',
         );
 
         // if there's not a valid prop in the update, just skip this.

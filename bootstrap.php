@@ -193,7 +193,7 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
  * @param bool $force_now
  */
 function mailchimp_handle_or_queue(Mailchimp_Woocommerce_Job $job, $delay = 0)
-{   
+{
     if ($job instanceof \MailChimp_WooCommerce_Single_Order && isset($job->id)) {
         // if this is a order process already queued - just skip this
         if (get_site_transient("mailchimp_order_being_processed_{$job->id}") == true) {

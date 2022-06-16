@@ -376,11 +376,16 @@ class MailChimp_WooCommerce
 			// save post hooks
 			$this->loader->add_action('save_post_shop_order', $service, 'handleOrderSaved', 10, 3);
 			$this->loader->add_action('save_post_product', $service, 'handleProductCreated', 10, 3);
-			$this->loader->add_action('post_updated', $service, 'handleProductUpdated', 10, 3);
-			$this->loader->add_action('updated_post_meta', $service, 'handleProductStockUpdated', 10, 4);
-            $this->loader->add_action('wp_trash_post', $service, 'handlePostTrashed', 10, 1);
+
+			// here's the hook we need to check for "relevant fields" where we can see which property was updated.
+			$this->loader->add_action('woocommerce_product_object_updated_props', $service, 'handleProcessProductMeta', 10, 2);
+
+			// we need to listen for all 3 events because changes aren't the same as "new" or "deleted".
+			$this->loader->add_action('updated_post_meta', $service, 'handleProductMetaUpdated', 10, 4);
+            $this->loader->add_action('added_post_meta', $service, 'handleProductMetaUpdated', 10, 4);
+            $this->loader->add_action('deleted_post_meta', $service, 'handleProductMetaUpdated', 10, 4);
+			$this->loader->add_action('wp_trash_post', $service, 'handlePostTrashed', 10, 1);
             $this->loader->add_action('untrashed_post', $service, 'handlePostRestored', 10, 1);
-            $this->loader->add_action('post_updated', $service, 'handlePostUpdated', 10, 3);
 			//coupons
             $this->loader->add_action('woocommerce_new_coupon', $service, 'handleNewCoupon', 10, 1);
             $this->loader->add_action('woocommerce_coupon_options_save', $service, 'handleCouponSaved', 10, 2);

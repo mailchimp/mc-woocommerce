@@ -321,35 +321,47 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             mailchimp_error('delete promo code', $e->getMessage());
         }
     }
-  
-	/**
-	 * When a product post has been updated, handle or queue syncing when key fields have changed.
-	 *
-	 * @param int     $post_ID     The ID of the post/product being updated
-	 * @param WP_Post $post_after  The post object as it existed before the update
-	 * @param WP_Post $post_before The post object as it exists after the update
-	 * @return void
-	 */
-	public function handleProductUpdated($post_ID, WP_Post $post_after, WP_Post $post_before)
+
+    /**
+     * @param \WC_Product $product
+     * @param $data
+     */
+    public function handleProcessProductMeta($product, $data)
     {
-		// Only work with products that have certain statuses
-		if ( 'product' !== $post_after->post_type ||
-            in_array($post_after->post_status, array('trash', 'auto-draft', 'draft', 'pending')) ||
-            !mailchimp_is_configured()
-		) {
-			return;
-		}
+        if (!is_array($data) || empty($data) || !$product) {
+            return;
+        }
 
-		// Check if product title or description has been altered
-		if ($post_after->post_title !== $post_before->post_title ||
-            $post_after->post_content !== $post_before->post_content
-		) {
-			mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product( $post_ID ), 5);
-		}
-	}
+        $valid_keys = array(
+            '_thumbnail_id',
+            'image_id',
+            'price',
+            'sku',
+            'regular_price',
+            'sale_price',
+            '_stock_status',
+            'stock_quantity',
+            '_stock',
+            'stock_status',
+            'manage_stock',
+            'gallery_image_ids',
+        );
+
+        // if there's not a valid prop in the update, just skip this.
+        if (!array_intersect($valid_keys, $data)) {
+            return;
+        }
+
+        mailchimp_debug('action', "handleProcessProductMeta {$product->get_id()} update being queued", array(
+            'data' => $data,
+        ));
+
+        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($product->post->ID), 5);
+    }
 
 	/**
-	 * When the _stock meta is updated for a product, handle or queue syncing updates.
+	 * When the _stock, _thumbnail_id,
+     * meta is updated for a product, handle or queue syncing updates.
 	 *
 	 * @param int    $meta_id     The ID of the post meta entry that was updated
 	 * @param int    $object_id   The ID of the object the post meta entry is attached to
@@ -357,10 +369,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 	 * @param mixed  $_meta_value The value of the meta entry that was updated
 	 * @return void
 	 */
-	public function handleProductStockUpdated($meta_id, $object_id, $meta_key, $_meta_value)
+	public function handleProductMetaUpdated($meta_id, $object_id, $meta_key, $_meta_value)
     {
 		// If we're not working with the meta key used to store stock quantity, bail
-		if ('_stock' !== $meta_key) {
+		if (!in_array($meta_key, array('_thumbnail_id'), true)) {
 			return;
 		}
 
@@ -369,6 +381,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 		if ($product instanceof WC_Product &&
             !in_array($product->get_status(), array('trash', 'auto-draft', 'draft', 'pending'))
 		) {
+		    mailchimp_debug('queue', "handling meta update for meta [{$meta_key}] on product {$object_id}");
 			mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($object_id), 5);
 		}
 	}

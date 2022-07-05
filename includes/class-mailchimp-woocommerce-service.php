@@ -154,10 +154,17 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $gdpr_fields = isset($_POST['mailchimp_woocommerce_gdpr']) ? 
             $_POST['mailchimp_woocommerce_gdpr'] : false;
 
-        if (isset($tracking)) {
-            // update the post meta with campaing tracking details for future sync
+        // update the post meta with campaign tracking and landing site details
+        if (!empty($campaign_id)) {
             update_post_meta($order_id, 'mailchimp_woocommerce_campaign_id', $campaign_id);
+        }
+        if (!empty($landing_site)) {
             update_post_meta($order_id, 'mailchimp_woocommerce_landing_site', $landing_site);
+        }
+
+        // if we have gdpr fields in the post - let's save them to the order
+        if (!empty($gdpr_fields)) {
+            update_post_meta($order_id, "mailchimp_woocommerce_gdpr_fields", $gdpr_fields);
         }
 
         $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $campaign_id, $landing_site, $language, $gdpr_fields);

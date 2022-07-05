@@ -194,9 +194,10 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
  */
 function mailchimp_handle_or_queue(Mailchimp_Woocommerce_Job $job, $delay = 0)
 {
-    if ($job instanceof \MailChimp_WooCommerce_Single_Order && isset($job->id)) {
+    if ($job instanceof \MailChimp_WooCommerce_Single_Order && isset($job->id) && empty($job->gdpr_fields)) {
         // if this is a order process already queued - just skip this
         if (get_site_transient("mailchimp_order_being_processed_{$job->id}") == true) {
+            mailchimp_debug('queue', "Not queuing up order {$job->id} because it's already queued");
             return;
         }
         // tell the system the order is already queued for processing in this saving process - and we don't need to process it again.
@@ -1310,6 +1311,7 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
         'user_language' => $language,
         'caller' => $caller,
         'status_if_new' => $status_if_new,
+        'gdpr_fields' => $gdpr_fields,
     ));
     if (!$user_email) return;
     
@@ -1324,14 +1326,11 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
             // update member with new data
             // if the member's subscriber status was transactional - and if we're passing in either one of these options below,
             // we can attach the new status to the member.
-            
-
             if ($member['status'] === 'transactional' && in_array($status_if_new, array('subscribed', 'pending'))) {
                 $member['status'] = $status_if_new;
             }
-
             if (($member['status'] === 'transactional' && in_array($status_if_new, array('subscribed', 'pending'))) || $member['status'] === 'subscribed') {
-                if (!empty($gdpr_fields)) {
+                if (!empty($gdpr_fields) && is_array($gdpr_fields)) {
                     $gdpr_fields_to_save = [];
                     foreach ($gdpr_fields as $id => $value) {
                         $gdpr_field['marketing_permission_id'] = $id;
@@ -1342,27 +1341,32 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
             }
             $merge_fields = $order ? apply_filters('mailchimp_get_ecommerce_merge_tags', array(), $order) : array();
             if (!is_array($merge_fields)) $merge_fields = array();
-
             if ($update_status && in_array($member['status'], array('unsubscribed', 'cleaned'))) {
                 $member['status'] = $status_if_new;
             }
-            
             $result = mailchimp_get_api()->update($list_id, $user_email, $member['status'], $merge_fields, null, $language, $gdpr_fields_to_save);
             // set transient to prevent too many calls to update language
             mailchimp_set_transient($caller . ".member.{$hash}", true, 3600);
-
             mailchimp_log($caller . '.member.updated', "Updated {$user_email} subscriber status to {$result['status']} and language to {$language}");
         } catch (\Exception $e) {
             if ($e->getCode() == 404) {
                 $merge_fields = $order ? apply_filters('mailchimp_get_ecommerce_merge_tags', array(), $order) : array();
                 if (!is_array($merge_fields)) $merge_fields = array();
+                if (!empty($gdpr_fields) && is_array($gdpr_fields)) {
+                    $gdpr_fields_to_save = [];
+                    foreach ($gdpr_fields as $id => $value) {
+                        $gdpr_field['marketing_permission_id'] = $id;
+                        $gdpr_field['enabled'] = (bool) $value;
+                        $gdpr_fields_to_save[] = $gdpr_field;
+                    }
+                }
                 // member doesn't exist yet, create as transactional ( or what was passed in the function args )
-                mailchimp_get_api()->subscribe($list_id, $user_email, $status_if_new, $merge_fields, array(), $language);
+                mailchimp_get_api()->subscribe($list_id, $user_email, $status_if_new, $merge_fields, array(), $language, $gdpr_fields_to_save);
                 // set transient to prevent too many calls to update language
                 mailchimp_set_transient($caller . ".member.{$hash}", true, 3600);
                 mailchimp_log($caller . '.member.created', "Added {$user_email} as transactional, setting language to [{$language}]");
             } else {
-                mailchimp_error($caller . '.member.sync.error', $e->getMessage(), $user_email);
+                mailchimp_error($caller . '.member.sync.error', $e->getMessage());
             }
         }
     }
@@ -1428,6 +1432,7 @@ function mailchimp_get_outbound_ip() {
  * @return bool
  */
 function mailchimp_render_gdpr_fields() {
+    return true;
     return defined('MAILCHIMP_RENDER_GDPR_FIELDS') &&
         MAILCHIMP_RENDER_GDPR_FIELDS;
 }

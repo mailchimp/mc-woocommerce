@@ -352,6 +352,12 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 $status_if_new = $order->getCustomer()->getOptInStatus() ? 'subscribed' : 'transactional';
             }
 
+            // if this is not currently in mailchimp - and we have the saved GDPR fields from
+            // we can use the post meta for gdpr fields that were saved during checkout.
+            if (!$this->is_full_sync && $new_order && empty($this->gdpr_fields)) {
+                $this->gdpr_fields = get_post_meta($order->getId(), 'mailchimp_woocommerce_gdpr_fields', true);
+            }
+
             // Maybe sync subscriber to set correct member.language
             mailchimp_member_data_update($email, $this->user_language, 'order', $status_if_new, $order, $this->gdpr_fields, !$this->is_full_sync);
 

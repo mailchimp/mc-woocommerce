@@ -244,14 +244,12 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
         $gdpr_fields = isset($request['extensions']['mailchimp-newsletter']['gdprFields']) ?
             (array) $request['extensions']['mailchimp-newsletter']['gdprFields'] : null;
 
-        mailchimp_log('blocks', 'order processed', array(
-            'email' => $order->get_billing_email(),
-            'order' => $order->get_id(),
-            'optin' => $optin,
-            'gdpr_fields' => $gdpr_fields,
-        ));
         // update the order meta for the subscription status to support legacy functions
         update_post_meta($order->get_id(), $meta_key, $optin);
+        // let's set the GDPR fields here just in case we need to pull them again.
+        if (!empty($gdpr_fields)) {
+            update_post_meta($order->get_id(), "mailchimp_woocommerce_gdpr_fields", $gdpr_fields);
+        }
 
         // if the user id exists
         if (($user_id = $order->get_user_id())) {
@@ -273,10 +271,25 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
             }
         }
 
-        // maybe add the filter to only submit orders from subscribers?
-        $service = MailChimp_Service::instance();
-        $tracking = $service->onNewOrder($order->get_id());
-        $service->onOrderSave($order->get_id(), $tracking, true);
+        $tracking = MailChimp_Service::instance()->onNewOrder($order->get_id());
+        // queue up the single order to be processed.
+        $campaign_id = isset($tracking) && isset($tracking['campaign_id']) ? $tracking['campaign_id'] : null;
+        $landing_site = isset($tracking) && isset($tracking['landing_site']) ? $tracking['landing_site'] : null;
+        $language = substr( get_locale(), 0, 2 );
+
+        // update the post meta with campaign tracking details for future sync
+        if (!empty($campaign_id)) {
+            update_post_meta($order->get_id(), 'mailchimp_woocommerce_campaign_id', $campaign_id);
+        }
+        if (!empty($landing_site)) {
+            update_post_meta($order->get_id(), 'mailchimp_woocommerce_landing_site', $landing_site);
+        }
+
+        $handler = new MailChimp_WooCommerce_Single_Order($order->get_id(), null, $campaign_id, $landing_site, $language, $gdpr_fields);
+        $handler->is_update = false;
+        $handler->is_admin_save = is_admin();
+
+        mailchimp_handle_or_queue($handler, 15);
     }
 
     /**

@@ -218,6 +218,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                     'sync_completed_at' => get_option('mailchimp-woocommerce-sync.completed_at'),
                     'subscribed_to_hooks' => true,
                     'uses_custom_rules' => false,
+                    'wp_cron_enabled' => $this->hasWPCronEnabled(),
                     'ecomm_stats' => [
                         'products' => $product_count,
                         'customers' => $customer_count,
@@ -361,6 +362,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
         return array(
             array('key' => 'PhpVersion', 'value' => phpversion()),
             array('key' => 'Memory Limit', 'value' => ini_get('memory_limit')),
+            array('key' => 'WP CRON Enabled', 'value' => $this->hasWPCronEnabled()),
             array('key' => 'Curl Enabled', 'value' => function_exists('curl_init')),
             array('key' => 'Curl Version', 'value' => $this->getCurlVersion()),
             array('key' => 'Wordpress Version', 'value' => $wp_version),
@@ -371,6 +373,15 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
             array('key' => 'Active Plugins', 'value' => $this->getActivePlugins()),
             array('key' => 'Actions', 'value' => $actions),
         );
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasWPCronEnabled()
+    {
+        return !defined( 'DISABLE_WP_CRON' ) ||
+            (defined( 'DISABLE_WP_CRON' ) && !DISABLE_WP_CRON);
     }
 
     public function getCurlVersion()

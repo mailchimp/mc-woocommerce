@@ -2219,7 +2219,8 @@ class MailChimp_WooCommerce_MailChimpApi
             return $data;
         }
 
-        $error_status = isset($data['status']) ? (int) $data['status'] : (int) $http_code;
+        $error_status = isset($data['status']) && is_numeric($data['status']) ?
+            (int) $data['status'] : (int) $http_code;
 
         if ($http_code >= 400 && $http_code <= 500) {
             if ($http_code == 403) {
@@ -2260,7 +2261,7 @@ class MailChimp_WooCommerce_MailChimpApi
         }
 
         // make sure the response is correct from the data in the response array
-        if (isset($data['status']) && $data['status'] >= 400) {
+        if (isset($data['status']) && is_numeric($data['status']) && $data['status'] >= 400) {
             if (isset($data['http_code']) && $data['http_code'] == 403) {
                 throw new MailChimp_WooCommerce_RateLimitError();
             }

@@ -94,7 +94,9 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
     private function extractServiceIDs($data)
     {
         if (is_object($data)) {
-            $service_id = isset($data->web_id) ? $data->web_id : isset($data->id) ? $data->id : null;
+            $service_id = isset($data->web_id) ?
+                $data->web_id :
+                (isset($data->id) ? $data->id : null);
             $email = isset($data->email) ? $data->email : null;
             return array($service_id, $email);
         } else {

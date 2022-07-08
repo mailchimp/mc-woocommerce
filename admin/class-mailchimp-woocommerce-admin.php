@@ -773,7 +773,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
      * Mailchimp OAuth connection start
      */
     public function mailchimp_woocommerce_ajax_oauth_start()
-    {   
+    {
+        $this->adminOnlyMiddleware();
+
 		$secret = uniqid();
         $args = array(
             'domain' => site_url(),
@@ -806,7 +808,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
      * Mailchimp OAuth connection status
      */
     public function mailchimp_woocommerce_ajax_oauth_status()
-    {   
+    {
+        $this->adminOnlyMiddleware();
+
 		$url = $_POST['url'];
 		// set the default headers to NOTHING because the oauth server will block
 		// any non standard header that it was not expecting to receive and it was
@@ -832,7 +836,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
      * Mailchimp OAuth connection finish
      */
     public function mailchimp_woocommerce_ajax_oauth_finish()
-    {   
+    {
+        $this->adminOnlyMiddleware();
+
         $args = array(
             'domain' => site_url(),
             'secret' => get_site_transient('mailchimp-woocommerce-oauth-secret'),
@@ -864,6 +870,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 
 	public function mailchimp_woocommerce_ajax_create_account_check_username () {
+        $this->adminOnlyMiddleware();
+
 		$user = $_POST['username'];
 		$response = wp_remote_get( 'https://woocommerce.mailchimpapp.com/api/usernames/available/' . $_POST['username']);
         // need to return the error message if this is the problem.
@@ -892,6 +900,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	}
 	
 	public function mailchimp_woocommerce_ajax_support_form() {
+        $this->adminOnlyMiddleware();
+
 		$data = $_POST['data'];
 		
 		// try to figure out user IP address
@@ -964,6 +974,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
     }
 
 	public function mailchimp_woocommerce_ajax_create_account_signup() {
+        $this->adminOnlyMiddleware();
+
 		$data = $_POST['data'];
 		
 		// try to figure out user IP address
@@ -1867,6 +1879,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function mailchimp_woocommerce_communication_status()
     {
+        $this->adminOnlyMiddleware();
+
 		$original_opt = $this->getData('comm.opt',0);
 		$opt = $_POST['opt'];
 		$admin_email = $this->getOptions()['admin_email'];
@@ -1897,6 +1911,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
      */
     public function mailchimp_woocommerce_tower_status()
     {
+        $this->adminOnlyMiddleware();
+
         $original_opt = $this->getData('tower.opt',0);
         $opt = $_POST['opt'];
 
@@ -1924,6 +1940,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function mailchimp_set_communications_status_on_server($opt, $admin_email, $remove = false)
     {
+        $this->adminOnlyMiddleware();
+
 		$env = mailchimp_environment_variables();
 		$audience = !empty(mailchimp_get_list_id()) ? 1 : 0;
 		$synced = get_option('mailchimp-woocommerce-sync.completed_at') > 0 ? 1 : 0;
@@ -1960,6 +1978,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
      */
     public function mailchimp_woocommerce_ajax_delete_log_file()
     {
+        $this->adminOnlyMiddleware();
+
         if (!isset($_POST['log_file']) || empty($_POST['log_file'])) {
             wp_send_json_error(__('No log file provided', 'mailchimp-for-woocommerce'));
             return;
@@ -1975,6 +1995,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
      */
 	public function mailchimp_woocommerce_ajax_load_log_file()
     {
+        $this->adminOnlyMiddleware();
+
         if (!isset($_POST['log_file']) || empty($_POST['log_file'])) {
             wp_send_json_error(__('No log file provided', 'mailchimp-for-woocommerce'));
             return;
@@ -2005,8 +2027,24 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
     public function defineWebHooks()
     {
 	    // run this every time the store is saved to be sure we've got the hooks enabled.
-        if (mailchimp_is_configured()) {
-    		mailchimp_handle_or_queue(new MailChimp_WooCommerce_WebHooks_Sync());
+        try {
+            if (mailchimp_is_configured()) {
+                mailchimp_handle_or_queue(new MailChimp_WooCommerce_WebHooks_Sync());
+            }
+        } catch (\Exception $e) {
+            mailchimp_log('plugin', "defineWebhooks", array('message' => $e->getMessage()));
         }
+    }
+
+    /**
+     * @param string $message
+     * @return bool
+     */
+    protected function adminOnlyMiddleware($message = "You're not allowed to do this")
+    {
+        if (!current_user_can(mailchimp_get_allowed_capability())) {
+            wp_send_json_error(array('message' => $message));
+        }
+        return true;
     }
 }

@@ -36,14 +36,16 @@ class MailChimp_WooCommerce_WebHooks_Sync extends Mailchimp_Woocommerce_Job
             $api = mailchimp_get_api();
             $token = mailchimp_get_data('webhook.token');
 
-            // if we have a key, and we have a url, but the token is not in the url,
-            // we need to delete the webhook and re-attach it.
-            if (!empty($key) && !empty($url) && (!mailchimp_string_contains($url, $key) || !$api->hasWebhook($list, $url))) {
-                $match = MailChimp_WooCommerce_Rest_Api::url('member-sync');
-                mailchimp_log('webhooks', "found discrepancy on audience webhook - deleting invalid hooks");
-                $api->webHookDelete($list, $match);
-                $url = null;
-                $key = null;
+            $hooks = $api->getWebHooks($list);
+            foreach ($hooks['webhooks'] as $hook) {
+                $href = isset($hook['url']) ? $hook['url'] : (isset($hook['href']) ? $hook['href'] : null);
+                if (mailchimp_string_contains($href, 'mailchimp-for-woocommerce/v1/member-sync')) {
+                    $api->webHookDelete($list, $hook['id']);
+                    $url = null;
+                    $key = null;
+                    $token = null;
+                    mailchimp_log('webhooks', "Deleted old plugin webhook {$hook['id']}");
+                }
             }
 
             // for some reason the webhook url does not work with ?rest_route style, permalinks should be defined also 

@@ -332,7 +332,7 @@ class MailChimp_WooCommerce_Rest_Api
                     ];
                 } else {
                     $previous_url = mailchimp_get_webhook_url();
-                    if ($previous_url && $api->hasWebhook($list, $previous_url)) {
+                    if (mailchimp_get_data('webhook.token') && $previous_url && $api->hasWebhook($list, $previous_url)) {
                         $response = [
                             'title' => "Store Webhooks",
                             'description' => "Store already has webhooks enabled!",

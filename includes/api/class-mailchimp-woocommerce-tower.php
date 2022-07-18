@@ -180,7 +180,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                     'phone' => isset($options['store_phone']) && $options['store_phone'] ? $options['store_phone'] : '',
                 ),
                 'metrics' => array_values([
-                    'shopify_hooks' => (object) array('key' => 'shopify_hooks', 'value' => true),
+                    'shopify_hooks' => (object) array('key' => 'shopify_hooks', 'value' => $this->hasWebhookInstalled()),
                     'shop.products' => (object) array('key' => 'shop.products', 'value' => $product_count),
                     'shop.customers' => (object) array('key' => 'shop.customers', 'value' => $customer_count),
                     'shop.orders' => (object) array('key' => 'shop.orders', 'value' => $order_count),
@@ -260,6 +260,21 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
         ];
     }
 
+    /**
+     * @return bool
+     */
+    protected function hasWebhookInstalled()
+    {
+        if (!mailchimp_is_configured() || !mailchimp_get_data('webhook.token')) {
+            return false;
+        }
+        try {
+            return (bool) mailchimp_get_api()->hasWebhook(mailchimp_get_list_id(), mailchimp_get_webhook_url());
+        } catch (\Throwable $e) {
+            mailchimp_log('tower', 'could not get webhook URL', array('message' => $e->getMessage()));
+            return false;
+        }
+    }
     /**
      * @param $domain
      * @return string|string[]

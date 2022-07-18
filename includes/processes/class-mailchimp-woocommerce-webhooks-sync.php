@@ -34,6 +34,7 @@ class MailChimp_WooCommerce_WebHooks_Sync extends Mailchimp_Woocommerce_Job
             $key = mailchimp_get_data('webhook.token');
             $url = mailchimp_get_webhook_url();
             $api = mailchimp_get_api();
+            $token = mailchimp_get_data('webhook.token');
 
             // if we have a key, and we have a url, but the token is not in the url,
             // we need to delete the webhook and re-attach it.
@@ -46,7 +47,7 @@ class MailChimp_WooCommerce_WebHooks_Sync extends Mailchimp_Woocommerce_Job
             }
 
             // for some reason the webhook url does not work with ?rest_route style, permalinks should be defined also 
-            if (!$url && get_option('permalink_structure') !== '') {
+            if (!$token && get_option('permalink_structure') !== '') {
                 $key = mailchimp_create_webhook_token();
                 $url = mailchimp_build_webhook_url($key);
                 mailchimp_set_data('webhook.token', $key);
@@ -55,11 +56,15 @@ class MailChimp_WooCommerce_WebHooks_Sync extends Mailchimp_Woocommerce_Job
                 //if no errors let save the url
                 mailchimp_set_webhook_url($webhook['url']);
                 mailchimp_log('webhooks', "added webhook to audience");
+            } else {
+                mailchimp_log('webhooks', "could not add webhooks because of the permalink structure!", array(
+                    'permalink_structure' => get_option('permalink_structure'),
+                ));
             }
         } catch (\Throwable $e) {
+            mailchimp_error('webhook', $e->getMessage());
             mailchimp_set_data('webhook.token', false);
             mailchimp_set_webhook_url(false);
-            mailchimp_error('webhook', $e->getMessage());
         }
         return false;
     }

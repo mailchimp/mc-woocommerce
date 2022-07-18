@@ -318,7 +318,7 @@ function mailchimp_get_list_id() {
  * @return string $url Webhook url
  */
 function mailchimp_build_webhook_url( $key ) {
-    $key = base64_encode($key);
+    //$key = base64_encode($key);
     $url = MailChimp_WooCommerce_Rest_Api::url('member-sync') . '?auth=' . $key;
     return $url;
 }
@@ -1418,12 +1418,8 @@ function mailchimp_allowed_to_use_cookie($cookie) {
  */
 function mailchimp_get_outbound_ip() {
     // if we have a dedicated IP address, and have set a configuration for it, we'll use it here.
-    if (defined('MAILCHIMP_USE_OUTBOUND_IP')) {
+    if (defined('MAILCHIMP_USE_OUTBOUND_IP') && !empty(MAILCHIMP_USE_OUTBOUND_IP)) {
         return MAILCHIMP_USE_OUTBOUND_IP;
-    } elseif (($server_address = mailchimp_get_data('SERVER_ADDR')) && !empty($server_address)) {
-        return $server_address;
-    } elseif (isset($_SERVER) && isset($_SERVER['SERVER_ADDR']) && !empty($_SERVER['SERVER_ADDR'])) {
-        return $_SERVER['SERVER_ADDR'];
     }
     return null;
 }
@@ -1432,9 +1428,10 @@ function mailchimp_get_outbound_ip() {
  * @return bool
  */
 function mailchimp_render_gdpr_fields() {
+    if (defined('MAILCHIMP_RENDER_GDPR_FIELDS') && !MAILCHIMP_RENDER_GDPR_FIELDS) {
+        return false;
+    }
     return true;
-    return defined('MAILCHIMP_RENDER_GDPR_FIELDS') &&
-        MAILCHIMP_RENDER_GDPR_FIELDS;
 }
 
 // Add WP CLI commands

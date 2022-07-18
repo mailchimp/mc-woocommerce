@@ -1,4 +1,8 @@
 == Changelog ==
+= 2.7.1 =
+* Fixes the outgoing IP address defaults
+* Fixes webhook creation on plugin install
+* Enhancements to the support tool
 = 2.7 =
 * adds support for WooCommerce Checkout block
 * adds support for the tracking url from Mailchimp API

@@ -819,7 +819,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             'headers' => array(),
         );
 
-		$response = wp_remote_post($url, $pload);
+		$response = wp_safe_remote_post($url, $pload);
 
         // need to return the error message if this is the problem.
         if ($response instanceof WP_Error) {

@@ -50,13 +50,6 @@
                         <input required type="text" id="last_name" name="last_name" value="<?= get_user_meta( $user_id, 'last_name', true );?>"/>
                     </div>
                     <div class="box">
-                        <label for="username">
-                            <span> <?php esc_html_e('Username', 'mailchimp-for-woocommerce'); ?></span>
-                        </label>
-                        <input required type="text" id="username" name="username"/>
-                        <p class="description" id ="username_suggestion"><?= esc_html__( 'Suggested username: ', 'mailchimp-for-woocommerce' ); ?><span></span></p>
-                    </div>
-                    <div class="box">
                         <label for="email">
                             <span> <?php esc_html_e('Email', 'mailchimp-for-woocommerce'); ?></span>
                         </label>

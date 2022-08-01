@@ -82,5 +82,6 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 * Add first/last name into new Mailchimp account form
 * Optimize get request for spam list blocking
 * Enhancements to the auth process
+* Block based checkout interface check
 
 [Historical Changelog](https://raw.githubusercontent.com/mailchimp/mc-woocommerce/master/CHANGELOG.txt)

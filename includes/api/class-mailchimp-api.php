@@ -1948,6 +1948,7 @@ class MailChimp_WooCommerce_MailChimpApi
                 'body' => json_encode(array(
                     'store_id' => mailchimp_get_store_id(),
                     'list_id' => mailchimp_get_list_id(),
+                    'domain' => site_url(),
                     'email' => $email
                 )),
                 'timeout'     => 30,

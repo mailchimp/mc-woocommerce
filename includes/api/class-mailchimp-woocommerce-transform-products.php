@@ -10,11 +10,12 @@
  */
 class MailChimp_WooCommerce_Transform_Products
 {
-    /**
-     * @param int $page
-     * @param int $limit
-     * @return \stdClass
-     */
+	/**
+	 * @param int $page
+	 * @param int $limit
+	 *
+	 * @return object
+	 */
     public function compile($page = 1, $limit = 5)
     {
         $response = (object) array(
@@ -33,7 +34,7 @@ class MailChimp_WooCommerce_Transform_Products
             }
         }
 
-        $response->stuffed = ($response->count > 0 && (int) $response->count === (int) $limit) ? true : false;
+        $response->stuffed = $response->count > 0 && (int) $response->count === (int) $limit;
 
         return $response;
     }
@@ -64,10 +65,13 @@ class MailChimp_WooCommerce_Transform_Products
         return $product;
     }
 
-    /**
-     * @param WP_Post $post
-     * @return MailChimp_WooCommerce_Product
-     */
+	/**
+	 * @param WP_Post $post
+	 * @param null $fallback_title
+	 *
+	 * @return MailChimp_WooCommerce_Product
+	 * @throws Exception
+	 */
     public function transform(WP_Post $post, $fallback_title = null)
     {
         if (!($woo = wc_get_product($post))) {
@@ -127,11 +131,12 @@ class MailChimp_WooCommerce_Transform_Products
         return $product;
     }
 
-    /**
-     * @param WP_Post $post
-     * @param string $fallback_title
-     * @return MailChimp_WooCommerce_ProductVariation
-     */
+	/**
+	 * @param $post
+	 * @param null $fallback_title
+	 *
+	 * @return MailChimp_WooCommerce_ProductVariation
+	 */
     public function variant($post, $fallback_title = null)
     {
         if ($post instanceof WC_Product || $post instanceof WC_Product_Variation) {
@@ -283,11 +288,15 @@ class MailChimp_WooCommerce_Transform_Products
         return mailchimp_get_option('mailchimp_product_image_key', 'medium');
     }
 
-    /**
-     * @param $id
-     * @return bool|MailChimp_WooCommerce_Product
-     * @throws Exception
-     */
+	/**
+	 * @param $id
+	 * @param $title
+	 *
+	 * @return bool|MailChimp_WooCommerce_Product
+	 * @throws MailChimp_WooCommerce_Error
+	 * @throws MailChimp_WooCommerce_RateLimitError
+	 * @throws MailChimp_WooCommerce_ServerError
+	 */
     public static function deleted($id, $title)
     {
         $store_id = mailchimp_get_store_id();
@@ -313,11 +322,14 @@ class MailChimp_WooCommerce_Transform_Products
         return $product;
     }
 
-    /**
-     * @param $id
-     * @return bool|MailChimp_WooCommerce_Product
-     * @throws Exception
-     */
+	/**
+	 * @param $item
+	 *
+	 * @return bool|MailChimp_WooCommerce_Product
+	 * @throws MailChimp_WooCommerce_Error
+	 * @throws MailChimp_WooCommerce_RateLimitError
+	 * @throws MailChimp_WooCommerce_ServerError
+	 */
     public static function missing_order_item($item)
     {
         // we can only do this with an order item
@@ -357,11 +369,12 @@ class MailChimp_WooCommerce_Transform_Products
         return $product;
     }
 
-    /**
-     * @param \WP_Post $post
-     * @param string|null $fallback_title
-     * @return MailChimp_WooCommerce_Product
-     */
+	/**
+	 * @param $post
+	 * @param null $fallback_title
+	 *
+	 * @return MailChimp_WooCommerce_Product
+	 */
     protected function wooProductNotLoadedCorrectly($post, $fallback_title = null)
     {
         $product = new MailChimp_WooCommerce_Product();

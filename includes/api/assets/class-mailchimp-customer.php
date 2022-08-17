@@ -278,14 +278,14 @@ class MailChimp_WooCommerce_Customer
      */
     public function setWordpressUser($user)
     {
-        if ($user instanceof \WP_User) {
+        if ($user instanceof WP_User) {
             $this->wordpress_user = $user;
         }
         return $this;
     }
 
     /**
-     * @return null|\WP_User
+     * @return null|WP_User
      */
     public function getWordpressUser()
     {

@@ -153,11 +153,11 @@ class MailChimp_WooCommerce_ProductVariation
     }
 
     /**
-     * @return null
+     * @return null|string
      */
     public function getImageUrl()
     {
-        return !empty($this->image_url) ? $this->image_url : null;
+        return !empty($this->image_url) ? (string) $this->image_url : null;
     }
 
     /**

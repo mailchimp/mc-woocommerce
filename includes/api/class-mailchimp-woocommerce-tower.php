@@ -50,11 +50,12 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
         return $this->getData();
     }
 
-    /**
-     * @return array
-     * @throws MailChimp_WooCommerce_Error
-     * @throws MailChimp_WooCommerce_ServerError
-     */
+	/**
+	 * @return array
+	 * @throws MailChimp_WooCommerce_Error
+	 * @throws MailChimp_WooCommerce_RateLimitError
+	 * @throws MailChimp_WooCommerce_ServerError
+	 */
     public function getData()
     {
         $product_count = $customer_count = $order_count = $mc_product_count = $mc_customer_count = $mc_order_count = 0;
@@ -72,7 +73,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
             $order_count = mailchimp_get_order_count();
             $plan = $plan_name = 'Woo';
             $store_active = true;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $store_active = false;
             $plan = null;
         }
@@ -90,7 +91,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
         if ($authenticated) {
             try {
                 $account_info = $api->getProfile();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $account_info = array();
                 if ($e->getCode() === 503) {
                     $akamai_block = true;
@@ -130,7 +131,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                     $mc_customer_count = $api->getCustomerCount($store_id);
                     $mc_order_count = $api->getOrderCount($store_id);
                 }
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 if ($e->getCode() === 503) {
                     $akamai_block = true;
                 }
@@ -140,8 +141,8 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
             $merge_fields = array();
             try {
                 foreach ($api->getAutomations($list_id) as $automation) {
-                    $created = new \DateTime($automation['create_time']);
-                    $started = new \DateTime($automation['start_time']);
+                    $created = new DateTime($automation['create_time']);
+                    $started = new DateTime($automation['start_time']);
                     $automations[] = array(
                         'created_at' => $created->format('Y-m-d H:i:s'),
                         'start_at' => $started->format('Y-m-d H:i:s'),
@@ -153,14 +154,14 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                 }
                 $merge_fields = $api->mergeFields($list_id);
                 $merge_fields = $merge_fields['merge_fields'];
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 if ($e->getCode() === 503) {
                     $akamai_block = true;
                 }
             }
         }
 
-        $time = new \DateTime('now');
+        $time = new DateTime('now');
 
         return [
             'store' => (object) array(
@@ -243,13 +244,13 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                     ],
                     'list' => [
                         'id' => $list_id,
-                        'name' => $list_name,
-                        'double_opt_in' => mailchimp_list_has_double_optin(false),
+                        'name' => isset($list_name) ? $list_name : null,
+                        'double_opt_in' => $this->hasDoubleOptInEnabled(),
                         'valid' => $list_is_valid,
                     ],
                     'account_info' => $account_info,
-                    'automations' => $automations,
-                    'merge_fields' => (object) $merge_fields,
+                    'automations' => isset($automations) ? $automations : null,
+                    'merge_fields' => isset($merge_fields) ? (object) $merge_fields : null,
                 ],
                 'merge_tags' => [
 
@@ -258,6 +259,18 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
             'logs' => static::logs($this->with_log_file, $this->with_log_search),
             'system_report' => $this->getSystemReport(),
         ];
+    }
+
+	/**
+	 * @return bool
+	 */
+    public function hasDoubleOptInEnabled()
+    {
+    	try {
+    		return mailchimp_list_has_double_optin();
+	    } catch (Exception $e) {
+    		return false;
+	    }
     }
 
     /**
@@ -270,7 +283,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
         }
         try {
             return (bool) mailchimp_get_api()->hasWebhook(mailchimp_get_list_id(), mailchimp_get_webhook_url());
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             mailchimp_log('tower', 'could not get webhook URL', array('message' => $e->getMessage()));
             return false;
         }
@@ -288,18 +301,24 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
         );
     }
 
-    /**
-     * @param null $file
-     * @param null $search
-     * @return array
-     */
+	/**
+	 * @param null $file
+	 * @param null $search
+	 *
+	 * @return array
+	 */
     public function logs($file = null, $search = null)
     {
-        $logs = new MailChimp_WooCommerce_Logs();
-        $logs->limit(200);
-        $logs->withView(!is_null($file) ? $file : $this->with_log_file);
-        $logs->searching(!is_null($search) ? $search : $this->with_log_search);
-        return $logs->handle();
+        try {
+	        $logs = new MailChimp_WooCommerce_Logs();
+	        $logs->limit(200);
+	        $logs->withView(!is_null($file) ? $file : $this->with_log_file);
+	        $logs->searching(!is_null($search) ? $search : $this->with_log_search);
+	        return $logs->handle();
+        } catch (Exception $e) {
+        	mailchimp_error('tower', $e->getMessage());
+        	return array();
+        }
     }
 
     public function getShopSales()
@@ -361,7 +380,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                 $total += $product->gross;
             }
             return $total;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             mailchimp_log('tower', $e->getMessage());
             return 0;
         }
@@ -450,7 +469,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
         global $wpdb;
         $results = $wpdb->get_results("SELECT * FROM $wpdb->options WHERE option_name LIKE 'mailchimp-woocommerce-%'");
         $response = array();
-        $date = new \DateTime('now');
+        $date = new DateTime('now');
         foreach ($results as $result) {
             $response[] = array(
                 'key' => str_replace('mailchimp-woocommerce-', '', $result->option_name),
@@ -461,14 +480,15 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
         return $response;
     }
 
-    /**
-     * This is where we need to hook into tower from the store owner's support request.
-     * We can enable and disable this feature which will generate an API token specific to
-     * tower which will be used for authentication coming from our server to this specific store.
-     *
-     * @param bool $enable
-     * @return array|mixed|object|null
-     */
+	/**
+	 * This is where we need to hook into tower from the store owner's support request.
+	 * We can enable and disable this feature which will generate an API token specific to
+	 * tower which will be used for authentication coming from our server to this specific store.
+	 *
+	 * @param bool $enable
+	 *
+	 * @return array|mixed|object|null
+	 */
     public function toggle($enable = true)
     {
         $command = (bool) $enable ? 'enable' : 'disable';
@@ -512,7 +532,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
                     $job = new MailChimp_WooCommerce_Fix_Duplicate_Store($store_id, false, false);
                     $job->handle();
                     $dup_store = (bool) $job->hasDuplicateStoreProblem();
-                } catch (\Throwable $e) {
+                } catch (Throwable $e) {
                     $list_info = false;
                     $syncing_mc = false;
                     $account_info = false;
@@ -550,18 +570,17 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job
             );
             $response = wp_remote_post($post_url, $payload);
             return json_decode($response['body']);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             return null;
         }
     }
 
-    /**
-     * Get oldest or newest scheduled date for a given status.
-     *
-     * @param string $status Action status label/name string.
-     * @param string $date_type Oldest or Newest.
-     * @return string
-     */
+	/**
+	 * @param $status
+	 * @param string $date_type
+	 *
+	 * @return string
+	 */
     protected function get_action_status_date( $status, $date_type = 'oldest' )
     {
         $order = 'oldest' === $date_type ? 'ASC' : 'DESC';

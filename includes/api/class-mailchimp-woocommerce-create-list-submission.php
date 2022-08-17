@@ -59,10 +59,11 @@ class MailChimp_WooCommerce_CreateListSubmission
         return $this;
     }
 
-    /**
-     * @param string $email
-     * @return $this
-     */
+	/**
+	 * @param $email
+	 *
+	 * @return $this
+	 */
     public function setNotifyOnUnSubscribe($email)
     {
         $this->props['notify_on_unsubscribe'] = $email;
@@ -92,10 +93,11 @@ class MailChimp_WooCommerce_CreateListSubmission
         return $this;
     }
 
-     /**
-     * @param bool $public
-     * @return $this
-     */
+	/**
+	 * @param false $doi
+	 *
+	 * @return $this
+	 */
     public function setDoi($doi = false)
     {
         $this->props['double_optin'] = (bool) $doi;

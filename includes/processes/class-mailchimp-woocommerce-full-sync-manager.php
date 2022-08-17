@@ -13,9 +13,11 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 		 * @var string
 		 */
 		private $plugin_name = 'mailchimp-woocommerce';
-		
+
 		/**
-		 * Start the full sync process
+		 * @throws MailChimp_WooCommerce_Error
+		 * @throws MailChimp_WooCommerce_RateLimitError
+		 * @throws MailChimp_WooCommerce_ServerError
 		 */
 		public function start_sync() {
 			
@@ -53,8 +55,8 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 				$wpdb->show_errors(false);
 				mailchimp_delete_as_jobs();
 				mailchimp_flush_sync_job_tables();
-				$wpdb->show_errors(true);
-			} catch (\Exception $e) {}
+				$wpdb->show_errors();
+			} catch (Exception $e) {}
 
 			mailchimp_log("{$this->plugin_name}-sync.started", "Starting Sync :: ".date('D, M j, Y g:i A'));
 
@@ -65,7 +67,9 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 		}
 
 		/**
-		 * 
+		 * @throws MailChimp_WooCommerce_Error
+		 * @throws MailChimp_WooCommerce_RateLimitError
+		 * @throws MailChimp_WooCommerce_ServerError
 		 */
 		function flag_stop_sync()
 		{
@@ -96,6 +100,11 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 
 		}
 
+		/**
+		 * @throws MailChimp_WooCommerce_Error
+		 * @throws MailChimp_WooCommerce_RateLimitError
+		 * @throws MailChimp_WooCommerce_ServerError
+		 */
 		public function handle(){
 			// Trigger respawn
 			$this->recreate();
@@ -155,7 +164,7 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 					$this->flag_stop_sync();
                     try {
                         as_unschedule_action('MailChimp_WooCommerce_Process_Full_Sync_Manager', array(), 'mc-woocommerce' );
-                    } catch (\Exception $e) {}
+                    } catch (Exception $e) {}
 				}	
 			}
 		}

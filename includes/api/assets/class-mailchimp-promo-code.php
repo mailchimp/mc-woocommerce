@@ -50,7 +50,7 @@ class MailChimp_WooCommerce_PromoCode
     protected $enabled;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      * @title Start Time
      * @default null
      * @description The date and time when the promotion starts in ISO 8601 format
@@ -58,7 +58,7 @@ class MailChimp_WooCommerce_PromoCode
     protected $created_at_foreign;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      * @title Start Time
      * @default null
      * @description The date and time when the promotion starts in ISO 8601 format
@@ -130,10 +130,11 @@ class MailChimp_WooCommerce_PromoCode
         return $this->code;
     }
 
-    /**
-     * @param string $code
-     * @return MailChimp_WooCommerce_PromoCode
-     */
+	/**
+	 * @param $code
+	 *
+	 * @return $this
+	 */
     public function setCode($code)
     {
         $this->code = $code;
@@ -149,10 +150,11 @@ class MailChimp_WooCommerce_PromoCode
         return $this->redemption_url;
     }
 
-    /**
-     * @param string $url
-     * @return MailChimp_WooCommerce_PromoCode
-     */
+	/**
+	 * @param $url
+	 *
+	 * @return $this
+	 */
     public function setRedemptionURL($url)
     {
         $this->redemption_url = $url;
@@ -165,10 +167,11 @@ class MailChimp_WooCommerce_PromoCode
         return $this->usage_count;
     }
 
-    /**
-     * @param $count
-     * @return MailChimp_WooCommerce_PromoCode
-     */
+	/**
+	 * @param $count
+	 *
+	 * @return $this
+	 */
     public function setUsageCount($count)
     {
         $this->usage_count = $count;
@@ -176,10 +179,11 @@ class MailChimp_WooCommerce_PromoCode
         return $this;
     }
 
-    /**
-     * @param $enabled
-     * @return MailChimp_WooCommerce_PromoCode
-     */
+	/**
+	 * @param $enabled
+	 *
+	 * @return $this
+	 */
     public function setEnabled($enabled)
     {
         $this->enabled = (bool) $enabled;
@@ -208,10 +212,11 @@ class MailChimp_WooCommerce_PromoCode
         ]);
     }
 
-    /**
-     * @param array $data
-     * @return MailChimp_WooCommerce_PromoCode
-     */
+	/**
+	 * @param array $data
+	 *
+	 * @return $this
+	 */
     public function fromArray(array $data)
     {
         $singles = [

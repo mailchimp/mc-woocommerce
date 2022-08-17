@@ -10,11 +10,12 @@
  */
 class MailChimp_WooCommerce_Transform_Coupons
 {
-    /**
-     * @param int $page
-     * @param int $limit
-     * @return \stdClass
-     */
+	/**
+	 * @param int $page
+	 * @param int $limit
+	 *
+	 * @return object
+	 */
     public function compile($page = 1, $limit = 5)
     {
         $response = (object) array(
@@ -33,15 +34,16 @@ class MailChimp_WooCommerce_Transform_Coupons
             }
         }
 
-        $response->stuffed = ($response->count > 0 && (int) $response->count === (int) $limit) ? true : false;
+        $response->stuffed = $response->count > 0 && (int) $response->count === (int) $limit;
 
         return $response;
     }
 
-    /**
-     * @param int $post_id
-     * @return MailChimp_WooCommerce_PromoCode
-     */
+	/**
+	 * @param $post_id
+	 *
+	 * @return MailChimp_WooCommerce_PromoCode
+	 */
     public function transform($post_id)
     {
         $resource = new WC_Coupon($post_id);

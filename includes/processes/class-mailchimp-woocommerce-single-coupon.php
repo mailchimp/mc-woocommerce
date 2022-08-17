@@ -31,11 +31,15 @@ class MailChimp_WooCommerce_SingleCoupon extends Mailchimp_Woocommerce_Job
         if (!empty($id)) {
             $this->id = $id instanceof WP_Post ? $id->ID : $id;
         }
+        return $this;
     }
-    
-    /**
-     * @return null
-     */
+
+	/**
+	 * @return false|void
+	 * @throws MailChimp_WooCommerce_Error
+	 * @throws MailChimp_WooCommerce_RateLimitError
+	 * @throws MailChimp_WooCommerce_ServerError
+	 */
     public function handle()
     {
         try {
@@ -56,8 +60,8 @@ class MailChimp_WooCommerce_SingleCoupon extends Mailchimp_Woocommerce_Job
             $transformer = new MailChimp_WooCommerce_Transform_Coupons();
             $code = $transformer->transform($this->id);
 
-            $api->addPromoRule($store_id, $code->getAttachedPromoRule(), true);
-            $api->addPromoCodeForRule($store_id, $code->getAttachedPromoRule(), $code, true);
+            $api->addPromoRule($store_id, $code->getAttachedPromoRule());
+            $api->addPromoCodeForRule($store_id, $code->getAttachedPromoRule(), $code);
 
             mailchimp_log('promo_code_submit.success', "#{$this->id} :: code: {$code->getCode()}");
         } catch (MailChimp_WooCommerce_RateLimitError $e) {
@@ -67,19 +71,18 @@ class MailChimp_WooCommerce_SingleCoupon extends Mailchimp_Woocommerce_Job
             $this->applyRateLimitedScenario();
             throw $e;
         } catch (MailChimp_WooCommerce_ServerError $e) {
-            mailchimp_error('promo_code_submit.error', mailchimp_error_trace($e, "error updating promo rule #{$this->id} :: {$code->getCode()}"));
+	        $promo_code = isset($code) ? "code {$code->getCode()}" : "id {$this->id}";
+            mailchimp_error('promo_code_submit.error', mailchimp_error_trace($e, "error updating promo rule #{$this->id} :: {$promo_code}"));
             throw $e;
         } catch (MailChimp_WooCommerce_Error $e) {
-            mailchimp_error('promo_code_submit.error', mailchimp_error_trace($e, "error updating promo rule #{$this->id} :: {$code->getCode()}"));
+	        $promo_code = isset($code) ? "code {$code->getCode()}" : "id {$this->id}";
+            mailchimp_error('promo_code_submit.error', mailchimp_error_trace($e, "error updating promo rule #{$this->id} :: {$promo_code}"));
             throw $e;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $promo_code = isset($code) ? "code {$code->getCode()}" : "id {$this->id}";
             mailchimp_error('promo_code_submit.exception', mailchimp_error_trace($e, "error updating promo rule :: {$promo_code}"));
             throw $e;
-        } catch (\Error $e) {
-            $promo_code = isset($code) ? "code {$code->getCode()}" : "id {$this->id}";
-            mailchimp_error('promo_code_submit.error', mailchimp_error_trace($e, "Error :: #{$promo_code}"));
-            throw $e;
         }
+        return;
     }
 }

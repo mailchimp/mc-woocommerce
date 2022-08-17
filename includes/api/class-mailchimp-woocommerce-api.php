@@ -58,12 +58,13 @@ class MailChimp_WooCommerce_Api
         return $this->paginate('orders', $page, $per);
     }
 
-    /**
-     * @param $resource
-     * @param int $page
-     * @param int $per
-     * @return object|stdClass
-     */
+	/**
+	 * @param $resource
+	 * @param int $page
+	 * @param int $per
+	 *
+	 * @return object|stdClass
+	 */
     public function paginate($resource, $page = 1, $per = 5)
     {
         if (($sync = $this->engine($resource))) {
@@ -88,10 +89,8 @@ class MailChimp_WooCommerce_Api
         switch ($resource) {
             case 'products' :
                 return new MailChimp_WooCommerce_Transform_Products();
-                break;
             case 'orders' :
                 return new MailChimp_WooCommerce_Transform_Orders();
-                break;
             case 'coupons':
                 return new MailChimp_WooCommerce_Transform_Coupons();
             default:

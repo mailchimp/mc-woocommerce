@@ -50,9 +50,9 @@ class MailChimp_WooCommerce_Cart
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
+	/**
+	 * @return mixed|string
+	 */
     public function getStoreID()
     {
         if (empty($this->store_id)) {
@@ -141,10 +141,9 @@ class MailChimp_WooCommerce_Cart
         return $this->checkout_url;
     }
 
-    /**
-     * @param $code
-     * @return $this
-     */
+	/**
+	 * @return $this
+	 */
     public function setCurrencyCode()
     {
         $this->currency_code = get_woocommerce_currency();

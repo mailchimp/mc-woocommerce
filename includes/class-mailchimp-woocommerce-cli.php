@@ -24,9 +24,10 @@ class Mailchimp_Wocoomerce_CLI extends WP_CLI_Command {
         $this->pid = getmypid();
     }
 
-    /**
-     * Flush all of the records in the queue.
-     */
+	/**
+	 * @param $args
+	 * @param array $assoc_args
+	 */
     public function flush($args, $assoc_args = array())
     {
         global $wpdb;
@@ -47,11 +48,11 @@ class Mailchimp_Wocoomerce_CLI extends WP_CLI_Command {
     }
 
 	/**
-	 * Creates the queue tables.
-	 *
-	 * @subcommand create-tables
+	 * @param $args
+	 * @param array $assoc_args
 	 */
 	public function create_tables( $args, $assoc_args = array() ) {
+		global $wpdb;
         install_mailchimp_queue();
 		WP_CLI::success( "Table {$wpdb->prefix}queue created." );
 	}
@@ -100,9 +101,10 @@ class Mailchimp_Wocoomerce_CLI extends WP_CLI_Command {
         WP_CLI::log($output);  
         exit;
     }
-    
-    /**
-	 * Deprecated commands
+
+	/**
+	 * @param $args
+	 * @param array $assoc_args
 	 */
 	public function work( $args, $assoc_args = array() ) {
         WP_CLI::warning(WP_CLI::colorize('%Wqueue work%n').' command is deprecated since Mailchimp for Woocommerce version 2.3. Please use '.WP_CLI::colorize('%ywp action-scheduler run --group="mc-woocommerce%n"').' instead'); 

@@ -53,7 +53,7 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
             try {
                 $handled_key = "subscriber_sync.{$service_id}.handled";
                 // see if we've saved a service call in the last 30 minutes.
-                $handled = mailchimp_get_transient($handled_key, null);
+                $handled = mailchimp_get_transient($handled_key);
                 // if we've got the subscriber sync id and it's the same as the previous submission, just skip out now.
                 if ($handled === $subscribe) {
                     mailchimp_log('subscriber_sync', "didn't need to do anything");
@@ -65,7 +65,7 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
                     // update the cached status just in case this is causing trouble with the webhook.
                     $hashed = md5(trim(strtolower($email)));
                     // tell the webhooks that we've just synced this customer with a certain status.
-                    mailchimp_set_transient("{$hashed}.subscriber_sync", array('time' => time(), 'status' => $subscribe), 90);
+                    mailchimp_set_transient("{$hashed}.subscriber_sync", array('time' => time(), 'status' => false), 90);
                 }
                 // update the user meta to show the proper value.
                 update_user_meta($user->ID, 'mailchimp_woocommerce_is_subscribed', $subscribe);
@@ -76,13 +76,15 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
                     'user_id' => $user->ID,
                 ));
                 return true;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $error = $e->getMessage();
                 mailchimp_error('webhook', "Updating Subscriber Status :: MC service ID {$service_id} :: {$hook_type} :: {$error}");
                 return false;
             }
-        } catch (\Throwable $e) {
-            mailchimp_error('webhook', $e->getMessage(), array('data' => $data ? json_encode($data) : null));
+        } catch (Throwable $e) {
+            mailchimp_error('webhook', $e->getMessage(), array(
+            	'data' => isset($data) && $data ? json_encode($data) : null
+            ));
         }
         return false;
     }
@@ -124,12 +126,14 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
         return array($hook_type, $data, $failed);
     }
 
-    /**
-     * @param $email
-     * @return \WP_User
-     * @throws MailChimp_WooCommerce_Error
-     * @throws MailChimp_WooCommerce_ServerError
-     */
+	/**
+	 * @param $email
+	 *
+	 * @return int|WP_Error
+	 * @throws MailChimp_WooCommerce_Error
+	 * @throws MailChimp_WooCommerce_RateLimitError
+	 * @throws MailChimp_WooCommerce_ServerError
+	 */
     private function createNewCustomer($email)
     {
         $member = mailchimp_get_api()->member(mailchimp_get_list_id(), $email);
@@ -140,11 +144,11 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
         // TODO maybe use the registration method and keep a record for when the user is verified later
         $user = wp_create_user(strtolower($email), wp_generate_password(), strtolower($email));
         // subscribe them because this function only runs for subscribers.
-        update_user_meta($user->ID, 'mailchimp_woocommerce_is_subscribed', true);
+        update_user_meta($user, 'mailchimp_woocommerce_is_subscribed', true);
         // if we have a first and last name from the MC account, just use that.
         if ($first_name && $last_name) {
             wp_update_user(array(
-                'ID' => $user->ID,
+                'ID' => $user,
                 'first_name' => $first_name,
                 'last_name' => $last_name
             ));
@@ -171,15 +175,6 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
         return mailchimp_string_contains($email, array(
             'forgotten.mailchimp.com'
         ));
-    }
-
-    /**
-     * @param string $error
-     * @return bool
-     */
-    private function isUnprocessableEntityError(string $error): bool
-    {
-        return mailchimp_string_contains($error, 'Unprocessable Entity');
     }
 
     /**

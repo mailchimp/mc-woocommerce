@@ -8,12 +8,12 @@ class MailChimp_WooCommerce_Transform_Orders
     public $campaign_id = null;
     protected $is_syncing = false;
 
-    /**
-     * @param int $page
-     * @param int $limit
-     * @return object
-     * @throws Exception
-     */
+	/**
+	 * @param int $page
+	 * @param int $limit
+	 *
+	 * @return object
+	 */
     public function compile($page = 1, $limit = 5)
     {
         $this->is_syncing = true;
@@ -36,17 +36,20 @@ class MailChimp_WooCommerce_Transform_Orders
             }
         }
 
-        $response->stuffed = ($response->count > 0 && (int) $response->count === (int) $limit) ? true : false;
+        $response->stuffed = $response->count > 0 && (int) $response->count === (int) $limit;
         $this->is_syncing = false;
 
         return $response;
     }
 
-    /**
-     * @param WP_Post $post
-     * @return MailChimp_WooCommerce_Order
-     * @throws Exception
-     */
+	/**
+	 * @param WP_Post $post
+	 *
+	 * @return MailChimp_WooCommerce_Order|mixed|void
+	 * @throws MailChimp_WooCommerce_Error
+	 * @throws MailChimp_WooCommerce_RateLimitError
+	 * @throws MailChimp_WooCommerce_ServerError
+	 */
     public function transform(WP_Post $post)
     {
         $woo = wc_get_order($post);
@@ -95,12 +98,12 @@ class MailChimp_WooCommerce_Transform_Orders
         if (!empty($this->campaign_id)) {
             try {
                 $order->setCampaignId($this->campaign_id);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 mailchimp_log('transform_order_set_campaign_id.error', 'No campaign added to order, with provided ID: '. $this->campaign_id. ' :: '. $e->getMessage(). ' :: in '.$e->getFile().' :: on '.$e->getLine());
             }
         }
 
-        $order->setProcessedAt($woo->get_date_created()->setTimezone(new \DateTimeZone('UTC')));
+        $order->setProcessedAt($woo->get_date_created()->setTimezone(new DateTimeZone('UTC')));
 
         $order->setCurrencyCode($woo->get_currency());
 
@@ -135,7 +138,7 @@ class MailChimp_WooCommerce_Transform_Orders
         // only set this if the order is cancelled.
         if ($status === 'cancelled') {
             if (method_exists($woo, 'get_date_modified')) {
-                $order->setCancelledAt($woo->get_date_modified()->setTimezone(new \DateTimeZone('UTC')));
+                $order->setCancelledAt($woo->get_date_modified()->setTimezone(new DateTimeZone('UTC')));
             }
         }
 
@@ -200,7 +203,7 @@ class MailChimp_WooCommerce_Transform_Orders
                 
                 try {
                     $deleted_product = MailChimp_WooCommerce_Transform_Products::deleted($pid, $title);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     mailchimp_log('order.items.error', "Order #{$woo->get_id()} :: Product {$pid} does not exist!");
                     continue;
                 }
@@ -227,11 +230,11 @@ class MailChimp_WooCommerce_Transform_Orders
         return apply_filters('mailchimp_filter_ecommerce_order', $order, $woo);
     }
 
-    /**
-     * @param WC_Abstract_Order $order
-     * @return MailChimp_WooCommerce_Customer
-     * @throws Exception
-     */
+	/**
+	 * @param WC_Order|WC_Order_Refund $order
+	 *
+	 * @return MailChimp_WooCommerce_Customer
+	 */
     public function buildCustomerFromOrder($order)
     {
         $customer = new MailChimp_WooCommerce_Customer();
@@ -262,7 +265,7 @@ class MailChimp_WooCommerce_Transform_Orders
 
         try {
             $doi = mailchimp_list_has_double_optin();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $doi = false;
         }
 
@@ -289,7 +292,7 @@ class MailChimp_WooCommerce_Transform_Orders
                 }
 
                 $customer->setOptInStatus($subscriber['status'] === 'subscribed');
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 // if double opt in is enabled - we need to make a request now that subscribes the customer as pending
                 // so that the double opt in will actually fire.
                 if ($doi && (!isset($subscriber) || empty($subscriber))) {
@@ -301,11 +304,12 @@ class MailChimp_WooCommerce_Transform_Orders
         return $customer;
     }
 
-    /**
-     * @param $key
-     * @param WC_Order_Item_Product $order_detail
-     * @return MailChimp_WooCommerce_LineItem
-     */
+	/**
+	 * @param $key
+	 * @param $order_detail
+	 *
+	 * @return MailChimp_WooCommerce_LineItem
+	 */
     protected function transformLineItem($key, $order_detail)
     {
         // fire up a new MC line item
@@ -420,11 +424,12 @@ class MailChimp_WooCommerce_Transform_Orders
         return empty($orders) ? false : $orders;
     }
 
-    /**
-     * @param WC_Abstract_Order $order
-     * @return object
-     * @throws Exception
-     */
+	/**
+	 * @param $order
+	 *
+	 * @return object
+	 * @throws Exception
+	 */
     public function getCustomerOrderTotals($order)
     {
         if (!function_exists('wc_get_orders')) {

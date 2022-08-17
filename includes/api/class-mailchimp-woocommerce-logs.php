@@ -5,6 +5,7 @@ class MailChimp_WooCommerce_Logs
     protected $view = null;
     protected $limit = false;
     protected $search_query = null;
+    public $items = array();
 
     /**
      * @param $view
@@ -36,10 +37,10 @@ class MailChimp_WooCommerce_Logs
         return $this;
     }
 
-    /**
-     * @param null $view
-     * @return array
-     */
+	/**
+	 * @return array
+	 * @throws Exception
+	 */
     public function handle()
     {
         if ($this->view) {
@@ -49,9 +50,13 @@ class MailChimp_WooCommerce_Logs
         $logs = array();
 
         foreach (MailChimp_WooCommerce_Log_Viewer::all() as $item) {
-            $date = new \DateTime($item['date']);
-            $item['date'] = $date->format('D, M j, Y g:i A');
-            $item['datetime'] = $date->format('Y-m-d H:i:s A');
+            try {
+	            $date = new DateTime($item['date']);
+            } catch (Exception $e) {
+	            $date = new DateTime();
+            }
+	        $item['date'] = $date->format('D, M j, Y g:i A');
+	        $item['datetime'] = $date->format('Y-m-d H:i:s A');
             $item['text'] = strtolower(str_replace('[]', ' ', $item['text']));
             if (!empty($this->search_query) && !mailchimp_string_contains($item['text'], $this->search_query)) {
                 continue;

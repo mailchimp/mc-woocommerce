@@ -74,10 +74,11 @@ class MailChimp_WooCommerce_Order
         return (bool) $this->is_privacy_protected;
     }
 
-    /**
-     * @param string $status
-     * @return $this
-     */
+	/**
+	 * @param $status
+	 *
+	 * @return $this
+	 */
     public function setOriginalWooStatus($status)
     {
         $this->original_woo_status = (string) $status;
@@ -85,7 +86,7 @@ class MailChimp_WooCommerce_Order
     }
 
     /**
-     * @return null
+     * @return null|string
      */
     public function getOriginalWooStatus()
     {
@@ -246,10 +247,14 @@ class MailChimp_WooCommerce_Order
         return $this->campaign_id;
     }
 
-    /**
-     * @param null $campaign_id
-     * @return MailChimp_WooCommerce_Order
-     */
+	/**
+	 * @param $id
+	 *
+	 * @return $this
+	 * @throws MailChimp_WooCommerce_Error
+	 * @throws MailChimp_WooCommerce_RateLimitError
+	 * @throws MailChimp_WooCommerce_ServerError
+	 */
     public function setCampaignId($id)
     {
         $api = MailChimp_WooCommerce_MailChimpApi::getInstance();
@@ -320,7 +325,7 @@ class MailChimp_WooCommerce_Order
         try {
             $woo = wc_get_order($this->id);
             $this->currency_code = $woo->get_currency();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->currency_code = get_woocommerce_currency();
         }
 
@@ -425,10 +430,10 @@ class MailChimp_WooCommerce_Order
     }
 
     /**
-     * @param \DateTime $time
+     * @param DateTime $time
      * @return $this
      */
-    public function setProcessedAt(\DateTime $time)
+    public function setProcessedAt(DateTime $time)
     {
         $this->processed_at_foreign = $time->format('Y-m-d H:i:s');
 
@@ -444,10 +449,10 @@ class MailChimp_WooCommerce_Order
     }
 
     /**
-     * @param \DateTime $time
+     * @param DateTime $time
      * @return $this
      */
-    public function setCancelledAt(\DateTime $time)
+    public function setCancelledAt(DateTime $time)
     {
         $this->cancelled_at_foreign = $time->format('Y-m-d H:i:s');
 
@@ -463,10 +468,10 @@ class MailChimp_WooCommerce_Order
     }
 
     /**
-     * @param \DateTime $time
+     * @param DateTime $time
      * @return $this
      */
-    public function setUpdatedAt(\DateTime $time)
+    public function setUpdatedAt(DateTime $time)
     {
         $this->updated_at_foreign = $time->format('Y-m-d H:i:s');
 
@@ -492,11 +497,11 @@ class MailChimp_WooCommerce_Order
         return $lines_ids;
     }
 
-    /**
-     * @param $bool
-     * @param $bool
-     * @return $this
-     */
+	/**
+	 * @param $bool
+	 *
+	 * @return $this
+	 */
     public function confirmAndPay($bool)
     {
         $this->confirm_and_paid = (bool) $bool;
@@ -555,9 +560,12 @@ class MailChimp_WooCommerce_Order
         }
         return $this->billing_address;
     }
-    /**
-     * Set Tracking url if exists
-     */
+
+	/**
+	 * @param string $url
+	 *
+	 * @return mixed|string|void
+	 */
     public function setTrackingUrl($url = ''){
 
         if(!empty($url)){ return $this->tracking_url = $url; }
@@ -582,6 +590,7 @@ class MailChimp_WooCommerce_Order
         }
         
         $this->tracking_url = $tracking_url;
+        return;
     }
     /**
      * @return string               Tracking url
@@ -589,23 +598,23 @@ class MailChimp_WooCommerce_Order
     public function getTrackingUrl(){
         return $this->tracking_url;
     }
-    /**
-     * Set Tracking number if exists
-     * @param string $tracking_number Tracking number from first-party plugin
-     */
+
+	/**
+	 * @param $tracking_number
+	 */
     public function setTrackingNumber( $tracking_number ){
         $this->tracking_number = $tracking_number;
     }
     /**
-     * @return string               Tracking number
+     * @return string
      */
     public function getTrackingNumber(){
         return $this->tracking_number;
     }
-    /**
-     * Set Tracking url if exists
-     * @param string $tracking_carrier Tracking carrier from first-party plugin
-     */
+
+	/**
+	 * @param $tracking_carrier
+	 */
     public function setTrackingCarrier( $tracking_carrier ){
         $this->tracking_carrier = $tracking_carrier;
     }
@@ -705,25 +714,22 @@ class MailChimp_WooCommerce_Order
     public function setTrackingInfo()
     {
         // Support for woocomemrce shipment tracking plugin (https://woocommerce.com/products/shipment-tracking)
-        if (function_exists('wc_st_add_tracking_number' )){
+        if (function_exists('wc_st_add_tracking_number' ) && class_exists('WC_Shipment_Tracking_Actions')){
             $trackings = get_post_meta( (int) $this->getId(), '_wc_shipment_tracking_items', true );
-
             if ( empty($trackings) ) {
                 return ;
             }
-            foreach($trackings as $tracking){
+            foreach ($trackings as $tracking) {
                 // carrier
-                if(!empty($tracking['custom_tracking_provider'])){
+                if (!empty($tracking['custom_tracking_provider'])) {
                     $this->setTrackingCarrier($tracking['custom_tracking_provider']);
-                }elseif(!empty($tracking['tracking_provider'])){
+                } elseif(!empty($tracking['tracking_provider'])) {
                     $this->setTrackingCarrier($tracking['tracking_provider']);
                 }
-
                 // tracking url
                 $ship = WC_Shipment_Tracking_Actions::get_instance();
                 $url = $ship->get_formatted_tracking_item($this->getId(), $tracking);
                 $this->setTrackingUrl($url['formatted_tracking_link']);
-
                 // tracking number
                 $this->setTrackingNumber($tracking['tracking_number']);
                 return;
@@ -731,19 +737,19 @@ class MailChimp_WooCommerce_Order
         }
 
         // Support for woocoomerce shipping plugin (https://woocommerce.com/woocommerce-shipping/)
-        if( class_exists( 'WC_Connect_Loader' ) ){
+        if ( class_exists( 'WC_Connect_Loader' ) ) {
             $label_data = get_post_meta( (int) $this->getId(), 'wc_connect_labels', true );
             // return an empty array if the data doesn't exist.
             if ( empty($label_data) ) {
                 return ;
             }
-            if( !is_array($label_data) && is_string( $label_data ) ){
+            if ( !is_array($label_data) && is_string( $label_data ) ) {
                 $label_data = json_decode( $label_data, true );
             }
             // labels stored as an array, return.
-            if ( is_array( $label_data ) ){
+            if ( is_array( $label_data ) ) {
                 foreach ($label_data as $label) {
-                    if (!empty($label['tracking']) && !empty($label['carrier_id']) ){
+                    if (!empty($label['tracking']) && !empty($label['carrier_id']) ) {
                         $this->setTrackingNumber( $label['tracking'] );
                         $this->setTrackingCarrier( $label['carrier_id'] );
                         $this->setTrackingUrl();
@@ -752,7 +758,5 @@ class MailChimp_WooCommerce_Order
             }
             return;
         }
-
-        
     }
 }

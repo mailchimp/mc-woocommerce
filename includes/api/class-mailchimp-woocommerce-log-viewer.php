@@ -36,7 +36,7 @@ class MailChimp_WooCommerce_Log_Viewer
      * Log levels that are used
      * @var array
      */
-    private static $log_levels = [
+    public static $log_levels = [
         'emergency',
         'alert',
         'critical',
@@ -50,9 +50,11 @@ class MailChimp_WooCommerce_Log_Viewer
 
     const MAX_FILE_SIZE = 52428800;
 
-    /**
-     * @param string $file
-     */
+	/**
+	 * @param $file
+	 *
+	 * @throws Exception
+	 */
     public static function setFile($file)
     {
         $file = self::pathToLogFile($file);
@@ -64,7 +66,7 @@ class MailChimp_WooCommerce_Log_Viewer
     /**
      * @param $file
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     public static function pathToLogFile($file)
     {
@@ -84,9 +86,9 @@ class MailChimp_WooCommerce_Log_Viewer
         return basename(self::$file);
     }
 
-    /**
-     * @return array
-     */
+	/**
+	 * @return array|null
+	 */
     public static function all()
     {
         $log = array();

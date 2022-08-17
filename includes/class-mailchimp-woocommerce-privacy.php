@@ -56,7 +56,7 @@ class MailChimp_WooCommerce_Privacy
 
         $data = array();
 
-        if (get_site_option('mailchimp_woocommerce_db_mailchimp_carts', false)) {
+        if (get_site_option('mailchimp_woocommerce_db_mailchimp_carts')) {
             $table = "{$wpdb->prefix}mailchimp_carts";
             $statement = "SELECT * FROM $table WHERE id = %s";
             $sql = $wpdb->prepare($statement, $uid);
@@ -97,7 +97,7 @@ class MailChimp_WooCommerce_Privacy
         $uid = mailchimp_hash_trim_lower($email_address);
         $count = 0;
 
-        if (get_site_option('mailchimp_woocommerce_db_mailchimp_carts', false)) {
+        if (get_site_option('mailchimp_woocommerce_db_mailchimp_carts')) {
             $table = "{$wpdb->prefix}mailchimp_carts";
             $sql = $wpdb->prepare("DELETE FROM $table WHERE id = %s", $uid);
             $count = $wpdb->query($sql);

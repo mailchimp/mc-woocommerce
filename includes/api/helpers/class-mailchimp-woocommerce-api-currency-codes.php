@@ -1102,9 +1102,11 @@ class MailChimp_WooCommerce_CurrencyCodes
         return $response;
     }
 
-    /**
-     * @return array
-     */
+	/**
+	 * @param $alpha3
+	 *
+	 * @return mixed|null
+	 */
     public static function getCurrency($alpha3)
     {
         $response = array();

@@ -220,10 +220,10 @@ class MailChimp_WooCommerce_Product
     }
 
     /**
-     * @param \DateTime $time
+     * @param DateTime $time
      * @return MailChimp_WooCommerce_Product
      */
-    public function setPublishedAtForeign(\DateTime $time)
+    public function setPublishedAtForeign(DateTime $time)
     {
         $this->published_at_foreign = $time->format('Y-m-d H:i:s');
 

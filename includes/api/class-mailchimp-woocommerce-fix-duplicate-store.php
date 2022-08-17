@@ -22,9 +22,11 @@ class MailChimp_WooCommerce_Fix_Duplicate_Store
         $this->should_delete_legacy = $delete_legacy;
     }
 
-    /**
-     *
-     */
+	/**
+	 * @throws MailChimp_WooCommerce_Error
+	 * @throws MailChimp_WooCommerce_RateLimitError
+	 * @throws MailChimp_WooCommerce_ServerError
+	 */
     public function handle()
     {
         $this->deleted_stores = [];

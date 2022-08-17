@@ -131,9 +131,7 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Deactivation_Survey', false ) ) {
 		}
 
 		/**
-		 * Survey javascript.
 		 *
-		 * @since 1.0.0
 		 */
 		public function js() {
 

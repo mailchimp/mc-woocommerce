@@ -38,7 +38,7 @@ class MailChimp_WooCommerce_PromoRule
     protected $description;
 
     /**
-     * @var \DateTime
+     * @var string
      * @title Start Time
      * @default null
      * @description The date and time when the promotion starts in ISO 8601 format
@@ -46,7 +46,7 @@ class MailChimp_WooCommerce_PromoRule
     protected $starts_at;
 
     /**
-     * @var \DateTime
+     * @var string
      * @title Start Time
      * @default null
      * @description The date and time when the promotion starts in ISO 8601 format
@@ -86,7 +86,7 @@ class MailChimp_WooCommerce_PromoRule
     protected $enabled = true;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      * @title Start Time
      * @default null
      * @description The date and time when the promotion starts in ISO 8601 format
@@ -94,7 +94,7 @@ class MailChimp_WooCommerce_PromoRule
     protected $created_at_foreign;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      * @title Start Time
      * @default null
      * @description The date and time when the promotion starts in ISO 8601 format
@@ -146,10 +146,11 @@ class MailChimp_WooCommerce_PromoRule
         return $this->title;
     }
 
-    /**
-     * @param string $name
-     * @return MailChimp_WooCommerce_PromoRule
-     */
+	/**
+	 * @param $name
+	 *
+	 * @return $this
+	 */
     public function setTitle($name)
     {
         $this->title = $name;
@@ -165,10 +166,11 @@ class MailChimp_WooCommerce_PromoRule
         return $this->description;
     }
 
-    /**
-     * @param string $description
-     * @return MailChimp_WooCommerce_PromoRule
-     */
+	/**
+	 * @param $description
+	 *
+	 * @return $this
+	 */
     public function setDescription($description)
     {
         $this->description = $description;
@@ -177,38 +179,38 @@ class MailChimp_WooCommerce_PromoRule
     }
 
     /**
-     * @param \DateTime $date
+     * @param DateTime $date
      * @return $this
      */
-    public function setStartsAt(\DateTime $date)
+    public function setStartsAt(DateTime $date)
     {
-        $this->starts_at = (string) $date;
+        $this->starts_at = $date->format(DATE_ISO8601);
 
         return $this;
     }
 
-    /**
-     * @return \DateTime
-     */
+	/**
+	 * @return string
+	 */
     public function getStartsAt()
     {
         return $this->starts_at;
     }
 
     /**
-     * @param \DateTime $date
+     * @param DateTime $date
      * @return $this
      */
-    public function setEndsAt(\DateTime $date)
+    public function setEndsAt(DateTime $date)
     {
-        $this->ends_at = (string) $date;
+        $this->ends_at = $date->format(DATE_ISO8601);
 
         return $this;
     }
 
-    /**
-     * @return \DateTime
-     */
+	/**
+	 * @return string
+	 */
     public function getEndsAt()
     {
         return $this->ends_at;
@@ -240,10 +242,11 @@ class MailChimp_WooCommerce_PromoRule
         return $this->amount;
     }
 
-    /**
-     * @param int $amount
-     * @return MailChimp_WooCommerce_PromoRule
-     */
+	/**
+	 * @param $amount
+	 *
+	 * @return $this
+	 */
     public function setAmount($amount)
     {
         $this->amount = $amount;
@@ -317,18 +320,18 @@ class MailChimp_WooCommerce_PromoRule
         return $this;
     }
     /**
-     * @param \DateTime $time
+     * @param DateTime $time
      * @return $this
      */
-    public function setUpdatedAt(\DateTime $time)
+    public function setUpdatedAt(DateTime $time)
     {
-        $this->updated_at_foreign = (string) $time;
+        $this->updated_at_foreign = $time->format(DATE_ISO8601);
 
         return $this;
     }
 
     /**
-     * @return null
+     * @return null|string
      */
     public function getUpdatedAt()
     {
@@ -336,18 +339,18 @@ class MailChimp_WooCommerce_PromoRule
     }
 
     /**
-     * @param \DateTime $time
+     * @param DateTime $time
      * @return $this
      */
-    public function setCreatedAt(\DateTime $time)
+    public function setCreatedAt(DateTime $time)
     {
-        $this->created_at_foreign = (string) $time;
+        $this->created_at_foreign = $time->format(DATE_ISO8601);
 
         return $this;
     }
 
     /**
-     * @return null
+     * @return null|string
      */
     public function getCreatedAt()
     {

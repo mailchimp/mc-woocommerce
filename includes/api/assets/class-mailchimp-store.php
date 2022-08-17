@@ -165,10 +165,11 @@ class MailChimp_WooCommerce_Store
         return $this->currency_code;
     }
 
-    /**
-     * @param null $currency_code
-     * @return MailChimp_WooCommerce_Store;
-     */
+	/**
+	 * @param $code
+	 *
+	 * @return $this
+	 */
     public function setCurrencyCode($code)
     {   
         if(!isset($code)){
@@ -186,10 +187,11 @@ class MailChimp_WooCommerce_Store
         return $this->money_format;
     }
 
-    /**
-     * @param null $money_format
-     * @return MailChimp_WooCommerce_Store;
-     */
+	/**
+	 * @param $code
+	 *
+	 * @return $this
+	 */
     public function setMoneyFormat($code)
     {   
         if(!isset($code)){
@@ -288,10 +290,11 @@ class MailChimp_WooCommerce_Store
         return $this->address;
     }
 
-    /**
-     * @param MailChimp_WooCommerce_Address $address
-     * @return Store;
-     */
+	/**
+	 * @param MailChimp_WooCommerce_Address $address
+	 *
+	 * @return $this
+	 */
     public function setAddress(MailChimp_WooCommerce_Address $address)
     {
         $this->address = $address;

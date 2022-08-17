@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+
+<ruleset  name="PHP_CodeSniffer">
+    <description>PHPCS configuration file.</description>
+    <!-- check all files in the app directory, feel free to add more files with:
+    <file>FOLDER NAME</file>
+    -->
+    <rule ref="PHPCompatibilityWP">
+        <include-pattern>*\.php$</include-pattern>
+    </rule>
+</ruleset>

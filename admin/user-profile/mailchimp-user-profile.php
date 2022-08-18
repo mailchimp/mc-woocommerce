@@ -1,4 +1,4 @@
-<?php $mailchimp_user_is_subscribed = (isset($user) && $user) ? get_user_meta( $user->ID, 'mailchimp_woocommerce_is_subscribed', true ) : false; ?>
+<?php $mailchimp_user_is_subscribed = ( isset( $user ) && $user ) ? get_user_meta( $user->ID, 'mailchimp_woocommerce_is_subscribed', true ) : false; ?>
 
 <h2>Mailchimp</h2>
 <table class="form-table">

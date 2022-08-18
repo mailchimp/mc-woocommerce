@@ -1,12 +1,21 @@
+<?php
+/**
+ * Api key page
+ *
+ * @package    MailChimp_WooCommerce
+ * @subpackage MailChimp_WooCommerce/admin
+ */
+
+?>
 <fieldset class="full connect-button">
 	<input type="hidden" name="mailchimp_active_settings_tab" value="api_key"/>
 	<legend class="screen-reader-text">
 		<span><?php esc_html_e( 'Connect your store to Mailchimp', 'mailchimp-for-woocommerce' ); ?></span>
 	</legend>
-	<a id="mailchimp-oauth-connect" class="button button-primary tab-content-submit oauth-connect"><?php isset($has_valid_api_key) && $has_valid_api_key ? esc_html_e( 'Reconnect account', 'mailchimp-for-woocommerce' ) : esc_html_e( 'Connect account', 'mailchimp-for-woocommerce' ); ?></a>
+	<a id="mailchimp-oauth-connect" class="button button-primary tab-content-submit oauth-connect"><?php isset( $has_valid_api_key ) && $has_valid_api_key ? esc_html_e( 'Reconnect account', 'mailchimp-for-woocommerce' ) : esc_html_e( 'Connect account', 'mailchimp-for-woocommerce' ); ?></a>
 	<a class="button create-account" href='#mc-woocommerce-create-account'>Create account</a>
-	<input type="hidden" id="<?php echo $this->plugin_name; ?>-mailchimp-api-key" name="<?php echo $this->plugin_name; ?>[mailchimp_api_key]" value="<?php echo isset( $options['mailchimp_api_key'] ) ? esc_html($options['mailchimp_api_key']) : ''; ?>" required/>
-	<?php if ( isset($has_valid_api_key) && $has_valid_api_key ) : ?>
+	<input type="hidden" id="<?php echo esc_attr( $this->plugin_name ); ?>-mailchimp-api-key" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_api_key]" value="<?php echo isset( $options['mailchimp_api_key'] ) ? esc_html( $options['mailchimp_api_key'] ) : ''; ?>" required/>
+	<?php if ( isset( $has_valid_api_key ) && $has_valid_api_key ) : ?>
 		<p id="mailchimp-oauth-api-key-valid"><?php esc_html_e( 'Already connected. You can reconnect with another Mailchimp account if you want.', 'mailchimp-for-woocommerce' ); ?></p>
 	<?php endif; ?>
 	<p id="mailchimp-oauth-waiting" class="oauth-description"><?php esc_html_e( 'Connecting. A new window will open with Mailchimp\'s OAuth service. Please log-in and we will take care of the rest.', 'mailchimp-for-woocommerce' ); ?></p>
@@ -36,18 +45,18 @@
 			<div id="mc-woocommerce-create-account-step-1" class="mc-woocommerce-create-account-step">
 				<fieldset>
 					<?php $user_id = get_current_user_id(); ?>
-					<input id="org" name="org" type="hidden" value="<?php echo get_bloginfo( 'name' ); ?>">
+					<input id="org" name="org" type="hidden" value="<?php echo esc_html( get_bloginfo( 'name' ) ); ?>">
 					<div class="box">
 						<label for="first_name">
 							<span> <?php esc_html_e( 'First name', 'mailchimp-for-woocommerce' ); ?></span>
 						</label>
-						<input required type="text" id="first_name" name="first_name" value="<?php echo get_user_meta( $user_id, 'first_name', true ); ?>"/>
+						<input required type="text" id="first_name" name="first_name" value="<?php echo esc_html( get_user_meta( $user_id, 'first_name', true ) ); ?>"/>
 					</div>
 					<div class="box">
 						<label for="last_name">
 							<span> <?php esc_html_e( 'Last name', 'mailchimp-for-woocommerce' ); ?></span>
 						</label>
-						<input required type="text" id="last_name" name="last_name" value="<?php echo get_user_meta( $user_id, 'last_name', true ); ?>"/>
+						<input required type="text" id="last_name" name="last_name" value="<?php echo esc_html( get_user_meta( $user_id, 'last_name', true ) ); ?>"/>
 					</div>
 					<div class="box">
 						<label for="email">
@@ -106,7 +115,7 @@
 						<input required type="text" id="zip" name="zip"/>
 					</div>
 					<div class="box box-half">
-						<label for="<?php echo $this->plugin_name; ?>[store_country]">
+						<label for="<?php echo esc_attr( $this->plugin_name ); ?>[store_country]">
 							<span> <?php esc_html_e( 'Country', 'mailchimp-for-woocommerce' ); ?></span>
 						</label>
 						<?php
@@ -137,7 +146,7 @@
 						<input required type="text" id="phone" name="phone"/>
 					</div>
 					<div class="box">
-						<label for="<?php echo $this->plugin_name; ?>-store-timezone-label">
+						<label for="<?php echo esc_attr( $this->plugin_name ); ?>-store-timezone-label">
 							<span><?php esc_html_e( 'Timezone', 'mailchimp-for-woocommerce' ); ?></span>
 						</label>
 						<div class="mailchimp-select-wrapper">
@@ -200,7 +209,7 @@
 				</fieldset>
 			</div>
 			<div class="modal-footer">
-				©2001–<?php echo date( 'Y' ); ?> All Rights Reserved. Mailchimp® is a registered trademark of The Rocket Science Group. Cookie Preferences, Privacy, and Terms.
+				©2001–<?php echo esc_html( gmdate( 'Y' ) ); ?> All Rights Reserved. Mailchimp® is a registered trademark of The Rocket Science Group. Cookie Preferences, Privacy, and Terms.
 			</div>
 		</div>
 	</div>

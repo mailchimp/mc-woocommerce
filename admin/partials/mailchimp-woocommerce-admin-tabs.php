@@ -130,7 +130,7 @@ if ( isset( $options['mailchimp_api_key'] ) ) {
 								?>
 							</div>
 							<div class="connect-buttons">
-								<?php include_once 'tabs/api_key.php'; ?>
+								<?php include_once 'tabs/api-key.php'; ?>
 							</div>
 					<?php endif; ?>
 					<div class="mc-woocommerce-wizard-btn">
@@ -261,21 +261,21 @@ if ( isset( $options['mailchimp_api_key'] ) ) {
 					}
 					?>
 				</div>
-				<input type="hidden" name="<?php echo esc_html( $this->plugin_name ); ?>[mailchimp_active_tab]" value="<?php echo esc_attr( $active_tab ); ?>"/>
+				<input type="hidden" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_active_tab]" value="<?php echo esc_attr( $active_tab ); ?>"/>
 				<?php if ( 'store_info' === $active_tab && $has_valid_api_key ) : ?>
-					<?php include_once 'tabs/store_info.php'; ?>
+					<?php include_once 'tabs/store-info.php'; ?>
 				<?php endif; ?>
 				<?php if ( 'newsletter_settings' === $active_tab ) : ?>
-					<?php include_once 'tabs/newsletter_settings.php'; ?>
+					<?php include_once 'tabs/newsletter-settings.php'; ?>
 				<?php endif; ?>
 				<?php if ( 'sync' === $active_tab && $show_sync_tab ) : ?>
-					<?php include_once 'tabs/store_sync.php'; ?>
+					<?php include_once 'tabs/store-sync.php'; ?>
 				<?php endif; ?>
 				<?php if ( 'logs' === $active_tab && $show_sync_tab ) : ?>
 					<?php include_once 'tabs/logs.php'; ?>
 				<?php endif; ?>
 				<?php if ( 'plugin_settings' === $active_tab && $show_sync_tab ) : ?>
-					<?php include_once 'tabs/plugin_settings.php'; ?>
+					<?php include_once 'tabs/plugin-settings.php'; ?>
 				<?php endif; ?>
 				<?php if ( mailchimp_is_configured() ) : ?>
 					<div class="box"> 

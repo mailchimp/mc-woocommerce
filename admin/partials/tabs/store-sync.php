@@ -1,6 +1,16 @@
 <?php
-if (!isset($handler)) {
-    $handler = MailChimp_WooCommerce_Admin::instance();
+/**
+ * Store sync page
+ *
+ * @package    MailChimp_WooCommerce
+ * @subpackage MailChimp_WooCommerce/admin
+ */
+
+$verified_nonce = check_admin_referer( 'mailchimp_woocommerce_options', 'mailchimp_woocommerce_nonce' );
+?>
+<?php
+if ( ! isset( $handler ) ) {
+	$handler = MailChimp_WooCommerce_Admin::instance();
 }
 $store_id = mailchimp_get_store_id();
 
@@ -8,8 +18,12 @@ $product_count     = mailchimp_get_product_count();
 $order_count       = mailchimp_get_order_count();
 $promo_rules_count = mailchimp_count_posts( 'shop_coupon' );
 
-$mailchimp_total_products    = $mailchimp_total_orders = $mailchimp_total_promo_rules = 0;
-$mailchimp_total_subscribers = $mailchimp_total_unsubscribed = $mailchimp_total_transactional = 0;
+$mailchimp_total_products      = 0;
+$mailchimp_total_orders        = 0;
+$mailchimp_total_promo_rules   = 0;
+$mailchimp_total_subscribers   = 0;
+$mailchimp_total_unsubscribed  = 0;
+$mailchimp_total_transactional = 0;
 
 $store_syncing     = false;
 $last_updated_time = get_option( 'mailchimp-woocommerce-resource-last-updated' );
@@ -37,10 +51,13 @@ if ( ! empty( $last_updated_time ) ) {
 if ( (bool) get_site_transient( 'mailchimp_woocommerce_start_sync' ) ) {
 	MailChimp_WooCommerce_Admin::connect()->startSync();
 }
+$mailchimp_api = mailchimp_get_api();
+$store         = $mailchimp_api ? $mailchimp_api->getStoreIfAvailable( $store_id ) : null;
 
-if ( ( $mailchimp_api = mailchimp_get_api() ) && ( $store = $mailchimp_api->getStoreIfAvailable( $store_id ) ) ) {
-	$store_syncing = $store->isSyncing();
-	if ( ( $account_details = $handler->getAccountDetails() ) ) {
+if ( $store ) {
+	$store_syncing   = $store->isSyncing();
+	$account_details = $handler->getAccountDetails();
+	if ( $account_details ) {
 		$account_name = $account_details['account_name'];
 	}
 	try {
@@ -85,41 +102,37 @@ if ( ( $mailchimp_api = mailchimp_get_api() ) && ( $store = $mailchimp_api->getS
 ?>
 <input type="hidden" name="mailchimp_active_settings_tab" value="store_sync"/>
 <div class="sync-content-wrapper">
-	
 	<div class="box box-half">
 		<div class="sync-stats-wrapper overview-stats-store">
 			<div class="box">
-				<strong><?php esc_html_e( 'Account Connected', 'mailchimp-for-woocommerce' ); ?>:</strong> <?php echo esc_html($account_name); ?>
+				<strong><?php esc_html_e( 'Account Connected', 'mailchimp-for-woocommerce' ); ?>:</strong> <?php echo esc_html( $account_name ); ?>
 			</div> 
 			<div class="box">
-				<strong><?php esc_html_e( 'Audience Connected', 'mailchimp-for-woocommerce' ); ?>:</strong> <?php echo esc_html($mailchimp_list_name); ?>
+				<strong><?php esc_html_e( 'Audience Connected', 'mailchimp-for-woocommerce' ); ?>:</strong> <?php echo esc_html( $mailchimp_list_name ); ?>
 			</div> 
 		</div>
 	</div>
-
 	<div class="box box-half">
-		
-		
 		<div class="sync-stats-wrapper last-updated">
-			<div class="box" >
+			<div class="box">
 				<strong><?php esc_html_e( 'Sync Status:', 'mailchimp-for-woocommerce' ); ?></strong>
 				<?php if ( $last_updated_time ) : ?>
 					<?php if ( mailchimp_is_done_syncing() ) : ?>
 						<?php esc_html_e( 'Completed', 'mailchimp-for-woocommerce' ); ?>
 					<?php else : ?>
 						<?php esc_html_e( 'Running', 'mailchimp-for-woocommerce' ); ?>
-						<img class="sync-loader" src="<?php echo plugin_dir_url( __FILE__ ) . 'images/3dotpurple.gif'; ?>"/>
+						<img class="sync-loader" src="<?php echo esc_attr( plugin_dir_url( __FILE__ ) . 'images/3dotpurple.gif' ); ?>"/>
 					<?php endif; ?>        
 				<?php elseif ( $sync_started_at && ! $sync_completed_at ) : ?>
 					<?php esc_html_e( 'Initial sync in progress', 'mailchimp-for-woocommerce' ); ?>
-					<img class="sync-loader" src="<?php echo plugin_dir_url( __FILE__ ) . 'images/3dotpurple.gif'; ?>"/>
+					<img class="sync-loader" src="<?php echo esc_attr( plugin_dir_url( __FILE__ ) . 'images/3dotpurple.gif' ); ?>"/>
 				<?php endif; ?>
 			</div>    
-			<div class="box" >   
+			<div class="box">
 				<strong><?php esc_html_e( 'Last Updated:', 'mailchimp-for-woocommerce' ); ?></strong>
 				<i id="mailchimp_last_updated">
 					<?php if ( $last_updated_time ) : ?>
-						<?php echo $last_updated_time->format( __( 'D, M j, Y g:i A', 'mailchimp-for-woocommerce' ) ); ?>
+						<?php echo esc_html( $last_updated_time->format( 'D, M j, Y g:i A' ) ); ?>
 					<?php else : ?>
 						<?php esc_html_e( 'Starting...', 'mailchimp-for-woocommerce' ); ?>
 					<?php endif; ?>
@@ -129,9 +142,6 @@ if ( ( $mailchimp_api = mailchimp_get_api() ) && ( $store = $mailchimp_api->getS
 	</div>
 </div>
 <div class="sync-content-wrapper">
-	
-   
-	
 	<div class="box box-half">
 		<div class="sync-stats-wrapper sync-stats-store">
 			<div class="box sync-stats-card promo_rules" >
@@ -166,36 +176,33 @@ if ( ( $mailchimp_api = mailchimp_get_api() ) && ( $store = $mailchimp_api->getS
 			</div>
 		</div>
 	</div>
-	
 	<div class="box box-half">
-
 		<div class="sync-stats-wrapper sync-stats-audience">
 			<div class="box sync-stats-card subscribers" >
 				<div class="sync-stats-card-content">
 					<span class="card_label"><strong><?php esc_html_e( 'Subscribers', 'mailchimp-for-woocommerce' ); ?></strong></span>
 					<span class="card_count" id="mailchimp_subscriber_count"><?php echo number_format( $mailchimp_total_subscribers ); ?></span>
-					<img class="sync-loader" src="<?php echo plugin_dir_url( __FILE__ ) . 'images/3dotpurple.gif'; ?>"/>
+					<img class="sync-loader" src="<?php echo esc_attr( plugin_dir_url( __FILE__ ) . 'images/3dotpurple.gif' ); ?>"/>
 				</div>
 			</div>
 			<div class="box sync-stats-card transactional" >
 				<div class="sync-stats-card-content">
 					<span class="card_label"><strong><?php esc_html_e( 'Transactional', 'mailchimp-for-woocommerce' ); ?></strong></span>
 					<span class="card_count" id="mailchimp_transactional_count"><?php echo number_format( $mailchimp_total_transactional ); ?></span>
-					<img class="sync-loader" src="<?php echo plugin_dir_url( __FILE__ ) . 'images/3dotpurple.gif'; ?>"/>
+					<img class="sync-loader" src="<?php echo esc_attr( plugin_dir_url( __FILE__ ) . 'images/3dotpurple.gif' ); ?>"/>
 				</div>
 			</div>
 			<div class="box sync-stats-card unsubscribed" >
 				<div class="sync-stats-card-content">
 					<span class="card_label"><strong><?php esc_html_e( 'Unsubscribed', 'mailchimp-for-woocommerce' ); ?></strong></span>
 					<span class="card_count" id="mailchimp_unsubscribed_count"><?php echo number_format( $mailchimp_total_unsubscribed ); ?></span>
-					<img class="sync-loader" src="<?php echo plugin_dir_url( __FILE__ ) . 'images/3dotpurple.gif'; ?>"/>
+					<img class="sync-loader" src="<?php echo esc_attr( plugin_dir_url( __FILE__ ) . 'images/3dotpurple.gif' ); ?>"/>
 				</div>
 			</div>
 		</div>
 	</div>
 </div>
-
-<?php $show_resync = $mailchimp_api && ( ! $store_syncing || isset( $_GET['resync'] ) && $_GET['resync'] === '1' ); ?>
+<?php $show_resync = $mailchimp_api && ( ! $store_syncing || isset( $_GET['resync'] ) && '1' === $_GET['resync'] ); ?>
 <div class="sync-content-wrapper sync-more-wrapper">
 	<div class="box box-half support-container">
 		<div class="content ">
@@ -271,7 +278,6 @@ if ( ( $mailchimp_api = mailchimp_get_api() ) && ( $store = $mailchimp_api->getS
 			</ul>
 		</div>
 	</div>
-
 	<div class="box box-half resync-container">
 		<div class="content ">
 			<h3 style="padding-top: 1em;"><?php esc_html_e( 'Synchronization', 'mailchimp-for-woocommerce' ); ?></h3>
@@ -280,10 +286,10 @@ if ( ( $mailchimp_api = mailchimp_get_api() ) && ( $store = $mailchimp_api->getS
 				<?php esc_html_e( 'You can safely resync your audience at any time without losing any of your e-commerce data.', 'mailchimp-for-woocommerce' ); ?>
 			</p>
 			<?php if ( $show_resync ) : ?>
-				<?php submit_button( __( 'Resync now', 'mailchimp-for-woocommerce' ), 'primary mc-woocommerce-resync-button'); ?>
+				<?php submit_button( __( 'Resync now', 'mailchimp-for-woocommerce' ), 'primary mc-woocommerce-resync-button' ); ?>
 			<?php else : ?>
 				<?php submit_button( __( 'Resync now', 'mailchimp-for-woocommerce' ), 'mc-woocommerce-resync-button', 'submit', true, array( 'disabled' => true ) ); ?>
-				<p class="description"><?php _e( 'Sync is running. Please wait until it finishes.', 'mailchimp-for-woocommerce' ); ?></p>
+				<p class="description"><?php esc_html_e( 'Sync is running. Please wait until it finishes.', 'mailchimp-for-woocommerce' ); ?></p>
 			<?php endif; ?>
 		</div>
 	</div>

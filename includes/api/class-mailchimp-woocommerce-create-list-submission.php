@@ -8,168 +8,157 @@
  * Date: 7/8/16
  * Time: 4:16 PM
  */
-class MailChimp_WooCommerce_CreateListSubmission
-{
-    /**
-     * @var array
-     */
-    protected $props = array();
+class MailChimp_WooCommerce_CreateListSubmission {
 
-    /**
-     * @param $name
-     * @return $this
-     */
-    public function setName($name)
-    {
-        $this->props['name'] = $name;
+	/**
+	 * @var array
+	 */
+	protected $props = array();
 
-        return $this;
-    }
+	/**
+	 * @param $name
+	 * @return $this
+	 */
+	public function setName( $name ) {
+		$this->props['name'] = $name;
 
-    /**
-     * @param $bool
-     * @return $this
-     */
-    public function setUseArchiveBar($bool)
-    {
-        $this->props['use_archive_bar'] = (bool) $bool;
+		return $this;
+	}
 
-        return $this;
-    }
+	/**
+	 * @param $bool
+	 * @return $this
+	 */
+	public function setUseArchiveBar( $bool ) {
+		$this->props['use_archive_bar'] = (bool) $bool;
 
-    /**
-     * @param $reminder
-     * @return $this
-     */
-    public function setPermissionReminder($reminder)
-    {
-        $this->props['permission_reminder'] = $reminder;
+		return $this;
+	}
 
-        return $this;
-    }
+	/**
+	 * @param $reminder
+	 * @return $this
+	 */
+	public function setPermissionReminder( $reminder ) {
+		$this->props['permission_reminder'] = $reminder;
 
-    /**
-     * @param $email
-     * @return $this
-     */
-    public function setNotifyOnSubscribe($email)
-    {
-        $this->props['notify_on_subscribe'] = $email;
+		return $this;
+	}
 
-        return $this;
-    }
+	/**
+	 * @param $email
+	 * @return $this
+	 */
+	public function setNotifyOnSubscribe( $email ) {
+		$this->props['notify_on_subscribe'] = $email;
+
+		return $this;
+	}
 
 	/**
 	 * @param $email
 	 *
 	 * @return $this
 	 */
-    public function setNotifyOnUnSubscribe($email)
-    {
-        $this->props['notify_on_unsubscribe'] = $email;
+	public function setNotifyOnUnSubscribe( $email ) {
+		$this->props['notify_on_unsubscribe'] = $email;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * @param $bool
-     * @return $this
-     */
-    public function setEmailTypeOption($bool)
-    {
-        $this->props['email_type_option'] = (bool) $bool;
+	/**
+	 * @param $bool
+	 * @return $this
+	 */
+	public function setEmailTypeOption( $bool ) {
+		$this->props['email_type_option'] = (bool) $bool;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * @param bool $public
-     * @return $this
-     */
-    public function setVisibility($public = true)
-    {
-        $this->props['visibility'] = $public ? 'pub' : 'prv';
+	/**
+	 * @param bool $public
+	 * @return $this
+	 */
+	public function setVisibility( $public = true ) {
+		$this->props['visibility'] = $public ? 'pub' : 'prv';
 
-        return $this;
-    }
+		return $this;
+	}
 
 	/**
 	 * @param false $doi
 	 *
 	 * @return $this
 	 */
-    public function setDoi($doi = false)
-    {
-        $this->props['double_optin'] = (bool) $doi;
+	public function setDoi( $doi = false ) {
+		$this->props['double_optin'] = (bool) $doi;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * @param $name
-     * @param $email
-     * @param $subject
-     * @param string $language
-     * @return $this
-     */
-    public function setCampaignDefaults($name, $email, $subject, $language = 'en')
-    {
-        $this->props['campaign_defaults'] = array(
-            'from_name' => $name,
-            'from_email' => $email,
-            'subject' => $subject,
-            'language' => $language,
-        );
+	/**
+	 * @param $name
+	 * @param $email
+	 * @param $subject
+	 * @param string  $language
+	 * @return $this
+	 */
+	public function setCampaignDefaults( $name, $email, $subject, $language = 'en' ) {
+		$this->props['campaign_defaults'] = array(
+			'from_name'  => $name,
+			'from_email' => $email,
+			'subject'    => $subject,
+			'language'   => $language,
+		);
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * @param MailChimp_WooCommerce_Address $address
-     * @return $this
-     */
-    public function setContact(MailChimp_WooCommerce_Address $address)
-    {
-        $data = array();
+	/**
+	 * @param MailChimp_WooCommerce_Address $address
+	 * @return $this
+	 */
+	public function setContact( MailChimp_WooCommerce_Address $address ) {
+		$data = array();
 
-        if (($company = $address->getCompany()) && !empty($company)) {
-            $data['company'] = $company;
-        }
+		if ( ( $company = $address->getCompany() ) && ! empty( $company ) ) {
+			$data['company'] = $company;
+		}
 
-        if (($street = $address->getAddress1()) && !empty($address)) {
-            $data['address1'] = $street;
-        }
+		if ( ( $street = $address->getAddress1() ) && ! empty( $address ) ) {
+			$data['address1'] = $street;
+		}
 
-        if (($city = $address->getCity()) && !empty($city)) {
-            $data['city'] = $city;
-        }
+		if ( ( $city = $address->getCity() ) && ! empty( $city ) ) {
+			$data['city'] = $city;
+		}
 
-        if (($state = $address->getProvince()) && !empty($state)) {
-            $data['state'] = $state;
-        }
+		if ( ( $state = $address->getProvince() ) && ! empty( $state ) ) {
+			$data['state'] = $state;
+		}
 
-        if (($zip = $address->getPostalCode()) && !empty($zip)) {
-            $data['zip'] = $zip;
-        }
+		if ( ( $zip = $address->getPostalCode() ) && ! empty( $zip ) ) {
+			$data['zip'] = $zip;
+		}
 
-        if (($country = $address->getCountry()) && !empty($country)) {
-            $data['country'] = $country;
-        }
+		if ( ( $country = $address->getCountry() ) && ! empty( $country ) ) {
+			$data['country'] = $country;
+		}
 
-        if (($phone = $address->getPhone()) && !empty($phone)) {
-            $data['phone'] = $phone;
-        }
+		if ( ( $phone = $address->getPhone() ) && ! empty( $phone ) ) {
+			$data['phone'] = $phone;
+		}
 
-        $this->props['contact'] = $data;
+		$this->props['contact'] = $data;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * @return array
-     */
-    public function getSubmission()
-    {
-        return $this->props;
-    }
+	/**
+	 * @return array
+	 */
+	public function getSubmission() {
+		return $this->props;
+	}
 }

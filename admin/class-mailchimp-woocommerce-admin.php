@@ -99,7 +99,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 	/**
 	 * @param $hook
-     * @since    1.0.0
+	 * @since    1.0.0
 	 */
 	public function enqueue_styles( $hook ) {
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin.css', array(), $this->version . '.21' );
@@ -115,6 +115,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 	/**
 	 * Register the JavaScript for the admin area.
+	 *
 	 * @param $hook
 	 * @since    1.0.0
 	 */
@@ -217,7 +218,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * Setup Feedback Survey Form
 	 *
 	 * @since    2.1.15
-     * @return bool
+	 * @return bool
 	 */
 	public function setup_survey_form() {
 		if ( is_admin() ) {
@@ -242,7 +243,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @param $links
 	 *
 	 * @return array
-     * @since    1.0.0
+	 * @since    1.0.0
 	 */
 	public function add_action_links( $links ) {
 		$settings_link = array(
@@ -307,7 +308,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			// if we don't have the server address set, let's save it to be used with curl requests
 			if ( ! mailchimp_get_data( 'SERVER_ADDR' ) ) {
 				if ( isset( $_SERVER ) && isset( $_SERVER['SERVER_ADDR'] ) && ! empty( $_SERVER['SERVER_ADDR'] ) ) {
-					mailchimp_set_data( 'SERVER_ADDR', sanitize_text_field($_SERVER['SERVER_ADDR']) );
+					mailchimp_set_data( 'SERVER_ADDR', sanitize_text_field( $_SERVER['SERVER_ADDR'] ) );
 				}
 			}
 
@@ -326,7 +327,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				}
 			}
 
-			$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field($_GET['tab']) : ( $this->getOption( 'active_tab' ) ? $this->getOption( 'active_tab' ) : 'api_key' );
+			$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : ( $this->getOption( 'active_tab' ) ? $this->getOption( 'active_tab' ) : 'api_key' );
 			if ( $active_tab == 'sync' && get_option( 'mailchimp-woocommerce-sync.initial_sync' ) == 1 && get_option( 'mailchimp-woocommerce-sync.completed_at' ) > 0 ) {
 				$this->mailchimp_show_initial_sync_message();
 			}
@@ -530,9 +531,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$new_currency_code = null;
 
 		if ( isset( $_POST['woo_multi_currency_params'] ) ) {
-			$new_currency_code = sanitize_text_field($_POST['currency_default']);
+			$new_currency_code = sanitize_text_field( $_POST['currency_default'] );
 		} elseif ( isset( $_POST['woocommerce_currency'] ) ) {
-			$new_currency_code = sanitize_text_field($_POST['woocommerce_currency']);
+			$new_currency_code = sanitize_text_field( $_POST['woocommerce_currency'] );
 		}
 
 		$data = $this->mailchimp_set_store_currency_code( $new_currency_code );
@@ -677,7 +678,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 			case 'logs':
 				if ( isset( $_POST['log_file'] ) && ! empty( $_POST['log_file'] ) ) {
-					set_site_transient( 'mailchimp-woocommerce-view-log-file', sanitize_text_field($_POST['log_file']), 30 );
+					set_site_transient( 'mailchimp-woocommerce-view-log-file', sanitize_text_field( $_POST['log_file'] ), 30 );
 				}
 
 				$data = array(
@@ -801,7 +802,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	public function mailchimp_woocommerce_ajax_oauth_status() {
 		$this->adminOnlyMiddleware();
 
-		$url = esc_url_raw($_POST['url']);
+		$url = esc_url_raw( $_POST['url'] );
 		// set the default headers to NOTHING because the oauth server will block
 		// any non standard header that it was not expecting to receive and it was
 		// preventing folks from being able to connect.
@@ -832,7 +833,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$args = array(
 			'domain' => site_url(),
 			'secret' => get_site_transient( 'mailchimp-woocommerce-oauth-secret' ),
-			'token'  => sanitize_text_field($_POST['token']),
+			'token'  => sanitize_text_field( $_POST['token'] ),
 		);
 
 		$pload = array(
@@ -863,8 +864,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	public function mailchimp_woocommerce_ajax_create_account_check_username() {
 		$this->adminOnlyMiddleware();
 
-		$username = sanitize_text_field($_POST['username']);
-		$response = wp_remote_get( 'https://woocommerce.mailchimpapp.com/api/usernames/available/' . $username);
+		$username = sanitize_text_field( $_POST['username'] );
+		$response = wp_remote_get( 'https://woocommerce.mailchimpapp.com/api/usernames/available/' . $username );
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
 			wp_send_json_error( $response );
@@ -897,29 +898,28 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	/**
 	 * @return array
 	 */
-	protected function getPostData()
-    {
-	    $data = $_POST['data'];
+	protected function getPostData() {
+		$data = $_POST['data'];
 
-	    // try to figure out user IP address
-	    if ( $_SERVER['REMOTE_ADDR'] == '::1' || $_SERVER['REMOTE_ADDR'] == '127.0.0.1' ) {
-		    $data['ip_address'] = '127.0.0.1';
-	    } else {
-		    $data['ip_address'] = isset( $_SERVER['HTTP_CLIENT_IP'] ) ? $_SERVER['HTTP_CLIENT_IP'] : ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'] );
-	    }
+		// try to figure out user IP address
+		if ( $_SERVER['REMOTE_ADDR'] == '::1' || $_SERVER['REMOTE_ADDR'] == '127.0.0.1' ) {
+			$data['ip_address'] = '127.0.0.1';
+		} else {
+			$data['ip_address'] = isset( $_SERVER['HTTP_CLIENT_IP'] ) ? $_SERVER['HTTP_CLIENT_IP'] : ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'] );
+		}
 
-	    return array(
-		    'headers' => array(
-			    'Content-type' => 'application/json',
-		    ),
-		    'body'    => json_encode( $data ),
-		    'timeout' => 30,
-	    );
-    }
+		return array(
+			'headers' => array(
+				'Content-type' => 'application/json',
+			),
+			'body'    => json_encode( $data ),
+			'timeout' => 30,
+		);
+	}
 
 	public function mailchimp_woocommerce_ajax_support_form() {
 		$this->adminOnlyMiddleware();
-		$pload = $this->getPostData();
+		$pload    = $this->getPostData();
 		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/support', $pload );
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
@@ -981,7 +981,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 	public function mailchimp_woocommerce_ajax_create_account_signup() {
 		$this->adminOnlyMiddleware();
-		$pload = $this->getPostData();
+		$pload    = $this->getPostData();
 		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/signup/', $pload );
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
@@ -1293,17 +1293,16 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	/**
 	 * @return array|bool|mixed|object|null
 	 */
-	public function validateApiKey()
-    {
-        try {
-            return $this->hasValidApiKey();
-        } catch (Exception $e) {
-            return false;
-        }
-    }
+	public function validateApiKey() {
+		try {
+			return $this->hasValidApiKey();
+		} catch ( Exception $e ) {
+			return false;
+		}
+	}
 
 	/**
-	 * @param null $data
+	 * @param null  $data
 	 * @param false $throw_if_not_valid
 	 *
 	 * @return array|bool|mixed|object|null
@@ -1340,9 +1339,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			}
 
 			return $this->api()->hasList( $this->getOption( 'mailchimp_list' ) );
-        } catch (Exception $e) {
-		    return false;
-        }
+		} catch ( Exception $e ) {
+			return false;
+		}
 	}
 
 	/**
@@ -1376,9 +1375,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			if ( ! $this->validateApiKey() ) {
 				return false;
 			}
-        } catch (Exception $e) {
-		    return false;
-        }
+		} catch ( Exception $e ) {
+			return false;
+		}
 
 		try {
 			if ( ( $pinged = $this->getCached( 'api-lists' ) ) === null ) {
@@ -1459,7 +1458,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 				if (on_sync_tab === 'yes') {
 					var call_mailchimp_for_stats = function (showSpinner = false) {
-					    let mc_last_updated = jQuery('#mailchimp_last_updated');
+						let mc_last_updated = jQuery('#mailchimp_last_updated');
 						if (showSpinner ) mc_last_updated.next('.spinner').css('visibility', 'visible');
 						jQuery.get(endpoint, function(response) {
 							if (response.success) {
@@ -1529,16 +1528,16 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 									}
 									jQuery('.sync-stats-card.orders .progress-bar').width(ordersProgress+"%");
 
-                                    mc_last_updated.html(response.date);
+									mc_last_updated.html(response.date);
 
 									// only call status again if sync is running.
 									setTimeout(function() {
 										call_mailchimp_for_stats(true);
 									}, 10000);
-                                    mc_last_updated.next('.spinner').css('visibility', 'hidden');
+									mc_last_updated.next('.spinner').css('visibility', 'hidden');
 								}
 								else {
-                                    mc_last_updated.next('.spinner').css('visibility', 'hidden');
+									mc_last_updated.next('.spinner').css('visibility', 'hidden');
 									jQuery('.sync-stats-card .progress-bar-wrapper').hide();
 									jQuery('#mailchimp_order_count').css('display', 'inline-block');
 									jQuery('#mailchimp_product_count').css('display', 'inline-block');
@@ -1665,7 +1664,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @param null $data
 	 *
 	 * @return bool
-     * @throws Exception
+	 * @throws Exception
 	 * @throws MailChimp_WooCommerce_Error
 	 * @throws MailChimp_WooCommerce_RateLimitError
 	 * @throws MailChimp_WooCommerce_ServerError
@@ -1965,7 +1964,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	/**
 	 * @param $opt
 	 * @param $admin_email
-	 * @param false $remove
+	 * @param false       $remove
 	 *
 	 * @return array|WP_Error
 	 */
@@ -2032,7 +2031,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			wp_send_json_error( __( 'No log file provided', 'mailchimp-for-woocommerce' ) );
 			return;
 		}
-		$requested_log_file = sanitize_text_field($_POST['log_file']);
+		$requested_log_file = sanitize_text_field( $_POST['log_file'] );
 		$files              = defined( 'WC_LOG_DIR' ) ? @scandir( WC_LOG_DIR ) : array();
 
 		$logs = array();

@@ -6,7 +6,6 @@
  * @subpackage MailChimp_WooCommerce/admin
  */
 
-$verified_nonce = check_admin_referer( 'mailchimp_woocommerce_options', 'mailchimp_woocommerce_nonce' );
 $files          = defined( 'WC_LOG_DIR' ) && is_dir( WC_LOG_DIR ) ? scandir( WC_LOG_DIR ) : array();
 $logs           = array();
 if ( ! empty( $files ) ) {
@@ -23,7 +22,7 @@ $requested_log_file = get_site_transient( 'mailchimp-woocommerce-view-log-file' 
 delete_site_transient( 'mailchimp-woocommerce-view-log-file' );
 
 if ( empty( $requested_log_file ) ) {
-	$requested_log_file = $verified_nonce && ! empty( $_REQUEST['log_file'] ) ? esc_attr( sanitize_text_field( wp_unslash( $_REQUEST['log_file'] ) ) ) : false;
+	$requested_log_file = ! empty( $_REQUEST['log_file'] ) && check_admin_referer( 'mailchimp_woocommerce_options', 'mailchimp_woocommerce_nonce' ) ? esc_attr( sanitize_text_field( wp_unslash( $_REQUEST['log_file'] ) ) ) : false;
 }
 if ( ! empty( $requested_log_file ) && isset( $logs[ sanitize_title( $requested_log_file ) ] ) ) {
 	$viewed_log = $logs[ sanitize_title( $requested_log_file ) ];

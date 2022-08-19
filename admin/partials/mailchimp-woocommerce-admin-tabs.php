@@ -16,20 +16,18 @@ $options = get_option( $this->plugin_name, array() );
 
 /** Verify that the nonce is correct for the GET and POST variables. */
 
-$verified_nonce = check_admin_referer( 'mailchimp_woocommerce_options', 'mailchimp_woocommerce_nonce' );
-
-$active_tab = $verified_nonce && isset( $_GET['tab'] ) ?
+$active_tab = isset( $_GET['tab'] ) && check_admin_referer( 'mailchimp_woocommerce_options', 'mailchimp_woocommerce_nonce' ) ?
 	esc_attr( sanitize_key( $_GET['tab'] ) ) :
 	( isset( $options['active_tab'] ) ? esc_attr( wp_unslash( $options['active_tab'] ) ) : 'api_key' );
 
 $mc_configured = mailchimp_is_configured();
 
 if ( ! $mc_configured && in_array( $active_tab, array( 'sync', 'logs' ), true ) ) {
-	$active_tab = $verified_nonce && isset( $options['active_tab'] ) ? $options['active_tab'] : 'api_key';
+	$active_tab =  isset( $options['active_tab'] ) && check_admin_referer( 'mailchimp_woocommerce_options', 'mailchimp_woocommerce_nonce' ) ? $options['active_tab'] : 'api_key';
 }
-$is_mailchimp_post = $verified_nonce && isset( $_POST['mailchimp_woocommerce_settings_hidden'] ) && strtolower( esc_attr( sanitize_key( $_POST['mailchimp_woocommerce_settings_hidden'] ) ) ) === 'y';
+$is_mailchimp_post = isset( $_POST['mailchimp_woocommerce_settings_hidden'] ) && check_admin_referer( 'mailchimp_woocommerce_options', 'mailchimp_woocommerce_nonce' ) && strtolower( esc_attr( sanitize_key( $_POST['mailchimp_woocommerce_settings_hidden'] ) ) ) === 'y';
 
-$show_sync_tab = $verified_nonce && isset( $_GET['resync'] ) ? ( esc_attr( sanitize_key( $_GET['resync'] ) ) === '1' ) : false;
+$show_sync_tab = isset( $_GET['resync'] ) && check_admin_referer( 'mailchimp_woocommerce_options', 'mailchimp_woocommerce_nonce' ) ? ( esc_attr( sanitize_key( $_GET['resync'] ) ) === '1' ) : false;
 /**  If we have a transient set to start the sync on this page view, initiate it now that the values have been saved. */
 
 if ( $mc_configured && ! $show_sync_tab && (bool) get_site_transient( 'mailchimp_woocommerce_start_sync' ) ) {

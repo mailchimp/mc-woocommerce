@@ -6,7 +6,6 @@
  * @subpackage MailChimp_WooCommerce/admin
  */
 
-$verified_nonce = check_admin_referer( 'mailchimp_woocommerce_options', 'mailchimp_woocommerce_nonce' );
 ?>
 <?php
 

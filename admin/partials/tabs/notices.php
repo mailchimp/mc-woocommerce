@@ -6,9 +6,8 @@
  * @subpackage MailChimp_WooCommerce/admin
  */
 
-$verified_nonce = check_admin_referer( 'mailchimp_woocommerce_options', 'mailchimp_woocommerce_nonce' );
 ?>
-<?php if ( $verified_nonce && isset( $_GET['error_notice'] ) ) : ?>
+<?php if ( isset( $_GET['error_notice'] ) && check_admin_referer( 'mailchimp_woocommerce_options', 'mailchimp_woocommerce_nonce' ) ) : ?>
 <div class="error notice is-dismissable">
 	<?php
 	switch ( $_GET['error_notice'] ) {
@@ -30,7 +29,7 @@ $verified_nonce = check_admin_referer( 'mailchimp_woocommerce_options', 'mailchi
 </div>
 <?php endif; ?>
 
-<?php if ( $verified_nonce && isset( $_GET['success_notice'] ) ) : ?>
+<?php if ( isset( $_GET['success_notice'] ) && check_admin_referer( 'mailchimp_woocommerce_options', 'mailchimp_woocommerce_nonce' )) : ?>
 	<div class="success notice is-dismissable">
 		<?php
 		switch ( $_GET['error_notice'] ) {

@@ -34,7 +34,7 @@ $newsletter_settings_error = $this->getData( 'errors.mailchimp_list', false );
 
 <?php if ( $newsletter_settings_error ) : ?>
 	<div class="error notice is-dismissable">
-		<p><?php echo esc_html( $newsletter_settings_error ); ?></p>
+		<p><?php echo wp_kses_post( $newsletter_settings_error ); ?></p>
 	</div>
 <?php endif; ?>
 

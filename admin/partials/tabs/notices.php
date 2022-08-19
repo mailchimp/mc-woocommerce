@@ -7,7 +7,7 @@
  */
 
 ?>
-<?php if ( isset( $_GET['error_notice'] ) && check_admin_referer( 'mailchimp_woocommerce_options', 'mailchimp_woocommerce_nonce' ) ) : ?>
+<?php if ( isset( $_GET['error_notice'] ) ) : ?>
 <div class="error notice is-dismissable">
 	<?php
 	switch ( $_GET['error_notice'] ) {
@@ -29,7 +29,7 @@
 </div>
 <?php endif; ?>
 
-<?php if ( isset( $_GET['success_notice'] ) && check_admin_referer( 'mailchimp_woocommerce_options', 'mailchimp_woocommerce_nonce' )) : ?>
+<?php if ( isset( $_GET['success_notice'] ) ) : ?>
 	<div class="success notice is-dismissable">
 		<?php
 		switch ( $_GET['error_notice'] ) {

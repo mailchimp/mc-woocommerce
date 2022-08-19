@@ -9,6 +9,7 @@
 ?>
 <?php
 
+$allowed_html = array( 'br' => array() );
 $handler = MailChimp_WooCommerce_Admin::connect();
 
 // if we don't have a valid api key we need to redirect back to the 'api_key' tab.
@@ -112,15 +113,15 @@ if ( ! isset( $options ) ) {
 	<div class="box" >
 		<p>
 			<?php
-				echo sprintf(
-					/* translators: %1$s - The Currency name and format (ex: USD | US Dollar) %2$s - Timezone name or offset (ex: America/New_York or UTC-4:00) %3$s and %5$s- <a> tag open %4$s - </a> tag close*/
-					esc_html__( 'We\'ve detected that your WooCommerce store\'s currency is <b>%1$s</b> (%3$schange%4$s), and the WordPress timezone is <b>%2$s</b> (%5$schange%4$s).', 'mailchimp-for-woocommerce' ),
-					esc_html__( isset( $current_currency_data ) ? $current_currency . ' | ' . $current_currency_data['name'] : $current_currency ),
-					esc_html__( mailchimp_get_timezone( true ) ),
-					esc_html( '<a href="' . admin_url( 'admin.php?page=wc-settings#woocommerce_currency' ) . '" title="' . __( 'General Settings' ) . '">' ),
-					esc_html( '</a>' ),
-					esc_html( '<a href="' . admin_url( 'options-general.php#timezone_string' ) . '" title="' . __( 'WooCommerce Settings' ) . '">' )
-				);
+				echo wp_kses_post(sprintf(
+				/* translators: %1$s - The Currency name and format (ex: USD | US Dollar) %2$s - Timezone name or offset (ex: America/New_York or UTC-4:00) %3$s and %5$s- <a> tag open %4$s - </a> tag close*/
+					__( 'We\'ve detected that your WooCommerce store\'s currency is <b>%1$s</b> (%3$schange%4$s), and the WordPress timezone is <b>%2$s</b> (%5$schange%4$s).', 'mailchimp-for-woocommerce' ),
+					esc_attr( isset( $current_currency_data ) ? $current_currency . ' | ' . $current_currency_data['name'] : $current_currency ),
+					mailchimp_get_timezone( true ) ,
+					'<a href="' . admin_url( 'admin.php?page=wc-settings#woocommerce_currency' ) . '" title="' . __( 'General Settings' ) . '">',
+					'</a>',
+					'<a href="' . admin_url( 'options-general.php#timezone_string' ) . '" title="' . __( 'WooCommerce Settings' ) . '">'
+				));
 				?>
 		</p>
 	</div>

@@ -86,7 +86,7 @@ class MailChimp_WooCommerce_Public {
     {
         if (apply_filters( 'mailchimp_add_inline_footer_script', true)) {
             if (($fragment = mailchimp_get_connected_site_script_fragment()) && !empty($fragment)) {
-                echo esc_js($fragment);
+                echo $fragment;
             }
         }
 	}

@@ -402,7 +402,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             'data' => $data,
         ));
 
-        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($product->post->ID), 5);
+        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($product->get_id()), 5);
     }
 
 	/**

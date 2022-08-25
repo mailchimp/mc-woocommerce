@@ -2119,6 +2119,18 @@ class MailChimp_WooCommerce_MailChimpApi {
 	}
 
 	/**
+	 * @return array|bool|mixed|object|null
+	 * @throws MailChimp_WooCommerce_Error
+	 * @throws MailChimp_WooCommerce_RateLimitError
+	 * @throws MailChimp_WooCommerce_ServerError
+	 */
+	public function getJourneys() {
+		$journeys = $this->get( 'customer-journeys/journeys', array( 'limit' => 1000 ));
+		return is_array($journeys) && array_key_exists( 'journeys', $journeys) ?
+			$journeys : array();
+	}
+
+	/**
 	 * @param $url
 	 * @param null $params
 	 *

@@ -60,6 +60,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 		$list_id       = mailchimp_get_list_id();
 		$url           = get_option( 'siteurl' );
 		$options       = (array) get_option( 'mailchimp-woocommerce' );
+		$last_sync_at  = mailchimp_get_data('sync.last_loop_at');
 
 		try {
 			$product_count  = mailchimp_get_product_count();
@@ -133,6 +134,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 
 			$automations  = array();
 			$merge_fields = array();
+			$journeys     = array();
 			try {
 				foreach ( $api->getAutomations( $list_id ) as $automation ) {
 					$created       = new DateTime( $automation['create_time'] );
@@ -148,6 +150,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 				}
 				$merge_fields = $api->mergeFields( $list_id );
 				$merge_fields = $merge_fields['merge_fields'];
+				$journeys     = $api->getJourneys();
 			} catch ( Throwable $e ) {
 				if ( $e->getCode() === 503 ) {
 					$akamai_block = true;
@@ -260,6 +263,10 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 							'key'   => 'order_sync_completed',
 							'value' => get_option( 'mailchimp-woocommerce-sync.orders.completed_at' ),
 						),
+						'last_loop_at'              => (object) array(
+							'key' => 'last_loop_at',
+							'value', $last_sync_at,
+						),
 					)
 				),
 				'meta'                  => $this->getMeta(),
@@ -309,6 +316,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 					),
 					'account_info'            => $account_info,
 					'automations'             => isset( $automations ) ? $automations : null,
+					'journeys'                => isset( $journeys ) ? $journeys : null,
 					'merge_fields'            => isset( $merge_fields ) ? (object) $merge_fields : null,
 				),
 				'merge_tags' => array(),
@@ -460,6 +468,10 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 				'value' => $this->hasWPCronEnabled(),
 			),
 			array(
+				'key'   => 'WP CLI Enabled',
+				'value' => defined('WP_CLI') && WP_CLI,
+			),
+			array(
 				'key'   => 'Curl Enabled',
 				'value' => function_exists( 'curl_init' ),
 			),
@@ -474,6 +486,10 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 			array(
 				'key'   => 'WooCommerce Version',
 				'value' => defined( 'WC_VERSION' ) ? WC_VERSION : null,
+			),
+			array(
+				'key'   => 'Action Scheduler Version',
+				'value' => $this->getActionSchedulerVersion(),
 			),
 			array(
 				'key'   => 'Theme Name',
@@ -506,9 +522,23 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 			( defined( 'DISABLE_WP_CRON' ) && ! DISABLE_WP_CRON );
 	}
 
+	/**
+	 * @return mixed|null
+	 */
 	public function getCurlVersion() {
 		$version = function_exists( 'curl_version' ) ? curl_version() : null;
 		return is_array( $version ) ? $version['version'] : null;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getActionSchedulerVersion() {
+		if ( !class_exists('ActionScheduler_Versions') ) {
+			return 'none';
+		}
+		$job = new ActionScheduler_Versions();
+		return (string) $job->latest_version();
 	}
 
 	public function getActivePlugins() {

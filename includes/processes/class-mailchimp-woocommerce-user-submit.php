@@ -124,15 +124,27 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
             return false;
         }
 
+	    $user_subscribed = get_user_meta($this->id, 'mailchimp_woocommerce_is_subscribed', true);
+        $unsaved = '' === $user_subscribed || null === $user_subscribed;
+
         // if we have a null value, we need to grab the correct user meta for is_subscribed
         if (is_null($this->subscribed)) {
-            $user_subscribed = get_user_meta($this->id, 'mailchimp_woocommerce_is_subscribed', true);
-            if ($user_subscribed === '' || $user_subscribed === null) {
+            if ( $unsaved ) {
                 mailchimp_log('member.sync', "Skipping sync for {$email} because no subscriber status has been set");
                 static::$handling_for = null;
                 return false;
             }
             $this->subscribed = (bool) $user_subscribed;
+        }
+
+        // if the meta we've stored on the user is not equal to the value being passed to Mailchimp
+	    // let's update that value here.
+        if ( $unsaved || ( (bool) $this->subscribed && (bool) $user_subscribed !== (bool) $this->subscribed ) ) {
+        	update_user_meta(
+        		$this->id,
+		        'mailchimp_woocommerce_is_subscribed',
+		        $this->subscribed ? '1' : '0'
+	        );
         }
 
         $api_key = isset($options['mailchimp_api_key']) ? $options['mailchimp_api_key'] : false;
@@ -285,7 +297,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 
                 try {
                     $uses_doi = isset($status_meta['requires_double_optin']) && $status_meta['requires_double_optin'];
-                    $status_if_new = $uses_doi ? 'pending' : true;
+                    $status_if_new = $uses_doi && $this->subscribed ? 'pending' : (bool) $this->subscribed;
 
                     $api->subscribe($list_id, $user->user_email, $status_if_new, $merge_fields, null, $language, $gdpr_fields);
                     

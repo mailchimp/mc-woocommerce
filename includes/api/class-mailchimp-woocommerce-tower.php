@@ -264,8 +264,8 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 							'value' => get_option( 'mailchimp-woocommerce-sync.orders.completed_at' ),
 						),
 						'last_loop_at'              => (object) array(
-							'key' => 'last_loop_at',
-							'value', $last_sync_at,
+							'key'   => 'last_loop_at',
+							'value' => $last_sync_at,
 						),
 					)
 				),
@@ -534,11 +534,15 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 	 * @return string
 	 */
 	public function getActionSchedulerVersion() {
+
+		// do a query to make sure this exists.
 		if ( !class_exists('ActionScheduler_Versions') ) {
 			return 'none';
 		}
-		$job = new ActionScheduler_Versions();
-		return (string) $job->latest_version();
+		if ( ! ActionScheduler::is_initialized( __FUNCTION__ ) ) {
+			return 'Not Initialized In REST API';
+		}
+		return (string) ActionScheduler_Versions::instance()->latest_version();
 	}
 
 	public function getActivePlugins() {

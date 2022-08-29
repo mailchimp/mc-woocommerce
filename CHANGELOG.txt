@@ -1,6 +1,6 @@
 == Changelog ==
 = 2.7.3 =
-* updates for WPSC recommendations
+* updates for WPCS recommendations
 = 2.7.2 =
 * fix for mailchimp account creation credentials
 * updates to PHP warning handling

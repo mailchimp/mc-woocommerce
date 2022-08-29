@@ -388,12 +388,12 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			$message = sprintf(
 			/* translators: Placeholders %1$s - opening strong HTML tag, %2$s - closing strong HTML tag, %3$s - opening link HTML tag, %4$s - closing link HTML tag */
 				esc_html__(
-					'%1$sMailchimp for Woocommerce%2$s has not added the webhook to Mailchimp, %3$svisit the plugin settings page and synchronize your store%4$s.',
+					'%1$sMailchimp for Woocommerce%2$s has not added the webhook to Mailchimp, Please enable “Remote Diagnostics” from the plugin’s Settings tab and open a support ticket with us on %3$sGitHub%4$s.',
 					'mailchimp-for-woocommerce'
 				),
 				'<strong>',
 				'</strong>',
-				'<a href="' . admin_url( 'admin.php?page=' ) . $this->plugin_name . '">',
+				'<a href="https://github.com/mailchimp/mc-woocommerce/wiki/Webhook-Has-Not-Been-Setup-Error">',
 				'</a>'
 			);
 			printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );

@@ -148,9 +148,9 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 						'stats'      => $automation['report_summary'],
 					);
 				}
-				$merge_fields = $api->mergeFields( $list_id );
-				$merge_fields = $merge_fields['merge_fields'];
-				$journeys     = $api->getJourneys();
+				$merge_fields   = $api->mergeFields( $list_id );
+				$merge_fields   = $merge_fields['merge_fields'];
+				$journeys       = $api->getJourneys();
 			} catch ( Throwable $e ) {
 				if ( $e->getCode() === 503 ) {
 					$akamai_block = true;

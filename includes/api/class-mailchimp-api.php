@@ -2126,8 +2126,15 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 */
 	public function getJourneys() {
 		$journeys = $this->get( 'customer-journeys/journeys', array( 'limit' => 1000 ));
-		return is_array($journeys) && array_key_exists( 'journeys', $journeys) ?
-			$journeys : array();
+		return is_array($journeys) && array_key_exists( 'journeys', $journeys) ? $journeys['journeys'] : array();
+	}
+
+	/**
+	 * @param $id
+	 */
+	public function getJourney($id)
+	{
+		return $this->get("customer-journeys/journeys/{$id}");
 	}
 
 	/**

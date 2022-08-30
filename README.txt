@@ -4,7 +4,7 @@ Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.9
 Tested up to: 6.0
-Stable tag: 2.7
+Stable tag: 2.7.3
 Requires PHP: 7.4
 WC requires at least: 3.5
 WC tested up to: 6.8

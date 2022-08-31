@@ -4,10 +4,11 @@ class MailChimp_WooCommerce_Rest_Api
 {
     protected static $namespace = 'mailchimp-for-woocommerce/v1';
 
-    /**
-     * @param $path
-     * @return string
-     */
+	/**
+	 * @param $path
+	 *
+	 * @return string
+	 */
     public static function url($path)
     {
         return esc_url_raw(rest_url(static::$namespace.'/'.ltrim($path, '/')));
@@ -100,19 +101,21 @@ class MailChimp_WooCommerce_Rest_Api
         return ($cap === 'manage_woocommerce' || $cap === 'manage_options' );
     }
 
-    /**
-     * @param WP_REST_Request $request
-     * @return WP_Error|WP_REST_Response
-     */
+	/**
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_REST_Response
+	 */
     public function ping(WP_REST_Request $request)
     {
         return $this->mailchimp_rest_response(array('success' => true));
     }
 
-    /**
-     * @param WP_REST_Request $request
-     * @return WP_REST_Response
-     */
+	/**
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_REST_Response
+	 */
     public function post_disconnect_survey(WP_REST_Request $request)
     {
         // need to send a post request to
@@ -133,10 +136,11 @@ class MailChimp_WooCommerce_Rest_Api
         return $this->mailchimp_rest_response($result);
     }
 
-    /**
-     * @param WP_REST_Request $request
-     * @return WP_REST_Response
-     */
+	/**
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_REST_Response
+	 */
     public function get_sync_stats(WP_REST_Request $request)
     {
         // if the queue is running in the console - we need to say tell the response why it's not going to fire this way.
@@ -163,17 +167,17 @@ class MailChimp_WooCommerce_Rest_Api
         //     $promo_rules = $api->getPromoRules($store_id, 1, 1, 1);
         //     $mailchimp_total_promo_rules = $promo_rules['total_items'];
         //     if (isset($promo_rules_count['publish']) && $mailchimp_total_promo_rules > $promo_rules_count['publish']) $mailchimp_total_promo_rules = $promo_rules_count['publish'];
-        // } catch (\Exception $e) { $mailchimp_total_promo_rules = 0; }
+        // } catch (Exception $e) { $mailchimp_total_promo_rules = 0; }
         // try {
         //     $products = $api->products($store_id, 1, 1);
         //     $mailchimp_total_products = $products['total_items'];
         //     if ($mailchimp_total_products > $product_count) $mailchimp_total_products = $product_count;
-        // } catch (\Exception $e) { $mailchimp_total_products = 0; }
+        // } catch (Exception $e) { $mailchimp_total_products = 0; }
         // try {
         //     $orders = $api->orders($store_id, 1, 1);
         //     $mailchimp_total_orders = $orders['total_items'];
         //     if ($mailchimp_total_orders > $order_count) $mailchimp_total_orders = $order_count;
-        // } catch (\Exception $e) { $mailchimp_total_orders = 0; }
+        // } catch (Exception $e) { $mailchimp_total_orders = 0; }
 
         $date = mailchimp_date_local('now');
 
@@ -193,26 +197,28 @@ class MailChimp_WooCommerce_Rest_Api
             // 'products_page' => get_option('mailchimp-woocommerce-sync.products.current_page'),
             // 'orders_page' => get_option('mailchimp-woocommerce-sync.orders.current_page'),
             
-            'date' => $date->format( __('D, M j, Y g:i A', 'mailchimp-for-woocommerce')),
+            'date' => $date ? $date->format( __('D, M j, Y g:i A', 'mailchimp-for-woocommerce')) : '',
             'has_started' => mailchimp_has_started_syncing() || ($order_count != $mailchimp_total_orders),
             'has_finished' => mailchimp_is_done_syncing() && ($order_count == $mailchimp_total_orders),
+	        'last_loop_at' => mailchimp_get_data('sync.last_loop_at'),
         ));
     }
-    
-    /**
-     * @param WP_REST_Request $request
-     * @return WP_Error|WP_REST_Response
-     */
+
+	/**
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_REST_Response
+	 */
     public function dismiss_review_banner(WP_REST_Request $request)
     {
         return $this->mailchimp_rest_response(array('success' => delete_option('mailchimp-woocommerce-sync.initial_sync')));
     }
 
-    /**
-     * Syncs members with updated statuses on Mailchimp panel
-     * @param WP_REST_Request $request
-     * @return WP_Error|WP_REST_Response
-     */
+	/**
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_REST_Response
+	 */
     public function member_sync(WP_REST_Request $request)
     {
         $this->authorize('webhook.token', $request);
@@ -225,21 +231,25 @@ class MailChimp_WooCommerce_Rest_Api
         return $this->mailchimp_rest_response(array('success' => false));
     }
 
-    /**
-     * Returns an alive signal to confirm url exists to mailchimp system
-     * @param WP_REST_Request $request
-     * @return WP_Error|WP_REST_Response
-     */
+	/**
+	 * Returns an alive signal to confirm url exists to mailchimp system
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_REST_Response
+	 */
     public function member_sync_alive_signal(WP_REST_Request $request)
     {
         $this->authorize('webhook.token', $request);
         return $this->mailchimp_rest_response(array('success' => true));
     }
 
-    /**
-     * @param WP_REST_Request $request
-     * @return WP_Error|WP_REST_Response
-     */
+	/**
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_REST_Response
+	 * @throws MailChimp_WooCommerce_Error
+	 * @throws MailChimp_WooCommerce_ServerError
+	 */
     public function get_tower_report(WP_REST_Request $request)
     {
         $this->authorize('tower.token', $request);
@@ -248,10 +258,15 @@ class MailChimp_WooCommerce_Rest_Api
         );
     }
 
-    /**
-     * @param WP_REST_Request $request
-     * @return WP_Error|WP_REST_Response
-     */
+	/**
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_REST_Response
+	 * @throws MailChimp_WooCommerce_Error
+	 * @throws MailChimp_WooCommerce_RateLimitError
+	 * @throws MailChimp_WooCommerce_ServerError
+	 * @throws Throwable
+	 */
     public function handle_tower_action(WP_REST_Request $request)
     {
         $this->authorize('tower.token', $request);
@@ -351,7 +366,7 @@ class MailChimp_WooCommerce_Rest_Api
                                 'description' => "Set up a new webhook at {$webhook['url']}",
                                 'type' => 'success',
                             ];
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             $response = [
                                 'title' => "Store Webhooks",
                                 'description' => $e->getMessage(),
@@ -366,7 +381,7 @@ class MailChimp_WooCommerce_Rest_Api
                 break;
             case 'resync_all':
                 $service = new MailChimp_Service();
-                $service->removePointers(true, true);
+                $service->removePointers();
                 MailChimp_WooCommerce_Admin::instance()->startSync();
                 $service->setData('sync.config.resync', true);
                 $response = [
@@ -446,10 +461,11 @@ class MailChimp_WooCommerce_Rest_Api
         return $this->mailchimp_rest_response($response);
     }
 
-    /**
-     * @param WP_REST_Request $request
-     * @return WP_Error|WP_REST_Response
-     */
+	/**
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_REST_Response
+	 */
     public function get_tower_logs(WP_REST_Request $request)
     {
         $this->authorize('tower.token', $request);
@@ -458,10 +474,14 @@ class MailChimp_WooCommerce_Rest_Api
         );
     }
 
-    /**
-     * @param WP_REST_Request $request
-     * @return WP_Error|WP_REST_Response
-     */
+	/**
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_REST_Response
+	 * @throws MailChimp_WooCommerce_Error
+	 * @throws MailChimp_WooCommerce_RateLimitError
+	 * @throws MailChimp_WooCommerce_ServerError
+	 */
     public function get_tower_resource(WP_REST_Request $request)
     {
         $this->authorize('tower.token', $request);
@@ -476,11 +496,11 @@ class MailChimp_WooCommerce_Rest_Api
             ));
         }
 
+        $platform = null;
+        $mc = null;
         $store_id = mailchimp_get_store_id();
-
         switch ($body['resource']) {
             case 'order':
-                $platform = null;
                 $order = get_post($body['resource_id']);
                 $mc = !$order->ID ? null : mailchimp_get_api()->getStoreOrder($store_id, $order->ID);
                 if ($order->ID) {
@@ -500,7 +520,7 @@ class MailChimp_WooCommerce_Rest_Api
                 if ($mc = mailchimp_get_api()->getCustomer($store_id, $hashed)) {
                     try {
                         $member = mailchimp_get_api()->member(mailchimp_get_list_id(), $mc->getEmailAddress());
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         $member = null;
                     }
                     $mc = array(
@@ -531,9 +551,7 @@ class MailChimp_WooCommerce_Rest_Api
                 break;
             case 'promo_code':
                 $platform = new WC_Coupon($body['resource_id']);
-                if ($mc = mailchimp_get_api()->getPromoRuleWithCodes($store_id, $body['resource_id'])) {
-                    //$mc = $mc->toArray();
-                }
+	            $mc = mailchimp_get_api()->getPromoRuleWithCodes($store_id, $body['resource_id']);
                 break;
         }
 
@@ -545,10 +563,11 @@ class MailChimp_WooCommerce_Rest_Api
         ));
     }
 
-    /**
-     * @param WP_REST_Request $request
-     * @return WP_REST_Response
-     */
+	/**
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_REST_Response
+	 */
     public function get_tower_sync_stats(WP_REST_Request $request)
     {
         $this->authorize('tower.token', $request);
@@ -568,17 +587,17 @@ class MailChimp_WooCommerce_Rest_Api
             if ($mailchimp_total_products > $product_count) {
                 $mailchimp_total_products = $product_count;
             }
-        } catch (\Exception $e) { $mailchimp_total_products = 0; }
+        } catch (Exception $e) { $mailchimp_total_products = 0; }
         try {
             $mailchimp_total_customers = $api->getCustomerCount($store_id);
-        } catch (\Exception $e) { $mailchimp_total_customers = 0; }
+        } catch (Exception $e) { $mailchimp_total_customers = 0; }
         try {
             $orders = $api->orders($store_id, 1, 1);
             $mailchimp_total_orders = $orders['total_items'];
             if ($mailchimp_total_orders > $order_count) {
                 $mailchimp_total_orders = $order_count;
             }
-        } catch (\Exception $e) { $mailchimp_total_orders = 0; }
+        } catch (Exception $e) { $mailchimp_total_orders = 0; }
 
         // but we need to do it just in case.
         return $this->mailchimp_rest_response(array(
@@ -595,10 +614,11 @@ class MailChimp_WooCommerce_Rest_Api
         ));
     }
 
-    /**
-     * @param null $params
-     * @return MailChimp_WooCommerce_Tower
-     */
+	/**
+	 * @param null $params
+	 *
+	 * @return MailChimp_WooCommerce_Tower
+	 */
     private function tower($params = null)
     {
         if (!is_array($params)) $params = array();
@@ -608,12 +628,12 @@ class MailChimp_WooCommerce_Rest_Api
         return $job;
     }
 
-
-    /**
-     * @param array $data
-     * @param int $status
-     * @return WP_REST_Response
-     */
+	/**
+	 * @param $data
+	 * @param int $status
+	 *
+	 * @return WP_REST_Response
+	 */
     private function mailchimp_rest_response($data, $status = 200)
     {
         if (!is_array($data)) $data = array();
@@ -622,12 +642,12 @@ class MailChimp_WooCommerce_Rest_Api
         return $response;
     }
 
-    /**
-     * @param $key
-     * @param WP_REST_Request $request
-     * @return bool
-     * @throws WC_REST_Exception
-     */
+	/**
+	 * @param $key
+	 * @param WP_REST_Request $request
+	 *
+	 * @return bool
+	 */
     private function authorize($key, WP_REST_Request $request)
     {
         $allowed_keys = array(
@@ -651,10 +671,11 @@ class MailChimp_WooCommerce_Rest_Api
         return true;
     }
 
-    /**
-     * @param WP_REST_Request $request
-     * @return false|mixed|string
-     */
+	/**
+	 * @param WP_REST_Request $request
+	 *
+	 * @return false|mixed|string
+	 */
     private function getAuthToken(WP_REST_Request $request)
     {
         if (($token = $this->getBearerTokenHeader($request))) {
@@ -663,10 +684,11 @@ class MailChimp_WooCommerce_Rest_Api
         return $this->getAuthQueryStringParam($request);
     }
 
-    /**
-     * @param WP_REST_Request $request
-     * @return false|string
-     */
+	/**
+	 * @param WP_REST_Request $request
+	 *
+	 * @return false|string
+	 */
     private function getBearerTokenHeader(WP_REST_Request $request)
     {
         $header = $request->get_header('Authorization');
@@ -680,10 +702,11 @@ class MailChimp_WooCommerce_Rest_Api
         return false;
     }
 
-    /**
-     * @param WP_REST_Request $request
-     * @return false|mixed
-     */
+	/**
+	 * @param WP_REST_Request $request
+	 *
+	 * @return false|mixed
+	 */
     private function getAuthQueryStringParam(WP_REST_Request $request)
     {
         $params = $request->get_query_params();

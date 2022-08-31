@@ -59,7 +59,7 @@ class MailChimp_WooCommerce_Public {
 	 * @since    1.0.0
 	 */
 	public function enqueue_scripts() {
-		wp_register_script($this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-public.min.js', array(), $this->version.'.01', false);
+		wp_register_script($this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-public.min.js', array(), $this->version.'.01');
 		wp_localize_script($this->plugin_name, 'mailchimp_public_data', array(
 			'site_url' => site_url(),
 			'ajax_url' => admin_url('admin-ajax.php'),
@@ -131,7 +131,7 @@ class MailChimp_WooCommerce_Public {
         }
 
         $api = mailchimp_get_api();
-        $GDPRfields = $api->getCachedGDPRFields(mailchimp_get_list_id(), 5);
+        $GDPRfields = $api->getCachedGDPRFields(mailchimp_get_list_id());
 
         $checkbox = '';
 
@@ -160,7 +160,7 @@ class MailChimp_WooCommerce_Public {
                     $member = mailchimp_get_api()->member(mailchimp_get_list_id(), $user->user_email);
                     $current_gdpr_fields = isset($member['marketing_permissions']) ?
                         $member['marketing_permissions'] : array();
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     //mailchimp_error("GDPR ERROR", $e->getMessage());
                 }
             }

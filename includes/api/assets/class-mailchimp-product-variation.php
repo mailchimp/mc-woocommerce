@@ -8,243 +8,230 @@
  * Date: 3/8/16
  * Time: 2:17 PM
  */
-class MailChimp_WooCommerce_ProductVariation
-{
-    protected $id = null;
-    protected $title = null;
-    protected $url = null;
-    protected $sku = null;
-    protected $price = null;
-    protected $inventory_quantity = null;
-    protected $image_url = null;
-    protected $backorders = null;
-    protected $visibility = null;
+class MailChimp_WooCommerce_ProductVariation {
 
-    /**
-     * @return array
-     */
-    public function getValidation()
-    {
-        return array(
-            'id' => 'required|string',
-            'title' => 'required|string',
-            'url' => 'url',
-            'sku' => 'string',
-            'price' => 'numeric',
-            'inventory_quantity' => 'integer',
-            'image_url' => 'url',
-            'backorders' => 'string',
-            'visibility' => 'string',
-        );
-    }
+	protected $id                 = null;
+	protected $title              = null;
+	protected $url                = null;
+	protected $sku                = null;
+	protected $price              = null;
+	protected $inventory_quantity = null;
+	protected $image_url          = null;
+	protected $backorders         = null;
+	protected $visibility         = null;
 
-    /**
-     * @return null
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
+	/**
+	 * @return array
+	 */
+	public function getValidation() {
+		return array(
+			'id'                 => 'required|string',
+			'title'              => 'required|string',
+			'url'                => 'url',
+			'sku'                => 'string',
+			'price'              => 'numeric',
+			'inventory_quantity' => 'integer',
+			'image_url'          => 'url',
+			'backorders'         => 'string',
+			'visibility'         => 'string',
+		);
+	}
 
-    /**
-     * @param null $id
-     * @return MailChimp_WooCommerce_ProductVariation
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
+	/**
+	 * @return null
+	 */
+	public function getId() {
+		return $this->id;
+	}
 
-        return $this;
-    }
+	/**
+	 * @param null $id
+	 * @return MailChimp_WooCommerce_ProductVariation
+	 */
+	public function setId( $id ) {
+		$this->id = $id;
 
-    /**
-     * @return null
-     */
-    public function getTitle()
-    {
-        return $this->title;
-    }
+		return $this;
+	}
 
-    /**
-     * @param null $title
-     * @return MailChimp_WooCommerce_ProductVariation
-     */
-    public function setTitle($title)
-    {
-        $this->title = strip_tags($title);
+	/**
+	 * @return null
+	 */
+	public function getTitle() {
+		return $this->title;
+	}
 
-        return $this;
-    }
+	/**
+	 * @param null $title
+	 * @return MailChimp_WooCommerce_ProductVariation
+	 */
+	public function setTitle( $title ) {
+		$this->title = strip_tags( $title );
 
-    /**
-     * @return null
-     */
-    public function getUrl()
-    {
-        return $this->url;
-    }
+		return $this;
+	}
 
-    /**
-     * @param null $url
-     * @return MailChimp_WooCommerce_ProductVariation
-     */
-    public function setUrl($url)
-    {
-        $this->url = $url;
+	/**
+	 * @return null
+	 */
+	public function getUrl() {
+		return $this->url;
+	}
 
-        return $this;
-    }
+	/**
+	 * @param null $url
+	 * @return MailChimp_WooCommerce_ProductVariation
+	 */
+	public function setUrl( $url ) {
+		$this->url = $url;
 
-    /**
-     * @return null
-     */
-    public function getSku()
-    {
-        return $this->sku;
-    }
+		return $this;
+	}
 
-    /**
-     * @param null $sku
-     * @return MailChimp_WooCommerce_ProductVariation
-     */
-    public function setSku($sku)
-    {
-        $this->sku = $sku;
+	/**
+	 * @return null
+	 */
+	public function getSku() {
+		return $this->sku;
+	}
 
-        return $this;
-    }
+	/**
+	 * @param null $sku
+	 * @return MailChimp_WooCommerce_ProductVariation
+	 */
+	public function setSku( $sku ) {
+		$this->sku = $sku;
 
-    /**
-     * @return null
-     */
-    public function getPrice()
-    {
-        return $this->price;
-    }
+		return $this;
+	}
 
-    /**
-     * @param null $price
-     * @return MailChimp_WooCommerce_ProductVariation
-     */
-    public function setPrice($price)
-    {
-        $this->price = $price;
+	/**
+	 * @return null
+	 */
+	public function getPrice() {
+		return $this->price;
+	}
 
-        return $this;
-    }
+	/**
+	 * @param null $price
+	 * @return MailChimp_WooCommerce_ProductVariation
+	 */
+	public function setPrice( $price ) {
+		$this->price = $price;
 
-    /**
-     * @return null
-     */
-    public function getInventoryQuantity()
-    {
-        return $this->inventory_quantity;
-    }
+		return $this;
+	}
 
-    /**
-     * @param null $inventory_quantity
-     * @return MailChimp_WooCommerce_ProductVariation
-     */
-    public function setInventoryQuantity($inventory_quantity)
-    {
-        $this->inventory_quantity = $inventory_quantity;
+	/**
+	 * @return null
+	 */
+	public function getInventoryQuantity() {
+		return $this->inventory_quantity;
+	}
 
-        return $this;
-    }
+	/**
+	 * @param null $inventory_quantity
+	 * @return MailChimp_WooCommerce_ProductVariation
+	 */
+	public function setInventoryQuantity( $inventory_quantity ) {
+		$this->inventory_quantity = $inventory_quantity;
 
-    /**
-     * @return null
-     */
-    public function getImageUrl()
-    {
-        return !empty($this->image_url) ? $this->image_url : null;
-    }
+		return $this;
+	}
 
-    /**
-     * @param null $image_url
-     * @return MailChimp_WooCommerce_ProductVariation
-     */
-    public function setImageUrl($image_url)
-    {
-        $this->image_url = $image_url;
+	/**
+	 * @return null|string
+	 */
+	public function getImageUrl() {
+		return ! empty( $this->image_url ) ? (string) $this->image_url : null;
+	}
 
-        return $this;
-    }
+	/**
+	 * @param null $image_url
+	 * @return MailChimp_WooCommerce_ProductVariation
+	 */
+	public function setImageUrl( $image_url ) {
+		$this->image_url = $image_url;
 
-    /**
-     * @return null
-     */
-    public function getBackorders()
-    {
-        return $this->backorders;
-    }
+		return $this;
+	}
 
-    /**
-     * @param null $backorders
-     * @return MailChimp_WooCommerce_ProductVariation
-     */
-    public function setBackorders($backorders)
-    {
-        $this->backorders = $backorders;
+	/**
+	 * @return null
+	 */
+	public function getBackorders() {
+		return $this->backorders;
+	}
 
-        return $this;
-    }
+	/**
+	 * @param null $backorders
+	 * @return MailChimp_WooCommerce_ProductVariation
+	 */
+	public function setBackorders( $backorders ) {
+		$this->backorders = $backorders;
 
-    /**
-     * @return null
-     */
-    public function getVisibility()
-    {
-        return $this->visibility;
-    }
+		return $this;
+	}
 
-    /**
-     * @param null $visibility
-     * @return MailChimp_WooCommerce_ProductVariation
-     */
-    public function setVisibility($visibility)
-    {
-        $this->visibility = $visibility;
+	/**
+	 * @return null
+	 */
+	public function getVisibility() {
+		return $this->visibility;
+	}
 
-        return $this;
-    }
+	/**
+	 * @param null $visibility
+	 * @return MailChimp_WooCommerce_ProductVariation
+	 */
+	public function setVisibility( $visibility ) {
+		$this->visibility = $visibility;
 
-    /**
-     * @return array
-     */
-    public function toArray()
-    {
-        return mailchimp_array_remove_empty(array(
-            'id' => (string) $this->getId(),
-            'title' => $this->getTitle(),
-            'url' => (string) $this->getUrl(),
-            'sku' => (string) $this->getSku(),
-            'price' => $this->getPrice(),
-            'inventory_quantity' => (int) $this->getInventoryQuantity(),
-            'image_url' => (string) $this->getImageUrl(),
-            'backorders' => $this->getBackorders() ? 'true' : 'false',
-            'visibility' => (string) $this->getVisibility(),
-        ));
-    }
+		return $this;
+	}
 
-    /**
-     * @param array $data
-     * @return MailChimp_WooCommerce_ProductVariation
-     */
-    public function fromArray(array $data)
-    {
-        $singles = array(
-            'id', 'title', 'url', 'sku',
-            'price', 'inventory_quantity', 'image_url', 'backorders',
-            'visibility',
-        );
+	/**
+	 * @return array
+	 */
+	public function toArray() {
+		return mailchimp_array_remove_empty(
+			array(
+				'id'                 => (string) $this->getId(),
+				'title'              => $this->getTitle(),
+				'url'                => (string) $this->getUrl(),
+				'sku'                => (string) $this->getSku(),
+				'price'              => $this->getPrice(),
+				'inventory_quantity' => (int) $this->getInventoryQuantity(),
+				'image_url'          => (string) $this->getImageUrl(),
+				'backorders'         => $this->getBackorders() ? 'true' : 'false',
+				'visibility'         => (string) $this->getVisibility(),
+			)
+		);
+	}
 
-        foreach ($singles as $key) {
-            if (array_key_exists($key, $data)) {
-                $this->$key = $data[$key];
-            }
-        }
+	/**
+	 * @param array $data
+	 * @return MailChimp_WooCommerce_ProductVariation
+	 */
+	public function fromArray( array $data ) {
+		$singles = array(
+			'id',
+			'title',
+			'url',
+			'sku',
+			'price',
+			'inventory_quantity',
+			'image_url',
+			'backorders',
+			'visibility',
+		);
 
-        return $this;
-    }
+		foreach ( $singles as $key ) {
+			if ( array_key_exists( $key, $data ) ) {
+				$this->$key = $data[ $key ];
+			}
+		}
+
+		return $this;
+	}
 }

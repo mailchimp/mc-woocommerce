@@ -60,7 +60,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
     abstract protected function complete();
 
     /**
-     * @return bool
+     * @return void
      */
     public function createSyncManagers()
     {
@@ -91,9 +91,9 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
         }
     }
 
-    /**
-     * @return string
-     */
+	/**
+	 * @param $current_page
+	 */
     public function setCurrentPage($current_page)
     {
         $this->current_page = $current_page;
@@ -107,26 +107,25 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
         return $this->current_page;
     }
 
-    /**
-     * @return string
-     */
+	/**
+	 * @return mixed|string
+	 */
     public function getStoreID()
     {
         return mailchimp_get_store_id();
     }
 
-    /**
-     * Task
-     *
-     * Override this method to perform any actions required on each
-     * queue item. Return the modified item for further processing
-     * in the next pass through. Or, return false to remove the
-     * item from the queue.
-     *
-     * @param mixed $item Queue item to iterate over
-     *
-     * @return mixed
-     */
+	/**
+	 * Override this method to perform any actions required on each
+	 * queue item. Return the modified item for further processing
+	 * in the next pass through. Or, return false to remove the
+	 * item from the queue.
+	 *
+	 * @return false
+	 * @throws MailChimp_WooCommerce_Error
+	 * @throws MailChimp_WooCommerce_RateLimitError
+	 * @throws MailChimp_WooCommerce_ServerError
+	 */
     public function handle()
     {
         if (!mailchimp_is_configured()) {
@@ -146,6 +145,9 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
             mailchimp_debug(get_called_class().'@handle', 'store id not loaded');
             return false;
         }
+
+        // set the last loop timestamp
+        mailchimp_set_data( 'sync.last_loop_at', time() );
 
         // if we're being rate limited - we need to pause here.
         if ($this->isBeingRateLimited()) {
@@ -287,10 +289,10 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
 
         if ($time > 0) {
             try {
-                $date = new \DateTime();
+                $date = new DateTime();
                 $date->setTimestamp($time);
                 return $date;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 return false;
             }
         }

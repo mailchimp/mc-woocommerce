@@ -12,10 +12,9 @@
 class MailChimp_WooCommerce_Activator {
 
 	/**
-	 * Short Description. (use period)
-	 *
-	 * Long Description.
-	 *
+	 * @throws MailChimp_WooCommerce_Error
+	 * @throws MailChimp_WooCommerce_RateLimitError
+	 * @throws MailChimp_WooCommerce_ServerError
 	 * @since    1.0.0
 	 */
 	public static function activate() {
@@ -93,11 +92,8 @@ class MailChimp_WooCommerce_Activator {
 		update_site_option('mailchimp_woocommerce_version', mailchimp_environment_variables()->version);
 	}
 
-		/**
-	 * Migrate wp_queue jobs to Action Scheduler
-	 * 
-	 * @param string $code
-	 * @return array $options 
+	/**
+	 *
 	 */
 	public static function migrate_jobs() {
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
@@ -115,6 +111,11 @@ class MailChimp_WooCommerce_Activator {
 		}
 	}
 
+	/**
+	 * @param $job
+	 *
+	 * @return null
+	 */
 	private static function get_possible_job_ids($job) {
 		$id = null;
 		

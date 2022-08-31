@@ -27,9 +27,9 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
         return static::$_instance;
     }
 
-    /**
-     * @param WC_Checkout $checkout
-     */
+	/**
+	 * @param $checkout
+	 */
     public function applyNewsletterField($checkout)
     {
         // some folks have asked to be able to check out on behalf of customers. I guess this makes sense
@@ -40,7 +40,7 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
             $api = mailchimp_get_api();
 
             // get the gdpr fields from the cache - or call it again and save for 5 minutes.
-            $GDPRfields = $api->getCachedGDPRFields(mailchimp_get_list_id(), 5);
+            $GDPRfields = $api->getCachedGDPRFields(mailchimp_get_list_id());
 
             // if the user has chosen to hide the checkbox, don't do anything.
             if (($default_setting = $this->getOption('mailchimp_checkbox_defaults', 'check')) === 'hide') {
@@ -103,9 +103,9 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
         $this->handleStatus($order_id);
     }
 
-    /**
-     * @param WC_Order $order
-     */
+	/**
+	 * @param $order
+	 */
     public function processPayPalNewsletterField($order)
     {
         $this->handleStatus($order->get_id());

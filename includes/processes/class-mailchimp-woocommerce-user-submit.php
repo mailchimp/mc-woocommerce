@@ -20,12 +20,15 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
     public $should_ignore = false;
     public $submit_transactional = true;
 
-    /**
-     * MailChimp_WooCommerce_User_Submit constructor.
-     * @param null $id
-     * @param null $subscribed
-     * @param WP_User|null $updated_data
-     */
+	/**
+	 * MailChimp_WooCommerce_User_Submit constructor.
+	 *
+	 * @param null $id
+	 * @param null $subscribed
+	 * @param null $updated_data
+	 * @param null $language
+	 * @param null $gdpr_fields
+	 */
     public function __construct($id = null, $subscribed = null, $updated_data = null, $language = null, $gdpr_fields = null)
     {
         if (!empty($id)) {
@@ -70,9 +73,9 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
         return $this;
     }
 
-    /**
-     * @return bool
-     */
+	/**
+	 * @return bool
+	 */
     public function handle()
     {
         if (!mailchimp_is_configured()) {
@@ -121,15 +124,27 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
             return false;
         }
 
+	    $user_subscribed = get_user_meta($this->id, 'mailchimp_woocommerce_is_subscribed', true);
+        $unsaved = '' === $user_subscribed || null === $user_subscribed;
+
         // if we have a null value, we need to grab the correct user meta for is_subscribed
         if (is_null($this->subscribed)) {
-            $user_subscribed = get_user_meta($this->id, 'mailchimp_woocommerce_is_subscribed', true);
-            if ($user_subscribed === '' || $user_subscribed === null) {
+            if ( $unsaved ) {
                 mailchimp_log('member.sync', "Skipping sync for {$email} because no subscriber status has been set");
                 static::$handling_for = null;
                 return false;
             }
             $this->subscribed = (bool) $user_subscribed;
+        }
+
+        // if the meta we've stored on the user is not equal to the value being passed to Mailchimp
+	    // let's update that value here.
+        if ( $unsaved || ( (bool) $this->subscribed && (bool) $user_subscribed !== (bool) $this->subscribed ) ) {
+        	update_user_meta(
+        		$this->id,
+		        'mailchimp_woocommerce_is_subscribed',
+		        $this->subscribed ? '1' : '0'
+	        );
         }
 
         $api_key = isset($options['mailchimp_api_key']) ? $options['mailchimp_api_key'] : false;
@@ -200,7 +215,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
                     // update the member tags but fail silently just in case.
                     $api->updateMemberTags(mailchimp_get_list_id(), $email, true);
 
-                    mailchimp_tell_system_about_user_submit($email, $status_meta, 60);
+                    mailchimp_tell_system_about_user_submit($email, $status_meta);
 
                     if ($status_meta['created']) {
                         mailchimp_log('member.sync', 'Subscriber Swap '.$this->updated_data['user_email'].' to '.$email, array(
@@ -238,7 +253,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
                 // update the member tags but fail silently just in case.
                 $api->updateMemberTags(mailchimp_get_list_id(), $email, true);
 
-                mailchimp_tell_system_about_user_submit($email, $status_meta, 60);
+                mailchimp_tell_system_about_user_submit($email, $status_meta);
                 mailchimp_log('member.sync', "Updated Member {$email}", array(
                     'previous_status' => $member_data['status'],
                     'status' => $status_meta['updated'],
@@ -260,7 +275,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
                 // update the member tags but fail silently just in case.
                 $api->updateMemberTags(mailchimp_get_list_id(), $email, true);
 
-                mailchimp_tell_system_about_user_submit($email, $status_meta, 60);
+                mailchimp_tell_system_about_user_submit($email, $status_meta);
                 mailchimp_log('member.sync', "Updated Member {$email}", array(
                     'status' => $member_data['status'],
                     'language' => $language,
@@ -276,26 +291,26 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
             sleep(3);
             mailchimp_error('member.sync.error', mailchimp_error_trace($e, "RateLimited :: user #{$this->id}"));
             $this->retry();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // if we have a 404 not found, we can create the member
             if ($e->getCode() == 404) {
 
                 try {
                     $uses_doi = isset($status_meta['requires_double_optin']) && $status_meta['requires_double_optin'];
-                    $status_if_new = $uses_doi ? 'pending' : true;
+                    $status_if_new = $uses_doi && $this->subscribed ? 'pending' : (bool) $this->subscribed;
 
                     $api->subscribe($list_id, $user->user_email, $status_if_new, $merge_fields, null, $language, $gdpr_fields);
                     
                     // update the member tags but fail silently just in case.
                     $api->updateMemberTags(mailchimp_get_list_id(), $email, true);
 
-                    mailchimp_tell_system_about_user_submit($email, $status_meta, 60);
+                    mailchimp_tell_system_about_user_submit($email, $status_meta);
                     if ($status_meta['created']) {
                         mailchimp_log('member.sync', "Subscribed Member {$user->user_email}", array('status_if_new' => $status_if_new, 'merge_fields' => $merge_fields));
                     } else {
                         mailchimp_log('member.sync', "{$user->user_email} is Pending Double OptIn");
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     mailchimp_log('member.sync', $e->getMessage());
                 }
                 static::$handling_for = null;

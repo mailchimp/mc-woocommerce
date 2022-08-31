@@ -6,22 +6,22 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Job' ) ) {
 		private $attempts = 0;
 
 		/**
-		 * Set attempts
-		*/
+		 * @param $attempts
+		 */
 		public function set_attempts( $attempts ) {
-			$this->attempts = $attempts;
+			$this->attempts = (int) $attempts;
 		}
 
 		/**
-		 * Get attempts
-		*/
+		 * @return int
+		 */
 		public function get_attempts( ) {
 			return $this->attempts;
 		}
 
 		/**
-		 * Reschedule action 4 times
-		*/
+		 * @param int $delay
+		 */
 		public function retry( $delay = 30 ) {
 			$job = $this;
 			if (null == $job->attempts) $job->set_attempts(0);
@@ -34,7 +34,7 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Job' ) ) {
 		 */
 		protected function applyRateLimitedScenario()
 		{
-			mailchimp_set_transient('api-rate-limited', true, 60);
+			mailchimp_set_transient('api-rate-limited', true );
 
 			$this->retry();
 

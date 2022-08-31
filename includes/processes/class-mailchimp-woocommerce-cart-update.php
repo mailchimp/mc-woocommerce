@@ -20,13 +20,15 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
     public $status = false;
 
 
-    /**
-     * MailChimp_WooCommerce_Cart_Update constructor.
-     * @param null $uid
-     * @param null $email
-     * @param null $campaign_id
-     * @param array $cart_data
-     */
+	/**
+	 * MailChimp_WooCommerce_Cart_Update constructor.
+	 *
+	 * @param null $uid
+	 * @param null $email
+	 * @param null $campaign_id
+	 * @param array $cart_data
+	 * @param null $user_language
+	 */
     public function __construct($uid = null, $email = null, $campaign_id = null, array $cart_data = array(), $user_language = null)
     {
         if ($uid) {
@@ -62,10 +64,10 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
      */
     public function assignIP()
     {
-        $this->ip_address = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null;
+        $this->ip_address = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field($_SERVER['REMOTE_ADDR']): null;
 
         if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            $forwarded_address = explode(',',$_SERVER['HTTP_X_FORWARDED_FOR']);
+            $forwarded_address = explode(',', sanitize_text_field($_SERVER['HTTP_X_FORWARDED_FOR']));
             $this->ip_address = $forwarded_address[0];
         }
 
@@ -129,7 +131,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
             if (!empty($this->campaign_id)) {
                 try {
                     $cart->setCampaignID($this->campaign_id, true);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     mailchimp_log('cart_set_campaign_id.error', 'No campaign added to abandoned cart, with provided ID: '. $this->campaign_id. ' :: '. $e->getMessage(). ' :: in '.$e->getFile().' :: on '.$e->getLine());
                 }
             }
@@ -150,7 +152,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
                         $order_total += ($qty * $price);
                     }
                     $products[] = $line;
-                } catch (\Exception $e) {}
+                } catch (Exception $e) {}
             }
 
             if (empty($products)) {
@@ -165,7 +167,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
                     if ($api->addCart($store_id, $cart, false) !== false) {
                         mailchimp_log('abandoned_cart.success', "email: {$customer->getEmailAddress()} :: checkout_url: $checkout_url");
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     // for some reason this happens on carts and we need to make sure that this doesn't prevent
                     // the submission from going through.
                     if (mailchimp_string_contains($e->getMessage(), 'campaign with the')) {
@@ -178,7 +180,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
                         throw $e;
                     }
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
 
                 mailchimp_error('abandoned_cart.error', "email: {$customer->getEmailAddress()} :: attempting product update :: {$e->getMessage()}");
 
@@ -206,7 +208,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
             sleep(3);
             mailchimp_error('cart.error', mailchimp_error_trace($e, "RateLimited :: email {$this->email}"));
             $this->retry();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             update_option('mailchimp-woocommerce-cart-error', $e->getMessage());
             mailchimp_error('abandoned_cart.error', $e);
         }
@@ -214,11 +216,12 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
         return false;
     }
 
-    /**
-     * @param string $hash
-     * @param $item
-     * @return MailChimp_WooCommerce_LineItem
-     */
+	/**
+	 * @param $hash
+	 * @param $item
+	 *
+	 * @return MailChimp_WooCommerce_LineItem
+	 */
     protected function transformLineItem($hash, $item)
     {
         $variant_id = isset($item['variation_id']) && $item['variation_id'] > 0 ? $item['variation_id'] : null;

@@ -1,4 +1,10 @@
 == Changelog ==
+= 2.7.3 =
+* updates for WPCS recommendations
+= 2.7.2 =
+* fix for mailchimp account creation credentials
+* updates to PHP warning handling
+* patches bug related to WPScan
 = 2.7.1 =
 * Fixes the outgoing IP address defaults
 * Fixes webhook creation on plugin install

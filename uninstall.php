@@ -46,7 +46,7 @@ function mailchimp_woocommerce_uninstall() {
                 }
             }
         }
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
         error_log($e->getMessage().' on '.$e->getLine().' in '.$e->getFile());
     }
     mailchimp_remove_communication_status();
@@ -64,7 +64,7 @@ if (!is_multisite()) {
             mailchimp_woocommerce_uninstall();
         }
         restore_current_blog();
-    } catch (\Exception $e) {}
+    } catch (Exception $e) {}
 }
 
 

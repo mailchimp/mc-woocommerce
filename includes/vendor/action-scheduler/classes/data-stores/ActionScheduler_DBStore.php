@@ -45,7 +45,7 @@ class ActionScheduler_DBStore extends ActionScheduler_Store {
 	 * @return int Action ID.
 	 * @throws RuntimeException     Throws exception when saving the action fails.
 	 */
-	public function save_action( ActionScheduler_Action $action, \DateTime $date = null ) {
+	public function save_action( ActionScheduler_Action $action, DateTime $date = null ) {
 		try {
 
 			$this->validate_action( $action );
@@ -81,7 +81,7 @@ class ActionScheduler_DBStore extends ActionScheduler_Store {
 			do_action( 'action_scheduler_stored_action', $action_id );
 
 			return $action_id;
-		} catch ( \Exception $e ) {
+		} catch ( Exception $e ) {
 			/* translators: %s: error message */
 			throw new \RuntimeException( sprintf( __( 'Error saving action: %s', 'action-scheduler' ), $e->getMessage() ), 0 );
 		}
@@ -298,7 +298,7 @@ class ActionScheduler_DBStore extends ActionScheduler_Store {
 			$sql_params   = array_merge( $sql_params, array_values( $statuses ) );
 		}
 
-		if ( $query['date'] instanceof \DateTime ) {
+		if ( $query['date'] instanceof DateTime ) {
 			$date = clone $query['date'];
 			$date->setTimezone( new \DateTimeZone( 'UTC' ) );
 			$date_string  = $date->format( 'Y-m-d H:i:s' );
@@ -307,7 +307,7 @@ class ActionScheduler_DBStore extends ActionScheduler_Store {
 			$sql_params[] = $date_string;
 		}
 
-		if ( $query['modified'] instanceof \DateTime ) {
+		if ( $query['modified'] instanceof DateTime ) {
 			$modified = clone $query['modified'];
 			$modified->setTimezone( new \DateTimeZone( 'UTC' ) );
 			$date_string  = $modified->format( 'Y-m-d H:i:s' );
@@ -550,7 +550,7 @@ class ActionScheduler_DBStore extends ActionScheduler_Store {
 	 *
 	 * @param string $action_id Action ID.
 	 *
-	 * @return \DateTime The local date the action is scheduled to run, or the date that it ran.
+	 * @return DateTime The local date the action is scheduled to run, or the date that it ran.
 	 */
 	public function get_date( $action_id ) {
 		$date = $this->get_date_gmt( $action_id );
@@ -564,7 +564,7 @@ class ActionScheduler_DBStore extends ActionScheduler_Store {
 	 * @param int $action_id Action ID.
 	 *
 	 * @throws \InvalidArgumentException If action cannot be identified.
-	 * @return \DateTime The GMT date the action is scheduled to run, or the date that it ran.
+	 * @return DateTime The GMT date the action is scheduled to run, or the date that it ran.
 	 */
 	protected function get_date_gmt( $action_id ) {
 		/** @var \wpdb $wpdb */
@@ -584,13 +584,13 @@ class ActionScheduler_DBStore extends ActionScheduler_Store {
 	 * Stake a claim on actions.
 	 *
 	 * @param int       $max_actions Maximum number of action to include in claim.
-	 * @param \DateTime $before_date Jobs must be schedule before this date. Defaults to now.
+	 * @param DateTime $before_date Jobs must be schedule before this date. Defaults to now.
 	 * @param array     $hooks Hooks to filter for.
 	 * @param string    $group Group to filter for.
 	 *
 	 * @return ActionScheduler_ActionClaim
 	 */
-	public function stake_claim( $max_actions = 10, \DateTime $before_date = null, $hooks = array(), $group = '' ) {
+	public function stake_claim( $max_actions = 10, DateTime $before_date = null, $hooks = array(), $group = '' ) {
 		$claim_id = $this->generate_claim_id();
 
 		$this->claim_before_date = $before_date;
@@ -620,7 +620,7 @@ class ActionScheduler_DBStore extends ActionScheduler_Store {
 	 *
 	 * @param string    $claim_id Claim Id.
 	 * @param int       $limit Number of action to include in claim.
-	 * @param \DateTime $before_date Should use UTC timezone.
+	 * @param DateTime $before_date Should use UTC timezone.
 	 * @param array     $hooks Hooks to filter for.
 	 * @param string    $group Group to filter for.
 	 *
@@ -628,7 +628,7 @@ class ActionScheduler_DBStore extends ActionScheduler_Store {
 	 * @throws \InvalidArgumentException Throws InvalidArgumentException if group doesn't exist.
 	 * @throws \RuntimeException Throws RuntimeException if unable to claim action.
 	 */
-	protected function claim_actions( $claim_id, $limit, \DateTime $before_date = null, $hooks = array(), $group = '' ) {
+	protected function claim_actions( $claim_id, $limit, DateTime $before_date = null, $hooks = array(), $group = '' ) {
 		/** @var \wpdb $wpdb */
 		global $wpdb;
 

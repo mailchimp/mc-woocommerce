@@ -8,132 +8,131 @@
  * Date: 10/06/17
  * Time: 8:29 AM
  */
-class MailChimp_WooCommerce_Transform_Coupons
-{
-    /**
-     * @param int $page
-     * @param int $limit
-     * @return \stdClass
-     */
-    public function compile($page = 1, $limit = 5)
-    {
-        $response = (object) array(
-            'endpoint' => 'coupons',
-            'page' => $page ? $page : 1,
-            'limit' => (int) $limit,
-            'count' => 0,
-            'stuffed' => false,
-            'items' => array(),
-        );
+class MailChimp_WooCommerce_Transform_Coupons {
 
-        if ((($coupons = $this->getCouponPosts($page, $limit)) && !empty($coupons))) {
-            foreach ($coupons as $post_id) {
-                $response->items[] = $post_id;
-                $response->count++;
-            }
-        }
+	/**
+	 * @param int $page
+	 * @param int $limit
+	 *
+	 * @return object
+	 */
+	public function compile( $page = 1, $limit = 5 ) {
+		$response = (object) array(
+			'endpoint' => 'coupons',
+			'page'     => $page ? $page : 1,
+			'limit'    => (int) $limit,
+			'count'    => 0,
+			'stuffed'  => false,
+			'items'    => array(),
+		);
 
-        $response->stuffed = ($response->count > 0 && (int) $response->count === (int) $limit) ? true : false;
+		if ( ( ( $coupons = $this->getCouponPosts( $page, $limit ) ) && ! empty( $coupons ) ) ) {
+			foreach ( $coupons as $post_id ) {
+				$response->items[] = $post_id;
+				$response->count++;
+			}
+		}
 
-        return $response;
-    }
+		$response->stuffed = $response->count > 0 && (int) $response->count === (int) $limit;
 
-    /**
-     * @param int $post_id
-     * @return MailChimp_WooCommerce_PromoCode
-     */
-    public function transform($post_id)
-    {
-        $resource = new WC_Coupon($post_id);
-        $valid = true;
+		return $response;
+	}
 
-        if (($exp = $resource->get_date_expires()) && current_time('timestamp', true) > $exp->getTimestamp()) {
-            $valid = false;
-        }
+	/**
+	 * @param $post_id
+	 *
+	 * @return MailChimp_WooCommerce_PromoCode
+	 */
+	public function transform( $post_id ) {
+		$resource = new WC_Coupon( $post_id );
+		$valid    = true;
 
-        $rule = new MailChimp_WooCommerce_PromoRule();
+		if ( ( $exp = $resource->get_date_expires() ) && time() > $exp->getTimestamp() ) {
+			$valid = false;
+		}
 
-        $rule->setId($resource->get_id());
-        $rule->setTitle($resource->get_code());
-        $rule->setDescription($resource->get_description());
-        $rule->setEnabled($valid);
-        $rule->setAmount($resource->get_amount('edit'));
+		$rule = new MailChimp_WooCommerce_PromoRule();
 
-        if (!$rule->getDescription()) {
-            $rule->setDescription($resource->get_code());
-        }
+		$rule->setId( $resource->get_id() );
+		$rule->setTitle( $resource->get_code() );
+		$rule->setDescription( $resource->get_description() );
+		$rule->setEnabled( $valid );
+		$rule->setAmount( $resource->get_amount( 'edit' ) );
 
-        switch ($resource->get_discount_type()) {
-            case 'fixed_product':
-            // Support to Woocommerce Free Gift Coupon Plugin 
-            case 'free_gift':
-                $rule->setTypeFixed();
-                $rule->setTargetTypePerItem();
-                break;
+		if ( ! $rule->getDescription() ) {
+			$rule->setDescription( $resource->get_code() );
+		}
 
-            case 'fixed_cart':
-                $rule->setTypeFixed();
-                $rule->setTargetTypeTotal();
-                break;
+		switch ( $resource->get_discount_type() ) {
+			case 'fixed_product':
+				// Support to Woocommerce Free Gift Coupon Plugin
+			case 'free_gift':
+				$rule->setTypeFixed();
+				$rule->setTargetTypePerItem();
+				break;
 
-            case 'percent':
-                $rule->setTypePercentage();
-                $rule->setTargetTypeTotal();
-                $rule->setAmount(($resource->get_amount('edit')/100));
-                break;
-        }
+			case 'fixed_cart':
+				$rule->setTypeFixed();
+				$rule->setTargetTypeTotal();
+				break;
 
-        if (($exp = $resource->get_date_expires())) {
-            $rule->setEndsAt($exp);
-        }
+			case 'percent':
+				$rule->setTypePercentage();
+				$rule->setTargetTypeTotal();
+				$rule->setAmount( ( $resource->get_amount( 'edit' ) / 100 ) );
+				break;
+		}
 
-        $code = new MailChimp_WooCommerce_PromoCode();
+		if ( ( $exp = $resource->get_date_expires() ) ) {
+			$rule->setEndsAt( $exp );
+		}
 
-        $code->setId($resource->get_id());
-        $code->setCode($resource->get_code());
-        $code->setEnabled($valid);
-        $code->setRedemptionURL(get_home_url());
-        $code->setUsageCount($resource->get_usage_count());
+		$code = new MailChimp_WooCommerce_PromoCode();
 
-        // attach the rule for use.
-        $code->attachPromoRule($rule);
+		$code->setId( $resource->get_id() );
+		$code->setCode( $resource->get_code() );
+		$code->setEnabled( $valid );
+		$code->setRedemptionURL( get_home_url() );
+		$code->setUsageCount( $resource->get_usage_count() );
 
-        return $code;
-    }
+		// attach the rule for use.
+		$code->attachPromoRule( $rule );
 
-    /**
-     * @param int $page
-     * @param int $posts
-     * @return array|bool
-     */
-    public function getCouponPosts($page = 1, $posts = 5)
-    {
-        $offset = 0;
-        if ($page > 1) {
-            $offset = (($page - 1) * $posts);
-        }
+		return $code;
+	}
 
-        $args = array(
-            'post_type' => array_merge(array_keys(wc_get_product_types()), array('shop_coupon')),
-            'posts_per_page' => $posts,
-            'offset' => $offset,
-            'orderby' => 'ID',
-            'order' => 'ASC',
-            'fields' => 'ids'
-        );
+	/**
+	 * @param int $page
+	 * @param int $posts
+	 * @return array|bool
+	 */
+	public function getCouponPosts( $page = 1, $posts = 5 ) {
+		$offset = 0;
+		if ( $page > 1 ) {
+			$offset = ( ( $page - 1 ) * $posts );
+		}
 
-        $coupons = get_posts($args);
+		$args = array(
+			'post_type'      => array_merge( array_keys( wc_get_product_types() ), array( 'shop_coupon' ) ),
+			'posts_per_page' => $posts,
+			'offset'         => $offset,
+			'orderby'        => 'ID',
+			'order'          => 'ASC',
+			'fields'         => 'ids',
+		);
 
-        if (empty($coupons)) {
+		$coupons = get_posts( $args );
 
-            sleep(2);
+		if ( empty( $coupons ) ) {
 
-            $coupons = get_posts($args);
-            if (empty($coupons)) {
-                return false;
-            }
-        }
+			sleep( 2 );
 
-        return $coupons;
-    }
+			$coupons = get_posts( $args );
+			if ( empty( $coupons ) ) {
+				return false;
+			}
+		}
+
+		return $coupons;
+	}
 }

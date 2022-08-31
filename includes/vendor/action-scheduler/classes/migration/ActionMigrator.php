@@ -46,7 +46,7 @@ class ActionMigrator {
 		try {
 			$action = $this->source->fetch_action( $source_action_id );
 			$status = $this->source->get_status( $source_action_id );
-		} catch ( \Exception $e ) {
+		} catch ( Exception $e ) {
 			$action = null;
 			$status = '';
 		}
@@ -57,7 +57,7 @@ class ActionMigrator {
 			// delete it and move on
 			try {
 				$this->source->delete_action( $source_action_id );
-			} catch ( \Exception $e ) {
+			} catch ( Exception $e ) {
 				// nothing to do, it didn't exist in the first place
 			}
 			do_action( 'action_scheduler/no_action_to_migrate', $source_action_id, $this->source, $this->destination );
@@ -71,7 +71,7 @@ class ActionMigrator {
 			$last_attempt_date = ( $status !== \ActionScheduler_Store::STATUS_PENDING ) ? $this->source->get_date( $source_action_id ) : null;
 
 			$destination_action_id = $this->destination->save_action( $action, null, $last_attempt_date );
-		} catch ( \Exception $e ) {
+		} catch ( Exception $e ) {
 			do_action( 'action_scheduler/migrate_action_failed', $source_action_id, $this->source, $this->destination );
 
 			return 0; // could not save the action in the new store
@@ -97,7 +97,7 @@ class ActionMigrator {
 			do_action( 'action_scheduler/migrated_action', $source_action_id, $destination_action_id, $this->source, $this->destination );
 
 			return $destination_action_id;
-		} catch ( \Exception $e ) {
+		} catch ( Exception $e ) {
 			// could not delete from the old store
 			$this->source->mark_migrated( $source_action_id );
 			do_action( 'action_scheduler/migrate_action_incomplete', $source_action_id, $destination_action_id, $this->source, $this->destination );

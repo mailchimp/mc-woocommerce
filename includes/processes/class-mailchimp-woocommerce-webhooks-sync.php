@@ -63,7 +63,7 @@ class MailChimp_WooCommerce_WebHooks_Sync extends Mailchimp_Woocommerce_Job
                     'permalink_structure' => get_option('permalink_structure'),
                 ));
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             mailchimp_error('webhook', $e->getMessage());
             mailchimp_set_data('webhook.token', false);
             mailchimp_set_webhook_url(false);

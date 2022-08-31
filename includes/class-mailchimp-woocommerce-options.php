@@ -77,9 +77,9 @@ abstract class MailChimp_WooCommerce_Options
         return $this->version;
     }
 
-    /**
-     * @return string
-     */
+	/**
+	 * @return mixed|string
+	 */
     public function getUniqueStoreID()
     {
         return mailchimp_get_store_id();

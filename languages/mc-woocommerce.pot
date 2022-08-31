@@ -127,7 +127,7 @@ msgstr ""
 #: includes/class-mailchimp-woocommerce-newsletter.php:48
 #: admin/class-mailchimp-woocommerce-admin.php:129
 #: admin/class-mailchimp-woocommerce-admin.php:1080
-#: admin/partials/tabs/newsletter_settings.php:197
+#: admin/partials/tabs/newsletter-settings.php:197
 msgid "Subscribe to our newsletter"
 msgstr ""
 
@@ -136,7 +136,7 @@ msgid "Please select all the ways you would like to hear from us"
 msgstr ""
 
 #: includes/class-mailchimp-woocommerce-rest-api.php:151
-#: admin/partials/tabs/store_sync.php:102
+#: admin/partials/tabs/store-sync.php:102
 msgid "D, M j, Y g:i A"
 msgstr ""
 
@@ -261,7 +261,7 @@ msgstr ""
 
 #. translators: %s - plugin name.
 #: admin/class-mailchimp-woocommerce-admin.php:1090
-#: admin/partials/tabs/newsletter_settings.php:136
+#: admin/partials/tabs/newsletter-settings.php:136
 msgid "You were subscribed to the newsletter from %s"
 msgstr ""
 
@@ -319,153 +319,153 @@ msgstr ""
 msgid "Error loading log file contents"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:26
+#: admin/partials/tabs/newsletter-settings.php:26
 msgid "Audience Settings"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:31
+#: admin/partials/tabs/newsletter-settings.php:31
 msgid "Connect your store with an audience"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:36
+#: admin/partials/tabs/newsletter-settings.php:36
 msgid "Audience name"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:42
+#: admin/partials/tabs/newsletter-settings.php:42
 msgid "Create New Audience"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:46
+#: admin/partials/tabs/newsletter-settings.php:46
 msgid "Select Audience"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:70
+#: admin/partials/tabs/newsletter-settings.php:70
 msgid "During initial sync, auto subscribe the existing customers."
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:75
+#: admin/partials/tabs/newsletter-settings.php:75
 msgid "Your store is currently connected to:"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:78
+#: admin/partials/tabs/newsletter-settings.php:78
 msgid "To select another audience, you must first disconnect your store at Settings tab"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:83
+#: admin/partials/tabs/newsletter-settings.php:83
 msgid "Audience Defaults"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:87
+#: admin/partials/tabs/newsletter-settings.php:87
 msgid "From Name"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:95
+#: admin/partials/tabs/newsletter-settings.php:95
 msgid "From Email"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:103
-#: admin/partials/tabs/store_sync.php:262
+#: admin/partials/tabs/newsletter-settings.php:103
+#: admin/partials/tabs/store-sync.php:262
 msgid "Subject"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:106
+#: admin/partials/tabs/newsletter-settings.php:106
 msgid "Store Newsletter"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:111
+#: admin/partials/tabs/newsletter-settings.php:111
 msgid "Language"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:129
+#: admin/partials/tabs/newsletter-settings.php:129
 msgid "Permission reminder message"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:144
+#: admin/partials/tabs/newsletter-settings.php:144
 msgid "Opt-in Settings"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:149
+#: admin/partials/tabs/newsletter-settings.php:149
 msgid "Checkbox display options"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:150
+#: admin/partials/tabs/newsletter-settings.php:150
 msgid "Choose how you want the opt-in to your newsletter checkbox to render at checkout"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:156
+#: admin/partials/tabs/newsletter-settings.php:156
 msgid "Visible, checked by default"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:159
+#: admin/partials/tabs/newsletter-settings.php:159
 msgid "Visible, unchecked by default"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:162
+#: admin/partials/tabs/newsletter-settings.php:162
 msgid "Hidden, unchecked by default"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:166
+#: admin/partials/tabs/newsletter-settings.php:166
 msgid "Message for the opt-in checkbox"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:167
+#: admin/partials/tabs/newsletter-settings.php:167
 msgid "The call-to-action text that prompts customers to subscribe to your newsletter at checkout."
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:171
+#: admin/partials/tabs/newsletter-settings.php:171
 msgid "HTML tags allowed: <a href=\"\" target=\"\" title=\"\"></a> and <br>"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:171
+#: admin/partials/tabs/newsletter-settings.php:171
 msgid "Leave it blank to use language translation files (.po / .mo), translating the string: \"Subscribe to our newsletter\"."
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:175
+#: admin/partials/tabs/newsletter-settings.php:175
 msgid "Shop checkout preview"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:176
+#: admin/partials/tabs/newsletter-settings.php:176
 msgid "The box below is a preview of your checkout page. Styles and fields may not be exact."
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:213
+#: admin/partials/tabs/newsletter-settings.php:213
 msgid "Advanced Opt-in Settings"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:218
+#: admin/partials/tabs/newsletter-settings.php:218
 msgid "Opt-in checkbox position"
 msgstr ""
 
 #. translators: %s - Woocommerce Actions documentation URL.
-#: admin/partials/tabs/newsletter_settings.php:219
+#: admin/partials/tabs/newsletter-settings.php:219
 msgid "To change the position of the opt-in <br/>checkbox at checkout, input one of the <a href=%s target=_blank>available WooCommerce form actions</a>."
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:225
+#: admin/partials/tabs/newsletter-settings.php:225
 msgid "Enter a WooCommerce form action"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:229
+#: admin/partials/tabs/newsletter-settings.php:229
 msgid "Subscriber Settings"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:234
+#: admin/partials/tabs/newsletter-settings.php:234
 msgid "Tags"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:235
+#: admin/partials/tabs/newsletter-settings.php:235
 msgid "Add a comma-separated list of tags to apply to a subscriber in Mailchimp after a transaction occurs"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:244
+#: admin/partials/tabs/newsletter-settings.php:244
 msgid "Product Settings"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:250
+#: admin/partials/tabs/newsletter-settings.php:250
 msgid "Product Image Size"
 msgstr ""
 
-#: admin/partials/tabs/newsletter_settings.php:251
+#: admin/partials/tabs/newsletter-settings.php:251
 msgid "Define the product image size used by abandoned carts, order notifications, and product recommendations."
 msgstr ""
 
@@ -526,190 +526,190 @@ msgstr ""
 msgid "Mailchimp says: Your re-sync has been started!"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:78
+#: admin/partials/tabs/store-sync.php:78
 msgid "Account Connected"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:81
+#: admin/partials/tabs/store-sync.php:81
 msgid "Audience Connected"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:92
+#: admin/partials/tabs/store-sync.php:92
 msgid "Sync Status:"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:93
+#: admin/partials/tabs/store-sync.php:93
 msgid "Completed"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:93
+#: admin/partials/tabs/store-sync.php:93
 msgid "Running..."
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:95
+#: admin/partials/tabs/store-sync.php:95
 msgid "Initial sync in progress"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:99
+#: admin/partials/tabs/store-sync.php:99
 msgid "Last Updated:"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:104
+#: admin/partials/tabs/store-sync.php:104
 msgid "Starting..."
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:120
+#: admin/partials/tabs/store-sync.php:120
 msgid "Coupons"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:130
+#: admin/partials/tabs/store-sync.php:130
 msgid "Products"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:140
+#: admin/partials/tabs/store-sync.php:140
 msgid "Orders"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:156
+#: admin/partials/tabs/store-sync.php:156
 msgid "Subscribers"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:163
+#: admin/partials/tabs/store-sync.php:163
 msgid "Transactional"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:170
+#: admin/partials/tabs/store-sync.php:170
 msgid "Unsubscribed"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:183
+#: admin/partials/tabs/store-sync.php:183
 msgid "More Information"
 msgstr ""
 
 #. translators: %s - Plugin review URL.
-#: admin/partials/tabs/store_sync.php:185
+#: admin/partials/tabs/store-sync.php:185
 msgid "Is this plugin helping your e-commerce business? <a href=%s target=_blank>Please leave us a ★★★★★ review!</a>."
 msgstr ""
 
 #. translators: Placeholders %1$s - plugin wiki CLI URL, %2$s - plugin wiki WP caching issues url
-#: admin/partials/tabs/store_sync.php:186
+#: admin/partials/tabs/store-sync.php:186
 msgid "Have a larger store or having issues syncing? Consider using <a href=%1$s target=_blank>WP-CLI</a> or browse documentation around common <a href=%2$s target=_blank>caching problems</a>."
 msgstr ""
 
 #. translators: Placeholders %1$s - plugin wiki CLI URL, %2$s - plugin wiki WP caching issues url
-#: admin/partials/tabs/store_sync.php:187
+#: admin/partials/tabs/store-sync.php:187
 msgid "Order and customer information will not sync if they contain an Amazon or generic email address."
 msgstr ""
 
 #. translators: Placeholders %1$s - Mailchimp Support URL, %2$s - link element id, %3$s - popup element id
-#: admin/partials/tabs/store_sync.php:188
+#: admin/partials/tabs/store-sync.php:188
 msgid "Need help? Visit <a href=%1$s target=_blank>Mailchimp support</a> or <a id=%2$s href=%3$s>send us an email.</a> "
 msgstr ""
 
 #. translators: %s - Mailchimp Privacy Policy URL.
-#: admin/partials/tabs/store_sync.php:189
+#: admin/partials/tabs/store-sync.php:189
 msgid "By using this plugin, Mailchimp will process customer information in accordance with their <a href=%s target=_blank>Privacy Policy</a>."
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:195
+#: admin/partials/tabs/store-sync.php:195
 msgid "Synchronization"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:198
+#: admin/partials/tabs/store-sync.php:198
 msgid "You can safely resync your audience at any time without losing any of your e-commerce data."
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:201
-#: admin/partials/tabs/store_sync.php:203
+#: admin/partials/tabs/store-sync.php:201
+#: admin/partials/tabs/store-sync.php:203
 msgid "Resync now"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:204
+#: admin/partials/tabs/store-sync.php:204
 msgid "Sync is running. Please wait until it finishes."
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:226
+#: admin/partials/tabs/store-sync.php:226
 msgid "Send us a support ticket"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:227
+#: admin/partials/tabs/store-sync.php:227
 msgid "The best way to get in touch with us is by submitting a ticket in the form below. </br> We do our best to get back to you within 48 hours. We look forward to hear from you!"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:241
+#: admin/partials/tabs/store-sync.php:241
 msgid "First name"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:248
+#: admin/partials/tabs/store-sync.php:248
 msgid "Last name"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:255
+#: admin/partials/tabs/store-sync.php:255
 #: admin/partials/tabs/api_key.php:54
-#: admin/partials/tabs/store_info.php:33
+#: admin/partials/tabs/store-info.php:33
 msgid "Email"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:269
+#: admin/partials/tabs/store-sync.php:269
 msgid "Message"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:275
+#: admin/partials/tabs/store-sync.php:275
 msgid "Send"
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:280
+#: admin/partials/tabs/store-sync.php:280
 #: admin/partials/tabs/api_key.php:74
 msgid "Invalid Email. Please double check."
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:281
+#: admin/partials/tabs/store-sync.php:281
 msgid "Invalid First Name. Please double check."
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:282
+#: admin/partials/tabs/store-sync.php:282
 msgid "Invalid Last Name. Please double check."
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:283
+#: admin/partials/tabs/store-sync.php:283
 msgid "Invalid Subject. Please double check."
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:284
+#: admin/partials/tabs/store-sync.php:284
 msgid "Invalid Message. Please double check."
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:285
+#: admin/partials/tabs/store-sync.php:285
 msgid "Message sent..."
 msgstr ""
 
-#: admin/partials/tabs/store_sync.php:286
+#: admin/partials/tabs/store-sync.php:286
 msgid "Error: Message not sent..."
 msgstr ""
 
-#: admin/partials/tabs/plugin_settings.php:12
+#: admin/partials/tabs/plugin-settings.php:12
 msgid "Plugin Settings"
 msgstr ""
 
-#: admin/partials/tabs/plugin_settings.php:17
+#: admin/partials/tabs/plugin-settings.php:17
 msgid "Communication"
 msgstr ""
 
 #. translators: Placeholders %1$s - admin email address
-#: admin/partials/tabs/plugin_settings.php:23
+#: admin/partials/tabs/plugin-settings.php:23
 msgid "Occasionally we may send you information about how-to's, updates, and other news to the store's admin email address. Choose whether or not you want to receive these messages at %1$s "
 msgstr ""
 
-#: admin/partials/tabs/plugin_settings.php:33
+#: admin/partials/tabs/plugin-settings.php:33
 msgid "Opt-in to our newsletter"
 msgstr ""
 
-#: admin/partials/tabs/plugin_settings.php:45
-#: admin/partials/tabs/plugin_settings.php:58
+#: admin/partials/tabs/plugin-settings.php:45
+#: admin/partials/tabs/plugin-settings.php:58
 msgid "Disconnect Store"
 msgstr ""
 
-#: admin/partials/tabs/plugin_settings.php:49
+#: admin/partials/tabs/plugin-settings.php:49
 msgid "Disconnect your store from MailChimp. This action will remove all entries from the database but you will be able to reconnect anytime."
 msgstr ""
 
@@ -766,12 +766,12 @@ msgid "Address Line 2"
 msgstr ""
 
 #: admin/partials/tabs/api_key.php:103
-#: admin/partials/tabs/store_info.php:49
+#: admin/partials/tabs/store-info.php:49
 msgid "City"
 msgstr ""
 
 #: admin/partials/tabs/api_key.php:110
-#: admin/partials/tabs/store_info.php:57
+#: admin/partials/tabs/store-info.php:57
 msgid "State"
 msgstr ""
 
@@ -780,7 +780,7 @@ msgid "Zip"
 msgstr ""
 
 #: admin/partials/tabs/api_key.php:124
-#: admin/partials/tabs/store_info.php:73
+#: admin/partials/tabs/store-info.php:73
 msgid "Country"
 msgstr ""
 
@@ -837,64 +837,64 @@ msgstr ""
 msgid "Connecting..."
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:21
+#: admin/partials/tabs/store-info.php:21
 msgid "Store Settings"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:25
+#: admin/partials/tabs/store-info.php:25
 msgid "Name"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:41
+#: admin/partials/tabs/store-info.php:41
 msgid "Street address"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:65
+#: admin/partials/tabs/store-info.php:65
 msgid "Postal Code"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:100
+#: admin/partials/tabs/store-info.php:100
 msgid "Phone Number"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:107
+#: admin/partials/tabs/store-info.php:107
 msgid "Locale Settings"
 msgstr ""
 
 #. translators: %1$s - The Currency name and format (ex: USD | US Dollar) %2$s - Timezone name or offset (ex: America/New_York or UTC-4:00) %3$s and %5$s- <a> tag open %4$s - </a> tag close
-#: admin/partials/tabs/store_info.php:116
+#: admin/partials/tabs/store-info.php:116
 msgid "We've detected that your WooCommerce store's currency is <b>%1$s</b> (%3$schange%4$s), and the WordPress timezone is <b>%2$s</b> (%5$schange%4$s)."
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:130
+#: admin/partials/tabs/store-info.php:130
 msgid "Locale"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:132
+#: admin/partials/tabs/store-info.php:132
 msgid "Please apply your locale settings. If you're unsure about these, use the defaults."
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:139
+#: admin/partials/tabs/store-info.php:139
 msgid "Select store's locale"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:157
+#: admin/partials/tabs/store-info.php:157
 msgid "Permission Settings"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:162
+#: admin/partials/tabs/store-info.php:162
 msgid "Plugin Permission Level"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:163
+#: admin/partials/tabs/store-info.php:163
 msgid "Select the minimum permission capability to manage Mailchimp for Woocommerce options"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:170
+#: admin/partials/tabs/store-info.php:170
 msgid "Administrators Only"
 msgstr ""
 
-#: admin/partials/tabs/store_info.php:173
+#: admin/partials/tabs/store-info.php:173
 msgid "Shop Managers and Administrators"
 msgstr ""
 

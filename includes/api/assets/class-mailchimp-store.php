@@ -8,389 +8,370 @@
  * Date: 3/8/16
  * Time: 3:13 PM
  */
-class MailChimp_WooCommerce_Store
-{
-    protected $id = null;
-    protected $is_syncing = false;
-    protected $list_id = null;
-    protected $name = null;
-    protected $domain = null;
-    protected $email_address = null;
-    protected $currency_code = null;
-    protected $money_format = null;
-    protected $primary_locale = null;
-    protected $timezone = null;
-    protected $phone = null;
-    protected $address = null;
-    protected $platform = null;
-    protected $connected_site = null;
+class MailChimp_WooCommerce_Store {
 
-    /**
-     * @return array
-     */
-    public function getValidation()
-    {
-        return array(
-            'id' => 'required|string',
-            'list_id' => 'required|string',
-            'name' => 'required|string',
-            'domain' => 'string',
-            'email_address' => 'email',
-            'currency_code' => 'required|currency_code',
-            'primary_locale' => 'locale_basic',
-            'timezone' => 'timezone',
-            'phone' => 'string',
-        );
-    }
+	protected $id             = null;
+	protected $is_syncing     = false;
+	protected $list_id        = null;
+	protected $name           = null;
+	protected $domain         = null;
+	protected $email_address  = null;
+	protected $currency_code  = null;
+	protected $money_format   = null;
+	protected $primary_locale = null;
+	protected $timezone       = null;
+	protected $phone          = null;
+	protected $address        = null;
+	protected $platform       = null;
+	protected $connected_site = null;
 
-    /**
-     * @return null
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
+	/**
+	 * @return array
+	 */
+	public function getValidation() {
+		return array(
+			'id'             => 'required|string',
+			'list_id'        => 'required|string',
+			'name'           => 'required|string',
+			'domain'         => 'string',
+			'email_address'  => 'email',
+			'currency_code'  => 'required|currency_code',
+			'primary_locale' => 'locale_basic',
+			'timezone'       => 'timezone',
+			'phone'          => 'string',
+		);
+	}
 
-    /**
-     * @param null $id
-     * @return MailChimp_WooCommerce_Store
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
+	/**
+	 * @return null
+	 */
+	public function getId() {
+		return $this->id;
+	}
 
-        return $this;
-    }
+	/**
+	 * @param null $id
+	 * @return MailChimp_WooCommerce_Store
+	 */
+	public function setId( $id ) {
+		$this->id = $id;
 
-    /**
-     * @param $bool
-     * @return $this
-     */
-    public function flagSyncing($bool)
-    {
-        $this->is_syncing = $bool;
+		return $this;
+	}
 
-        return $this;
-    }
+	/**
+	 * @param $bool
+	 * @return $this
+	 */
+	public function flagSyncing( $bool ) {
+		$this->is_syncing = $bool;
 
-    /**
-     * @return bool
-     */
-    public function isSyncing()
-    {
-        return $this->is_syncing;
-    }
+		return $this;
+	}
 
-    /**
-     * @return null
-     */
-    public function getListId()
-    {
-        return $this->list_id;
-    }
+	/**
+	 * @return bool
+	 */
+	public function isSyncing() {
+		return $this->is_syncing;
+	}
 
-    /**
-     * @param null $list_id
-     * @return MailChimp_WooCommerce_Store
-     */
-    public function setListId($list_id)
-    {
-        $this->list_id = $list_id;
+	/**
+	 * @return null
+	 */
+	public function getListId() {
+		return $this->list_id;
+	}
 
-        return $this;
-    }
+	/**
+	 * @param null $list_id
+	 * @return MailChimp_WooCommerce_Store
+	 */
+	public function setListId( $list_id ) {
+		$this->list_id = $list_id;
 
-    /**
-     * @return null
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
+		return $this;
+	}
 
-    /**
-     * @param null $name
-     * @return MailChimp_WooCommerce_Store;
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
+	/**
+	 * @return null
+	 */
+	public function getName() {
+		return $this->name;
+	}
 
-        return $this;
-    }
+	/**
+	 * @param null $name
+	 * @return MailChimp_WooCommerce_Store;
+	 */
+	public function setName( $name ) {
+		$this->name = $name;
 
-    /**
-     * @return null
-     */
-    public function getDomain()
-    {
-        return $this->domain;
-    }
+		return $this;
+	}
 
-    /**
-     * @param null $domain
-     * @return MailChimp_WooCommerce_Store;
-     */
-    public function setDomain($domain)
-    {
-        $this->domain = $domain;
+	/**
+	 * @return null
+	 */
+	public function getDomain() {
+		return $this->domain;
+	}
 
-        return $this;
-    }
+	/**
+	 * @param null $domain
+	 * @return MailChimp_WooCommerce_Store;
+	 */
+	public function setDomain( $domain ) {
+		$this->domain = $domain;
 
-    /**
-     * @return null
-     */
-    public function getEmailAddress()
-    {
-        return $this->email_address;
-    }
+		return $this;
+	}
 
-    /**
-     * @param null $email_address
-     * @return MailChimp_WooCommerce_Store;
-     */
-    public function setEmailAddress($email_address)
-    {
-        $this->email_address = $email_address;
+	/**
+	 * @return null
+	 */
+	public function getEmailAddress() {
+		return $this->email_address;
+	}
 
-        return $this;
-    }
+	/**
+	 * @param null $email_address
+	 * @return MailChimp_WooCommerce_Store;
+	 */
+	public function setEmailAddress( $email_address ) {
+		$this->email_address = $email_address;
 
-    /**
-     * @return null
-     */
-    public function getCurrencyCode()
-    {
-        return $this->currency_code;
-    }
+		return $this;
+	}
 
-    /**
-     * @param null $currency_code
-     * @return MailChimp_WooCommerce_Store;
-     */
-    public function setCurrencyCode($code)
-    {   
-        if(!isset($code)){
-            $code = get_woocommerce_currency();
-        }
-        $this->currency_code = $code;
-        return $this;
-    }
-    
-    /**
-     * @return null
-     */
-    public function getMoneyFormat()
-    {
-        return $this->money_format;
-    }
+	/**
+	 * @return null
+	 */
+	public function getCurrencyCode() {
+		return $this->currency_code;
+	}
 
-    /**
-     * @param null $money_format
-     * @return MailChimp_WooCommerce_Store;
-     */
-    public function setMoneyFormat($code)
-    {   
-        if(!isset($code)){
-            $code = get_woocommerce_currency();
-        }
-        
-        $this->money_format = html_entity_decode(get_woocommerce_currency_symbol($code));
+	/**
+	 * @param $code
+	 *
+	 * @return $this
+	 */
+	public function setCurrencyCode( $code ) {
+		if ( ! isset( $code ) ) {
+			$code = get_woocommerce_currency();
+		}
+		$this->currency_code = $code;
+		return $this;
+	}
 
-        return $this;
-    }
+	/**
+	 * @return null
+	 */
+	public function getMoneyFormat() {
+		return $this->money_format;
+	}
 
-    /**
-     * @return null
-     */
-    public function getPrimaryLocale()
-    {
-        return $this->primary_locale;
-    }
+	/**
+	 * @param $code
+	 *
+	 * @return $this
+	 */
+	public function setMoneyFormat( $code ) {
+		if ( ! isset( $code ) ) {
+			$code = get_woocommerce_currency();
+		}
 
-    /**
-     * @param null $primary_locale
-     * @return MailChimp_WooCommerce_Store;
-     */
-    public function setPrimaryLocale($primary_locale)
-    {
-        $this->primary_locale = $primary_locale;
+		$this->money_format = html_entity_decode( get_woocommerce_currency_symbol( $code ) );
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * @return null
-     */
-    public function getTimezone()
-    {
-        return $this->timezone;
-    }
+	/**
+	 * @return null
+	 */
+	public function getPrimaryLocale() {
+		return $this->primary_locale;
+	}
 
-    /**
-     * @param null $timezone
-     * @return MailChimp_WooCommerce_Store;
-     */
-    public function setTimezone($timezone)
-    {
-        $this->timezone = $timezone;
+	/**
+	 * @param null $primary_locale
+	 * @return MailChimp_WooCommerce_Store;
+	 */
+	public function setPrimaryLocale( $primary_locale ) {
+		$this->primary_locale = $primary_locale;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * @return null
-     */
-    public function getPhone()
-    {
-        return $this->phone;
-    }
+	/**
+	 * @return null
+	 */
+	public function getTimezone() {
+		return $this->timezone;
+	}
 
-    /**
-     * @param null $phone
-     * @return MailChimp_WooCommerce_Store;
-     */
-    public function setPhone($phone)
-    {
-        $this->phone = $phone;
+	/**
+	 * @param null $timezone
+	 * @return MailChimp_WooCommerce_Store;
+	 */
+	public function setTimezone( $timezone ) {
+		$this->timezone = $timezone;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * @param $platform
-     * @return $this
-     */
-    public function setPlatform($platform)
-    {
-        $this->platform = $platform;
+	/**
+	 * @return null
+	 */
+	public function getPhone() {
+		return $this->phone;
+	}
 
-        return $this;
-    }
+	/**
+	 * @param null $phone
+	 * @return MailChimp_WooCommerce_Store;
+	 */
+	public function setPhone( $phone ) {
+		$this->phone = $phone;
 
-    /**
-     * @return string
-     */
-    public function getPlatform()
-    {
-        return $this->platform;
-    }
+		return $this;
+	}
 
-    /**
-     * @return MailChimp_WooCommerce_Address
-     */
-    public function getAddress()
-    {
-        if (empty($this->address)) {
-            $this->address = new MailChimp_WooCommerce_Address();
-        }
-        return $this->address;
-    }
+	/**
+	 * @param $platform
+	 * @return $this
+	 */
+	public function setPlatform( $platform ) {
+		$this->platform = $platform;
 
-    /**
-     * @param MailChimp_WooCommerce_Address $address
-     * @return Store;
-     */
-    public function setAddress(MailChimp_WooCommerce_Address $address)
-    {
-        $this->address = $address;
+		return $this;
+	}
 
-        return $this;
-    }
+	/**
+	 * @return string
+	 */
+	public function getPlatform() {
+		return $this->platform;
+	}
 
-    /**
-     * @return null|string
-     */
-    public function getConnectedSiteForeignID()
-    {
-        return $this->getConnectedSiteParam('site_foreign_id');
-    }
+	/**
+	 * @return MailChimp_WooCommerce_Address
+	 */
+	public function getAddress() {
+		if ( empty( $this->address ) ) {
+			$this->address = new MailChimp_WooCommerce_Address();
+		}
+		return $this->address;
+	}
 
-    /**
-     * @return null|string
-     */
-    public function getConnectedSiteScriptUrl()
-    {
-        if (($script = $this->getConnectedSiteParam('site_script'))) {
-            return $script['url'];
-        }
-        return false;
-    }
+	/**
+	 * @param MailChimp_WooCommerce_Address $address
+	 *
+	 * @return $this
+	 */
+	public function setAddress( MailChimp_WooCommerce_Address $address ) {
+		$this->address = $address;
 
-    /**
-     * @return null|string
-     */
-    public function getConnectedSiteScriptFragment()
-    {
-        if (($script = $this->getConnectedSiteParam('site_script'))) {
-            return $script['fragment'];
-        }
-        return false;
-    }
+		return $this;
+	}
 
-    /**
-     * @param $key
-     * @param null $default
-     * @return null
-     */
-    public function getConnectedSiteParam($key, $default = null)
-    {
-        if (empty($this->connected_site)) {
-            return $default;
-        }
-        return array_key_exists($key, $this->connected_site) ? $this->connected_site[$key] : null;
-    }
+	/**
+	 * @return null|string
+	 */
+	public function getConnectedSiteForeignID() {
+		return $this->getConnectedSiteParam( 'site_foreign_id' );
+	}
 
-    /**
-     * @return array
-     */
-    public function toArray()
-    {
-        return mailchimp_array_remove_empty(array(
-            'id' => $this->getId(),
-            'is_syncing' => $this->isSyncing(),
-            'platform' => $this->getPlatform(),
-            'list_id' => $this->getListId(),
-            'name' => $this->getName(),
-            'domain' => $this->getDomain(),
-            'email_address' => $this->getEmailAddress(),
-            'currency_code' => $this->getCurrencyCode(),
-            'money_format' => $this->getMoneyFormat(),
-            'primary_locale' => $this->getPrimaryLocale(),
-            'timezone' => $this->getTimezone(),
-            'phone' => $this->getPhone(),
-            'address' => $this->getAddress()->toArray(),
-        ));
-    }
+	/**
+	 * @return null|string
+	 */
+	public function getConnectedSiteScriptUrl() {
+		if ( ( $script = $this->getConnectedSiteParam( 'site_script' ) ) ) {
+			return $script['url'];
+		}
+		return false;
+	}
 
-    /**
-     * @param array $data
-     * @return MailChimp_WooCommerce_Store
-     */
-    public function fromArray(array $data)
-    {
-        $singles = array(
-            'id', 'list_id', 'name', 'domain', 'is_syncing',
-            'email_address', 'currency_code', 'money_format',
-            'primary_locale', 'timezone', 'phone', 'platform',
-        );
+	/**
+	 * @return null|string
+	 */
+	public function getConnectedSiteScriptFragment() {
+		if ( ( $script = $this->getConnectedSiteParam( 'site_script' ) ) ) {
+			return $script['fragment'];
+		}
+		return false;
+	}
 
-        foreach ($singles as $key) {
-            if (array_key_exists($key, $data)) {
-                $this->$key = $data[$key];
-            }
-        }
+	/**
+	 * @param $key
+	 * @param null $default
+	 * @return null
+	 */
+	public function getConnectedSiteParam( $key, $default = null ) {
+		if ( empty( $this->connected_site ) ) {
+			return $default;
+		}
+		return array_key_exists( $key, $this->connected_site ) ? $this->connected_site[ $key ] : null;
+	}
 
-        if (array_key_exists('address', $data)) {
-            $address = new MailChimp_WooCommerce_Address();
-            $this->address = $address->fromArray($data['address']);
-        }
+	/**
+	 * @return array
+	 */
+	public function toArray() {
+		return mailchimp_array_remove_empty(
+			array(
+				'id'             => $this->getId(),
+				'is_syncing'     => $this->isSyncing(),
+				'platform'       => $this->getPlatform(),
+				'list_id'        => $this->getListId(),
+				'name'           => $this->getName(),
+				'domain'         => $this->getDomain(),
+				'email_address'  => $this->getEmailAddress(),
+				'currency_code'  => $this->getCurrencyCode(),
+				'money_format'   => $this->getMoneyFormat(),
+				'primary_locale' => $this->getPrimaryLocale(),
+				'timezone'       => $this->getTimezone(),
+				'phone'          => $this->getPhone(),
+				'address'        => $this->getAddress()->toArray(),
+			)
+		);
+	}
 
-        if (array_key_exists('connected_site', $data)) {
-            $this->connected_site = $data['connected_site'];
-        }
+	/**
+	 * @param array $data
+	 * @return MailChimp_WooCommerce_Store
+	 */
+	public function fromArray( array $data ) {
+		$singles = array(
+			'id',
+			'list_id',
+			'name',
+			'domain',
+			'is_syncing',
+			'email_address',
+			'currency_code',
+			'money_format',
+			'primary_locale',
+			'timezone',
+			'phone',
+			'platform',
+		);
 
-        return $this;
-    }
+		foreach ( $singles as $key ) {
+			if ( array_key_exists( $key, $data ) ) {
+				$this->$key = $data[ $key ];
+			}
+		}
+
+		if ( array_key_exists( 'address', $data ) ) {
+			$address       = new MailChimp_WooCommerce_Address();
+			$this->address = $address->fromArray( $data['address'] );
+		}
+
+		if ( array_key_exists( 'connected_site', $data ) ) {
+			$this->connected_site = $data['connected_site'];
+		}
+
+		return $this;
+	}
 }

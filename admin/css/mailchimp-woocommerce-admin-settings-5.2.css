@@ -128,7 +128,7 @@ a.button.back-step {
 
 .mc-woocommerce-settings-subtitles {
 	font-family: "proxima-nova", Arial, Helvetica, sans-serif;
-	font-size: 22px !important;	
+	font-size: 22px !important;
 	line-height: 32px;
 	color: #3C3C3C;
 	margin: 1em 1em 1em 13px;
@@ -249,9 +249,9 @@ a.button.back-step {
 
 .tab-content-wrapper fieldset select {
 	background: white url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23555%22%2F%3E%3C%2Fsvg%3E') no-repeat right 5px top 55%;
-    background-size: auto;
+	background-size: auto;
 
-} 
+}
 
 .tab-content-wrapper *,
 .sync-content-wrapper {
@@ -326,12 +326,12 @@ a.button.create-account {
 	font-size: 14px !important;
 	line-height: 16px !important;
 	padding: 15px 35px 27px 35px !important;
-	
+
 	/* identical to box height */
 	text-transform: uppercase !important;
 	color: #FFFFFF !important;
 	border: none !important;
-	
+
 }
 
 .oauth-description {
@@ -440,7 +440,7 @@ a.button.create-account {
 	transition: background-color 0.3s ease-out,
 		text-shadow 0.3s ease-out,
 		box-shadow 0.3s ease-out;
-	
+
 }
 
 .mc-woocommerce-resync-button:hover,
@@ -538,14 +538,14 @@ a.button.create-account {
 }
 
 .sync-content-wrapper .overview-stats-store {
-	margin-right: 13px; 
+	margin-right: 13px;
 	margin-bottom: 16px;
 	padding: 2em 1em;
 	min-height: 20px;
 }
 
 .sync-content-wrapper .last-updated {
-	margin-left: 13px; 
+	margin-left: 13px;
 	margin-bottom: 16px;
 	padding: 2em 1em;
 	min-height: 20px;
@@ -641,7 +641,7 @@ a.button.create-account {
 	display: inline;
 	float: left;
 	margin-right: 42px;
-	
+
 }
 
 .sync-content-wrapper .sync-controls p {
@@ -665,7 +665,7 @@ a.button.create-account {
 
 .sync-content-wrapper .sync-controls .mc-woocommerce-last-sync{
 	display: table;
-	float: right;	
+	float: right;
 	min-height:90px;
 	margin-right: 30px;
 }
@@ -707,10 +707,10 @@ a.button.create-account {
 
 .tab-content-wrapper.overview-example {
 	position: absolute;
-    z-index:1;
-    width:200px;
-    height:200px;
-    margin:50px auto;
+	z-index:1;
+	width:200px;
+	height:200px;
+	margin:50px auto;
 	width:100%;
 	text-align: center;
 }
@@ -754,7 +754,7 @@ a.button.create-account {
 	float: left;
 	clear: none;
 	width: 50%;
-	
+
 }
 
 .sync-more-wrapper .box.box-half .content{
@@ -770,19 +770,19 @@ a.button.create-account {
 	width: 30%;
 }
 
-.sync-more-wrapper .box.box-half.resync-container .content{	
+.sync-more-wrapper .box.box-half.resync-container .content{
 	margin-left: 13px;
 }
 
 .sync-more-wrapper .box.box-half.support-container {
-	width: 70%;	
+	width: 70%;
 }
 
 .sync-more-wrapper .box.box-half.support-container ul {
 	padding-bottom: 1em;
 }
 
-.sync-more-wrapper .box.box-half.support-container .content{	
+.sync-more-wrapper .box.box-half.support-container .content{
 	margin-right: 13px;
 }
 
@@ -818,7 +818,7 @@ a.button.create-account {
 	padding: 0.6em 1.5em;
 	width: 100%;
 	font-family: "Proxima Nova Alt Light", Arial, Helvetica, sans-serif
-	
+
 }
 
 .tab-content-wrapper .mailchimp-select-wrapper {
@@ -883,7 +883,7 @@ a.button.create-account {
 .tab-content-wrapper fieldset input[type='radio']:checked::before,
 .sync-content-wrapper fieldset input[type='radio']:checked::before {
 	background: url("data:image/svg+xml;charset=UTF-8,%3csvg width='13' height='9' viewBox='0 0 13 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M10.75 0.5L12.25 2L5.26 9L0.75 4.5L2.25 3L5.26 6L10.75 0.5Z' fill='%237FAD45'/%3e%3c/svg%3e ");
-	background-repeat: none; 
+	background-repeat: none;
 	width: 13px;
 	height: 9px;
 	margin: 8px 0 0 7px;
@@ -900,7 +900,7 @@ a.button.create-account {
 	border-radius: 4px;
 	padding: 15px 20px;
 	width: 100%;
-	
+
 }
 
 .tab-content-wrapper .optional-settings-label,
@@ -949,7 +949,7 @@ a.button.create-account {
 
 .log-file-actions {
 	display: flex;
-    justify-content: space-around;
+	justify-content: space-around;
 	align-items: stretch;
 }
 
@@ -990,7 +990,7 @@ a.button.create-account {
 	font-family: monospace;
 	white-space: pre-wrap;
 	font-size: 1em;
-	
+
 }
 
 #log-viewer #log-content:focus {
@@ -1003,7 +1003,7 @@ a.button.create-account {
 	background-size: 16px 16px;
 	width: 16px;
 	height: 16px;
-	margin: 30px 10px		
+	margin: 30px 10px
 }
 
 /* account create modal */
@@ -1062,7 +1062,7 @@ a.button.create-account {
 	box-shadow: 0 1px 1px 0 rgba(0,0,0,.1);
 	margin: 5px 15px 2px;
 	padding: 1px 12px;
-    padding-right: 12px;
+	padding-right: 12px;
 }
 
 #mc-woocommerce-create-account:target,
@@ -1146,7 +1146,7 @@ a.button.create-account {
 	box-shadow: 1px 1px 1px 1px rgba(0,0,0,.1);
 	margin: 5px 15px 2px;
 	padding: 4px 12px;
-    padding-right: 12px;
+	padding-right: 12px;
 }
 
 .mc-woocommerce-create-account-step-error #connecting,
@@ -1199,11 +1199,11 @@ a.button.create-account {
 	background: rgb(255,255,255);
 }
 
-.settings-sample-frame .mailchimp-newsletter{ 
+.settings-sample-frame .mailchimp-newsletter{
 	margin-top: 1em;
 }
 
-.settings-sample-frame .mailchimp-newsletter label{ 
+.settings-sample-frame .mailchimp-newsletter label{
 	display: inline;
 }
 
@@ -1239,7 +1239,7 @@ a.button.create-account {
 	}
 
 	.tab-content-wrapper .mailchimp-select-wrapper select {
-	
+
 		font-size: 16px;
 		line-height: 32px;
 	}
@@ -1289,7 +1289,7 @@ a.button.create-account {
 	.sync-more-wrapper .box.box-half .content {
 		padding: 0 1em;
 	}
-	
+
 	.sync-content-wrapper .sync-controls {
 		min-height: 150px;
 	}
@@ -1299,11 +1299,11 @@ a.button.create-account {
 		float: left;
 		margin-right: 42px;
 	}
-	
+
 	.sync-content-wrapper .sync-controls .spinner {
 		margin: -3px 10px 0 5px;
 	}
-	
+
 	.sync-content-wrapper .sync-stats-wrapper.sync-stats-store,
 	.sync-more-wrapper .box.box-half.support-container .content {
 		margin-right: 0px;
@@ -1325,7 +1325,7 @@ a.button.create-account {
 	.sync-more-wrapper .box.box-half.support-container,
 	.sync-more-wrapper .box.box-half.resync-container {
 		width: 100%;
-		
+
 	}
 
 	.view-log-select,
@@ -1379,7 +1379,7 @@ a.button.create-account {
 	#mc-woocommerce-create-account .reveal-modal{
 		width: 100%;
 	}
-	
+
 	.mc-woocommerce-create-account-step {
 		padding: 5px 5px 10px 5px;
 	}

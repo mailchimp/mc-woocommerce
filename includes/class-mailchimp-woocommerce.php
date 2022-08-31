@@ -138,20 +138,21 @@ class MailChimp_WooCommerce
     }
 
     /**
-     *
+     * @return void|bool
      */
     private function applyQueryStringOverrides()
     {
         // if we need to refresh the double opt in for any reason - just do it here.
-        if ($this->queryStringEquals('mc_doi_refresh', '1')) {
+        if ($this->queryStringEquals('mc_doi_refresh')) {
             try {
                 $enabled_doi = mailchimp_list_has_double_optin(true);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 mailchimp_error('mc.utils.doi_refresh', 'failed updating doi transient');
                 return false;
             }
             mailchimp_log('mc.utils.doi_refresh', ($enabled_doi ? 'turned ON' : 'turned OFF'));
         }
+        return;
     }
 
     /**
@@ -213,8 +214,8 @@ class MailChimp_WooCommerce
         $gdpr = new MailChimp_WooCommerce_Privacy();
 
         $this->loader->add_action('admin_init', $gdpr, 'privacy_policy');
-        $this->loader->add_filter('wp_privacy_personal_data_exporters', $gdpr, 'register_exporter', 10);
-        $this->loader->add_filter('wp_privacy_personal_data_erasers', $gdpr, 'register_eraser', 10);
+        $this->loader->add_filter('wp_privacy_personal_data_exporters', $gdpr, 'register_exporter');
+        $this->loader->add_filter('wp_privacy_personal_data_erasers', $gdpr, 'register_eraser');
     }
 
 	/**
@@ -302,12 +303,12 @@ class MailChimp_WooCommerce
 		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_scripts');
         $this->loader->add_action('wp_footer', $plugin_public, 'add_inline_footer_script');
 
-        $this->loader->add_action('woocommerce_after_checkout_form', $plugin_public, 'add_JS_checkout', 10);
-        $this->loader->add_action('woocommerce_register_form', $plugin_public, 'add_JS_checkout', 10);
+        $this->loader->add_action('woocommerce_after_checkout_form', $plugin_public, 'add_JS_checkout');
+        $this->loader->add_action('woocommerce_register_form', $plugin_public, 'add_JS_checkout');
 
         // set my-account opt-in checkbox
         $this->loader->add_action('woocommerce_edit_account_form', $plugin_public, 'user_my_account_opt_in', 100);
-        $this->loader->add_action('woocommerce_save_account_details', $plugin_public, 'user_my_account_opt_in_save', 100, 1);
+        $this->loader->add_action('woocommerce_save_account_details', $plugin_public, 'user_my_account_opt_in_save', 100);
 	}
 
 	/**
@@ -325,13 +326,13 @@ class MailChimp_WooCommerce
 			// adding the ability to render the checkbox on another screen of the checkout page.
 			$render_on = $service->getOption('mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form');
 
-			$this->loader->add_action($render_on, $service, 'applyNewsletterField', 10);
+			$this->loader->add_action($render_on, $service, 'applyNewsletterField');
 
-			$this->loader->add_action('woocommerce_ppe_checkout_order_review', $service, 'applyNewsletterField', 10);
-			$this->loader->add_action('woocommerce_register_form', $service, 'applyNewsletterField', 10);
+			$this->loader->add_action('woocommerce_ppe_checkout_order_review', $service, 'applyNewsletterField');
+			$this->loader->add_action('woocommerce_register_form', $service, 'applyNewsletterField');
 
 			$this->loader->add_action('woocommerce_checkout_order_processed', $service, 'processNewsletterField', 10, 2);
-			$this->loader->add_action('woocommerce_ppe_do_payaction', $service, 'processPayPalNewsletterField', 10, 1);
+			$this->loader->add_action('woocommerce_ppe_do_payaction', $service, 'processPayPalNewsletterField');
 			$this->loader->add_action('woocommerce_register_post', $service, 'processRegistrationForm', 10, 3);
 		}
 	}
@@ -361,7 +362,7 @@ class MailChimp_WooCommerce
             $this->loader->add_action('woocommerce_order_status_changed', $service, 'handleOrderStatusChanged', 11, 3);
 
 			// refunds
-            $this->loader->add_action('woocommerce_order_partially_refunded', $service, 'onPartiallyRefunded', 20, 1);
+            $this->loader->add_action('woocommerce_order_partially_refunded', $service, 'onPartiallyRefunded', 20);
             
             // set user profile info
             $this->loader->add_action('show_user_profile', $service, 'user_subscribed_profile', 100);
@@ -387,20 +388,20 @@ class MailChimp_WooCommerce
 			$this->loader->add_action('updated_post_meta', $service, 'handleProductMetaUpdated', 10, 4);
             $this->loader->add_action('added_post_meta', $service, 'handleProductMetaUpdated', 10, 4);
             $this->loader->add_action('deleted_post_meta', $service, 'handleProductMetaUpdated', 10, 4);
-			$this->loader->add_action('wp_trash_post', $service, 'handlePostTrashed', 10, 1);
-            $this->loader->add_action('untrashed_post', $service, 'handlePostRestored', 10, 1);
+			$this->loader->add_action('wp_trash_post', $service, 'handlePostTrashed');
+            $this->loader->add_action('untrashed_post', $service, 'handlePostRestored');
 			//coupons
-            $this->loader->add_action('woocommerce_new_coupon', $service, 'handleNewCoupon', 10, 1);
+            $this->loader->add_action('woocommerce_new_coupon', $service, 'handleNewCoupon');
             $this->loader->add_action('woocommerce_coupon_options_save', $service, 'handleCouponSaved', 10, 2);
             $this->loader->add_action('woocommerce_api_create_coupon', $service, 'handleCouponSaved', 9, 2);
 
-            $this->loader->add_action('woocommerce_delete_coupon', $service, 'handlePostTrashed', 10, 1);
-            $this->loader->add_action('woocommerce_trash_coupon', $service, 'handlePostTrashed', 10, 1);
+            $this->loader->add_action('woocommerce_delete_coupon', $service, 'handlePostTrashed');
+            $this->loader->add_action('woocommerce_trash_coupon', $service, 'handlePostTrashed');
             
             $this->loader->add_action('woocommerce_rest_delete_shop_coupon_object', $service, 'handleAPICouponTrashed', 10, 3);
 
 			// handle the user registration hook
-			$this->loader->add_action('user_register', $service, 'handleUserRegistration', 10, 1);
+			$this->loader->add_action('user_register', $service, 'handleUserRegistration');
 			// handle the user updated profile hook
 			$this->loader->add_action('profile_update', $service, 'handleUserUpdated', 10, 2);
 
@@ -426,11 +427,11 @@ class MailChimp_WooCommerce
                 "MailChimp_WooCommerce_WebHooks_Sync"
             );
             foreach ($jobs_classes as $job_class) {
-                $this->loader->add_action($job_class, $service, 'mailchimp_process_single_job', 10, 1);
+                $this->loader->add_action($job_class, $service, 'mailchimp_process_single_job');
             }
             
             // sync stats manager
-            $this->loader->add_action('MailChimp_WooCommerce_Process_Full_Sync_Manager', $service, 'mailchimp_process_sync_manager', 10, 1);
+            $this->loader->add_action('MailChimp_WooCommerce_Process_Full_Sync_Manager', $service, 'mailchimp_process_sync_manager');
 		}
 	}
 

@@ -33,7 +33,6 @@ If applicable, add screenshots to help explain your problem.
 **Things to verify before submitting a ticket**
 - Verify you are using the most up to date [plugin version](https://wordpress.org/plugins/mailchimp-for-woocommerce/).
 - Enable "Remote Diagnostics" from the plugin's Settings tab (if possible)
-- If you are recieving the error "Webhook not added to Mailchimp Audience", [learn more](https://github.com/mailchimp/mc-woocommerce/wiki/Webhook-Has-Not-Been-Setup-Error) about what needs to be configured with your hosting environment.
 - If there any fatal errors in WooCommerce, please provide (WooCommerce -> Status -> Logs)
 - If you're using the current version of the plugin, it utilizes a queue powered by [Action Scheduler](https://actionscheduler.org/). It depends on `WP_CRON` to be activated with your hosting provider. Please confirm with your host that it's enabled.
 - Do you have any caching plugins or services running? If you're using Redis, Nginx, or MemCache, see if you or your hosting provider can exclude certain paths to the `REST API` and `/wp-json/mailchimp-for-woocommerce`. Visit our Wiki help page on [this topic](https://github.com/mailchimp/mc-woocommerce/wiki/Using-Caches) for more information.

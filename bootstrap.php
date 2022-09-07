@@ -196,7 +196,18 @@ function mailchimp_handle_or_queue(Mailchimp_Woocommerce_Job $job, $delay = 0)
         // tell the system the order is already queued for processing in this saving process - and we don't need to process it again.
         set_site_transient( "mailchimp_order_being_processed_{$job->id}", true, 30);
     }
-    
+
+	// Allow sites to alter whether the order or product is synced.
+	// $job should contain at least the ID of the order/product as $job->id.
+	if (
+		( ( $job instanceof \MailChimp_WooCommerce_Single_Order )
+			&& ! apply_filters( 'mailchimp_should_push_order', $should_push = true, $order_id = $job->id ) )
+		|| ( ( $job instanceof \MailChimp_WooCommerce_Single_Product )
+			&& ! apply_filters( 'mailchimp_should_push_product', $should_push = true, $product_id = $job->id ) ) ) {
+		mailchimp_log( 'action_scheduler.queue_job', 'Exiting job due to filter result' );
+		return null;
+	}
+
     $as_job_id = mailchimp_as_push($job, $delay);
     
     if (!is_int($as_job_id)) {

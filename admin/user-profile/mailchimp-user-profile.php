@@ -9,5 +9,5 @@
 	</tr>
 </table>
 <?php if ( isset( $gdpr_fields ) && ! empty( $gdpr_fields ) ) : ?>
-	<?php wp_kses_post( $gdpr_fields ); ?>
+	<?php echo wp_kses( $gdpr_fields, mailchimp_expanded_alowed_tags() ); ?>
 <?php endif; ?>

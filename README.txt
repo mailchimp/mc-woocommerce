@@ -4,7 +4,7 @@ Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.9
 Tested up to: 6.0
-Stable tag: 2.7.3
+Stable tag: 2.7.4
 Requires PHP: 7.4
 WC requires at least: 3.5
 WC tested up to: 6.8
@@ -82,5 +82,6 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 * wiki article for webhook setup issues
 * new filter for my account newsletter field with wiki
 * add filter for products to be pushed or not
+* add filter for orders to be pushed or not
 
 [Historical Changelog](https://raw.githubusercontent.com/mailchimp/mc-woocommerce/master/CHANGELOG.txt)

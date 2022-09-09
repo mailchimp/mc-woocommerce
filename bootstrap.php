@@ -1499,6 +1499,7 @@ function mailchimp_expanded_alowed_tags() {
 		'name'  => array(),
 		'value' => array(),
 		'type'  => array(),
+		'checked' => array(),
 	);
 	// select
 	$my_allowed['select'] = array(

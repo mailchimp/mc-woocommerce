@@ -272,6 +272,9 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
                 // ok let's update this member
                 $api->update($list_id, $email, $member_data['status'], $merge_fields, null, $language, $gdpr_fields);
 
+                // delete this admin transient if there was one
+                mailchimp_delete_transient("updating_subscriber_status.{$this->id}" );
+
                 // update the member tags but fail silently just in case.
                 $api->updateMemberTags(mailchimp_get_list_id(), $email, true);
 
@@ -300,7 +303,10 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
                     $status_if_new = $uses_doi && $this->subscribed ? 'pending' : (bool) $this->subscribed;
 
                     $api->subscribe($list_id, $user->user_email, $status_if_new, $merge_fields, null, $language, $gdpr_fields);
-                    
+
+	                // delete this admin transient if there was one
+	                mailchimp_delete_transient("updating_subscriber_status.{$this->id}" );
+
                     // update the member tags but fail silently just in case.
                     $api->updateMemberTags(mailchimp_get_list_id(), $email, true);
 

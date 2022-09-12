@@ -279,6 +279,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			if ( empty( $user ) || ! is_email( $user->user_email ) || ! mailchimp_is_configured() ) {
 				return false;
 			}
+			// if we're setting the subscriber status in an admin update this might still be in limbo.
+			if ( mailchimp_get_transient("updating_subscriber_status.{$user->ID}", false) ) {
+			    return false;
+            }
 			if ( ( $status = mailchimp_get_api()->getCachedSubscriberStatusForAdminProfileView( mailchimp_get_list_id(), $user->user_email ) ) ) {
 				$subscribed = is_string( $status ) && in_array( $status, array( 'subscribed', 'pending' ) ) ? '1' : '0';
 				$saved      = (bool) get_user_meta( $user->ID, 'mailchimp_woocommerce_is_subscribed', true );

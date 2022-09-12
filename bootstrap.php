@@ -94,7 +94,7 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production', // staging or production
-        'version' => '2.7.3',
+        'version' => '2.7.4',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => function_exists('WC') ? WC()->version : null,
@@ -196,7 +196,21 @@ function mailchimp_handle_or_queue(Mailchimp_Woocommerce_Job $job, $delay = 0)
         // tell the system the order is already queued for processing in this saving process - and we don't need to process it again.
         set_site_transient( "mailchimp_order_being_processed_{$job->id}", true, 30);
     }
-    
+
+	// Allow sites to alter whether the order or product is synced.
+	// $job should contain at least the ID of the order/product as $job->id.
+	if ( $job instanceof \MailChimp_WooCommerce_Single_Order ) {
+		if ( apply_filters( 'mailchimp_should_push_order', $job->id ) === false ) {
+			mailchimp_debug( 'action_scheduler.queue_job.order', "Order {$job->id} not pushed do to filter." );
+			return null;
+		}
+	} else if ( $job instanceof \MailChimp_WooCommerce_Single_Product ) {
+		if ( apply_filters( 'mailchimp_should_push_product', $job->id ) === false ) {
+			mailchimp_debug( 'action_scheduler.queue_job.product', "Product {$job->id} not pushed do to filter." );
+			return null;
+		}
+	}
+
     $as_job_id = mailchimp_as_push($job, $delay);
     
     if (!is_int($as_job_id)) {
@@ -1466,6 +1480,45 @@ function mailchimp_render_gdpr_fields() {
         return false;
     }
     return true;
+}
+
+function mailchimp_expanded_alowed_tags() {
+	$my_allowed = wp_kses_allowed_html( 'post' );
+	// iframe
+	$my_allowed['iframe'] = array(
+		'src'             => array(),
+		'height'          => array(),
+		'width'           => array(),
+		'frameborder'     => array(),
+		'allowfullscreen' => array(),
+	);
+	// form fields - input
+	$my_allowed['input'] = array(
+		'class' => array(),
+		'id'    => array(),
+		'name'  => array(),
+		'value' => array(),
+		'type'  => array(),
+		'checked' => array(),
+	);
+	// select
+	$my_allowed['select'] = array(
+		'class'  => array(),
+		'id'     => array(),
+		'name'   => array(),
+		'value'  => array(),
+		'type'   => array(),
+	);
+	// select options
+	$my_allowed['option'] = array(
+		'selected' => array(),
+	);
+	// style
+	$my_allowed['style'] = array(
+		'types' => array(),
+	);
+
+	return $my_allowed;
 }
 
 // Add WP CLI commands

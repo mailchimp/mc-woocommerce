@@ -21,7 +21,7 @@
     "@wordpress/html-entities": "^3.2.1",
     "@wordpress/i18n": "3.15.0",
     "@wordpress/plugins": "^2.24.2",
-    "@wordpress/scripts": "^16.1.1",
+    "@wordpress/scripts": "^24.0.0",
     "node-wp-i18n": "~1.2.3",
     "wp-prettier": "npm:wp-prettier@^2.0.5"
   },

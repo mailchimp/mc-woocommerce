@@ -380,24 +380,27 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	}
 
 	/**
+     * Turning this off because it's more common than not to have the rest api disabled through a firewall
 	 * Displays notice when plugin is installed but not yet configured / connected to Mailchimp.
 	 */
 	public function webook_initial_notice() {
-		if ( mailchimp_is_configured() && ! mailchimp_get_webhook_url() ) {
-			$class   = 'notice notice-warning';
-			$message = sprintf(
-			/* translators: Placeholders %1$s - opening strong HTML tag, %2$s - closing strong HTML tag, %3$s - opening link HTML tag, %4$s - closing link HTML tag */
-				esc_html__(
-					'%1$sMailchimp for Woocommerce%2$s has not added the webhook to Mailchimp, Please enable “Remote Diagnostics” from the plugin’s Settings tab and open a support ticket with us on %3$sGitHub%4$s.',
-					'mailchimp-for-woocommerce'
-				),
-				'<strong>',
-				'</strong>',
-				'<a href="https://github.com/mailchimp/mc-woocommerce/wiki/Webhook-Has-Not-Been-Setup-Error">',
-				'</a>'
-			);
-			printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );
-		}
+	    return null;
+//		if ( mailchimp_is_configured() && ! mailchimp_get_webhook_url() && mailchimp_is_done_syncing()) {
+//			$class   = 'notice notice-warning';
+//			$message = sprintf(
+//			        //Mailchimp for Woocommerce has not added the webhook to Mailchimp. Please follow the instructions outlined in the wiki to troubleshoot further.
+//			/* translators: Placeholders %1$s - opening strong HTML tag, %2$s - closing strong HTML tag, %3$s - opening link HTML tag, %4$s - closing link HTML tag */
+//				esc_html__(
+//					'%1$sMailchimp for Woocommerce%2$s has not added the webhook to Mailchimp, Please follow the instructions outlined in the %3$swiki%4$s to troubleshoot further.',
+//					'mailchimp-for-woocommerce'
+//				),
+//				'<strong>',
+//				'</strong>',
+//				'<a href="https://github.com/mailchimp/mc-woocommerce/wiki/Webhook-Has-Not-Been-Setup-Error">',
+//				'</a>'
+//			);
+//			printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );
+//		}
 	}
 
 	/**

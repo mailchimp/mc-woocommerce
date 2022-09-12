@@ -1,4 +1,9 @@
 == Changelog ==
+= 2.7.4 =
+* wiki article for webhook setup issues
+* new filter for my account newsletter field with wiki
+* add filter for products to be pushed or not
+* add filter for orders to be pushed or not
 = 2.7.3 =
 * updates for WPCS recommendations
 = 2.7.2 =

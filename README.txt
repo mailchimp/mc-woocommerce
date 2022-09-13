@@ -4,10 +4,10 @@ Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.9
 Tested up to: 6.0
-Stable tag: 2.7.4
+Stable tag: 2.7.5
 Requires PHP: 7.4
 WC requires at least: 3.5
-WC tested up to: 6.8
+WC tested up to: 6.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your Mailchimp audience to track sales, create targeted emails, send abandoned cart emails, and more.
@@ -78,10 +78,8 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
 == Changelog ==
-= 2.7.4 =
-* wiki article for webhook setup issues
-* new filter for my account newsletter field with wiki
-* add filter for products to be pushed or not
-* add filter for orders to be pushed or not
+= 2.7.5 =
+* fix admin subscription status checkbox flow
+* remove support flag on plugin uninstall
 
 [Historical Changelog](https://raw.githubusercontent.com/mailchimp/mc-woocommerce/master/CHANGELOG.txt)

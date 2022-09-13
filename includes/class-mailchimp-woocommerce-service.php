@@ -1209,14 +1209,28 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function user_update_subscribe_status( $user_id )
     {
-        $subscribed = isset($_POST['mailchimp_woocommerce_is_subscribed_checkbox']) &&
+    	$subscribed = isset($_POST['mailchimp_woocommerce_is_subscribed_checkbox']) &&
             $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == 'on';
         $gdpr_fields = isset($_POST['mailchimp_woocommerce_gdpr']) ? $_POST['mailchimp_woocommerce_gdpr'] : null;
+
+        // set a site transient that will prevent overlapping updates from refreshing the page on the admin user view
+        mailchimp_set_transient("updating_subscriber_status.{$user_id}", true, 300);
+
         mailchimp_log("profile", 'user_update_subscribe_status', array(
             'subscribed' => $subscribed,
             'user_id' => $user_id,
             'gdpr_fields' => $gdpr_fields,
         ));
+
+	    $user = get_user_by('id', $user_id);
+
+	    if ( $user && $user->user_email ) {
+		    $email_hash = md5( strtolower( trim( $user->user_email ) ) );
+		    $list_id = mailchimp_get_list_id();
+		    $transient = "mailchimp-woocommerce-subscribed.{$list_id}.{$email_hash}";
+		    delete_site_transient( $transient );
+	    }
+
         update_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', $subscribed);
         update_user_meta($user_id, 'mailchimp_woocommerce_gdpr_fields', $gdpr_fields);
         mailchimp_set_transient("mailchimp_woocommerce_gdpr_fields_{$user_id}", $gdpr_fields, 300);

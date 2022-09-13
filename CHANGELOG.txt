@@ -1,4 +1,7 @@
 == Changelog ==
+= 2.7.5 =
+* fix admin subscription status checkbox flow
+* remove support flag on plugin uninstall
 = 2.7.4 =
 * wiki article for webhook setup issues
 * new filter for my account newsletter field with wiki

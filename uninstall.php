@@ -40,6 +40,10 @@ function mailchimp_woocommerce_uninstall() {
             if (isset($options['mailchimp_api_key'])) {
                 $store_id = get_option('mailchimp-woocommerce-store_id', false);
                 if (!empty($store_id)) {
+                	// disable support if they had it enabled
+                	$tower = new MailChimp_WooCommerce_Tower($store_id);
+                	$tower->toggle(false);
+                	// delete the store if it's in Mailchimp
                     $api = new MailChimp_WooCommerce_MailChimpApi($options['mailchimp_api_key']);
                     $result = $api->deleteStore($store_id) ? 'has been deleted' : 'did not delete';
                     error_log("store id {$store_id} {$result} MailChimp");

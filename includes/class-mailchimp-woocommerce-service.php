@@ -90,16 +90,19 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         if (!mailchimp_is_configured()) {
         	return;
         }
+        
 
         // see if we have a session id and a campaign id, also only do this when this user is not the admin.
-        $campaign_id = $this->getCampaignTrackingID();
-        if (empty($campaign_id)) {
-            $campaign_id =  get_post_meta($order_id, 'mailchimp_woocommerce_campaign_id', true);
-            // make sure this campaign ID has a valid format before we submit something
-            if (!$this->campaignIdMatchesFormat($campaign_id)) {
-                $campaign = null;
-            }
-        }
+        if( !current_user_can('administrator') ) { // --- LDS added ---
+	        $campaign_id = $this->getCampaignTrackingID();
+	        if (empty($campaign_id)) {
+	            $campaign_id =  get_post_meta($order_id, 'mailchimp_woocommerce_campaign_id', true);
+	            // make sure this campaign ID has a valid format before we submit something
+	            if (!$this->campaignIdMatchesFormat($campaign_id)) {
+	                $campaign = null;
+	            }
+	        }
+		}
 
         // grab the landing site cookie if we have one here.
         $landing_site = $this->getLandingSiteCookie();
@@ -272,8 +275,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
                 $this->cart_was_submitted = true;
 
-                // grab the cookie data that could play important roles in the submission
-                $campaign = $this->getCampaignTrackingID();
+                if( !current_user_can('administrator') ) { // --- LDS added ---
+	                // grab the cookie data that could play important roles in the submission
+	                $campaign = $this->getCampaignTrackingID();
+				}
                 
                 // get user language or default to admin main language
                 $language = $this->user_language ?: substr(get_locale(), 0, 2);

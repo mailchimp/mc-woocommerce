@@ -2,8 +2,10 @@
 
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface;
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
+use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
 use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CheckoutSchema;
+use Automattic\WooCommerce\StoreApi\StoreApi;
+use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -176,8 +178,9 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
 	 */
 	public function extend_store_api()
     {
+        /** @var ExtendRestApi $extend */
         /** @var ExtendSchema $extend */
-		$extend = Package::container()->get(ExtendSchema::class);
+		$extend = class_exists('Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema') ? StoreApi::container()->get(ExtendSchema::class) : Package::container()->get(ExtendRestApi::class);
 
 		$extend->register_endpoint_data(
 			array(

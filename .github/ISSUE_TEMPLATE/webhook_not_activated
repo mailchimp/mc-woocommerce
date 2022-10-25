@@ -1,0 +1,19 @@
+---
+name: Webhook Has Not Been Setup Error
+title: "[BUG] Description of Issue"
+labels: investigating
+
+---
+
+**Important**
+- This error typically goes away automatically. Do not submit a ticket until your sync is complete.
+
+**Things to verify before submitting a ticket**
+- Verify all steps have been taken in [this Wiki article](https://github.com/mailchimp/mc-woocommerce/wiki/Webhook-Has-Not-Been-Setup-Error).
+
+**Operating environment (please complete the following information):**
+- Store URL:
+- Plugin version:
+- WooCommerce version:
+- Wordpress version:
+- PHP version:

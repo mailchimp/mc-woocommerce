@@ -62,7 +62,7 @@ class MailChimp_WooCommerce_Transform_Products {
 
 		$product->addVariant( $variant );
 
-		return $product;
+		return apply_filters('mailchimp_sync_lineitem', $product);
 	}
 
 	/**
@@ -129,7 +129,7 @@ class MailChimp_WooCommerce_Transform_Products {
 			$product->addVariant( $product_variant );
 		}
 
-		return $product;
+		return apply_filters('mailchimp_sync_product', $product, $woo);
 	}
 
 	/**

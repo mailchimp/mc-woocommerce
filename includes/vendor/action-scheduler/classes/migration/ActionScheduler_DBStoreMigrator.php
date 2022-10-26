@@ -17,13 +17,13 @@ class ActionScheduler_DBStoreMigrator extends ActionScheduler_DBStore {
 	 * that when first saving the action.
 	 *
 	 * @param ActionScheduler_Action $action
-	 * @param DateTime $scheduled_date Optional date of the first instance to store.
-	 * @param DateTime $last_attempt_date Optional date the action was last attempted.
+	 * @param \DateTime $scheduled_date Optional date of the first instance to store.
+	 * @param \DateTime $last_attempt_date Optional date the action was last attempted.
 	 *
 	 * @return string The action ID
 	 * @throws \RuntimeException When the action is not saved.
 	 */
-	public function save_action( ActionScheduler_Action $action, DateTime $scheduled_date = null, DateTime $last_attempt_date = null ){
+	public function save_action( ActionScheduler_Action $action, \DateTime $scheduled_date = null, \DateTime $last_attempt_date = null ){
 		try {
 			/** @var \wpdb $wpdb */
 			global $wpdb;
@@ -40,7 +40,7 @@ class ActionScheduler_DBStoreMigrator extends ActionScheduler_DBStore {
 			}
 
 			return $action_id;
-		} catch ( Exception $e ) {
+		} catch ( \Exception $e ) {
 			throw new \RuntimeException( sprintf( __( 'Error saving action: %s', 'action-scheduler' ), $e->getMessage() ), 0 );
 		}
 	}

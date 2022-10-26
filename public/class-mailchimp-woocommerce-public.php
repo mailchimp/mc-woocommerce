@@ -108,7 +108,7 @@ class MailChimp_WooCommerce_Public {
     public function user_my_account_opt_in_save($user_id)
     {
         $subscribed = isset($_POST['mailchimp_woocommerce_is_subscribed_checkbox']) &&
-            $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == 'on';
+            ( $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == 'on' || $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == '1');
         update_user_meta( $user_id, 'mailchimp_woocommerce_is_subscribed', $subscribed);
     }
 

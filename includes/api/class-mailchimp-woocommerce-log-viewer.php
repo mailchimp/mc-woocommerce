@@ -158,7 +158,7 @@ class MailChimp_WooCommerce_Log_Viewer {
 		$files = array_filter(
 			$files,
 			function( $value ) {
-				return static::stringEndsWith( $value, '.log' );
+				return static::stringEndsWith( $value, '.log' ) && static::isValidLogFile( $value );
 			}
 		);
 		if ( $basename && is_array( $files ) ) {
@@ -188,5 +188,14 @@ class MailChimp_WooCommerce_Log_Viewer {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * @param $file
+	 *
+	 * @return bool
+	 */
+	public static function isValidLogFile( $file ) {
+		return mailchimp_string_contains( $file, array('mailchimp_', 'fatal-') );
 	}
 }

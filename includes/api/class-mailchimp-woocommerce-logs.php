@@ -72,6 +72,9 @@ class MailChimp_WooCommerce_Logs {
 			if ( ! isset( $matches[2] ) ) {
 				continue;
 			}
+			if ( !mailchimp_string_contains($file, array('mailchimp_', 'fatal-')) ) {
+				continue;
+			}
 			$files[] = array(
 				'value'    => base64_encode( $file ),
 				'filename' => $file,

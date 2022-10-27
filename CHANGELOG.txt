@@ -1,4 +1,8 @@
 == Changelog ==
+= 2.7.6 =
+* deprecated ExtendRestAPI filling logs
+* update action scheduler version
+* fix for saving profile unsubscribes
 = 2.7.5 =
 * fix admin subscription status checkbox flow
 * remove support flag on plugin uninstall

@@ -138,6 +138,7 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
         $data = array(
             'optinDefaultText' => __( 'I want to receive updates about products and promotions.', 'mailchimp-newsletter' ),
         );
+        $data['gdprStatus'] = $this->getOptinStatus();
 
         if (!empty($gdpr)) {
             $data['gdprHeadline'] = __( 'Please select all the ways you would like to hear from us', 'mailchimp-newsletter' );
@@ -316,6 +317,38 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
             return false;
         }
         return mailchimp_get_api();
+    }
+
+    /**
+     * @return bool
+     */
+    protected function getOptinStatus()
+    {
+
+        $mailchimp_newsletter = new MailChimp_Newsletter();
+        // if the user has chosen to hide the checkbox, don't do anything.
+        if ( ( $default_setting = $mailchimp_newsletter->getOption('mailchimp_checkbox_defaults', 'check') ) === 'hide') {
+            return 'hide';
+        }
+
+        // allow the user to specify the text in the newsletter label.
+        $label = $mailchimp_newsletter->getOption('newsletter_label');
+        if ($label == '') $label = __('Subscribe to our newsletter', 'mailchimp-for-woocommerce');
+        // if the user chose 'check' or nothing at all, we default to true.
+        $default_checked = $default_setting === 'check';
+        $status = $default_checked;
+
+        // if the user is logged in, we will pull the 'is_subscribed' property out of the meta for the value.
+        // otherwise we use the default settings.
+        if (is_user_logged_in()) {
+            $status = get_user_meta(get_current_user_id(), 'mailchimp_woocommerce_is_subscribed', true);
+            /// if the user is logged in - and is already subscribed - just ignore this checkbox.
+            if ($status === '' || $status === null) {
+                $status = $default_checked;
+            }
+        }
+
+        return $status === true ? 'check' : 'uncheck';
     }
 
     /**

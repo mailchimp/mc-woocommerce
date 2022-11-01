@@ -5,7 +5,7 @@ import { useEffect, useState } from '@wordpress/element';
 import { CheckboxControl } from '@woocommerce/blocks-checkout';
 import {__} from "@wordpress/i18n";
 
-const Block = ( { cart, extensions, text, gdprHeadline, gdpr, checkoutExtensionData } ) => {
+const Block = ( { cart, extensions, text, gdprHeadline, gdprStatus, gdpr, checkoutExtensionData } ) => {
 
 	let defaultGDPR = {};
 	if (gdpr && gdpr.length) {
@@ -13,7 +13,11 @@ const Block = ( { cart, extensions, text, gdprHeadline, gdpr, checkoutExtensionD
 			defaultGDPR[item.marketing_permission_id] = false;
 		});
 	}
-	const [ checked, setChecked ] = useState( false );
+
+	if ( gdprStatus === 'hide' ) return '';
+
+	const status = gdprStatus === 'check';
+	const [ checked, setChecked ] = useState( status );
 	const [ gdprFields ] = useState({});
 	const { setExtensionData } = checkoutExtensionData;
 

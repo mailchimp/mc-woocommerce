@@ -46,6 +46,9 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 			update_option("{$this->plugin_name}-sync.syncing", true);
 			update_option("{$this->plugin_name}-sync.started_at", time());
 
+			// let this happen if they start the sync again.
+			mailchimp_delete_transient('stop_sync');
+
 			if (! get_option("{$this->plugin_name}-sync.completed_at")) {
 				update_option("{$this->plugin_name}-sync.initial_sync", 1);
 			} else delete_option("{$this->plugin_name}-sync.initial_sync");
@@ -106,6 +109,12 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 		 * @throws MailChimp_WooCommerce_ServerError
 		 */
 		public function handle(){
+			// if we have a transient telling us to stop this sync, just break out here instead of
+			// respawn and try to delete.
+			if (mailchimp_get_transient('stop_sync', false)) {
+				return;
+			}
+
 			// Trigger respawn
 			$this->recreate();
 			
@@ -161,11 +170,14 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 
 			if ($completed['orders']) {
 				if (mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Single_Order') <= 0 && mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Process_Orders') <= 0) {
+					mailchimp_set_transient('stop_sync', 600);
 					$this->flag_stop_sync();
                     try {
                         as_unschedule_action('MailChimp_WooCommerce_Process_Full_Sync_Manager', array(), 'mc-woocommerce' );
-                    } catch (Exception $e) {}
-				}	
+                    } catch (Exception $e) {
+                    	mailchimp_error('sync.unschedule.error', $e->getMessage());
+                    }
+				}
 			}
 		}
 

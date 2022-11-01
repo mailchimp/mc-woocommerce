@@ -1,4 +1,6 @@
 == Changelog ==
+= 2.7.7 =
+* Added transient to help sync manager finish
 = 2.7.6 =
 * deprecated ExtendRestAPI filling logs
 * update action scheduler version

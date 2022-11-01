@@ -295,6 +295,13 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
             mailchimp_error('member.sync.error', mailchimp_error_trace($e, "RateLimited :: user #{$this->id}"));
             $this->retry();
         } catch (Exception $e) {
+
+        	$compliance_state = mailchimp_string_contains($e->getMessage(), 'compliance state');
+
+        	if ($compliance_state) {
+        		return $this->handleComplianceState($email, $merge_fields);
+	        }
+
             // if we have a 404 not found, we can create the member
             if ($e->getCode() == 404) {
 
@@ -329,4 +336,16 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 
         return false;
     }
+
+	/**
+	 * @param $email
+	 * @param array $fields
+	 * @param array $interests
+	 * @throws \Throwable
+	 */
+	protected function handleComplianceState($email, $fields = [], $interests = [])
+	{
+		mailchimp_log('subscriber_sync', "member {$email} is in compliance state, sending double opt in.");
+		return mailchimp_get_api()->updateOrCreate(mailchimp_get_list_id(), $email, 'pending', $fields, $interests);
+	}
 }

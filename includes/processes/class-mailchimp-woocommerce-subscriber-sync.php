@@ -22,6 +22,8 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
      */
     public function handle()
     {
+    	mailchimp_debug('subscriber_sync', "tracing mailchimp post", array('data' => $this->data));
+
         try {
             // if the store is not properly connected to Mailchimp - we need to skip this.
             if (!mailchimp_is_configured()) {
@@ -32,6 +34,12 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
             list($hook_type, $data, $failed) = $this->parseInputData();
             // extract the service ids from the data we get
             list ($service_id, $email) = $this->extractServiceIDs($data);
+
+            /// when subscriber sync hooks come in, force refresh the admin view
+            $list_id = mailchimp_get_list_id();
+	        $email_hash = md5( strtolower( trim( $email ) ) );
+	        delete_site_transient( "mailchimp-woocommerce-subscribed.{$list_id}.{$email_hash}" );
+
             // ignore the empty submissions or certain events or emails
             if ($this->hasInvalidEvent($hook_type, $failed, $data)) {
                 mailchimp_log('subscriber_sync', 'Webhook has invalid event', compact('email'));

@@ -324,16 +324,12 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
      */
     protected function getOptinStatus()
     {
-
         $mailchimp_newsletter = new MailChimp_Newsletter();
         // if the user has chosen to hide the checkbox, don't do anything.
         if ( ( $default_setting = $mailchimp_newsletter->getOption('mailchimp_checkbox_defaults', 'check') ) === 'hide') {
             return 'hide';
         }
 
-        // allow the user to specify the text in the newsletter label.
-        $label = $mailchimp_newsletter->getOption('newsletter_label');
-        if ($label == '') $label = __('Subscribe to our newsletter', 'mailchimp-for-woocommerce');
         // if the user chose 'check' or nothing at all, we default to true.
         $default_checked = $default_setting === 'check';
         $status = $default_checked;

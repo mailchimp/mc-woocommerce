@@ -7,6 +7,7 @@ const {
 	optinDefaultText,
 	gdprHeadline,
 	gdprFields,
+	gdprStatus,
 } = getSetting( 'mailchimp-newsletter_data', '' );
 
 export default {
@@ -21,5 +22,9 @@ export default {
 	gdpr: {
 		type: 'array',
 		default: gdprFields
+	},
+	gdprStatus: {
+		type: 'string',
+		default: gdprStatus
 	}
 };

@@ -697,6 +697,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function getCampaignTrackingID()
     {
+    	if ($this->isAdmin()) {
+    		return false;
+	    }
+
         $cookie = $this->cookie('mailchimp_campaign_id', false);
 
         if (empty($cookie)) {

@@ -105,10 +105,6 @@ class MailChimp_WooCommerce_Public extends MailChimp_WooCommerce_Options {
 		wp_enqueue_script($this->plugin_name. '_gdpr', plugin_dir_url( __FILE__ ) .'js/mailchimp-woocommerce-checkout-gdpr.min.js', array(), $this->version, true);
 	}
 
-	public function display_user_my_account_opt_in() {
-//        do_action('display_user_my_account_opt_in');
-    }
-
 	public function user_my_account_opt_in()
     {
         $gdpr_fields = $this->user_my_account_gdpr_fields();

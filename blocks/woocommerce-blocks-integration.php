@@ -196,6 +196,15 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
 									}
 									return true;
 								},
+								'sanitize_callback' => function ( $value ) {
+									if ( is_bool( $value ) ) {
+										return $value;
+									}
+
+									// Return a boolean when "null" is passed,
+									// which is the only non-boolean value allowed.
+									return false;
+								},
 							),
 						),
                         'gdprFields' => array(

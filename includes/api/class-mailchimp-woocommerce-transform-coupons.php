@@ -98,7 +98,7 @@ class MailChimp_WooCommerce_Transform_Coupons {
 		// attach the rule for use.
 		$code->attachPromoRule( $rule );
 
-		return $code;
+		return apply_filters('mailchimp_sync_promocode', $code, $resource);
 	}
 
 	/**

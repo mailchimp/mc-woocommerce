@@ -102,15 +102,24 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 
 			if ( is_array( $stores ) && ! empty( $stores ) ) {
 				foreach ( $stores as $mc_store ) {
+					/** @var MailChimp_WooCommerce_Store $mc_store */
 					$store_url          = $this->baseDomain( $mc_store->getDomain() );
 					$public_key_matched = $mc_store->getId() === $store_id;
 					// make sure the current store in context is inside the Mailchimp array of stores.
 					if ( $public_key_matched ) {
 						$shop                 = $mc_store;
-						$syncing_mc           = $mc_store->isSyncing();
+						$syncing_mc           = (bool) mailchimp_get_data('sync.syncing' );
 						$store_attached       = true;
 						$list_is_valid        = $mc_store->getListId() === $list_id;
 						$has_mailchimp_script = (bool) $mc_store->getConnectedSiteScriptFragment();
+
+						// if the store is not syncing locally, but is still marked as syncing on Mailchimp,
+						// clean it up by toggling to false.
+						if ( !$syncing_mc && $mc_store->isSyncing() ) {
+							if ( $api->flagStoreSync($store_id, false) ) {
+								mailchimp_log('tower', 'Toggled Mailchimp store to not syncing historical data');
+							}
+						}
 					}
 					if ( $store_url === $compare_url ) {
 						if ( ! $public_key_matched && $mc_store->getPlatform() === 'Woocommerce' ) {

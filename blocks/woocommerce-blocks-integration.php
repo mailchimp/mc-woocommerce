@@ -191,14 +191,23 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
 					return array(
 						'optin' => array(
 							'description' => __( 'Subscribe to marketing opt-in.', 'mailchimp-newsletter' ),
-							'type'        => 'boolean',
+							'type'        => array( 'boolean', 'null' ),
 							'context'     => array(),
 							'arg_options' => array(
 								'validate_callback' => function( $value ) {
-									if ( ! is_bool( $value ) ) {
+									if ( ! is_null( $value ) && ! is_bool( $value ) ) {
 										return new WP_Error( 'api-error', 'value of type ' . gettype( $value ) . ' was posted to the newsletter optin callback' );
 									}
 									return true;
+								},
+								'sanitize_callback' => function ( $value ) {
+									if ( is_bool( $value ) ) {
+										return $value;
+									}
+
+									// Return a boolean when "null" is passed,
+									// which is the only non-boolean value allowed.
+									return false;
 								},
 							),
 						),

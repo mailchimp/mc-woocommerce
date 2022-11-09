@@ -224,6 +224,11 @@ class MailChimp_WooCommerce_Order {
 	 * @return null
 	 */
 	public function getCampaignId() {
+		// if the campaign ID is empty, let's try to pull the last clicked campaign from Mailchimp.
+		if (empty($this->campaign_id)) {
+			$job = new MailChimp_WooCommerce_Pull_Last_Campaign($this->getCustomer()->getEmailAddress());
+			$this->campaign_id = $job->handle();
+		}
 		return $this->campaign_id;
 	}
 

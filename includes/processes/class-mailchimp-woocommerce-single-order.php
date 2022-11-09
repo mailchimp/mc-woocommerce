@@ -284,11 +284,27 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
             // only do this stuff on new orders
             if ($new_order) {
+            	// if we have the saved order meta from previous syncs let's use it.
+	            // This should help with reporting after people may have disconnected and reconnected to a new store.
+	            if (($saved = get_post_meta($order_post->ID, 'mailchimp_woocommerce_campaign_id', true))) {
+		            $this->campaign_id = $saved;
+	            }
+            	// if the campaign ID is empty, let's try to pull the last clicked campaign from Mailchimp.
+	            // but only do this if we're not in a syncing status.
+            	if (empty($this->campaign_id) && !$this->is_full_sync) {
+            		// see if we have a saved version
+		            // pull the last clicked campaign for this email address
+		            $job = new MailChimp_WooCommerce_Pull_Last_Campaign($email);
+		            $this->campaign_id = $job->handle();
+	            }
+
                 // apply a campaign id if we have one.
                 if (!empty($this->campaign_id)) {
                     try {
                         $order->setCampaignId($this->campaign_id);
                         $log .= ' :: campaign id ' . $this->campaign_id;
+                        // save it for later if we don't have this value.
+	                    update_post_meta($order_post->ID, 'mailchimp_woocommerce_campaign_id', $campaign_id);
                     }
                     catch (Exception $e) {
                         mailchimp_log('single_order_set_campaign_id.error', 'No campaign added to order, with provided ID: '. $this->campaign_id. ' :: '. $e->getMessage(). ' :: in '.$e->getFile().' :: on '.$e->getLine());

@@ -245,7 +245,7 @@ $newsletter_settings_error = $this->getData( 'errors.mailchimp_list', false );
 						<label for="billing_state" class="">State / County&nbsp;<span class="optional">(optional)</span></label><span class="woocommerce-input-wrapper"><input type="hidden" id="billing_state" name="billing_state" placeholder="" data-input-classes="" class="hidden"></span>
 					</p>
 					<p class="form-row form-row-wide validate-required validate-email" id="billing_email_field" data-priority="110">
-						<label for="billing_email" class="">Email address&nbsp;</label><span class="woocommerce-input-wrapper"><input type="email" class="input-text " name="billing_email" id="billing_email" placeholder="" value="" autocomplete="email username"></span>
+						<label for="billing_email" class="">Email address&nbsp;</label><span class="woocommerce-input-wrapper"><input type="email" class="input-text " name="billing_email" id="billing_email" placeholder="" value="" autocomplete="email"></span>
 					</p>
 				</div>
 				<?php

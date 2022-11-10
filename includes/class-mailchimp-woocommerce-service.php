@@ -1213,8 +1213,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function user_update_subscribe_status( $user_id )
     {
-    	$subscribed = isset($_POST['mailchimp_woocommerce_is_subscribed_checkbox']) &&
-            $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == 'on';
+    	$subscribed = isset($_POST['mailchimp_woocommerce_is_subscribed_radio']) ? $_POST['mailchimp_woocommerce_is_subscribed_radio'] : '';
         $gdpr_fields = isset($_POST['mailchimp_woocommerce_gdpr']) ? $_POST['mailchimp_woocommerce_gdpr'] : null;
 
         // set a site transient that will prevent overlapping updates from refreshing the page on the admin user view

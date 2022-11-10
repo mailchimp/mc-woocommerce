@@ -134,16 +134,17 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
                 static::$handling_for = null;
                 return false;
             }
-            $this->subscribed = (bool) $user_subscribed;
+            $this->subscribed = $user_subscribed;
         }
 
         // if the meta we've stored on the user is not equal to the value being passed to Mailchimp
 	    // let's update that value here.
-        if ( $unsaved || ( (bool) $this->subscribed && (bool) $user_subscribed !== (bool) $this->subscribed ) ) {
-        	update_user_meta(
+
+        if ( $unsaved || ( metadata_exist('user', $this->id, 'mailchimp_woocommerce_is_subscribed') && $user_subscribed !== $this->subscribed ) ) {
+            update_user_meta(
         		$this->id,
 		        'mailchimp_woocommerce_is_subscribed',
-		        $this->subscribed ? '1' : '0'
+		        $this->subscribed
 	        );
         }
 

@@ -118,8 +118,7 @@ class MailChimp_WooCommerce_Public extends MailChimp_WooCommerce_Options {
 	    	return;
 	    }
 
-        $subscribed = isset($_POST['mailchimp_woocommerce_is_subscribed_checkbox']) &&
-            ( $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == 'on' || $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == '1');
+        $subscribed = isset($_POST['mailchimp_woocommerce_is_subscribed_radio']) ? $_POST['mailchimp_woocommerce_is_subscribed_radio'] : '';
         update_user_meta( $user_id, 'mailchimp_woocommerce_is_subscribed', $subscribed);
     }
 

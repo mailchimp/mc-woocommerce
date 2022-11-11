@@ -564,9 +564,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $is_subscribed = get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true);
         $gdpr_fields = get_user_meta($user_id, 'mailchimp_woocommerce_gdpr_fields', true);
 
+        mailchimp_log('member.sync', "handleUserUpdated " . $is_subscribed);
         $job = new MailChimp_WooCommerce_User_Submit(
             $user_id,
-            (bool) $is_subscribed,
+            $is_subscribed,
             $old_user_data,
             null,
             !empty($gdpr_fields) ? $gdpr_fields : null

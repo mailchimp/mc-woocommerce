@@ -1,5 +1,5 @@
 <?php $mailchimp_user_subscription_status = ( isset( $user ) && $user ) ? get_user_meta( $user->ID, 'mailchimp_woocommerce_is_subscribed', true ) : false; ?>
-<h2>Mailchimp <?= $user->ID ?> <?= get_user_meta( $user->ID, 'mailchimp_woocommerce_is_subscribed', true ) ?></h2>
+<h2>Mailchimp</h2>
 <table class="form-table">
 	<tr>
 		<th><label for="mailchimp_woocommerce_is_subscribed"><?php esc_html_e( 'User Subscribed', 'mailchimp-for-woocommerce' ); ?></label></th>
@@ -23,7 +23,7 @@
                            name="mailchimp_woocommerce_is_subscribed_radio"
                            id="mailchimp_woocommerce_is_unsubscribed"
                             <?= $mailchimp_user_subscription_status === 'unsubscribed' ? ' checked="checked"' : '' ?>
-                           value="unsubscribed"' />
+                           value="unsubscribed" />
                     <?= translate( 'Unsubscribe from out newsletter', 'mailchimp-for-woocommerce' ) ?>
                 </label>
             </p>

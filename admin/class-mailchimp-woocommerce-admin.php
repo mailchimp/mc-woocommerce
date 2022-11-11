@@ -275,7 +275,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @return bool
 	 */
 	protected function syncUserStatus( $user ) {
-		try {
+        try {
 			if ( empty( $user ) || ! is_email( $user->user_email ) || ! mailchimp_is_configured() ) {
 				return false;
 			}
@@ -284,7 +284,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			    return false;
             }
 			if ( ( $status = mailchimp_get_api()->getCachedSubscriberStatusForAdminProfileView( mailchimp_get_list_id(), $user->user_email ) ) ) {
-			    if ( is_string( $status ) ) {
+                if ( is_string( $status ) ) {
 			        if ( $status === 'unsubscribed' ) {
                         $subscribed_status = 'unsubscribed';
                     } else if ( in_array( $status, array( 'subscribed', 'pending' ) ) ) {

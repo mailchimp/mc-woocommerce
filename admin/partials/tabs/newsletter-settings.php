@@ -250,9 +250,9 @@ $newsletter_settings_error = $this->getData( 'errors.mailchimp_list', false );
 				</div>
 				<?php
 					$label = $this->getOption( 'newsletter_label' );
-				if ( '' === $label ) {
+				if ( '' === $label || is_null($label) ) {
 					$label = __( 'Subscribe to our newsletter', 'mailchimp-for-woocommerce' );
-				}
+                }
 				?>
 				<fieldset>
 					<p class="form-row form-row-wide mailchimp-newsletter">

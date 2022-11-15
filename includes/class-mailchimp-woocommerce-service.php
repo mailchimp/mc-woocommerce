@@ -547,7 +547,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         update_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', $subscribed);
 
         if ($subscribed) {
-            $job = new MailChimp_WooCommerce_User_Submit($user_id, true, null, null, $gdpr_fields);
+            $job = new MailChimp_WooCommerce_User_Submit($user_id, '1', null, null, $gdpr_fields);
             mailchimp_handle_or_queue($job);
         }
     }

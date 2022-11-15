@@ -40,7 +40,6 @@ if ($mailchimp_user_subscription_status !== false) {
 		echo wp_kses($gdpr_fields, mailchimp_expanded_alowed_tags());
 	}
 } else {
-//	echo '<input type="hidden" name="mailchimp_woocommerce_is_subscribed_checkbox" id="mailchimp_woocommerce_is_subscribed" value="1">';
 	echo '<input type="hidden" name="mailchimp_woocommerce_is_subscribed_radio" id="mailchimp_woocommerce_is_subscribed" value="1">';
 }
 ?>

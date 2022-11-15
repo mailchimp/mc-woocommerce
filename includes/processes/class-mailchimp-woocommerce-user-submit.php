@@ -244,7 +244,6 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
                     return false;
                 }
             }
-            mailchimp_log('member.sync', "current member status in MC = " . $member_data['status'] );
 
             // if the member is unsubscribed or pending, we really can't do anything here.
             if (isset($member_data['status']) && in_array($member_data['status'], array('unsubscribed', 'pending'))) {

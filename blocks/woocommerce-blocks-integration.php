@@ -287,7 +287,7 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
                 mailchimp_handle_or_queue(
                     new MailChimp_WooCommerce_User_Submit(
                         $user_id,
-                        true,
+                        '1',
                         null,
                         $language,
                         $gdpr_fields

@@ -405,7 +405,7 @@ class MailChimp_WooCommerce
 			// handle the user registration hook
 			$this->loader->add_action('user_register', $service, 'handleUserRegistration');
 			// handle the user updated profile hook
-			$this->loader->add_action('profile_update', $service, 'handleUserUpdated', 9999999, 2);
+			$this->loader->add_action('profile_update', $service, 'handleUserUpdated', 100, 2);
 
 			// get user by hash ( public and private )
             $this->loader->add_action('wp_ajax_mailchimp_get_user_by_hash', $service, 'get_user_by_hash');

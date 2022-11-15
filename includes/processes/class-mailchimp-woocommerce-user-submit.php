@@ -31,7 +31,6 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 	 */
     public function __construct($id = null, $subscribed = null, $updated_data = null, $language = null, $gdpr_fields = null)
     {
-        mailchimp_log('member.sync', " var subscribed $subscribed");
 
         if (!empty($id)) {
             // if we're passing in another user with the same id during the same php process we need to ignore it.
@@ -64,7 +63,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
             $this->language = $language;
         }
 
-        mailchimp_log('member.sync', " this subscribed $this->subscribed");
+        mailchimp_log('member.sync', "construct this -> subscribed " . $this->subscribed);
 
     }
 
@@ -201,7 +200,6 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
         $transient_id = mailchimp_get_transient_email_key($email);
         $status_meta = mailchimp_get_subscriber_status_options($this->subscribed);
 
-        mailchimp_log('member.sync', "this -> subscribed " . $this->subscribed);
         mailchimp_log('member.sync', "Status meta " , $status_meta);
 
         try {

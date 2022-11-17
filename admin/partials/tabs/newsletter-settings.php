@@ -30,6 +30,8 @@ if ( ! isset( $options ) ) {
 	$options = array();
 }
 $newsletter_settings_error = $this->getData( 'errors.mailchimp_list', false );
+
+$checkout_page_id = get_option('woocommerce_checkout_page_id');
 ?>
 
 <?php if ( $newsletter_settings_error ) : ?>
@@ -198,6 +200,11 @@ $newsletter_settings_error = $this->getData( 'errors.mailchimp_list', false );
 		<div class="box fieldset-header margin-large" >
 			<h3><?php esc_html_e( 'Opt-In Checkbox Settings', 'mailchimp-for-woocommerce' ); ?></h3>
 		</div>
+        <?php if ( has_block( 'woocommerce/checkout', get_post($checkout_page_id ) ) ) : ?>
+        <div class="box" >
+            <h4><?= sprintf(__('Checkout page is using woocommerce blocks. Settings are available there. Check block settings <a href="">here</a>', 'mailchimp-for-woocommerce'), get_the_permalink($checkout_page_id) ) ?></h4>
+        </div>
+        <?php else: ?>
 		<div class="box box-half">
 			<label>
 				<h4><?php esc_html_e( 'Checkbox display options', 'mailchimp-for-woocommerce' ); ?></h4>
@@ -263,6 +270,7 @@ $newsletter_settings_error = $this->getData( 'errors.mailchimp_list', false );
 				<div class="overlay"></div>
 			</div>
 		</div>
+        <?php endif; // checkout page is using blocks ?>
 		<div class="box fieldset-header" >
 			<h3><?php esc_html_e( 'Opt-In checkbox position', 'mailchimp-for-woocommerce' ); ?></h3>
 		</div>

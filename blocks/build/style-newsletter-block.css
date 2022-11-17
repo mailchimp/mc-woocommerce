@@ -1,1 +1,20 @@
-.wp-block-woocommerce-checkout-newsletter-subscription{align-items:flex-start;display:flex;margin:20px 0;padding-bottom:4px;padding-top:4px}.wp-block-woocommerce-checkout-newsletter-subscription .block-editor-rich-text__editable{line-height:24px;vertical-align:middle}.wp-block-woocommerce-checkout-newsletter-subscription .wc-block-components-checkbox{margin-right:16px;margin-top:0}
+/*!************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[3].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[3].use[3]!./assets/js/checkout-newsletter-subscription-block/style.scss ***!
+  \************************************************************************************************************************************************************************************************************************************************************************************/
+.wp-block-woocommerce-checkout-newsletter-subscription {
+  margin: 20px 0;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  display: flex;
+  align-items: flex-start;
+}
+.wp-block-woocommerce-checkout-newsletter-subscription .block-editor-rich-text__editable {
+  vertical-align: middle;
+  line-height: 24px;
+}
+.wp-block-woocommerce-checkout-newsletter-subscription .wc-block-components-checkbox {
+  margin-right: 16px;
+  margin-top: 0;
+}
+
+/*# sourceMappingURL=style-newsletter-block.css.map*/

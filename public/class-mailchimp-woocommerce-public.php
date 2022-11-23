@@ -113,14 +113,29 @@ class MailChimp_WooCommerce_Public extends MailChimp_WooCommerce_Options {
 
     public function user_my_account_opt_in_save($user_id)
     {
-	    if (!has_action('woocommerce_edit_account_form', array(MailChimp_WooCommerce_Public::instance(), 'user_my_account_opt_in' ))) {
+        if (!has_action('woocommerce_edit_account_form', array(MailChimp_WooCommerce_Public::instance(), 'user_my_account_opt_in' ))) {
 	    	// blocking the post request from updating the user profile since the developer has removed this form.
 	    	return;
 	    }
 
-        $subscribed = isset($_POST['mailchimp_woocommerce_is_subscribed_checkbox']) &&
-            ( $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == 'on' || $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == '1');
+
+        $subscribed = isset($_POST['mailchimp_woocommerce_is_subscribed_radio']) ? $_POST['mailchimp_woocommerce_is_subscribed_radio'] : '';
+        $gdpr_fields = isset($_POST['mailchimp_woocommerce_gdpr']) ? $_POST['mailchimp_woocommerce_gdpr'] : false;
+        mailchimp_log('member.sync', "user_my_account_opt_in_save " . $subscribed );
+
         update_user_meta( $user_id, 'mailchimp_woocommerce_is_subscribed', $subscribed);
+        update_user_meta( $user_id, 'mailchimp_woocommerce_gdpr_fields', $gdpr_fields);
+
+        $job = new MailChimp_WooCommerce_User_Submit(
+            $user_id,
+            $subscribed,
+            null,
+            null,
+            !empty($gdpr_fields) ? $gdpr_fields : null
+        );
+
+        mailchimp_handle_or_queue($job);
+
     }
 
     /**

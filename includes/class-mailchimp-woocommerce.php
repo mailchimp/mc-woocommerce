@@ -310,7 +310,7 @@ class MailChimp_WooCommerce
 
         // set my-account opt-in checkbox
         $this->loader->add_action('woocommerce_edit_account_form', $plugin_public, 'user_my_account_opt_in', 100);
-        $this->loader->add_action('woocommerce_save_account_details', $plugin_public, 'user_my_account_opt_in_save', 100);
+        $this->loader->add_action('woocommerce_save_account_details', $plugin_public, 'user_my_account_opt_in_save', 1);
 	}
 
 	/**
@@ -405,7 +405,7 @@ class MailChimp_WooCommerce
 			// handle the user registration hook
 			$this->loader->add_action('user_register', $service, 'handleUserRegistration');
 			// handle the user updated profile hook
-			$this->loader->add_action('profile_update', $service, 'handleUserUpdated', 10, 2);
+			$this->loader->add_action('profile_update', $service, 'handleUserUpdated', 100, 2);
 
 			// get user by hash ( public and private )
             $this->loader->add_action('wp_ajax_mailchimp_get_user_by_hash', $service, 'get_user_by_hash');

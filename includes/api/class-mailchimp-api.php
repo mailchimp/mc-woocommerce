@@ -216,14 +216,14 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 * @throws MailChimp_WooCommerce_RateLimitError
 	 * @throws MailChimp_WooCommerce_ServerError
 	 */
-	public function subscribe( $list_id, $email, $subscribed = true, $merge_fields = array(), $list_interests = array(), $language = null, $gdpr_fields = null ) {
-		if ( is_string( $subscribed ) ) {
-			$status = $subscribed;
-		} elseif ( $subscribed === true ) {
-			$status = 'subscribed';
-		} else {
-			$status = 'transactional';
-		}
+	public function subscribe( $list_id, $email, $subscribed = '1', $merge_fields = array(), $list_interests = array(), $language = null, $gdpr_fields = null ) {
+		if ( $subscribed === '1' ) {
+            $status = 'subscribed';
+		} elseif ( $subscribed === '0' ) {
+            $status = 'transactional';
+        } else {
+            $status = $subscribed;
+        }
 
 		$data = $this->cleanListSubmission(
 			array(
@@ -271,12 +271,12 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 * @throws MailChimp_WooCommerce_RateLimitError
 	 * @throws MailChimp_WooCommerce_ServerError
 	 */
-	public function update( $list_id, $email, $subscribed = true, $merge_fields = array(), $list_interests = array(), $language = null, $gdpr_fields = null ) {
+	public function update( $list_id, $email, $subscribed = '1', $merge_fields = array(), $list_interests = array(), $language = null, $gdpr_fields = null ) {
 		$hash = md5( strtolower( trim( $email ) ) );
 
-		if ( $subscribed === true ) {
+		if ( $subscribed === '1' ) {
 			$status = 'subscribed';
-		} elseif ( $subscribed === false ) {
+		} elseif ( $subscribed === '0' ) {
 			$status = 'transactional';
 		} elseif ( $subscribed === null ) {
 			$status = 'cleaned';

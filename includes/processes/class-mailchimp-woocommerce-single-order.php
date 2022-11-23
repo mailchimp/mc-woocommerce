@@ -99,6 +99,15 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             return false;
         }
 
+        $order = wc_get_order($woo_order_number);
+        if ( $order ) {
+            $user   = get_user_by( 'ID', $order->get_user_id() );
+            if ( !in_array( 'customer', (array) $user->roles ) ) {
+                mailchimp_log('order_process', "Order #{$woo_order_number} skipped, user #{$order->get_user_id()} user role is not customer");
+                return false;
+            }
+        }
+
         $job = new MailChimp_WooCommerce_Transform_Orders();
 
         // set the campaign ID
@@ -342,7 +351,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 }
             }
             
-            mailchimp_debug('order_submit', "#{$woo_order_number}", $order->toArray());
+            mailchimp_debug('order_submit', " #{$woo_order_number}", $order->toArray());
 
             try {
                 // update or create

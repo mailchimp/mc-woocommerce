@@ -31,6 +31,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 	 */
     public function __construct($id = null, $subscribed = null, $updated_data = null, $language = null, $gdpr_fields = null)
     {
+
         if (!empty($id)) {
             // if we're passing in another user with the same id during the same php process we need to ignore it.
             if (static::$handling_for === $id) {
@@ -40,10 +41,10 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
             static::$handling_for = $this->id = $id;
         }
 
-        if (is_bool($subscribed)) {
+        if ( !is_null($subscribed) ) {
             $this->subscribed = $subscribed;
-            
-            if ($subscribed && !empty($gdpr_fields)) {
+
+            if ( is_string($subscribed) && !empty($gdpr_fields)) {
                 foreach ($gdpr_fields as $id => $value) {
                     $gdpr_field['marketing_permission_id'] = $id;
                     $gdpr_field['enabled'] = (bool) $value;
@@ -52,7 +53,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
             }
         }
 
-        
+
 
         if (!empty($updated_data)) {
             $this->updated_data = $updated_data->to_array();
@@ -61,6 +62,9 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
         if (!empty($language)) {
             $this->language = $language;
         }
+
+        mailchimp_log('member.sync', "construct this -> subscribed " . $this->subscribed);
+
     }
 
     /**
@@ -78,6 +82,9 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 	 */
     public function handle()
     {
+
+        mailchimp_log('member.sync', "first this -> subscribed " . $this->subscribed);
+
         if (!mailchimp_is_configured()) {
             mailchimp_debug(get_called_class(), 'Mailchimp is not configured properly');
             static::$handling_for = null;
@@ -124,7 +131,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
             return false;
         }
 
-	    $user_subscribed = get_user_meta($this->id, 'mailchimp_woocommerce_is_subscribed', true);
+        $user_subscribed = get_user_meta($this->id, 'mailchimp_woocommerce_is_subscribed', true);
         $unsaved = '' === $user_subscribed || null === $user_subscribed;
 
         // if we have a null value, we need to grab the correct user meta for is_subscribed
@@ -134,16 +141,17 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
                 static::$handling_for = null;
                 return false;
             }
-            $this->subscribed = (bool) $user_subscribed;
+            $this->subscribed = $user_subscribed;
         }
 
         // if the meta we've stored on the user is not equal to the value being passed to Mailchimp
 	    // let's update that value here.
-        if ( $unsaved || ( (bool) $this->subscribed && (bool) $user_subscribed !== (bool) $this->subscribed ) ) {
-        	update_user_meta(
+
+        if ( $unsaved || ( $this->subscribed !== '' && $user_subscribed !== $this->subscribed ) ) {
+            update_user_meta(
         		$this->id,
 		        'mailchimp_woocommerce_is_subscribed',
-		        $this->subscribed ? '1' : '0'
+		        $this->subscribed
 	        );
         }
 
@@ -159,7 +167,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 
         // don't let anyone be unsubscribed from the list - that should only happen on email campaigns
         // and someone clicking the unsubscribe linkage.
-        if (!$this->subscribed && !$this->submit_transactional) {
+        if ($this->subscribed === '0' && !$this->submit_transactional) {
             static::$handling_for = null;
             return false;
         }
@@ -184,7 +192,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
         }
         // language
         $language = $this->language;
-        
+
         // GDPR
         $gdpr_fields = $this->gdpr_fields;
 
@@ -235,7 +243,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 
             // if the member is unsubscribed or pending, we really can't do anything here.
             if (isset($member_data['status']) && in_array($member_data['status'], array('unsubscribed', 'pending'))) {
-                if ($this->subscribed && $member_data['status'] !== 'pending') {
+                if ( ( $this->subscribed === '1' || $this->subscribed === '0' )  && $member_data['status'] !== 'pending') {
                     mailchimp_log('member.sync', "pushing {$email} status as pending because they were previously unsubscribed, and must use the double opt in to make it back on the list.");
                     $member_data['status'] = 'pending';
                 } else {
@@ -249,7 +257,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
             if (isset($member_data['status']) && $member_data['status'] === 'transactional' || $member_data['status'] === 'cleaned') {
                 // ok let's update this member
                 $api->update($list_id, $email, $status_meta['updated'], $merge_fields, null, $language, $gdpr_fields);
-                
+
                 // update the member tags but fail silently just in case.
                 $api->updateMemberTags(mailchimp_get_list_id(), $email, true);
 
@@ -266,9 +274,14 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
             }
 
             if (isset($member_data['status'])) {
-                if ($member_data['status'] === 'subscribed' && !$this->subscribed) {
+                if ( ($member_data['status'] === 'subscribed' || $member_data['status'] === 'unsubscribed') && $this->subscribed === '0') {
                     $member_data['status'] = 'transactional';
+                } else if ( ($member_data['status'] === 'subscribed' || $member_data['status'] === 'transactional') && $this->subscribed === 'unsubscribed' ) {
+                    $member_data['status'] = 'unsubscribed';
                 }
+
+                mailchimp_log('member.sync', "woocommerce user submit = " . $member_data['status'] );
+
                 // ok let's update this member
                 $api->update($list_id, $email, $member_data['status'], $merge_fields, null, $language, $gdpr_fields);
 

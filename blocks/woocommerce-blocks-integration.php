@@ -140,6 +140,12 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
         );
         $data['gdprStatus'] = $this->getOptinStatus();
 
+        $data['checkboxSettings'] = array(
+            [ 'label' => 'Visible, checked by default', 'value' => 'check' ],
+            [ 'label' => 'Visible, unchecked by default', 'value' => 'uncheck' ],
+            [ 'label' => 'Hidden, unchecked by default', 'value' => 'hide' ],
+        );
+
         if (!empty($gdpr)) {
             $data['gdprHeadline'] = __( 'Please select all the ways you would like to hear from us', 'mailchimp-newsletter' );
             $data['gdprFields'] = $gdpr;
@@ -287,7 +293,7 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
                 mailchimp_handle_or_queue(
                     new MailChimp_WooCommerce_User_Submit(
                         $user_id,
-                        true,
+                        '1',
                         null,
                         $language,
                         $gdpr_fields

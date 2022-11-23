@@ -560,11 +560,13 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     {
         if (!mailchimp_is_configured()) return;
 
+        // check if user_my_account_opt_in_save is processing on frontend.
+        if ( !is_admin() ) return;
+
         // only update this person if they were marked as subscribed before
         $is_subscribed = get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true);
         $gdpr_fields = get_user_meta($user_id, 'mailchimp_woocommerce_gdpr_fields', true);
 
-        mailchimp_log('member.sync', "handleUserUpdated " . $is_subscribed);
         $job = new MailChimp_WooCommerce_User_Submit(
             $user_id,
             $is_subscribed,

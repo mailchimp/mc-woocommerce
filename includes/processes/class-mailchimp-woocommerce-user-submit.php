@@ -200,8 +200,6 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
         $transient_id = mailchimp_get_transient_email_key($email);
         $status_meta = mailchimp_get_subscriber_status_options($this->subscribed);
 
-        mailchimp_log('member.sync', "Status meta " , $status_meta);
-
         try {
 
             // check to see if the status meta has changed when a false response is given

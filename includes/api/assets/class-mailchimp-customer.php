@@ -30,7 +30,7 @@ class MailChimp_WooCommerce_Customer {
 		return array(
 			'id'            => 'required',
 			'email_address' => 'required|email',
-			'opt_in_status' => 'required|boolean',
+			'opt_in_status' => 'required|string',
 			'company'       => 'string',
 			'first_name'    => 'string',
 			'last_name'     => 'string',
@@ -85,7 +85,12 @@ class MailChimp_WooCommerce_Customer {
 	 * @return MailChimp_WooCommerce_Customer
 	 */
 	public function setOptInStatus( $opt_in_status ) {
-		$this->opt_in_status = $opt_in_status;
+
+        if ( is_bool( $opt_in_status ) ) {
+            $this->opt_in_status = $opt_in_status;
+        } else {
+            $this->opt_in_status = $opt_in_status === '1';
+        }
 
 		return $this;
 	}

@@ -63,7 +63,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
             $this->language = $language;
         }
 
-        mailchimp_log('member.sync', "construct this -> subscribed " . $this->subscribed);
+        mailchimp_debug('member.sync', "construct this -> subscribed " . $this->subscribed);
 
     }
 
@@ -83,7 +83,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
     public function handle()
     {
 
-        mailchimp_log('member.sync', "first this -> subscribed " . $this->subscribed);
+        mailchimp_debug('member.sync', "first this -> subscribed " . $this->subscribed);
 
         if (!mailchimp_is_configured()) {
             mailchimp_debug(get_called_class(), 'Mailchimp is not configured properly');
@@ -279,8 +279,6 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
                 } else if ( ($member_data['status'] === 'subscribed' || $member_data['status'] === 'transactional') && $this->subscribed === 'unsubscribed' ) {
                     $member_data['status'] = 'unsubscribed';
                 }
-
-                mailchimp_log('member.sync', "woocommerce user submit = " . $member_data['status'] );
 
                 // ok let's update this member
                 $api->update($list_id, $email, $member_data['status'], $merge_fields, null, $language, $gdpr_fields);

@@ -18,7 +18,7 @@ if ($mailchimp_user_subscription_status !== false) {
     $mailchimp_my_account .= '<input type="radio" class="woocommerce-form__input woocommerce-form__input-radio input-radio" name="mailchimp_woocommerce_is_subscribed_radio" id="mailchimp_woocommerce_is_unsubscribed" value="unsubscribed"';
     $mailchimp_my_account .= $mailchimp_user_subscription_status === 'unsubscribed' ? ' checked="checked"' : '';
     $mailchimp_my_account .= '>';
-    $mailchimp_my_account .= translate( 'Unsubscribe from out newsletter', 'mailchimp-for-woocommerce' );
+    $mailchimp_my_account .= translate( 'Unsubscribe from our newsletter', 'mailchimp-for-woocommerce' );
     $mailchimp_my_account .= '</label>';
     $mailchimp_my_account .= '</p>';
 

@@ -24,7 +24,7 @@
                            id="mailchimp_woocommerce_is_unsubscribed"
                             <?= $mailchimp_user_subscription_status === 'unsubscribed' ? ' checked="checked"' : '' ?>
                            value="unsubscribed" />
-                    <?= translate( 'Unsubscribe from out newsletter', 'mailchimp-for-woocommerce' ) ?>
+                    <?= translate( 'Unsubscribe from our newsletter', 'mailchimp-for-woocommerce' ) ?>
                 </label>
             </p>
 

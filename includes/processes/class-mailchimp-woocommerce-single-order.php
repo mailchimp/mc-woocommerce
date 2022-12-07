@@ -309,6 +309,10 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 		            // pull the last clicked campaign for this email address
 		            $job = new MailChimp_WooCommerce_Pull_Last_Campaign($email);
 		            $this->campaign_id = $job->handle();
+
+		            if (!empty($this->campaign_id)) {
+		            	mailchimp_debug('campaign_id', "Pulled campaign tracking from mailchimp user activity for {$email}");
+		            }
 	            }
 
                 // apply a campaign id if we have one.

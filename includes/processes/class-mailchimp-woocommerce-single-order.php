@@ -102,7 +102,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
         $order = wc_get_order($woo_order_number);
         if ( $order ) {
             $user   = get_user_by( 'ID', $order->get_user_id() );
-            if ( !in_array( 'customer', (array) $user->roles ) ) {
+            if (  $user && !in_array( 'customer', (array) $user->roles ) ) {
                 mailchimp_log('order_process', "Order #{$woo_order_number} skipped, user #{$order->get_user_id()} user role is not customer");
                 return false;
             }
@@ -466,7 +466,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 return false;
             }
             $woo = wc_get_order($order_post);
-            return $this->woo_order_number = $woo->get_order_number();
+            return $this->woo_order_number = $woo ? $woo->get_order_number() : false;
         } catch (Exception $e) {
             $this->woo_order_number = false;
             mailchimp_error('order_sync.failure', mailchimp_error_trace($e, "{$this->id} could not be loaded"));

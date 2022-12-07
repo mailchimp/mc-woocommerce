@@ -24,36 +24,9 @@ const Block = ( { cart, extensions, text, gdprHeadline, gdprStatus, gdpr, checko
 		setExtensionData( 'mailchimp-newsletter', 'optin', checked );
 	}, [ checked, setExtensionData ] );
 
-	if ( gdprStatus === 'hide') {
-		return (
-			<>
-				<div style={{ display: 'none' }}>
-					<CheckboxControl
-						id="subscribe-to-newsletter"
-						checked={ checked }
-						onChange={ setChecked }
-					>
-						<span dangerouslySetInnerHTML={ {__html: text} }/>
-					</CheckboxControl>
-					{gdpr && gdpr.length ? __(gdprHeadline, 'mailchimp-for-woocommerce') : ''}
-					{gdpr && gdpr.length ? gdpr.map((gdprItem) => {
-						return (<CheckboxControl
-							id={'gdpr_'+gdprItem.marketing_permission_id}
-							checked={ gdprFields[gdprItem.marketing_permission_id] }
-							onChange={ (e) => {
-								gdprFields[gdprItem.marketing_permission_id] = !gdprFields[gdprItem.marketing_permission_id];
-								setExtensionData( 'mailchimp-newsletter', 'gdprFields', gdprFields);
-							}}
-						>
-							<span dangerouslySetInnerHTML={ {__html: gdprItem.text} }/>
-						</CheckboxControl>);
-					}) : ''}
-				</div>
-			</>
-		);
-	} else {
-		return (
-			<>
+	return (
+		<>
+			<div style={{ display: gdprStatus === 'hide' ? 'none' : 'block' }}>
 				<CheckboxControl
 					id="subscribe-to-newsletter"
 					checked={ checked }
@@ -74,9 +47,9 @@ const Block = ( { cart, extensions, text, gdprHeadline, gdprStatus, gdpr, checko
 						<span dangerouslySetInnerHTML={ {__html: gdprItem.text} }/>
 					</CheckboxControl>);
 				}) : ''}
-			</>
-		);
-	}
+			</div>
+		</>
+	);
 };
 
 export default Block;

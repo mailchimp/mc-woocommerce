@@ -450,6 +450,9 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 return false;
             }
             $woo = wc_get_order($order_post);
+            if ( !$woo )
+                mailchimp_log('order_sync.failure', "Order #{$this->id}. Can’t submit order without a valid ID");
+
             return $this->woo_order_number = $woo ? $woo->get_order_number() : false;
         } catch (Exception $e) {
             $this->woo_order_number = false;

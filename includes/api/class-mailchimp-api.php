@@ -167,6 +167,18 @@ class MailChimp_WooCommerce_MailChimpApi {
 
 	/**
 	 * @param $list_id
+	 * @param $email
+	 * @return array|bool
+	 * @throws \Throwable
+	 */
+	public function activity($list_id, $email)
+	{
+		$hash = md5(strtolower(trim($email)));
+		return $this->get("lists/{$list_id}/members/{$hash}/activity");
+	}
+
+	/**
+	 * @param $list_id
 	 *
 	 * @return array|bool|mixed|object|null
 	 * @throws MailChimp_WooCommerce_Error

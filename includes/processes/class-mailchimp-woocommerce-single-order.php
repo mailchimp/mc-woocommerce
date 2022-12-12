@@ -102,8 +102,12 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
         $order = wc_get_order($woo_order_number);
         if ( $order ) {
             $user   = get_user_by( 'ID', $order->get_user_id() );
-            if (  $user && !in_array( 'customer', (array) $user->roles ) ) {
-                mailchimp_log('order_process', "Order #{$woo_order_number} skipped, user #{$order->get_user_id()} user role is not customer");
+            $allowed_roles = array('customer', 'subscriber');
+            $allowed_roles = apply_filters('mailchimp_campaign_user_roles', $allowed_roles );
+
+            if (  $user && count( array_intersect($allowed_roles,  $user->roles) ) === 0 ) {
+
+                mailchimp_log('order_process', "Order #{$woo_order_number} skipped, user #{$order->get_user_id()} user role is not in the list");
                 return false;
             }
         }
@@ -466,6 +470,9 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 return false;
             }
             $woo = wc_get_order($order_post);
+            if ( !$woo )
+                mailchimp_log('order_sync.failure', "Order #{$this->id}. Can’t submit order without a valid ID");
+
             return $this->woo_order_number = $woo ? $woo->get_order_number() : false;
         } catch (Exception $e) {
             $this->woo_order_number = false;

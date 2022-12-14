@@ -138,6 +138,16 @@ class MailChimp_WooCommerce_Public extends MailChimp_WooCommerce_Options {
 
     }
 
+    public function order_subscribe_user($order)
+    {
+        include_once('partials/mailchimp-woocommerce-order-field.php');
+    }
+
+    public function save_order_subscribe_user($order_id) {
+        update_post_meta( $order_id, 'mailchimp_woocommerce_is_subscribed', isset( $_POST['mailchimp_woocommerce_is_subscribed'] ) );
+//        update_post_meta( $order_id, 'mailchimp_woocommerce_is_subscribed', esc_attr($_POST[ 'mailchimp_woocommerce_is_subscribed' ] ) === 'yes' );
+    }
+
     /**
      * @return string
      */

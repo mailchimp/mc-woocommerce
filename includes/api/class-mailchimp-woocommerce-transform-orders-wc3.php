@@ -264,7 +264,6 @@ class MailChimp_WooCommerce_Transform_Orders {
 		// we now hold this data inside the customer object for usage in the order handler class
 		// we only update the subscriber status on a member IF they were subscribed.
 		$subscribed_on_order = $customer->wasSubscribedOnOrder( $order->get_id() );
-
 		$customer->setOptInStatus( $subscribed_on_order );
 
 		try {

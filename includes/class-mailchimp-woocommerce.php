@@ -311,6 +311,14 @@ class MailChimp_WooCommerce
         // set my-account opt-in checkbox
         $this->loader->add_action('woocommerce_edit_account_form', $plugin_public, 'user_my_account_opt_in', 100);
         $this->loader->add_action('woocommerce_save_account_details', $plugin_public, 'user_my_account_opt_in_save', 1);
+
+        // set order opt-in checkbox
+//        $this->loader->add_filter('woocommerce_admin_billing_fields', $plugin_public, 'order_subscribe_user');
+//        $this->loader->add_action('woocommerce_checkout_create_order', $plugin_public, 'save_order_subscribe_user', 220, 2);
+//
+//        // set order opt-in checkbox
+        $this->loader->add_action('woocommerce_admin_order_data_after_order_details', $plugin_public, 'order_subscribe_user');
+        $this->loader->add_action('woocommerce_process_shop_order_meta', $plugin_public, 'save_order_subscribe_user', 100, 1);
 	}
 
 	/**

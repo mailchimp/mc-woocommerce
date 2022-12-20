@@ -976,10 +976,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             $this->respondJSON(array('success' => false, 'email' => false, 'message' => 'filter blocked due to cookie preferences'));
         }
 
-        if ($this->doingAjax() && isset($_GET['email'])) {
+        if ($this->doingAjax() && isset($_POST['email'])) {
             $cookie_duration = $this->getCookieDuration();
 
-            $this->user_email = trim(str_replace(' ','+', $_GET['email']));
+            $this->user_email = trim(str_replace(' ','+', $_POST['email']));
 
             if (($current_email = $this->getEmailFromSession()) && $current_email !== $this->user_email) {
                 $this->previous_email = $current_email;
@@ -991,12 +991,12 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
             $this->getCartItems();
 
-            if (isset($_GET['mc_language'])) {
-                $this->user_language = $_GET['mc_language'];
+            if (isset($_POST['mc_language'])) {
+                $this->user_language = $_POST['mc_language'];
             }
 
-            if (isset($_GET['subscribed'])) {
-                $this->cart_subscribe = (bool) $_GET['subscribed'];
+            if (isset($_POST['subscribed'])) {
+                $this->cart_subscribe = (bool) $_POST['subscribed'];
             }
 
             $this->handleCartUpdated();

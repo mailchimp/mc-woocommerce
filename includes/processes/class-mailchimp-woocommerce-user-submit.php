@@ -318,7 +318,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 
                 try {
                     $uses_doi = isset($status_meta['requires_double_optin']) && $status_meta['requires_double_optin'];
-                    $status_if_new = $uses_doi && $this->subscribed ? 'pending' : (bool) $this->subscribed;
+                    $status_if_new = $uses_doi && $this->subscribed ? 'pending' : $this->subscribed;
 
                     $api->subscribe($list_id, $user->user_email, $status_if_new, $merge_fields, null, $language, $gdpr_fields);
 

@@ -317,8 +317,8 @@ class MailChimp_WooCommerce
 //        $this->loader->add_action('woocommerce_checkout_create_order', $plugin_public, 'save_order_subscribe_user', 220, 2);
 //
 //        // set order opt-in checkbox
-        $this->loader->add_action('woocommerce_admin_order_data_after_order_details', $plugin_public, 'order_subscribe_user');
-        $this->loader->add_action('woocommerce_process_shop_order_meta', $plugin_public, 'save_order_subscribe_user', 100, 1);
+//        $this->loader->add_action('woocommerce_admin_order_data_after_order_details', $plugin_public, 'order_subscribe_user');
+//        $this->loader->add_action('woocommerce_process_shop_order_meta', $plugin_public, 'save_order_subscribe_user', 100, 1);
 	}
 
 	/**

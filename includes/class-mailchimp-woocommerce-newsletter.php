@@ -82,8 +82,6 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
                         $marketing_permission_id = $field['marketing_permission_id'];
 
                         $text = $field['text'];
-                        do_action( 'wpml_register_single_string', 'Mailchimp for Woocommerce', 'GDPR text', $text );
-                        $text = apply_filters( 'wpml_translate_single_string', $text, 'mailchimp-for-woocommerce', 'GDPR text');
 
                         // Add to the checkbox output
                         $checkbox .= "<input type='hidden' value='0' name='mailchimp_woocommerce_gdpr[{$marketing_permission_id}]'>";

@@ -376,7 +376,11 @@ a.button.create-account {
 		text-shadow 0.3s ease-out,
 		box-shadow 0.3s ease-out;
 }
-
+.button.tab-content-submit[disabled] {
+	opacity: 0.5 !important;
+	color: #fff !important;
+	cursor: not-allowed;
+}
 .disconnect-confirm {
 	width:180px;
 	margin: 0 0.5em !important;

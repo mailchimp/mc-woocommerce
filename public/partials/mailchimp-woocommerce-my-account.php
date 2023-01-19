@@ -2,7 +2,7 @@
 $user = wp_get_current_user();
 $mailchimp_user_subscription_status = ($user && $user->ID) ? get_user_meta($user->ID, 'mailchimp_woocommerce_is_subscribed', true) : false;
 
-if ($mailchimp_user_subscription_status !== false) {
+if ($mailchimp_user_subscription_status !== false && $mailchimp_user_subscription_status !== 'archived') {
 
     $mailchimp_my_account = '<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">';
     $mailchimp_my_account .= '<label for="mailchimp_woocommerce_is_subscribed">';

@@ -100,7 +100,10 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
         }
 
         $order = wc_get_order($woo_order_number);
+		$wordpress_user_id = null;
+
         if ( $order ) {
+			$wordpress_user_id = $order->get_user_id();
             $user   = get_user_by( 'ID', $order->get_user_id() );
             $allowed_roles = array('customer', 'subscriber');
             $allowed_roles = apply_filters('mailchimp_campaign_user_roles', $allowed_roles );
@@ -215,6 +218,11 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                         if ($pulled_member && $current_status != 'archived' && isset($subscriber)) {
                             $status = !in_array($subscriber['status'], array('unsubscribed', 'transactional'));
                             $order->getCustomer()->setOptInStatus($status);
+	                        // if the wordpress user id is not empty, and the status is subscribed, we can update the
+	                        // subscribed status meta so it reflects the current status of Mailchimp during a sync.
+	                        if ($wordpress_user_id && $status) {
+		                        update_user_meta($wordpress_user_id, 'mailchimp_woocommerce_is_subscribed', '1');
+	                        }
                         }
                     } catch (Exception $e) {
                         if ($e instanceof MailChimp_WooCommerce_RateLimitError) {

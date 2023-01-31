@@ -80,5 +80,13 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 == Changelog ==
 = 2.8 =
 * Added transient to help sync manager finish
+* Adds cookie enhancement filter
+* Support for previous unsubscribes to be resubscribed
+* Fixes the my account subscription status
+* Adds option to remove the my account opt-in checkbox
+* Adds ability to ignore campaign data reporting for admins
+* Support for Woocommerce Blocks options
+* Fix for Askew opt-in checkbox on Default Wordpress Theme
+* Adds ability to use "last clicked campaign" from the API as a fallback if cookies aren't capturing revenue
 
 [Historical Changelog](https://raw.githubusercontent.com/mailchimp/mc-woocommerce/master/CHANGELOG.txt)

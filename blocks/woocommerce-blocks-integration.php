@@ -138,6 +138,13 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
         $data = array(
             'optinDefaultText' => __( 'I want to receive updates about products and promotions.', 'mailchimp-newsletter' ),
         );
+        $data['gdprStatus'] = $this->getOptinStatus();
+
+        $data['checkboxSettings'] = array(
+            [ 'label' => 'Visible, checked by default', 'value' => 'check' ],
+            [ 'label' => 'Visible, unchecked by default', 'value' => 'uncheck' ],
+            [ 'label' => 'Hidden, unchecked by default', 'value' => 'hide' ],
+        );
 
         if (!empty($gdpr)) {
             $data['gdprHeadline'] = __( 'Please select all the ways you would like to hear from us', 'mailchimp-newsletter' );
@@ -190,14 +197,23 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
 					return array(
 						'optin' => array(
 							'description' => __( 'Subscribe to marketing opt-in.', 'mailchimp-newsletter' ),
-							'type'        => 'boolean',
+							'type'        => array( 'boolean', 'null' ),
 							'context'     => array(),
 							'arg_options' => array(
 								'validate_callback' => function( $value ) {
-									if ( ! is_bool( $value ) ) {
+									if ( ! is_null( $value ) && ! is_bool( $value ) ) {
 										return new WP_Error( 'api-error', 'value of type ' . gettype( $value ) . ' was posted to the newsletter optin callback' );
 									}
 									return true;
+								},
+								'sanitize_callback' => function ( $value ) {
+									if ( is_bool( $value ) ) {
+										return $value;
+									}
+
+									// Return a boolean when "null" is passed,
+									// which is the only non-boolean value allowed.
+									return false;
 								},
 							),
 						),
@@ -277,7 +293,7 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
                 mailchimp_handle_or_queue(
                     new MailChimp_WooCommerce_User_Submit(
                         $user_id,
-                        true,
+                        '1',
                         null,
                         $language,
                         $gdpr_fields
@@ -316,6 +332,34 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
             return false;
         }
         return mailchimp_get_api();
+    }
+
+    /**
+     * @return bool
+     */
+    protected function getOptinStatus()
+    {
+        $mailchimp_newsletter = new MailChimp_Newsletter();
+        // if the user has chosen to hide the checkbox, don't do anything.
+        if ( ( $default_setting = $mailchimp_newsletter->getOption('mailchimp_checkbox_defaults', 'check') ) === 'hide') {
+            return 'hide';
+        }
+
+        // if the user chose 'check' or nothing at all, we default to true.
+        $default_checked = $default_setting === 'check';
+        $status = $default_checked;
+
+        // if the user is logged in, we will pull the 'is_subscribed' property out of the meta for the value.
+        // otherwise we use the default settings.
+        if (is_user_logged_in()) {
+            $status = get_user_meta(get_current_user_id(), 'mailchimp_woocommerce_is_subscribed', true);
+            /// if the user is logged in - and is already subscribed - just ignore this checkbox.
+            if ($status === '' || $status === null) {
+                $status = $default_checked;
+            }
+        }
+
+        return $status === true ? 'check' : 'uncheck';
     }
 
     /**

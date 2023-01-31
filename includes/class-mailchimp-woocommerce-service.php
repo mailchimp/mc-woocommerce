@@ -547,7 +547,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         update_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', $subscribed);
 
         if ($subscribed) {
-            $job = new MailChimp_WooCommerce_User_Submit($user_id, true, null, null, $gdpr_fields);
+            $job = new MailChimp_WooCommerce_User_Submit($user_id, '1', null, null, $gdpr_fields);
             mailchimp_handle_or_queue($job);
         }
     }
@@ -560,13 +560,16 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     {
         if (!mailchimp_is_configured()) return;
 
+        // check if user_my_account_opt_in_save is processing on frontend.
+        if ( !is_admin() ) return;
+
         // only update this person if they were marked as subscribed before
         $is_subscribed = get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true);
         $gdpr_fields = get_user_meta($user_id, 'mailchimp_woocommerce_gdpr_fields', true);
 
         $job = new MailChimp_WooCommerce_User_Submit(
             $user_id,
-            (bool) $is_subscribed,
+            $is_subscribed,
             $old_user_data,
             null,
             !empty($gdpr_fields) ? $gdpr_fields : null
@@ -697,6 +700,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function getCampaignTrackingID()
     {
+    	if ($this->isAdmin()) {
+    		return false;
+	    }
+
         $cookie = $this->cookie('mailchimp_campaign_id', false);
 
         if (empty($cookie)) {
@@ -969,10 +976,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             $this->respondJSON(array('success' => false, 'email' => false, 'message' => 'filter blocked due to cookie preferences'));
         }
 
-        if ($this->doingAjax() && isset($_GET['email'])) {
+        if ($this->doingAjax() && isset($_POST['email'])) {
             $cookie_duration = $this->getCookieDuration();
 
-            $this->user_email = trim(str_replace(' ','+', $_GET['email']));
+            $this->user_email = trim(str_replace(' ','+', $_POST['email']));
 
             if (($current_email = $this->getEmailFromSession()) && $current_email !== $this->user_email) {
                 $this->previous_email = $current_email;
@@ -984,12 +991,12 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
             $this->getCartItems();
 
-            if (isset($_GET['mc_language'])) {
-                $this->user_language = $_GET['mc_language'];
+            if (isset($_POST['mc_language'])) {
+                $this->user_language = $_POST['mc_language'];
             }
 
-            if (isset($_GET['subscribed'])) {
-                $this->cart_subscribe = (bool) $_GET['subscribed'];
+            if (isset($_POST['subscribed'])) {
+                $this->cart_subscribe = (bool) $_POST['subscribed'];
             }
 
             $this->handleCartUpdated();
@@ -1209,8 +1216,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function user_update_subscribe_status( $user_id )
     {
-    	$subscribed = isset($_POST['mailchimp_woocommerce_is_subscribed_checkbox']) &&
-            $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == 'on';
+    	$subscribed = isset($_POST['mailchimp_woocommerce_is_subscribed_radio']) ? $_POST['mailchimp_woocommerce_is_subscribed_radio'] : '';
         $gdpr_fields = isset($_POST['mailchimp_woocommerce_gdpr']) ? $_POST['mailchimp_woocommerce_gdpr'] : null;
 
         // set a site transient that will prevent overlapping updates from refreshing the page on the admin user view

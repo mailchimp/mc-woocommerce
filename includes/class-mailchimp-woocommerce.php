@@ -300,7 +300,8 @@ class MailChimp_WooCommerce
 	 */
 	private function define_public_hooks() {
 
-		$plugin_public = new MailChimp_WooCommerce_Public( $this->get_plugin_name(), $this->get_version() );
+		$plugin_public = MailChimp_WooCommerce_Public::instance();
+
 		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_scripts');
         $this->loader->add_action('wp_footer', $plugin_public, 'add_inline_footer_script');
 
@@ -309,7 +310,15 @@ class MailChimp_WooCommerce
 
         // set my-account opt-in checkbox
         $this->loader->add_action('woocommerce_edit_account_form', $plugin_public, 'user_my_account_opt_in', 100);
-        $this->loader->add_action('woocommerce_save_account_details', $plugin_public, 'user_my_account_opt_in_save', 100);
+        $this->loader->add_action('woocommerce_save_account_details', $plugin_public, 'user_my_account_opt_in_save', 1);
+
+        // set order opt-in checkbox
+//        $this->loader->add_filter('woocommerce_admin_billing_fields', $plugin_public, 'order_subscribe_user');
+//        $this->loader->add_action('woocommerce_checkout_create_order', $plugin_public, 'save_order_subscribe_user', 220, 2);
+//
+//        // set order opt-in checkbox
+//        $this->loader->add_action('woocommerce_admin_order_data_after_order_details', $plugin_public, 'order_subscribe_user');
+//        $this->loader->add_action('woocommerce_process_shop_order_meta', $plugin_public, 'save_order_subscribe_user', 100, 1);
 	}
 
 	/**
@@ -404,7 +413,7 @@ class MailChimp_WooCommerce
 			// handle the user registration hook
 			$this->loader->add_action('user_register', $service, 'handleUserRegistration');
 			// handle the user updated profile hook
-			$this->loader->add_action('profile_update', $service, 'handleUserUpdated', 10, 2);
+			$this->loader->add_action('profile_update', $service, 'handleUserUpdated', 100, 2);
 
 			// get user by hash ( public and private )
             $this->loader->add_action('wp_ajax_mailchimp_get_user_by_hash', $service, 'get_user_by_hash');

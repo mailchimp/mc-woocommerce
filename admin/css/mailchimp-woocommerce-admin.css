@@ -6,3 +6,7 @@
  #http-worker-deprecated-message strong {
 	font-weight:inherit;
 }
+
+.mailchimp_woocommerce_is_subscribed_field  {
+    display: flex;
+}

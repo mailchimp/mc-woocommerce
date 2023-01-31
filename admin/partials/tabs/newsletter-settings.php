@@ -30,6 +30,8 @@ if ( ! isset( $options ) ) {
 	$options = array();
 }
 $newsletter_settings_error = $this->getData( 'errors.mailchimp_list', false );
+
+$checkout_page_id = get_option('woocommerce_checkout_page_id');
 ?>
 
 <?php if ( $newsletter_settings_error ) : ?>
@@ -198,6 +200,11 @@ $newsletter_settings_error = $this->getData( 'errors.mailchimp_list', false );
 		<div class="box fieldset-header margin-large" >
 			<h3><?php esc_html_e( 'Opt-In Checkbox Settings', 'mailchimp-for-woocommerce' ); ?></h3>
 		</div>
+        <?php if ( has_block( 'woocommerce/checkout', get_post($checkout_page_id ) ) ) : ?>
+        <div class="box">
+            <h4><?= sprintf(__('Checkout page is using Woocommerce blocks. Settings are available within the block options while editing the <a href="%s">checkout page</a>.', 'mailchimp-for-woocommerce'), get_the_permalink($checkout_page_id) ) ?></h4>
+        </div>
+        <?php else: ?>
 		<div class="box box-half">
 			<label>
 				<h4><?php esc_html_e( 'Checkbox display options', 'mailchimp-for-woocommerce' ); ?></h4>
@@ -245,14 +252,14 @@ $newsletter_settings_error = $this->getData( 'errors.mailchimp_list', false );
 						<label for="billing_state" class="">State / County&nbsp;<span class="optional">(optional)</span></label><span class="woocommerce-input-wrapper"><input type="hidden" id="billing_state" name="billing_state" placeholder="" data-input-classes="" class="hidden"></span>
 					</p>
 					<p class="form-row form-row-wide validate-required validate-email" id="billing_email_field" data-priority="110">
-						<label for="billing_email" class="">Email address&nbsp;</label><span class="woocommerce-input-wrapper"><input type="email" class="input-text " name="billing_email" id="billing_email" placeholder="" value="" autocomplete="email username"></span>
+						<label for="billing_email" class="">Email address&nbsp;</label><span class="woocommerce-input-wrapper"><input type="email" class="input-text " name="billing_email" id="billing_email" placeholder="" value="" autocomplete="email"></span>
 					</p>
 				</div>
 				<?php
 					$label = $this->getOption( 'newsletter_label' );
-				if ( '' === $label ) {
+				if ( '' === $label || is_null($label) ) {
 					$label = __( 'Subscribe to our newsletter', 'mailchimp-for-woocommerce' );
-				}
+                }
 				?>
 				<fieldset>
 					<p class="form-row form-row-wide mailchimp-newsletter">
@@ -263,6 +270,7 @@ $newsletter_settings_error = $this->getData( 'errors.mailchimp_list', false );
 				<div class="overlay"></div>
 			</div>
 		</div>
+        <?php endif; // checkout page is using blocks ?>
 		<div class="box fieldset-header" >
 			<h3><?php esc_html_e( 'Opt-In checkbox position', 'mailchimp-for-woocommerce' ); ?></h3>
 		</div>

@@ -99,6 +99,19 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             return false;
         }
 
+        $order = wc_get_order($woo_order_number);
+        if ( $order ) {
+            $user   = get_user_by( 'ID', $order->get_user_id() );
+            $allowed_roles = array('customer', 'subscriber');
+            $allowed_roles = apply_filters('mailchimp_campaign_user_roles', $allowed_roles );
+
+            if (  $user && count( array_intersect($allowed_roles,  $user->roles) ) === 0 ) {
+
+                mailchimp_log('order_process', "Order #{$woo_order_number} skipped, user #{$order->get_user_id()} user role is not in the list");
+                return false;
+            }
+        }
+
         $job = new MailChimp_WooCommerce_Transform_Orders();
 
         // set the campaign ID
@@ -284,11 +297,31 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
             // only do this stuff on new orders
             if ($new_order) {
+            	// if we have the saved order meta from previous syncs let's use it.
+	            // This should help with reporting after people may have disconnected and reconnected to a new store.
+	            if (($saved = get_post_meta($order_post->ID, 'mailchimp_woocommerce_campaign_id', true))) {
+		            $this->campaign_id = $saved;
+	            }
+            	// if the campaign ID is empty, let's try to pull the last clicked campaign from Mailchimp.
+	            // but only do this if we're not in a syncing status.
+            	if (empty($this->campaign_id) && !$this->is_full_sync) {
+            		// see if we have a saved version
+		            // pull the last clicked campaign for this email address
+		            $job = new MailChimp_WooCommerce_Pull_Last_Campaign($email);
+		            $this->campaign_id = $job->handle();
+
+		            if (!empty($this->campaign_id)) {
+		            	mailchimp_debug('campaign_id', "Pulled campaign tracking from mailchimp user activity for {$email}");
+		            }
+	            }
+
                 // apply a campaign id if we have one.
                 if (!empty($this->campaign_id)) {
                     try {
                         $order->setCampaignId($this->campaign_id);
                         $log .= ' :: campaign id ' . $this->campaign_id;
+                        // save it for later if we don't have this value.
+	                    update_post_meta($order_post->ID, 'mailchimp_woocommerce_campaign_id', $campaign_id);
                     }
                     catch (Exception $e) {
                         mailchimp_log('single_order_set_campaign_id.error', 'No campaign added to order, with provided ID: '. $this->campaign_id. ' :: '. $e->getMessage(). ' :: in '.$e->getFile().' :: on '.$e->getLine());
@@ -326,7 +359,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 }
             }
             
-            mailchimp_debug('order_submit', "#{$woo_order_number}", $order->toArray());
+            mailchimp_debug('order_submit', " #{$woo_order_number}", $order->toArray());
 
             try {
                 // update or create
@@ -441,7 +474,10 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 return false;
             }
             $woo = wc_get_order($order_post);
-            return $this->woo_order_number = $woo->get_order_number();
+            if ( !$woo )
+                mailchimp_log('order_sync.failure', "Order #{$this->id}. Can’t submit order without a valid ID");
+
+            return $this->woo_order_number = $woo ? $woo->get_order_number() : false;
         } catch (Exception $e) {
             $this->woo_order_number = false;
             mailchimp_error('order_sync.failure', mailchimp_error_trace($e, "{$this->id} could not be loaded"));

@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/blocks\n"
-"POT-Creation-Date: 2022-09-07 17:22:48+00:00\n"
+"POT-Creation-Date: 2022-12-07 15:10:17+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -13,18 +13,18 @@ msgstr ""
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "X-Generator: node-wp-i18n 1.2.6\n"
 
-#: woocommerce-blocks-integration.php:137
+#: woocommerce-blocks-integration.php:139
 msgid "I want to receive updates about products and promotions."
 msgstr ""
 
-#: woocommerce-blocks-integration.php:141
+#: woocommerce-blocks-integration.php:150
 msgid "Please select all the ways you would like to hear from us"
 msgstr ""
 
-#: woocommerce-blocks-integration.php:189
+#: woocommerce-blocks-integration.php:199
 msgid "Subscribe to marketing opt-in."
 msgstr ""
 
-#: woocommerce-blocks-integration.php:202
+#: woocommerce-blocks-integration.php:221
 msgid "GDPR marketing opt-in."
 msgstr ""

@@ -20,7 +20,7 @@
  * @subpackage MailChimp_WooCommerce/public
  * @author     Ryan Hungate <ryan@vextras.com>
  */
-class MailChimp_WooCommerce_Public {
+class MailChimp_WooCommerce_Public extends MailChimp_WooCommerce_Options {
 
 	/**
 	 * The ID of this plugin.
@@ -29,7 +29,7 @@ class MailChimp_WooCommerce_Public {
 	 * @access   private
 	 * @var      string    $plugin_name    The ID of this plugin.
 	 */
-	private $plugin_name;
+	public $plugin_name;
 
 	/**
 	 * The version of this plugin.
@@ -38,20 +38,26 @@ class MailChimp_WooCommerce_Public {
 	 * @access   private
 	 * @var      string    $version    The current version of this plugin.
 	 */
-	private $version;
+	public $version;
 
-	/**
-	 * Initialize the class and set its properties.
-	 *
-	 * @since    1.0.0
-	 * @param      string    $plugin_name       The name of the plugin.
-	 * @param      string    $version    The version of this plugin.
-	 */
-	public function __construct( $plugin_name, $version ) {
 
-		$this->plugin_name = $plugin_name;
-		$this->version = $version;
-	}
+    /** @var null|static */
+    protected static $_instance = null;
+
+    /**
+     * @return MailChimp_WooCommerce_Public
+     */
+    public static function instance()
+    {
+        if (!empty(static::$_instance)) {
+            return static::$_instance;
+        }
+        $env = mailchimp_environment_variables();
+        static::$_instance = new MailChimp_WooCommerce_Public();
+        static::$_instance->setVersion($env->version);
+        static::$_instance->plugin_name = 'mailchimp-woocommerce';
+        return static::$_instance;
+    }
 
 	/**
 	 * Register the JavaScript for the public-facing side of the site.
@@ -98,7 +104,7 @@ class MailChimp_WooCommerce_Public {
 	{
 		wp_enqueue_script($this->plugin_name. '_gdpr', plugin_dir_url( __FILE__ ) .'js/mailchimp-woocommerce-checkout-gdpr.min.js', array(), $this->version, true);
 	}
-	
+
 	public function user_my_account_opt_in()
     {
         $gdpr_fields = $this->user_my_account_gdpr_fields();
@@ -107,10 +113,39 @@ class MailChimp_WooCommerce_Public {
 
     public function user_my_account_opt_in_save($user_id)
     {
-        $subscribed = isset($_POST['mailchimp_woocommerce_is_subscribed_checkbox']) &&
-            ( $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == 'on' || $_POST['mailchimp_woocommerce_is_subscribed_checkbox'] == '1');
+        if (!has_action('woocommerce_edit_account_form', array(MailChimp_WooCommerce_Public::instance(), 'user_my_account_opt_in' ))) {
+	    	// blocking the post request from updating the user profile since the developer has removed this form.
+	    	return;
+	    }
+
+
+        $subscribed = isset($_POST['mailchimp_woocommerce_is_subscribed_radio']) ? $_POST['mailchimp_woocommerce_is_subscribed_radio'] : '';
+        $gdpr_fields = isset($_POST['mailchimp_woocommerce_gdpr']) ? $_POST['mailchimp_woocommerce_gdpr'] : false;
+        mailchimp_log('member.sync', "user_my_account_opt_in_save " . $subscribed );
+
         update_user_meta( $user_id, 'mailchimp_woocommerce_is_subscribed', $subscribed);
+        update_user_meta( $user_id, 'mailchimp_woocommerce_gdpr_fields', $gdpr_fields);
+
+        $job = new MailChimp_WooCommerce_User_Submit(
+            $user_id,
+            $subscribed,
+            null,
+            null,
+            !empty($gdpr_fields) ? $gdpr_fields : null
+        );
+
+        mailchimp_handle_or_queue($job);
+
     }
+
+//    public function order_subscribe_user($order)
+//    {
+//        include_once('partials/mailchimp-woocommerce-order-field.php');
+//    }
+//
+//    public function save_order_subscribe_user($order_id) {
+//        update_post_meta( $order_id, 'mailchimp_woocommerce_is_subscribed', isset( $_POST['mailchimp_woocommerce_is_subscribed'] ) );
+//    }
 
     /**
      * @return string

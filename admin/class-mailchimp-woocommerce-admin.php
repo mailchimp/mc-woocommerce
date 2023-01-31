@@ -275,7 +275,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @return bool
 	 */
 	protected function syncUserStatus( $user ) {
-		try {
+        try {
 			if ( empty( $user ) || ! is_email( $user->user_email ) || ! mailchimp_is_configured() ) {
 				return false;
 			}
@@ -284,11 +284,20 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			    return false;
             }
 			if ( ( $status = mailchimp_get_api()->getCachedSubscriberStatusForAdminProfileView( mailchimp_get_list_id(), $user->user_email ) ) ) {
-				$subscribed = is_string( $status ) && in_array( $status, array( 'subscribed', 'pending' ) ) ? '1' : '0';
-				$saved      = (bool) get_user_meta( $user->ID, 'mailchimp_woocommerce_is_subscribed', true );
-				if ( (bool) $subscribed !== $saved ) {
-					update_user_meta( $user->ID, 'mailchimp_woocommerce_is_subscribed', $subscribed );
-				}
+                if ( is_string( $status ) ) {
+			        if ( $status === 'unsubscribed' ) {
+                        $subscribed_status = 'unsubscribed';
+                    } else if ( in_array( $status, array( 'subscribed', 'pending' ) ) ) {
+                        $subscribed_status = '1';
+                    } else {
+                        $subscribed_status = '0';
+                    }
+
+                    $saved = get_user_meta( $user->ID, 'mailchimp_woocommerce_is_subscribed', true );
+                    if ( $subscribed_status !== $saved ) {
+                        update_user_meta( $user->ID, 'mailchimp_woocommerce_is_subscribed', $subscribed_status );
+                    }
+                }
 			}
 		} catch ( Exception $e ) {
 			return false;

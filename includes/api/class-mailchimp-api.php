@@ -219,7 +219,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 	public function subscribe( $list_id, $email, $subscribed = '1', $merge_fields = array(), $list_interests = array(), $language = null, $gdpr_fields = null ) {
 		if ( $subscribed === '1' ) {
             $status = 'subscribed';
-		} elseif ( $subscribed === '0' ) {
+		} elseif ( $subscribed === '0' || empty($subscribed) ) {
             $status = 'transactional';
         } else {
             $status = $subscribed;

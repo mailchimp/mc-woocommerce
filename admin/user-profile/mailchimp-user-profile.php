@@ -4,6 +4,19 @@
 	<tr>
 		<th><label for="mailchimp_woocommerce_is_subscribed"><?php esc_html_e( 'User Subscribed', 'mailchimp-for-woocommerce' ); ?></label></th>
 		<td>
+            <?php if ( $mailchimp_user_subscription_status === 'archived' ) : ?>
+                <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+                    <label for="mailchimp_woocommerce_is_subscribed">
+                        <input type="radio"
+                               class="woocommerce-form__input woocommerce-form__input-radio input-radio"
+                               name="mailchimp_woocommerce_is_subscribed_radio"
+                               id="mailchimp_woocommerce_is_subscribed"
+                            <?= $mailchimp_user_subscription_status === 'archived' ? ' checked="checked"' : '' ?>
+                               value="archived" />
+                        <b><?= translate( 'Archived', 'mailchimp-for-woocommerce' ) ?></b>
+                    </label>
+                </p>
+            <?php else : ?>
             <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
                 <label for="mailchimp_woocommerce_is_subscribed">
                     <input type="radio"
@@ -39,6 +52,7 @@
                     <?= translate( 'Receive Order Updates', 'mailchimp-for-woocommerce' ) ?>
                 </label>
             </p>
+            <?php endif; ?>
 		</td>
 	</tr>
 </table>

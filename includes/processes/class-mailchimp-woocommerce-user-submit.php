@@ -53,8 +53,6 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
             }
         }
 
-
-
         if (!empty($updated_data)) {
             $this->updated_data = $updated_data->to_array();
         }
@@ -63,8 +61,11 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
             $this->language = $language;
         }
 
-        mailchimp_debug('member.sync', "construct this -> subscribed " . $this->subscribed);
+		/// if we're only submitting subscribers, we have to skip the transactional members.
+	    /// this is a setting in the UI that says "only sync subscribers"
+		$this->submittingTransactional(!mailchimp_submit_subscribed_only());
 
+        mailchimp_debug('member.sync', "construct this -> subscribed " . $this->subscribed);
     }
 
     /**
@@ -169,6 +170,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
         // and someone clicking the unsubscribe linkage.
         if ($this->subscribed === '0' && !$this->submit_transactional) {
             static::$handling_for = null;
+	        mailchimp_log('member.sync', "Member profile update for {$email} was blocked due to subscriber only audience sync settings.");
             return false;
         }
 

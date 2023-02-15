@@ -1,4 +1,5 @@
 <?php $mailchimp_user_subscription_status = ( isset( $user ) && $user ) ? get_user_meta( $user->ID, 'mailchimp_woocommerce_is_subscribed', true ) : false; ?>
+<?php $only_submit_subscribers = mailchimp_submit_subscribed_only(); ?>
 <h2>Mailchimp</h2>
 <table class="form-table">
 	<tr>
@@ -34,9 +35,12 @@
                            class="woocommerce-form__input woocommerce-form__input-radio input-radio"
                            name="mailchimp_woocommerce_is_subscribed_radio"
                            id="mailchimp_woocommerce_is_transactional"
+                           <?= $only_submit_subscribers ? ' disabled="disabled"' : '' ?>
                            <?= $mailchimp_user_subscription_status === '0' ? ' checked="checked"' : '' ?>
                            value="0" />
-                    <?= translate( 'Receive Order Updates', 'mailchimp-for-woocommerce' ) ?>
+                    <span <?= $only_submit_subscribers ? ' style="opacity:0.25"' : '' ?>>
+                        <?= translate( 'Receive Order Updates', 'mailchimp-for-woocommerce' ) ?>
+                    </span>
                 </label>
             </p>
 		</td>

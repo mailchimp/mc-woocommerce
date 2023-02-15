@@ -57,6 +57,8 @@
 	</tr>
 </table>
 <?php if ( isset( $gdpr_fields ) && ! empty( $gdpr_fields ) ) : ?>
-	<?php echo wp_kses( $gdpr_fields, mailchimp_expanded_alowed_tags() ); ?>
+     <div style="display: <?= $mailchimp_user_subscription_status === 'archived' ? 'none' : 'block' ?>">
+        <?php echo wp_kses( $gdpr_fields, mailchimp_expanded_alowed_tags() ); ?>
+     </div>
 <?php endif; ?>
 

@@ -35,10 +35,10 @@
                            class="woocommerce-form__input woocommerce-form__input-radio input-radio"
                            name="mailchimp_woocommerce_is_subscribed_radio"
                            id="mailchimp_woocommerce_is_transactional"
-                           <?= $only_submit_subscribers ? ' disabled="disabled"' : '' ?>
+                           <?= $only_submit_subscribers || $mailchimp_user_subscription_status === 'unsubscribed' ? ' disabled="disabled"' : '' ?>
                            <?= $mailchimp_user_subscription_status === '0' ? ' checked="checked"' : '' ?>
                            value="0" />
-                    <span <?= $only_submit_subscribers ? ' style="opacity:0.25"' : '' ?>>
+                    <span <?= $only_submit_subscribers || $mailchimp_user_subscription_status === 'unsubscribed' ? ' style="opacity:0.25"' : '' ?>>
                         <?= translate( 'Receive Order Updates', 'mailchimp-for-woocommerce' ) ?>
                     </span>
                 </label>

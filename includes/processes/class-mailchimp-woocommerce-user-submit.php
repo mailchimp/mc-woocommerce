@@ -245,7 +245,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 
             // if the member is unsubscribed or pending, we really can't do anything here.
             if (isset($member_data['status']) && in_array($member_data['status'], array('unsubscribed', 'pending'))) {
-                if ( ( $this->subscribed === '1' || $this->subscribed === '0' )  && $member_data['status'] !== 'pending') {
+                if ( $this->subscribed === '1'  && $member_data['status'] !== 'pending') {
                     mailchimp_log('member.sync', "pushing {$email} status as pending because they were previously unsubscribed, and must use the double opt in to make it back on the list.");
                     $member_data['status'] = 'pending';
                 } else {

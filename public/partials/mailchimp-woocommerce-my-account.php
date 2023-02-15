@@ -22,8 +22,7 @@ if ($mailchimp_user_subscription_status !== false) {
     $mailchimp_my_account .= translate( 'Unsubscribe from our newsletter', 'mailchimp-for-woocommerce' );
     $mailchimp_my_account .= '</label>';
     $mailchimp_my_account .= '</p>';
-    var_dump( $mailchimp_user_subscription_status !== 'unsubscribed');
-    var_dump(!$only_submit_subscribers);
+
     if ( !$only_submit_subscribers && $mailchimp_user_subscription_status !== 'unsubscribed' ) :
         $mailchimp_my_account .= '<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">';
         $mailchimp_my_account .= '<label for="mailchimp_woocommerce_is_transactional">';

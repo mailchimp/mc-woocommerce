@@ -816,9 +816,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         // Catching images, videos and fonts file types
         preg_match("/^.*\.(ai|bmp|gif|ico|jpeg|jpg|png|ps|psd|svg|tif|tiff|fnt|fon|otf|ttf|3g2|3gp|avi|flv|h264|m4v|mkv|mov|mp4|mpg|mpeg|rm|swf|vob|wmv|aif|cda|mid|midi|mp3|mpa|ogg|wav|wma|wpl)$/i", $landing_site, $matches);
         
-        if (!empty($landing_site) && !wp_doing_ajax() && ( count($matches) == 0 ) ) {
-            if ( !$this->is_rest() )
-                mailchimp_set_cookie('mailchimp_landing_site', $landing_site, $this->getCookieDuration(), '/' );
+        if (!empty($landing_site) && !wp_doing_ajax() && ( count($matches) == 0 ) && !$this->is_rest() ) {
+            mailchimp_set_cookie('mailchimp_landing_site', $landing_site, $this->getCookieDuration(), '/' );
             $this->setWooSession('mailchimp_landing_site', $landing_site);
         }
 
@@ -849,9 +848,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         if (!mailchimp_allowed_to_use_cookie('mailchimp_landing_site')) {
             return $this;
         }
-        if ( !$this->is_rest() )
+        if ( !$this->is_rest() ) {
             mailchimp_set_cookie('mailchimp_landing_site', false, $this->getCookieDuration(), '/' );
-        $this->setWooSession('mailchimp_landing_site', false);
+            $this->setWooSession('mailchimp_landing_site', false);
+        }
 
         return $this;
     }

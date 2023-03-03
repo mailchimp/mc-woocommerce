@@ -6,8 +6,9 @@
 		<td>
             <?php if ( $mailchimp_user_subscription_status === 'archived' ) : ?>
                 <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-                    <label for="mailchimp_woocommerce_is_subscribed">
+                    <label style="opacity: 0.5" for="mailchimp_woocommerce_is_subscribed">
                         <input type="radio"
+                               disabled
                                class="woocommerce-form__input woocommerce-form__input-radio input-radio"
                                name="mailchimp_woocommerce_is_subscribed_radio"
                                id="mailchimp_woocommerce_is_subscribed"
@@ -25,7 +26,7 @@
                            id="mailchimp_woocommerce_is_subscribed"
                             <?= $mailchimp_user_subscription_status === '1' ? ' checked="checked"' : '' ?>
                            value="1" />
-                    <?= translate( 'Subscribe to our newsletter', 'mailchimp-for-woocommerce' ) ?>
+                    <?= __( 'Subscribe to our newsletter', 'mailchimp-for-woocommerce' ) ?>
                 </label>
             </p>
 
@@ -37,7 +38,7 @@
                            id="mailchimp_woocommerce_is_unsubscribed"
                             <?= $mailchimp_user_subscription_status === 'unsubscribed' ? ' checked="checked"' : '' ?>
                            value="unsubscribed" />
-                    <?= translate( 'Unsubscribe from our newsletter', 'mailchimp-for-woocommerce' ) ?>
+                    <?= __( 'Unsubscribe from our newsletter', 'mailchimp-for-woocommerce' ) ?>
                 </label>
             </p>
 
@@ -49,7 +50,7 @@
                            id="mailchimp_woocommerce_is_transactional"
                            <?= $mailchimp_user_subscription_status === '0' ? ' checked="checked"' : '' ?>
                            value="0" />
-                    <?= translate( 'Receive Order Updates', 'mailchimp-for-woocommerce' ) ?>
+                    <?= __( 'Receive Order Updates', 'mailchimp-for-woocommerce' ) ?>
                 </label>
             </p>
             <?php endif; ?>

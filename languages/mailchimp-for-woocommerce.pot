@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Mailchimp for WooCommerce\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-02 11:12+0000\n"
+"POT-Creation-Date: 2023-03-03 09:50+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: \n"
@@ -17,7 +17,7 @@ msgstr ""
 "X-Domain: mailchimp-for-woocommerce"
 
 #. Placeholders %1$s - opening strong HTML tag, %2$s - closing strong HTML tag, %3$s - opening link HTML tag, %4$s - closing link HTML tag
-#: admin/class-mailchimp-woocommerce-admin.php:353
+#: admin/class-mailchimp-woocommerce-admin.php:364
 #, php-format
 msgid ""
 "%1$sMailchimp for Woocommerce%2$s is not yet connected to a Mailchimp "
@@ -25,7 +25,7 @@ msgid ""
 msgstr ""
 
 #. Placeholders %1$s - opening strong HTML tag, %2$s
-#: admin/class-mailchimp-woocommerce-admin.php:375
+#: admin/class-mailchimp-woocommerce-admin.php:386
 #, php-format
 msgid ""
 "%1$sMailchimp for Woocommerce%2$s needs Action Scheduler plugin to function "
@@ -36,7 +36,7 @@ msgstr ""
 msgid "Account Connected"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:298
+#: admin/partials/tabs/newsletter-settings.php:306
 msgid ""
 "Add a comma-separated list of tags to apply to a subscriber in Mailchimp "
 "after a transaction occurs"
@@ -94,13 +94,13 @@ msgstr ""
 msgid "Are you sure?"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1146
+#: admin/class-mailchimp-woocommerce-admin.php:1157
 msgid ""
 "As part of the Mailchimp Terms of Use, we require a contact email and a "
 "physical mailing address."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1150
+#: admin/class-mailchimp-woocommerce-admin.php:1161
 msgid ""
 "As part of the Mailchimp Terms of Use, we require a valid phone number for "
 "your store."
@@ -114,19 +114,19 @@ msgstr ""
 msgid "Audience Connected"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:82
+#: admin/partials/tabs/newsletter-settings.php:84
 msgid "Audience Defaults"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:52
+#: admin/partials/tabs/newsletter-settings.php:54
 msgid "Audience name"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:44
+#: admin/partials/tabs/newsletter-settings.php:46
 msgid "Audience Settings"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:147
+#: admin/partials/tabs/newsletter-settings.php:149
 msgid "Auto-subscribe all customers on the initial sync"
 msgstr ""
 
@@ -162,25 +162,32 @@ msgstr ""
 msgid "Campaign and messaging settings"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1625
+#: admin/class-mailchimp-woocommerce-admin.php:1636
 msgid "Cannot create or update List at Mailchimp."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1056
-#: admin/class-mailchimp-woocommerce-admin.php:1227
-#: admin/class-mailchimp-woocommerce-admin.php:1850
+#: admin/class-mailchimp-woocommerce-admin.php:1067
+#: admin/class-mailchimp-woocommerce-admin.php:1238
+#: admin/class-mailchimp-woocommerce-admin.php:1861
 msgid "Cannot create or update Store at Mailchimp."
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:178
+#: admin/partials/tabs/newsletter-settings.php:180
 msgid "Cart Tracking"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:203
+#: admin/partials/tabs/newsletter-settings.php:210
 msgid "Checkbox display options"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:204
+#: admin/partials/tabs/newsletter-settings.php:205
+#, php-format
+msgid ""
+"Checkout page is using Woocommerce blocks. Settings are available within the "
+"block options while editing the <a href=\"%s\">checkout page</a>."
+msgstr ""
+
+#: admin/partials/tabs/newsletter-settings.php:211
 msgid ""
 "Choose how you want the opt-in to your newsletter checkbox to render at "
 "checkout"
@@ -214,7 +221,7 @@ msgstr ""
 msgid "Connect your store to Mailchimp"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:48
+#: admin/partials/tabs/newsletter-settings.php:50
 msgid "Connect your store with an audience"
 msgstr ""
 
@@ -262,7 +269,7 @@ msgstr ""
 msgid "Coupons"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:57
+#: admin/partials/tabs/newsletter-settings.php:59
 msgid "Create New Audience"
 msgstr ""
 
@@ -274,7 +281,7 @@ msgstr ""
 msgid "Debug"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:309
+#: admin/partials/tabs/newsletter-settings.php:317
 msgid ""
 "Define the product image size used by abandoned carts, order notifications, "
 "and product recommendations."
@@ -284,7 +291,7 @@ msgstr ""
 msgid "Delete Log"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:194
+#: admin/partials/tabs/newsletter-settings.php:196
 msgid "Disable cart tracking"
 msgstr ""
 
@@ -311,23 +318,23 @@ msgstr ""
 msgid "Enable support"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:291
+#: admin/partials/tabs/newsletter-settings.php:299
 msgid "Enter a WooCommerce form action"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:2061
+#: admin/class-mailchimp-woocommerce-admin.php:2072
 msgid "Error loading log file contents"
 msgstr ""
 
-#: bootstrap.php:296
+#: bootstrap.php:297
 msgid "Error retrieving list for double_optin check"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1927
+#: admin/class-mailchimp-woocommerce-admin.php:1938
 msgid "Error setting communications status"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1962
+#: admin/class-mailchimp-woocommerce-admin.php:1973
 msgid "Error setting tower support status"
 msgstr ""
 
@@ -339,11 +346,11 @@ msgstr ""
 msgid "First name"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:93
+#: admin/partials/tabs/newsletter-settings.php:95
 msgid "From Email"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:86
+#: admin/partials/tabs/newsletter-settings.php:88
 msgid "From Name"
 msgstr ""
 
@@ -364,11 +371,11 @@ msgid ""
 "target=_blank>caching problems</a>."
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:220
+#: admin/partials/tabs/newsletter-settings.php:227
 msgid "Hidden, unchecked by default"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:230
+#: admin/partials/tabs/newsletter-settings.php:237
 msgid "HTML tags allowed: <a href=\"\" target=\"\" title=\"\"></a> and <br>"
 msgstr ""
 
@@ -414,7 +421,7 @@ msgstr ""
 msgid "If you have a moment, please share why you are deactivating %s:"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:141
+#: admin/partials/tabs/newsletter-settings.php:143
 msgid "Initial Sync"
 msgstr ""
 
@@ -466,7 +473,7 @@ msgstr ""
 msgid "It's a temporary deactivation."
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:107
+#: admin/partials/tabs/newsletter-settings.php:109
 msgid "Language"
 msgstr ""
 
@@ -478,11 +485,11 @@ msgstr ""
 msgid "Last Updated:"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1894
+#: admin/class-mailchimp-woocommerce-admin.php:1905
 msgid "Leave a Review"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:230
+#: admin/partials/tabs/newsletter-settings.php:237
 msgid ""
 "Leave it blank to use language translation files (.po / .mo), translating "
 "the string: \"Subscribe to our newsletter\"."
@@ -500,7 +507,7 @@ msgstr ""
 msgid "Log events from the Mailchimp plugin"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:339
+#: admin/class-mailchimp-woocommerce-admin.php:350
 msgid "Log file deleted."
 msgstr ""
 
@@ -528,12 +535,12 @@ msgstr ""
 msgid "Mailchimp for WooCommerce"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:505
+#: admin/class-mailchimp-woocommerce-admin.php:516
 #: includes/class-mailchimp-woocommerce-deactivation-survey.php:377
 msgid "Mailchimp for Woocommerce"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1154
+#: admin/class-mailchimp-woocommerce-admin.php:1165
 msgid "Mailchimp for WooCommerce requires a Store Name to connect your store."
 msgstr ""
 
@@ -571,7 +578,7 @@ msgstr ""
 msgid "MailChimp Shopping Cart Data"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:225
+#: admin/partials/tabs/newsletter-settings.php:232
 msgid "Message for the opt-in checkbox"
 msgstr ""
 
@@ -601,8 +608,8 @@ msgstr ""
 msgid "Next step"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:2022
-#: admin/class-mailchimp-woocommerce-admin.php:2038
+#: admin/class-mailchimp-woocommerce-admin.php:2033
+#: admin/class-mailchimp-woocommerce-admin.php:2049
 msgid "No log file provided"
 msgstr ""
 
@@ -623,35 +630,35 @@ msgid ""
 "receive these messages at %1$s "
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1200
-#: admin/class-mailchimp-woocommerce-admin.php:1252
+#: admin/class-mailchimp-woocommerce-admin.php:1211
+#: admin/class-mailchimp-woocommerce-admin.php:1263
 msgid "One or more fields were not updated"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:160
+#: admin/partials/tabs/newsletter-settings.php:162
 msgid "Ongoing Sync"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:152
+#: admin/partials/tabs/newsletter-settings.php:154
 msgid ""
 "Only sync customers in this store who are subscribed in my Mailchimp Audience"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:171
+#: admin/partials/tabs/newsletter-settings.php:173
 msgid ""
 "Only sync subscribers. No transactional customers will be sent to your "
 "Mailchimp Audience"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:189
+#: admin/partials/tabs/newsletter-settings.php:191
 msgid "Only track carts for subscribed customers"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:267
+#: admin/partials/tabs/newsletter-settings.php:275
 msgid "Opt-In checkbox position"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:199
+#: admin/partials/tabs/newsletter-settings.php:201
 msgid "Opt-In Checkbox Settings"
 msgstr ""
 
@@ -677,7 +684,7 @@ msgstr ""
 msgid "Overview"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:123
+#: admin/partials/tabs/newsletter-settings.php:125
 msgid "Permission reminder message"
 msgstr ""
 
@@ -727,12 +734,12 @@ msgstr ""
 msgid "Please provide a bit of information about your WooCommerce store"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1625
+#: admin/class-mailchimp-woocommerce-admin.php:1636
 msgid "Please retry."
 msgstr ""
 
-#: includes/class-mailchimp-woocommerce-newsletter.php:77
-#: public/class-mailchimp-woocommerce-public.php:140
+#: includes/class-mailchimp-woocommerce-newsletter.php:78
+#: public/class-mailchimp-woocommerce-public.php:175
 msgid "Please select all the ways you would like to hear from us"
 msgstr ""
 
@@ -760,7 +767,7 @@ msgstr ""
 msgid "Postal Code"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:305
+#: admin/partials/tabs/newsletter-settings.php:313
 msgid "Product Image Size"
 msgstr ""
 
@@ -770,6 +777,11 @@ msgstr ""
 
 #: includes/class-mailchimp-woocommerce-deactivation-survey.php:368
 msgid "Quick Feedback"
+msgstr ""
+
+#: admin/user-profile/mailchimp-user-profile.php:53
+#: public/partials/mailchimp-woocommerce-my-account.php:30
+msgid "Receive Order Updates"
 msgstr ""
 
 #: admin/partials/tabs/logs.php:81
@@ -804,12 +816,12 @@ msgstr ""
 msgid "Running"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1921
-#: admin/class-mailchimp-woocommerce-admin.php:1957
+#: admin/class-mailchimp-woocommerce-admin.php:1932
+#: admin/class-mailchimp-woocommerce-admin.php:1968
 msgid "Saved"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:60
+#: admin/partials/tabs/newsletter-settings.php:62
 msgid "Select Audience"
 msgstr ""
 
@@ -823,7 +835,7 @@ msgid ""
 "options"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:166
+#: admin/partials/tabs/newsletter-settings.php:168
 msgid ""
 "Send all data to your Mailchimp Audience, including subscribers and "
 "transactional customers"
@@ -841,7 +853,7 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:233
+#: admin/partials/tabs/newsletter-settings.php:240
 msgid "Shop checkout preview"
 msgstr ""
 
@@ -853,7 +865,7 @@ msgstr ""
 msgid "Skip & Deactivate"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1870
+#: admin/class-mailchimp-woocommerce-admin.php:1881
 msgid ""
 "Sometimes the sync can take a while, especially on sites with lots of orders "
 "and/or products. It is safe to navigate away from this screen while it is "
@@ -868,7 +880,7 @@ msgstr ""
 msgid "Start sync"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1866
+#: admin/class-mailchimp-woocommerce-admin.php:1877
 msgid "Starting the sync process..."
 msgstr ""
 
@@ -884,11 +896,11 @@ msgstr ""
 msgid "Store"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:714
+#: admin/class-mailchimp-woocommerce-admin.php:725
 msgid "Store Disconnect Failed"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:103
+#: admin/partials/tabs/newsletter-settings.php:105
 msgid "Store Newsletter"
 msgstr ""
 
@@ -900,7 +912,7 @@ msgstr ""
 msgid "Street address"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:100
+#: admin/partials/tabs/newsletter-settings.php:102
 msgid "Subject"
 msgstr ""
 
@@ -909,10 +921,11 @@ msgid "Submit & Deactivate"
 msgstr ""
 
 #: admin/class-mailchimp-woocommerce-admin.php:126
-#: admin/class-mailchimp-woocommerce-admin.php:1183
+#: admin/class-mailchimp-woocommerce-admin.php:1194
 #: includes/class-mailchimp-woocommerce-newsletter.php:52
-#: public/partials/mailchimp-woocommerce-my-account.php:5
-#: admin/partials/tabs/newsletter-settings.php:254
+#: admin/user-profile/mailchimp-user-profile.php:29
+#: public/partials/mailchimp-woocommerce-my-account.php:12
+#: admin/partials/tabs/newsletter-settings.php:261
 msgid "Subscribe to our newsletter"
 msgstr ""
 
@@ -932,7 +945,7 @@ msgstr ""
 msgid "Sync is running. Please wait until it finishes."
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:135
+#: admin/partials/tabs/newsletter-settings.php:137
 msgid "Sync Settings"
 msgstr ""
 
@@ -944,7 +957,7 @@ msgstr ""
 msgid "Synchronization"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:294
+#: admin/partials/tabs/newsletter-settings.php:302
 msgid "Tags"
 msgstr ""
 
@@ -952,13 +965,13 @@ msgstr ""
 msgid "Thanks, your message has been received."
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:234
+#: admin/partials/tabs/newsletter-settings.php:241
 msgid ""
 "The box below is a preview of your checkout page. Styles and fields may not "
 "be exact."
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:226
+#: admin/partials/tabs/newsletter-settings.php:233
 msgid ""
 "The call-to-action text that prompts customers to subscribe to your "
 "newsletter at checkout."
@@ -968,7 +981,7 @@ msgstr ""
 msgid "The order data isn't syncing."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1868
+#: admin/class-mailchimp-woocommerce-admin.php:1879
 msgid ""
 "The plugin has started the initial sync with your store, and the process "
 "will work in the background automatically."
@@ -978,7 +991,7 @@ msgstr ""
 msgid "The promo codes aren't showing up."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:508
+#: admin/class-mailchimp-woocommerce-admin.php:519
 msgid ""
 "These constants are deprecated since Mailchimp for Woocommerce version 2.3. "
 "Please refer to the <a href=\"https://github.com/mailchimp/mc-"
@@ -990,14 +1003,14 @@ msgid "Timezone"
 msgstr ""
 
 #. %s - Woocommerce Actions documentation URL.
-#: admin/partials/tabs/newsletter-settings.php:275
+#: admin/partials/tabs/newsletter-settings.php:283
 #, php-format
 msgid ""
 "To change the position of the opt-in <br/>checkbox at checkout, input one of "
 "the <a href=%s target=_blank>available WooCommerce form actions</a>."
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:161
+#: admin/partials/tabs/newsletter-settings.php:163
 msgid ""
 "To maximize your marketing efforts, we recommend syncing all customer data "
 "with Mailchimp. This way, you can send both marketing and transactional "
@@ -1007,13 +1020,13 @@ msgid ""
 "not trigger if you decide to only send to subscribers."
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:78
+#: admin/partials/tabs/newsletter-settings.php:80
 msgid ""
 "To select another audience, you must first disconnect your store on the "
 "Settings tab."
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:184
+#: admin/partials/tabs/newsletter-settings.php:186
 msgid "Track carts for all customers"
 msgstr ""
 
@@ -1023,6 +1036,11 @@ msgstr ""
 
 #: admin/class-mailchimp-woocommerce-admin.php:144
 msgid "Try again"
+msgstr ""
+
+#: admin/user-profile/mailchimp-user-profile.php:41
+#: public/partials/mailchimp-woocommerce-my-account.php:21
+msgid "Unsubscribe from our newsletter"
 msgstr ""
 
 #: admin/partials/tabs/store-sync.php:196
@@ -1041,22 +1059,22 @@ msgstr ""
 msgid "Username"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:210
+#: admin/partials/tabs/newsletter-settings.php:217
 msgid "Visible, checked by default"
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:215
+#: admin/partials/tabs/newsletter-settings.php:222
 msgid "Visible, unchecked by default"
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:506
+#: admin/class-mailchimp-woocommerce-admin.php:517
 msgid ""
 "We dectected that this site has the following constants defined, likely at "
 "wp-config.php file"
 msgstr ""
 
 #. %1$s: Number of synced orders %2$s: Audience name
-#: admin/class-mailchimp-woocommerce-admin.php:1888
+#: admin/class-mailchimp-woocommerce-admin.php:1899
 #, php-format
 msgid ""
 "We successfully synced %1$s orders to your Audience, %2$s. If you’re happy "
@@ -1082,7 +1100,7 @@ msgid ""
 "privacy policy <a href=\"%s\">here</a>."
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:142
+#: admin/partials/tabs/newsletter-settings.php:144
 msgid ""
 "WooCommerce does not keep a historical record of a customer's opt-in "
 "preferences. This plugin will add this functionality moving forward. Do you "
@@ -1112,17 +1130,17 @@ msgid ""
 "commerce data."
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:179
+#: admin/partials/tabs/newsletter-settings.php:181
 msgid "You may disable this if you are not using Abandoned Cart Automations."
 msgstr ""
 
-#: admin/class-mailchimp-woocommerce-admin.php:1339
+#: admin/class-mailchimp-woocommerce-admin.php:1350
 msgid "You must supply your Mailchimp API key to pull the audiences."
 msgstr ""
 
 #. %s - plugin name.
-#: admin/class-mailchimp-woocommerce-admin.php:1195
-#: admin/partials/tabs/newsletter-settings.php:130
+#: admin/class-mailchimp-woocommerce-admin.php:1206
+#: admin/partials/tabs/newsletter-settings.php:132
 #, php-format
 msgid "You were subscribed to the newsletter from %s"
 msgstr ""
@@ -1131,7 +1149,7 @@ msgstr ""
 msgid "You will not be able to revert."
 msgstr ""
 
-#: admin/partials/tabs/newsletter-settings.php:75
+#: admin/partials/tabs/newsletter-settings.php:77
 msgid "Your store is currently connected to:"
 msgstr ""
 

@@ -688,8 +688,8 @@ function mailchimp_check_curl_is_installed() {
 }
 
 function mailchimp_check_woocommerce_is_installed() {
-    if (!mailchimp_check_woocommerce_plugin_status()) {
-        // Deactivate the plugin
+    if (!mailchimp_check_woocommerce_plugin_status() && !( defined('WP_CLI') && WP_CLI )) {
+    // Deactivate the plugin
         deactivate_plugins(__FILE__);
         $error_message = __('The MailChimp For WooCommerce plugin requires the <a href="http://wordpress.org/extend/plugins/woocommerce/">WooCommerce</a> plugin to be active!', 'woocommerce');
         wp_die($error_message);

@@ -310,13 +310,14 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
             $log = "$call :: #{$order->getId()} :: email: {$email}";
 
+            // if we have the saved order meta from previous syncs let's use it.
+            // This should help with reporting after people may have disconnected and reconnected to a new store.
+            if (($saved = get_post_meta($order_post->ID, 'mailchimp_woocommerce_campaign_id', true))) {
+                $this->campaign_id = $saved;
+            }
             // only do this stuff on new orders
             if ($new_order) {
-            	// if we have the saved order meta from previous syncs let's use it.
-	            // This should help with reporting after people may have disconnected and reconnected to a new store.
-	            if (($saved = get_post_meta($order_post->ID, 'mailchimp_woocommerce_campaign_id', true))) {
-		            $this->campaign_id = $saved;
-	            }
+
             	// if the campaign ID is empty, let's try to pull the last clicked campaign from Mailchimp.
 	            // but only do this if we're not in a syncing status.
             	if (empty($this->campaign_id) && !$this->is_full_sync) {

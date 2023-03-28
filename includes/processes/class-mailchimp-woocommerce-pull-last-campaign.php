@@ -48,7 +48,7 @@ class MailChimp_WooCommerce_Pull_Last_Campaign
                     // try to find a "click" event
                     if ((isset($item['action']) && $item['action'] === 'click') && isset($item['url'])) {
                     	// get the number of seconds since the button click
-	                    $diff = (int) abs( strtotime('now') - $item['timestamp'] );
+	                    $diff = (int) abs( strtotime('now') - (int) $item['timestamp'] );
 	                    // and as long as it's less than 30 days ago we use this. ( 86400 seconds in a day )
 	                    if ((int) round($diff/86400) < 31) {
 		                    // store it in the cache for faster use later.

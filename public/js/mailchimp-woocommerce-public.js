@@ -37,10 +37,13 @@ function mailchimpHandleBillingEmail(selector) {
         var b = void 0 !== a ? a.value : "";
         if (!mailchimp_cart.valueEmail(b) || mailchimp_submitted_email === b) { return false; }
         mailchimp_cart.setEmail(b);
+        console.log(b);
+        console.log(mailchimp_cart);
         var c = mailchimp_public_data.ajax_url + "?action=mailchimp_set_user_by_email";
         var d = new XMLHttpRequest;
         d.open("POST", c, !0);
         d.onload = function () {
+            console.log(d);
             var successful = d.status >= 200 && d.status < 400;
             var msg = successful ? "mailchimp.handle_billing_email.request.success" : "mailchimp.handle_billing_email.request.error";
             if (successful) {
@@ -51,7 +54,7 @@ function mailchimpHandleBillingEmail(selector) {
         d.onerror = function () {
             console.log("mailchimp.handle_billing_email.request.error", d.responseText)
         };
-        d.setRequestHeader("Content-Type", "application/json");
+        d.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         d.setRequestHeader("Accept", "application/json");
         d.send("email=" + b + "&mc_language=" + mailchimp_public_data.language + "&subscribed=" + (subscribed && subscribed.checked ? '1' : '0'));
         return true;

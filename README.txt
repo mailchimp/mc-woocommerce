@@ -3,7 +3,7 @@ Contributors: ryanhungate, Mailchimp
 Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.9
-Tested up to: 6.1
+Tested up to: 6.2
 Stable tag: 2.8.2
 Requires PHP: 7.4
 WC requires at least: 4.2
@@ -78,12 +78,9 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
 == Changelog ==
-= 2.8.1 =
-* Surfaces Archived status for customers accounts in admin
-* Updates to translation filenames 
-* support for populating usermeta on initial sync
-* fix for REST API caching issues 
-* Initial sync interface enchancements
-* Action Scheduler updates 
-
+= 2.8.2 =
+* enhancements to logic for setting campaign ids on orders
+* updates to WP CLI deployment automations
+* patch for text encoding issue impacting abandoned carts
+* fix for PHP warnings non-numeric value encountered 
 [Historical Changelog](https://raw.githubusercontent.com/mailchimp/mc-woocommerce/master/CHANGELOG.txt)

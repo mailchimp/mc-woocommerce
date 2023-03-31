@@ -1477,7 +1477,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 		$api      = mailchimp_get_api();
 
 		try {
-			$response = $api->addStoreProduct( $store_id, $product );
+			$response = $api->addStoreProduct( $store_id, $product, false );
 			mailchimp_set_data( 'empty_line_item_placeholder', true );
 			return $response;
 		} catch ( Exception $e ) {

@@ -287,6 +287,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 if ( is_string( $status ) ) {
 			        if ( $status === 'unsubscribed' ) {
                         $subscribed_status = 'unsubscribed';
+                    } else if ( $status === 'archived' ) {
+                        $subscribed_status = 'archived';
                     } else if ( in_array( $status, array( 'subscribed', 'pending' ) ) ) {
                         $subscribed_status = '1';
                     } else {

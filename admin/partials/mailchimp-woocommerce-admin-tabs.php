@@ -70,7 +70,13 @@ if ( isset( $options['mailchimp_api_key'] ) ) {
 			}
 		}
 	} catch ( Exception $e ) {
-		$has_api_error = $e->getMessage() . ' on ' . $e->getLine() . ' in ' . $e->getFile();
+		if (mailchimp_string_contains($e->getMessage(), array('API key', 'User Disabled'))) {
+			$active_tab    = 'api_key';
+			$show_sync_tab = false;
+			$has_api_error = "This Mailchimp API key has been disabled, please flush any object caches you may be using and re-connect.";
+		} else {
+			$has_api_error = $e->getMessage() . ' on ' . $e->getLine() . ' in ' . $e->getFile();
+		}
 	}
 } else {
 	$active_tab = 'api_key';

@@ -1,4 +1,16 @@
 == Changelog ==
+= 2.8.2 =
+* enhancements to logic for setting campaign ids on orders
+* updates to WP CLI deployment automations
+* patch for text encoding issue impacting abandoned carts
+* fix for PHP warnings non-numeric value encountered 
+= 2.8.1 =
+* Surfaces Archived status for customers accounts in admin
+* Updates to translation filenames 
+* support for populating usermeta on initial sync
+* fix for REST API caching issues 
+* Initial sync interface enchancements
+* Action Scheduler updates 
 = 2.8 =
 * Added transient to help sync manager finish
 * Adds cookie enhancement filter

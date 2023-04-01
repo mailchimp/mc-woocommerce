@@ -762,6 +762,24 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     }
 
     /**
+     * @return bool
+     * Checks if the current request is a WP REST API request.
+     */
+    function is_rest() {
+        if (defined('REST_REQUEST') && REST_REQUEST
+            || isset($_GET['rest_route'])
+            && strpos( $_GET['rest_route'] , '/', 0 ) === 0)
+            return true;
+
+        global $wp_rewrite;
+        if ($wp_rewrite === null) $wp_rewrite = new WP_Rewrite();
+
+        $rest_url = wp_parse_url( trailingslashit( rest_url( ) ) );
+        $current_url = wp_parse_url( add_query_arg( array( ) ) );
+        return strpos( $current_url['path'] ?? '/', $rest_url['path'], 0 ) === 0;
+    }
+
+    /**
      * @return mixed|null
      */
     public function getLandingSiteCookie()
@@ -798,7 +816,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         // Catching images, videos and fonts file types
         preg_match("/^.*\.(ai|bmp|gif|ico|jpeg|jpg|png|ps|psd|svg|tif|tiff|fnt|fon|otf|ttf|3g2|3gp|avi|flv|h264|m4v|mkv|mov|mp4|mpg|mpeg|rm|swf|vob|wmv|aif|cda|mid|midi|mp3|mpa|ogg|wav|wma|wpl)$/i", $landing_site, $matches);
         
-        if (!empty($landing_site) && !wp_doing_ajax() && ( count($matches) == 0 ) ) {
+        if (!empty($landing_site) && !wp_doing_ajax() && ( count($matches) == 0 ) && !$this->is_rest() ) {
             mailchimp_set_cookie('mailchimp_landing_site', $landing_site, $this->getCookieDuration(), '/' );
             $this->setWooSession('mailchimp_landing_site', $landing_site);
         }
@@ -830,9 +848,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         if (!mailchimp_allowed_to_use_cookie('mailchimp_landing_site')) {
             return $this;
         }
-
-        mailchimp_set_cookie('mailchimp_landing_site', false, $this->getCookieDuration(), '/' );
-        $this->setWooSession('mailchimp_landing_site', false);
+        if ( !$this->is_rest() ) {
+            mailchimp_set_cookie('mailchimp_landing_site', false, $this->getCookieDuration(), '/' );
+            $this->setWooSession('mailchimp_landing_site', false);
+        }
 
         return $this;
     }

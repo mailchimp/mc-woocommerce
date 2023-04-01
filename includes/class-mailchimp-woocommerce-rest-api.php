@@ -406,7 +406,7 @@ class MailChimp_WooCommerce_Rest_Api
                         'type' => 'error',
                     ];
                 } else {
-                    $job = new MailChimp_WooCommerce_Single_Order($order);
+                    $job = new MailChimp_WooCommerce_Single_Order($order->get_id());
                     $data = $job->handle();
                     $response = [
                         'title' => "Executed order resync",

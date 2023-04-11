@@ -1,8 +1,13 @@
 {
+	"license": "GPL-2.0-or-later",
 	"require-dev": {
-    	"phpcompatibility/php-compatibility": "*",
+		"phpcompatibility/php-compatibility": "*",
 		"dealerdirect/phpcodesniffer-composer-installer": "^0.6",
 		"phpcompatibility/phpcompatibility-wp": "^2.1"
+	},
+	"require": {
+		"php": "^7|^8",
+		"ext-pcre": "*"
 	},
 	"prefer-stable" : true
 }

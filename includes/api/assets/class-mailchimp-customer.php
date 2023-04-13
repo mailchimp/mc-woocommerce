@@ -100,7 +100,7 @@ class MailChimp_WooCommerce_Customer {
         } else {
             $this->opt_in_status = $opt_in_status === '1';
         }
-        $this->marketing_status_updated_at = date('Y-m-d H:i:s');
+        //$this->marketing_status_updated_at = date('Y-m-d H:i:s');
 
 		return $this;
 	}
@@ -292,7 +292,7 @@ class MailChimp_WooCommerce_Customer {
 				'id'            => (string) $this->getId(),
 				'email_address' => (string) $this->getEmailAddress(),
 				'opt_in_status' => $this->getOptInStatus(),
-                'marketing_status_updated_at' => $this->getOptInStatusTime(),
+                //'marketing_status_updated_at' => $this->getOptInStatusTime(),
                 'company'       => (string) $this->getCompany(),
                 'first_name'    => (string) $this->getFirstName(),
 				'last_name'     => (string) $this->getLastName(),

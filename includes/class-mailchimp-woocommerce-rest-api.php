@@ -513,21 +513,23 @@ class MailChimp_WooCommerce_Rest_Api
                 $body['resource_id'] = urldecode($body['resource_id']);
                 $field = is_email($body['resource_id']) ? 'email' : 'id';
                 $platform = get_user_by($field, $body['resource_id']);
+	            $mc = array('member' => null, 'customer' => null);
                 if ($platform) {
                     $platform->mailchimp_woocommerce_is_subscribed = (bool) get_user_meta($platform->ID, 'mailchimp_woocommerce_is_subscribed', true);
+	                $hashed = mailchimp_hash_trim_lower($platform->user_email);
+                } else if ('email' === $field) {
+	                $hashed = mailchimp_hash_trim_lower($body['resource_id']);
                 }
-                $hashed = mailchimp_hash_trim_lower($platform->user_email);
-                if ($mc = mailchimp_get_api()->getCustomer($store_id, $hashed)) {
-                    try {
-                        $member = mailchimp_get_api()->member(mailchimp_get_list_id(), $mc->getEmailAddress());
-                    } catch (Exception $e) {
-                        $member = null;
-                    }
-                    $mc = array(
-                        'customer' => $mc->toArray(),
-                        'member' => $member,
-                    );
-                }
+				if (isset($hashed) && $hashed) {
+					try {
+						$mc['member'] = mailchimp_get_api()->member(mailchimp_get_list_id(), $platform->user_email);
+					} catch (Exception $e) {
+						$mc['member'] = null;
+					}
+					if ($customer = mailchimp_get_api()->getCustomer($store_id, $hashed)) {
+						$mc['customer'] = $customer->toArray();
+					}
+				}
                 break;
             case 'product':
                 $platform = get_post($body['resource_id']);

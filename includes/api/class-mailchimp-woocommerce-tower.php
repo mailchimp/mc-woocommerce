@@ -244,6 +244,11 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 							'key'   => 'mc.has_legacy_integration',
 							'value' => $has_old_integration,
 						),
+						// this is to identify the people using selective sync.
+						'mc.has_selective_sync'     => (object) array(
+							'key'   => 'mc.has_selective_sync',
+							'value' => mailchimp_submit_subscribed_only(),
+						),
 						'admin.updated_at'          => (object) array(
 							'key'   => 'admin.updated_at',
 							'value' => $time->format( 'Y-m-d H:i:s' ),

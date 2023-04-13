@@ -1,4 +1,6 @@
 == Changelog ==
+= 2.8.3 =
+* back-end updates for support
 = 2.8.2 =
 * enhancements to logic for setting campaign ids on orders
 * updates to WP CLI deployment automations

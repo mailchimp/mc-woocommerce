@@ -510,7 +510,7 @@ class MailChimp_WooCommerce_Rest_Api
                 if ($mc) $mc = $mc->toArray();
                 break;
             case 'customer':
-                $body['resource_id'] = urldecode($body['resource_id']);
+                //$body['resource_id'] = urldecode($body['resource_id']);
                 $field = is_email($body['resource_id']) ? 'email' : 'id';
                 $platform = get_user_by($field, $body['resource_id']);
 	            $mc = array('member' => null, 'customer' => null);

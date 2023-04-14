@@ -392,7 +392,7 @@ class MailChimp_WooCommerce_Rest_Api
                 break;
             case 'resync_customer':
                 $response = [
-                    'title' => "Error syncing custome",
+                    'title' => "Error syncing customer",
                     'description' => "WooCommerce only works with orders.",
                     'type' => 'error',
                 ];

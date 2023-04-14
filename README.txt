@@ -7,7 +7,7 @@ Tested up to: 6.2
 Stable tag: 2.8.3
 Requires PHP: 7.4
 WC requires at least: 4.2
-WC tested up to: 7.5
+WC tested up to: 7.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your Mailchimp audience to track sales, create targeted emails, send abandoned cart emails, and more.

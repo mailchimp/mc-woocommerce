@@ -1,4 +1,6 @@
 == Changelog ==
+= 2.8.4 =
+* support for HPOS
 = 2.8.3 =
 * back-end updates for support
 = 2.8.2 =

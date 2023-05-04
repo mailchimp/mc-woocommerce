@@ -7,6 +7,10 @@ use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CheckoutSchema;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 defined( 'ABSPATH' ) || exit;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+$HPOS_enabled = false;
+if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {	$HPOS_enabled = true; }
+/* HPOS_enabled - flag for data from db, where hpos is enabled or not */
 
 /**
  * Class Mailchimp_Woocommerce_Newsletter_Blocks_Integration
@@ -276,10 +280,24 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
             (array) $request['extensions']['mailchimp-newsletter']['gdprFields'] : null;
 
         // update the order meta for the subscription status to support legacy functions
-        update_post_meta($order->get_id(), $meta_key, $optin);
+        if($HPOS_enabled){ 
+            $order_c = wc_get_order( $order->get_id() );
+            $order_c->update_meta_data( $meta_key, $optin );
+            $order_c->save();
+        }
+		else{ update_post_meta($order->get_id(), $meta_key, $optin); }		
+        /*update_post_meta($order->get_id(), $meta_key, $optin);*/
         // let's set the GDPR fields here just in case we need to pull them again.
         if (!empty($gdpr_fields)) {
-            update_post_meta($order->get_id(), "mailchimp_woocommerce_gdpr_fields", $gdpr_fields);
+
+            if($HPOS_enabled){ 
+                $order_c = wc_get_order( $order->get_id() );
+                $order_c->update_meta_data("mailchimp_woocommerce_gdpr_fields", $gdpr_fields);
+                $order_c->save();
+            }
+            else{ update_post_meta($order->get_id(), "mailchimp_woocommerce_gdpr_fields", $gdpr_fields); }		
+
+            //update_post_meta($order->get_id(), "mailchimp_woocommerce_gdpr_fields", $gdpr_fields);
         }
 
         // if the user id exists
@@ -310,10 +328,24 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
 
         // update the post meta with campaign tracking details for future sync
         if (!empty($campaign_id)) {
-            update_post_meta($order->get_id(), 'mailchimp_woocommerce_campaign_id', $campaign_id);
+
+            if($HPOS_enabled){ 
+                $order_c = wc_get_order( $order->get_id() );
+                $order_c->update_meta_data('mailchimp_woocommerce_campaign_id', $campaign_id);
+                $order_c->save();
+            }
+            else{ update_post_meta($order->get_id(), 'mailchimp_woocommerce_campaign_id', $campaign_id); }		
+
+            /*update_post_meta($order->get_id(), 'mailchimp_woocommerce_campaign_id', $campaign_id);*/
         }
         if (!empty($landing_site)) {
-            update_post_meta($order->get_id(), 'mailchimp_woocommerce_landing_site', $landing_site);
+            if($HPOS_enabled){ 
+                $order_c = wc_get_order( $order->get_id() );
+                $order_c->update_meta_data('mailchimp_woocommerce_landing_site', $landing_site);
+                $order_c->save();
+            }
+            else{ update_post_meta($order->get_id(), 'mailchimp_woocommerce_landing_site', $landing_site); }		
+            //update_post_meta($order->get_id(), 'mailchimp_woocommerce_landing_site', $landing_site);
         }
 
         $handler = new MailChimp_WooCommerce_Single_Order($order->get_id(), null, $campaign_id, $landing_site, $language, $gdpr_fields);

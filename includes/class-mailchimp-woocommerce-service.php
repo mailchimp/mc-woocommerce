@@ -8,6 +8,12 @@
  * Date: 2/17/16
  * Time: 12:03 PM
  */
+
+ use Automattic\WooCommerce\Utilities\OrderUtil;
+ $HPOS_enabled = false;
+ if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {	$HPOS_enabled = true; }
+ /* HPOS_enabled - flag for data from db, where hpos is enabled or not */ 
+
 class MailChimp_Service extends MailChimp_WooCommerce_Options
 {
     protected $user_email = null;
@@ -161,15 +167,33 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
         // update the post meta with campaign tracking and landing site details
         if (!empty($campaign_id)) {
-            update_post_meta($order_id, 'mailchimp_woocommerce_campaign_id', $campaign_id);
+            if($HPOS_enabled){ 
+                $order_c = wc_get_order( $order_id );
+                $order_c->update_meta_data('mailchimp_woocommerce_campaign_id', $campaign_id);
+                $order_c->save();
+            }
+            else{ update_post_meta($order_id, 'mailchimp_woocommerce_campaign_id', $campaign_id); }		
+            //update_post_meta($order_id, 'mailchimp_woocommerce_campaign_id', $campaign_id);
         }
         if (!empty($landing_site)) {
-            update_post_meta($order_id, 'mailchimp_woocommerce_landing_site', $landing_site);
+            if($HPOS_enabled){ 
+                $order_c = wc_get_order( $order_id );
+                $order_c->update_meta_data('mailchimp_woocommerce_landing_site', $landing_site);
+                $order_c->save();
+            }
+            else{ update_post_meta($order_id, 'mailchimp_woocommerce_landing_site', $landing_site); }		
+            //update_post_meta($order_id, 'mailchimp_woocommerce_landing_site', $landing_site);
         }
 
         // if we have gdpr fields in the post - let's save them to the order
         if (!empty($gdpr_fields)) {
-            update_post_meta($order_id, "mailchimp_woocommerce_gdpr_fields", $gdpr_fields);
+            if($HPOS_enabled){ 
+                $order_c = wc_get_order( $order_id );
+                $order_c->update_meta_data("mailchimp_woocommerce_gdpr_fields", $gdpr_fields);
+                $order_c->save();
+            }
+            else{ update_post_meta($order_id, "mailchimp_woocommerce_gdpr_fields", $gdpr_fields); }		
+            //update_post_meta($order_id, "mailchimp_woocommerce_gdpr_fields", $gdpr_fields);
         }
 
         $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $campaign_id, $landing_site, $language, $gdpr_fields);
@@ -478,9 +502,30 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function handlePostTrashed($post_id)
     {
-        if (!mailchimp_is_configured()) return;
-
-        switch (get_post_type($post_id)) {
+        if (!mailchimp_is_configured()) return;        
+        if($HPOS_enabled){ 
+            switch (OrderUtil::get_order_type( $post_id )) {
+                case 'shop_coupon':
+                    try {
+                        $deleted = mailchimp_get_api()->deletePromoRule(mailchimp_get_store_id(), $post_id);
+                        if ($deleted) mailchimp_log('promo_code.deleted', "deleted promo code {$post_id}");
+                        else mailchimp_log('promo_code.delete_fail', "Unable to delete promo code {$post_id}");
+                    } catch (Exception $e) {
+                        mailchimp_error('delete promo code', $e->getMessage());
+                    }
+                    break;
+                case 'product':
+                    try {
+                        $deleted = mailchimp_get_api()->deleteStoreProduct(mailchimp_get_store_id(), $post_id);
+                        if ($deleted) mailchimp_log('product.deleted', "deleted product {$post_id}");
+                        else mailchimp_log('product.delete_fail', "Unable to deleted product {$post_id}");
+                    } catch (Exception $e) {
+                        mailchimp_error('delete product', $e->getMessage());
+                    }
+                    break;
+            }
+        }
+        else{ switch (get_post_type($post_id)) {
             case 'shop_coupon':
                 try {
                     $deleted = mailchimp_get_api()->deletePromoRule(mailchimp_get_store_id(), $post_id);
@@ -499,7 +544,28 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                     mailchimp_error('delete product', $e->getMessage());
                 }
                 break;
-        }
+            } 
+        }	
+        /*switch (get_post_type($post_id)) {
+            case 'shop_coupon':
+                try {
+                    $deleted = mailchimp_get_api()->deletePromoRule(mailchimp_get_store_id(), $post_id);
+                    if ($deleted) mailchimp_log('promo_code.deleted', "deleted promo code {$post_id}");
+                    else mailchimp_log('promo_code.delete_fail', "Unable to delete promo code {$post_id}");
+                } catch (Exception $e) {
+                    mailchimp_error('delete promo code', $e->getMessage());
+                }
+                break;
+            case 'product':
+                try {
+                    $deleted = mailchimp_get_api()->deleteStoreProduct(mailchimp_get_store_id(), $post_id);
+                    if ($deleted) mailchimp_log('product.deleted', "deleted product {$post_id}");
+                    else mailchimp_log('product.delete_fail', "Unable to deleted product {$post_id}");
+                } catch (Exception $e) {
+                    mailchimp_error('delete product', $e->getMessage());
+                }
+                break;
+        }*/
     }
 
     /**
@@ -508,16 +574,32 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function handlePostRestored($post_id)
     {
-        if (!mailchimp_is_configured() || !($post = get_post($post_id))) {
-        	return;
+
+        if($HPOS_enabled){                             
+            if (!mailchimp_is_configured() || !($post = wc_get_order($post_id))) {
+                return;
+            }
         }
+        else {                 
+            if (!mailchimp_is_configured() || !($post = get_post($post_id))) {
+                return;
+            }
+        }		
+        
+        /*if (!mailchimp_is_configured() || !($post = get_post($post_id))) {
+        	return;
+        }*/
 
         // don't handle any of these statuses because they're not ready for the show
         if (in_array($post->post_status, array('trash', 'auto-draft', 'draft', 'pending'))) {
             return;
         }
-
-        switch(get_post_type($post_id)) {
+        $pid_n=get_post_type($post_id);
+        if($HPOS_enabled){ 
+            $pid_n=OrderUtil::get_order_type( $post_id );
+        }
+        switch($pid_n) {
+        //switch(get_post_type($post_id)) {
             case 'shop_coupon':
                 $this->handleCouponRestored($post_id);
                 break;

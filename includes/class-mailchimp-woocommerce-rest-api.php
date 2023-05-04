@@ -1,5 +1,10 @@
 <?php
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
+$HPOS_enabled = false;
+if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {	$HPOS_enabled = true; }
+/* HPOS_enabled - flag for data from db, where hpos is enabled or not */
+
 class MailChimp_WooCommerce_Rest_Api
 {
     protected static $namespace = 'mailchimp-for-woocommerce/v1';
@@ -501,7 +506,8 @@ class MailChimp_WooCommerce_Rest_Api
         $store_id = mailchimp_get_store_id();
         switch ($body['resource']) {
             case 'order':
-                $order = get_post($body['resource_id']);
+                if ($HPOS_enabled) { $order = wc_get_order($body['resource_id']); }
+                else { $order = get_post($body['resource_id']); }
                 $mc = !$order->ID ? null : mailchimp_get_api()->getStoreOrder($store_id, $order->ID);
                 if ($order->ID) {
                     $transformer = new MailChimp_WooCommerce_Transform_Orders();
@@ -532,7 +538,8 @@ class MailChimp_WooCommerce_Rest_Api
 				}
                 break;
             case 'product':
-                $platform = get_post($body['resource_id']);
+                if ($HPOS_enabled) { $platform = wc_get_order($body['resource_id']); }
+                else { $platform = get_post($body['resource_id']); }		
                 if ($platform) {
                     $transformer = new MailChimp_WooCommerce_Transform_Products();
                     $platform = $transformer->transform($platform)->toArray();

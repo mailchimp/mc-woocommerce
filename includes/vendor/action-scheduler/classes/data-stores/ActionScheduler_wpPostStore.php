@@ -3,6 +3,11 @@
 /**
  * Class ActionScheduler_wpPostStore
  */
+use Automattic\WooCommerce\Utilities\OrderUtil;
+$HPOS_enabled = false;
+if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {	$HPOS_enabled = true; }
+/* HPOS_enabled - flag for data from db, where hpos is enabled or not */
+
 class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	const POST_TYPE         = 'scheduled-action';
 	const GROUP_TAXONOMY    = 'action-group';
@@ -164,7 +169,12 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	 * @return void
 	 */
 	protected function save_post_schedule( $post_id, $schedule ) {
-		update_post_meta( $post_id, self::SCHEDULE_META_KEY, $schedule );
+		if($HPOS_enabled){ 
+			$order_c = wc_get_order( $post_id );
+			$order_c->update_meta_data(self::SCHEDULE_META_KEY, $schedule);
+			$order_c->save();
+}
+else{ update_post_meta( $post_id, self::SCHEDULE_META_KEY, $schedule ); }
 	}
 
 	/**
@@ -509,7 +519,8 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	 * @throws InvalidArgumentException If $action_id is not identified.
 	 */
 	public function cancel_action( $action_id ) {
-		$post = get_post( $action_id );
+		if($HPOS_enabled){ $post = wc_get_order( $action_id ); }
+		else{ $post = get_post( $action_id ); }
 		if ( empty( $post ) || ( self::POST_TYPE !== $post->post_type ) ) {
 			/* translators: %s is the action ID */
 			throw new InvalidArgumentException( sprintf( __( 'Unidentified action %s', 'action-scheduler' ), $action_id ) );
@@ -528,7 +539,8 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	 * @throws InvalidArgumentException If action is not identified.
 	 */
 	public function delete_action( $action_id ) {
-		$post = get_post( $action_id );
+		if($HPOS_enabled){ $post = wc_get_order( $action_id ); }
+		else{ $post = get_post( $action_id ); }		
 		if ( empty( $post ) || ( self::POST_TYPE !== $post->post_type ) ) {
 			/* translators: %s is the action ID */
 			throw new InvalidArgumentException( sprintf( __( 'Unidentified action %s', 'action-scheduler' ), $action_id ) );
@@ -558,7 +570,8 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	 * @return ActionScheduler_DateTime The date the action is schedule to run, or the date that it ran.
 	 */
 	public function get_date_gmt( $action_id ) {
-		$post = get_post( $action_id );
+		if($HPOS_enabled){ $post = wc_get_order( $action_id ); }
+		else{ $post = get_post( $action_id ); }
 		if ( empty( $post ) || ( self::POST_TYPE !== $post->post_type ) ) {
 			/* translators: %s is the action ID */
 			throw new InvalidArgumentException( sprintf( __( 'Unidentified action %s', 'action-scheduler' ), $action_id ) );
@@ -968,7 +981,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	 * @throws RuntimeException         When there was an error executing the action.
 	 */
 	public function mark_complete( $action_id ) {
-		$post = get_post( $action_id );
+		if($HPOS_enabled){ $post = wc_get_order( $action_id ); }
 		if ( empty( $post ) || ( self::POST_TYPE !== $post->post_type ) ) {
 			/* translators: %s is the action ID */
 			throw new InvalidArgumentException( sprintf( __( 'Unidentified action %s', 'action-scheduler' ), $action_id ) );

@@ -8,6 +8,13 @@
  * Date: 7/15/16
  * Time: 11:42 AM
  */
+
+use Automattic\WooCommerce\Utilities\OrderUtil;
+$HPOS_enabled = false;
+if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {	$HPOS_enabled = true; }
+/* HPOS_enabled - flag for data from db, where hpos is enabled or not */
+
+
 class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
 {
     public $id;
@@ -126,9 +133,21 @@ class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
 
         try {
 
-            if (!($product_post = get_post($this->id))) {
-                return false;
+            if($HPOS_enabled){                 
+                if (!($product_post = wc_get_order($this->id))) {
+                    return false;
+                }
             }
+		    else {                 
+                if (!($product_post = get_post($this->id))) {
+                    return false;
+                }
+            }		
+
+
+            /*if (!($product_post = get_post($this->id))) {
+                return false;
+            }*/
 
             try {
                 // pull the product from Mailchimp first to see what method we need to call next.

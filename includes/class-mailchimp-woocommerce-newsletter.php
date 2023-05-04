@@ -8,6 +8,10 @@
  * Date: 2/22/16
  * Time: 9:09 AM
  */
+use Automattic\WooCommerce\Utilities\OrderUtil;
+$HPOS_enabled = false;
+if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {	$HPOS_enabled = true; }
+/* HPOS_enabled - flag for data from db, where hpos is enabled or not */
 class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
 {
     /** @var null|static */
@@ -148,7 +152,15 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
 
         // if we passed in an order id, we update it here.
         if ($order_id) {
-            update_post_meta($order_id, $meta_key, $status);
+            
+            if($HPOS_enabled){ 
+                $order_c = wc_get_order( $order_id );
+                $order_c->update_meta_data($meta_key, $status);
+                $order_c->save();
+            }
+            else{ update_post_meta($order_id, $meta_key, $status); }		
+
+            //update_post_meta($order_id, $meta_key, $status);
         }
 
         // if the user is logged in, we will update the status correctly.

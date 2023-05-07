@@ -3,10 +3,6 @@
 /**
  * Class ActionScheduler_wpPostStore
  */
-use Automattic\WooCommerce\Utilities\OrderUtil;
-$HPOS_enabled = false;
-if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {	$HPOS_enabled = true; }
-/* HPOS_enabled - flag for data from db, where hpos is enabled or not */
 
 class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	const POST_TYPE         = 'scheduled-action';
@@ -168,15 +164,8 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	 *
 	 * @return void
 	 */
-	protected function save_post_schedule( $post_id, $schedule ) {
-		if($HPOS_enabled){ 
-			$order_c = wc_get_order( $post_id );
-			$order_c->update_meta_data(self::SCHEDULE_META_KEY, $schedule);
-			$order_c->save();
-}
-else{ update_post_meta( $post_id, self::SCHEDULE_META_KEY, $schedule ); }		
-
-		//update_post_meta( $post_id, self::SCHEDULE_META_KEY, $schedule );
+	protected function save_post_schedule( $post_id, $schedule ) {		
+		update_post_meta( $post_id, self::SCHEDULE_META_KEY, $schedule );
 	}
 
 	/**
@@ -200,10 +189,8 @@ else{ update_post_meta( $post_id, self::SCHEDULE_META_KEY, $schedule ); }
 	 * @param int $action_id Action ID.
 	 * @return object
 	 */
-	public function fetch_action( $action_id ) {
-		if($HPOS_enabled){ $post = wc_get_order( $action_id ); }
-		else{ $post = get_post( $action_id ); }		
-		/*$post = $this->get_post( $action_id );*/
+	public function fetch_action( $action_id ) {		
+		$post = $this->get_post( $action_id );
 		if ( empty( $post ) || self::POST_TYPE !== $post->post_type ) {
 			return $this->get_null_action();
 		}
@@ -522,10 +509,8 @@ else{ update_post_meta( $post_id, self::SCHEDULE_META_KEY, $schedule ); }
 	 *
 	 * @throws InvalidArgumentException If $action_id is not identified.
 	 */
-	public function cancel_action( $action_id ) {
-		if($HPOS_enabled){ $post = wc_get_order( $action_id ); }
-		else{ $post = get_post( $action_id ); }		
-		/*$post = get_post( $action_id );*/
+	public function cancel_action( $action_id ) {				
+		$post = get_post( $action_id );
 		if ( empty( $post ) || ( self::POST_TYPE !== $post->post_type ) ) {
 			/* translators: %s is the action ID */
 			throw new InvalidArgumentException( sprintf( __( 'Unidentified action %s', 'action-scheduler' ), $action_id ) );
@@ -543,10 +528,8 @@ else{ update_post_meta( $post_id, self::SCHEDULE_META_KEY, $schedule ); }
 	 * @return void
 	 * @throws InvalidArgumentException If action is not identified.
 	 */
-	public function delete_action( $action_id ) {
-		if($HPOS_enabled){ $post = wc_get_order( $action_id ); }
-		else{ $post = get_post( $action_id ); }		
-		/*$post = get_post( $action_id );*/
+	public function delete_action( $action_id ) {		
+		$post = get_post( $action_id );
 		if ( empty( $post ) || ( self::POST_TYPE !== $post->post_type ) ) {
 			/* translators: %s is the action ID */
 			throw new InvalidArgumentException( sprintf( __( 'Unidentified action %s', 'action-scheduler' ), $action_id ) );
@@ -575,10 +558,8 @@ else{ update_post_meta( $post_id, self::SCHEDULE_META_KEY, $schedule ); }
 	 * @throws InvalidArgumentException If $action_id is not identified.
 	 * @return ActionScheduler_DateTime The date the action is schedule to run, or the date that it ran.
 	 */
-	public function get_date_gmt( $action_id ) {
-		if($HPOS_enabled){ $post = wc_get_order( $action_id ); }
-		else{ $post = get_post( $action_id ); }		
-		/* $post = get_post( $action_id ); */
+	public function get_date_gmt( $action_id ) {		
+		$post = get_post( $action_id ); 
 		if ( empty( $post ) || ( self::POST_TYPE !== $post->post_type ) ) {
 			/* translators: %s is the action ID */
 			throw new InvalidArgumentException( sprintf( __( 'Unidentified action %s', 'action-scheduler' ), $action_id ) );
@@ -987,10 +968,8 @@ else{ update_post_meta( $post_id, self::SCHEDULE_META_KEY, $schedule ); }
 	 * @throws InvalidArgumentException When the action ID is invalid.
 	 * @throws RuntimeException         When there was an error executing the action.
 	 */
-	public function mark_complete( $action_id ) {
-		if($HPOS_enabled){ $post = wc_get_order( $action_id ); }
-		else{ $post = get_post( $action_id ); }		
-		/*$post = get_post( $action_id );*/
+	public function mark_complete( $action_id ) {		
+		$post = get_post( $action_id );
 		if ( empty( $post ) || ( self::POST_TYPE !== $post->post_type ) ) {
 			/* translators: %s is the action ID */
 			throw new InvalidArgumentException( sprintf( __( 'Unidentified action %s', 'action-scheduler' ), $action_id ) );

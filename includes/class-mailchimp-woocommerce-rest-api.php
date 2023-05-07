@@ -1,9 +1,6 @@
 <?php
 
-use Automattic\WooCommerce\Utilities\OrderUtil;
-$HPOS_enabled = false;
-if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {	$HPOS_enabled = true; }
-/* HPOS_enabled - flag for data from db, where hpos is enabled or not */
+use HPOS_Supported_MailChimp\custom_functions_mailchimp_hpos;
 
 class MailChimp_WooCommerce_Rest_Api
 {
@@ -504,18 +501,12 @@ class MailChimp_WooCommerce_Rest_Api
         $platform = null;
         $mc = null;
         $store_id = mailchimp_get_store_id();
+        $HPOS_MailChimp_Support_Functions = new HPOS_Supported_MailChimp\custom_functions_mailchimp_hpos();
+        /*hpos supporter init object*/
         switch ($body['resource']) {
-            case 'order':
-                
-                if($HPOS_enabled){                             
-                    $order = wc_get_order($body['resource_id']);
-                }
-                else {                 
-                    $order = get_post($body['resource_id']);
-                }		
-
+            case 'order':                
+                $order=$HPOS_MailChimp_Support_Functions->hpos_custom_get_post($body['resource_id']);                
                 /*$order = get_post($body['resource_id']);*/
-
                 $mc = !$order->ID ? null : mailchimp_get_api()->getStoreOrder($store_id, $order->ID);
                 if ($order->ID) {
                     $transformer = new MailChimp_WooCommerce_Transform_Orders();
@@ -545,16 +536,8 @@ class MailChimp_WooCommerce_Rest_Api
 					}
 				}
                 break;
-            case 'product':
-                
-                if($HPOS_enabled){                             
-                    $platform = wc_get_order($body['resource_id']);
-                }
-                else {                 
-                    $platform = get_post($body['resource_id']);
-                }		
-
-                /*$platform = get_post($body['resource_id']);*/
+            case 'product':                
+                $platform = get_post($body['resource_id']);
 
                 if ($platform) {
                     $transformer = new MailChimp_WooCommerce_Transform_Products();

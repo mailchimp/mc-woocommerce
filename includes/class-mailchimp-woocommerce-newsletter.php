@@ -8,10 +8,8 @@
  * Date: 2/22/16
  * Time: 9:09 AM
  */
-use Automattic\WooCommerce\Utilities\OrderUtil;
-$HPOS_enabled = false;
-if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {	$HPOS_enabled = true; }
-/* HPOS_enabled - flag for data from db, where hpos is enabled or not */
+use HPOS_Supported_MailChimp\custom_functions_mailchimp_hpos;
+
 class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
 {
     /** @var null|static */
@@ -148,18 +146,12 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
         // if the status is null, we don't do anything
         if ($status === null) {
             return false;
-        }
-
+        }        
+        $HPOS_MailChimp_Support_Functions = new HPOS_Supported_MailChimp\custom_functions_mailchimp_hpos();
+        /*hpos supporter init object*/
         // if we passed in an order id, we update it here.
         if ($order_id) {
-            
-            if($HPOS_enabled){ 
-                $order_c = wc_get_order( $order_id );
-                $order_c->update_meta_data($meta_key, $status);
-                $order_c->save();
-            }
-            else{ update_post_meta($order_id, $meta_key, $status); }		
-
+            $HPOS_MailChimp_Support_Functions->hpos_custom_update_order_meta($order_id, $meta_key, $status);
             //update_post_meta($order_id, $meta_key, $status);
         }
 

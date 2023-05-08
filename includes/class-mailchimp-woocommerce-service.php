@@ -485,9 +485,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function handlePostTrashed($post_id)
     {
-        if (!mailchimp_is_configured()) return;        
-        $HPOS_MailChimp_Support_Functions = new HPOS_Supported_MailChimp\custom_functions_mailchimp_hpos();        
-        switch ($HPOS_MailChimp_Support_Functions->hpos_custom_get_type($post_id)) {
+        if (!mailchimp_is_configured()) return;                
+        switch (get_post_type($post_id)) {
             case 'shop_coupon':
                 try {
                     $deleted = mailchimp_get_api()->deletePromoRule(mailchimp_get_store_id(), $post_id);
@@ -516,18 +515,15 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     public function handlePostRestored($post_id)
     {
         $HPOS_MailChimp_Support_Functions = new HPOS_Supported_MailChimp\custom_functions_mailchimp_hpos();        
-        if (!mailchimp_is_configured() || !($post = $HPOS_MailChimp_Support_Functions->hpos_custom_get_type( $post_id ))) {
+        if (!mailchimp_is_configured() || !($post = get_post_type($post_id))) {
         	return;
         }
 
         // don't handle any of these statuses because they're not ready for the show
         if (in_array($post->post_status, array('trash', 'auto-draft', 'draft', 'pending'))) {
             return;
-        }
-        $HPOS_MailChimp_Support_Functions = new HPOS_Supported_MailChimp\custom_functions_mailchimp_hpos();                
-        $pid_n=$HPOS_MailChimp_Support_Functions->hpos_custom_get_type( $post_id );        
-        switch($pid_n) {
-        //switch(get_post_type($post_id)) {
+        }        
+        switch(get_post_type($post_id)) {
             case 'shop_coupon':
                 $this->handleCouponRestored($post_id);
                 break;

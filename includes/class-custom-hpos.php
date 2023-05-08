@@ -38,13 +38,4 @@ class custom_functions_mailchimp_hpos{
    $order_c->save();
   }
  }
- public function hpos_custom_get_type( $post_id ){
-  hpos_init();
-  if ( !$HPOS_enabled ) {
-   return get_post_type($post_id);
-  }
-  else{
-   return OrderUtil::get_order_type( $post_id );
-  }
- }
 }

@@ -3,6 +3,7 @@
 /**
  * Class ActionScheduler_wpPostStore
  */
+
 class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	const POST_TYPE         = 'scheduled-action';
 	const GROUP_TAXONOMY    = 'action-group';
@@ -163,7 +164,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	 *
 	 * @return void
 	 */
-	protected function save_post_schedule( $post_id, $schedule ) {
+	protected function save_post_schedule( $post_id, $schedule ) {		
 		update_post_meta( $post_id, self::SCHEDULE_META_KEY, $schedule );
 	}
 
@@ -188,7 +189,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	 * @param int $action_id Action ID.
 	 * @return object
 	 */
-	public function fetch_action( $action_id ) {
+	public function fetch_action( $action_id ) {		
 		$post = $this->get_post( $action_id );
 		if ( empty( $post ) || self::POST_TYPE !== $post->post_type ) {
 			return $this->get_null_action();
@@ -508,7 +509,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	 *
 	 * @throws InvalidArgumentException If $action_id is not identified.
 	 */
-	public function cancel_action( $action_id ) {
+	public function cancel_action( $action_id ) {				
 		$post = get_post( $action_id );
 		if ( empty( $post ) || ( self::POST_TYPE !== $post->post_type ) ) {
 			/* translators: %s is the action ID */
@@ -527,7 +528,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	 * @return void
 	 * @throws InvalidArgumentException If action is not identified.
 	 */
-	public function delete_action( $action_id ) {
+	public function delete_action( $action_id ) {		
 		$post = get_post( $action_id );
 		if ( empty( $post ) || ( self::POST_TYPE !== $post->post_type ) ) {
 			/* translators: %s is the action ID */
@@ -557,8 +558,8 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	 * @throws InvalidArgumentException If $action_id is not identified.
 	 * @return ActionScheduler_DateTime The date the action is schedule to run, or the date that it ran.
 	 */
-	public function get_date_gmt( $action_id ) {
-		$post = get_post( $action_id );
+	public function get_date_gmt( $action_id ) {		
+		$post = get_post( $action_id ); 
 		if ( empty( $post ) || ( self::POST_TYPE !== $post->post_type ) ) {
 			/* translators: %s is the action ID */
 			throw new InvalidArgumentException( sprintf( __( 'Unidentified action %s', 'action-scheduler' ), $action_id ) );
@@ -967,7 +968,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	 * @throws InvalidArgumentException When the action ID is invalid.
 	 * @throws RuntimeException         When there was an error executing the action.
 	 */
-	public function mark_complete( $action_id ) {
+	public function mark_complete( $action_id ) {		
 		$post = get_post( $action_id );
 		if ( empty( $post ) || ( self::POST_TYPE !== $post->post_type ) ) {
 			/* translators: %s is the action ID */
@@ -975,6 +976,8 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 		}
 		add_filter( 'wp_insert_post_data', array( $this, 'filter_insert_post_data' ), 10, 1 );
 		add_filter( 'pre_wp_unique_post_slug', array( $this, 'set_unique_post_slug' ), 10, 5 );
+		
+		
 		$result = wp_update_post(
 			array(
 				'ID'          => $action_id,

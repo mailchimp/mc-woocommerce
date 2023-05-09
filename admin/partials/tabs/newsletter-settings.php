@@ -199,8 +199,8 @@ $checkout_page_id = get_option('woocommerce_checkout_page_id');
 		</div>
 		<div class="box fieldset-header margin-large" >
 			<h3><?php esc_html_e( 'Opt-In Checkbox Settings', 'mailchimp-for-woocommerce' ); ?></h3>
-		</div>
-        <?php if ( has_block( 'woocommerce/checkout', get_post($checkout_page_id ) ) ) : ?>
+		</div>        
+								<?php if ( has_block( 'woocommerce/checkout', get_post($checkout_page_id ) ) ) : ?>								
         <div class="box">
             <h4><?= sprintf(__('Checkout page is using Woocommerce blocks. Settings are available within the block options while editing the <a href="%s">checkout page</a>.', 'mailchimp-for-woocommerce'), get_the_permalink($checkout_page_id) ) ?></h4>
         </div>

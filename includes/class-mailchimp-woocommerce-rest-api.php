@@ -1,5 +1,7 @@
 <?php
 
+use HPOS_Supported_MailChimp\custom_functions_mailchimp_hpos;
+
 class MailChimp_WooCommerce_Rest_Api
 {
     protected static $namespace = 'mailchimp-for-woocommerce/v1';
@@ -392,7 +394,7 @@ class MailChimp_WooCommerce_Rest_Api
                 break;
             case 'resync_customer':
                 $response = [
-                    'title' => "Error syncing customer",
+                    'title' => "Error syncing custome",
                     'description' => "WooCommerce only works with orders.",
                     'type' => 'error',
                 ];
@@ -499,9 +501,12 @@ class MailChimp_WooCommerce_Rest_Api
         $platform = null;
         $mc = null;
         $store_id = mailchimp_get_store_id();
+        $HPOS_MailChimp_Support_Functions = new HPOS_Supported_MailChimp\custom_functions_mailchimp_hpos();
+        /*hpos supporter init object*/
         switch ($body['resource']) {
-            case 'order':
-                $order = get_post($body['resource_id']);
+            case 'order':                
+                $order=$HPOS_MailChimp_Support_Functions->hpos_custom_get_post($body['resource_id']);                
+                /*$order = get_post($body['resource_id']);*/
                 $mc = !$order->ID ? null : mailchimp_get_api()->getStoreOrder($store_id, $order->ID);
                 if ($order->ID) {
                     $transformer = new MailChimp_WooCommerce_Transform_Orders();
@@ -531,8 +536,9 @@ class MailChimp_WooCommerce_Rest_Api
 					}
 				}
                 break;
-            case 'product':
+            case 'product':                
                 $platform = get_post($body['resource_id']);
+
                 if ($platform) {
                     $transformer = new MailChimp_WooCommerce_Transform_Products();
                     $platform = $transformer->transform($platform)->toArray();

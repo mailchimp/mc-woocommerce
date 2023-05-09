@@ -22,6 +22,7 @@ spl_autoload_register(function($class) {
         'Mailchimp_Woocommerce_Deactivation_Survey' => 'includes/class-mailchimp-woocommerce-deactivation-survey.php',
         'MailChimp_WooCommerce_Rest_Api' => 'includes/class-mailchimp-woocommerce-rest-api.php',
         'Mailchimp_Wocoomerce_CLI' => 'includes/class-mailchimp-woocommerce-cli.php',
+        'HPOS_Supported_MailChimp' => 'includes/class-custom-hpos.php',
         
         // includes/api/assets
         'MailChimp_WooCommerce_Address' => 'includes/api/assets/class-mailchimp-address.php',

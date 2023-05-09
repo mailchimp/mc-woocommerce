@@ -8,6 +8,9 @@
  * Date: 2/17/16
  * Time: 12:03 PM
  */
+
+use HPOS_Supported_MailChimp\custom_functions_mailchimp_hpos;
+
 class MailChimp_Service extends MailChimp_WooCommerce_Options
 {
     protected $user_email = null;
@@ -149,8 +152,9 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 	 */
     public function onOrderSave($order_id, $tracking = null, $newOrder = null)
     {
-        if (!mailchimp_is_configured()) return;
-
+        if (!mailchimp_is_configured()) return;        
+        $HPOS_MailChimp_Support_Functions = new HPOS_Supported_MailChimp\custom_functions_mailchimp_hpos();
+        /*hpos supporter init object*/
         // queue up the single order to be processed.
         $campaign_id = isset($tracking) && isset($tracking['campaign_id']) ? $tracking['campaign_id'] : null;
         $landing_site = isset($tracking) && isset($tracking['landing_site']) ? $tracking['landing_site'] : null;
@@ -161,15 +165,18 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
         // update the post meta with campaign tracking and landing site details
         if (!empty($campaign_id)) {
-            update_post_meta($order_id, 'mailchimp_woocommerce_campaign_id', $campaign_id);
+            $HPOS_MailChimp_Support_Functions->hpos_custom_update_order_meta($order_id,'mailchimp_woocommerce_campaign_id', $campaign_id);
+            //update_post_meta($order_id, 'mailchimp_woocommerce_campaign_id', $campaign_id);
         }
         if (!empty($landing_site)) {
-            update_post_meta($order_id, 'mailchimp_woocommerce_landing_site', $landing_site);
+            $HPOS_MailChimp_Support_Functions->hpos_custom_update_order_meta($order_id, 'mailchimp_woocommerce_landing_site', $landing_site);
+            //update_post_meta($order_id, 'mailchimp_woocommerce_landing_site', $landing_site);
         }
 
         // if we have gdpr fields in the post - let's save them to the order
         if (!empty($gdpr_fields)) {
-            update_post_meta($order_id, "mailchimp_woocommerce_gdpr_fields", $gdpr_fields);
+            $HPOS_MailChimp_Support_Functions->hpos_custom_update_order_meta($order_id, "mailchimp_woocommerce_gdpr_fields", $gdpr_fields);
+            //update_post_meta($order_id, "mailchimp_woocommerce_gdpr_fields", $gdpr_fields);
         }
 
         $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $campaign_id, $landing_site, $language, $gdpr_fields);
@@ -478,8 +485,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function handlePostTrashed($post_id)
     {
-        if (!mailchimp_is_configured()) return;
-
+        if (!mailchimp_is_configured()) return;                
         switch (get_post_type($post_id)) {
             case 'shop_coupon':
                 try {
@@ -508,15 +514,15 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function handlePostRestored($post_id)
     {
-        if (!mailchimp_is_configured() || !($post = get_post($post_id))) {
+        $HPOS_MailChimp_Support_Functions = new HPOS_Supported_MailChimp\custom_functions_mailchimp_hpos();        
+        if (!mailchimp_is_configured() || !($post = get_post_type($post_id))) {
         	return;
         }
 
         // don't handle any of these statuses because they're not ready for the show
         if (in_array($post->post_status, array('trash', 'auto-draft', 'draft', 'pending'))) {
             return;
-        }
-
+        }        
         switch(get_post_type($post_id)) {
             case 'shop_coupon':
                 $this->handleCouponRestored($post_id);

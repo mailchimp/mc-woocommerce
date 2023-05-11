@@ -9,7 +9,6 @@
  * Time: 11:42 AM
  */
 
-use HPOS_Supported_MailChimp\custom_functions_mailchimp_hpos;
 
 class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 {
@@ -150,9 +149,8 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 	    $email = null;
 
         // will either add or update the order
-        try {
-            $HPOS_MailChimp_Support_Functions = new HPOS_Supported_MailChimp\custom_functions_mailchimp_hpos();
-            if (!($order_post = $HPOS_MailChimp_Support_Functions->hpos_custom_get_post($this->id))) {
+        try {            
+            if (!($order_post = MailChimp_WooCommerce_HPOS::get_post($this->id))) {
                 return false;
             }
             /*if (!($order_post = get_post($this->id))) {
@@ -342,9 +340,8 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                     try {
                         $order->setCampaignId($this->campaign_id);
                         $log .= ' :: campaign id ' . $this->campaign_id;
-                        // save it for later if we don't have this value.
-	                    $HPOS_MailChimp_Support_Functions = new HPOS_Supported_MailChimp\custom_functions_mailchimp_hpos();
-                        $HPOS_MailChimp_Support_Functions->hpos_custom_update_order_meta($order_post->ID, 'mailchimp_woocommerce_campaign_id', $campaign_id);                                                
+                        // save it for later if we don't have this value.	                    
+                        MailChimp_WooCommerce_HPOS::update_order_meta($order_post->ID, 'mailchimp_woocommerce_campaign_id', $campaign_id);                                                
                         //update_post_meta($order_post->ID, 'mailchimp_woocommerce_campaign_id', $campaign_id);
                     }
                     catch (Exception $e) {
@@ -458,9 +455,8 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             $message = strtolower($e->getMessage());
             mailchimp_error('order_submit.tracing_error', $e);
             if (!isset($order)) {
-                // transform the order
-                $HPOS_MailChimp_Support_Functions = new HPOS_Supported_MailChimp\custom_functions_mailchimp_hpos();
-                $order=$HPOS_MailChimp_Support_Functions->hpos_custom_get_post($this->id);
+                // transform the order                
+                $order=MailChimp_WooCommerce_HPOS::get_post($this->id);
                 /*$order = $job->transform(get_post($this->id));*/
                 $this->cart_session_id = $order->getCustomer()->getId();
             }
@@ -495,9 +491,8 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
      */
     public function getRealOrderNumber()
     {
-        try {
-            $HPOS_MailChimp_Support_Functions = new HPOS_Supported_MailChimp\custom_functions_mailchimp_hpos();            
-            if (empty($this->id) || !($order_post = $HPOS_MailChimp_Support_Functions->hpos_custom_get_post($this->id))) {
+        try {            
+            if (empty($this->id) || !($order_post = MailChimp_WooCommerce_HPOS::get_post($this->id))) {
                 return false;
             }
             /*if (empty($this->id) || !($order_post = get_post($this->id))) {
@@ -541,3 +536,4 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
         return false;
     }
 }
+

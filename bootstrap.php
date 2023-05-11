@@ -22,7 +22,7 @@ spl_autoload_register(function($class) {
         'Mailchimp_Woocommerce_Deactivation_Survey' => 'includes/class-mailchimp-woocommerce-deactivation-survey.php',
         'MailChimp_WooCommerce_Rest_Api' => 'includes/class-mailchimp-woocommerce-rest-api.php',
         'Mailchimp_Wocoomerce_CLI' => 'includes/class-mailchimp-woocommerce-cli.php',
-        'HPOS_Supported_MailChimp' => 'includes/class-custom-hpos.php',
+        'MailChimp_WooCommerce_HPOS' => 'includes/class-custom-hpos.php',
         
         // includes/api/assets
         'MailChimp_WooCommerce_Address' => 'includes/api/assets/class-mailchimp-address.php',
@@ -96,7 +96,7 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production', // staging or production
-        'version' => '2.8.4',
+        'version' => '2.8.3',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => function_exists('WC') ? WC()->version : null,

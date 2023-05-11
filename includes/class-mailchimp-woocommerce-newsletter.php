@@ -8,7 +8,6 @@
  * Date: 2/22/16
  * Time: 9:09 AM
  */
-use HPOS_Supported_MailChimp\custom_functions_mailchimp_hpos;
 
 class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
 {
@@ -147,11 +146,10 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
         if ($status === null) {
             return false;
         }        
-        $HPOS_MailChimp_Support_Functions = new HPOS_Supported_MailChimp\custom_functions_mailchimp_hpos();
-        /*hpos supporter init object*/
+        
         // if we passed in an order id, we update it here.
         if ($order_id) {
-            $HPOS_MailChimp_Support_Functions->hpos_custom_update_order_meta($order_id, $meta_key, $status);
+            MailChimp_WooCommerce_HPOS::update_order_meta($order_id, $meta_key, $status);
             //update_post_meta($order_id, $meta_key, $status);
         }
 

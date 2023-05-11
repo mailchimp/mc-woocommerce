@@ -9,8 +9,6 @@
  * Time: 11:42 AM
  */
 
-use HPOS_Supported_MailChimp\custom_functions_mailchimp_hpos;
-
 class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
 {
     public $id;
@@ -128,8 +126,8 @@ class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
         $method = "no action";
 
         try {
-            $HPOS_MailChimp_Support_Functions = new HPOS_Supported_MailChimp\custom_functions_mailchimp_hpos();
-            if (!($product_post = $HPOS_MailChimp_Support_Functions->hpos_get_custom_product($this->id))) {
+
+            if( !($product_post = HPOS_Supported_MailChimp::get_product($this->id)) ){
                 return false;
             }
             /*if (!($product_post = get_post($this->id))) {

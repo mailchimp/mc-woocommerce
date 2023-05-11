@@ -1,7 +1,5 @@
 <?php
 
-use HPOS_Supported_MailChimp\custom_functions_mailchimp_hpos;
-
 class MailChimp_WooCommerce_Rest_Api
 {
     protected static $namespace = 'mailchimp-for-woocommerce/v1';
@@ -501,11 +499,10 @@ class MailChimp_WooCommerce_Rest_Api
         $platform = null;
         $mc = null;
         $store_id = mailchimp_get_store_id();
-        $HPOS_MailChimp_Support_Functions = new HPOS_Supported_MailChimp\custom_functions_mailchimp_hpos();
-        /*hpos supporter init object*/
+        
         switch ($body['resource']) {
             case 'order':                
-                $order=$HPOS_MailChimp_Support_Functions->hpos_custom_get_post($body['resource_id']);                
+                $order=MailChimp_WooCommerce_HPOS::get_order($body['resource_id']);                
                 /*$order = get_post($body['resource_id']);*/
                 $mc = !$order->ID ? null : mailchimp_get_api()->getStoreOrder($store_id, $order->ID);
                 if ($order->ID) {

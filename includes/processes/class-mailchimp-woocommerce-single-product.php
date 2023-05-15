@@ -127,7 +127,7 @@ class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
 
         try {
 
-            if( !($product_post = HPOS_Supported_MailChimp::get_product($this->id)) ){
+            if( !($product_post = MailChimp_WooCommerce_HPOS::get_product($this->id)) ){
                 return false;
             }
             /*if (!($product_post = get_post($this->id))) {

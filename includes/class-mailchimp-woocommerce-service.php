@@ -435,6 +435,22 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 	}
 
 	/**
+	 * Add a listener that updates the marketing status timestamp on users when the subscription status is changed.
+	 * @param $meta_id
+	 * @param $object_id
+	 * @param $meta_key
+	 * @param $_meta_value
+	 *
+	 * @return void
+	 */
+	public function handleUserMetaUpdated($meta_id, $object_id, $meta_key, $_meta_value)
+	{
+		if ('mailchimp_woocommerce_is_subscribed' === $meta_key) {
+			update_user_meta($object_id, 'mailchimp_woocommerce_marketing_status_updated_at', time());
+		}
+	}
+
+	/**
 	 * If a product has been updated and isn't an existing post, handle or queue syncing updates.
 	 *
 	 * @param int     $post_ID           The ID of the post that was updated/created

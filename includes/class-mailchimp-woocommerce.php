@@ -398,6 +398,11 @@ class MailChimp_WooCommerce
 			$this->loader->add_action('updated_post_meta', $service, 'handleProductMetaUpdated', 10, 4);
             $this->loader->add_action('added_post_meta', $service, 'handleProductMetaUpdated', 10, 4);
             $this->loader->add_action('deleted_post_meta', $service, 'handleProductMetaUpdated', 10, 4);
+
+			// hooks for user meta updates and additions
+			$this->loader->add_action('added_user_meta', $service, 'handleUserMetaUpdated', 10, 4);
+			$this->loader->add_action('updated_user_meta', $service, 'handleUserMetaUpdated', 10, 4);
+
 			$this->loader->add_action('wp_trash_post', $service, 'handlePostTrashed');
             $this->loader->add_action('untrashed_post', $service, 'handlePostRestored');
 			//coupons

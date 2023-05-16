@@ -180,7 +180,6 @@ class MailChimp_WooCommerce_Rest_Api
         // } catch (Exception $e) { $mailchimp_total_orders = 0; }
 
         $date = mailchimp_date_local('now');
-
         // but we need to do it just in case.
         return $this->mailchimp_rest_response(array(
             'success' => true,
@@ -517,7 +516,9 @@ class MailChimp_WooCommerce_Rest_Api
                 $platform = get_user_by($field, $body['resource_id']);
 	            $mc = array('member' => null, 'customer' => null);
                 if ($platform) {
+	                $date = mailchimp_get_marketing_status_updated_at($platform->ID);
                     $platform->mailchimp_woocommerce_is_subscribed = (bool) get_user_meta($platform->ID, 'mailchimp_woocommerce_is_subscribed', true);
+	                $platform->marketing_status_updated_at = $date ? $date->format(__('D, M j, Y g:i A', 'mailchimp-for-woocommerce')) : '';
 	                $hashed = mailchimp_hash_trim_lower($platform->user_email);
                 } else if ('email' === $field) {
 	                $hashed = mailchimp_hash_trim_lower($body['resource_id']);

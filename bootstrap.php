@@ -1523,6 +1523,19 @@ function mailchimp_expanded_alowed_tags() {
 	return $my_allowed;
 }
 
+/**
+ * @param $user_id
+ *
+ * @return DateTime|false|null
+ */
+function mailchimp_get_marketing_status_updated_at($user_id) {
+	if (empty($user_id) || !is_numeric($user_id)) {
+		return null;
+	}
+	$value = get_user_meta($user_id, 'mailchimp_woocommerce_marketing_status_updated_at', true);
+	return !empty($value) && is_numeric($value) ? mailchimp_date_local($value) : null;
+}
+
 // Add WP CLI commands
 if (defined( 'WP_CLI' ) && WP_CLI) {
     try {

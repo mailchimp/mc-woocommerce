@@ -6,7 +6,7 @@ class MailChimp_WooCommerce_HPOS {
 	 */
 	public static function enabled() {
 		/* HPOS_enabled - flag for data from db, where hpos is enabled or not */
-		return class_exists( \Automattic\WooCommerce\Utilities\OrderUtil::class ) &&
+		return class_exists( 'Automattic\WooCommerce\Utilities\OrderUtil' ) &&
 		       OrderUtil::custom_orders_table_usage_is_enabled();
 	}
 

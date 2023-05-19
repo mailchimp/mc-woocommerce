@@ -150,7 +150,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
         // will either add or update the order
         try {            
-            if (!($order_post = MailChimp_WooCommerce_HPOS::get_post($this->id))) {
+            if (!($order_post = MailChimp_WooCommerce_HPOS::get_order($this->id))) {
                 return false;
             }
             /*if (!($order_post = get_post($this->id))) {
@@ -456,7 +456,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             mailchimp_error('order_submit.tracing_error', $e);
             if (!isset($order)) {
                 // transform the order                
-                $order=MailChimp_WooCommerce_HPOS::get_post($this->id);
+                $order = MailChimp_WooCommerce_HPOS::get_order($this->id);
                 /*$order = $job->transform(get_post($this->id));*/
                 $this->cart_session_id = $order->getCustomer()->getId();
             }
@@ -492,7 +492,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
     public function getRealOrderNumber()
     {
         try {            
-            if (empty($this->id) || !($order_post = MailChimp_WooCommerce_HPOS::get_post($this->id))) {
+            if (empty($this->id) || !($order_post = MailChimp_WooCommerce_HPOS::get_order($this->id))) {
                 return false;
             }
             /*if (empty($this->id) || !($order_post = get_post($this->id))) {

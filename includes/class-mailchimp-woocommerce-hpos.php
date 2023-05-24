@@ -27,7 +27,7 @@ class MailChimp_WooCommerce_HPOS {
 	 */
 	public static function get_product( $post_id )
 	{
-		return !static::enabled() ? get_post($post_id) : wc_get_product($post_id);
+		return wc_get_product($post_id);
 	}
 
 	/**

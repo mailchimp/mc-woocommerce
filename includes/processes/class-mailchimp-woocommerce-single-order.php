@@ -328,6 +328,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             		// see if we have a saved version
 		            // pull the last clicked campaign for this email address
 		            $job = new MailChimp_WooCommerce_Pull_Last_Campaign($email);
+					$job->handle();
 
 					/// get the click date
 		            $clicked = $job->getClickDate();

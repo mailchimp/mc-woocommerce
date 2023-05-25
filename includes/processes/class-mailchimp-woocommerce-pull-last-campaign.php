@@ -84,4 +84,12 @@ class MailChimp_WooCommerce_Pull_Last_Campaign
     {
         return $this->clicked_url;
     }
+
+	/**
+	 * @return bool|mixed
+	 */
+	public function getCampaignID()
+	{
+		return $this->campaign_id;
+	}
 }

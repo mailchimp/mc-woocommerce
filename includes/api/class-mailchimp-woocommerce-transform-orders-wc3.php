@@ -42,14 +42,14 @@ class MailChimp_WooCommerce_Transform_Orders {
 	}
 
 	/**
-	 * @param WC_Order $woo
+	 * @param $woo
 	 *
 	 * @return MailChimp_WooCommerce_Order|mixed|void
 	 * @throws MailChimp_WooCommerce_Error
 	 * @throws MailChimp_WooCommerce_RateLimitError
 	 * @throws MailChimp_WooCommerce_ServerError
 	 */
-	public function transform( WC_Order $woo ) {
+	public function transform( $woo ) {
 		$order = new MailChimp_WooCommerce_Order();
 
 		// if the woo get order returns an empty value, we need to skip the whole thing.

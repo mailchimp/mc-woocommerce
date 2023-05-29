@@ -66,7 +66,7 @@ class MailChimp_WooCommerce_Transform_Products {
 	}
 
 	/**
-	 * @param WP_Post $post
+	 * @param $woo
 	 * @param null    $fallback_title
 	 *
 	 * @return MailChimp_WooCommerce_Product

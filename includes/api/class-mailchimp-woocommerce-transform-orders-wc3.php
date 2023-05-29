@@ -42,21 +42,19 @@ class MailChimp_WooCommerce_Transform_Orders {
 	}
 
 	/**
-	 * @param WP_Post $post
+	 * @param $woo
 	 *
 	 * @return MailChimp_WooCommerce_Order|mixed|void
 	 * @throws MailChimp_WooCommerce_Error
 	 * @throws MailChimp_WooCommerce_RateLimitError
 	 * @throws MailChimp_WooCommerce_ServerError
 	 */
-	public function transform( WP_Post $post ) {
-		$woo = wc_get_order( $post );
-
+	public function transform( $woo ) {
 		$order = new MailChimp_WooCommerce_Order();
 
 		// if the woo get order returns an empty value, we need to skip the whole thing.
 		if ( empty( $woo ) ) {
-			mailchimp_error( 'sync', 'get woo post was not found for order ' . $post->ID );
+			mailchimp_error( 'sync', 'get woo post was not found for order ' . $woo->get_id() );
 			return $order;
 		}
 
@@ -71,7 +69,7 @@ class MailChimp_WooCommerce_Transform_Orders {
 		// we know how to resolve these types of things.
 		// mailchimp_log('get_billing_mail', method_exists($woo, 'get_billing_email'), array($order->toArray(), $woo));
 		if ( ! method_exists( $woo, 'get_billing_email' ) ) {
-			$message = "Post ID {$post->ID} was an order refund. Skipping this.";
+			$message = "Post ID {$woo->get_id()} was an order refund. Skipping this.";
 			if ( $this->is_syncing ) {
 				throw new MailChimp_WooCommerce_Error( $message );
 			}

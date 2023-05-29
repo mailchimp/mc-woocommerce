@@ -535,7 +535,7 @@ class MailChimp_WooCommerce_Rest_Api
 				}
                 break;
             case 'product':                
-                $platform = get_post($body['resource_id']);
+                $platform = MailChimp_WooCommerce_HPOS::get_product($body['resource_id']);
 
                 if ($platform) {
                     $transformer = new MailChimp_WooCommerce_Transform_Products();

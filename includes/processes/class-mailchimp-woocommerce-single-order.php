@@ -328,11 +328,17 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             		// see if we have a saved version
 		            // pull the last clicked campaign for this email address
 		            $job = new MailChimp_WooCommerce_Pull_Last_Campaign($email);
-		            $this->campaign_id = $job->handle();
+					$job->handle();
 
-		            if (!empty($this->campaign_id)) {
-		            	mailchimp_debug('campaign_id', "Pulled campaign tracking from mailchimp user activity for {$email}");
-		            }
+					/// get the click date
+		            $clicked = $job->getClickDate();
+					$processed = $order->getProcessedAtDate();
+
+					// if the order was placed after the click event we can assign the campaign id.
+					if ($clicked && $processed && $processed->getTimestamp() > $clicked->getTimestamp()) {
+						$this->campaign_id = $job->getCampaignID();
+						mailchimp_debug('campaign_id', "Order {$order->getId()} pulled mailchimp user activity for {$email} and found campaign {$this->campaign_id}, clicked on {$clicked->format( 'Y-m-d H:i:s' )}");
+					}
 	            }
 
                 // apply a campaign id if we have one.

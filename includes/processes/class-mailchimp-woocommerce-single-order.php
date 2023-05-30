@@ -316,7 +316,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
             // if we have the saved order meta from previous syncs let's use it.
             // This should help with reporting after people may have disconnected and reconnected to a new store.
-            if (($saved = get_post_meta($order_post->ID, 'mailchimp_woocommerce_campaign_id', true))) {
+            if ($saved = $order_post->get_meta('mailchimp_woocommerce_campaign_id') ) {
                 $this->campaign_id = $saved;
             }
             // only do this stuff on new orders
@@ -341,7 +341,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                         $order->setCampaignId($this->campaign_id);
                         $log .= ' :: campaign id ' . $this->campaign_id;
                         // save it for later if we don't have this value.	                    
-                        MailChimp_WooCommerce_HPOS::update_order_meta($order_post->ID, 'mailchimp_woocommerce_campaign_id', $campaign_id);                                                
+                        MailChimp_WooCommerce_HPOS::update_order_meta($order_post->get_id(), 'mailchimp_woocommerce_campaign_id', $campaign_id);
                         //update_post_meta($order_post->ID, 'mailchimp_woocommerce_campaign_id', $campaign_id);
                     }
                     catch (Exception $e) {
@@ -498,7 +498,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             /*if (empty($this->id) || !($order_post = get_post($this->id))) {
                 return false;
             }*/
-            $woo = wc_get_order($order_post);
+            $woo = wc_get_order($this->id);
             if ( !$woo )
                 mailchimp_log('order_sync.failure', "Order #{$this->id}. Can’t submit order without a valid ID");
 

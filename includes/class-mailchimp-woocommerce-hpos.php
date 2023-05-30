@@ -37,15 +37,14 @@ class MailChimp_WooCommerce_HPOS {
 	 *
 	 * @return void
 	 */
-	public static function update_order_meta( $order_id, $meta_key, $optin ){
-		if (!static::enabled()) {
+	public static function update_order_meta( $order_id, $meta_key, $optin, $force_use_post = 0 ){
+		if (!static::enabled() || $force_use_post) {
 			update_post_meta($order_id, $meta_key, $optin);
 			return;
 		}
 		$order_c = wc_get_order( $order_id );
 		$order_c->update_meta_data( $meta_key, $optin );
-		$order_c->save();
-	}
+    }
 
 	/**
 	 * @param $post_id

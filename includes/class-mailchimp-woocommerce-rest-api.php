@@ -501,10 +501,10 @@ class MailChimp_WooCommerce_Rest_Api
         
         switch ($body['resource']) {
             case 'order':                
-                $order=MailChimp_WooCommerce_HPOS::get_order($body['resource_id']);                
+                $order = MailChimp_WooCommerce_HPOS::get_order($body['resource_id']);
                 /*$order = get_post($body['resource_id']);*/
-                $mc = !$order->ID ? null : mailchimp_get_api()->getStoreOrder($store_id, $order->ID);
-                if ($order->ID) {
+                $mc = !$order->get_id() ? null : mailchimp_get_api()->getStoreOrder($store_id, $order->get_id());
+                if ($order->get_id()) {
                     $transformer = new MailChimp_WooCommerce_Transform_Orders();
                     $platform = $transformer->transform($order)->toArray();
                 }

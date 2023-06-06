@@ -86,7 +86,7 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
                 foreach ($GDPRfields as $key => $field) {
                     $marketing_permission_id = $field['marketing_permission_id'];
 
-                    $gdpr_checked = (int) $field['enabled'];
+                    $gdpr_checked = $field['enabled'];
                     $text = $field['text'];
 
                     // Add to the checkbox output

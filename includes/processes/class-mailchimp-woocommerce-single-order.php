@@ -346,7 +346,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                     try {
                         $order->setCampaignId($this->campaign_id);
                         $log .= ' :: campaign id ' . $this->campaign_id;
-                        // save it for later if we don't have this value.	                    
+                        // save it for later if we don't have this value.
                         MailChimp_WooCommerce_HPOS::update_order_meta($order_post->get_id(), 'mailchimp_woocommerce_campaign_id', $campaign_id);
                         //update_post_meta($order_post->ID, 'mailchimp_woocommerce_campaign_id', $campaign_id);
                     }
@@ -430,7 +430,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             // if this is not currently in mailchimp - and we have the saved GDPR fields from
             // we can use the post meta for gdpr fields that were saved during checkout.
             if (!$this->is_full_sync && $new_order && empty($this->gdpr_fields)) {
-                $this->gdpr_fields = get_post_meta($order->getId(), 'mailchimp_woocommerce_gdpr_fields', true);
+                $this->gdpr_fields = $order->get_meta('mailchimp_woocommerce_gdpr_fields');
             }
 
             // Maybe sync subscriber to set correct member.language

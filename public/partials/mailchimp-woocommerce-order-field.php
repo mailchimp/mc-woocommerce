@@ -1,6 +1,6 @@
 <div class="form-field form-field-wide">
     <?php
-    $is_subscribed = get_post_meta( $order->get_id(), 'mailchimp_woocommerce_is_subscribed', true );
+    $is_subscribed = $order->get_meta('mailchimp_woocommerce_is_subscribed');
     $cbvalue = $is_subscribed ? 'yes' : 'no';
     ?>
     <div class="mailchimp-woocommerce-subscribe">

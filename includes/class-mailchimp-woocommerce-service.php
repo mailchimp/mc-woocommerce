@@ -95,7 +95,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         // see if we have a session id and a campaign id, also only do this when this user is not the admin.
         $campaign_id = $this->getCampaignTrackingID();
         if (empty($campaign_id)) {
-            $campaign_id =  get_post_meta($order_id, 'mailchimp_woocommerce_campaign_id', true);
+            $campaign_id =  $order->get_meta('mailchimp_woocommerce_campaign_id');
             // make sure this campaign ID has a valid format before we submit something
             if (!$this->campaignIdMatchesFormat($campaign_id)) {
                 $campaign = null;
@@ -105,7 +105,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         // grab the landing site cookie if we have one here.
         $landing_site = $this->getLandingSiteCookie();
         if (empty($landing_site)) {
-            $landing_site =  get_post_meta($order_id, 'mailchimp_woocommerce_landing_site', true);
+            $landing_site =  $order->get_meta('mailchimp_woocommerce_landing_site');
             if (!$landing_site) $campaign = null;
         }
 
@@ -159,22 +159,28 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $gdpr_fields = isset($_POST['mailchimp_woocommerce_gdpr']) ?
             $_POST['mailchimp_woocommerce_gdpr'] : false;
 
+        $is_subscribed = isset($_POST['mailchimp_woocommerce_newsletter']) ?
+            (bool) $_POST['mailchimp_woocommerce_newsletter'] : false;
+
         // update the post meta with campaign tracking and landing site details
         if (!empty($campaign_id)) {
-            MailChimp_WooCommerce_HPOS::update_order_meta($order_id,'mailchimp_woocommerce_campaign_id', $campaign_id, 1);
+            MailChimp_WooCommerce_HPOS::update_order_meta($order_id,'mailchimp_woocommerce_campaign_id', $campaign_id);
             //update_post_meta($order_id, 'mailchimp_woocommerce_campaign_id', $campaign_id);
         }
         if (!empty($landing_site)) {
-            MailChimp_WooCommerce_HPOS::update_order_meta($order_id, 'mailchimp_woocommerce_landing_site', $landing_site, 1);
+            MailChimp_WooCommerce_HPOS::update_order_meta($order_id, 'mailchimp_woocommerce_landing_site', $landing_site);
             //update_post_meta($order_id, 'mailchimp_woocommerce_landing_site', $landing_site);
         }
 
         // if we have gdpr fields in the post - let's save them to the order
         if (!empty($gdpr_fields)) {
-            MailChimp_WooCommerce_HPOS::update_order_meta($order_id, "mailchimp_woocommerce_gdpr_fields", $gdpr_fields, 1);
+            MailChimp_WooCommerce_HPOS::update_order_meta($order_id, 'mailchimp_woocommerce_gdpr_fields', $gdpr_fields);
             //update_post_meta($order_id, "mailchimp_woocommerce_gdpr_fields", $gdpr_fields);
         }
 
+        if ($is_subscribed) {
+            MailChimp_WooCommerce_HPOS::update_order_meta($order_id, 'mailchimp_woocommerce_is_subscribed', $is_subscribed);
+        }
 
         $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $campaign_id, $landing_site, $language, $gdpr_fields);
         $handler->is_update = $newOrder ? !$newOrder : null;
@@ -476,20 +482,36 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     /**
      * Fire new order and order save handling/queueing events when a shop_order post is saved.
      *
-     * @param $post_ID
-     * @param $woo
+     * @param $order_id
+     * @param $order
      * @param $is_existing_post
      */
-	public function handleOrderSaved( $post_ID, $woo, $is_existing_post)
+	public function handleOrderSaved($order_id, $order, $is_existing_post)
     {
-        $order = MailChimp_WooCommerce_HPOS::get_order($post_ID);
 		if (!mailchimp_is_configured()) {
 			return;
 		}
 
-        $tracking = $this->onNewOrder($post_ID);
-        $this->onOrderSave($post_ID, $tracking, !$is_existing_post);
+        $tracking = $this->onNewOrder($order_id);
+        $this->onOrderSave($order_id, $tracking, !$is_existing_post);
 	}
+
+    /**
+     * @param $order_id
+     * @param $order
+     */
+	public function handleOrderCreate($order_id, $order) {
+        $this->handleOrderSaved($order_id, $order, false);
+    }
+
+    /**
+     * @param $order_id
+     * @param $order
+     */
+    public function handleOrderUpdate($order_id, $order) {
+        mailchimp_log('handleOrderUpdate', 'order_status');
+        $this->handleOrderSaved($order_id, $order, true);
+    }
 
     /**
      * @param $post_id

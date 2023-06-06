@@ -274,12 +274,12 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
         $gdpr_fields = isset($request['extensions']['mailchimp-newsletter']['gdprFields']) ?
             (array) $request['extensions']['mailchimp-newsletter']['gdprFields'] : null;
         // update the order meta for the subscription status to support legacy functions
-        
+
         MailChimp_WooCommerce_HPOS::update_order_meta($order->get_id(), $meta_key, $optin);
         /*update_post_meta($order->get_id(), $meta_key, $optin);*/
         // let's set the GDPR fields here just in case we need to pull them again.
         if (!empty($gdpr_fields)) {
-            MailChimp_WooCommerce_HPOS::update_order_meta($order->get_id(), "mailchimp_woocommerce_gdpr_fields", $gdpr_fields);
+            MailChimp_WooCommerce_HPOS::update_order_meta($order->get_id(), 'mailchimp_woocommerce_gdpr_fields', $gdpr_fields);
             //update_post_meta($order->get_id(), "mailchimp_woocommerce_gdpr_fields", $gdpr_fields);
         }
 

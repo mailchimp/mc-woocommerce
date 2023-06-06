@@ -240,7 +240,9 @@ class MailChimp_WooCommerce_Customer {
 	 */
 	public function wasSubscribedOnOrder( $id ) {
 		// we are saving the post meta for subscribers on each order... so if they have subscribed on checkout
-		$subscriber_meta = get_post_meta( $id, 'mailchimp_woocommerce_is_subscribed', true );
+        $order           = wc_get_order($id);
+		$subscriber_meta = $order->get_meta('mailchimp_woocommerce_is_subscribed');
+
 		$subscribed      = $subscriber_meta === '' ? false : $subscriber_meta;
 
 		return $this->original_subscriber_status = $subscribed;

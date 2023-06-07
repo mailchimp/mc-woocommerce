@@ -77,7 +77,7 @@ class MailChimp_WooCommerce_Transform_Orders {
 				'initial_sync',
 				$message,
 				array(
-					'post'        => $post,
+					'post'        => $woo,
 					'order_class' => get_class( $woo ),
 				)
 			);
@@ -182,6 +182,7 @@ class MailChimp_WooCommerce_Transform_Orders {
 		foreach ( $woo->get_items() as $key => $order_detail ) {
 			/** @var WC_Order_Item_Product $order_detail */
 
+            $key = apply_filters( 'mailchimp_line_item_key', $key, $woo );
 			// add it into the order item container.
 			$item = $this->transformLineItem( $key, $order_detail );
 

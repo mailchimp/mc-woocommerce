@@ -430,7 +430,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             // if this is not currently in mailchimp - and we have the saved GDPR fields from
             // we can use the post meta for gdpr fields that were saved during checkout.
             if (!$this->is_full_sync && $new_order && empty($this->gdpr_fields)) {
-                $this->gdpr_fields = $order->get_meta('mailchimp_woocommerce_gdpr_fields');
+                $this->gdpr_fields = $order_post->get_meta('mailchimp_woocommerce_gdpr_fields');
             }
 
             // Maybe sync subscriber to set correct member.language

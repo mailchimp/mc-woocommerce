@@ -999,6 +999,15 @@ function mailchimp_hash_trim_lower($str) {
 }
 
 /**
+ * @param $email
+ * @return mixed
+ */
+function mailchimp_get_wc_customer($email) {
+    global $wpdb;
+    return $wpdb->get_row( "SELECT * FROM `{$wpdb->prefix}wc_customer_lookup` WHERE `email` = '{$email}'" );
+}
+
+/**
  * @param $key
  * @param null $default
  * @return mixed|null

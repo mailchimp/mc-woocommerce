@@ -521,7 +521,20 @@ class MailChimp_WooCommerce_Rest_Api
 	                $platform->marketing_status_updated_at = $date ? $date->format(__('D, M j, Y g:i A', 'mailchimp-for-woocommerce')) : '';
 	                $hashed = mailchimp_hash_trim_lower($platform->user_email);
                 } else if ('email' === $field) {
-	                $hashed = mailchimp_hash_trim_lower($body['resource_id']);
+                    $hashed = mailchimp_hash_trim_lower($body['resource_id']);
+                    $wc_customer = mailchimp_get_wc_customer($body['resource_id']);
+                    if ( $wc_customer !== null ) {
+                        $platform = $wc_customer;
+                        $orders = wc_get_orders( array(
+                            'customer' => $body['resource_id'],
+                            'limit' => 1,
+                            'orderby' => 'date',
+                            'order' => 'DESC',
+                        ) );
+                        $date = $orders[0]->get_meta('marketing_status_updated_at');
+                        $platform->mailchimp_woocommerce_is_subscribed = (bool) $orders[0]->get_meta('mailchimp_woocommerce_is_subscribed');
+                        $platform->marketing_status_updated_at = $date ? $date->format(__('D, M j, Y g:i A', 'mailchimp-for-woocommerce')) : '';
+                    }
                 }
 				if (isset($hashed) && $hashed) {
 					try {

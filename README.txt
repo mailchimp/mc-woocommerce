@@ -7,7 +7,7 @@ Tested up to: 6.2
 Stable tag: 2.8.3
 Requires PHP: 7.4
 WC requires at least: 4.2
-WC tested up to: 7.6
+WC tested up to: 7.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your Mailchimp audience to track sales, create targeted emails, send abandoned cart emails, and more.
@@ -79,4 +79,7 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 
 == Changelog ==
 = 3.0 =
-* support for HPOS
+* Adds support for High Performance Order Storage (HPOS)
+* Fix for campaign reports showing data from older orders 
+* Fix for GDPR selections updating on each checkout 
+* Fix for DOI enabled audience customers not syncing

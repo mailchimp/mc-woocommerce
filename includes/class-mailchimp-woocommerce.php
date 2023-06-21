@@ -385,8 +385,9 @@ class MailChimp_WooCommerce
 			$this->loader->add_action('woocommerce_cart_item_removed', $service, 'handleCartUpdated');
 
 			// save post hooks
-			$this->loader->add_action('save_post_shop_order', $service, 'handleOrderSaved', 10, 3);
-			$this->loader->add_action('save_post_product', $service, 'handleProductCreated', 10, 3);
+			$this->loader->add_action('woocommerce_new_order', $service, 'handleOrderCreate', 200, 2);
+            $this->loader->add_action('woocommerce_update_order', $service, 'handleOrderUpdate', 10, 2);
+            $this->loader->add_action('save_post_product', $service, 'handleProductCreated', 10, 3);
 
 			// this needs to listen for the title and the description updates.
             $this->loader->add_action('post_updated', $service, 'handleProductUpdated', 10, 3);

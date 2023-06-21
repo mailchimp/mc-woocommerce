@@ -17,7 +17,7 @@ class MailChimp_WooCommerce_HPOS {
 	 */
 	public static function get_order( $post_id )
 	{
-		return !static::enabled() ? get_post($post_id) : wc_get_order($post_id);
+		return wc_get_order($post_id);
 	}
 
 	/**
@@ -27,7 +27,7 @@ class MailChimp_WooCommerce_HPOS {
 	 */
 	public static function get_product( $post_id )
 	{
-		return !static::enabled() ? get_post($post_id) : wc_get_product($post_id);
+		return wc_get_product($post_id);
 	}
 
 	/**
@@ -37,15 +37,17 @@ class MailChimp_WooCommerce_HPOS {
 	 *
 	 * @return void
 	 */
-	public static function update_order_meta( $order_id, $meta_key, $optin ){
-		if (!static::enabled()) {
-			update_post_meta($order_id, $meta_key, $optin);
+	public static function update_order_meta( $order_id, $meta_key, $meta_value, $force_use_post = 0 )
+    {
+		if (!static::enabled() || $force_use_post) {
+			update_post_meta($order_id, $meta_key, $meta_value);
 			return;
-		}
-		$order_c = wc_get_order( $order_id );
-		$order_c->update_meta_data( $meta_key, $optin );
-		$order_c->save();
-	}
+		} else {
+            $order_c = wc_get_order( $order_id );
+            $order_c->update_meta_data( $meta_key, $meta_value );
+            $order_c->save_meta_data();
+        }
+    }
 
 	/**
 	 * @param $post_id

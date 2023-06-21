@@ -100,7 +100,7 @@ class MailChimp_WooCommerce_Customer {
         } else {
             $this->opt_in_status = $opt_in_status === '1';
         }
-        //$this->marketing_status_updated_at = date('Y-m-d H:i:s');
+        $this->marketing_status_updated_at = date('Y-m-d H:i:s');
 
 		return $this;
 	}
@@ -240,7 +240,9 @@ class MailChimp_WooCommerce_Customer {
 	 */
 	public function wasSubscribedOnOrder( $id ) {
 		// we are saving the post meta for subscribers on each order... so if they have subscribed on checkout
-		$subscriber_meta = get_post_meta( $id, 'mailchimp_woocommerce_is_subscribed', true );
+        $order           = wc_get_order($id);
+		$subscriber_meta = $order->get_meta('mailchimp_woocommerce_is_subscribed');
+
 		$subscribed      = $subscriber_meta === '' ? false : $subscriber_meta;
 
 		return $this->original_subscriber_status = $subscribed;
@@ -292,7 +294,7 @@ class MailChimp_WooCommerce_Customer {
 				'id'            => (string) $this->getId(),
 				'email_address' => (string) $this->getEmailAddress(),
 				'opt_in_status' => $this->getOptInStatus(),
-                //'marketing_status_updated_at' => $this->getOptInStatusTime(),
+                'marketing_status_updated_at' => $this->getOptInStatusTime(),
                 'company'       => (string) $this->getCompany(),
                 'first_name'    => (string) $this->getFirstName(),
 				'last_name'     => (string) $this->getLastName(),

@@ -40,11 +40,11 @@ class MailChimp_WooCommerce_WebHooks_Sync extends Mailchimp_Woocommerce_Job
             foreach ($hooks['webhooks'] as $hook) {
                 $href = isset($hook['url']) ? $hook['url'] : (isset($hook['href']) ? $hook['href'] : null);
                 if (mailchimp_string_contains($href, 'mailchimp-for-woocommerce/v1/member-sync')) {
-                    $api->webHookDelete($list, $hook['id']);
+                    $api->deleteWebhookByID($list, $hook['id']);
                     $url = null;
                     $key = null;
                     $token = null;
-                    mailchimp_log('webhooks', "Deleted old plugin webhook {$hook['id']}");
+                    mailchimp_log('webhooks', "Deleted old plugin webhook {$href}");
                 }
             }
 

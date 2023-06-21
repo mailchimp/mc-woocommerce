@@ -1967,6 +1967,21 @@ class MailChimp_WooCommerce_MailChimpApi {
 
 	/**
 	 * @param $list_id
+	 * @param $id
+	 *
+	 * @return array|bool|mixed|object|null
+	 * @throws MailChimp_WooCommerce_Error
+	 * @throws MailChimp_WooCommerce_RateLimitError
+	 * @throws MailChimp_WooCommerce_ServerError
+	 */
+	public function deleteWebhookByID($list_id, $id)
+	{
+		mailchimp_log('admin', "deleting webhook id {$id}");
+		return $this->delete("lists/{$list_id}/webhooks/{$id}");
+	}
+
+	/**
+	 * @param $list_id
 	 * @param $url
 	 *
 	 * @return bool

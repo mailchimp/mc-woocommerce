@@ -132,9 +132,6 @@ class MailChimp_WooCommerce
         $this->activateMailChimpNewsletter();
         $this->activateMailChimpService();
         $this->applyQueryStringOverrides();
-
-        // load webhooks
-        $this->registerWebhooks();
     }
 
     /**
@@ -490,14 +487,4 @@ class MailChimp_WooCommerce
 	public function get_version() {
 		return $this->version;
 	}
-
-    private function registerWebhooks()
-    {
-        $defined = mailchimp_get_data('registered_webhooks');
-        if (empty($defined)) {
-            mailchimp_log('admin', 'syncing webhooks for existing plugin');
-            mailchimp_set_data('registered_webhooks', true);
-            MailChimp_WooCommerce_Admin::instance()->defineWebhooks();
-        }
-    }
 }

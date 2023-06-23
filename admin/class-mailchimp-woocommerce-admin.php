@@ -69,6 +69,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			}
 		}
 
+        // delete the webhooks on store disconnects.
+		$webhooks = new MailChimp_WooCommerce_WebHooks_Sync;
+		$webhooks->cleanHooks();
+
 		// clean database
 		mailchimp_clean_database();
 

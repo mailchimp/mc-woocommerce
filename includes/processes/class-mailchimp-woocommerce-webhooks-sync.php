@@ -30,23 +30,11 @@ class MailChimp_WooCommerce_WebHooks_Sync extends Mailchimp_Woocommerce_Job
                 return null;
             }
 
+	        $this->cleanHooks();
+
             $list = mailchimp_get_list_id();
-            $key = mailchimp_get_data('webhook.token');
-            $url = mailchimp_get_webhook_url();
             $api = mailchimp_get_api();
             $token = mailchimp_get_data('webhook.token');
-
-            $hooks = $api->getWebHooks($list);
-            foreach ($hooks['webhooks'] as $hook) {
-                $href = isset($hook['url']) ? $hook['url'] : (isset($hook['href']) ? $hook['href'] : null);
-                if (mailchimp_string_contains($href, 'mailchimp-for-woocommerce/v1/member-sync')) {
-                    $api->deleteWebhookByID($list, $hook['id']);
-                    $url = null;
-                    $key = null;
-                    $token = null;
-                    mailchimp_log('webhooks', "Deleted old plugin webhook {$href}");
-                }
-            }
 
             // for some reason the webhook url does not work with ?rest_route style, permalinks should be defined also 
             if (!$token && get_option('permalink_structure') !== '') {
@@ -70,4 +58,31 @@ class MailChimp_WooCommerce_WebHooks_Sync extends Mailchimp_Woocommerce_Job
         }
         return false;
     }
+
+	/**
+	 * @return array|null
+	 */
+	public function cleanHooks()
+	{
+		if (!mailchimp_is_configured()) {
+			return null;
+		}
+		$list = mailchimp_get_list_id();
+		$api = mailchimp_get_api();
+		$deleted = [];
+		try {
+			$hooks = $api->getWebHooks($list);
+			foreach ($hooks['webhooks'] as $hook) {
+				$href = isset($hook['url']) ? $hook['url'] : (isset($hook['href']) ? $hook['href'] : null);
+				if ($href && mailchimp_string_contains($href, 'mailchimp-for-woocommerce/v1/member-sync')) {
+					$api->deleteWebhookByID($list, $hook['id']);
+					$deleted[] = $hook['id'];
+					mailchimp_log('webhooks', "Deleted old plugin webhook id {$hook['id']} :: {$href}");
+				}
+			}
+		} catch (Throwable $e) {
+			mailchimp_error('webhook deletion error', $e->getMessage());
+		}
+		return $deleted;
+	}
 }

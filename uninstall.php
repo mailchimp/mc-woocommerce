@@ -48,6 +48,9 @@ function mailchimp_woocommerce_uninstall() {
                     $result = $api->deleteStore($store_id) ? 'has been deleted' : 'did not delete';
                     error_log("store id {$store_id} {$result} MailChimp");
                 }
+
+				$webhooks = new MailChimp_WooCommerce_WebHooks_Sync;
+				$webhooks->cleanHooks();
             }
         }
     } catch (Exception $e) {

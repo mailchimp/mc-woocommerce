@@ -82,15 +82,15 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 		$account_info            = array();
 		$shop                    = null;
 		$akamai_block            = false;
+		$mailchimp_api_connected = false;
 
 		if ( $authenticated ) {
 			try {
 				$account_info = $api->getProfile();
+				$mailchimp_api_connected = true;
 			} catch ( Exception $e ) {
 				$account_info = array();
-				if ( $e->getCode() === 503 ) {
-					$akamai_block = true;
-				}
+				$akamai_block = $e->getCode() === 503;
 			}
 			if ( is_array( $account_info ) ) {
 				// don't need these
@@ -166,6 +166,9 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 				}
 			}
 		}
+
+		// mc authed, has a list, but no longer connected to MC API
+		$broken_mailchimp = $authenticated && !empty($list_id) && !$mailchimp_api_connected;
 
 		$time = new DateTime( 'now' );
 
@@ -276,6 +279,22 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 						'order_sync_completed'      => (object) array(
 							'key'   => 'order_sync_completed',
 							'value' => get_option( 'mailchimp-woocommerce-sync.orders.completed_at' ),
+						),
+						'curl_enabled' => (object) array(
+							'key' => 'curl_enabled',
+							'value' => function_exists( 'curl_init' ),
+						),
+						'wp_cron_enabled' => (object) array(
+							'key' => 'wp_cron_enabled',
+							'value' => function_exists( 'curl_init' ),
+						),
+						'akamai_blocked' => (object) array(
+							'key' => 'segment.akamai_blocked',
+							'value' => $akamai_block,
+						),
+						'segment.broken_mailchimp_users' => (object) array(
+							'key' => 'segment.broken_mailchimp_users',
+							'value' => $broken_mailchimp,
 						),
 						'last_loop_at'              => (object) array(
 							'key'   => 'last_loop_at',

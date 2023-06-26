@@ -81,12 +81,30 @@ class MailChimp_WooCommerce_Customer {
 		return $this->opt_in_status;
 	}
 
-    /**
-     * @return null
-     */
+	/**
+	 * @return DateTime|false|mixed|null
+	 */
     public function getOptInStatusTime() {
-        return $this->marketing_status_updated_at;
+		if ($this->marketing_status_updated_at) {
+			return $this->marketing_status_updated_at;
+		}
+
+		if (($user = $this->getWordpressUser())) {
+			return $this->marketing_status_updated_at = mailchimp_get_marketing_status_updated_at($user->ID);
+		}
+        return null;
     }
+
+	/**
+	 * @return string
+	 */
+	public function getOptInStatusTimeAsString()
+	{
+		if (($date = $this->getOptInStatusTime())) {
+			return $date->format('D, M j, Y g:i A');
+		}
+		return '';
+	}
 
 
     /**
@@ -94,14 +112,11 @@ class MailChimp_WooCommerce_Customer {
 	 * @return MailChimp_WooCommerce_Customer
 	 */
 	public function setOptInStatus( $opt_in_status ) {
-
         if ( is_bool( $opt_in_status ) ) {
             $this->opt_in_status = $opt_in_status;
         } else {
             $this->opt_in_status = $opt_in_status === '1';
         }
-        $this->marketing_status_updated_at = date('Y-m-d H:i:s');
-
 		return $this;
 	}
 
@@ -294,7 +309,7 @@ class MailChimp_WooCommerce_Customer {
 				'id'            => (string) $this->getId(),
 				'email_address' => (string) $this->getEmailAddress(),
 				'opt_in_status' => $this->getOptInStatus(),
-                'marketing_status_updated_at' => $this->getOptInStatusTime(),
+                'marketing_status_updated_at' => $this->getOptInStatusTimeAsString(),
                 'company'       => (string) $this->getCompany(),
                 'first_name'    => (string) $this->getFirstName(),
 				'last_name'     => (string) $this->getLastName(),

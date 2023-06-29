@@ -83,6 +83,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 		$shop                    = null;
 		$akamai_block            = false;
 		$mailchimp_api_connected = false;
+		$mailchimp_plan_name     = null;
 
 		if ( $authenticated ) {
 			try {
@@ -170,6 +171,13 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 		// mc authed, has a list, but no longer connected to MC API
 		$broken_mailchimp = $authenticated && !empty($list_id) && !$mailchimp_api_connected;
 
+		$mc_plan_name = !empty($account_info) &&
+		                isset($account_info['pricing_plan_type']) &&
+		                !empty($account_info['pricing_plan_type']) &&
+		                $account_info['pricing_plan_type'] ? $account_info['pricing_plan_type'] : 'none';
+
+		$paid_account = in_array($mc_plan_name, ['pay_as_you_go', 'monthly']);
+
 		$time = new DateTime( 'now' );
 
 		return array(
@@ -242,6 +250,10 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 						'mc_list_valid'             => (object) array(
 							'key'   => 'mc_list_valid',
 							'value' => $list_is_valid,
+						),
+						'mc_paid_account'                => (object) array(
+							'key'   => 'mc_paid_account',
+							'value' => (bool) $paid_account,
 						),
 						'mc.has_legacy_integration' => (object) array(
 							'key'   => 'mc.has_legacy_integration',
@@ -348,6 +360,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 						'valid'         => $list_is_valid,
 					),
 					'account_info'            => $account_info,
+					'plan_name'               => $mc_plan_name,
 					'automations'             => isset( $automations ) ? $automations : null,
 					'journeys'                => isset( $journeys ) ? $journeys : null,
 					'merge_fields'            => isset( $merge_fields ) ? (object) $merge_fields : null,

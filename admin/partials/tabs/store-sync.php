@@ -76,8 +76,7 @@ if ( $store ) {
 	} catch ( Exception $e ) {
 		$mailchimp_total_products = 0; }
 	try {
-		$orders                 = $mailchimp_api->orders( $store_id, 1, 1 );
-		$mailchimp_total_orders = $orders['total_items'];
+		$mailchimp_total_orders = $mailchimp_api->getOrderCount($store_id);
 		if ( $mailchimp_total_orders > $order_count ) {
 			$mailchimp_total_orders = $order_count;
 		}

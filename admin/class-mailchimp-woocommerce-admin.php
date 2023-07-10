@@ -1894,7 +1894,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		try {
 			$order_count = mailchimp_get_api()->getOrderCount( mailchimp_get_store_id() );
 		} catch ( Exception $e ) {
-			$order_count = mailchimp_get_order_count();
+            $order_count = 'your';
 		}
 
 		$text = '<p id="sync-status-message">' .

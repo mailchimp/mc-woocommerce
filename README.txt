@@ -83,3 +83,4 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 * Fix for campaign reports showing data from older orders 
 * Fix for GDPR selections updating on each checkout 
 * Fix for DOI enabled audience customers not syncing
+* Implemented webhook cleaner function during uninstall

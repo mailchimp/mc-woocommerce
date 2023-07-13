@@ -40,7 +40,7 @@
     "lint:js-fix": "eslint assets/js --ext=js,jsx,ts,tsx --fix",
     "start": "wp-scripts start",
     "test:unit": "wp-scripts test-unit-js",
-    "makepot": "wpi18n makepot --domain-path ../languages --pot-file mc-woocommerce-newsletter.pot --type plugin --main-file newsletter-blocks-integration.php --exclude node_modules,tests,docs"
+    "makepot": "wpi18n makepot --domain-path ../languages --pot-file mc-woocommerce-newsletter.pot --type plugin --main-file woocommerce-blocks-integration.php --exclude node_modules,tests,docs"
   },
   "engines": {
     "node": ">=8.9.3",

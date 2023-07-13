@@ -1,0 +1,30 @@
+# Copyright (C) 2023 
+# This file is distributed under the same license as the  package.
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/blocks\n"
+"POT-Creation-Date: 2023-07-13 13:49:46+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2023-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"X-Generator: node-wp-i18n 1.2.7\n"
+
+#: woocommerce-blocks-integration.php:138
+msgid "I want to receive updates about products and promotions."
+msgstr ""
+
+#: woocommerce-blocks-integration.php:149
+msgid "Please select all the ways you would like to hear from us"
+msgstr ""
+
+#: woocommerce-blocks-integration.php:198
+msgid "Subscribe to marketing opt-in."
+msgstr ""
+
+#: woocommerce-blocks-integration.php:220
+msgid "GDPR marketing opt-in."
+msgstr ""

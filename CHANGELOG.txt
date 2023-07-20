@@ -4,7 +4,6 @@
 * Fix for campaign reports showing data from older orders
 * Fix for GDPR selections updating on each checkout
 * Fix for DOI enabled audience customers not syncing
-* Implemented webhook cleaner function during uninstall
 = 2.8.3 =
 * back-end updates for support
 = 2.8.2 =

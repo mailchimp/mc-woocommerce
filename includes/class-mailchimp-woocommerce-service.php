@@ -504,14 +504,15 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $this->handleOrderSaved($order_id, $order, false);
     }
 
-    /**
-     * @param $order_id
-     * @param $order
-     */
-    public function handleOrderUpdate($order_id, $order) {
-        mailchimp_log('handleOrderUpdate', 'order_status');
-        $this->handleOrderSaved($order_id, $order, true);
-    }
+	/**
+	 * @param $order_id
+	 * @param $order
+	 */
+	public function handleOrderUpdate($order_id, $order = null) {
+		if (empty($order)) $order = MailChimp_WooCommerce_HPOS::get_order($order_id);
+		mailchimp_log('handleOrderUpdate', 'order_status');
+		$this->handleOrderSaved($order_id, $order, true);
+	}
 
     /**
      * @param $post_id
@@ -1300,3 +1301,4 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         mailchimp_set_transient("mailchimp_woocommerce_gdpr_fields_{$user_id}", $gdpr_fields, 300);
     }
 }
+

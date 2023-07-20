@@ -79,4 +79,7 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 
 == Changelog ==
 = 3.1 =
+* Adds support for new product editor
+* Includes tough-cookie v4.1.3
+* Fix for metadata issues on subscription products
 

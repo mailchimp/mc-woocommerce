@@ -4,7 +4,7 @@ Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.9
 Tested up to: 6.3
-Stable tag: 2.8.3
+Stable tag: 3.1
 Requires PHP: 7.4
 WC requires at least: 4.2
 WC tested up to: 7.9
@@ -81,4 +81,3 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 = 3.1 =
 * Adds support for new product editor 
 * Includes tough-cookie v4.1.3
-* Fix for metadata issues on subscriptions products

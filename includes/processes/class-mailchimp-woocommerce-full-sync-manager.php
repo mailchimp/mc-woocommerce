@@ -114,9 +114,6 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 			if (mailchimp_get_transient('stop_sync', false)) {
 				return;
 			}
-
-			// Trigger respawn
-			$this->recreate();
 			
 			// get started queueing processes
 			$started = array(
@@ -172,13 +169,18 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 				if (mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Single_Order') <= 0 && mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Process_Orders') <= 0) {
 					mailchimp_set_transient('stop_sync', 600);
 					$this->flag_stop_sync();
+					mailchimp_log('sync', "Sync manager has finished queuing jobs and flagged the store as not syncing.");
                     try {
                         as_unschedule_action('MailChimp_WooCommerce_Process_Full_Sync_Manager', array(), 'mc-woocommerce' );
+						return true;
                     } catch (Exception $e) {
                     	mailchimp_error('sync.unschedule.error', $e->getMessage());
                     }
 				}
 			}
+
+			// Trigger respawn
+			$this->recreate();
 		}
 
 		/**

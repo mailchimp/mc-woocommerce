@@ -1,10 +1,17 @@
 == Changelog ==
+= 3.1 =
+* Adds support for new product editor
+* Includes tough-cookie v4.1.3
+* Fixed fatal error while updating orders via API & subscription renewals
 = 3.0 =
 * Adds support for High Performance Order Storage (HPOS)
 * Fix for campaign reports showing data from older orders
 * Fix for GDPR selections updating on each checkout
 * Fix for DOI enabled audience customers not syncing
+<<<<<<< HEAD
 * Implemented webhook cleaner function during uninstall
+=======
+>>>>>>> origin/3.1
 = 2.8.3 =
 * back-end updates for support
 = 2.8.2 =

@@ -37,11 +37,12 @@ export const Edit = ( { attributes, setAttributes } ) => {
 					/>
 				</PanelBody>
 			</InspectorControls>
-			<div style={{display: 'flex'}}>
+			<div style={{display: 'flex', lineHeight: '1.5em', alignItems: 'center'}}>
 				<CheckboxControl
 					id="newsletter-text"
 					checked={ checked }
 					disabled={ true }
+					style={{marginTop: 0}}
 				/>
 				<RichText
 					value={ text }

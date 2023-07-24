@@ -81,3 +81,4 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 = 3.1 =
 * Adds support for new product editor 
 * Includes tough-cookie v4.1.3
+* Fixed fatal error while updating orders via API & subscription renewals

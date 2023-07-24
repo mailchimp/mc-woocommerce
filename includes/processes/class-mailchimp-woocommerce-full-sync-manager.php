@@ -172,10 +172,10 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 					mailchimp_log('sync', "Sync manager has finished queuing jobs and flagged the store as not syncing.");
                     try {
                         as_unschedule_action('MailChimp_WooCommerce_Process_Full_Sync_Manager', array(), 'mc-woocommerce' );
-						return true;
                     } catch (Exception $e) {
                     	mailchimp_error('sync.unschedule.error', $e->getMessage());
                     }
+					return true;
 				}
 			}
 

@@ -3,13 +3,8 @@ Contributors: ryanhungate, Mailchimp
 Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.9
-<<<<<<< HEAD
-Tested up to: 6.2
-Stable tag: 3.0
-=======
 Tested up to: 6.3
 Stable tag: 3.1
->>>>>>> origin/3.1
 Requires PHP: 7.4
 WC requires at least: 4.2
 WC tested up to: 7.9
@@ -83,16 +78,7 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
 == Changelog ==
-<<<<<<< HEAD
-= 3.0 =
-* Adds support for High Performance Order Storage (HPOS)
-* Fix for campaign reports showing data from older orders 
-* Fix for GDPR selections updating on each checkout 
-* Fix for DOI enabled audience customers not syncing
-* Implemented webhook cleaner function during uninstall
-=======
 = 3.1 =
-* Adds support for new product editor 
+* Adds support for new product editor
 * Includes tough-cookie v4.1.3
 * Fixed fatal error while updating orders via API & subscription renewals
->>>>>>> origin/3.1

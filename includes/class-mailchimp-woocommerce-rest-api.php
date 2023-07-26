@@ -618,11 +618,13 @@ class MailChimp_WooCommerce_Rest_Api
             }
         } catch (Exception $e) { $mailchimp_total_orders = 0; }
 
+	    $wc_customer_api = new WC_API_Customers();
+
         // but we need to do it just in case.
         return $this->mailchimp_rest_response(array(
             'platform' => array(
                 'products' => $product_count,
-                'customers' => 0,
+                'customers' => $wc_customer_api->get_customers_count(),
                 'orders' => $order_count,
             ),
             'mailchimp' => array(

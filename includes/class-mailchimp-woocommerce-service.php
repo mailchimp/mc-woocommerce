@@ -500,7 +500,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      * @param $order_id
      * @param $order
      */
-	public function handleOrderCreate($order_id, $order) {
+	public function handleOrderCreate($order_id, $order = null) {
+		if (empty($order)) $order = MailChimp_WooCommerce_HPOS::get_order($order_id);
         $this->handleOrderSaved($order_id, $order, false);
     }
 

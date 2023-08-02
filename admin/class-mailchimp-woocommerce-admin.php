@@ -542,7 +542,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		// if the saved version is less than the current version
 		if (version_compare( $version, $saved_version ) > 0) {
 			$webhooks = new MailChimp_WooCommerce_WebHooks_Sync;
-			$webhooks->cleanHooks();
+			$webhooks->subscribeWebhook();
 
 			$this->update_db_check();
 
@@ -554,7 +554,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$our_plugin = 'mc-woocommerce/mailchimp-woocommerce.php';
 
 		// If an update has taken place and the updated type is plugins and the plugins element exists
-		if ( $options['action'] === 'update' && $options['type'] === 'plugin' && isset( $options['plugins'] ) ) {
+		if ( isset( $options ) && isset( $options['action'] ) && isset( $options['type'] ) && $options['action'] === 'update' && $options['type'] === 'plugin' && isset( $options['plugins'] ) ) {
 			// Iterate through the plugins being updated and check if ours is there
 			foreach ( $options['plugins'] as $plugin ) {
 				if ( $plugin == $our_plugin ) {

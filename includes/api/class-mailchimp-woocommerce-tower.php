@@ -557,6 +557,14 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 				'key'   => 'Actions',
 				'value' => $actions,
 			),
+			array(
+				'key'   => 'Store Currency',
+				'value' => get_woocommerce_currency(),
+			),
+			array(
+				'key'   => 'HPOS (COT) Enabled',
+				'value' => MailChimp_WooCommerce_HPOS::enabled() ? 'Yes' : 'No',
+			),
 		);
 	}
 

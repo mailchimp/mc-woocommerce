@@ -533,6 +533,37 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 	}
 
+	public function update_plugin_check() {
+		$version = mailchimp_environment_variables()->version;
+
+		// grab the saved version or default to 1.0.3 since that's when we first did this.
+		$saved_version = get_site_option( 'mailchimp_woocommerce_version', '1.0.3' );
+
+		// if the saved version is less than the current version
+		if (version_compare( $version, $saved_version ) > 0) {
+			$webhooks = new MailChimp_WooCommerce_WebHooks_Sync;
+			$webhooks->subscribeWebhook();
+
+			$this->update_db_check();
+
+			mailchimp_log('webhooks', 'Deleted old plugin webhooks');
+		}
+	}
+
+	public function plugin_upgrade_completed( $upgrader_object, $options ) {
+		$our_plugin = 'mc-woocommerce/mailchimp-woocommerce.php';
+
+		// If an update has taken place and the updated type is plugins and the plugins element exists
+		if ( isset( $options ) && isset( $options['action'] ) && isset( $options['type'] ) && $options['action'] === 'update' && $options['type'] === 'plugin' && isset( $options['plugins'] ) ) {
+			// Iterate through the plugins being updated and check if ours is there
+			foreach ( $options['plugins'] as $plugin ) {
+				if ( $plugin == $our_plugin ) {
+					$this->update_plugin_check();
+				}
+			}
+		}
+	}
+
 	/**
 	 * @param null $code
 	 *

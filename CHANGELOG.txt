@@ -1,5 +1,9 @@
 == Changelog ==
 = 3.2 =
+* fix for too few arguments to function MailChimp_Service::handleOrderUpdate()
+* update to lateset version of core blocks for the site editor
+* adds the plugin icon back to wp-admin menu
+* adds automatic webhook cleaning
 = 3.1 =
 * Adds support for new product editor
 * Includes tough-cookie v4.1.3

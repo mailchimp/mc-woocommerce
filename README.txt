@@ -7,7 +7,7 @@ Tested up to: 6.3
 Stable tag: 3.1
 Requires PHP: 7.4
 WC requires at least: 4.2
-WC tested up to: 7.9
+WC tested up to: 8.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your Mailchimp audience to track sales, create targeted emails, send abandoned cart emails, and more.
@@ -79,3 +79,7 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 
 == Changelog ==
 = 3.2 =
+* fix for too few arguments to function MailChimp_Service::handleOrderUpdate()
+* update to lateset version of core blocks for the site editor
+* adds the plugin icon back to wp-admin menu
+* adds automatic webhook cleaning

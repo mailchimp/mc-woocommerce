@@ -384,7 +384,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             return;
         }
 
-        $valid_keys = array(
+        $valid_keys = apply_filters( 'mailchimp_filter_valid_keys', array(
             '_thumbnail_id',
             'description',
             'image_id',
@@ -401,7 +401,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             'name',
             'status',
             'slug',
-        );
+        ) );
 
         // if there's not a valid prop in the update, just skip this.
         if (!array_intersect($valid_keys, $data)) {

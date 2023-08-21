@@ -4,7 +4,7 @@ Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.9
 Tested up to: 6.3
-Stable tag: 3.1
+Stable tag: 3.2
 Requires PHP: 7.4
 WC requires at least: 4.2
 WC tested up to: 8.0
@@ -79,6 +79,7 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 
 == Changelog ==
 = 3.2 =
+* Released: 08-21-2023
 * fix for too few arguments to function MailChimp_Service::handleOrderUpdate()
 * update to lateset version of core blocks for the site editor
 * adds the plugin icon back to wp-admin menu

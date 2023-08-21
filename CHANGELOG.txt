@@ -1,5 +1,6 @@
 == Changelog ==
 = 3.2 =
+* Released: 08-21-2023
 * fix for too few arguments to function MailChimp_Service::handleOrderUpdate()
 * update to lateset version of core blocks for the site editor
 * adds the plugin icon back to wp-admin menu

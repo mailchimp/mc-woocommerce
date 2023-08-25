@@ -88,12 +88,12 @@ class MailChimp_WooCommerce_Transform_Products {
 		}
 
 		$product->setId( $woo->get_id() );
-		$product->setHandle( $woo->get_slug() );
+		$product->setHandle( urldecode($woo->get_slug() ) );
 		$product->setImageUrl( $this->getProductImage( $woo ) );
 		$product->setDescription( $woo->get_description() );
 		$product->setPublishedAtForeign( mailchimp_date_utc( $woo->get_date_created() ) );
 		$product->setTitle( $woo->get_title() );
-		$product->setUrl( $woo->get_permalink() );
+		$product->setUrl( urldecode( $woo->get_permalink() ) );
 
 		$original_vendor = '';
 		if ( in_array( 'woocommerce-product-vendors/woocommerce-product-vendors.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) || defined( 'WC_PRODUCT_VENDORS_VERSION' ) ) {
@@ -159,7 +159,7 @@ class MailChimp_WooCommerce_Transform_Products {
 		}
 
 		$variant->setId( $woo->get_id() );
-		$variant->setUrl( $woo->get_permalink() );
+		$variant->setUrl( urldecode( $woo->get_permalink() ) );
 		$variant->setImageUrl( $this->getProductImage( $post ) );
 		$variant->setPrice( $woo->get_price() );
 		$variant->setSku( $woo->get_sku() );

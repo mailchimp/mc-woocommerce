@@ -78,8 +78,5 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
 == Changelog ==
-= 3.2 =
-* fix for too few arguments to function MailChimp_Service::handleOrderUpdate()
-* update to lateset version of core blocks for the site editor
-* adds the plugin icon back to wp-admin menu
-* adds automatic webhook cleaning
+= 3.3 =
+* remove excessive mailchimp double opt in calls during sync

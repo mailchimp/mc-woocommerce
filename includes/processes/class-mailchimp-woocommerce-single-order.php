@@ -242,7 +242,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                         }
                         // if they are using double opt in, we need to pass this in as false here so it doesn't auto subscribe.
                         try {
-                            $doi = mailchimp_list_has_double_optin(true);
+                            $doi = mailchimp_list_has_double_optin(false);
                         } catch (Exception $e_doi) {
                             throw $e_doi;
                         }

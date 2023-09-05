@@ -181,11 +181,16 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 return false;
             }
 
+			$original_status = $order->getCustomer()->getOriginalSubscriberStatus();
             $status = $order->getCustomer()->getOptInStatus();
             $transient_key = mailchimp_hash_trim_lower($email).".mc.status";
             $current_status = null;
 
-            if (!$status && mailchimp_submit_subscribed_only()) {
+			// if the customer did not actually check the box, this will always be false.
+	        // we needed to use this flag because when using double opt in, the status gets
+	        // overwritten to allow us to submit a pending status to the list member endpoint
+	        // which fires the double opt in.
+            if (!$original_status && mailchimp_submit_subscribed_only()) {
                 try {
                     $subscriber = $api->member(mailchimp_get_list_id(), $email);
                     $current_status = $subscriber['status'];

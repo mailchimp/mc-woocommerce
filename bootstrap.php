@@ -336,8 +336,9 @@ function mailchimp_get_list_id() {
  * @return string
  */
 function mailchimp_build_webhook_url( $key ) {
-    //$key = base64_encode($key);
-    return MailChimp_WooCommerce_Rest_Api::url('member-sync') . '?auth=' . $key;
+	$rest_url = MailChimp_WooCommerce_Rest_Api::url('member-sync');
+	$qs = str_contains($rest_url, '/wp-json/') ? '?' : '&';
+    return $rest_url.$qs."auth={$key}";
 }
 /**
  * Generate random string

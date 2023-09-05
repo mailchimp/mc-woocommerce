@@ -338,45 +338,37 @@ class MailChimp_WooCommerce_Rest_Api
             case 'activate_webhooks':
                 $api = mailchimp_get_api();
                 $list = mailchimp_get_list_id();
-                if (get_option('permalink_structure') === '') {
-                    $response = [
-                        'title' => "Store Webhooks",
-                        'description' => "No store webhooks to apply",
-                        'type' => 'error',
-                    ];
-                } else {
-                    $previous_url = mailchimp_get_webhook_url();
-                    if (mailchimp_get_data('webhook.token') && $previous_url && $api->hasWebhook($list, $previous_url)) {
-                        $response = [
-                            'title' => "Store Webhooks",
-                            'description' => "Store already has webhooks enabled!",
-                            'type' => 'success',
-                        ];
-                    } else {
-                        $key = mailchimp_create_webhook_token();
-                        $url = mailchimp_build_webhook_url($key);
-                        mailchimp_set_data('webhook.token', $key);
-                        try {
-                            $webhook = $api->webHookSubscribe($list, $url);
-                            mailchimp_set_webhook_url($webhook['url']);
-                            mailchimp_log('webhooks', "added webhook to audience");
-                            $response = [
-                                'title' => "Store Webhooks",
-                                'description' => "Set up a new webhook at {$webhook['url']}",
-                                'type' => 'success',
-                            ];
-                        } catch (Exception $e) {
-                            $response = [
-                                'title' => "Store Webhooks",
-                                'description' => $e->getMessage(),
-                                'type' => 'error',
-                            ];
-                            mailchimp_set_data('webhook.token', false);
-                            mailchimp_set_webhook_url(false);
-                            mailchimp_error('webhook', $e->getMessage());
-                        }
-                    }
-                }
+	            $previous_url = mailchimp_get_webhook_url();
+	            if (mailchimp_get_data('webhook.token') && $previous_url && $api->hasWebhook($list, $previous_url)) {
+		            $response = [
+			            'title' => "Store Webhooks",
+			            'description' => "Store already has webhooks enabled!",
+			            'type' => 'success',
+		            ];
+	            } else {
+		            $key = mailchimp_create_webhook_token();
+		            $url = mailchimp_build_webhook_url($key);
+		            mailchimp_set_data('webhook.token', $key);
+		            try {
+			            $webhook = $api->webHookSubscribe($list, $url);
+			            mailchimp_set_webhook_url($webhook['url']);
+			            mailchimp_log('webhooks', "added webhook to audience");
+			            $response = [
+				            'title' => "Store Webhooks",
+				            'description' => "Set up a new webhook at {$webhook['url']}",
+				            'type' => 'success',
+			            ];
+		            } catch (Exception $e) {
+			            $response = [
+				            'title' => "Store Webhooks",
+				            'description' => $e->getMessage(),
+				            'type' => 'error',
+			            ];
+			            mailchimp_set_data('webhook.token', false);
+			            mailchimp_set_webhook_url(false);
+			            mailchimp_error('webhook', $e->getMessage());
+		            }
+	            }
                 break;
             case 'resync_all':
                 $service = new MailChimp_Service();

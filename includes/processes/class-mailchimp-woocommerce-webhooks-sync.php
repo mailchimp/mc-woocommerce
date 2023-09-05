@@ -34,10 +34,10 @@ class MailChimp_WooCommerce_WebHooks_Sync extends Mailchimp_Woocommerce_Job
 
             $list = mailchimp_get_list_id();
             $api = mailchimp_get_api();
-            $token = mailchimp_get_data('webhook.token');
 
-            // for some reason the webhook url does not work with ?rest_route style, permalinks should be defined also 
-            if (!$token && get_option('permalink_structure') !== '') {
+			// we used to check for this until we fixed the url delimiter problem
+            // get_option('permalink_structure') !== ''
+            if (!mailchimp_get_data('webhook.token')) {
                 $key = mailchimp_create_webhook_token();
                 $url = mailchimp_build_webhook_url($key);
                 mailchimp_set_data('webhook.token', $key);

@@ -80,6 +80,9 @@ class MailChimp_WooCommerce_WebHooks_Sync extends Mailchimp_Woocommerce_Job
 					mailchimp_log('webhooks', "Deleted old plugin webhook id {$hook['id']} :: {$href}");
 				}
 			}
+
+			mailchimp_set_data('webhook.token', false);
+			mailchimp_set_webhook_url(false);
 		} catch (Throwable $e) {
 			mailchimp_error('webhook deletion error', $e->getMessage());
 		}

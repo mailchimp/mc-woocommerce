@@ -1388,7 +1388,7 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
             if ($member['status'] === 'transactional' && in_array($status_if_new, array('subscribed', 'pending'))) {
                 $member['status'] = $status_if_new;
             }
-            if (($member['status'] === 'transactional' && in_array($status_if_new, array('subscribed', 'pending'))) || $member['status'] === 'subscribed') {
+            if (($member['status'] === 'transactional' && in_array($status_if_new, array('subscribed', 'pending'))) || $member['status'] === 'subscribed' || $member['status'] === 'pending') {
                 if (!empty($gdpr_fields) && is_array($gdpr_fields)) {
                     $gdpr_fields_to_save = [];
                     foreach ($gdpr_fields as $id => $value) {

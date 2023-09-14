@@ -685,6 +685,11 @@ class MailChimp_WooCommerce_Order {
 			$this->setCustomer( $customer_object->fromArray( $data['customer'] ) );
 		}
 
+		// apply the campaign id from the response if there is one.
+		if (array_key_exists('outreach', $data) && !empty($data['outreach']) && array_key_exists('id', $data['outreach'])) {
+			$this->setCampaignId($data['outreach']['id']);
+		}
+
 		return $this;
 	}
 	/**

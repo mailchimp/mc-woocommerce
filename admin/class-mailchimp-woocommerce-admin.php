@@ -2119,7 +2119,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	protected function adminOnlyMiddleware( $message = "You're not allowed to do this" ) {
 		if ( ! current_user_can( mailchimp_get_allowed_capability() ) ) {
-			wp_send_json_error( array( 'message' => $message ) );
+            $error = new \Exception();
+            mailchimp_debug('admin', 'tracing admin json error', $error->getTrace());
+			wp_send_json_error( array( 'message' => $message, 'from' => 'mailchimp-for-woocommerce' ) );
 		}
 		return true;
 	}

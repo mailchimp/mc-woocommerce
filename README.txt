@@ -7,7 +7,7 @@ Tested up to: 6.3
 Stable tag: 3.2
 Requires PHP: 7.4
 WC requires at least: 4.2
-WC tested up to: 8.0
+WC tested up to: 8.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your Mailchimp audience to track sales, create targeted emails, send abandoned cart emails, and more.
@@ -79,4 +79,9 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 
 == Changelog ==
 = 3.3 =
-* remove excessive mailchimp double opt in calls during sync
+* Performance enhancement: Removing excessive double opt-in api calls during initial sync 
+* Fix for translated product issue
+* Fix for ongoing sync settings failing when double opt-in enabled 
+* Fix for permalink conflicting with Webhook creation
+* Fix for GDPR Marketing Preferences not captured on checkout 
+* Word-wrap version update to 1.2.3 in blocks 

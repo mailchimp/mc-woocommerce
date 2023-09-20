@@ -1,6 +1,11 @@
 == Changelog ==
 = 3.3 =
-* remove excessive mailchimp double opt in calls during sync
+* Performance enhancement: Removing excessive double opt-in api calls during initial sync 
+* Fix for translated product issue
+* Fix for ongoing sync settings failing when double opt-in enabled 
+* Fix for permalink conflicting with Webhook creation
+* Fix for GDPR Marketing Preferences not captured on checkout 
+* Word-wrap version update to 1.2.3 in blocks 
 = 3.2 =
 * fix for too few arguments to function MailChimp_Service::handleOrderUpdate()
 * update to lateset version of core blocks for the site editor

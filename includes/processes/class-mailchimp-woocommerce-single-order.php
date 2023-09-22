@@ -185,6 +185,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             $status = $order->getCustomer()->getOptInStatus();
             $transient_key = mailchimp_hash_trim_lower($email).".mc.status";
             $current_status = null;
+            $pulled_member = false;
 
 			// if the customer did not actually check the box, this will always be false.
 	        // we needed to use this flag because when using double opt in, the status gets

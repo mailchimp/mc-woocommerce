@@ -298,7 +298,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 						),
 						'wp_cron_enabled' => (object) array(
 							'key' => 'wp_cron_enabled',
-							'value' => function_exists( 'curl_init' ),
+							'value' => !defined('DISABLE_WP_CRON') || DISABLE_WP_CRON === false,
 						),
 						'akamai_blocked' => (object) array(
 							'key' => 'segment.akamai_blocked',

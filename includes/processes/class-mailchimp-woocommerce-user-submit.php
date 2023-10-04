@@ -320,13 +320,6 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 					$uses_doi = isset($status_meta['requires_double_optin']) && $status_meta['requires_double_optin'];
 					$status_if_new = $uses_doi && (bool) $this->subscribed ? 'pending' : $this->subscribed;
 
-					if ( mailchimp_submit_subscribed_only() ) {
-						mailchimp_debug('filter', "{$user->user_email} was blocked due to subscriber only settings");
-
-						static::$handling_for = null;
-						return false;
-					}
-
 					$api->subscribe($list_id, $user->user_email, $status_if_new, $merge_fields, null, $language, $gdpr_fields);
 
 					// delete this admin transient if there was one

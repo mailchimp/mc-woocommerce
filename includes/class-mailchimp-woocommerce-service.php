@@ -608,6 +608,12 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $is_subscribed = get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true);
         $gdpr_fields = get_user_meta($user_id, 'mailchimp_woocommerce_gdpr_fields', true);
 
+        if ( ! $is_subscribed && mailchimp_submit_subscribed_only() ) {
+	        mailchimp_debug('filter', "{$old_user_data->user_email} was blocked due to subscriber only settings");
+
+	        return;
+        }
+
         $job = new MailChimp_WooCommerce_User_Submit(
             $user_id,
             $is_subscribed,

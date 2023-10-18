@@ -1,11 +1,7 @@
 <?php
 
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface;
-use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
-use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CheckoutSchema;
-use Automattic\WooCommerce\StoreApi\StoreApi;
-use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
+
 defined( 'ABSPATH' ) || exit;
 /**
  * Class Mailchimp_Woocommerce_Newsletter_Blocks_Integration
@@ -33,11 +29,8 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
 		$this->register_frontend_scripts();
         $this->register_editor_scripts();
 		$this->register_editor_blocks();
-		$this->extend_store_api();
 		add_filter( '__experimental_woocommerce_blocks_add_data_attributes_to_block', [ $this, 'add_attributes_to_frontend_blocks' ], 10, 1 );
         add_action('woocommerce_before_order_object_save', [$this, 'capture_from_store_api'], 1);
-        add_action('woocommerce_blocks_checkout_update_order_from_request', [$this, 'order_processed'], 10, 2);
-        //add_action('woocommerce_blocks_checkout_order_processed', [$this, 'order_processed'], 10, 2);
 	}
 
 	/**
@@ -180,64 +173,11 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
 	}
 
 	/**
-	 * @throws Exception
-	 */
-	public function extend_store_api()
-    {
-        /** @var ExtendRestApi $extend */
-        /** @var ExtendSchema $extend */
-		$extend = class_exists('Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema') ? StoreApi::container()->get(ExtendSchema::class) : Package::container()->get(ExtendRestApi::class);
-
-		$extend->register_endpoint_data(
-			array(
-				'endpoint'        => CheckoutSchema::IDENTIFIER,
-				'namespace'       => $this->get_name(),
-				'schema_callback' => function() {
-					return array(
-						'optin' => array(
-							'description' => __( 'Subscribe to marketing opt-in.', 'mailchimp-newsletter' ),
-							'type'        => array( 'boolean', 'null' ),
-							'context'     => array(),
-							'arg_options' => array(
-								'validate_callback' => function( $value ) {
-									if ( ! is_null( $value ) && ! is_bool( $value ) ) {
-										return new WP_Error( 'api-error', 'value of type ' . gettype( $value ) . ' was posted to the newsletter optin callback' );
-									}
-									return true;
-								},
-								'sanitize_callback' => function ( $value ) {
-									if ( is_bool( $value ) ) {
-										return $value;
-									}
-
-									// Return a boolean when "null" is passed,
-									// which is the only non-boolean value allowed.
-									return false;
-								},
-							),
-						),
-                        'gdprFields' => array(
-                            'description' => __( 'GDPR marketing opt-in.', 'mailchimp-newsletter' ),
-                            'type'        => 'object',
-                            'context'     => array(),
-                            'arg_options' => array(
-                                'validate_callback' => function( $value ) {
-                                    return true;
-                                },
-                            ),
-                        ),
-					);
-				},
-			)
-		);
-	}
-
-	/**
 	 * Store guest info when they submit email from Store API.
 	 *
 	 * The guest email, first name and last name are captured.
 	 *
-	 * @see \Automattic\WooCommerce\Blocks\StoreApi\Routes\CartUpdateCustomer
+	 * @see \Automattic\WooCommerce\StoreApi\Routes\V1\CartUpdateCustomer
 	 *
 	 * @param WC_Order|WC_Order_Refund $order
 	 *
@@ -267,8 +207,8 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
      * @param WC_Order $order
      * @param $request
      */
-    public function order_processed($order, $request)
-    {          
+    public static function order_processed($order, $request)
+    {
         $meta_key = 'mailchimp_woocommerce_is_subscribed';
         $optin = $request['extensions']['mailchimp-newsletter']['optin'];
         $gdpr_fields = isset($request['extensions']['mailchimp-newsletter']['gdprFields']) ?

@@ -202,11 +202,17 @@ mailchimpReady(function () {
         void 0 !== b.mc_cart_id && mailchimpGetCurrentUserByHash(b.mc_cart_id);
 
         var subscribed = document.querySelector('#mailchimp_woocommerce_newsletter');
+        var blockSubscribed = document.querySelector("#subscribe-to-newsletter");
 
         if (subscribed) {
             subscribed.onchange = function() {
                 mailchimp_submitted_email = null;
                 mailchimpHandleBillingEmail('#billing_email');
+            }
+        } else if (blockSubscribed) {
+            blockSubscribed.onchange = function() {
+                mailchimp_submitted_email = null;
+                mailchimpHandleBillingEmail('#contact-fields input[type="email"]');
             }
         }
 

@@ -32,6 +32,7 @@ function mailchimpHandleBillingEmail(selector) {
         if (!mailchimp_public_data.allowed_to_set_cookies) return;
         if (mailchimp_public_data.disable_carts) return;
         var subscribed = document.querySelector('#mailchimp_woocommerce_newsletter');
+        if (!subscribed) subscribed = document.querySelector("#subscribe-to-newsletter");
         if (!selector) selector = "#billing_email";
         var a = document.querySelector(selector);
         var b = void 0 !== a ? a.value : "";
@@ -219,6 +220,7 @@ mailchimpReady(function () {
         mailchimp_username_email = document.querySelector("#username");
         mailchimp_billing_email = document.querySelector("#billing_email");
         mailchimp_registration_email = document.querySelector("#reg_email");
+        var mailchimp_username_email_block =  document.querySelector("#contact-fields input[type=\"email\"]");
 
         if (mailchimp_billing_email) {
             mailchimp_billing_email.onblur = function () { mailchimpHandleBillingEmail('#billing_email'); };
@@ -233,6 +235,17 @@ mailchimpReady(function () {
         if (mailchimp_registration_email) {
             mailchimp_registration_email.onblur = function () { mailchimpHandleBillingEmail('#reg_email'); };
             mailchimp_registration_email.onfocus = function () { mailchimpHandleBillingEmail('#reg_email'); }
+        }
+
+        if (mailchimp_username_email_block) {
+            mailchimp_username_email_block.onblur = function () { mailchimpHandleBillingEmail('#contact-fields input[type="email"]'); };
+            mailchimp_username_email_block.onfocus = function () { mailchimpHandleBillingEmail('#contact-fields input[type="email"]'); }
+
+            mailchimp_username_email_block.addEventListener("input", function() {
+                if (mailchimp_cart.valueEmail(mailchimp_username_email_block.value)) {
+                    mailchimpHandleBillingEmail('#contact-fields input[type="email"]');
+                }
+            });
         }
 
     } catch (e) {

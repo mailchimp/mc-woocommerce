@@ -241,10 +241,20 @@ mailchimpReady(function () {
             mailchimp_username_email_block.onblur = function () { mailchimpHandleBillingEmail('#contact-fields input[type="email"]'); };
             mailchimp_username_email_block.onfocus = function () { mailchimpHandleBillingEmail('#contact-fields input[type="email"]'); }
 
-            mailchimp_username_email_block.addEventListener("input", function() {
-                if (mailchimp_cart.valueEmail(mailchimp_username_email_block.value)) {
-                    mailchimpHandleBillingEmail('#contact-fields input[type="email"]');
-                }
+            var typingTimer;
+            // on keyup, start the countdown
+            mailchimp_username_email_block.addEventListener('keyup', function() {
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(function() {
+                    if (mailchimp_cart.valueEmail(mailchimp_username_email_block.value)) {
+                        mailchimpHandleBillingEmail('#contact-fields input[type="email"]');
+                    }
+                }, 2000);
+            });
+
+            // on keydown, clear the countdown
+            mailchimp_username_email_block.addEventListener('keydown', function () {
+                clearTimeout(typingTimer);
             });
         }
 

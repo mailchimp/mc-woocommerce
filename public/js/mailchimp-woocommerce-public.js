@@ -244,7 +244,7 @@ mailchimpReady(function () {
             var typingTimer;
             // on keyup, start the countdown
             mailchimp_username_email_block.addEventListener('keyup', function() {
-                clearTimeout(typingTimer);
+                typingTimer && clearTimeout(typingTimer);
                 typingTimer = setTimeout(function() {
                     if (mailchimp_cart.valueEmail(mailchimp_username_email_block.value)) {
                         mailchimpHandleBillingEmail('#contact-fields input[type="email"]');
@@ -254,7 +254,7 @@ mailchimpReady(function () {
 
             // on keydown, clear the countdown
             mailchimp_username_email_block.addEventListener('keydown', function () {
-                clearTimeout(typingTimer);
+                typingTimer && clearTimeout(typingTimer);
             });
         }
 

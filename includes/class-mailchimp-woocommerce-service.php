@@ -1032,6 +1032,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     {
         if (mailchimp_carts_disabled()) {
             $this->respondJSON(array('success' => false, 'message' => 'filter blocked due to carts being disabled'));
+        } elseif (mailchimp_carts_subscribers_only()) {
+            $this->respondJSON(array('success' => false, 'message' => 'filter blocked due to carts for subscribers only'));
         }
 
         if ($this->is_admin) {

@@ -249,7 +249,12 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                     $cached_status = mailchimp_get_subscriber_status($user_email);
                     mailchimp_set_transient($transient_key, $cached_status ? $cached_status : false, 300);
                 }
-                if (isset($cached_status['value']) && $cached_status['value'] !== 'subscribed') {
+
+                if (isset($cached_status['value'])) {
+	                $cached_status = $cached_status['value'];
+                }
+
+                if ($cached_status !== 'subscribed') {
                     mailchimp_debug('filter', "preventing {$user_email} from submitting cart data due to subscriber settings.");
                     return $updated;
                 }

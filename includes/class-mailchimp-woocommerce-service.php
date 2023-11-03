@@ -242,14 +242,14 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
             // if the user chose to send to subscribers only we need to do a quick check
             // to see if this email has already subscribed.
-            if (!$this->cart_subscribe && (mailchimp_carts_subscribers_only() || mailchimp_submit_subscribed_only())) {
+            if (mailchimp_carts_subscribers_only() || mailchimp_submit_subscribed_only()) {
                 $transient_key = mailchimp_hash_trim_lower($user_email).".mc.status";
                 $cached_status = mailchimp_get_transient($transient_key);
                 if ($cached_status === null) {
                     $cached_status = mailchimp_get_subscriber_status($user_email);
                     mailchimp_set_transient($transient_key, $cached_status ? $cached_status : false, 300);
                 }
-                if ($cached_status !== 'subscribed') {
+                if (isset($cached_status['value']) && $cached_status['value'] !== 'subscribed') {
                     mailchimp_debug('filter', "preventing {$user_email} from submitting cart data due to subscriber settings.");
                     return $updated;
                 }

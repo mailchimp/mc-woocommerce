@@ -191,7 +191,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 				'average_monthly_sales' => $this->getShopSales(),
 				'address'               => (object) array(
 					'street'  => isset( $options['store_street'] ) && $options['store_street'] ? $options['store_street'] : '',
-					'city'    => isset( $options['store_street'] ) && $options['store_street'] ? $options['store_street'] : '',
+					'city'    => isset( $options['store_city'] ) && $options['store_city'] ? $options['store_city'] : '',
 					'state'   => isset( $options['store_state'] ) && $options['store_state'] ? $options['store_state'] : '',
 					'country' => isset( $options['store_country'] ) && $options['store_country'] ? $options['store_country'] : '',
 					'zip'     => isset( $options['store_postal_code'] ) && $options['store_postal_code'] ? $options['store_postal_code'] : '',

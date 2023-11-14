@@ -11,7 +11,7 @@ class MailChimp_WooCommerce_Rest_Api
 	 */
     public static function url($path)
     {
-        return esc_url_raw(rest_url(static::$namespace.'/'.ltrim($path, '/')));
+        return esc_url_raw(static::mc_get_rest_url(static::$namespace.'/'.ltrim($path, '/')));
     }
     /**
      * Register all Mailchimp API routes.
@@ -798,4 +798,65 @@ class MailChimp_WooCommerce_Rest_Api
         $params = $request->get_query_params();
         return empty($params['auth']) ? false : $params['auth'];
     }
+
+	/**
+	 * Retrieves the URL to a REST endpoint on a site.
+	 *
+	 * Note: The returned URL is NOT escaped.
+	 *
+	 * @since 4.4.0
+	 *
+	 * @todo Check if this is even necessary
+	 * @global WP_Rewrite $wp_rewrite
+	 *
+	 * @param int    $blog_id Optional. Blog ID. Default of null returns URL for current blog.
+	 * @param string $path    Optional. REST route. Default '/'.
+	 * @param string $scheme  Optional. Sanitization scheme. Default 'rest'.
+	 * @return string Full URL to the endpoint.
+	 */
+	private static function mc_get_rest_url( $blog_id = null, $path = '/', $scheme = 'rest' ) {
+		if ( empty( $path ) ) {
+			$path = '/';
+		}
+
+		if ( is_multisite() && get_blog_option( $blog_id, 'permalink_structure' ) || get_option( 'permalink_structure' ) ) {
+			global $wp_rewrite;
+
+			// for some reason this global is not available - causing errors.
+			if (!empty($wp_rewrite) && $wp_rewrite->using_index_permalinks() ) {
+				$url = get_home_url( $blog_id, $wp_rewrite->index . '/' . rest_get_url_prefix(), $scheme );
+			} else {
+				$url = get_home_url( $blog_id, rest_get_url_prefix(), $scheme );
+			}
+
+			$url .= '/' . ltrim( $path, '/' );
+		} else {
+			$url = trailingslashit( get_home_url( $blog_id, '', $scheme ) );
+
+			$path = '/' . ltrim( $path, '/' );
+
+			$url = add_query_arg( 'rest_route', $path, $url );
+		}
+
+		if ( is_ssl() ) {
+			// If the current host is the same as the REST URL host, force the REST URL scheme to HTTPS.
+			if ( $_SERVER['SERVER_NAME'] === parse_url( get_home_url( $blog_id ), PHP_URL_HOST ) ) {
+				$url = set_url_scheme( $url, 'https' );
+			}
+		}
+
+		/**
+		 * Filters the REST URL.
+		 *
+		 * Use this filter to adjust the url returned by the get_rest_url() function.
+		 *
+		 * @since 4.4.0
+		 *
+		 * @param string $url     REST URL.
+		 * @param string $path    REST route.
+		 * @param int    $blog_id Blog ID.
+		 * @param string $scheme  Sanitization scheme.
+		 */
+		return apply_filters( 'rest_url', $url, $path, $blog_id, $scheme );
+	}
 }

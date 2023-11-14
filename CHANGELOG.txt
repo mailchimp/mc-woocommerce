@@ -1,4 +1,6 @@
 == Changelog ==
+= 3.4 =
+* Fix rest_url function for installs that are not using wp_rewrite
 = 3.3 =
 * Performance enhancement: Removing excessive double opt-in api calls during initial sync 
 * Fix for translated product issue

@@ -4,7 +4,7 @@ Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.9
 Tested up to: 6.4
-Stable tag: 3.2
+Stable tag: 3.3
 Requires PHP: 7.4
 WC requires at least: 4.2
 WC tested up to: 8.3
@@ -78,10 +78,5 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
 == Changelog ==
-= 3.3 =
-* Performance enhancement: Removing excessive double opt-in api calls during initial sync 
-* Fix for translated product issue
-* Fix for ongoing sync settings failing when double opt-in enabled 
-* Fix for permalink conflicting with Webhook creation
-* Fix for GDPR Marketing Preferences not captured on checkout 
-* Word-wrap version update to 1.2.3 in blocks 
+= 3.4 =
+* Fix rest_url function for installs that are not using wp_rewrite

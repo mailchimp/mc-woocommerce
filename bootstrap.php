@@ -97,7 +97,7 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production', // staging or production
-        'version' => '3.3',
+        'version' => '3.4',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => function_exists('WC') ? WC()->version : null,
@@ -1215,9 +1215,6 @@ function run_mailchimp_woocommerce() {
     $env = mailchimp_environment_variables();
     $plugin = new MailChimp_WooCommerce($env->environment, $env->version);
     $plugin->run();
-    if (isset($_GET['restart_order_sync']) && $_GET['restart_order_sync'] === '1') {
-        mailchimp_as_push(new MailChimp_WooCommerce_Process_Orders());
-    }
 }
 
 function mailchimp_on_all_plugins_loaded() {

@@ -185,7 +185,7 @@ abstract class MailChimp_WooCommerce_Options
     public function getCached($key, $default = null)
     {
         $cached = $this->getData("cached-$key", false);
-        if (empty($cached) || !($cached = unserialize($cached))) {
+	    if (empty($cached) || !($cached = is_string($cached) ? unserialize($cached) : [])) {
             return $default;
         }
 

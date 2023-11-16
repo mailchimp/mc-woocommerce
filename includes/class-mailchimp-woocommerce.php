@@ -251,7 +251,7 @@ class MailChimp_WooCommerce
 
         $this->loader->add_action('plugins_loaded', $plugin_admin, 'update_db_check');
 		$this->loader->add_action('upgrader_process_complete', $plugin_admin, 'plugin_upgrade_completed', 10, 2);
-        $this->loader->add_action('plugins_loaded', $plugin_admin, 'update_plugin_check', 13);
+        $this->loader->add_action('init', $plugin_admin, 'update_plugin_check', 13);
         $this->loader->add_action('admin_init', $plugin_admin, 'setup_survey_form');
         $this->loader->add_action('admin_footer', $plugin_admin, 'inject_sync_ajax_call');
 
@@ -380,7 +380,7 @@ class MailChimp_WooCommerce
             $this->loader->add_action('edit_user_profile_update', $service, 'user_update_subscribe_status', 100);
             // cart hooks
             $this->loader->add_filter('woocommerce_update_cart_action_cart_updated', $service, 'handleCartUpdated');
-			$this->loader->add_filter('woocommerce_cart_contents_changed', $service, 'handleCartUpdated');
+			$this->loader->add_action('woocommerce_cart_item_set_quantity', $service, 'handleCartUpdated');
 			$this->loader->add_action('woocommerce_add_to_cart', $service, 'handleCartUpdated');
 			$this->loader->add_action('woocommerce_cart_item_removed', $service, 'handleCartUpdated');
 

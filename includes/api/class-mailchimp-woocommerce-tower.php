@@ -515,7 +515,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 			),
 			array(
 				'key'   => 'WP CLI Enabled',
-				'value' => defined('WP_CLI') && WP_CLI,
+				'value' => shell_exec('wp cli version') !== null,
 			),
 			array(
 				'key'   => 'Curl Enabled',

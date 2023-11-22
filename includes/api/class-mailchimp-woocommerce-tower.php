@@ -515,7 +515,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 			),
 			array(
 				'key'   => 'WP CLI Enabled',
-				'value' => shell_exec('wp cli version') !== null,
+				'value' => $this->is_shell_enabled() ? shell_exec('wp cli version') !== null : 'N/A',
 			),
 			array(
 				'key'   => 'Curl Enabled',
@@ -774,5 +774,20 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 			$action_date = '&ndash;';
 		}
 		return $action_date;
+	}
+
+	public function is_shell_enabled() {
+		/*Check if shell_exec() is enabled on this server*/
+		if ( function_exists( 'shell_exec' ) && ! in_array( 'shell_exec', array_map( 'trim', explode( ', ', ini_get( 'disable_functions' ) ) ) ) ) {
+			/*If enabled, check if shell_exec() actually have execution power*/
+			$returnVal = shell_exec( 'cat /proc/cpuinfo' );
+			if ( ! empty( $returnVal ) ) {
+				return true;
+			}
+
+			return false;
+		}
+
+		return false;
 	}
 }

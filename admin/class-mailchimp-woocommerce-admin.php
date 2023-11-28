@@ -364,6 +364,13 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * Displays notice when plugin is installed but not yet configured / connected to Mailchimp.
 	 */
 	public function initial_notice() {
+		global $pagenow;
+
+        // if we're on the mc admin setup pages - don't do anything
+		if ($pagenow == 'admin.php' && isset( $_GET ) && isset( $_GET['page'] ) && 'mailchimp-woocommerce' === $_GET['page'] ) {
+            return null;
+		}
+
         // if they've logged in oauth - but have not selected a list id yet - show the admin notice.
 		if ( (bool) (mailchimp_get_api_key() && !mailchimp_get_list_id())) {
 			$class   = 'notice notice-warning is-dismissible';

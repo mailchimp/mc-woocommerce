@@ -678,7 +678,13 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     public function getCartItems()
     {
         if (!($this->cart = $this->getWooSession('cart', false))) {
-            $this->cart = !function_exists('WC') ? false : WC()->cart->get_cart();
+			if (!function_exists('WC')) {
+				$this->cart = false;
+			} else if (WC()->cart) {
+				$this->cart = WC()->cart->get_cart();
+			} else {
+				return false;
+			}
         } else {
             $cart_session = array();
             foreach ( $this->cart as $key => $values ) {

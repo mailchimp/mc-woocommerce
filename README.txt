@@ -80,3 +80,6 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 == Changelog ==
 = 3.4 =
 * Fix rest_url function for installs that are not using wp_rewrite
+* Strict type-checks before calling unserialize
+* Better wp-cli detection for support
+* Fix webhook validation during plugin updates

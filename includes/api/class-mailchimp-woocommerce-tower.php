@@ -672,7 +672,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 		$akamai_block   = false;
 
 		if ( (bool) $enable ) {
-			mailchimp_set_data( 'tower.token', $support_token = wp_generate_password() );
+			mailchimp_set_data( 'tower.token', $support_token = wp_generate_password(12, false, false) );
 		} else {
 			$support_token = mailchimp_get_data( 'tower.token' );
 			delete_option( 'mailchimp-woocommerce-tower.support_token' );

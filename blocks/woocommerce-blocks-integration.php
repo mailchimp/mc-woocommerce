@@ -245,21 +245,15 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
 
         $tracking = MailChimp_Service::instance()->onNewOrder($order->get_id());
         // queue up the single order to be processed.
-        $campaign_id = isset($tracking) && isset($tracking['campaign_id']) ? $tracking['campaign_id'] : null;
         $landing_site = isset($tracking) && isset($tracking['landing_site']) ? $tracking['landing_site'] : null;
         $language = substr( get_locale(), 0, 2 );
 
         // update the post meta with campaign tracking details for future sync
-        if (!empty($campaign_id)) {
-            MailChimp_WooCommerce_HPOS::update_order_meta($order->get_id(), 'mailchimp_woocommerce_campaign_id', $campaign_id);
-            /*update_post_meta($order->get_id(), 'mailchimp_woocommerce_campaign_id', $campaign_id);*/
-        }
         if (!empty($landing_site)) {
             MailChimp_WooCommerce_HPOS::update_order_meta($order->get_id(), 'mailchimp_woocommerce_landing_site', $landing_site);
-            //update_post_meta($order->get_id(), 'mailchimp_woocommerce_landing_site', $landing_site);
         }
 
-        $handler = new MailChimp_WooCommerce_Single_Order($order->get_id(), null, $campaign_id, $landing_site, $language, $gdpr_fields);
+        $handler = new MailChimp_WooCommerce_Single_Order($order->get_id(), null, $landing_site, $language, $gdpr_fields);
         $handler->is_update = false;
         $handler->is_admin_save = is_admin();
 

@@ -13,7 +13,6 @@ class MailChimp_WooCommerce_Cart {
 	protected $store_id;
 	protected $id;
 	protected $customer;
-	protected $campaign_id;
 	protected $checkout_url;
 	protected $currency_code;
 	protected $order_total;
@@ -77,36 +76,6 @@ class MailChimp_WooCommerce_Cart {
 		}
 
 		return $this->customer;
-	}
-
-	/**
-	 * @param $id
-	 * @param bool $throw_if_invalid
-	 * @return $this
-	 * @throws Exception
-	 */
-	public function setCampaignID( $id, $throw_if_invalid = false ) {
-		$api = MailChimp_WooCommerce_MailChimpApi::getInstance();
-		$cid = trim( $id );
-		if ( ! empty( $cid ) && ( $campaign = $api->getCampaign( $cid, $throw_if_invalid ) ) ) {
-			$this->campaign_id = $campaign['id'];
-		}
-		return $this;
-	}
-
-	/**
-	 * @return $this
-	 */
-	public function removeCampaignID() {
-		$this->campaign_id = null;
-		return $this;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function getCampaignID() {
-		return $this->campaign_id;
 	}
 
 	/**
@@ -208,7 +177,6 @@ class MailChimp_WooCommerce_Cart {
 			array(
 				'id'            => (string) $this->getId(),
 				'customer'      => $this->getCustomer()->toArray(),
-				'campaign_id'   => (string) $this->getCampaignID(),
 				'checkout_url'  => (string) $this->getCheckoutURL(),
 				'currency_code' => (string) $this->getCurrencyCode(),
 				'order_total'   => floatval( $this->getOrderTotal() ),
@@ -229,7 +197,6 @@ class MailChimp_WooCommerce_Cart {
 	public function toArrayForUpdate() {
 		return mailchimp_array_remove_empty(
 			array(
-				'campaign_id'   => (string) $this->getCampaignID(),
 				'checkout_url'  => (string) $this->getCheckoutURL(),
 				'currency_code' => (string) $this->getCurrencyCode(),
 				'order_total'   => $this->getOrderTotal(),
@@ -252,7 +219,6 @@ class MailChimp_WooCommerce_Cart {
 		$singles = array(
 			'store_id',
 			'id',
-			'campaign_id',
 			'checkout_url',
 			'currency_code',
 			'order_total',

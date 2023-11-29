@@ -14,7 +14,6 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 {
     public $id;
     public $cart_session_id;
-    public $campaign_id;
     public $landing_site;
     public $user_language;
     public $is_update = false;
@@ -31,16 +30,14 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 	 *
 	 * @param null $id
 	 * @param null $cart_session_id
-	 * @param null $campaign_id
 	 * @param null $landing_site
 	 * @param null $user_language
 	 * @param null $gdpr_fields
 	 */
-    public function __construct($id = null, $cart_session_id = null, $campaign_id = null, $landing_site = null, $user_language = null, $gdpr_fields = null)
+    public function __construct($id = null, $cart_session_id = null, $landing_site = null, $user_language = null, $gdpr_fields = null)
     {
         if (!empty($id)) $this->id = $id;
         if (!empty($cart_session_id)) $this->cart_session_id = $cart_session_id;
-        if (!empty($campaign_id)) $this->campaign_id = $campaign_id;
         if (!empty($landing_site)) $this->landing_site = $landing_site;
         if (!empty($user_language)) $this->user_language = $user_language;
         if (!empty($gdpr_fields)) $this->gdpr_fields = $gdpr_fields;
@@ -118,9 +115,6 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
         $job = new MailChimp_WooCommerce_Transform_Orders();
 
-        // set the campaign ID
-        $job->campaign_id = $this->campaign_id;
-
         try {
             $call = ($api_response = $api->getStoreOrder($store_id, $woo_order_number, true)) ? 'updateStoreOrder' : 'addStoreOrder';
         } catch (Exception $e) {
@@ -141,15 +135,13 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
         // if we already pushed this order into the system, we need to unset it now just in case there
         // was another campaign that had been sent and this was only an order update.
         if (!$new_order) {
-            $job->campaign_id = null;
-            $this->campaign_id = null;
             $this->landing_site = null;
         }
 
 	    $email = null;
 
         // will either add or update the order
-        try {            
+        try {
             if (!($order_post = MailChimp_WooCommerce_HPOS::get_order($this->id))) {
                 return false;
             }
@@ -262,18 +254,6 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             // will be the same as the customer id. an md5'd hash of a lowercased email.
             $this->cart_session_id = $order->getCustomer()->getId();
 
-            // see if we have a campaign ID already from the order transformer / cookie.
-            $campaign_id = $order->getCampaignId();
-
-            // if the campaign ID is empty, and we have a cart session id
-            if (empty($campaign_id) && !empty($this->cart_session_id)) {
-                // pull the cart info from Mailchimp
-                if (($abandoned_cart_record = $api->getCart($store_id, $this->cart_session_id))) {
-                    // set the campaign ID
-                    $order->setCampaignId($this->campaign_id = $abandoned_cart_record->getCampaignID());
-                }
-            }
-
             if ($order->getOriginalWooStatus() !== 'pending') {
                 // delete the AC cart record.
                 $deleted_abandoned_cart = !empty($this->cart_session_id) && $api->deleteCartByID($store_id, $this->cart_session_id);
@@ -320,53 +300,12 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
             $log = "$call :: #{$order->getId()} :: email: {$email}";
 
-            // if we have the saved order meta from previous syncs let's use it.
-            // This should help with reporting after people may have disconnected and reconnected to a new store.
-            if ($saved = $order_post->get_meta('mailchimp_woocommerce_campaign_id') ) {
-                $this->campaign_id = $saved;
-            }
             // only do this stuff on new orders
-            if ($new_order) {
-
-            	// if the campaign ID is empty, let's try to pull the last clicked campaign from Mailchimp.
-	            // but only do this if we're not in a syncing status.
-            	if (empty($this->campaign_id) && !$this->is_full_sync) {
-            		// see if we have a saved version
-		            // pull the last clicked campaign for this email address
-		            $job = new MailChimp_WooCommerce_Pull_Last_Campaign($email);
-					$job->handle();
-
-					/// get the click date
-		            $clicked = $job->getClickDate();
-					$processed = $order->getProcessedAtDate();
-
-					// if the order was placed after the click event we can assign the campaign id.
-					if ($clicked && $processed && $processed->getTimestamp() > $clicked->getTimestamp()) {
-						$this->campaign_id = $job->getCampaignID();
-						mailchimp_debug('campaign_id', "Order {$order->getId()} pulled mailchimp user activity for {$email} and found campaign {$this->campaign_id}, clicked on {$clicked->format( 'Y-m-d H:i:s' )}");
-					}
-	            }
-
-                // apply a campaign id if we have one.
-                if (!empty($this->campaign_id)) {
-                    try {
-                        $order->setCampaignId($this->campaign_id);
-                        $log .= ' :: campaign id ' . $this->campaign_id;
-                        // save it for later if we don't have this value.
-                        MailChimp_WooCommerce_HPOS::update_order_meta($order_post->get_id(), 'mailchimp_woocommerce_campaign_id', $campaign_id);
-                        //update_post_meta($order_post->ID, 'mailchimp_woocommerce_campaign_id', $campaign_id);
-                    }
-                    catch (Exception $e) {
-                        mailchimp_log('single_order_set_campaign_id.error', 'No campaign added to order, with provided ID: '. $this->campaign_id. ' :: '. $e->getMessage(). ' :: in '.$e->getFile().' :: on '.$e->getLine());
-                    }
-                }
-
-                // apply the landing site if we have one.
-                if (!empty($this->landing_site)) {
-                    $log .= ' :: landing site ' . $this->landing_site;
-                    $order->setLandingSite($this->landing_site);
-                }
-            }
+	        // apply the landing site if we have one.
+	        if ( $new_order && ! empty( $this->landing_site ) ) {
+	            $log .= ' :: landing site ' . $this->landing_site;
+	            $order->setLandingSite($this->landing_site);
+	        }
 
             if ($this->is_full_sync) {
                 $line_items = $order->items();
@@ -446,7 +385,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
             if ($this->is_full_sync && $new_order) {
                 // if the customer has a flag to double opt in - we need to push this data over to MailChimp as pending
-                //TODO: RYAN: this is the only place getOriginalSubscriberStatus() is called, but the iterate method uses another way. 
+                //TODO: RYAN: this is the only place getOriginalSubscriberStatus() is called, but the iterate method uses another way.
                 // mailchimp_update_member_with_double_opt_in($order, ($should_auto_subscribe || $status));
                 mailchimp_update_member_with_double_opt_in($order, ((isset($should_auto_subscribe) && $should_auto_subscribe) || $order->getCustomer()->getOriginalSubscriberStatus()));
             }
@@ -467,7 +406,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             $message = strtolower($e->getMessage());
             mailchimp_error('order_submit.tracing_error', $e);
             if (!isset($order)) {
-                // transform the order                
+                // transform the order
                 $order = MailChimp_WooCommerce_HPOS::get_order($this->id);
                 /*$order = $job->transform(get_post($this->id));*/
                 $this->cart_session_id = $order->getCustomer()->getId();
@@ -481,9 +420,6 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                     // update or create
                     $api_response = $api->$call($store_id, $order, false);
                     $log = "Deleted Customer :: $call :: #{$order->getId()} :: email: {$email}";
-                    if (!empty($job->campaign_id)) {
-                        $log .= ' :: campaign id '.$job->campaign_id;
-                    }
                     mailchimp_log('order_submit.success', $log);
                     // if we're adding a new order and the session id is here, we need to delete the AC cart record.
                     if (!empty($this->cart_session_id)) {
@@ -503,7 +439,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
      */
     public function getRealOrderNumber()
     {
-        try {            
+        try {
             if (empty($this->id) || !($order_post = MailChimp_WooCommerce_HPOS::get_order($this->id))) {
                 return false;
             }

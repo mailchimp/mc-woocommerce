@@ -344,11 +344,6 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                     $api->handleProductsMissingFromAPI($order);
                     // make another attempt again to add the order.
                     $api_response = $api->$call($store_id, $order, false);
-                } elseif (mailchimp_string_contains($e->getMessage(), 'campaign with the provided ID')) {
-                    // the campaign was invalid, we need to remove it and re-submit
-                    $order->setCampaignId(null);
-                    // make another attempt again to add the order.
-                    $api_response = $api->$call($store_id, $order, false);
                 } else {
                     throw $e;
                 }
@@ -362,6 +357,13 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             if (isset($deleted_abandoned_cart) && $deleted_abandoned_cart) {
                 $log .= " :: abandoned cart deleted [{$this->cart_session_id}]";
             }
+
+			// log the campaign id if we have this value from the API response.
+	        if ( $new_order && $api_response instanceof MailChimp_WooCommerce_Order ) {
+				if (($campaign_id = $api_response->getCampaignId()) && !empty($campaign_id)) {
+					$log .= " :: campaign id {$campaign_id}";
+				}
+	        }
 
             // if we require double opt in on the list, and the customer requires double opt in,
             // we should mark them as pending so they get the opt in email now.

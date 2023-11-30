@@ -13,6 +13,7 @@ class MailChimp_WooCommerce_Order {
 	protected $id                   = null;
 	protected $landing_site         = null;
 	protected $customer             = null;
+	protected $campaign_id          = null;
 	protected $financial_status     = null;
 	protected $fulfillment_status   = null;
 	protected $currency_code        = null;
@@ -112,6 +113,7 @@ class MailChimp_WooCommerce_Order {
 			'id'                   => 'required|string',
 			'landing_site'         => 'required|string',
 			'customer'             => 'required',
+			'campaign_id'          => 'string',
 			'financial_status'     => 'string',
 			'fulfillment_status'   => 'string',
 			'currency_code'        => 'required|currency_code',
@@ -217,6 +219,35 @@ class MailChimp_WooCommerce_Order {
 	 */
 	public function items() {
 		return $this->lines;
+	}
+
+	/**
+	 * @return null
+	 */
+	public function getCampaignId() {
+		// if the campaign ID is empty, let's try to pull the last clicked campaign from Mailchimp.
+		if (empty($this->campaign_id)) {
+			$job = new MailChimp_WooCommerce_Pull_Last_Campaign($this->getCustomer()->getEmailAddress());
+			$this->campaign_id = $job->handle();
+		}
+		return $this->campaign_id;
+	}
+
+	/**
+	 * @param $id
+	 *
+	 * @return $this
+	 * @throws MailChimp_WooCommerce_Error
+	 * @throws MailChimp_WooCommerce_RateLimitError
+	 * @throws MailChimp_WooCommerce_ServerError
+	 */
+	public function setCampaignId( $id ) {
+		$api = MailChimp_WooCommerce_MailChimpApi::getInstance();
+		$cid = trim( $id );
+		if ( ! empty( $cid ) && $campaign = $api->getCampaign( $cid, false ) ) {
+			$this->campaign_id = $campaign['id'];
+		}
+		return $this;
 	}
 
 	/**
@@ -560,12 +591,15 @@ class MailChimp_WooCommerce_Order {
 	 * @return array
 	 */
 	public function toArray() {
+		$campaign_id = (string) $this->getCampaignId();
 		$this->setTrackingInfo();
 		return mailchimp_array_remove_empty(
 			array(
 				'id'                   => (string) $this->getId(),
 				'landing_site'         => (string) $this->getLandingSite(),
 				'customer'             => $this->getCustomer()->toArray(),
+				// 'campaign_id' => (string) $this->getCampaignId(),
+				'outreach'             => $campaign_id ? array( 'id' => $campaign_id ) : null,
 				'financial_status'     => (string) $this->getFinancialStatus(),
 				'fulfillment_status'   => (string) $this->getFulfillmentStatus(),
 				'currency_code'        => (string) $this->getCurrencyCode(),
@@ -602,6 +636,7 @@ class MailChimp_WooCommerce_Order {
 		$singles = array(
 			'id',
 			'landing_site',
+			'campaign_id',
 			'financial_status',
 			'fulfillment_status',
 			'currency_code',
@@ -648,6 +683,11 @@ class MailChimp_WooCommerce_Order {
 		if ( array_key_exists( 'customer', $data ) ) {
 			$customer_object = new MailChimp_WooCommerce_Customer();
 			$this->setCustomer( $customer_object->fromArray( $data['customer'] ) );
+		}
+
+		// apply the campaign id from the response if there is one.
+		if (array_key_exists('outreach', $data) && !empty($data['outreach']) && array_key_exists('id', $data['outreach'])) {
+			$this->setCampaignId($data['outreach']['id']);
 		}
 
 		return $this;

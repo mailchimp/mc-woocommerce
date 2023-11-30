@@ -420,9 +420,6 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                     // update or create
                     $api_response = $api->$call($store_id, $order, false);
                     $log = "Deleted Customer :: $call :: #{$order->getId()} :: email: {$email}";
-                    if ( ! empty( $api_response->campaign_id ) ) {
-                        $log .= ' :: campaign id ' . $api_response->campaign_id;
-                    }
                     mailchimp_log('order_submit.success', $log);
                     // if we're adding a new order and the session id is here, we need to delete the AC cart record.
                     if (!empty($this->cart_session_id)) {

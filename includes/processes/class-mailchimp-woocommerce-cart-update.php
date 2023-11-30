@@ -13,7 +13,6 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
     public $id;
     public $email;
     public $previous_email;
-    public $campaign_id;
     public $cart_data;
     public $ip_address;
     public $user_language;
@@ -25,11 +24,10 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
 	 *
 	 * @param null $uid
 	 * @param null $email
-	 * @param null $campaign_id
 	 * @param array $cart_data
 	 * @param null $user_language
 	 */
-    public function __construct($uid = null, $email = null, $campaign_id = null, array $cart_data = array(), $user_language = null)
+    public function __construct($uid = null, $email = null, array $cart_data = array(), $user_language = null)
     {
         if ($uid) {
             $this->id = $uid;
@@ -41,10 +39,6 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
             $this->cart_data = json_encode($cart_data);
         }
 
-        if ($campaign_id) {
-            $this->campaign_id = $campaign_id;
-        }
-        
         if ($user_language) {
             $this->user_language = $user_language;
         }
@@ -126,15 +120,6 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
 
             $cart = new MailChimp_WooCommerce_Cart();
             $cart->setId($this->id);
-
-            // if we have a campaign id let's set it now.
-            if (!empty($this->campaign_id)) {
-                try {
-                    $cart->setCampaignID($this->campaign_id, true);
-                } catch (Exception $e) {
-                    mailchimp_log('cart_set_campaign_id.error', 'No campaign added to abandoned cart, with provided ID: '. $this->campaign_id. ' :: '. $e->getMessage(). ' :: in '.$e->getFile().' :: on '.$e->getLine());
-                }
-            }
 
             $cart->setCheckoutUrl($checkout_url);
             $cart->setCurrencyCode();

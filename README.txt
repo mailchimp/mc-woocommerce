@@ -7,7 +7,7 @@ Tested up to: 6.4
 Stable tag: 3.3
 Requires PHP: 7.4
 WC requires at least: 4.2
-WC tested up to: 8.3
+WC tested up to: 8.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your Mailchimp audience to track sales, create targeted emails, send abandoned cart emails, and more.
@@ -78,8 +78,7 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
 == Changelog ==
-= 3.4 =
-* Fix rest_url function for installs that are not using wp_rewrite
-* Strict type-checks before calling unserialize
-* Better wp-cli detection for support
-* Fix webhook validation during plugin updates
+= 3.5 =
+* Support for updated Mailchimp attribution methods
+* Adds a Continue to Mailchimp CTA to Woo Dashboard UI
+* Tested for WooCommerce v8.4 compatibility

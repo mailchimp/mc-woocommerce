@@ -1,4 +1,8 @@
 == Changelog ==
+= 3.5 =
+* Support for updated Mailchimp attribution methods
+* Adds a Continue to Mailchimp CTA to Woo Dashboard UI
+* Tested for WooCommerce v8.4 compatibility
 = 3.4 =
 * Fix rest_url function for installs that are not using wp_rewrite
 * Strict type-checks before calling unserialize

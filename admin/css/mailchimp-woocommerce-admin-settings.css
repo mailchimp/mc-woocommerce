@@ -125,6 +125,12 @@ a.button.back-step {
 	padding-left: 58px;
 }
 
+.mc-woocommerce-settings-subtitles-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
 .mc-woocommerce-settings-subtitles {
 	font-family: "proxima-nova", Arial, Helvetica, sans-serif;
 	font-size: 22px !important;
@@ -1226,6 +1232,14 @@ a.button.create-account {
 	left: 0;
 	background: rgb(255,255,255);
 	background: linear-gradient(0deg, rgba(255,255,255,0) 10%, rgba(255,255,255,0.6964986678265056) 36%, rgba(255,255,255,1) 100%);
+}
+
+@media screen and (max-width: 960px) {
+	.mc-woocommerce-settings-subtitles-row {
+		flex-direction: column;
+		align-items: flex-start;
+		margin-bottom: 1.69em;
+	}
 }
 
 @media screen and (max-width: 782px) {

@@ -725,10 +725,6 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             }
         }
 
-        if (isset($_GET['mc_cid'])) {
-            $this->setCampaignTrackingID($_GET['mc_cid'], $cookie_duration);
-        }
-
         if (isset($_GET['mc_eid'])) {
             mailchimp_set_cookie('mailchimp_email_id', trim($_GET['mc_eid']), $cookie_duration, '/' );
         }

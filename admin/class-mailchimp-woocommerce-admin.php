@@ -554,7 +554,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 			$this->update_db_check();
 
-			mailchimp_log('webhooks', 'Deleted old plugin webhooks');
+			mailchimp_log('webhooks', 'Ran plugin updater');
 		}
 	}
 

@@ -77,12 +77,12 @@ class MailChimp_WooCommerce_WebHooks_Sync extends Mailchimp_Woocommerce_Job
 				if ($href && mailchimp_string_contains($href, $rest_url)) {
 					if (!empty($token) && mailchimp_string_contains($href, $token)) {
 						$this->skip_creation = true;
-						mailchimp_log('webhooks', "Verified webhook {$hook['id']} :: {$href}");
+						mailchimp_log('webhooks', "Verified webhook {$hook['id']}");
 						continue;
 					}
 					$api->deleteWebhookByID($list, $hook['id']);
 					$deleted[] = $hook['id'];
-					mailchimp_log('webhooks', "Deleted old plugin webhook id {$hook['id']} :: {$href}");
+					mailchimp_log('webhooks', "Deleted old plugin webhook id {$hook['id']}");
 				}
 			}
 

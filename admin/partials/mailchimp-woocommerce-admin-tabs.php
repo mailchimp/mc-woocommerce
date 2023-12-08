@@ -213,7 +213,7 @@ if ( isset( $options['mailchimp_api_key'] ) ) {
 							?>
 						</p>
 						<?php if ( 'sync' === $active_tab && $show_sync_tab ): ?>
-							<a href="http://admin.mailchimp.com/integrations/manage?name=woocommerce" target="_blank" class="button button-primary tab-content-submit mc-woocommerce-settings-subtitles-cta">Continue to Mailchimp</a>
+							<a href="http://admin.mailchimp.com/integrations/manage?name=woocommerce&source=partner" target="_blank" class="button button-primary tab-content-submit mc-woocommerce-settings-subtitles-cta">Continue to Mailchimp</a>
 						<?php endif; ?>
 					</div>
 					<div class="nav-tab-wrapper">

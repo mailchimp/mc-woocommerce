@@ -191,7 +191,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 				'average_monthly_sales' => $this->getShopSales(),
 				'address'               => (object) array(
 					'street'  => isset( $options['store_street'] ) && $options['store_street'] ? $options['store_street'] : '',
-					'city'    => isset( $options['store_street'] ) && $options['store_street'] ? $options['store_street'] : '',
+					'city'    => isset( $options['store_city'] ) && $options['store_city'] ? $options['store_city'] : '',
 					'state'   => isset( $options['store_state'] ) && $options['store_state'] ? $options['store_state'] : '',
 					'country' => isset( $options['store_country'] ) && $options['store_country'] ? $options['store_country'] : '',
 					'zip'     => isset( $options['store_postal_code'] ) && $options['store_postal_code'] ? $options['store_postal_code'] : '',
@@ -298,7 +298,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 						),
 						'wp_cron_enabled' => (object) array(
 							'key' => 'wp_cron_enabled',
-							'value' => function_exists( 'curl_init' ),
+							'value' => !defined('DISABLE_WP_CRON') || DISABLE_WP_CRON === false,
 						),
 						'akamai_blocked' => (object) array(
 							'key' => 'segment.akamai_blocked',
@@ -515,7 +515,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 			),
 			array(
 				'key'   => 'WP CLI Enabled',
-				'value' => defined('WP_CLI') && WP_CLI,
+				'value' => $this->is_shell_enabled() ? shell_exec('wp cli version') !== null : 'N/A',
 			),
 			array(
 				'key'   => 'Curl Enabled',
@@ -672,7 +672,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 		$akamai_block   = false;
 
 		if ( (bool) $enable ) {
-			mailchimp_set_data( 'tower.token', $support_token = wp_generate_password() );
+			mailchimp_set_data( 'tower.token', $support_token = wp_generate_password(12, false, false) );
 		} else {
 			$support_token = mailchimp_get_data( 'tower.token' );
 			delete_option( 'mailchimp-woocommerce-tower.support_token' );
@@ -774,5 +774,20 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 			$action_date = '&ndash;';
 		}
 		return $action_date;
+	}
+
+	public function is_shell_enabled() {
+		/*Check if shell_exec() is enabled on this server*/
+		if ( function_exists( 'shell_exec' ) && ! in_array( 'shell_exec', array_map( 'trim', explode( ', ', ini_get( 'disable_functions' ) ) ) ) ) {
+			/*If enabled, check if shell_exec() actually have execution power*/
+			$returnVal = shell_exec( 'pwd' );
+			if ( ! empty( $returnVal ) ) {
+				return true;
+			}
+
+			return false;
+		}
+
+		return false;
 	}
 }

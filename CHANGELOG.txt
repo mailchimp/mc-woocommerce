@@ -1,4 +1,20 @@
 == Changelog ==
+= 3.5 =
+* Support for updated Mailchimp attribution methods
+* Adds a Continue to Mailchimp CTA to Woo Dashboard UI
+* Tested for WooCommerce v8.4 compatibility
+= 3.4 =
+* Fix rest_url function for installs that are not using wp_rewrite
+* Strict type-checks before calling unserialize
+* Better wp-cli detection for support
+* Fix webhook validation during plugin updates
+= 3.3 =
+* Performance enhancement: Removing excessive double opt-in api calls during initial sync 
+* Fix for translated product issue
+* Fix for ongoing sync settings failing when double opt-in enabled 
+* Fix for permalink conflicting with Webhook creation
+* Fix for GDPR Marketing Preferences not captured on checkout 
+* Word-wrap version update to 1.2.3 in blocks 
 = 3.2 =
 * Released: 08-21-2023
 * fix for too few arguments to function MailChimp_Service::handleOrderUpdate()

@@ -68,7 +68,6 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_Process_Full_Sync_Manager' => 'includes/processes/class-mailchimp-woocommerce-full-sync-manager.php',
         'MailChimp_WooCommerce_Subscriber_Sync' => 'includes/processes/class-mailchimp-woocommerce-subscriber-sync.php',
         'MailChimp_WooCommerce_WebHooks_Sync' => 'includes/processes/class-mailchimp-woocommerce-webhooks-sync.php',
-        'MailChimp_WooCommerce_Pull_Last_Campaign' => 'includes/processes/class-mailchimp-woocommerce-pull-last-campaign.php',
 
         'MailChimp_WooCommerce_Public' => 'public/class-mailchimp-woocommerce-public.php',
         'MailChimp_WooCommerce_Admin' => 'admin/class-mailchimp-woocommerce-admin.php',
@@ -97,7 +96,7 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production', // staging or production
-        'version' => '3.3',
+        'version' => '3.5',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => function_exists('WC') ? WC()->version : null,
@@ -336,8 +335,9 @@ function mailchimp_get_list_id() {
  * @return string
  */
 function mailchimp_build_webhook_url( $key ) {
-    //$key = base64_encode($key);
-    return MailChimp_WooCommerce_Rest_Api::url('member-sync') . '?auth=' . $key;
+	$rest_url = MailChimp_WooCommerce_Rest_Api::url('member-sync');
+	$qs = mailchimp_string_contains($rest_url, '/wp-json/') ? '?' : '&';
+    return $rest_url.$qs."auth={$key}";
 }
 /**
  * Generate random string
@@ -1214,9 +1214,6 @@ function run_mailchimp_woocommerce() {
     $env = mailchimp_environment_variables();
     $plugin = new MailChimp_WooCommerce($env->environment, $env->version);
     $plugin->run();
-    if (isset($_GET['restart_order_sync']) && $_GET['restart_order_sync'] === '1') {
-        mailchimp_as_push(new MailChimp_WooCommerce_Process_Orders());
-    }
 }
 
 function mailchimp_on_all_plugins_loaded() {
@@ -1387,7 +1384,7 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
             if ($member['status'] === 'transactional' && in_array($status_if_new, array('subscribed', 'pending'))) {
                 $member['status'] = $status_if_new;
             }
-            if (($member['status'] === 'transactional' && in_array($status_if_new, array('subscribed', 'pending'))) || $member['status'] === 'subscribed') {
+            if (($member['status'] === 'transactional' && in_array($status_if_new, array('subscribed', 'pending'))) || $member['status'] === 'subscribed' || $member['status'] === 'pending') {
                 if (!empty($gdpr_fields) && is_array($gdpr_fields)) {
                     $gdpr_fields_to_save = [];
                     foreach ($gdpr_fields as $id => $value) {

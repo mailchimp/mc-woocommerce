@@ -112,7 +112,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			if ( get_bloginfo( 'version' ) < '5.3' ) {
 				wp_enqueue_style( $this->plugin_name . '-settings', plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin-settings-5.2.css', array(), $this->version );
 			}
-			wp_enqueue_style( $this->plugin_name . '-settings', plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin-settings.css', array(), $this->version );
+			wp_enqueue_style( $this->plugin_name . '-settings', plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin-settings.css', array(), $this->version . '.01' );
 			wp_style_add_data( $this->plugin_name . '-settings', 'rtl', 'replace' );
 		}
 	}
@@ -364,7 +364,15 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * Displays notice when plugin is installed but not yet configured / connected to Mailchimp.
 	 */
 	public function initial_notice() {
-		if ( ! mailchimp_is_configured() ) {
+		global $pagenow;
+
+        // if we're on the mc admin setup pages - don't do anything
+		if ($pagenow == 'admin.php' && isset( $_GET ) && isset( $_GET['page'] ) && 'mailchimp-woocommerce' === $_GET['page'] ) {
+            return null;
+		}
+
+        // if they've logged in oauth - but have not selected a list id yet - show the admin notice.
+		if ( (bool) (mailchimp_get_api_key() && !mailchimp_get_list_id())) {
 			$class   = 'notice notice-warning is-dismissible';
 			$message = sprintf(
 			/* translators: Placeholders %1$s - opening strong HTML tag, %2$s - closing strong HTML tag, %3$s - opening link HTML tag, %4$s - closing link HTML tag */
@@ -546,7 +554,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 			$this->update_db_check();
 
-			mailchimp_log('webhooks', 'Deleted old plugin webhooks');
+			mailchimp_log('webhooks', 'Ran plugin updater');
 		}
 	}
 
@@ -2119,7 +2127,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	protected function adminOnlyMiddleware( $message = "You're not allowed to do this" ) {
 		if ( ! current_user_can( mailchimp_get_allowed_capability() ) ) {
-			wp_send_json_error( array( 'message' => $message ) );
+            $error = new \Exception();
+            mailchimp_debug('admin', 'tracing admin json error', $error->getTrace());
+			wp_send_json_error( array( 'message' => $message, 'from' => 'mailchimp-for-woocommerce' ) );
 		}
 		return true;
 	}

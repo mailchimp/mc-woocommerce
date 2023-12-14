@@ -25,8 +25,8 @@ const Block = ( { cart, extensions, text, gdprHeadline, gdprStatus, gdpr, checko
 	}, [ checked, setExtensionData ] );
 
 	return (
-		<>
-			<div style={{ display: gdprStatus === 'hide' ? 'none' : 'block' }}>
+		<div className='wc-block-components-checkout-step__container'>
+			<div style={{ display: gdprStatus === 'hide' ? 'none' : '' }} className='wc-block-components-checkout-step__content'>
 				<CheckboxControl
 					id="subscribe-to-newsletter"
 					checked={ checked }
@@ -48,7 +48,7 @@ const Block = ( { cart, extensions, text, gdprHeadline, gdprStatus, gdpr, checko
 					</CheckboxControl>);
 				}) : ''}
 			</div>
-		</>
+		</div>
 	);
 };
 

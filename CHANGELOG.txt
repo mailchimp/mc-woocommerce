@@ -1,4 +1,7 @@
 == Changelog ==
+= 3.6 =
+* Add support for product image size changes
+* Add sync filter for order post types
 = 3.5 =
 * Support for updated Mailchimp attribution methods
 * Adds a Continue to Mailchimp CTA to Woo Dashboard UI

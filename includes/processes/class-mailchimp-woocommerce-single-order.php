@@ -101,6 +101,15 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
         $order = wc_get_order($woo_order_number);
 		$wordpress_user_id = null;
 
+        $order_post_type_list = apply_filters( 'mailchimp_should_push_order_post_type_list', [
+            'shop_order'
+        ]);
+
+        if ( ! in_array( $order->get_type(), $order_post_type_list ) ) {
+            mailchimp_debug('filter', "Order {$woo_order_number} was skipped by the filter");
+            return false;
+        }
+
         if ( $order ) {
 			$wordpress_user_id = $order->get_user_id();
             $user   = get_user_by( 'ID', $order->get_user_id() );

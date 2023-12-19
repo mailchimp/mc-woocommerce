@@ -1291,6 +1291,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				$data['mailchimp_list'] = $this->swapped_list_id;
 			}
 
+			// run sync all products if the image size has changed
+			if ( mailchimp_get_option( 'mailchimp_product_image_key', 'medium' ) !== $data['mailchimp_product_image_key'] ) {
+				 mailchimp_handle_or_queue(new MailChimp_WooCommerce_Process_Products());
+			}
+
 			// start the sync automatically if the sync is false
 			if ( $store_created && ( (bool) $this->getData( 'sync.started_at', false ) === false ) ) {
 				// tell the next page view to start the sync with a transient since the data isn't available yet

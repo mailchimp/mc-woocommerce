@@ -50,7 +50,7 @@ function mailchimp_woocommerce_uninstall() {
                 }
 
 				$webhooks = new MailChimp_WooCommerce_WebHooks_Sync;
-				$webhooks->cleanHooks();
+				$webhooks->cleanHooks(true);
             }
         }
     } catch (Exception $e) {

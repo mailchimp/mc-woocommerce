@@ -71,7 +71,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
         // delete the webhooks on store disconnects.
 		$webhooks = new MailChimp_WooCommerce_WebHooks_Sync;
-		$webhooks->cleanHooks();
+		$webhooks->cleanHooks(true);
 
 		// clean database
 		mailchimp_clean_database();
@@ -1289,6 +1289,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			// if there was already a store in Mailchimp, use the list ID from Mailchimp
 			if ( $this->swapped_list_id ) {
 				$data['mailchimp_list'] = $this->swapped_list_id;
+			}
+
+			// run sync all products if the image size has changed
+			if ( mailchimp_get_option( 'mailchimp_product_image_key', 'medium' ) !== $data['mailchimp_product_image_key'] ) {
+				 mailchimp_handle_or_queue(new MailChimp_WooCommerce_Process_Products());
 			}
 
 			// start the sync automatically if the sync is false

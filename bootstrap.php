@@ -96,7 +96,7 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production', // staging or production
-        'version' => '3.5',
+        'version' => '3.6',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => function_exists('WC') ? WC()->version : null,
@@ -657,6 +657,8 @@ function mailchimp_woocommerce_get_all_image_sizes_list() {
     foreach (mailchimp_woocommerce_get_all_image_sizes() as $key => $data) {
         $label = ucwords(str_replace('_', ' ', $key));
         $label = __($label);
+        $data['height'] = $data['height'] !== 0 ? $data['height'] : 'auto';
+        $data['width'] = $data['width'] !== 0 ? $data['width'] : 'auto';
         $response[$key] = "{$label} ({$data['width']} x {$data['height']})";
     }
     return $response;

@@ -7,7 +7,7 @@ Tested up to: 6.4
 Stable tag: 3.5
 Requires PHP: 7.4
 WC requires at least: 4.2
-WC tested up to: 8.4
+WC tested up to: 8.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your Mailchimp audience to track sales, create targeted emails, send abandoned cart emails, and more.
@@ -81,3 +81,7 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 = 3.6 =
 * Add support for product image size changes
 * Add sync filter for order post types
+* Fix for double order issue w/ Woo subscription plugin 
+* Support for changing variable products to simple products 
+* Enhancement in Webhook handling due to permalink structures 
+

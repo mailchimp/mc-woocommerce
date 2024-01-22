@@ -458,6 +458,7 @@ class MailChimp_WooCommerce_Rest_Api
 			        'description' => "There were no changes made.",
 			        'type' => 'error',
 		        ];
+				break;
         }
 
         return $this->mailchimp_rest_response($response);

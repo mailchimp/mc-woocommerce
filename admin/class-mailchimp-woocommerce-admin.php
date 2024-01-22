@@ -470,6 +470,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 					mailchimp_error( 'marketing_status_update', $e->getMessage() );
 				}
 			}
+
+            // we have some stores that are in a perpetual state of syncing - causing issues with support.
+            // trying to adjust things on plugin update
+			//$this->fix_is_syncing_problem();
 		}
 
 		if ( ! get_option( $this->plugin_name . '_cart_table_add_index_update' ) ) {
@@ -587,6 +591,39 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		update_option( $this->plugin_name, $options );
 		return $options;
 	}
+
+    public function fix_is_syncing_problem()
+    {
+	    if ((bool) mailchimp_get_data('sync.syncing' )) {
+		    $toggle_mailchimp = false;
+            if (get_option( 'mailchimp-woocommerce-sync.orders.completed_at' )) {
+			    $toggle_mailchimp = true;
+		    } else {
+	            $sync_started_at = (int) get_option( 'mailchimp-woocommerce-sync.started_at' );
+	            $seconds_in_days = 86400;
+	            $now = time();
+	            $difference = $sync_started_at > 0 ? ($now - $sync_started_at) : 0;
+                if ($difference >= $seconds_in_days && ($sync_started_at / $seconds_in_days >= 30)) {
+		            $toggle_mailchimp = true;
+	                update_option( 'mailchimp-woocommerce-sync.products.started_at', $sync_started_at);
+	                update_option( 'mailchimp-woocommerce-sync.products.completed_at', $sync_started_at+60);
+		            update_option( 'mailchimp-woocommerce-sync.orders.started_at', $sync_started_at);
+		            update_option( 'mailchimp-woocommerce-sync.orders.completed_at', $sync_started_at+60);
+	            }
+            }
+		    if ($toggle_mailchimp) {
+			    mailchimp_set_data('sync.syncing', false);
+			    mailchimp_log('tower', 'Fixed local sync.syncing record during plugin update.');
+			    if (mailchimp_is_configured() && ($store_id = mailchimp_get_store_id())) {
+				    if ( mailchimp_get_api()->flagStoreSync($store_id, false) ) {
+					    mailchimp_log('tower', 'Toggled Mailchimp store to not syncing during plugin update.');
+				    }
+			    }
+		    }
+            return $toggle_mailchimp;
+	    }
+        return false;
+    }
 
 	/**
 	 * @return bool

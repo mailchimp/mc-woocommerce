@@ -482,7 +482,7 @@ class MailChimp_WooCommerce_Transform_Orders {
 			// Payment received and stock has been reduced – the order is awaiting fulfillment.
 			// All product orders require processing, except those for digital downloads
 			'processing' => (object) array(
-				'financial'   => 'pending',
+				'financial'   => 'processing',
 				'fulfillment' => null,
 			),
 			// Awaiting payment – stock is reduced, but you need to confirm payment

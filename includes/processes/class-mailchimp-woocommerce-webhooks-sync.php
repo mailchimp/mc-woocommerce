@@ -59,7 +59,7 @@ class MailChimp_WooCommerce_WebHooks_Sync extends Mailchimp_Woocommerce_Job
 	/**
 	 * @return array|bool|null
 	 */
-	public function cleanHooks()
+	public function cleanHooks($disconnect = false)
 	{
 		if (!mailchimp_is_configured()) {
 			return null;
@@ -75,7 +75,7 @@ class MailChimp_WooCommerce_WebHooks_Sync extends Mailchimp_Woocommerce_Job
 			foreach ($hooks['webhooks'] as $hook) {
 				$href = isset($hook['url']) ? $hook['url'] : (isset($hook['href']) ? $hook['href'] : null);
 				if ($href && mailchimp_string_contains($href, $rest_url)) {
-					if (!empty($token) && mailchimp_string_contains($href, $token)) {
+					if (!$disconnect && !empty($token) && mailchimp_string_contains($href, $token)) {
 						$this->skip_creation = true;
 						mailchimp_log('webhooks', "Verified webhook {$hook['id']}");
 						continue;

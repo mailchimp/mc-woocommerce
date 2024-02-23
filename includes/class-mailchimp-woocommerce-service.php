@@ -465,6 +465,21 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 		}
 	}
 
+	/**
+	 * If the product type has changed from variable to simple, then we delete this product from MailChimp.
+	 *
+	 * @param int $variation_id
+	 */
+	public function handleDeleteProductVariation($variation_id) {
+		try {
+			$deleted = mailchimp_get_api()->deleteStoreProduct(mailchimp_get_store_id(), $variation_id);
+			if ($deleted) mailchimp_log('product.deleted', "deleted product variation {$variation_id}");
+			else mailchimp_log('product.delete_fail', "Unable to deleted product variation {$variation_id}");
+		} catch (Exception $e) {
+			mailchimp_error('delete product variation', $e->getMessage());
+		}
+	}
+
     /**
      * Fire new order and order save handling/queueing events when a shop_order post is saved.
      *

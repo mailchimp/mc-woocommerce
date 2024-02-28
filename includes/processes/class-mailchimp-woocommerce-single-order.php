@@ -111,14 +111,18 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
         }
 
         if ( $order ) {
-			$wordpress_user_id = $order->get_user_id();
+            $wordpress_user_id = $order->get_user_id();
             $user   = get_user_by( 'ID', $order->get_user_id() );
-            $allowed_roles = array('customer', 'subscriber');
+            $restricted_roles = array('administrator');
+            $allowed_roles = array();
             $allowed_roles = apply_filters('mailchimp_campaign_user_roles', $allowed_roles );
 
-            if (  $user && count( array_intersect($allowed_roles,  $user->roles) ) === 0 ) {
-                mailchimp_log('order_process', "Order #{$woo_order_number} skipped, user #{$order->get_user_id()} user role is not in the list");
-                return false;
+            if ( $user ) {
+                if ( ( count( $allowed_roles ) && count( array_intersect( $allowed_roles, $user->roles ) ) === 0 ) || ( count( array_intersect( $restricted_roles, $user->roles ) ) !== 0 ) ) {
+                    mailchimp_log( 'order_process', "Order #{$woo_order_number} skipped, user #{$order->get_user_id()} user role is not in the list" );
+
+                    return false;
+                }
             }
         }
 

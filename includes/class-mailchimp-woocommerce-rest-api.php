@@ -506,16 +506,14 @@ class MailChimp_WooCommerce_Rest_Api
         switch ($body['resource']) {
             case 'order':                
                 $order = MailChimp_WooCommerce_HPOS::get_order($body['resource_id']);
-                /*$order = get_post($body['resource_id']);*/
-                if ($order && $order->get_id()) {
-                    $mc = mailchimp_get_api()->getStoreOrder($store_id, $order->get_id());
+                if ($order && $order->get_order_number()) {
+                    $mc = mailchimp_get_api()->getStoreOrder($store_id, $order->get_order_number());
                     $transformer = new MailChimp_WooCommerce_Transform_Orders();
                     $platform = $transformer->transform($order)->toArray();
                 }
                 if ($mc) $mc = $mc->toArray();
                 break;
             case 'customer':
-                //$body['resource_id'] = urldecode($body['resource_id']);
                 $field = is_email($body['resource_id']) ? 'email' : 'id';
                 $platform = get_user_by($field, $body['resource_id']);
 	            $mc = array('member' => null, 'customer' => null);

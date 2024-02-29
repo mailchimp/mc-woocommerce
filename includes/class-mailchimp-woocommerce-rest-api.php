@@ -447,6 +447,18 @@ class MailChimp_WooCommerce_Rest_Api
                     'type' => 'error',
                 ];
                 break;
+	        case 'fix_is_syncing_problem':
+		        $fixed = MailChimp_WooCommerce_Admin::instance()->fix_is_syncing_problem();
+		        $response = $fixed ? [
+			        'title' => "Successfully fixed sync flags.",
+			        'description' => "Please reload the store stats to see updated meta",
+			        'type' => 'success',
+		        ] : [
+			        'title' => "Sync flags not changed",
+			        'description' => "There were no changes made.",
+			        'type' => 'error',
+		        ];
+				break;
         }
 
         return $this->mailchimp_rest_response($response);

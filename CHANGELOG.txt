@@ -1,4 +1,10 @@
 == Changelog ==
+= 3.6 =
+* Add support for product image size changes
+* Add sync filter for order post types
+* Fix for double order issue w/ Woo subscription plugin 
+* Support for changing variable products to simple products 
+* Enhancement in Webhook handling due to permalink structures 
 = 3.5 =
 * Support for updated Mailchimp attribution methods
 * Adds a Continue to Mailchimp CTA to Woo Dashboard UI

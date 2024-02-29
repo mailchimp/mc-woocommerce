@@ -19,3 +19,5 @@ add_action( 'woocommerce_blocks_loaded', function() {
 } );
 
 add_action( 'woocommerce_store_api_checkout_update_order_from_request', array( 'Mailchimp_Woocommerce_Newsletter_Blocks_Integration', 'order_processed' ), 10, 2 );
+
+add_action( 'woocommerce_store_api_checkout_order_processed', array( 'Mailchimp_Woocommerce_Newsletter_Blocks_Integration', 'order_customer_processed' ) );

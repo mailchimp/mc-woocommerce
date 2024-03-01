@@ -504,8 +504,8 @@ class MailChimp_WooCommerce_Rest_Api
         $store_id = mailchimp_get_store_id();
         
         switch ($body['resource']) {
-            case 'order':                
-                $order = MailChimp_WooCommerce_HPOS::get_order($body['resource_id']);
+            case 'order':
+                $order = MailChimp_WooCommerce_HPOS::get_order_for_tower($body['resource_id']);
                 if ($order && $order->get_order_number()) {
                     $mc = mailchimp_get_api()->getStoreOrder($store_id, $order->get_order_number());
                     $transformer = new MailChimp_WooCommerce_Transform_Orders();

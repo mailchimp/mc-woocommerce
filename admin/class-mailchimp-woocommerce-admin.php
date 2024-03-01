@@ -641,13 +641,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		// sync the store with MC
 		try {
-			$store_created = $this->syncStore( $data );
+			return $this->syncStore( $data );
 		} catch ( Exception $e ) {
 			mailchimp_log( 'store.sync@woo.update', 'Store cannot be synced', $e->getMessage() );
 			return false;
 		}
-
-		return $store_created;
 	}
 
 	/**
@@ -1285,7 +1283,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			'campaign_from_name'            => isset( $input['campaign_from_name'] ) ? $input['campaign_from_name'] : false,
 			'campaign_from_email'           => isset( $input['campaign_from_email'] ) && is_email( $input['campaign_from_email'] ) ? $input['campaign_from_email'] : false,
 			'campaign_subject'              => isset( $input['campaign_subject'] ) ? $input['campaign_subject'] : get_option( 'blogname' ),
-			'campaign_language'             => isset( $input['campaign_language'] ) ? $input['campaign_language'] : 'en',
+			'campaign_language'             => isset( $input['campaign_language'] ) ? $input['campaign_language'] : $this->getOption( 'store_locale' , 'en'),
 			'campaign_permission_reminder'  => isset( $input['campaign_permission_reminder'] ) ? $input['campaign_permission_reminder'] : sprintf( /* translators: %s - plugin name. */esc_html__( 'You were subscribed to the newsletter from %s', 'mailchimp-for-woocommerce' ), get_option( 'blogname' ) ),
 		);
 
@@ -1314,7 +1312,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 			// sync the store with MC
 			try {
-				$store_created = $this->syncStore( array_merge( $this->getOptions(), $data ) );
+				$store_created = $this->syncStore( array_merge( $this->getOptions(), $data ), true );
 			} catch ( Exception $e ) {
 				$this->setData( 'validation.newsletter_settings', false );
 				mailchimp_log( 'errors.newsletter_settings', 'Store cannot be synced :: ' . $e->getMessage() );
@@ -1760,14 +1758,14 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 	/**
 	 * @param null $data
-	 *
+	 * @param bool $update_campaign_defaults
 	 * @return bool
 	 * @throws Exception
 	 * @throws MailChimp_WooCommerce_Error
 	 * @throws MailChimp_WooCommerce_RateLimitError
 	 * @throws MailChimp_WooCommerce_ServerError
 	 */
-	public function syncStore( $data = null ) {
+	public function syncStore( $data = null, $update_campaign_defaults = false ) {
 		if ( empty( $data ) ) {
 			$data = $this->getOptions();
 		}
@@ -1811,13 +1809,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$store->setListId( $list_id );
 
 		try {
-			mailchimp_log(
-				'sync_store',
-				'posting data',
-				array(
-					'store_post' => $store->toArray(),
-				)
-			);
+			mailchimp_log('sync_store', 'posting data', array('store_post' => $store->toArray()));
 
 			// let's create a new store for this user through the API
 			$this->api()->$call( $store, false );
@@ -1830,7 +1822,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			mailchimp_update_connected_site_script();
 
 			// we need to update the list again with the campaign defaults
-			$this->updateMailChimpList( $data, $list_id );
+            if (!$update_campaign_defaults) {
+	            $this->updateMailChimpList( $data, $list_id );
+            }
 
 			return true;
 		} catch ( Exception $e ) {

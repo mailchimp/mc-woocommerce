@@ -83,15 +83,29 @@ class MailChimp_WooCommerce_HPOS {
 	 */
 	public static function get_post_id_from_order_number($order_number)
 	{
-		$args = array(
-			'post_type' => 'shop_order',
-			'post_status' => 'any',
-			'meta_query' => array(array('key' => '_order_number', 'value' => $order_number, 'compare' => '='))
-		);
-		$query = new WP_Query( $args );
-		if (empty( $query->posts )) {
-			return null;
+		if (static::enabled()) {
+			$orders = wc_get_orders([
+				'return'     => 'ids',
+				'limit'      => 1,
+				'meta_query' => [
+					[
+						'key'        => '_order_number',
+						'value'      => $order_number,
+						'comparison' => '='
+					],
+				],
+			]);
+		} else {
+			$orders = get_posts([
+				'numberposts' => 1,
+				'meta_key'    => '_order_number',
+				'meta_value'  => $order_number,
+				'post_type'   => 'shop_order',
+				'post_status' => 'any',
+				'fields'      => 'ids',
+			]);
 		}
-		return $query->posts[ 0 ]->ID;
+
+		return $orders ? current($orders) : null;
 	}
 }

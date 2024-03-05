@@ -162,8 +162,14 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             //update_post_meta($order_id, "mailchimp_woocommerce_gdpr_fields", $gdpr_fields);
         }
 
+		// on order save
         if ($is_subscribed) {
             MailChimp_WooCommerce_HPOS::update_order_meta($order_id, 'mailchimp_woocommerce_is_subscribed', $is_subscribed);
+	        if ($order = MailChimp_WooCommerce_HPOS::get_order($order_id)) {
+				if ($user_id = $order->get_user_id()) {
+					update_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', $is_subscribed);
+				}
+	        }
         }
 
         $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $landing_site, $language, $gdpr_fields);

@@ -53,7 +53,6 @@ class MailChimp_WooCommerce_Transform_Orders {
 
 		// if the woo get order returns an empty value, we need to skip the whole thing.
 		if ( empty( $woo ) ) {
-			mailchimp_error( 'sync', 'get woo post was not found for order ' . $woo->get_id() );
 			return $order;
 		}
 

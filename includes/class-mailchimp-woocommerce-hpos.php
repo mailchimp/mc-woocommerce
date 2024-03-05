@@ -14,7 +14,7 @@ class MailChimp_WooCommerce_HPOS {
 	/**
 	 * @param $post_id
 	 *
-	 * @return mixed
+	 * @return bool|WC_Order|WC_Order_Refund
 	 */
 	public static function get_order( $post_id )
 	{

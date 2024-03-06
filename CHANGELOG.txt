@@ -1,4 +1,8 @@
 == Changelog ==
+= 3.7 =
+* Allow orders to be sent to Mailchimp even if a Wordpress user role isn't set
+* Support for custom order IDs
+* Updated dependabot issues related to block-based checkouts
 = 3.6 =
 * Add support for product image size changes
 * Add sync filter for order post types

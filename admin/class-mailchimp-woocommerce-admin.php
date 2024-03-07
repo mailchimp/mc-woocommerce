@@ -1111,26 +1111,28 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	protected function validatePostStoreInfo( $input ) {
 		$data = $this->compileStoreInfoData( $input );
 
-		if ( ! $this->hasValidStoreInfo( $data ) ) {
+//		if ( ! $this->hasValidStoreInfo( $data ) ) {
+//
+//			if ( $this->hasInvalidStoreAddress( $data ) ) {
+//				$this->addInvalidAddressAlert();
+//			}
+//
+//			if ( $this->hasInvalidStorePhone( $data ) ) {
+//				$this->addInvalidPhoneAlert();
+//			}
+//
+//			if ( $this->hasInvalidStoreName( $data ) ) {
+//				$this->addInvalidStoreNameAlert();
+//			}
+//
+//			$this->setData( 'validation.store_info', false );
+//
+//			$data['active_tab'] = 'store_info';
+//
+//			return $input;
+//		}
 
-			if ( $this->hasInvalidStoreAddress( $data ) ) {
-				$this->addInvalidAddressAlert();
-			}
 
-			if ( $this->hasInvalidStorePhone( $data ) ) {
-				$this->addInvalidPhoneAlert();
-			}
-
-			if ( $this->hasInvalidStoreName( $data ) ) {
-				$this->addInvalidStoreNameAlert();
-			}
-
-			$this->setData( 'validation.store_info', false );
-
-			$data['active_tab'] = 'store_info';
-
-			return $input;
-		}
 
 		// change communication status options
 		$comm_opt = get_option( 'mailchimp-woocommerce-comm.opt', 0 );
@@ -1178,6 +1180,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			'store_country'            => isset( $input['store_country'] ) ? $input['store_country'] : false,
 			'store_phone'              => isset( $input['store_phone'] ) ? $input['store_phone'] : false,
 			// locale info
+            'store_currency_code'      => get_woocommerce_currency(),
 			'store_locale'             => isset( $input['store_locale'] ) ? $input['store_locale'] : false,
 			'store_timezone'           => mailchimp_get_timezone(),
 			'admin_email'              => isset( $input['admin_email'] ) && is_email( $input['admin_email'] ) ? $input['admin_email'] : $this->getOption( 'admin_email', false ),
@@ -1312,7 +1315,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 			// sync the store with MC
 			try {
-				$store_created = $this->syncStore( array_merge( $this->getOptions(), $data ), true );
+				$store_created = $this->syncStore( array_merge( $this->getOptions(), $data ) );
 			} catch ( Exception $e ) {
 				$this->setData( 'validation.newsletter_settings', false );
 				mailchimp_log( 'errors.newsletter_settings', 'Store cannot be synced :: ' . $e->getMessage() );
@@ -1771,15 +1774,15 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 
 		$list_id  = $this->array_get( $data, 'mailchimp_list', false );
-		$site_url = $this->getUniqueStoreID();
+		$store_id = $this->getUniqueStoreID();
 
-		if ( empty( $list_id ) || empty( $site_url ) ) {
+		if ( empty( $list_id ) || empty( $store_id ) ) {
 			return false;
 		}
 
 		$new = false;
 
-		if ( ! ( $store = $this->api()->getStore( $site_url ) ) ) {
+		if ( ! ( $store = $this->api()->getStore( $store_id ) ) ) {
 			$new   = true;
 			$store = new MailChimp_WooCommerce_Store();
 		}
@@ -1787,7 +1790,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$call     = $new ? 'addStore' : 'updateStore';
 		$time_key = $new ? 'store_created_at' : 'store_updated_at';
 
-		$store->setId( $site_url );
+		$store->setId( $store_id );
 		$store->setPlatform( 'woocommerce' );
 
 		// set the locale data
@@ -1822,7 +1825,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			mailchimp_update_connected_site_script();
 
 			// we need to update the list again with the campaign defaults
-            if (!$update_campaign_defaults) {
+            if ($update_campaign_defaults) {
 	            $this->updateMailChimpList( $data, $list_id );
             }
 
@@ -1861,39 +1864,23 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @return MailChimp_WooCommerce_Address
 	 */
 	private function address( array $data ) {
+        $nodes = array(
+            'store_street' => 'setAddress1',
+            'store_city' => 'setCity',
+            'store_state' => 'setProvince',
+            'store_country' => 'setCountry',
+            'store_postal_code' => 'setPostalCode',
+            'store_name' => 'setCompany',
+            'store_phone' => 'setPhone'
+        );
 		$address = new MailChimp_WooCommerce_Address();
-
-		if ( isset( $data['store_street'] ) && $data['store_street'] ) {
-			$address->setAddress1( $data['store_street'] );
-		}
-
-		if ( isset( $data['store_city'] ) && $data['store_city'] ) {
-			$address->setCity( $data['store_city'] );
-		}
-
-		if ( isset( $data['store_state'] ) && $data['store_state'] ) {
-			$address->setProvince( $data['store_state'] );
-		}
-
-		if ( isset( $data['store_country'] ) && $data['store_country'] ) {
-			$address->setCountry( $data['store_country'] );
-		}
-
-		if ( isset( $data['store_postal_code'] ) && $data['store_postal_code'] ) {
-			$address->setPostalCode( $data['store_postal_code'] );
-		}
-
-		if ( isset( $data['store_name'] ) && $data['store_name'] ) {
-			$address->setCompany( $data['store_name'] );
-		}
-
-		if ( isset( $data['store_phone'] ) && $data['store_phone'] ) {
-			$address->setPhone( $data['store_phone'] );
-		}
-
+        foreach ($nodes as $key => $fn) {
+            if ( isset( $data[$key] ) && $data[$key] ) {
+                $address->$fn( $data[$key] );
+            }
+        }
 		$woo_countries = new WC_Countries();
 		$address->setCountryCode( $woo_countries->get_base_country() );
-
 		return $address;
 	}
 

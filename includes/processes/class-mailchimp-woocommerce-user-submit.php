@@ -127,6 +127,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 
 		// make sure we don't need to skip this email
 		if (!mailchimp_email_is_allowed($email)) {
+			mailchimp_debug('email.filter', "$email is either blocked, or invalid");
 			static::$handling_for = null;
 			return false;
 		}
@@ -142,6 +143,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 				return false;
 			}
 			$this->subscribed = $user_subscribed;
+			mailchimp_debug('user_submit.action', "set subscribed variable for {$email} to {$this->subscribed}");
 		}
 
 		// if the meta we've stored on the user is not equal to the value being passed to Mailchimp
@@ -153,6 +155,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 				'mailchimp_woocommerce_is_subscribed',
 				$this->subscribed
 			);
+			mailchimp_debug('user_submit.update_meta', "Updated user meta for {$email} to {$this->subscribed}");
 		}
 
 		$api_key = isset($options['mailchimp_api_key']) ? $options['mailchimp_api_key'] : false;
@@ -329,10 +332,11 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 					$api->updateMemberTags(mailchimp_get_list_id(), $email, true);
 
 					mailchimp_tell_system_about_user_submit($email, $status_meta);
+
 					if ($status_meta['created']) {
-						mailchimp_log('member.sync', "Subscribed Member {$user->user_email}", array('status_if_new' => $status_if_new, 'merge_fields' => $merge_fields));
+						mailchimp_log('member.sync', "Subscribed Member {$user->user_email}", array('status_if_new' => $status_if_new, 'has_doi' => $uses_doi, 'merge_fields' => $merge_fields));
 					} else {
-						mailchimp_log('member.sync', "{$user->user_email} is Pending Double OptIn");
+						mailchimp_log('member.sync', "{$user->user_email} is Pending Double OptIn", array('status_if_new' => $status_if_new, 'has_doi' => $uses_doi, 'status_meta' => $status_meta));
 					}
 				} catch (Exception $e) {
 					mailchimp_log('member.sync', $e->getMessage());

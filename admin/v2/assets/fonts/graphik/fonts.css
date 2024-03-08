@@ -1,0 +1,263 @@
+/*
+	This font software is the property of Commercial Type.
+
+	You may not modify the font software, use it on another website, or install it on a computer.
+
+	License information is available at http://commercialtype.com/eula
+	For more information please visit Commercial Type at http://commercialtype.com or email us at info[at]commercialtype.com
+
+	Copyright (C) 2016 Schwartzco Inc.
+	
+*/
+
+.GraphikMailchimp-Thin-Web {
+    font-family: 'Graphik Mailchimp Web';
+    font-weight: 100;
+    font-style: normal;
+    }
+
+.GraphikMailchimp-ThinItalic-Web {
+    font-family: 'Graphik Mailchimp Web';
+    font-weight: 100;
+    font-style: italic;
+    }
+
+.GraphikMailchimp-Extralight-Web {
+    font-family: 'Graphik Mailchimp Web';
+    font-weight: 200;
+    font-style: normal;
+    }
+
+.GraphikMailchimp-ExtralightItalic-Web {
+    font-family: 'Graphik Mailchimp Web';
+    font-weight: 200;
+    font-style: italic;
+    }
+
+.GraphikMailchimp-Light-Web {
+    font-family: 'Graphik Mailchimp Web';
+    font-weight: 300;
+    font-style: normal;
+    }
+
+.GraphikMailchimp-LightItalic-Web {
+    font-family: 'Graphik Mailchimp Web';
+    font-weight: 300;
+    font-style: italic;
+    }
+
+.GraphikMailchimp-Regular-Web {
+    font-family: 'Graphik Mailchimp Web';
+    font-weight: 400;
+    font-style: normal;
+    }
+
+.GraphikMailchimp-RegularItalic-Web {
+    font-family: 'Graphik Mailchimp Web';
+    font-weight: 400;
+    font-style: italic;
+    }
+
+.GraphikMailchimp-Medium-Web {
+    font-family: 'Graphik Mailchimp Web';
+    font-weight: 500;
+    font-style: normal;
+    }
+
+.GraphikMailchimp-MediumItalic-Web {
+    font-family: 'Graphik Mailchimp Web';
+    font-weight: 500;
+    font-style: italic;
+    }
+
+.GraphikMailchimp-Semibold-Web {
+    font-family: 'Graphik Mailchimp Web';
+    font-weight: 600;
+    font-style: normal;
+    }
+
+.GraphikMailchimp-SemiboldItalic-Web {
+    font-family: 'Graphik Mailchimp Web';
+    font-weight: 600;
+    font-style: italic;
+    }
+
+.GraphikMailchimp-Bold-Web {
+    font-family: 'Graphik Mailchimp Web';
+    font-weight: 700;
+    font-style: normal;
+    }
+
+.GraphikMailchimp-BoldItalic-Web {
+    font-family: 'Graphik Mailchimp Web';
+    font-weight: 700;
+    font-style: italic;
+    }
+
+.GraphikMailchimp-Black-Web {
+    font-family: 'Graphik Mailchimp Web';
+    font-weight: 800;
+    font-style: normal;
+    }
+
+.GraphikMailchimp-BlackItalic-Web {
+    font-family: 'Graphik Mailchimp Web';
+    font-weight: 800;
+    font-style: italic;
+    }
+
+.GraphikMailchimp-Super-Web {
+    font-family: 'Graphik Mailchimp Web';
+    font-weight: 900;
+    font-style: normal;
+    }
+
+.GraphikMailchimp-SuperItalic-Web {
+    font-family: 'Graphik Mailchimp Web';
+    font-weight: 900;
+    font-style: italic;
+    }
+
+@font-face {
+    font-family: 'Graphik Mailchimp Web';
+    src: url('GraphikMailchimp-Thin-Web.woff2') format('woff2'),
+         url('GraphikMailchimp-Thin-Web.woff') format('woff');
+    font-weight: 100;
+    font-style: normal;
+    }
+
+@font-face {
+    font-family: 'Graphik Mailchimp Web';
+    src: url('GraphikMailchimp-ThinItalic-Web.woff2') format('woff2'),
+         url('GraphikMailchimp-ThinItalic-Web.woff') format('woff');
+    font-weight: 100;
+    font-style: italic;
+    }
+
+@font-face {
+    font-family: 'Graphik Mailchimp Web';
+    src: url('GraphikMailchimp-Extralight-Web.woff2') format('woff2'),
+         url('GraphikMailchimp-Extralight-Web.woff') format('woff');
+    font-weight: 200;
+    font-style: normal;
+    }
+
+@font-face {
+    font-family: 'Graphik Mailchimp Web';
+    src: url('GraphikMailchimp-ExtralightItalic-Web.woff2') format('woff2'),
+         url('GraphikMailchimp-ExtralightItalic-Web.woff') format('woff');
+    font-weight: 200;
+    font-style: italic;
+    }
+
+@font-face {
+    font-family: 'Graphik Mailchimp Web';
+    src: url('GraphikMailchimp-Light-Web.woff2') format('woff2'),
+         url('GraphikMailchimp-Light-Web.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+    }
+
+@font-face {
+    font-family: 'Graphik Mailchimp Web';
+    src: url('GraphikMailchimp-LightItalic-Web.woff2') format('woff2'),
+         url('GraphikMailchimp-LightItalic-Web.woff') format('woff');
+    font-weight: 300;
+    font-style: italic;
+    }
+
+@font-face {
+    font-family: 'Graphik Mailchimp Web';
+    src: url('GraphikMailchimp-Regular-Web.woff2') format('woff2'),
+         url('GraphikMailchimp-Regular-Web.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    }
+
+@font-face {
+    font-family: 'Graphik Mailchimp Web';
+    src: url('GraphikMailchimp-RegularItalic-Web.woff2') format('woff2'),
+         url('GraphikMailchimp-RegularItalic-Web.woff') format('woff');
+    font-weight: 400;
+    font-style: italic;
+    }
+
+@font-face {
+    font-family: 'Graphik Mailchimp Web';
+    src: url('GraphikMailchimp-Medium-Web.woff2') format('woff2'),
+         url('GraphikMailchimp-Medium-Web.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    }
+
+@font-face {
+    font-family: 'Graphik Mailchimp Web';
+    src: url('GraphikMailchimp-MediumItalic-Web.woff2') format('woff2'),
+         url('GraphikMailchimp-MediumItalic-Web.woff') format('woff');
+    font-weight: 500;
+    font-style: italic;
+    }
+
+@font-face {
+    font-family: 'Graphik Mailchimp Web';
+    src: url('GraphikMailchimp-Semibold-Web.woff2') format('woff2'),
+         url('GraphikMailchimp-Semibold-Web.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+    }
+
+@font-face {
+    font-family: 'Graphik Mailchimp Web';
+    src: url('GraphikMailchimp-SemiboldItalic-Web.woff2') format('woff2'),
+         url('GraphikMailchimp-SemiboldItalic-Web.woff') format('woff');
+    font-weight: 600;
+    font-style: italic;
+    }
+
+@font-face {
+    font-family: 'Graphik Mailchimp Web';
+    src: url('GraphikMailchimp-Bold-Web.woff2') format('woff2'),
+         url('GraphikMailchimp-Bold-Web.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+    }
+
+@font-face {
+    font-family: 'Graphik Mailchimp Web';
+    src: url('GraphikMailchimp-BoldItalic-Web.woff2') format('woff2'),
+         url('GraphikMailchimp-BoldItalic-Web.woff') format('woff');
+    font-weight: 700;
+    font-style: italic;
+    }
+
+@font-face {
+    font-family: 'Graphik Mailchimp Web';
+    src: url('GraphikMailchimp-Black-Web.woff2') format('woff2'),
+         url('GraphikMailchimp-Black-Web.woff') format('woff');
+    font-weight: 800;
+    font-style: normal;
+    }
+
+@font-face {
+    font-family: 'Graphik Mailchimp Web';
+    src: url('GraphikMailchimp-BlackItalic-Web.woff2') format('woff2'),
+         url('GraphikMailchimp-BlackItalic-Web.woff') format('woff');
+    font-weight: 800;
+    font-style: italic;
+    }
+
+@font-face {
+    font-family: 'Graphik Mailchimp Web';
+    src: url('GraphikMailchimp-Super-Web.woff2') format('woff2'),
+         url('GraphikMailchimp-Super-Web.woff') format('woff');
+    font-weight: 900;
+    font-style: normal;
+    }
+
+@font-face {
+    font-family: 'Graphik Mailchimp Web';
+    src: url('GraphikMailchimp-SuperItalic-Web.woff2') format('woff2'),
+         url('GraphikMailchimp-SuperItalic-Web.woff') format('woff');
+    font-weight: 900;
+    font-style: italic;
+    }

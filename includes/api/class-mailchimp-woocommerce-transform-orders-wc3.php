@@ -254,6 +254,12 @@ class MailChimp_WooCommerce_Transform_Orders {
 		$subscribed_on_order = $customer->wasSubscribedOnOrder( $order->get_id() );
 		$customer->setOptInStatus( $subscribed_on_order );
 
+		if ($subscribed_on_order) {
+			mailchimp_debug('trace', "{$customer->getEmailAddress()} subscribed on order");
+		} else {
+			mailchimp_debug('trace', "{$customer->getEmailAddress()} was not subscribed on order");
+		}
+
 		try {
 			$doi = mailchimp_list_has_double_optin();
 		} catch ( Exception $e ) {
@@ -274,10 +280,14 @@ class MailChimp_WooCommerce_Transform_Orders {
 					$customer->setOptInStatus( false );
 					// when the list requires a double opt in - flag it here.
 					if ( $doi ) {
+						mailchimp_debug('trace', "found list member {$customer->getEmailAddress()} and applied false to customer requiring double opt in");
 						$customer->requireDoubleOptIn( true );
+					} else {
+						mailchimp_debug('trace', "found list member {$customer->getEmailAddress()} and applied false to customer");
 					}
 					return $customer;
 				} elseif ( $subscriber['status'] === 'pending' ) {
+					mailchimp_debug('trace', "found list member {$customer->getEmailAddress()} and applied false to customer because they were in a pending state");
 					$customer->setOptInStatus( false );
 					return $customer;
 				}

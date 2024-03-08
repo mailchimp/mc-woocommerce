@@ -77,8 +77,9 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 = My question is not listed =
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
-== Changelog ==
-= 3.7 =
+
+= 4.0 =
 * Allow orders to be sent to Mailchimp even if a Wordpress user role isn't set
 * Support for custom order IDs
 * Updated dependabot issues related to block-based checkouts
+

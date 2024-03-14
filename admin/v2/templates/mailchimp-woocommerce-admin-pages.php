@@ -17,13 +17,13 @@ $options = get_option( $this->plugin_name, array() );
 /** Verify that the nonce is correct for the GET and POST variables. */
 
 $active_breadcrumb = isset( $_GET['breadcrumb'] ) ?
-	esc_attr( sanitize_key( $_GET['breadcrumb'] ) ) : 
+	esc_attr( sanitize_key( $_GET['breadcrumb'] ) ) :
 	( isset( $options['breadcrumb'] ) ? esc_attr( wp_unslash( $options['breadcrumb'] ) ) : '' );
 
 // Active tab for confirmation breadcrumb
 $active_tab = isset( $_GET['tab'] ) ?
-esc_attr( sanitize_key( $_GET['tab'] ) ) : 
-( isset( $options['tab'] ) ? esc_attr( wp_unslash( $options['tab'] ) ) : 'api_key' );
+	esc_attr( sanitize_key( $_GET['tab'] ) ) :
+	( isset( $options['active_tab'] ) ? esc_attr( wp_unslash( $options['active_tab'] ) ) : 'api_key' );
 
 $mc_configured 		= mailchimp_is_configured();
 $is_mailchimp_post 	= isset( $_POST['mailchimp_woocommerce_settings_hidden'] ) && check_admin_referer( 'mailchimp_woocommerce_options', 'mailchimp_woocommerce_nonce' ) && strtolower( esc_attr( sanitize_key( $_POST['mailchimp_woocommerce_settings_hidden'] ) ) ) === 'y';
@@ -175,7 +175,7 @@ if ((MC_WC_CONFIRMATION === $active_breadcrumb && ! $is_confirmation)) {
 			?>
 		</div>
 		<!-- End notification -->
-		
+
 		<!-- Content -->
 		<input type="hidden" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_active_breadcrumb]" value="<?php echo esc_attr( $active_breadcrumb ); ?>"/>
 		<input type="hidden" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_active_tab]" value="<?php echo esc_attr( $active_tab ); ?>"/>

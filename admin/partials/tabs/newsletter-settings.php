@@ -111,13 +111,13 @@ $checkout_page_id = get_option('woocommerce_checkout_page_id');
 		</label>
 		<div class="mailchimp-select-wrapper">
 			<select id="<?php echo esc_attr( $this->plugin_name ); ?>-campaign-language-label" name="<?php echo esc_attr( $this->plugin_name ); ?>[campaign_language]" required>
-				<?php $selected_locale = isset( $options['store_locale'] ) && ! empty( $options['store_locale'] ) ? esc_html( $options['store_locale'] ) : get_locale(); ?> ?>
+				<?php $selected_locale = isset( $options['campaign_language'] ) && ! empty( $options['campaign_language'] ) ? esc_html( $options['campaign_language'] ) : get_locale(); ?> ?>
 				<?php
 				foreach ( MailChimp_Api_Locales::all() as $locale_key => $local_value ) {
 					echo '<option value="' . esc_attr( $locale_key ) . '" ' . selected( $locale_key === $selected_locale, true, false ) . '>' . esc_html( $local_value ) . '</option>';
 				}
 				?>
-			</select>    
+			</select>
 		</div>
 	</div>
 	<div class="box">

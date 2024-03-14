@@ -220,7 +220,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			$this->plugin_name,
 			array( $this, 'display_plugin_setup_page') // Callback function to display content
 		);
-		
+
 		// Add the WooCommerce navigation items if the feauture exists.
 		if ( ! class_exists( '\Automattic\WooCommerce\Admin\Features\Navigation\Menu' ) ) {
 			return;
@@ -875,6 +875,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			'mailchimp_debugging'             => isset( $input['mailchimp_debugging'] ) ? $input['mailchimp_debugging'] : false,
 			'mailchimp_account_info_id'       => null,
 			'mailchimp_account_info_username' => null,
+			'store_name'                      => get_option( 'blogname' ),
 		);
 
 		$api = new MailChimp_WooCommerce_MailChimpApi( $data['mailchimp_api_key'] );
@@ -883,7 +884,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			$profile = $api->ping( true, true );
 			// tell our reporting system whether or not we had a valid ping.
 			$this->setData( 'validation.api.ping', true );
-			$data['active_tab'] = 'store_info';
+			$data['active_tab'] = 'newsletter_settings';
 			if ( isset( $profile ) && is_array( $profile ) && array_key_exists( 'account_id', $profile ) ) {
 				$data['mailchimp_account_info_id']       = $profile['account_id'];
 				$data['mailchimp_account_info_username'] = $profile['username'];
@@ -1205,7 +1206,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @return array
 	 */
 	protected function compileStoreInfoData( $input ) {
-		$checkbox = $this->getOption( 'mailchimp_permission_cap', 'check' );
+		$checkbox = $this->getOption( 'mailchimp_permission_cap', 'manage_woocommerce' );
 
 		// see if it's posted in the form.
 		if ( isset( $input['mailchimp_permission_cap'] ) && ! empty( $input['mailchimp_permission_cap'] ) ) {
@@ -1219,12 +1220,12 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			'store_state'              => isset( $input['store_state'] ) ? $input['store_state'] : false,
 			'store_postal_code'        => isset( $input['store_postal_code'] ) ? $input['store_postal_code'] : false,
 			'store_country'            => isset( $input['store_country'] ) ? $input['store_country'] : false,
-			'store_phone'              => isset( $input['store_phone'] ) ? $input['store_phone'] : false,
+//			'store_phone'              => isset( $input['store_phone'] ) ? $input['store_phone'] : false,
 			// locale info
             'store_currency_code'      => get_woocommerce_currency(),
-			'store_locale'             => isset( $input['store_locale'] ) ? $input['store_locale'] : false,
+			'store_locale'             => isset( $input['store_locale'] ) ? $input['store_locale'] : get_locale(),
 			'store_timezone'           => mailchimp_get_timezone(),
-			'admin_email'              => isset( $input['admin_email'] ) && is_email( $input['admin_email'] ) ? $input['admin_email'] : $this->getOption( 'admin_email', false ),
+			'admin_email'              => isset( $input['admin_email'] ) && is_email( $input['admin_email'] ) ? $input['admin_email'] : get_option('admin_email'),
 			'mailchimp_permission_cap' => $checkbox,
 		);
 	}
@@ -1324,9 +1325,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			'mailchimp_user_tags'           => isset( $input['mailchimp_user_tags'] ) ? implode( ',', $sanitized_tags ) : $this->getOption( 'mailchimp_user_tags' ),
 			'mailchimp_product_image_key'   => isset( $input['mailchimp_product_image_key'] ) ? $input['mailchimp_product_image_key'] : 'medium',
 			'mailchimp_cart_tracking'       => isset( $input['mailchimp_cart_tracking'] ) ? $input['mailchimp_cart_tracking'] : 'all',
-			'campaign_from_name'            => isset( $input['campaign_from_name'] ) ? $input['campaign_from_name'] : false,
-			'campaign_from_email'           => isset( $input['campaign_from_email'] ) && is_email( $input['campaign_from_email'] ) ? $input['campaign_from_email'] : false,
-			'campaign_subject'              => isset( $input['campaign_subject'] ) ? $input['campaign_subject'] : get_option( 'blogname' ),
+			'campaign_from_name'            => isset( $input['campaign_from_name'] ) ? $input['campaign_from_name'] : get_option( 'blogname' ),
+			'campaign_from_email'           => isset( $input['campaign_from_email'] ) && is_email( $input['campaign_from_email'] ) ? $input['campaign_from_email'] : $this->getOption( 'admin_email' , get_option('admin_email')),
+			'campaign_subject'              => isset( $input['campaign_subject'] ) ? $input['campaign_subject'] : esc_html__( 'Store Newsletter', 'mailchimp-for-woocommerce' ),
 			'campaign_language'             => isset( $input['campaign_language'] ) ? $input['campaign_language'] : $this->getOption( 'store_locale' , 'en'),
 			'campaign_permission_reminder'  => isset( $input['campaign_permission_reminder'] ) ? $input['campaign_permission_reminder'] : sprintf( /* translators: %s - plugin name. */esc_html__( 'You were subscribed to the newsletter from %s', 'mailchimp-for-woocommerce' ), get_option( 'blogname' ) ),
 		);
@@ -1705,7 +1706,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 							jQuery('.sync-status-time').addClass('mc-wc-d-none');
 							jQuery('.sync-status-icon-wrapper img').removeClass('mc-wc-d-none');
 						}
-						
+
 						jQuery.get(endpoint, function(response) {
 							if (response.success) {
 								// if the response is now finished - but the original sync status was "historical"
@@ -1942,7 +1943,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$store->setEmailAddress( $this->array_get( $data, 'admin_email' ) );
 
 		$store->setAddress( $this->address( $data ) );
-		$store->setPhone( $this->array_get( $data, 'store_phone' ) );
+//		$store->setPhone( $this->array_get( $data, 'store_phone' ) );
 		$store->setListId( $list_id );
 
 		try {

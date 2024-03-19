@@ -1,0 +1,132 @@
+/*
+	This font software is the property of Commercial Type.
+
+	You may not modify the font software, use it on another website, or install it on a computer.
+
+	License information is available at http://commercialtype.com/eula
+	For more information please visit Commercial Type at http://commercialtype.com or email us at info[at]commercialtype.com
+
+	Copyright (C) 2016 Schwartzco Inc.
+	
+*/
+
+
+.Means-Light-Web {
+    font-family: "Means Web";
+    font-weight: 300;
+    font-style: normal;
+    font-stretch: normal;
+}
+
+.Means-LightItalic-Web {
+    font-family: "Means Web";
+    font-weight: 300;
+    font-style: italic;
+    font-stretch: normal;
+}
+
+.Means-Regular-Web {
+    font-family: "Means Web";
+    font-weight: 400;
+    font-style: normal;
+    font-stretch: normal;
+}
+
+.Means-RegularItalic-Web {
+    font-family: "Means Web";
+    font-weight: 400;
+    font-style: italic;
+    font-stretch: normal;
+}
+
+.Means-Medium-Web {
+    font-family: "Means Web";
+    font-weight: 500;
+    font-style: normal;
+    font-stretch: normal;
+}
+
+.Means-MediumItalic-Web {
+    font-family: "Means Web";
+    font-weight: 500;
+    font-style: italic;
+    font-stretch: normal;
+}
+
+.Means-Bold-Web {
+    font-family: "Means Web";
+    font-weight: 700;
+    font-style: normal;
+    font-stretch: normal;
+}
+
+.Means-BoldItalic-Web {
+    font-family: "Means Web";
+    font-weight: 700;
+    font-style: italic;
+    font-stretch: normal;
+}
+
+@font-face {
+	font-family: "Means Web";
+	src: url("Means-Light-Web.woff2") format("woff2"),
+		     url("Means-Light-Web.woff") format("woff");
+	font-weight: 300;
+	font-style: normal;
+	}
+
+@font-face {
+	font-family: "Means Web";
+	src: url("Means-LightItalic-Web.woff2") format("woff2"),
+		     url("Means-LightItalic-Web.woff") format("woff");
+	font-weight: 300;
+	font-style: italic;
+	}
+
+@font-face {
+	font-family: "Means Web";
+	src: url("Means-Regular-Web.woff2") format("woff2"),
+		     url("Means-Regular-Web.woff") format("woff");
+	font-weight: 400;
+	font-style: normal;
+	}
+
+@font-face {
+	font-family: "Means Web";
+	src: url("Means-RegularItalic-Web.woff2") format("woff2"),
+		     url("Means-RegularItalic-Web.woff") format("woff");
+	font-weight: 400;
+	font-style: italic;
+	}
+
+@font-face {
+	font-family: "Means Web";
+	src: url("Means-Medium-Web.woff2") format("woff2"),
+		     url("Means-Medium-Web.woff") format("woff");
+	font-weight: 500;
+	font-style: normal;
+	}
+
+@font-face {
+	font-family: "Means Web";
+	src: url("Means-MediumItalic-Web.woff2") format("woff2"),
+		     url("Means-MediumItalic-Web.woff") format("woff");
+	font-weight: 500;
+	font-style: italic;
+	}
+
+@font-face {
+	font-family: "Means Web";
+	src: url("Means-Bold-Web.woff2") format("woff2"),
+		     url("Means-Bold-Web.woff") format("woff");
+	font-weight: 700;
+	font-style: normal;
+	}
+
+@font-face {
+	font-family: "Means Web";
+	src: url("Means-BoldItalic-Web.woff2") format("woff2"),
+		     url("Means-BoldItalic-Web.woff") format("woff");
+	font-weight: 700;
+	font-style: italic;
+	}

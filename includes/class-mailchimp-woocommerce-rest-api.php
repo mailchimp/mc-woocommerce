@@ -58,6 +58,13 @@ class MailChimp_WooCommerce_Rest_Api
             'permission_callback' => '__return_true',
         ));
 
+        // Tower verify connectivity
+        register_rest_route(static::$namespace, "/tower/verify", array(
+            'methods' => 'POST',
+            'callback' => array($this, 'verify_tower_connection'),
+            'permission_callback' => '__return_true',
+        ));
+
         // Tower report
         register_rest_route(static::$namespace, "/tower/report", array(
             'methods' => 'POST',
@@ -108,6 +115,17 @@ class MailChimp_WooCommerce_Rest_Api
 	 */
     public function ping(WP_REST_Request $request)
     {
+        return $this->mailchimp_rest_response(array('success' => true));
+    }
+
+    /**
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     */
+    public function verify_tower_connection(WP_REST_Request $request)
+    {
+        $this->authorize('tower.token', $request);
         return $this->mailchimp_rest_response(array('success' => true));
     }
 

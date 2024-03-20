@@ -738,6 +738,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 						'name'          => ! empty( $plugin_options ) && isset( $plugin_options['store_name'] ) ? $plugin_options['store_name'] : get_option( 'blogname' ),
 						'support_token' => $support_token,
 						'domain'        => get_option( 'siteurl' ),
+                        'validate'      => (bool) $enable,
 						'data'          => $data,
 					)
 				),

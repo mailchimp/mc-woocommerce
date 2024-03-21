@@ -2167,7 +2167,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			// if error, keep option to original value
 			wp_send_json_error(
 				array(
-					'error' => __( 'Error setting tower support status', 'mailchimp-for-woocommerce' ),
+					'error' => $response_body->message,
 					'opt'   => $original_opt,
 				)
 			);

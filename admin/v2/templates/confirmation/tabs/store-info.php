@@ -49,7 +49,7 @@
                     $selected_locale = isset( $options['store_locale'] ) && ! empty( $options['store_locale'] ) ? $options['store_locale'] : get_locale();
                     ?>
                     <?php foreach ( MailChimp_Api_Locales::all() as $locale_key => $local_value ) : ?>
-                        <option value="<?php echo esc_attr( $locale_key ) . '" ' . selected( $locale_key === $selected_locale, true, false ); ?>"> <?php esc_html_e( $local_value ); ?> </option>;
+                        <option value="<?php echo esc_attr( $locale_key ); ?>" <?php selected( $locale_key === $selected_locale ); ?>><?php esc_html_e( $local_value ); ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>

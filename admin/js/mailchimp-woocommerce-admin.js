@@ -390,8 +390,7 @@
 					switch_button.checked = opt;
 				}
 				else {
-					$('#mc-tower-save').html(response.data.error);
-					$('#mc-tower-save').css('color', 'red').show().fadeOut(3000);
+					$('<div class="notices-content-wrapper sync-notices"><div class="notice notice-error inline is-dismissible"><p>' + response.data.error +'</p></div></div>').insertAfter('.mc-wc-tab-buttons');
 					switch_button.checked = 1 - opt;
 					$('.tower_box_status').hide();
 					$('#tower_box_status_' + (1 - opt)).show();

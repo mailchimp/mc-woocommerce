@@ -1482,9 +1482,44 @@ select#log_file {}
     border: 1px solid #7C58B4 !important;
 }
 
+.mc-wc-tooltip {
+    position: relative;
+}
+
+.mc-wc-tooltip-text {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    z-index: 1;
+    transform: translate(-50%, -100%);
+    min-width: 200px;
+    padding: 10px;
+    font-size: 15px;
+    font-weight: normal;
+    background-color: #fff;
+    border-radius: var(--mc-wc-border-radius);
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.8s;
+}
+
+.mc-wc-tooltip:hover .mc-wc-tooltip-text {
+    opacity: 1;
+    visibility: visible;
+}
+
 @media screen and (max-width: 782px) {
     #wpcontent {
         padding-right: 10px;
+    }
+
+    .mc-wc-tooltip-text {
+        left: auto;
+        right: -20px;
+        transform: translate(0, -100%);
+        min-width: 150px;
     }
 }
 

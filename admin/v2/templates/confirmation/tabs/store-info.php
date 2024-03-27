@@ -94,7 +94,7 @@
             );
         else:
             echo sprintf(
-                __( 'To change the opt-in checkbox at checkout, input one of the <a href=%s target="_blank">available WooCommerce form actions</a>.', 'mailchimp-for-woocommerce' ),
+                __( 'Your checkout page is using WooCommerce the Classic Checkout Shortcode. To change the opt-in checkbox at checkout, input one of the <a href=%s target="_blank">available WooCommerce form actions</a>.', 'mailchimp-for-woocommerce' ),
                 esc_url( 'https://woocommerce.com/document/tutorial-customising-checkout-fields-using-actions-and-filters/')
             );
         endif;

@@ -15,19 +15,19 @@ $active_tab = isset( $_GET['tab'] ) ? esc_attr( sanitize_key( $_GET['tab'] ) ) :
 			<div class="mc-wc-tab-buttons">
 				<ul class="mc-wc-tab-buttons-wrapper">
 					<li class="<?php if (MC_WC_OVERVIEW_TAB === $active_tab) { echo 'current'; } ?>">
-						<a href="?page=mailchimp-woocommerce&breadcrumb=<?php echo MC_WC_CONFIRMATION; ?>&tab=<?php echo MC_WC_OVERVIEW_TAB; ?>" class="mc-wc-tab-button-text"><?php esc_html_e( 'Overview', 'mailchimp-for-woocommerce' ); ?></a>
+						<a href="?page=mailchimp-woocommerce&tab=<?php echo MC_WC_OVERVIEW_TAB; ?>" class="mc-wc-tab-button-text"><?php esc_html_e( 'Overview', 'mailchimp-for-woocommerce' ); ?></a>
 					</li>
 					<li class="<?php if (MC_WC_STORE_INFO_TAB === $active_tab) { echo 'current'; } ?>">
-						<a href="?page=mailchimp-woocommerce&breadcrumb=<?php echo MC_WC_CONFIRMATION; ?>&tab=<?php echo MC_WC_STORE_INFO_TAB; ?>" class="mc-wc-tab-button-text"><?php esc_html_e( 'Store', 'mailchimp-for-woocommerce' ); ?></a>
+						<a href="?page=mailchimp-woocommerce&tab=<?php echo MC_WC_STORE_INFO_TAB; ?>" class="mc-wc-tab-button-text"><?php esc_html_e( 'Store', 'mailchimp-for-woocommerce' ); ?></a>
 					</li>
 					<li class="<?php if (MC_WC_AUDIENCE_TAB === $active_tab) { echo 'current'; } ?>">
-						<a href="?page=mailchimp-woocommerce&breadcrumb=<?php echo MC_WC_CONFIRMATION; ?>&tab=<?php echo MC_WC_AUDIENCE_TAB; ?>" class="mc-wc-tab-button-text"><?php esc_html_e( 'Audience', 'mailchimp-for-woocommerce' ); ?></a>
+						<a href="?page=mailchimp-woocommerce&tab=<?php echo MC_WC_AUDIENCE_TAB; ?>" class="mc-wc-tab-button-text"><?php esc_html_e( 'Audience', 'mailchimp-for-woocommerce' ); ?></a>
 					</li>
 					<li class="<?php if (MC_WC_LOGS_TAB === $active_tab) { echo 'current'; } ?>">
-						<a href="?page=mailchimp-woocommerce&breadcrumb=<?php echo MC_WC_CONFIRMATION; ?>&tab=<?php echo MC_WC_LOGS_TAB; ?>" class="mc-wc-tab-button-text"><?php esc_html_e( 'Logs', 'mailchimp-for-woocommerce' ); ?></a>
+						<a href="?page=mailchimp-woocommerce&tab=<?php echo MC_WC_LOGS_TAB; ?>" class="mc-wc-tab-button-text"><?php esc_html_e( 'Logs', 'mailchimp-for-woocommerce' ); ?></a>
 					</li>
 					<li class="<?php if (MC_WC_ADVANCED_TAB === $active_tab) { echo 'current'; } ?>">
-						<a href="?page=mailchimp-woocommerce&breadcrumb=<?php echo MC_WC_CONFIRMATION; ?>&tab=<?php echo MC_WC_ADVANCED_TAB; ?>" class="mc-wc-tab-button-text"><?php esc_html_e( 'Advanced', 'mailchimp-for-woocommerce' ); ?></a>
+						<a href="?page=mailchimp-woocommerce&tab=<?php echo MC_WC_ADVANCED_TAB; ?>" class="mc-wc-tab-button-text"><?php esc_html_e( 'Advanced', 'mailchimp-for-woocommerce' ); ?></a>
 					</li>
 				</ul>
 			</div>
@@ -56,7 +56,7 @@ $active_tab = isset( $_GET['tab'] ) ? esc_attr( sanitize_key( $_GET['tab'] ) ) :
 					case MC_WC_ADVANCED_TAB:
 						include_once  __DIR__ .'/tabs/advanced.php';
 						break;
-					
+
 					default:
 						include_once  __DIR__ .'/tabs/overview.php';
 						break;

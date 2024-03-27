@@ -176,16 +176,17 @@ if ( $store ) {
                             <?php echo $mailchimp_total_subscribers; ?>
                         </span>
                         <span class="sync-number-total">
-                            <?php esc_html_e('of', 'mailchimp-for-woocommerce' ); ?> 
+                            <?php esc_html_e('of', 'mailchimp-for-woocommerce' ); ?>
                             <span><?php echo $mailchimp_total_subscribers; ?></span>
                         </span>
                     </div>
                     <div class="sync-text">
                         <span><?php esc_html_e('Contacts', 'mailchimp-for-woocommerce' ); ?></span>
-                        <div>
+                        <div class="mc-wc-tooltip">
                             <svg width="26" height="24" viewBox="0 0 26 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd" clip-rule="evenodd" d="M3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12C21 16.971 16.971 21 12 21C7.029 21 3 16.971 3 12ZM13 10V15L14 16V17H10V16L11 15V12H10L11 10H13ZM13 7V9H11V7H13Z" fill="#000624"/>
                             </svg>
+                            <div class="mc-wc-tooltip-text">WooCommerce customers sync to Mailchimp as new contacts.</div>
                         </div>
                     </div>
                 </div>
@@ -195,16 +196,17 @@ if ( $store ) {
                             <?php echo $mailchimp_total_orders; ?>
                         </span>
                         <span class="sync-number-total">
-                            <?php esc_html_e('of', 'mailchimp-for-woocommerce' ); ?> 
+                            <?php esc_html_e('of', 'mailchimp-for-woocommerce' ); ?>
                             <span><?php echo $mailchimp_total_orders; ?></span>
                         </span>
                     </div>
                     <div class="sync-text">
                         <span><?php esc_html_e('Orders', 'mailchimp-for-woocommerce' ); ?></span>
-                        <div>
+                        <div class="mc-wc-tooltip">
                             <svg width="26" height="24" viewBox="0 0 26 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd" clip-rule="evenodd" d="M3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12C21 16.971 16.971 21 12 21C7.029 21 3 16.971 3 12ZM13 10V15L14 16V17H10V16L11 15V12H10L11 10H13ZM13 7V9H11V7H13Z" fill="#000624"/>
                             </svg>
+                            <div class="mc-wc-tooltip-text">WooCommerce orders sync to Mailchimp so you can segment and automate based on your contacts’ past purchase behavior.</div>
                         </div>
                     </div>
                 </div>
@@ -214,16 +216,17 @@ if ( $store ) {
                             <?php echo $mailchimp_total_promo_rules; ?>
                         </span>
                         <span class="sync-number-total">
-                            <?php esc_html_e('of', 'mailchimp-for-woocommerce' ); ?> 
+                            <?php esc_html_e('of', 'mailchimp-for-woocommerce' ); ?>
                             <span><?php echo $mailchimp_total_promo_rules; ?></span>
                         </span>
                     </div>
                     <div class="sync-text">
                         <span><?php esc_html_e('Promo codes', 'mailchimp-for-woocommerce' ); ?></span>
-                        <div>
+                        <div class="mc-wc-tooltip">
                             <svg width="26" height="24" viewBox="0 0 26 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd" clip-rule="evenodd" d="M3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12C21 16.971 16.971 21 12 21C7.029 21 3 16.971 3 12ZM13 10V15L14 16V17H10V16L11 15V12H10L11 10H13ZM13 7V9H11V7H13Z" fill="#000624"/>
                             </svg>
+                            <div class="mc-wc-tooltip-text">WooCommerce discount codes sync to Mailchimp so you can use promo code content blocks in your Mailchimp campaigns.</div>
                         </div>
                     </div>
                 </div>
@@ -233,22 +236,23 @@ if ( $store ) {
                             <?php echo $mailchimp_total_products; ?>
                         </span>
                         <span class="sync-number-total">
-                            <?php esc_html_e('of', 'mailchimp-for-woocommerce' ); ?> 
+                            <?php esc_html_e('of', 'mailchimp-for-woocommerce' ); ?>
                             <span><?php echo $mailchimp_total_products; ?></span>
                         </span>
                     </div>
                     <div class="sync-text">
                         <span><?php esc_html_e('Products', 'mailchimp-for-woocommerce' ); ?></span>
-                        <div>
+                        <div class="mc-wc-tooltip">
                             <svg width="26" height="24" viewBox="0 0 26 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd" clip-rule="evenodd" d="M3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12C21 16.971 16.971 21 12 21C7.029 21 3 16.971 3 12ZM13 10V15L14 16V17H10V16L11 15V12H10L11 10H13ZM13 7V9H11V7H13Z" fill="#000624"/>
                             </svg>
+                            <div class="mc-wc-tooltip-text">WooCommerce products sync to Mailchimp so you can use the product and product recommendation content blocks in your Mailchimp campaigns.</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        
+
     </div>
     <div class="mc-wc-tab-content-box">
         <div class="mc-wc-tab-content-title has-underline">

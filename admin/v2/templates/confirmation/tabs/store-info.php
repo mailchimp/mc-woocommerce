@@ -17,8 +17,10 @@
     }
 
     $checkbox_default_settings = ( array_key_exists( 'mailchimp_permission_cap', $options ) && ! is_null( $options['mailchimp_permission_cap'] ) ) ? $options['mailchimp_permission_cap'] : 'manage_options';
+
+	$is_has_wc_checkout_block = has_block( 'woocommerce/checkout', (int) $checkout_page_id );
 ?>
-    
+
 <input type="hidden" name="mailchimp_active_settings_tab" value="<?php echo MC_WC_STORE_INFO_TAB; ?>"/>
 <input type="hidden" value="<?php echo ( esc_html( isset( $current_currency_data ) ? $current_currency . ' | ' . $current_currency_data['name'] : $current_currency ) ); ?>" disabled/>
 	<input type="hidden" value="<?php echo esc_attr( mailchimp_get_timezone( true ) ); ?>" disabled/>
@@ -85,17 +87,25 @@
         </div>
         <div class="mc-wc-tab-content-description">
         <?php
+        if ( $is_has_wc_checkout_block ):
             echo sprintf(
-                __( 'Your checkout page is using WooCommerce blocks. Settings are available within the block options while editing the <a href=%s target="_blank">checkout page</a>. To change the opt-in checkbox at checkout, input one of the <a href=%s target="_blank">available WooCommerce form actions</a>.', 'mailchimp-for-woocommerce' ),
-                get_the_permalink($checkout_page_id),
+                __( 'Your checkout page is using WooCommerce blocks. Settings are available within the block options while editing the <a href=%s target="_blank">checkout page</a>.', 'mailchimp-for-woocommerce' ),
+                get_the_permalink($checkout_page_id)
+            );
+        else:
+            echo sprintf(
+                __( 'Your checkout page is using WooCommerce the Classic Checkout Shortcode. To change the opt-in checkbox at checkout, input one of the <a href=%s target="_blank">available WooCommerce form actions</a>.', 'mailchimp-for-woocommerce' ),
                 esc_url( 'https://woocommerce.com/document/tutorial-customising-checkout-fields-using-actions-and-filters/')
             );
+        endif;
         ?>
         </div>
-        <div class="mc-wc-input-wrapper">
-			<input class="mc-wc-input style-2" type="text" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_checkbox_action]" value="<?php echo isset( $options['mailchimp_checkbox_action'] ) ? esc_html( $options['mailchimp_checkbox_action'] ) : 'woocommerce_after_checkout_billing_form'; ?>" />
-			<p class="description"><?php esc_html_e( 'Enter a WooCommerce form action', 'mailchimp-for-woocommerce' ); ?></p>
-		</div>
+        <?php if ( ! $is_has_wc_checkout_block ): ?>
+            <div class="mc-wc-input-wrapper">
+                <input class="mc-wc-input style-2" type="text" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_checkbox_action]" value="<?php echo isset( $options['mailchimp_checkbox_action'] ) ? esc_html( $options['mailchimp_checkbox_action'] ) : 'woocommerce_after_checkout_billing_form'; ?>" />
+                <p class="description"><?php esc_html_e( 'Enter a WooCommerce form action', 'mailchimp-for-woocommerce' ); ?></p>
+            </div>
+        <?php endif; ?>
     </div>
 
     <div class="mc-wc-tab-content-box product-image-setting">

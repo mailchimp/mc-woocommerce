@@ -6,7 +6,7 @@
 		$('.mc-wc-tag-list .mc-wc-input').keypress(function(event) {
 			var charCode = event.which || event.keyCode;
 			var charStr = String.fromCharCode(charCode);
-			if (/^[a-zA-Z\s]*$/.test(charStr)) {
+			if (/^[a-zA-Z0-9\s-_]*$/.test(charStr)) {
 				return true; // Allow input
 			} else {
 				return false; // Prevent input

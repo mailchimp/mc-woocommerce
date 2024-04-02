@@ -47,7 +47,7 @@ $tower_enabled = null !== $tower_opt ? $tower_opt : '0';
                     </div>
                 </div>
                 <div class="mc-wc-radio-checkbox-description">
-                    <?php esc_html_e( 'Occasionally we may send you updates, articles and other news to the store’s admin email address. Choose whether or not you want to receive these messages at [email address].', 'mailchimp-for-woocommerce' ); ?></a>
+                    <?php printf( esc_html__( 'Occasionally we may send you updates, articles and other news to the store’s admin email address. Choose whether or not you want to receive these messages at %s.', 'mailchimp-for-woocommerce' ), $admin_email ); ?></a>
                 </div>
             </div>
         </div>

@@ -280,7 +280,7 @@ if ( $store ) {
                         );
                     ?>
                     </p>
-                    <a href="#" class="mc-wc-btn mc-wc-btn-primary no-linear-gradient" target="_blank"><?php echo __('Create a pop-up form', 'mailchimp-for-woocommerce' ); ?></a>
+                    <a href="https://admin.mailchimp.com/audience/forms/dashboard" class="mc-wc-btn mc-wc-btn-primary no-linear-gradient" target="_blank"><?php echo __('Create a pop-up form', 'mailchimp-for-woocommerce' ); ?></a>
                 </div>
                 <div class="mc-wc-tab-content-blogs-image">
                     <img src="<?php echo esc_attr( plugin_dir_url( __FILE__ ) . '../../../assets/images/blog-image-1.png' ); ?>" alt="">
@@ -305,7 +305,7 @@ if ( $store ) {
                     <p>
                         <?php esc_html_e('Get started with flexible templates, drag-and-drop design, and our built-in, expert advice. AI-assisted tools can help generate and optimize your content.', 'mailchimp-for-woocommerce' ); ?>
                     </p>
-                    <a href="#" class="mc-wc-btn mc-wc-btn-primary no-linear-gradient" target="_blank"><?php esc_html_e('Create your first email', 'mailchimp-for-woocommerce' ); ?></a>
+                    <a href="https://admin.mailchimp.com/campaigns/#/create-campaign" class="mc-wc-btn mc-wc-btn-primary no-linear-gradient" target="_blank"><?php esc_html_e('Create your first email', 'mailchimp-for-woocommerce' ); ?></a>
                 </div>
                 <div class="mc-wc-tab-content-blogs-image">
                     <img src="<?php echo esc_attr( plugin_dir_url( __FILE__ ) . '../../../assets/images/blog-image-3.png' ); ?>" alt="">

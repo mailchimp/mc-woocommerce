@@ -40,7 +40,7 @@ $checkout_page_id = get_option('woocommerce_checkout_page_id');
             <div class="mc-wc-linked-audience-list">
                 <h3 class="mc-wc-settings-content-title"><?php esc_html_e( 'Linked audience', 'mailchimp-for-woocommerce' ); ?></h3>
                 <div class="mc-wc-select-wrapper">
-                    <select class="mc-wc-select" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_list]" required <?php echo ( isset( $only_one_list ) && $only_one_list ) ? 'disabled' : ''; ?>>
+                    <select id="mailchimp_list_selector" class="mc-wc-select" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_list]" required <?php echo ( isset( $only_one_list ) && $only_one_list ) ? 'disabled' : ''; ?>>
                         <?php if ( ! isset( $allow_new_list ) || true === $allow_new_list ) : ?>
                             <option value="create_new"><?php esc_html_e( 'Create New Audience', 'mailchimp-for-woocommerce' ); ?></option>
                         <?php endif ?>
@@ -61,15 +61,15 @@ $checkout_page_id = get_option('woocommerce_checkout_page_id');
             </div>
             <p class="mc-wc-linked-audience-description">
                 <?php esc_html_e( 'Confirm the Mailchimp audience you want to associate with your WooCommerce store', 'mailchimp-for-woocommerce' ); ?>
-                <span class="mc-wc-text-md"><?php echo esc_attr($audience_name); ?>.</span>
+                <span class="mc-wc-text-md store_name"><?php echo esc_attr($store_name); ?>.</span>
             </p>
         </div>
     </div>
     <div class="mc-wc-import-customers-initial">
         <?php $initial_sync_subscribe = ( array_key_exists( 'mailchimp_initial_sync', $options ) && ! is_null( $options['mailchimp_initial_sync'] ) ) ? $options['mailchimp_initial_sync'] : 'subscribed'; ?>
         <h3 class="mc-wc-settings-content-title"><?php esc_html_e( 'Import customers (initial sync)', 'mailchimp-for-woocommerce' ); ?></h3>
-        <p class="mc-wc-text-1">
-            <?php esc_html_e( 'Choose how you’ll add your 1,999 WooCommerce customers to Mailchimp:', 'mailchimp-for-woocommerce' ); ?>
+        <p class="mc-wc-text-1 pb-text">
+            <?php esc_html_e( 'Choose how you’ll add your '.mailchimp_get_customer_count().' WooCommerce customers to Mailchimp:', 'mailchimp-for-woocommerce' ); ?>
         </p>
         <div class="mc-wc-import-list-sync  <?php echo $initial_sync_subscribe; ?>">
             <div class="mc-wc-import-list-sync-item">

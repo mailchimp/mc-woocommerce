@@ -391,10 +391,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				}
 			}
 
-			$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : ( $this->getOption( 'active_tab' ) ? $this->getOption( 'active_tab' ) : 'api_key' );
-			if ( $active_tab == 'sync' && get_option( 'mailchimp-woocommerce-sync.initial_sync' ) == 1 && get_option( 'mailchimp-woocommerce-sync.completed_at' ) > 0 ) {
-				$this->mailchimp_show_initial_sync_message();
-			}
+//			$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : ( $this->getOption( 'active_tab' ) ? $this->getOption( 'active_tab' ) : 'api_key' );
+//			if ( $active_tab == 'sync' && get_option( 'mailchimp-woocommerce-sync.initial_sync' ) == 1 && get_option( 'mailchimp-woocommerce-sync.completed_at' ) > 0 ) {
+//				$this->mailchimp_show_initial_sync_message();
+//			}
 			if ( isset( $_GET['log_removed'] ) && $_GET['log_removed'] == '1' ) {
 				add_settings_error( 'mailchimp_log_settings', '', __( 'Log file deleted.', 'mailchimp-for-woocommerce' ), 'info' );
 			}
@@ -793,6 +793,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 			case 'api_key':
 				$data = $this->validatePostApiKey( $input );
+                if (!empty($data) && empty($data['api_ping_error'])) {
+                    mailchimp_set_transient('oauth_success', true, 10);
+                }
 				break;
 
 			case 'store_info':
@@ -1568,6 +1571,28 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 	}
 
+    /**
+     * @return false|string
+     */
+    public function getAccountName()
+    {
+        if ( ! $this->validateApiKey() ) {
+            return false;
+        }
+
+        if ( ( $account_name = $this->getData( 'account_name', false ) ) ) {
+            return $account_name;
+        }
+
+        $root = $this->api()->ping(true);
+
+        $name = is_array($root) && array_key_exists('account_name', $root) ? $root['account_name'] : false;
+
+        $this->setData('account_name', $name);
+
+        return $name;
+    }
+
 	/**
 	 * @return bool
 	 * @throws MailChimp_WooCommerce_Error
@@ -1716,70 +1741,20 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 								}
 
 								if (response.has_started && !response.has_finished) {
-
 									// Promo codes
-									jQuery('.sync-promo-codes .sync-number-total span').html(response.promo_rules_in_store.toLocaleString(undefined, {maximumFractionDigits: 0}));
-
-									if (response.promo_rules_page === 'complete') {
-										jQuery('.sync-promo-codes .sync-number-finished').html(response.promo_rules_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0}));
-									} else {
-										if (response.promo_rules_in_mailchimp === 0) {
-											promo_rulesProgress = 0;
-										} else {
-											promo_rulesProgress = response.promo_rules_in_mailchimp;
-										}
-										jQuery('.sync-promo-codes .sync-number-finished').html(promo_rulesProgress);
-									}
-
+                                    jQuery('.sync-promo-codes .sync-number-finished').html(response.promo_rules_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0}));
 									// Products
-									jQuery('.sync-products .sync-number-total span').html(response.products_in_store.toLocaleString(undefined, {maximumFractionDigits: 0}));
-
-									if (response.products_page === 'complete') {
-										jQuery('.sync-products .sync-number-finished').html(response.products_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0}));
-									} else {
-										if (response.products_in_mailchimp === 0) {
-											productsProgress = 0;
-										} else {
-											productsProgress = response.products_in_mailchimp;
-										}
-										jQuery('.sync-products .sync-number-finished').html(productsProgress);
-									}
-
+                                    jQuery('.sync-products .sync-number-finished').html(response.products_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0}));
 									// Orders
-									jQuery('.sync-orders .sync-number-total span').html(response.orders_in_store.toLocaleString(undefined, {maximumFractionDigits: 0}));
-
-									if (response.orders_page === 'complete') {
-										jQuery('.sync-orders .sync-number-finished').html(response.orders_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0}));
-									} else {
-										if (response.orders_in_mailchimp === 0) {
-											orders_Progress = 0;
-										} else {
-											orders_Progress = response.orders_in_mailchimp;
-										}
-										jQuery('.sync-orders .sync-number-finished').html(orders_Progress);
-									}
-
-									// TODO: Need API response contacts
+                                    jQuery('.sync-orders .sync-number-finished').html(response.orders_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0}));
 									// Contacts
-									// jQuery('.sync-contacts .sync-number-total span').html(response.contacts_in_store.toLocaleString(undefined, {maximumFractionDigits: 0}));
-
-									// if (response.contacts_page === 'complete') {
-									// 	jQuery('.sync-contacts .sync-number-finished').html(response.contacts_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0}));
-									// } else {
-									// 	if (response.contacts_in_mailchimp === 0) {
-									// 		contactsProgress = 0;
-									// 	} else {
-									// 		contactsProgress = response.contacts_in_mailchimp;
-									// 	}
-									// 	jQuery('.sync-contacts .sync-number-finished').html(contactsProgress);
-									// }
+									jQuery('.sync-contacts .sync-number-total span').html(response.customers_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0}));
 
 									// only call status again if sync is running.
 									setTimeout(function() {
 										call_mailchimp_for_stats_new(true);
-									}, 10000);
-								}
-								else {
+									}, 15000);
+								} else {
 									jQuery('.sync-status-icon-wrapper img').addClass('mc-wc-d-none');
 									jQuery('.sync-status-time').removeClass('mc-wc-d-none');
 									jQuery('.sync-status-icon-wrapper span').removeClass('mc-wc-d-none');

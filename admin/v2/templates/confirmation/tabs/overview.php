@@ -13,10 +13,12 @@ if ( ! isset( $handler ) ) {
 	$handler = MailChimp_WooCommerce_Admin::instance();
 }
 
+$customer_count    = mailchimp_get_customer_count();
 $product_count     = mailchimp_get_product_count();
 $order_count       = mailchimp_get_order_count();
 $promo_rules_count = mailchimp_count_posts( 'shop_coupon' );
 
+$mailchimp_total_customers     = 0;
 $mailchimp_total_products      = 0;
 $mailchimp_total_orders        = 0;
 $mailchimp_total_promo_rules   = 0;
@@ -86,6 +88,15 @@ if ( $store ) {
 		$mailchimp_total_transactional = 0; 
     }
 
+    try {
+        $mailchimp_total_customers = $mailchimp_api->getCustomerCount($store_id);
+        if ( $mailchimp_total_customers > $customer_count ) {
+            $mailchimp_total_customers = $customer_count;
+        }
+    } catch (Exception $e) {
+
+    }
+
 	$mailchimp_list_name = $handler->getListName();
 }
 
@@ -139,7 +150,7 @@ if ( $store ) {
                         <span>
                         <?php if ( $last_updated_time ) : ?>
                             <?php if ( mailchimp_is_done_syncing() ) : ?>
-                                <?php esc_html_e( 'Completed', 'mailchimp-for-woocommerce' ); ?>
+                                <?php esc_html_e( 'Complete', 'mailchimp-for-woocommerce' ); ?>
                             <?php else : ?>
                                 <?php esc_html_e( 'Running', 'mailchimp-for-woocommerce' ); ?>
                             <?php endif; ?>        
@@ -173,11 +184,7 @@ if ( $store ) {
                 <div class="sync-contacts">
                     <div class="sync-number">
                         <span class="sync-number-finished">
-                            <?php echo $mailchimp_total_subscribers; ?>
-                        </span>
-                        <span class="sync-number-total">
-                            <?php esc_html_e('of', 'mailchimp-for-woocommerce' ); ?>
-                            <span><?php echo $mailchimp_total_subscribers; ?></span>
+                            <?php echo $mailchimp_total_customers; ?>
                         </span>
                     </div>
                     <div class="sync-text">
@@ -195,10 +202,6 @@ if ( $store ) {
                         <span class="sync-number-finished">
                             <?php echo $mailchimp_total_orders; ?>
                         </span>
-                        <span class="sync-number-total">
-                            <?php esc_html_e('of', 'mailchimp-for-woocommerce' ); ?>
-                            <span><?php echo $mailchimp_total_orders; ?></span>
-                        </span>
                     </div>
                     <div class="sync-text">
                         <span><?php esc_html_e('Orders', 'mailchimp-for-woocommerce' ); ?></span>
@@ -215,10 +218,6 @@ if ( $store ) {
                         <span class="sync-number-finished">
                             <?php echo $mailchimp_total_promo_rules; ?>
                         </span>
-                        <span class="sync-number-total">
-                            <?php esc_html_e('of', 'mailchimp-for-woocommerce' ); ?>
-                            <span><?php echo $mailchimp_total_promo_rules; ?></span>
-                        </span>
                     </div>
                     <div class="sync-text">
                         <span><?php esc_html_e('Promo codes', 'mailchimp-for-woocommerce' ); ?></span>
@@ -232,14 +231,10 @@ if ( $store ) {
                 </div>
                 <div class="sync-products">
                 <div class="sync-number">
-                        <span class="sync-number-finished">
-                            <?php echo $mailchimp_total_products; ?>
-                        </span>
-                        <span class="sync-number-total">
-                            <?php esc_html_e('of', 'mailchimp-for-woocommerce' ); ?>
-                            <span><?php echo $mailchimp_total_products; ?></span>
-                        </span>
-                    </div>
+                    <span class="sync-number-finished">
+                        <?php echo $mailchimp_total_products; ?>
+                    </span>
+                </div>
                     <div class="sync-text">
                         <span><?php esc_html_e('Products', 'mailchimp-for-woocommerce' ); ?></span>
                         <div class="mc-wc-tooltip">

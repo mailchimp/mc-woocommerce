@@ -18,6 +18,13 @@
 	src: local('SF Pro Text'), url('../fonts/SF_Pro_Text/SFProText-Regular.ttf')  format('truetype');
 }
 
+@font-face {
+    font-family: 'SF Pro Text';
+    font-style: normal;
+    font-weight: 700;
+    src: local('SF Pro Text'), url('../fonts/SF_Pro_Text/SFProText-Regular.ttf')  format('truetype');
+}
+
 /* Roboto */
 @font-face {
 	font-family: 'Roboto';
@@ -536,7 +543,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
 
 .mc-wc-settings-content-title {
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 500;
     line-height: 24px;
     margin-block: 0 16px;
 }
@@ -562,9 +569,13 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
     color: #000624;
     font-family: Roboto;
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 400 !important;
     line-height: 24px;
     padding: 5px 6px 5px 12px;
+}
+
+.pb-text {
+    padding-bottom: 12px;
 }
 
 .wp-core-ui select:not(:disabled):hover {
@@ -599,7 +610,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
 .mc-wc-radio-label, .mc-wc-checkbox-label {
     font-family: Roboto;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 500;
     line-height: 20px;
     letter-spacing: 0px;
     text-align: left;
@@ -827,7 +838,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
 .mc-wc-tab-content-title h3 {
     font-family: Roboto;
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 400;
     line-height: 24px;
     letter-spacing: 0px;
     text-align: left;
@@ -900,7 +911,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
 .sync-status-text {
     font-family: Roboto;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 400;
     line-height: 20px;
     letter-spacing: 1px;
     text-align: center;
@@ -1012,7 +1023,7 @@ span.sync-number-total {
 .mc-wc-tab-content-blogs-detail h4 {
     font-family: Roboto;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 400;
     line-height: 20px;
     letter-spacing: 0px;
     text-align: left;

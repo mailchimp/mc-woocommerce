@@ -40,7 +40,10 @@ $only_one_list            	= false;
 $clicked_sync_button      	= $mc_configured && $is_mailchimp_post && MC_WC_OVERVIEW_TAB === $active_tab;
 $has_api_error            	= isset( $options['api_ping_error'] ) && ! empty( $options['api_ping_error'] ) ? $options['api_ping_error'] : null;
 $audience_name 				= $handler->getListName() ? $handler->getListName() : '';
+$account_name               = $handler->getAccountName();
+$store_name                 = get_option( 'blogname' );
 
+// only do this if we haven't selected an audience.
 if ( isset( $options['mailchimp_api_key'] ) ) {
 	try {
 		if ( $handler->hasValidApiKey( null, true ) ) {

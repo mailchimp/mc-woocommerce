@@ -67,6 +67,13 @@
 			removeTag(tag_list_current, tag_parent_ele, tag_remove);
 		});
 
+		// when the audience is selected
+		// $('#mailchimp_list_selector').change(function (e) {
+		// 	const label = $('#mailchimp_list_selector option:selected').text();
+		// 	$('.selected_audience_name').text(label);
+		// });
+
+
 		function removeTag(tag_list_ele, parent_ele, tag_remove) {
 			const tags_hidden = tag_list_ele.find('#mailchimp-woocommerce-user-tags');
 			let tags_hidden_vals = tags_hidden.val();

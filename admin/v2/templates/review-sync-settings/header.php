@@ -49,9 +49,9 @@
                         <path d="M48.1246 12.8365C47.1309 12.8365 46.6104 13.276 46.6104 13.781C46.6104 14.3252 47.2264 14.7256 48.1246 14.7256C49.0228 14.7256 49.6388 14.3252 49.6388 13.781C49.6388 13.276 49.1174 12.8365 48.1246 12.8365Z" fill="black"/>
                     </svg>
                 </div>
-                <?php if ($audience_name): ?>
+                <?php if ($account_name): ?>
                     <div class="mc-wc-header-account-logo-text">
-                        <span class="account-name-text"><?php echo esc_attr($audience_name); ?></span>
+                        <span class="account-name-text"><?php echo esc_attr($account_name); ?></span>
                         <span class="authorized-text"><?php echo __( 'Authorized', 'mailchimp-for-woocommerce' ); ?></span>
                     </div>
                 <?php endif; ?>

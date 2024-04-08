@@ -55,8 +55,12 @@
 			} else {
 				show_tagged.append(eleTagged);
 			}
-			
+
 			tags_hidden.val(tag_vals_str);
+
+			if ($('#mailchimp_woocommerce_options .mc-wc-tab-content').length) {
+				saveSettings();
+			}
 		}
 
 		$('.mc-wc-tag-list').on('click', '.mc-wc-tag-icon-del', function() {
@@ -85,7 +89,54 @@
 				let tag_vals_str = tags_vals_array.join(', ');
 				tags_hidden.val(tag_vals_str);
 				parent_ele.remove();
+
+				if ($('#mailchimp_woocommerce_options .mc-wc-tab-content').length) {
+					saveSettings();
+				}
 			}
+		}
+
+		$('#mailchimp_woocommerce_options .mc-wc-tab-content input:not(.mc-wc-tag-list .mc-wc-input):not(#tower_box_switch):not(#comm_box_switch), #mailchimp_woocommerce_options .mc-wc-tab-content select:not(#log_file):not(#mailchimp-log-pref)').change(function(e) {
+			e.preventDefault();
+
+			saveSettings();
+		});
+
+		function saveSettings() {
+			let formData = new FormData($('#mailchimp_woocommerce_options')[0]);
+			let notice = $('.mc-wc-notice');
+			let content = $('.mc-wc-tab-content');
+
+			content.addClass('loading');
+
+			notice
+				.removeClass('error success')
+				.text('');
+
+			$.ajax({
+				method: 'POST',
+				url: phpVars.ajax_url_option,
+				data: formData,
+				processData: false,
+				contentType: false,
+				success: function() {
+					notice
+						.addClass('success')
+						.text(phpVars.l10n.option_update_success)
+						.show()
+						.fadeOut(3000);
+				},
+				error: function () {
+					notice
+						.addClass('error')
+						.text(phpVars.l10n.option_update_error)
+						.show()
+						.fadeOut(3000);
+				},
+				complete: function() {
+					content.removeClass('loading');
+				}
+			});
 		}
 	});
 })( jQuery );

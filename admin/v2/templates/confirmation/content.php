@@ -39,6 +39,7 @@ $active_tab = isset( $_GET['tab'] ) ? esc_attr( sanitize_key( $_GET['tab'] ) ) :
 					</div>
 			<?php endif; ?>
 			<div class="mc-wc-tab-content <?php echo $active_tab; ?>">
+				<div class="mc-wc-notice"></div>
 			<?php
 				switch ($active_tab) {
 					case MC_WC_STORE_INFO_TAB:

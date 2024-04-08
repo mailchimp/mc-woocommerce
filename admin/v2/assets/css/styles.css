@@ -2,14 +2,6 @@
 @import url('../fonts/Means/fonts.css');
 @import url('../fonts/graphik/fonts.css');
 
-/* Means font */
-@font-face {
-    font-family: 'Means';
-	font-style: normal;
-	font-weight: normal;
-	src: local('Means'), url('../fonts/Means/Means.ttf')  format('truetype');
-}
-
 /* SF Pro Text */
 @font-face {
     font-family: 'SF Pro Text';
@@ -92,7 +84,7 @@
     font-size: 28px;
     font-weight: 500;
     line-height: 36px;
-    letter-spacing: 0em;
+    letter-spacing: 0;
     text-align: left;
     color: #000624;
     margin-block: 72px 26px;
@@ -205,7 +197,7 @@ input.mc-wc-btn {
 
 .mc-wc-setting-header {
     background-color: #fff;
-    box-shadow: 0px 4px 8px 0px #97979717;
+    box-shadow: 0 4px 8px 0 #97979717;
     border-radius: var(--mc-wc-border-radius);
 }
 
@@ -215,7 +207,6 @@ input.mc-wc-btn {
 
 .mc-wc-breadcrumbs-wrapper {
     list-style: none;
-    padding: 0;
     display: flex;
     gap: 24px;
     font-size: 13px;
@@ -290,7 +281,7 @@ input.mc-wc-btn {
     font-size: 32px;
     font-weight: 400;
     line-height: 36px;
-    letter-spacing: 0em;
+    letter-spacing: 0;
     text-align: left;
     margin-block: 0 20px;
 }
@@ -345,7 +336,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
     font-size: 14px;
     font-weight: 700;
     line-height: 24px;
-    letter-spacing: 0px;
+    letter-spacing: 0;
     text-align: left;
 }
 
@@ -355,7 +346,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
     font-style: italic;
     font-weight: 500;
     line-height: 24px;
-    letter-spacing: 0px;
+    letter-spacing: 0;
     text-align: left;
 }
 
@@ -382,7 +373,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
     font-size: 14px;
     font-weight: 400;
     line-height: 20px;
-    letter-spacing: 0px;
+    letter-spacing: 0;
     text-align: left;
     margin-block: 0 35px;
 }
@@ -418,7 +409,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
 .mc-wc-review-sync-settings-content {
     padding: 49px 77px 57px 57px;
     margin-top: 25px;
-    box-shadow: 0px 1px 2px 0px #00000026, 0px 0px 5px 0px #0000000D;
+    box-shadow: 0 1px 2px 0 #00000026, 0 0 5px 0 #0000000D;
     border-radius: 8px;
     background-color: #fff;
 }
@@ -511,7 +502,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
     padding: 8px 16px;
     border-radius: 4px;
     border: 1px solid #7D57A4;
-    box-shadow: 0px 1px 0px 0px #0000000D;
+    box-shadow: 0 1px 0 0 #0000000D;
     background-color: #fff;
     font-family: 'SF Pro Text';
     font-size: 14px;
@@ -545,7 +536,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
     font-size: 13px;
     font-weight: 400;
     line-height: 20px;
-    letter-spacing: 0px;
+    letter-spacing: 0;
     text-align: left;
     margin: 0;
 }
@@ -576,7 +567,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
     font-size: 12px;
     font-weight: 400;
     line-height: 18px;
-    letter-spacing: 0px;
+    letter-spacing: 0;
     text-align: left;
 }
 
@@ -592,7 +583,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
     font-size: 11px;
     font-weight: 400;
     line-height: 18px;
-    letter-spacing: 0px;
+    letter-spacing: 0;
     text-align: left;
 }
 
@@ -601,7 +592,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
     font-size: 13px;
     font-weight: 700;
     line-height: 20px;
-    letter-spacing: 0px;
+    letter-spacing: 0;
     text-align: left;
     position: relative;
     padding-left: 40px;
@@ -619,7 +610,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
     font-size: 12px;
     font-weight: 400;
     line-height: 18px;
-    letter-spacing: 0px;
+    letter-spacing: 0;
 }
 
 .mc-wc-import-list-sync-description a {
@@ -627,7 +618,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
     font-size: 12px;
     font-weight: 400;
     line-height: 18px;
-    letter-spacing: 0px;
+    letter-spacing: 0;
 }
 
 .mc-wc-tag-customer .mc-wc-text-1 {
@@ -635,19 +626,19 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
     font-size: 12px;
     font-weight: 400;
     line-height: 20px;
-    letter-spacing: 0em;
+    letter-spacing: 0;
     text-align: left;
     margin-block: 0 30px;
 }
 
 .mc-wc-input[type=text] {
     border: 1px solid #BDC1CC;
-    box-shadow: 0px 1px 0px 0px #0000000D;
+    box-shadow: 0 1px 0 0 #0000000D;
     font-family: 'SF Pro Text';
     font-size: 12px;
     font-weight: 400;
     line-height: 20px;
-    letter-spacing: 0px;
+    letter-spacing: 0;
     text-align: left;
     padding: 0 12px;
     margin: 0;
@@ -661,7 +652,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
     color: #979797;
     opacity: 1; /* Firefox */
 }
-  
+
 .mc-wc-input[type=text]::-ms-input-placeholder { /* Edge 12 -18 */
     color: #979797;
 }
@@ -775,7 +766,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
     font-size: 16px;
     font-weight: 500;
     line-height: 24px;
-    letter-spacing: 0em;
+    letter-spacing: 0;
     text-align: center;
 }
 
@@ -807,10 +798,34 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
 }
 
 .mc-wc-tab-content {
-    box-shadow: 0px 1px 2px 0px #00000026, 0px 0px 5px 0px #0000000D;
+    position: relative;
+    box-shadow: 0 1px 2px 0 #00000026, 0 0 5px 0 #0000000D;
     background-color: #fff;
     border-radius: 8px;
     padding: 12px 51px 80px 55px;
+    overflow: hidden;
+}
+
+.mc-wc-tab-content.loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 2;
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(2px);
+    animation: fadeIn 0.3s linear;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .mc-wc-tab-content-title {
@@ -829,7 +844,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
     font-size: 16px;
     font-weight: 600;
     line-height: 24px;
-    letter-spacing: 0px;
+    letter-spacing: 0;
     text-align: left;
     margin: 0;
 }
@@ -844,7 +859,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
     font-size: 13px;
     font-weight: 400;
     line-height: 24px;
-    letter-spacing: 0em;
+    letter-spacing: 0;
     text-align: left;
 }
 
@@ -853,7 +868,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
     font-size: 13px;
     font-weight: 400;
     line-height: 24px;
-    letter-spacing: 0em;
+    letter-spacing: 0;
     text-align: left;
     color: #7D59B6;
     text-decoration: none;
@@ -903,7 +918,6 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
     font-weight: 600;
     line-height: 20px;
     letter-spacing: 1px;
-    text-align: center;
     color: #000000;
     margin-bottom: 16px;
     display: flex;
@@ -964,7 +978,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
     font-size: 16px;
     font-weight: 600;
     line-height: 24px;
-    letter-spacing: 0px;
+    letter-spacing: 0;
     text-align: left;
     color: #000;
 }
@@ -977,7 +991,7 @@ span.sync-number-finished {
     font-size: 25px;
     font-weight: 400;
     line-height: 28px;
-    letter-spacing: 0em;
+    letter-spacing: 0;
     text-align: center;
 }
 
@@ -985,7 +999,7 @@ span.sync-number-total {
     font-size: 14px;
     font-weight: 300;
     line-height: 28px;
-    letter-spacing: 0em;
+    letter-spacing: 0;
     text-align: center;
 }
 
@@ -1014,23 +1028,17 @@ span.sync-number-total {
     font-size: 14px;
     font-weight: 600;
     line-height: 20px;
-    letter-spacing: 0px;
+    letter-spacing: 0;
     text-align: left;
-    margin-block: 0px 8px;
+    margin-block: 0 8px;
 }
 
 .mc-wc-tab-content-blogs-detail p {
-    font-family: Roboto;
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 20px;
-    letter-spacing: 0px;
-    text-align: left;
     font-family: SF Pro Text;
     font-size: 14px;
     font-weight: 400;
     line-height: 20px;
-    letter-spacing: 0px;
+    letter-spacing: 0;
     text-align: left;
     margin-block: 0 25px;
 }
@@ -1044,7 +1052,7 @@ span.sync-number-total {
     font-size: 11px;
     font-weight: 400;
     line-height: 20px;
-    letter-spacing: 0em;
+    letter-spacing: 0;
     text-align: left;
     display: block;
     color: #241C15A6;
@@ -1060,7 +1068,7 @@ span.sync-number-total {
     font-size: 14px;
     font-weight: 400;
     line-height: 20px;
-    letter-spacing: 0px;
+    letter-spacing: 0;
     text-align: left;
     margin-block: 0 25px;
 }
@@ -1074,7 +1082,7 @@ span.sync-number-total {
     font-size: 14px;
     font-weight: 400;
     line-height: 20px;
-    letter-spacing: 0px;
+    letter-spacing: 0;
 }
 
 .mc-wc-tab-content-description a {
@@ -1082,7 +1090,7 @@ span.sync-number-total {
     font-size: 14px;
     font-weight: 400;
     line-height: 20px;
-    letter-spacing: 0px;
+    letter-spacing: 0;
     text-align: left;
 }
 
@@ -1095,7 +1103,7 @@ span.sync-number-total {
     font-size: 14px;
     font-weight: 400;
     line-height: 24px;
-    letter-spacing: 0em;
+    letter-spacing: 0;
     color: #241C15;
     border: 1px solid #241C15A6;
     background: #fff url(data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23241C15B%22%2F%3E%3C%2Fsvg%3E) no-repeat right 5px top 55%;
@@ -1114,7 +1122,7 @@ span.sync-number-total {
     font-size: 12px;
     font-weight: 600;
     line-height: 20px;
-    letter-spacing: 0px;
+    letter-spacing: 0;
     text-align: left;
     color: #202223;
     width: 166px;
@@ -1150,7 +1158,7 @@ span.sync-number-total {
 }
 
 .mc-wc-tab-content.store_info {
-    padding: 0px 142px 75px 55px;
+    padding: 0 142px 75px 55px;
 }
 
 input.mc-wc-input.style-2 {
@@ -1158,7 +1166,7 @@ input.mc-wc-input.style-2 {
     font-size: 13px;
     font-weight: 400;
     line-height: 24px;
-    letter-spacing: 0em;
+    letter-spacing: 0;
     text-align: left;
     padding: 5px;
     padding-inline: 16px 21px;
@@ -1176,7 +1184,7 @@ input.mc-wc-input.style-2 {
     font-size: 13px !important;
     font-weight: 400;
     line-height: 24px !important;
-    letter-spacing: 0em;
+    letter-spacing: 0;
     text-align: left;
     margin-top: 8px;
     color: #241C15A6 !important;
@@ -1225,7 +1233,7 @@ input.mc-wc-input.style-2 {
 .mc-wc-warning-info-wrapper {
     border: 1px solid #241C1526;
     background-color: #F6F6F4;
-    box-shadow: 4px 0px 0px 0px #241C15 inset;
+    box-shadow: 4px 0 0 0 #241C15 inset;
     display: flex;
     padding: 14px 16px;
     gap: 16px;
@@ -1245,7 +1253,7 @@ input.mc-wc-input.style-2 {
     font-family: 'Graphik Mailchimp Web';
     font-weight: 400;
     line-height: 20px;
-    letter-spacing: 0em;
+    letter-spacing: 0;
     text-align: left;
     font-size: 13px;
 }
@@ -1255,7 +1263,7 @@ input.mc-wc-input.style-2 {
     font-size: 13px;
     font-weight: 700;
     line-height: 18px;
-    letter-spacing: 0px;
+    letter-spacing: 0;
     text-align: left;
 }
 
@@ -1272,7 +1280,7 @@ input.mc-wc-input.style-2 {
     font-size: 12px;
     font-weight: 400;
     line-height: 20px;
-    letter-spacing: 0em;
+    letter-spacing: 0;
     text-align: left;
 }
 
@@ -1304,7 +1312,7 @@ input.mc-wc-input.style-2 {
 }
 
 .mc-wc-tab-content-wrapper.audience > *:nth-child(3) {
-    padding-bottom: 0px;
+    padding-bottom: 0;
 }
 
 .mc-wc-tab-content-wrapper.audience > *:nth-child(4) {
@@ -1339,7 +1347,7 @@ input.mc-wc-input.style-2 {
     font-size: 14px;
     font-weight: 600;
     line-height: 20px;
-    letter-spacing: 0px;
+    letter-spacing: 0;
     text-align: left;
     margin: 0;
 }
@@ -1362,7 +1370,7 @@ input.mc-wc-input.style-2 {
     font-size: 14px;
     font-weight: 500;
     line-height: 24px;
-    letter-spacing: 0em;
+    letter-spacing: 0;
     text-align: left;
     margin: 0;
     padding-block: 10px 13px;
@@ -1406,7 +1414,7 @@ select#log_file {}
     font-size: 14px !important;
     font-weight: 400;
     line-height: 24px;
-    letter-spacing: 0em;
+    letter-spacing: 0;
     text-align: left;
     color: #241C15A6 !important;
     padding: 10px 16px !important;
@@ -1510,6 +1518,21 @@ select#log_file {}
     visibility: visible;
 }
 
+.mc-wc-notice {
+    position: absolute;
+    top: 25px;
+    right: 51px;
+    display: none;
+}
+
+.mc-wc-notice.success {
+    color: #72C418;
+}
+
+.mc-wc-notice.error {
+    color: #DB241D;
+}
+
 @media screen and (max-width: 782px) {
     #wpcontent {
         padding-right: 10px;
@@ -1558,16 +1581,16 @@ select#log_file {}
         padding: 32px 30px 19px 30px;
         flex-direction: column;
     }
-    
+
     ul.mc-wc-tab-buttons-wrapper {
         gap: 0;
     }
-    
+
     ul.mc-wc-tab-buttons-wrapper li {
         margin-right: 24px !important;
         margin-top: 15px;
     }
-    
+
     .mc-wc-setting-content {
         /* margin-top: 21px; */
     }
@@ -1577,7 +1600,7 @@ select#log_file {}
         align-items: center;
         gap: 40px;
     }
-    
+
     .mc-wc-tab-content-sync-detail > * {
         padding-block: 15px;
     }
@@ -1592,13 +1615,13 @@ select#log_file {}
         align-items: center;
         gap: 25px;
     }
-    
+
     .mc-wc-tab-content-blogs-item img {
         max-width: 100%;
     }
 
     .mc-wc-tab-content.store_info {
-        padding: 0px 55px 75px 55px;
+        padding: 0 55px 75px 55px;
     }
 
 }
@@ -1621,7 +1644,7 @@ select#log_file {}
     .mc-wc-header-account-wrapper {
         padding: 6px 30px 10px;
     }
-    
+
     .mc-wc-header-content-footer-wrapper {
         padding: 25px 30px 25px 30px;
     }
@@ -1629,7 +1652,7 @@ select#log_file {}
     .mc-wc-linked-audience-list {
         flex-direction: column;
     }
-    
+
     .mc-wc-review-sync-settings-content {
         padding: 38px 30px 38px 30px;
     }
@@ -1646,7 +1669,7 @@ select#log_file {}
     .mc-wc-breadcrumbs-wrapper {
         gap: unset;
     }
-    
+
     li.mc-wc-breadcrumb-link.mc-wc-breadcrumb-nextable {
         margin-right: 24px;
     }
@@ -1656,7 +1679,7 @@ select#log_file {}
         align-items: start;
         gap: 12px;
     }
-    
+
     .mc-wc-locale select {
         min-width: 100% !important;
         width: 100%;
@@ -1678,23 +1701,27 @@ select#log_file {}
     .mc-wc-logs-recent-list-header .log-file-actions {
         position: relative;
     }
-    
+
     .mc-wc-logs-recent-list-header #log-actions {
         position: absolute;
         top: -42px;
         right: 0;
     }
-    
+
     .mc-wc-logs-recent-list-header #log-actions a {
         padding: 6px 5px 2px 7px !important;
     }
-    
+
     .mailchimp-select-wrapper.view-log-select {
         margin-bottom: 0;
     }
 
     .mc-wc-radio-checkbox-list-item {
         gap: 15px;
+    }
+
+    .mc-wc-notice {
+        right: 30px;
     }
 }
 
@@ -1712,28 +1739,28 @@ select#log_file {}
     .mc-wc-linked-audience-list {
         flex-direction: column;
     }
-    
+
     .mc-wc-review-sync-settings-content {
         padding: 38px 30px 38px 30px;
     }
-    
+
     .mc-wc-import-list-sync-item {
         flex-direction: column;
         gap: 7px;
     }
-    
+
     .mc-wc-import-list-sync-item > * {
         width: calc(100% - 35px) !important;
     }
-    
+
     .mc-wc-radio-label, .mc-wc-checkbox-label {
         padding-left: 35px !important;
     }
-    
+
     .mc-wc-import-list-sync-description {
         padding-left: 35px;
     }
-    
+
     .mc-wc-linked-audience-list select {
         min-width: 100%;
     }
@@ -1745,12 +1772,12 @@ select#log_file {}
     .mc-wc-radio-checkbox-list-item > * {
         width: calc(100% - 35px) !important;
     }
-    
+
     .mc-wc-radio-checkbox-list-item {
         flex-direction: column;
         gap: 7px;
     }
-    
+
     .mc-wc-radio-checkbox-description {
         padding-left: 35px;
     }

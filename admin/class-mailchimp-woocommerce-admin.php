@@ -159,8 +159,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 						'support_message_ok'           => __( 'Message received', 'mailchimp-for-woocommerce' ),
 						'support_message_desc'         => __( 'Thanks, your message has been received.', 'mailchimp-for-woocommerce' ),
 						'subscribe_newsletter'         => $label,
+						'option_update_success'        => __( 'Changes Saved', 'mailchimp-for-woocommerce' ),
+						'option_update_error'          => __( 'Save error', 'mailchimp-for-woocommerce' ),
 					),
 					'current_optin_state'       => $checkbox_default_settings,
+					'ajax_url_option'               => admin_url( 'options.php' )
 				)
 			);
 			wp_enqueue_script( $this->plugin_name );
@@ -1318,7 +1321,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$data = array(
 			'mailchimp_list'                => isset( $input['mailchimp_list'] ) ? $input['mailchimp_list'] : $this->getOption( 'mailchimp_list', '' ),
 			'newsletter_label'              => ( isset( $input['newsletter_label'] ) ) ? wp_kses( $input['newsletter_label'], $allowed_html ) : $this->getOption( 'newsletter_label', __( 'Subscribe to our newsletter', 'mailchimp-for-woocommerce' ) ),
-			'mailchimp_auto_subscribe'      => isset( $input['mailchimp_auto_subscribe'] ) ? (bool) $input['mailchimp_auto_subscribe'] : false,
+			'mailchimp_auto_subscribe'      => isset( $input['mailchimp_auto_subscribe'] ) ? (bool) $input['mailchimp_auto_subscribe'] : $this->getOption( 'mailchimp_auto_subscribe', false ),
 			'mailchimp_ongoing_sync_status' => isset( $input['mailchimp_ongoing_sync_status'] ) ? (bool) $input['mailchimp_ongoing_sync_status'] : false,
 			'mailchimp_checkbox_defaults'   => $checkbox,
 			'mailchimp_checkbox_action'     => isset( $input['mailchimp_checkbox_action'] ) ? $input['mailchimp_checkbox_action'] : $this->getOption( 'mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form' ),

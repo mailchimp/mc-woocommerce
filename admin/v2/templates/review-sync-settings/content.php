@@ -66,7 +66,7 @@ $checkout_page_id = get_option('woocommerce_checkout_page_id');
         </div>
     </div>
     <div class="mc-wc-import-customers-initial">
-        <?php $initial_sync_subscribe = ( array_key_exists( 'mailchimp_initial_sync', $options ) && ! is_null( $options['mailchimp_initial_sync'] ) ) ? $options['mailchimp_initial_sync'] : 'subscribed'; ?>
+        <?php $initial_sync_subscribe = ( array_key_exists( 'mailchimp_auto_subscribe', $options ) && ! is_null( $options['mailchimp_auto_subscribe'] ) ) ? $options['mailchimp_auto_subscribe'] : 'subscribed'; ?>
         <h3 class="mc-wc-settings-content-title"><?php esc_html_e( 'Import customers (initial sync)', 'mailchimp-for-woocommerce' ); ?></h3>
         <p class="mc-wc-text-1">
             <?php esc_html_e( 'Choose how you’ll add your 1,999 WooCommerce customers to Mailchimp:', 'mailchimp-for-woocommerce' ); ?>

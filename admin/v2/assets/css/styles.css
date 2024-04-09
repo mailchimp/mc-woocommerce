@@ -596,17 +596,42 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
     line-height: 18px;
     letter-spacing: 0;
     text-align: left;
+
 }
 
 .mc-wc-radio-label, .mc-wc-checkbox-label {
     font-family: Roboto;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 400;
     line-height: 20px;
     letter-spacing: 0;
     text-align: left;
     position: relative;
     padding-left: 40px;
+}
+
+.fw-200 {
+    font-weight:200;
+}
+
+.fw-300 {
+    font-weight:300;
+}
+
+.fw-400 {
+    font-weight:400;
+}
+
+.fw-500 {
+    font-weight:500;
+}
+
+.fw-600 {
+    font-weight:600;
+}
+
+.fw-700 {
+    font-weight: 700;
 }
 
 .mc-wc-radio, .mc-wc-checkbox {
@@ -630,6 +655,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
     font-weight: 400;
     line-height: 18px;
     letter-spacing: 0;
+
 }
 
 .mc-wc-tag-customer .mc-wc-text-1 {
@@ -853,7 +879,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
 .mc-wc-tab-content-title h3 {
     font-family: Roboto;
     font-size: 16px;
-    font-weight: 400;
+    font-weight: 500;
     line-height: 24px;
     letter-spacing: 0;
     text-align: left;
@@ -926,7 +952,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
 .sync-status-text {
     font-family: Roboto;
     font-size: 14px;
-    font-weight: 400;
+    font-weight: 500;
     line-height: 20px;
     letter-spacing: 1px;
     color: #000000;
@@ -1037,7 +1063,7 @@ span.sync-number-total {
 .mc-wc-tab-content-blogs-detail h4 {
     font-family: Roboto;
     font-size: 14px;
-    font-weight: 400;
+    font-weight: 500;
     line-height: 20px;
     letter-spacing: 0;
     text-align: left;
@@ -1082,6 +1108,7 @@ span.sync-number-total {
     letter-spacing: 0;
     text-align: left;
     margin-block: 0 25px;
+
 }
 
 .mc-wc-settings-wrapper.confirmation {
@@ -1103,6 +1130,7 @@ span.sync-number-total {
     line-height: 20px;
     letter-spacing: 0;
     text-align: left;
+
 }
 
 .mc-wc-tab-content-description b {
@@ -1217,6 +1245,7 @@ input.mc-wc-input.style-2 {
 .mc-wc-tab-content-box.checkout-page-setting .mc-wc-tab-content-description a {
     font-size: 13px;
     line-height: 18px;
+
 }
 
 .mc-wc-tab-content-box.product-image-setting .mc-wc-tab-content-description {

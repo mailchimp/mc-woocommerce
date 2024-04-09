@@ -27,7 +27,7 @@ $tower_enabled = null !== $tower_opt ? $tower_opt : '0';
             <div class="mc-wc-radio-checkbox-list-item">
                 <div class="mc-wc-radio-checkbox-input">
                     <div class="mc-wc-checkbox">
-                        <label class="mc-wc-checkbox-label">
+                        <label class="mc-wc-checkbox-label fw-500">
                             <input id="tower_box_switch" type="checkbox" name="switch" value="1"<?php echo '1' === $tower_enabled ? ' checked="checked" ' : ''; ?>>
                             <?php esc_html_e( 'Enable support', 'mailchimp-for-woocommerce' ); ?>
                         </label>
@@ -40,7 +40,7 @@ $tower_enabled = null !== $tower_opt ? $tower_opt : '0';
             <div class="mc-wc-radio-checkbox-list-item">
                 <div class="mc-wc-radio-checkbox-input">
                     <div class="mc-wc-checkbox">
-                        <label class="mc-wc-checkbox-label">
+                        <label class="mc-wc-checkbox-label fw-500">
                             <input id="comm_box_switch" type="checkbox" name="switch" value="1"<?php echo '1' === $comm_enabled ? ' checked="checked" ' : ''; ?>>
                             <?php esc_html_e( 'Opt-in to email', 'mailchimp-for-woocommerce' ); ?>
                         </label>

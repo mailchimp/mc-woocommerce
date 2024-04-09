@@ -13,10 +13,10 @@ if ( ! isset( $handler ) ) {
 	$handler = MailChimp_WooCommerce_Admin::instance();
 }
 
-$customer_count    = mailchimp_get_customer_count();
-$product_count     = mailchimp_get_product_count();
-$order_count       = mailchimp_get_order_count();
-$promo_rules_count = mailchimp_count_posts( 'shop_coupon' );
+//$customer_count    = mailchimp_get_customer_count();
+//$product_count     = mailchimp_get_product_count();
+//$order_count       = mailchimp_get_order_count();
+//$promo_rules_count = mailchimp_count_posts( 'shop_coupon' );
 
 $mailchimp_total_customers     = 0;
 $mailchimp_total_products      = 0;
@@ -52,52 +52,40 @@ if ( ! empty( $last_updated_time ) ) {
 if ( $store ) {
 	$store_syncing   = $store->isSyncing();
 	$account_details = $handler->getAccountDetails();
+    $mailchimp_list_name = $handler->getListName();
 	if ( $account_details ) {
 		$account_name = $account_details['account_name'];
 	}
 	try {
 		$promo_rules                 = $mailchimp_api->getPromoRules( $store_id, 1, 1, 1 );
 		$mailchimp_total_promo_rules = $promo_rules['total_items'];
-		if ( isset( $promo_rules_count['publish'] ) && $mailchimp_total_promo_rules > $promo_rules_count['publish'] ) {
-			$mailchimp_total_promo_rules = $promo_rules_count['publish'];
-		}
 	} catch ( Exception $e ) {
-		$mailchimp_total_promo_rules = 0; }
+		$mailchimp_total_promo_rules = 0;
+    }
 	try {
-		$products                 = $mailchimp_api->products( $store_id, 1, 1 );
-		$mailchimp_total_products = $products['total_items'];
-		if ( $mailchimp_total_products > $product_count ) {
-			$mailchimp_total_products = $product_count;
-		}
+        $mailchimp_total_products = $mailchimp_api->getProductCount($store_id);
 	} catch ( Exception $e ) {
-		$mailchimp_total_products = 0; }
+		$mailchimp_total_products = 0;
+    }
 	try {
 		$mailchimp_total_orders = $mailchimp_api->getOrderCount($store_id);
-		if ( $mailchimp_total_orders > $order_count ) {
-			$mailchimp_total_orders = $order_count;
-		}
 	} catch ( Exception $e ) {
-		$mailchimp_total_orders = 0; }
-	try {
-		$mailchimp_total_subscribers = $mailchimp_api->getSubscribedCount( $store->getListId() );
-	} catch ( Exception $e ) {
-		$mailchimp_total_subscribers = 0; }
-	try {
-		$mailchimp_total_transactional = $mailchimp_api->getTransactionalCount( $store->getListId() );
-	} catch ( Exception $e ) {
-		$mailchimp_total_transactional = 0; 
+		$mailchimp_total_orders = 0;
     }
-
     try {
         $mailchimp_total_customers = $mailchimp_api->getCustomerCount($store_id);
-        if ( $mailchimp_total_customers > $customer_count ) {
-            $mailchimp_total_customers = $customer_count;
-        }
     } catch (Exception $e) {
 
     }
-
-	$mailchimp_list_name = $handler->getListName();
+    //	try {
+//		$mailchimp_total_subscribers = $mailchimp_api->getSubscribedCount( $store->getListId() );
+//	} catch ( Exception $e ) {
+//		$mailchimp_total_subscribers = 0; }
+//	try {
+//		$mailchimp_total_transactional = $mailchimp_api->getTransactionalCount( $store->getListId() );
+//	} catch ( Exception $e ) {
+//		$mailchimp_total_transactional = 0;
+//    }
 }
 
 ?>
@@ -164,7 +152,7 @@ if ( $store ) {
                             <?php esc_html_e('Last sync', 'mailchimp-for-woocommerce' ); ?>
                             <span>
                                 <?php if ( $last_updated_time ) : ?>
-                                    <?php echo $last_updated_time->format('d/m/y')?>
+                                    <?php echo $last_updated_time->format('m/d/y')?>
                                 <?php endif; ?>
                             </span>
                             

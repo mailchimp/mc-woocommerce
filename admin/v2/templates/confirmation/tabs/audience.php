@@ -46,19 +46,19 @@
         <?php $mailchimp_cart_tracking = ( array_key_exists( 'mailchimp_cart_tracking', $options ) && ! is_null( $options['mailchimp_cart_tracking'] ) ) ? $options['mailchimp_cart_tracking'] : 'all'; ?>
         <div class="mc-wc-tracking-choose">
             <div class="mc-wc-radio">
-                <label class="mc-wc-radio-label">
+                <label class="mc-wc-radio-label fw-700">
                     <input type="radio" id="cart_track_all" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_cart_tracking]" value="all"<?php echo 'all' === $mailchimp_cart_tracking ? ' checked="checked" ' : ''; ?>>
                     <?php esc_html_e( 'Track carts for all customers', 'mailchimp-for-woocommerce' ); ?>
                 </label>
             </div>
             <div class="mc-wc-radio">
-                <label class="mc-wc-radio-label">
+                <label class="mc-wc-radio-label fw-700">
                     <input type="radio" id="cart_track_subscribed" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_cart_tracking]" value="subscribed"<?php echo 'subscribed' === $mailchimp_cart_tracking ? ' checked="checked" ' : ''; ?>>
                     <?php esc_html_e( 'Only track carts for subscribed contacts', 'mailchimp-for-woocommerce' ); ?>
                 </label>
             </div>
             <div class="mc-wc-radio">
-                <label class="mc-wc-radio-label">
+                <label class="mc-wc-radio-label fw-700">
                     <input type="radio" id="cart_track_none" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_cart_tracking]" value="disabled"<?php echo 'disabled' === $mailchimp_cart_tracking ? ' checked="checked" ' : ''; ?>>
 				    <?php esc_html_e( 'Disable cart tracking', 'mailchimp-for-woocommerce' ); ?>
                 </label>
@@ -76,7 +76,7 @@
                 <div class="mc-wc-import-list-sync-item">
                     <div class="mc-wc-import-list-sync-input">
                         <div class="mc-wc-checkbox">
-                            <label class="mc-wc-checkbox-label">
+                            <label class="mc-wc-checkbox-label fw-700">
                                 <input type="checkbox" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_ongoing_sync_status]" value="1" <?php if ((bool) $ongoing_sync_subscribe){ echo "checked"; } ?>>
                                 <?php esc_html_e( 'Sync new non-subscribed contacts', 'mailchimp-for-woocommerce' ); ?>
                             </label>

@@ -2,21 +2,6 @@
 @import url('../fonts/Means/fonts.css');
 @import url('../fonts/graphik/fonts.css');
 
-/* SF Pro Text */
-@font-face {
-    font-family: 'SF Pro Text';
-	font-style: normal;
-	font-weight: normal;
-	src: local('SF Pro Text'), url('../fonts/SF_Pro_Text/SFProText-Regular.ttf')  format('truetype');
-}
-
-@font-face {
-    font-family: 'SF Pro Text';
-    font-style: normal;
-    font-weight: 700;
-    src: local('SF Pro Text'), url('../fonts/SF_Pro_Text/SFProText-Regular.ttf')  format('truetype');
-}
-
 /* Roboto */
 @font-face {
 	font-family: 'Roboto';
@@ -339,7 +324,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
 }
 
 .mc-wc-header-account-logo-text .account-name-text {
-    font-family: 'SF Pro Text';
+    font-family: 'Roboto';
     font-size: 14px;
     font-weight: 700;
     line-height: 24px;
@@ -348,7 +333,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
 }
 
 .mc-wc-header-account-logo-text .authorized-text {
-    font-family: 'SF Pro Text';
+    font-family: 'Roboto';
     font-size: 14px;
     font-style: italic;
     font-weight: 500;
@@ -471,7 +456,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
 }
 
 .mc-wc-tag-show-tagged > div > *:first-child {
-    font-family: 'SF Pro Text';
+    font-family: 'Roboto';
     font-size: 12px;
     font-weight: 400;
     line-height: 16px;
@@ -511,7 +496,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
     border: 1px solid #7D57A4;
     box-shadow: 0 1px 0 0 #0000000D;
     background-color: #fff;
-    font-family: 'SF Pro Text';
+    font-family: 'Roboto';
     font-size: 14px;
     font-weight: 500;
     line-height: 20px;
@@ -590,7 +575,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
 }
 
 .mc-wc-import-customers-initial .mc-wc-text-2 a {
-    font-family: SF Pro Text;
+    font-family: Roboto;
     font-size: 11px;
     font-weight: 400;
     line-height: 18px;
@@ -650,7 +635,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
 }
 
 .mc-wc-import-list-sync-description a {
-    font-family: SF Pro Text;
+    font-family: Roboto;
     font-size: 12px;
     font-weight: 400;
     line-height: 18px;
@@ -671,7 +656,7 @@ a.mc-wc-breadcrumb-text:hover, a.mc-wc-breadcrumb-text:focus {
 .mc-wc-input[type=text] {
     border: 1px solid #BDC1CC;
     box-shadow: 0 1px 0 0 #0000000D;
-    font-family: 'SF Pro Text';
+    font-family: 'Roboto';
     font-size: 12px;
     font-weight: 400;
     line-height: 20px;
@@ -1071,7 +1056,7 @@ span.sync-number-total {
 }
 
 .mc-wc-tab-content-blogs-detail p {
-    font-family: SF Pro Text;
+    font-family: Roboto;
     font-size: 14px;
     font-weight: 400;
     line-height: 20px;
@@ -1101,7 +1086,7 @@ span.sync-number-total {
 }
 
 .mc-wc-tab-content-blogs-detail p a {
-    font-family: SF Pro Text;
+    font-family: Roboto;
     font-size: 14px;
     font-weight: 400;
     line-height: 20px;

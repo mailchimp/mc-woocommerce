@@ -1640,7 +1640,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 */
 	public function getPromoCodesForRule( $store_id, $rule_id, $page = 1, $count = 10, $return_original = false ) {
 		$result = $this->get(
-			"ecommerce/stores/{$store_id}/promo-rules/{$rule_id}/promo_codes",
+			"ecommerce/stores/{$store_id}/promo-rules/{$rule_id}/promo-codes",
 			array(
 				'start'  => $page,
 				'count'  => $count,
@@ -1653,7 +1653,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 		}
 
 		$rules = array();
-		foreach ( $result as $rule_data ) {
+		foreach ( $result['promo_codes'] as $rule_data ) {
 			$rule = new MailChimp_WooCommerce_PromoCode();
 			$rule->fromArray( $rule_data );
 			$rules[] = $rule;
@@ -1690,7 +1690,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 		$rule = new MailChimp_WooCommerce_PromoCode();
 		$rule = $rule->fromArray( $this->get( "ecommerce/stores/{$store_id}/promo-rules/{$rule_id}" ) );
 		try {
-			$promo_codes = $this->getPromoCodesForRule( $store_id, $rule->getId(), 1, 100 );
+			$promo_codes = $this->getPromoCodesForRule( $store_id, $rule_id, 1, 100 );
 			$codes       = array();
 			foreach ( $promo_codes as $item ) {
 				$codes[] = $item->toArray();

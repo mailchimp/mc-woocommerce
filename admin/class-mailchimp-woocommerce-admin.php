@@ -817,7 +817,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 					$service = new MailChimp_Service();
 					$service->removePointers();
 					$this->startSync();
-					$this->showSyncStartedMessage();
+					//$this->showSyncStartedMessage();
 					$this->setData( 'sync.config.resync', true );
 				}
 				break;
@@ -1340,7 +1340,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		if ( ! $this->hasValidCampaignDefaults( $data ) ) {
 			$this->setData( 'validation.newsletter_settings', false );
-			add_settings_error( 'mailchimp_list_settings', '', __( 'One or more fields were not updated', 'mailchimp-for-woocommerce' ) );
+			//add_settings_error( 'mailchimp_list_settings', '', __( 'One or more fields were not updated', 'mailchimp-for-woocommerce' ) );
 			return array( 'active_tab' => 'newsletter_settings' );
 		}
 		$this->setData( 'validation.newsletter_settings', true );
@@ -1387,7 +1387,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				// tell the next page view to start the sync with a transient since the data isn't available yet
 				set_site_transient( 'mailchimp_woocommerce_start_sync', microtime(), 300 );
 
-				$this->showSyncStartedMessage();
+				//$this->showSyncStartedMessage();
 			}
 
 			$data['active_tab'] = 'sync';
@@ -1397,7 +1397,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		$this->setData( 'validation.newsletter_settings', false );
 
-		add_settings_error( 'mailchimp_newsletter_settings', '', __( 'One or more fields were not updated', 'mailchimp-for-woocommerce' ) );
+		//add_settings_error( 'mailchimp_newsletter_settings', '', __( 'One or more fields were not updated', 'mailchimp-for-woocommerce' ) );
 
 		$data['active_tab'] = 'newsletter_settings';
 

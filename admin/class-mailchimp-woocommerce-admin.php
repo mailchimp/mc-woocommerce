@@ -1200,6 +1200,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			}
 		}
 
+		// run sync all products if the image size has changed
+		if ( mailchimp_get_option( 'mailchimp_product_image_key', 'medium' ) !== $data['mailchimp_product_image_key'] ) {
+			mailchimp_handle_or_queue(new MailChimp_WooCommerce_Process_Products());
+		}
+
 		$data['active_tab']          = 'newsletter_settings';
 		$data['store_currency_code'] = get_woocommerce_currency();
 
@@ -1218,21 +1223,24 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		if ( isset( $input['mailchimp_permission_cap'] ) && ! empty( $input['mailchimp_permission_cap'] ) ) {
 			$checkbox = $input['mailchimp_permission_cap'];
 		}
+
 		return array(
 			// store basics
-			'store_name'               => trim( ( isset( $input['store_name'] ) ? $input['store_name'] : get_option( 'blogname' ) ) ),
-			'store_street'             => isset( $input['store_street'] ) ? $input['store_street'] : false,
-			'store_city'               => isset( $input['store_city'] ) ? $input['store_city'] : false,
-			'store_state'              => isset( $input['store_state'] ) ? $input['store_state'] : false,
-			'store_postal_code'        => isset( $input['store_postal_code'] ) ? $input['store_postal_code'] : false,
-			'store_country'            => isset( $input['store_country'] ) ? $input['store_country'] : false,
+			'store_name'                  => trim( ( isset( $input['store_name'] ) ? $input['store_name'] : get_option( 'blogname' ) ) ),
+			'store_street'                => isset( $input['store_street'] ) ? $input['store_street'] : false,
+			'store_city'                  => isset( $input['store_city'] ) ? $input['store_city'] : false,
+			'store_state'                 => isset( $input['store_state'] ) ? $input['store_state'] : false,
+			'store_postal_code'           => isset( $input['store_postal_code'] ) ? $input['store_postal_code'] : false,
+			'store_country'               => isset( $input['store_country'] ) ? $input['store_country'] : false,
 //			'store_phone'              => isset( $input['store_phone'] ) ? $input['store_phone'] : false,
 			// locale info
-            'store_currency_code'      => get_woocommerce_currency(),
-			'store_locale'             => isset( $input['store_locale'] ) ? $input['store_locale'] : get_locale(),
-			'store_timezone'           => mailchimp_get_timezone(),
-			'admin_email'              => isset( $input['admin_email'] ) && is_email( $input['admin_email'] ) ? $input['admin_email'] : get_option('admin_email'),
-			'mailchimp_permission_cap' => $checkbox,
+			'store_currency_code'         => get_woocommerce_currency(),
+			'store_locale'                => isset( $input['store_locale'] ) ? $input['store_locale'] : get_locale(),
+			'store_timezone'              => mailchimp_get_timezone(),
+			'admin_email'                 => isset( $input['admin_email'] ) && is_email( $input['admin_email'] ) ? $input['admin_email'] : get_option( 'admin_email' ),
+			'mailchimp_permission_cap'    => $checkbox,
+			'mailchimp_checkbox_action'   => isset( $input['mailchimp_checkbox_action'] ) ? $input['mailchimp_checkbox_action'] : $this->getOption( 'mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form' ),
+			'mailchimp_product_image_key' => isset( $input['mailchimp_product_image_key'] ) ? $input['mailchimp_product_image_key'] : 'medium',
 		);
 	}
 
@@ -1327,9 +1335,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			'mailchimp_auto_subscribe'      => isset( $input['mailchimp_auto_subscribe'] ) ? (bool) $input['mailchimp_auto_subscribe'] : $this->getOption( 'mailchimp_auto_subscribe', false ),
 			'mailchimp_ongoing_sync_status' => isset( $input['mailchimp_ongoing_sync_status'] ) ? (bool) $input['mailchimp_ongoing_sync_status'] : false,
 			'mailchimp_checkbox_defaults'   => $checkbox,
-			'mailchimp_checkbox_action'     => isset( $input['mailchimp_checkbox_action'] ) ? $input['mailchimp_checkbox_action'] : $this->getOption( 'mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form' ),
 			'mailchimp_user_tags'           => isset( $input['mailchimp_user_tags'] ) ? implode( ',', $sanitized_tags ) : $this->getOption( 'mailchimp_user_tags' ),
-			'mailchimp_product_image_key'   => isset( $input['mailchimp_product_image_key'] ) ? $input['mailchimp_product_image_key'] : 'medium',
 			'mailchimp_cart_tracking'       => isset( $input['mailchimp_cart_tracking'] ) ? $input['mailchimp_cart_tracking'] : 'all',
 			'campaign_from_name'            => isset( $input['campaign_from_name'] ) ? $input['campaign_from_name'] : get_option( 'blogname' ),
 			'campaign_from_email'           => isset( $input['campaign_from_email'] ) && is_email( $input['campaign_from_email'] ) ? $input['campaign_from_email'] : $this->getOption( 'admin_email' , get_option('admin_email')),
@@ -1375,11 +1381,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			// if there was already a store in Mailchimp, use the list ID from Mailchimp
 			if ( $this->swapped_list_id ) {
 				$data['mailchimp_list'] = $this->swapped_list_id;
-			}
-
-			// run sync all products if the image size has changed
-			if ( mailchimp_get_option( 'mailchimp_product_image_key', 'medium' ) !== $data['mailchimp_product_image_key'] ) {
-				 mailchimp_handle_or_queue(new MailChimp_WooCommerce_Process_Products());
 			}
 
 			// start the sync automatically if the sync is false

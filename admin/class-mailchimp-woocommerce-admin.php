@@ -1783,6 +1783,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @return false|mixed|null
 	 */
 	private function updateMailChimpList( $data = null, $list_id = null ) {
+        mailchimp_log('admin', 'updating mailchimp list', array('data' => $data));
 		if ( empty( $data ) ) {
 			$data = $this->getOptions();
 		}
@@ -1802,7 +1803,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		foreach ( $required as $requirement ) {
 			if ( ! isset( $data[ $requirement ] ) || empty( $data[ $requirement ] ) ) {
-				mailchimp_log( 'admin', 'does not have enough data to update the mailchimp list.' );
+				mailchimp_log( 'admin', 'does not have enough data to update the mailchimp list.', array('requirement' => $requirement));
+                $this->updateGDPRFields($list_id);
 				return false;
 			}
 		}
@@ -1848,22 +1850,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 			$this->setData( 'errors.mailchimp_list', false );
 
-			try {
-				if ( ! empty( $list_id ) ) {
-					$transient  = "mailchimp-woocommerce-gdpr-fields.{$list_id}";
-					$GDPRfields = mailchimp_get_api()->getGDPRFields( $list_id );
-					set_site_transient( $transient, $GDPRfields );
-					mailchimp_log(
-						'admin',
-						'updated GDPR fields',
-						array(
-							'fields' => $GDPRfields,
-						)
-					);
-				}
-			} catch ( Exception $e ) {
-				set_site_transient( $transient, array(), 60 );
-			}
+			$this->updateGDPRFields($list_id);
 
 			return $list_id;
 
@@ -1873,6 +1860,27 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			return false;
 		}
 	}
+
+    protected function updateGDPRFields($list_id)
+    {
+        try {
+            if ( ! empty( $list_id ) && !get_site_transient("mailchimp-woocommerce-gdpr-fields.{$list_id}.last_saved")) {
+                $transient  = "mailchimp-woocommerce-gdpr-fields.{$list_id}";
+                $GDPRfields = mailchimp_get_api()->getGDPRFields( $list_id );
+                set_site_transient( $transient, $GDPRfields );
+                set_site_transient("mailchimp-woocommerce-gdpr-fields.{$list_id}.last_saved", true, 120);
+                mailchimp_log(
+                    'admin',
+                    'updated GDPR fields',
+                    array(
+                        'fields' => $GDPRfields,
+                    )
+                );
+            }
+        } catch ( Exception $e ) {
+            set_site_transient( $transient, array(), 60 );
+        }
+    }
 
 	/**
 	 * @param null $data

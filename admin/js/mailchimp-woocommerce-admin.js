@@ -17,6 +17,10 @@
 			}
 		});
 
+		$('#mc_notice_button').on('click', function() {
+			$('.mc-wc-notice').fadeOut()
+		});
+
 		// re-enable disable select input on audience settings submit
 		$('#mailchimp_woocommerce_options').on('submit', function() {
 			$('select[name="mailchimp-woocommerce[mailchimp_list]"]').prop('disabled', false);
@@ -375,13 +379,13 @@
 			var switch_button = this;
 			var opt = this.checked ? 1 : 0;
 			var notice = $('.mc-wc-notice');
+			let notice_content = $('#mc_notice_text');
 			var content = $('.mc-wc-tab-content');
 
 			content.addClass('loading');
 
-			notice
-				.removeClass('error success')
-				.text('');
+			notice_content.text('');
+			notice.removeClass('error success');
 
 			var data = {
 				action: 'mailchimp_woocommerce_tower_status',
@@ -394,11 +398,8 @@
 			$.post(ajaxurl, data, function(response) {
 				content.removeClass('loading');
 				if (response.success) {
-					notice
-						.addClass('success')
-						.text(response.data)
-						.show()
-						.fadeOut(3000);
+					notice_content.text(response.data);
+					notice.addClass('success').fadeIn();
 					switch_button.checked = opt;
 				}
 				else {
@@ -414,13 +415,13 @@
 			var switch_button = this;
 			var opt = this.checked ? 1 : 0;
 			var notice = $('.mc-wc-notice');
+			let notice_content = $('#mc_notice_text');
 			var content = $('.mc-wc-tab-content');
 
 			content.addClass('loading');
 
-			notice
-				.removeClass('error success')
-				.text('');
+			notice_content.text('');
+			notice.removeClass('error success');
 
 			var data = {
 				action: 'mailchimp_woocommerce_communication_status',
@@ -433,11 +434,10 @@
 			$.post(ajaxurl, data, function(response) {
 				content.removeClass('loading');
 				if (response.success) {
+					notice_content.text(response.data);
 					notice
 						.addClass('success')
-						.text(response.data)
-						.show()
-						.fadeOut(3000);
+						.fadeIn();
 					switch_button.checked = opt;
 				}
 				else {

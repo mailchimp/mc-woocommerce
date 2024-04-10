@@ -39,7 +39,17 @@ $active_tab = isset( $_GET['tab'] ) ? esc_attr( sanitize_key( $_GET['tab'] ) ) :
 					</div>
 			<?php endif; ?>
 			<div class="mc-wc-tab-content <?php echo $active_tab; ?>">
-				<div class="mc-wc-notice"></div>
+				<div class="mc-wc-notice">
+                    <div class="flex justify-between items-center">
+                        <span id="mc_notice_text"></span>
+                        <button class="wink" type="button" id="mc_notice_button">
+                            <span class="wink-visually-hidden">Dismiss notification</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" focusable="false" aria-hidden="true" class="wink-icon" style="fill: #fff;">
+                                <path d="M12 13.414l6.293 6.293 1.414-1.414L13.414 12l6.293-6.293-1.414-1.414L12 10.586 5.707 4.293 4.293 5.707 10.586 12l-6.293 6.293 1.414 1.414L12 13.414z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
 			<?php
 				switch ($active_tab) {
 					case MC_WC_STORE_INFO_TAB:

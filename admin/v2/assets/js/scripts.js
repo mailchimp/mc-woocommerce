@@ -105,13 +105,13 @@
 		function saveSettings() {
 			let formData = new FormData($('#mailchimp_woocommerce_options')[0]);
 			let notice = $('.mc-wc-notice');
+			let notice_content = $('#mc_notice_text');
 			let content = $('.mc-wc-tab-content');
 
 			content.addClass('loading');
 
-			notice
-				.removeClass('error success')
-				.text('');
+			notice.removeClass('error success');
+			notice_content.text('');
 
 			$.ajax({
 				method: 'POST',
@@ -120,18 +120,19 @@
 				processData: false,
 				contentType: false,
 				success: function() {
+					// put the notice text in the right spot.
+					notice_content.text(phpVars.l10n.option_update_success);
 					notice
 						.addClass('success')
-						.text(phpVars.l10n.option_update_success)
-						.show()
-						.fadeOut(3000);
+						//.text(phpVars.l10n.option_update_success)
+						.fadeIn();
 				},
 				error: function () {
+					notice_content.text(phpVars.l10n.option_update_error);
 					notice
 						.addClass('error')
-						.text(phpVars.l10n.option_update_error)
-						.show()
-						.fadeOut(3000);
+						//.text(phpVars.l10n.option_update_error)
+						.fadeIn();
 				},
 				complete: function() {
 					content.removeClass('loading');

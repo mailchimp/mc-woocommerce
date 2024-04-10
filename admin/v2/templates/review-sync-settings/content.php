@@ -26,6 +26,8 @@ if ( ! isset( $options ) ) {
 $newsletter_settings_error = $this->getData( 'errors.mailchimp_list', false );
 
 $checkout_page_id = get_option('woocommerce_checkout_page_id');
+$mailchimp_customer_count = mailchimp_get_customer_count();
+
 ?>
 
 <?php if ( $newsletter_settings_error ) : ?>
@@ -69,7 +71,7 @@ $checkout_page_id = get_option('woocommerce_checkout_page_id');
         <?php $initial_sync_subscribe = ( array_key_exists( 'mailchimp_auto_subscribe', $options ) && ! is_null( $options['mailchimp_auto_subscribe'] ) ) ? $options['mailchimp_auto_subscribe'] : 'subscribed'; ?>
         <h3 class="mc-wc-settings-content-title"><?php esc_html_e( 'Import customers (initial sync)', 'mailchimp-for-woocommerce' ); ?></h3>
         <p class="mc-wc-text-1 pb-text">
-            <?php esc_html_e( 'Choose how you’ll add your '.mailchimp_get_customer_count().' WooCommerce customers to Mailchimp:', 'mailchimp-for-woocommerce' ); ?>
+            <?php esc_html_e( 'Choose how you’ll add your '.$mailchimp_customer_count.' WooCommerce customers to Mailchimp:', 'mailchimp-for-woocommerce' ); ?>
         </p>
         <div class="mc-wc-import-list-sync  <?php echo $initial_sync_subscribe; ?>">
             <div class="mc-wc-import-list-sync-item">
@@ -113,7 +115,7 @@ $checkout_page_id = get_option('woocommerce_checkout_page_id');
             </div>
         </div>
         <p class="mc-wc-text-2">
-            <?php esc_html_e( 'If you choose to sync customers as subscribed or non-subscribed, you will need', 'mailchimp-for-woocommerce' ); ?> <a href="https://mailchimp.com/help/about-mailchimp-pricing-plans/" target="_blank"><?php esc_html_e( 'a Mailchimp plan', 'mailchimp-for-woocommerce' ); ?></a> <?php esc_html_e( 'that includes 1,999 contacts. If your plan does not include enough contacts, you will incur additional monthly charges.', 'mailchimp-for-woocommerce' ); ?> <a href="https://mailchimp.com/help/about-additional-charges/" target="_blank"><?php esc_html_e( 'Learn about additional charges.', 'mailchimp-for-woocommerce' ); ?></a>
+            <?php esc_html_e( 'If you choose to sync customers as subscribed or non-subscribed, you will need', 'mailchimp-for-woocommerce' ); ?> <a href="https://mailchimp.com/help/about-mailchimp-pricing-plans/" target="_blank"><?php esc_html_e( 'a Mailchimp plan', 'mailchimp-for-woocommerce' ); ?></a> <?php esc_html_e( 'that includes '.$mailchimp_customer_count.' contacts. If your plan does not include enough contacts, you will incur additional monthly charges.', 'mailchimp-for-woocommerce' ); ?> <a href="https://mailchimp.com/help/about-additional-charges/" target="_blank"><?php esc_html_e( 'Learn about additional charges.', 'mailchimp-for-woocommerce' ); ?></a>
         </p>
     </div>
     <div class="mc-wc-import-customers-ongoing">

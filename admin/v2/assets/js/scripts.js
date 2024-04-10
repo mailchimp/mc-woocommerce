@@ -30,12 +30,13 @@
 		});
 
 		function addNewTag(tag_list_ele, tag) {
-			const tags_hidden = tag_list_ele.find('#mailchimp-woocommerce-user-tags');
-			const show_tagged = tag_list_ele.find('.mc-wc-tag-show-tagged');
+			// const tags_hidden = tag_list_ele.find('#mailchimp-woocommerce-user-tags');
+			const tags_hidden = $('#mailchimp-woocommerce-user-tags');
+			const show_tagged = $('.mc-wc-tag-show-tagged');
 
 			let tags_hidden_vals = tags_hidden.val();
 			let tags_vals_array = [];
-			let tag_vals_str = tag;
+			let tag_vals_str = String(tag);
 
 			if (tags_hidden_vals) {
 				tags_vals_array = tags_hidden_vals.split(', ');
@@ -77,15 +78,13 @@
 		// 	$('.selected_audience_name').text(label);
 		// });
 
-
 		function removeTag(tag_list_ele, parent_ele, tag_remove) {
 			const tags_hidden = tag_list_ele.find('#mailchimp-woocommerce-user-tags');
 			let tags_hidden_vals = tags_hidden.val();
 			let tags_vals_array = tags_hidden_vals.split(', ');
-			var tag_remove_index = tags_vals_array.indexOf(tag_remove);
+			var tag_remove_index = tags_vals_array.indexOf(String(tag_remove));
 			if (tag_remove_index !== -1) {
 				tags_vals_array.splice(tag_remove_index, 1);
-
 				let tag_vals_str = tags_vals_array.join(', ');
 				tags_hidden.val(tag_vals_str);
 				parent_ele.remove();

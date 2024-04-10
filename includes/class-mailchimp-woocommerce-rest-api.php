@@ -224,8 +224,10 @@ class MailChimp_WooCommerce_Rest_Api
             // 'orders_page' => get_option('mailchimp-woocommerce-sync.orders.current_page'),
             
             'date' => $date ? $date->format( __('D, M j, Y g:i A', 'mailchimp-for-woocommerce')) : '',
-            'has_started' => mailchimp_has_started_syncing() || ($order_count != $mailchimp_total_orders),
-            'has_finished' => mailchimp_is_done_syncing() && ($order_count == $mailchimp_total_orders),
+//            'has_started' => mailchimp_has_started_syncing() || ($order_count != $mailchimp_total_orders),
+//            'has_finished' => mailchimp_is_done_syncing() && ($order_count == $mailchimp_total_orders),
+            'has_started' => mailchimp_has_started_syncing(),
+            'has_finished' => mailchimp_is_done_syncing(),
 	        'last_loop_at' => mailchimp_get_data('sync.last_loop_at'),
         ));
     }

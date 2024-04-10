@@ -1210,9 +1210,9 @@ function mailchimp_clean_database() {
  * @return bool
  */
 function mailchimp_has_started_syncing() {
-    $sync_started_at = get_option('mailchimp-woocommerce-sync.started_at');
-    $sync_completed_at = get_option('mailchimp-woocommerce-sync.completed_at');
-    return ($sync_completed_at < $sync_started_at);
+    return (bool) get_option('mailchimp-woocommerce-sync.started_at');
+//    $sync_completed_at = get_option('mailchimp-woocommerce-sync.completed_at');
+//    return ($sync_completed_at < $sync_started_at);
 }
 
 /**

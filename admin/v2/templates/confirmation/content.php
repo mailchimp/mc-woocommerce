@@ -33,7 +33,7 @@ $active_tab = isset( $_GET['tab'] ) ? esc_attr( sanitize_key( $_GET['tab'] ) ) :
 			</div>
 			<?php
 				$settings_errors = get_settings_errors();
-				if (MC_WC_OVERVIEW_TAB === $active_tab ||  ( isset( $settings_errors[0] ) && 'success' !== $settings_errors[0]['type'] ) ): ?>
+				if (MC_WC_OVERVIEW_TAB === $active_tab && ( isset( $settings_errors[0] ) && 'success' !== $settings_errors[0]['type'] ) ): ?>
 					<div class="notices-content-wrapper sync-notices">
 						<?php echo wp_kses_post( mailchimp_settings_errors() ); ?>
 					</div>

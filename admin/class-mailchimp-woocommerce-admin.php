@@ -1730,13 +1730,14 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 					// New UI for overview tab
 					var call_mailchimp_for_stats_new = function (showSpinner = false) {
 
-						if (showSpinner ) {
+						if (showSpinner) {
 							jQuery('.sync-status-icon-wrapper span').addClass('mc-wc-d-none');
 							jQuery('.sync-status-time').addClass('mc-wc-d-none');
 							jQuery('.sync-status-icon-wrapper img').removeClass('mc-wc-d-none');
 						}
 
 						jQuery.get(endpoint, function(response) {
+                            //console.log('sync stats', response);
 							if (response.success) {
 								// if the response is now finished - but the original sync status was "historical"
 								// perform a page refresh because we need the re-sync buttons to show up again.
@@ -1756,7 +1757,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 									// only call status again if sync is running.
 									setTimeout(function() {
-										call_mailchimp_for_stats_new(true);
+										call_mailchimp_for_stats_new(showSpinner);
 									}, 15000);
 								} else {
 									jQuery('.sync-status-icon-wrapper img').addClass('mc-wc-d-none');

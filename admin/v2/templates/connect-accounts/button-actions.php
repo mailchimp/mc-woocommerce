@@ -3,6 +3,7 @@
  * Button actions (Create account and connect) template
  *
  */
+$show_connection_messages = false;
 ?>
 
 <fieldset class="full connect-button">
@@ -19,9 +20,11 @@
 	<?php if ( isset( $has_valid_api_key ) && $has_valid_api_key ) : ?>
 		<p id="mailchimp-oauth-api-key-valid"><?php esc_html_e( 'Already connected. You can reconnect with another Mailchimp account if you want.', 'mailchimp-for-woocommerce' ); ?></p>
 	<?php endif; ?>
+    <?php if ($show_connection_messages) : ?>
 	<p id="mailchimp-oauth-waiting" class="oauth-description"><?php esc_html_e( 'Connecting. A new window will open with Mailchimp\'s OAuth service. Please log-in and we will take care of the rest.', 'mailchimp-for-woocommerce' ); ?></p>
 	<p id="mailchimp-oauth-error" class="oauth-description"><?php esc_html_e( 'Error, can\'t login.', 'mailchimp-for-woocommerce' ); ?></p>
 	<p id="mailchimp-oauth-connecting" class="oauth-description"><?php esc_html_e( 'Connection in progress', 'mailchimp-for-woocommerce' ); ?><span class="spinner" style="visibility:visible; margin: 0 10px;"></span></p>
 	<p id="mailchimp-oauth-connected" class="oauth-description "><?php esc_html_e( 'Connected! Please wait while loading next step', 'mailchimp-for-woocommerce' ); ?></p>
+    <?php endif; ?>
 </fieldset>
 <?php include_once 'create-account-popup.php'; ?>

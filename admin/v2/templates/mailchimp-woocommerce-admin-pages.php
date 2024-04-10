@@ -149,7 +149,8 @@ if ((MC_WC_CONFIRMATION === $active_breadcrumb && ! $is_confirmation)) {
 		<div class="notices-content-wrapper">
 			<?php
 				$settings_errors = get_settings_errors();
-			if (( isset( $settings_errors[0] ) && 'success' !== $settings_errors[0]['type'] ) ) {
+                // ignore the settings saved banner
+			if (( isset( $settings_errors[0] ) && 'success' !== $settings_errors[0]['type'] ) && strtolower((string) $settings_errors[0]['message']) !== 'settings saved.') {
 				echo wp_kses_post( mailchimp_settings_errors() );
 			}
 			?>

@@ -1540,6 +1540,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				$pinged = $this->api()->getLists( true );
 				if ( $pinged ) {
 					$this->setCached( 'api-lists', $pinged, 120 );
+                    $this->safelyUpdateGDPRFields();
 				}
 				return $pinged;
 			}
@@ -1548,6 +1549,23 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			return array();
 		}
 	}
+
+    /**
+     * @return bool
+     */
+    public function safelyUpdateGDPRFields()
+    {
+        try {
+            if (($list_id = mailchimp_get_list_id())) {
+                $this->updateGDPRFields($list_id);
+                return true;
+            }
+            return false;
+        } catch (Exception $e) {
+            mailchimp_log('admin', 'safelyUpdateGDPRFields error', array('message' => $e->getMessage()));
+            return false;
+        }
+    }
 
 	/**
 	 * @return false|mixed
@@ -1566,6 +1584,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				$lists = $this->api()->getLists( true );
 				if ( $lists ) {
 					$this->setCached( 'api-lists', $lists, 120 );
+                    $this->safelyUpdateGDPRFields();
 				}
 			}
 
@@ -1879,6 +1898,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             }
         } catch ( Exception $e ) {
             set_site_transient( $transient, array(), 60 );
+            mailchimp_error( 'admin', 'updating GDPR fields failed '.$e->getMessage() );
         }
     }
 

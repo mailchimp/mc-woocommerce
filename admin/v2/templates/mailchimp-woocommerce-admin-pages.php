@@ -111,21 +111,21 @@ if ((MC_WC_CONFIRMATION === $active_breadcrumb && ! $is_confirmation)) {
 							<?php if (MC_WC_CONNECT_ACCOUNTS === $active_breadcrumb): ?>
 								<span class="mc-wc-breadcrumb-text"><?php echo __('Connect accounts', 'mailchimp-for-woocommerce'); ?></span>
 							<?php else: ?>
-								<a href="?page=mailchimp-woocommerce&breadcrumb=<?php echo MC_WC_CONNECT_ACCOUNTS; ?>" class="mc-wc-breadcrumb-text"><?php echo __('Connect accounts', 'mailchimp-for-woocommerce'); ?></a>
+								<span class="mc-wc-breadcrumb-text a"><?php echo __('Connect accounts', 'mailchimp-for-woocommerce'); ?></span>
 							<?php endif; ?>
 						</li>
 						<li class="<?php echo ( MC_WC_REVIEW_SYNC_SETTINGS === $active_breadcrumb && $has_valid_api_key) ? 'current' : (!$has_valid_api_key ? 'disabled' : 'mc-wc-breadcrumb-link'); ?> <?php echo ($is_confirmation ? 'mc-wc-breadcrumb-nextable' : ''); ?>">
 							<?php if (MC_WC_REVIEW_SYNC_SETTINGS === $active_breadcrumb || !$has_valid_api_key): ?>
 								<span class="mc-wc-breadcrumb-text"><?php echo __('Review sync settings', 'mailchimp-for-woocommerce'); ?></span>
 							<?php else: ?>
-								<a href="?page=mailchimp-woocommerce&breadcrumb=<?php echo MC_WC_REVIEW_SYNC_SETTINGS; ?>" class="mc-wc-breadcrumb-text"><?php echo __('Review sync settings', 'mailchimp-for-woocommerce'); ?></a>
+								<span class="mc-wc-breadcrumb-text a"><?php echo __('Review sync settings', 'mailchimp-for-woocommerce'); ?></span>
 							<?php endif; ?>
 						</li>
 						<li class="<?php echo ( MC_WC_CONFIRMATION === $active_breadcrumb ) ? 'current' : ($is_confirmation ? 'mc-wc-breadcrumb-link' : 'disabled') ; ?>">
 							<?php if (MC_WC_CONFIRMATION === $active_breadcrumb || !$is_confirmation): ?>
 								<span class="mc-wc-breadcrumb-text"><?php echo __('Confirmation', 'mailchimp-for-woocommerce'); ?></span>
 							<?php else: ?>
-								<a href="?page=mailchimp-woocommerce&breadcrumb=<?php echo MC_WC_CONFIRMATION; ?>" class="mc-wc-breadcrumb-text"><?php echo __('Confirmation', 'mailchimp-for-woocommerce'); ?></a>
+								<span class="mc-wc-breadcrumb-text a"><?php echo __('Confirmation', 'mailchimp-for-woocommerce'); ?></span>
 							<?php endif; ?>
 						</li>
 					</ul>

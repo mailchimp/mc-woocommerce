@@ -42,7 +42,7 @@ $mailchimp_customer_count = mailchimp_get_customer_count();
             <div class="mc-wc-linked-audience-list">
                 <h3 class="mc-wc-settings-content-title"><?php esc_html_e( 'Linked audience', 'mailchimp-for-woocommerce' ); ?></h3>
                 <div class="mc-wc-select-wrapper">
-                    <select id="mailchimp_list_selector" class="mc-wc-select" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_list]" required <?php echo ( isset( $only_one_list ) && $only_one_list ) ? 'disabled' : ''; ?>>
+                    <select id="mailchimp_list_selector" class="mc-wc-select mc-wc-select-not-bold" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_list]" required <?php echo ( isset( $only_one_list ) && $only_one_list ) ? 'disabled' : ''; ?>>
                         <?php if ( ! isset( $allow_new_list ) || true === $allow_new_list ) : ?>
                             <option value="create_new"><?php esc_html_e( 'Create New Audience', 'mailchimp-for-woocommerce' ); ?></option>
                         <?php endif ?>
@@ -59,7 +59,6 @@ $mailchimp_customer_count = mailchimp_get_customer_count();
                         ?>
                     </select>
                 </div>
-                
             </div>
             <p class="mc-wc-linked-audience-description">
                 <?php esc_html_e( 'Confirm the Mailchimp audience you want to associate with your WooCommerce store', 'mailchimp-for-woocommerce' ); ?>

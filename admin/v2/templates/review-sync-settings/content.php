@@ -27,9 +27,9 @@ $newsletter_settings_error = $this->getData( 'errors.mailchimp_list', false );
 
 $checkout_page_id = get_option('woocommerce_checkout_page_id');
 $mailchimp_customer_count = mailchimp_get_customer_count();
-
+$initial_sync_subscribe = ( array_key_exists( 'mailchimp_auto_subscribe', $options ) && ! is_null( $options['mailchimp_auto_subscribe'] ) ) ? (string) $options['mailchimp_auto_subscribe'] : '1';
+$ongoing_sync_subscribe = ( array_key_exists( 'mailchimp_ongoing_sync_status', $options ) && ! is_null( $options['mailchimp_ongoing_sync_status'] ) ) ? (string) $options['mailchimp_ongoing_sync_status'] : '1';
 ?>
-
 <?php if ( $newsletter_settings_error ) : ?>
 	<div class="error notice is-dismissable">
 		<p><?php echo wp_kses_post( $newsletter_settings_error ); ?></p>
@@ -67,7 +67,6 @@ $mailchimp_customer_count = mailchimp_get_customer_count();
         </div>
     </div>
     <div class="mc-wc-import-customers-initial">
-        <?php $initial_sync_subscribe = ( array_key_exists( 'mailchimp_auto_subscribe', $options ) && ! is_null( $options['mailchimp_auto_subscribe'] ) ) ? $options['mailchimp_auto_subscribe'] : 'subscribed'; ?>
         <h3 class="mc-wc-settings-content-title"><?php esc_html_e( 'Import customers (initial sync)', 'mailchimp-for-woocommerce' ); ?></h3>
         <p class="mc-wc-text-1 pb-text">
             <?php esc_html_e( 'Choose how you’ll add your '.$mailchimp_customer_count.' WooCommerce customers to Mailchimp:', 'mailchimp-for-woocommerce' ); ?>
@@ -77,7 +76,7 @@ $mailchimp_customer_count = mailchimp_get_customer_count();
                 <div class="mc-wc-import-list-sync-input">
                     <div class="mc-wc-radio">
                         <label class="mc-wc-radio-label">
-                            <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_auto_subscribe]" value="1" <?php if ('subscribed' === $initial_sync_subscribe){ echo "checked";} ?>>
+                            <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_auto_subscribe]" value="1" <?php if ('1' === $initial_sync_subscribe){ echo "checked";} ?>>
                             <?php esc_html_e( 'Sync as subscribed', 'mailchimp-for-woocommerce' ); ?>
                         </label>
                     </div>
@@ -90,7 +89,7 @@ $mailchimp_customer_count = mailchimp_get_customer_count();
                 <div class="mc-wc-import-list-sync-input">
                     <div class="mc-wc-radio">
                         <label class="mc-wc-radio-label">
-                            <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_auto_subscribe]" value="0" <?php echo ! (bool) $initial_sync_subscribe ? ' checked="checked" ' : ''; ?>>
+                            <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_auto_subscribe]" value="0" <?php echo '0' === $initial_sync_subscribe ? ' checked="checked" ' : ''; ?>>
                             <?php esc_html_e( 'Sync as non-subscribed', 'mailchimp-for-woocommerce' ); ?>
                         </label>
                     </div>
@@ -103,7 +102,7 @@ $mailchimp_customer_count = mailchimp_get_customer_count();
                 <div class="mc-wc-import-list-sync-input">
                     <div class="mc-wc-radio">
                         <label class="mc-wc-radio-label">
-                            <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_auto_subscribe]" value="2" <?php if (2 === $initial_sync_subscribe){ echo "checked";} ?>>
+                            <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_auto_subscribe]" value="2" <?php if ('1' === $initial_sync_subscribe){ echo "checked";} ?>>
                             <?php esc_html_e( 'Sync existing contacts only', 'mailchimp-for-woocommerce' ); ?>
                         </label>
                     </div>
@@ -118,7 +117,6 @@ $mailchimp_customer_count = mailchimp_get_customer_count();
         </p>
     </div>
     <div class="mc-wc-import-customers-ongoing">
-        <?php $ongoing_sync_subscribe = ( array_key_exists( 'mailchimp_ongoing_sync_status', $options ) && ! is_null( $options['mailchimp_ongoing_sync_status'] ) ) ? $options['mailchimp_ongoing_sync_status'] : '1'; ?>
         <h3 class="mc-wc-settings-content-title"><?php esc_html_e( 'Import customers (ongoing sync)', 'mailchimp-for-woocommerce' ); ?></h3>
         <div class="mc-wc-import-list-sync">
             <div class="mc-wc-import-list-sync-item">

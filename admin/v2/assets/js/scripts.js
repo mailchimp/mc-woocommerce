@@ -2,6 +2,15 @@
 	'use strict';
 
 	$(window).on('load', function() {
+
+		function debounce(func, timeout = 300){
+			let timer;
+			return (...args) => {
+				clearTimeout(timer);
+				timer = setTimeout(() => { func.apply(this, args); }, timeout);
+			};
+		}
+
 		// Tags
 		$('.mc-wc-tag-list .mc-wc-input').keypress(function(event) {
 			var charCode = event.which || event.keyCode;
@@ -100,6 +109,11 @@
 
 			saveSettings();
 		});
+
+		// auto save after 1.5 seconds.
+		$('.opt-in-checkbox-text').keyup(debounce(function() {
+			saveSettings();
+		}, 1500));
 
 		function saveSettings() {
 			let formData = new FormData($('#mailchimp_woocommerce_options')[0]);

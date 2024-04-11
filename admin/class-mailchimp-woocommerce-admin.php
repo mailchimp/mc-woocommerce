@@ -1217,12 +1217,29 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @return array
 	 */
 	protected function compileStoreInfoData( $input ) {
-		$checkbox = $this->getOption( 'mailchimp_permission_cap', 'manage_woocommerce' );
+		$permissions = $this->getOption( 'mailchimp_permission_cap', 'manage_woocommerce' );
 
 		// see if it's posted in the form.
 		if ( isset( $input['mailchimp_permission_cap'] ) && ! empty( $input['mailchimp_permission_cap'] ) ) {
-			$checkbox = $input['mailchimp_permission_cap'];
+            $permissions = $input['mailchimp_permission_cap'];
 		}
+
+        // default value.
+        $checkbox = $this->getOption( 'mailchimp_checkbox_defaults', 'check' );
+
+        // see if it's posted in the form.
+        if ( isset( $input['mailchimp_checkbox_defaults'] ) && ! empty( $input['mailchimp_checkbox_defaults'] ) ) {
+            $checkbox = $input['mailchimp_checkbox_defaults'];
+        }
+
+        $allowed_html = array(
+            'a'  => array(
+                'href'   => array(),
+                'title'  => array(),
+                'target' => array(),
+            ),
+            'br' => array(),
+        );
 
 		return array(
 			// store basics
@@ -1238,9 +1255,12 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			'store_locale'                => isset( $input['store_locale'] ) ? $input['store_locale'] : get_locale(),
 			'store_timezone'              => mailchimp_get_timezone(),
 			'admin_email'                 => isset( $input['admin_email'] ) && is_email( $input['admin_email'] ) ? $input['admin_email'] : get_option( 'admin_email' ),
-			'mailchimp_permission_cap'    => $checkbox,
+			'mailchimp_permission_cap'    => $permissions,
 			'mailchimp_checkbox_action'   => isset( $input['mailchimp_checkbox_action'] ) ? $input['mailchimp_checkbox_action'] : $this->getOption( 'mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form' ),
 			'mailchimp_product_image_key' => isset( $input['mailchimp_product_image_key'] ) ? $input['mailchimp_product_image_key'] : 'medium',
+
+            'newsletter_label'              => ( isset( $input['newsletter_label'] ) ) ? wp_kses( $input['newsletter_label'], $allowed_html ) : $this->getOption( 'newsletter_label', __( 'Subscribe to our newsletter', 'mailchimp-for-woocommerce' ) ),
+            'mailchimp_checkbox_defaults'   => $checkbox,
 		);
 	}
 
@@ -1311,30 +1331,12 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @return array|string[]
 	 */
 	protected function validatePostNewsletterSettings( $input ) {
-		// default value.
-		$checkbox = $this->getOption( 'mailchimp_checkbox_defaults', 'check' );
-
-		// see if it's posted in the form.
-		if ( isset( $input['mailchimp_checkbox_defaults'] ) && ! empty( $input['mailchimp_checkbox_defaults'] ) ) {
-			$checkbox = $input['mailchimp_checkbox_defaults'];
-		}
 		$sanitized_tags = array_map( 'sanitize_text_field', explode( ',', $input['mailchimp_user_tags'] ) );
-
-		$allowed_html = array(
-			'a'  => array(
-				'href'   => array(),
-				'title'  => array(),
-				'target' => array(),
-			),
-			'br' => array(),
-		);
 
 		$data = array(
 			'mailchimp_list'                => isset( $input['mailchimp_list'] ) ? $input['mailchimp_list'] : $this->getOption( 'mailchimp_list', '' ),
-			'newsletter_label'              => ( isset( $input['newsletter_label'] ) ) ? wp_kses( $input['newsletter_label'], $allowed_html ) : $this->getOption( 'newsletter_label', __( 'Subscribe to our newsletter', 'mailchimp-for-woocommerce' ) ),
 			'mailchimp_auto_subscribe'      => isset( $input['mailchimp_auto_subscribe'] ) ? (bool) $input['mailchimp_auto_subscribe'] : $this->getOption( 'mailchimp_auto_subscribe', false ),
 			'mailchimp_ongoing_sync_status' => isset( $input['mailchimp_ongoing_sync_status'] ) ? (bool) $input['mailchimp_ongoing_sync_status'] : false,
-			'mailchimp_checkbox_defaults'   => $checkbox,
 			'mailchimp_user_tags'           => isset( $input['mailchimp_user_tags'] ) ? implode( ',', $sanitized_tags ) : $this->getOption( 'mailchimp_user_tags' ),
 			'mailchimp_cart_tracking'       => isset( $input['mailchimp_cart_tracking'] ) ? $input['mailchimp_cart_tracking'] : 'all',
 			'campaign_from_name'            => isset( $input['campaign_from_name'] ) ? $input['campaign_from_name'] : get_option( 'blogname' ),
@@ -1514,7 +1516,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		try {
 			if ( ( $account = $this->getCached( 'api-account-name' ) ) === null ) {
 				if ( ( $account = $this->api()->getProfile() ) ) {
-					$this->setCached( 'api-account-name', $account, 120 );
+					$this->setCached( 'api-account-name', $account, 300 );
 				}
 			}
 			return $account;
@@ -1539,7 +1541,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			if ( ( $pinged = $this->getCached( 'api-lists' ) ) === null ) {
 				$pinged = $this->api()->getLists( true );
 				if ( $pinged ) {
-					$this->setCached( 'api-lists', $pinged, 120 );
+					$this->setCached( 'api-lists', $pinged, 300 );
                     $this->safelyUpdateGDPRFields();
 				}
 				return $pinged;
@@ -1583,7 +1585,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			if ( ( $lists = $this->getCached( 'api-lists' ) ) === null ) {
 				$lists = $this->api()->getLists( true );
 				if ( $lists ) {
-					$this->setCached( 'api-lists', $lists, 120 );
+					$this->setCached( 'api-lists', $lists, 300 );
                     $this->safelyUpdateGDPRFields();
 				}
 			}

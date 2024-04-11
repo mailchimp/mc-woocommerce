@@ -11,16 +11,13 @@
     $current_currency      = isset( $options['store_currency_code'] ) ? $options['store_currency_code'] : get_woocommerce_currency();
     $current_currency_data = MailChimp_WooCommerce_CurrencyCodes::getCurrency( $current_currency );
     $checkout_page_id = get_option('woocommerce_checkout_page_id');
-
     if ( ! isset( $options ) ) {
         $options = array();
     }
-
-    $checkbox_default_settings = ( array_key_exists( 'mailchimp_permission_cap', $options ) && ! is_null( $options['mailchimp_permission_cap'] ) ) ? $options['mailchimp_permission_cap'] : 'manage_options';
-
+    $permission_cap_settings = ( array_key_exists( 'mailchimp_permission_cap', $options ) && ! is_null( $options['mailchimp_permission_cap'] ) ) ? $options['mailchimp_permission_cap'] : 'manage_options';
+    $checkbox_default_settings = ( array_key_exists( 'mailchimp_checkbox_defaults', $options ) && ! is_null( $options['mailchimp_checkbox_defaults'] ) ) ? $options['mailchimp_checkbox_defaults'] : 'check';
 	$is_has_wc_checkout_block = has_block( 'woocommerce/checkout', (int) $checkout_page_id );
 ?>
-
 <input type="hidden" name="mailchimp_active_settings_tab" value="<?php echo MC_WC_STORE_INFO_TAB; ?>"/>
 <input type="hidden" value="<?php echo ( esc_html( isset( $current_currency_data ) ? $current_currency . ' | ' . $current_currency_data['name'] : $current_currency ) ); ?>" disabled/>
 	<input type="hidden" value="<?php echo esc_attr( mailchimp_get_timezone( true ) ); ?>" disabled/>
@@ -67,13 +64,13 @@
             <div class="mc-wc-permission-choose">
                 <div class="mc-wc-radio">
                     <label class="mc-wc-radio-label">
-                        <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_permission_cap]" value="manage_options"<?php echo 'manage_options' === $checkbox_default_settings ? ' checked="checked" ' : ''; ?>>
+                        <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_permission_cap]" value="manage_options"<?php echo 'manage_options' === $permission_cap_settings ? ' checked="checked" ' : ''; ?>>
                         <?php esc_html_e('Shop Managers and Administrators', 'mailchimp-for-woocommerce' ); ?>
                     </label>
                 </div>
                 <div class="mc-wc-radio">
                     <label class="mc-wc-radio-label">
-                        <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_permission_cap]" value="manage_woocommerce"<?php echo 'manage_woocommerce' === $checkbox_default_settings ? ' checked="checked" ' : ''; ?>>
+                        <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_permission_cap]" value="manage_woocommerce"<?php echo 'manage_woocommerce' === $permission_cap_settings ? ' checked="checked" ' : ''; ?>>
                         <?php esc_html_e('Administrators Only', 'mailchimp-for-woocommerce' ); ?>
                     </label>
                 </div>
@@ -104,6 +101,39 @@
             <div class="mc-wc-input-wrapper">
                 <input class="mc-wc-input style-2" type="text" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_checkbox_action]" value="<?php echo isset( $options['mailchimp_checkbox_action'] ) ? esc_html( $options['mailchimp_checkbox_action'] ) : 'woocommerce_after_checkout_billing_form'; ?>" />
                 <p class="description"><?php esc_html_e( 'Enter a WooCommerce form action', 'mailchimp-for-woocommerce' ); ?></p>
+            </div>
+
+            <div class="mc-wc-permission-wrapper">
+                <label><?php esc_html_e('Checkbox display options', 'mailchimp-for-woocommerce' ); ?></label>
+                <div class="mc-wc-permission-choose">
+                    <div class="mc-wc-radio">
+                        <label class="mc-wc-radio-label">
+                            <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_checkbox_defaults]" value="check"<?php echo 'check' === $checkbox_default_settings ? ' checked="checked" ' : ''; ?>>
+                            <?php esc_html_e( 'Visible, checked by default', 'mailchimp-for-woocommerce' ); ?>
+                        </label>
+                    </div>
+                    <div class="mc-wc-radio">
+                        <label class="mc-wc-radio-label">
+                            <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_checkbox_defaults]" value="uncheck"<?php echo 'uncheck' === $checkbox_default_settings ? ' checked="checked" ' : ''; ?>>
+                            <?php esc_html_e( 'Visible, unchecked by default', 'mailchimp-for-woocommerce' ); ?>
+                        </label>
+                    </div>
+                    <div class="mc-wc-radio">
+                        <label class="mc-wc-radio-label">
+                            <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_checkbox_defaults]" value="hide"<?php echo 'hide' === $checkbox_default_settings ? ' checked="checked" ' : ''; ?>>
+                            <?php esc_html_e( 'Hidden, unchecked by default', 'mailchimp-for-woocommerce' ); ?>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mc-wc-input-wrapper">
+                <h4 class="opt-in-checkbox-label"><?php esc_html_e( 'Checkbox message', 'mailchimp-for-woocommerce' ); ?></h4>
+                <textarea rows="3" class="opt-in-checkbox-text" id="<?php echo esc_attr( $this->plugin_name ); ?>-newsletter-checkbox-label" name="<?php echo esc_attr( $this->plugin_name ); ?>[newsletter_label]"><?php echo isset( $options['newsletter_label'] ) ? esc_html( $options['newsletter_label'] ) : ''; ?></textarea>
+                <p class="description">
+                    <?php echo esc_html( __( 'HTML tags allowed: <a href="" target="" title=""></a> and <br>', 'mailchimp-for-woocommerce' ) ); ?><br/>
+                    <?php echo esc_html( __( 'Leave it blank to use language translation files (.po / .mo), translating the string: "Subscribe to our newsletter".', 'mailchimp-for-woocommerce' ) ); ?>
+                </p>
             </div>
         <?php endif; ?>
     </div>

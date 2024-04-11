@@ -84,7 +84,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	private function is_disconnecting() {
 		return isset( $_REQUEST['mailchimp_woocommerce_disconnect_store'] )
-			   && current_user_can( 'manage_options' )
+			   && current_user_can( mailchimp_get_allowed_capability() )
 			   && $_REQUEST['mailchimp_woocommerce_disconnect_store'] == 1
 			   && isset( $_REQUEST['_disconnect-nonce'] )
 			   && wp_verify_nonce( $_REQUEST['_disconnect-nonce'], '_disconnect-nonce-' . mailchimp_get_store_id() );
@@ -95,7 +95,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	private function is_resyncing() {
 		return isset( $_REQUEST['mailchimp_woocommerce_resync'] )
-			&& current_user_can( 'manage_options' )
+			&& current_user_can( mailchimp_get_allowed_capability() )
 			&& $_REQUEST['mailchimp_woocommerce_resync'] == 1
 			&& isset( $_REQUEST['_resync-nonce'] )
 			&& wp_verify_nonce( $_REQUEST['_resync-nonce'], '_resync-nonce-' . mailchimp_get_store_id() );
@@ -214,12 +214,14 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function add_plugin_admin_menu_2() {
 
+        $cap = mailchimp_get_allowed_capability();
+
 		// Add woocommerce menu subitem
 		add_submenu_page(
 			'woocommerce',               // Parent Slug
 			__( 'Mailchimp for WooCommerce', 'mailchimp-for-woocommerce' ),
 			__( 'Mailchimp', 'mailchimp-for-woocommerce' ),
-			mailchimp_get_allowed_capability(),
+            $cap,
 			$this->plugin_name,
 			array( $this, 'display_plugin_setup_page') // Callback function to display content
 		);
@@ -233,7 +235,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			array(
 				'id'         => 'mailchimp-for-woocommerce',
 				'title'      => __( 'Mailchimp', 'mailchimp-for-woocommerce' ),
-				'capability' => mailchimp_get_allowed_capability(),
+				'capability' => $cap,
 				'url'        => $this->plugin_name,
 			)
 		);
@@ -501,7 +503,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 			// set permission_cap in case there's none set.
 			if ( ! isset( $options['mailchimp_permission_cap'] ) || empty( $options['mailchimp_permission_cap'] ) ) {
-				$options['mailchimp_permission_cap'] = 'manage_options';
+				$options['mailchimp_permission_cap'] = 'administrator';
 				update_option( $this->plugin_name, $options );
 			}
 

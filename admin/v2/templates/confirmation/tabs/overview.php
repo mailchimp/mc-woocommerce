@@ -49,6 +49,9 @@ if ( ! empty( $last_updated_time ) ) {
     $last_updated_time = $sync_completed_at;
 }
 
+$still_syncing = $sync_started_at && ! $sync_completed_at;
+$is_done_syncing = mailchimp_is_done_syncing();
+
 if ( $store ) {
 	$store_syncing   = $store->isSyncing();
 	$account_details = $handler->getAccountDetails();
@@ -121,30 +124,22 @@ if ( $store ) {
             <div class="mc-wc-tab-content-sync-status">
                 <div class="sync-status-icon">
                     <div class="sync-status-icon-wrapper">
-                        <span class="<?php if ( !$last_updated_time ) { echo "mc-wc-d-none"; } ?>">
+                        <span class="<?php if (!$is_done_syncing ) { echo "mc-wc-d-none"; } ?>">
                             <svg width="86" height="86" viewBox="0 0 86 86" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd" clip-rule="evenodd" d="M73.373 17.4191C75.6269 19.351 75.8879 22.7442 73.956 24.9981L41.706 62.6231C40.7317 63.7598 39.3273 64.4387 37.8313 64.4961C36.3352 64.5536 34.883 63.9845 33.8243 62.9258L17.6993 46.8008C15.6002 44.7017 15.6002 41.2985 17.6993 39.1994C19.7984 37.1003 23.2016 37.1003 25.3007 39.1994L37.3214 51.2201L65.794 18.0021C67.7259 15.7482 71.1191 15.4872 73.373 17.4191Z" fill="#805BB9"/>
                             </svg>
                         </span>
-                        
-                        <img class="sync-loader <?php if ( $last_updated_time ) { echo "mc-wc-d-none"; } ?>" src="<?php echo esc_attr( plugin_dir_url( __FILE__ ) . '../../../assets/images/3dotpurple.gif' ); ?>"/>
+                        <span></span>
+                        <img class="sync-loader <?php if ( !$still_syncing ) { echo "mc-wc-d-none"; } ?>" src="<?php echo esc_attr( plugin_dir_url( __FILE__ ) . '../../../assets/images/3dotpurple.gif' ); ?>"/>
                     </div>
                 </div>
                 <div class="sync-status-detail">
                     <div class="sync-status-text">
                         <span>
-                        <?php esc_html_e('Status:', 'mailchimp-for-woocommerce' ); ?> 
+                            <?php esc_html_e('Status:', 'mailchimp-for-woocommerce' ); ?>
                         </span>
                         <span>
-                        <?php if ( $last_updated_time ) : ?>
-                            <?php if ( mailchimp_is_done_syncing() ) : ?>
-                                <?php esc_html_e( 'Complete', 'mailchimp-for-woocommerce' ); ?>
-                            <?php else : ?>
-                                <?php esc_html_e( 'Running', 'mailchimp-for-woocommerce' ); ?>
-                            <?php endif; ?>        
-                        <?php elseif ( $sync_started_at && ! $sync_completed_at ) : ?>
-                            <?php esc_html_e( 'Initial sync in progress', 'mailchimp-for-woocommerce' ); ?>
-                        <?php endif; ?>
+                            <?php esc_html_e($is_done_syncing ? 'Complete' : 'Syncing', 'mailchimp-for-woocommerce' ); ?>
                         </span>
                     </div>
                     <div class="sync-status-time <?php if ( !$last_updated_time ) { echo "mc-wc-d-none"; } ?>">

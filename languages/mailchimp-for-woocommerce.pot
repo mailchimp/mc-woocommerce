@@ -813,7 +813,7 @@ msgid "Resync request in progress"
 msgstr ""
 
 #: admin/partials/tabs/store-sync.php:122
-msgid "Running"
+msgid "Syncing"
 msgstr ""
 
 #: admin/class-mailchimp-woocommerce-admin.php:1932

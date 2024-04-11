@@ -245,6 +245,13 @@ function mailchimp_submit_subscribed_only() {
 /**
  * @return bool
  */
+function mailchimp_sync_existing_contacts_only() {
+    return mailchimp_get_option('mailchimp_auto_subscribe', '1') === '2';
+}
+
+/**
+ * @return bool
+ */
 function mailchimp_carts_disabled() {
     return mailchimp_get_option('mailchimp_cart_tracking', 'all') === 'disabled';
 }

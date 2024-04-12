@@ -102,7 +102,7 @@ $ongoing_sync_subscribe = ( array_key_exists( 'mailchimp_ongoing_sync_status', $
                 <div class="mc-wc-import-list-sync-input">
                     <div class="mc-wc-radio">
                         <label class="mc-wc-radio-label">
-                            <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_auto_subscribe]" value="2" <?php if ('1' === $initial_sync_subscribe){ echo "checked";} ?>>
+                            <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_auto_subscribe]" value="2" <?php if ('2' === $initial_sync_subscribe){ echo "checked";} ?>>
                             <?php esc_html_e( 'Sync existing contacts only', 'mailchimp-for-woocommerce' ); ?>
                         </label>
                     </div>

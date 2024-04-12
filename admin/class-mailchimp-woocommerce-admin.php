@@ -800,6 +800,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				$data = $this->validatePostApiKey( $input );
                 if (!empty($data) && empty($data['api_ping_error'])) {
                     mailchimp_set_transient('oauth_success', true, 10);
+                    mailchimp_flush_sync_pointers();
                 }
 				break;
 
@@ -879,12 +880,22 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	protected function validatePostApiKey( $input ) {
 		$data = array(
-			'mailchimp_api_key'               => isset( $input['mailchimp_api_key'] ) ? trim( $input['mailchimp_api_key'] ) : false,
+			'mailchimp_api_key'               => isset( $input['mailchimp_api_key'] ) ? trim( $input['mailchimp_api_key'] ) : $this->getOption('mailchimp_api_key'),
 			'mailchimp_debugging'             => isset( $input['mailchimp_debugging'] ) ? $input['mailchimp_debugging'] : false,
 			'mailchimp_account_info_id'       => null,
 			'mailchimp_account_info_username' => null,
+            'api_ping_error'                  => null,
 			'store_name'                      => get_option( 'blogname' ),
 		);
+
+        if (empty($data['mailchimp_api_key'])) {
+            mailchimp_error("admin", "The Mailchimp API key was empty while validating.");
+            add_settings_error( 'mailchimp_store_settings', $e->getCode(), $e->getMessage() );
+            unset( $data['mailchimp_api_key'] );
+            $data['active_tab']     = 'api_key';
+            $data['api_ping_error'] = "No API key detected.";
+            return $data;
+        }
 
 		$api = new MailChimp_WooCommerce_MailChimpApi( $data['mailchimp_api_key'] );
 
@@ -977,8 +988,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * Mailchimp OAuth connection finish
 	 */
 	public function mailchimp_woocommerce_ajax_oauth_finish() {
+        mailchimp_log('admin', 'right before middleware oauth finish');
 		$this->adminOnlyMiddleware();
-
+        mailchimp_log('admin', 'right after middleware oauth finish');
 		$args = array(
 			'domain' => site_url(),
 			'secret' => get_site_transient( 'mailchimp-woocommerce-oauth-secret' ),
@@ -994,6 +1006,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/finish', $pload );
 
+        mailchimp_log('admin', "finished oauth", array('response' => $response));
+
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
 			wp_send_json_error( $response );
@@ -1002,6 +1016,14 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		if ( $response['response']['code'] == 200 ) {
 			delete_site_transient( 'mailchimp-woocommerce-oauth-secret' );
 			// save api_key? If yes, we can skip api key validation for validatePostApiKey();
+            $result = json_decode( $response['body'], true);
+            $options = get_option($this->plugin_name);
+            $options['mailchimp_api_key'] = $result['access_token'].'-'.$result['data_center'];
+
+            mailchimp_log('admin', "got access token - updating options", array('response' => $response['body']));
+
+            update_option( $this->plugin_name, $options );
+
 			wp_send_json_success( $response );
 		} else {
 			wp_send_json_error( $response );
@@ -1478,6 +1500,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		if ( ( $pinged = $this->getCached( 'api-ping-check' ) ) === null ) {
 			if ( ( $pinged = $this->api()->ping( false, $throw_if_not_valid === true ) ) ) {
 				$this->setCached( 'api-ping-check', true, 120 );
+                if (mailchimp_get_option('api_ping_error')) {
+                    $options = get_option($this->plugin_name);
+                    $options['api_ping_error'] = null;
+                    update_option( $this->plugin_name, $options );
+                }
 			}
 		}
 
@@ -1540,7 +1567,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 
 		try {
-			if ( ( $pinged = $this->getCached( 'api-lists' ) ) === null ) {
+			if ( ( $pinged = $this->getCached( 'api-lists' ) ) === false ) {
 				$pinged = $this->api()->getLists( true );
 				if ( $pinged ) {
 					$this->setCached( 'api-lists', $pinged, 300 );

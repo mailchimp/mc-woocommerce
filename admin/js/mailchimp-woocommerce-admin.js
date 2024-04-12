@@ -335,11 +335,12 @@
 										$('#mailchimp-oauth-error').hide();
 										$('#mailchimp-oauth-connecting').hide();
 										$('#mailchimp-oauth-connected').show();
-										
-										// get access_token from finishResponse and fill api-key field value including data_center
-										var accessToken = JSON.parse(finishResponse.data.body).access_token + '-' + JSON.parse(finishResponse.data.body).data_center 
-										$('#mailchimp-woocommerce-mailchimp-api-key').val(accessToken);
 
+										let body = JSON.parse(finishResponse.data.body);
+										// get access_token from finishResponse and fill api-key field value including data_center
+										var accessToken = body.access_token + '-' + body.data_center
+										$('#mailchimp-woocommerce-mailchimp-api-key').val(accessToken);
+										
 										// always go to next step on success, so change url of wp_http_referer
 										if ($('input[name=mailchimp_woocommerce_wizard_on]').val() == 1) {
 											var query = window.location.href.match(/^(.*)\&/);

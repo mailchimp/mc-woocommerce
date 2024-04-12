@@ -7,7 +7,6 @@
  */
 
 /** Grab plugin admin object */
-
 $handler = MailChimp_WooCommerce_Admin::connect();
 
 /** Grab all options for this particular tab we're viewing. */
@@ -76,6 +75,7 @@ if ( isset( $options['mailchimp_api_key'] ) ) {
 	} catch ( Exception $e ) {
 		if (mailchimp_string_contains($e->getMessage(), array('API key', 'User Disabled'))) {
 			$active_breadcrumb    = MC_WC_CONNECT_ACCOUNTS;
+            $active_tab = 'api_key';
 			$is_confirmation = false;
 			$has_api_error = "This Mailchimp API key has been disabled, please flush any object caches you may be using and re-connect.";
 		} else {

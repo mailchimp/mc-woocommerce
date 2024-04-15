@@ -1567,7 +1567,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 
 		try {
-			if ( ( $pinged = $this->getCached( 'api-lists' ) ) === false ) {
+			if ( ( $pinged = $this->getCached( 'api-lists' ) ) === null ) {
 				$pinged = $this->api()->getLists( true );
 				if ( $pinged ) {
 					$this->setCached( 'api-lists', $pinged, 300 );

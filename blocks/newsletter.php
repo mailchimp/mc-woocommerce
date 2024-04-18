@@ -4,6 +4,7 @@ define( 'MAILCHIMP_WOOCOMMERCE_NEWSLETTER_VERSION', '1.0.0' );
 
 add_action( 'woocommerce_blocks_loaded', function() {
 	if (class_exists( '\Automattic\WooCommerce\Blocks\Package' ) &&
+        class_exists('\Automattic\WooCommerce\StoreApi\StoreApi') &&
 	    interface_exists('\Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface')) {
 		require_once dirname( __FILE__ ) . '/woocommerce-blocks-integration.php';
 		require_once dirname( __FILE__ ) . '/woocommerce-blocks-extend-store-endpoint.php';

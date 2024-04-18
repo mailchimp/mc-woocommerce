@@ -121,7 +121,7 @@
 			let notice_content = $('#mc_notice_text');
 			let content = $('.mc-wc-tab-content');
 
-			content.addClass('loading');
+			//content.addClass('loading');
 
 			notice.removeClass('error success');
 			notice_content.text('');

@@ -383,7 +383,7 @@
 			let notice_content = $('#mc_notice_text');
 			var content = $('.mc-wc-tab-content');
 
-			content.addClass('loading');
+			//content.addClass('loading');
 
 			notice_content.text('');
 			notice.removeClass('error success');
@@ -419,7 +419,7 @@
 			let notice_content = $('#mc_notice_text');
 			var content = $('.mc-wc-tab-content');
 
-			content.addClass('loading');
+			//content.addClass('loading');
 
 			notice_content.text('');
 			notice.removeClass('error success');

@@ -1562,8 +1562,9 @@ select#log_file {}
 .mc-wc-notice {
     position:fixed;
     bottom: 40px;
-    right: 20px;
     width: 500px;
+    left: 50%;
+    margin-left: -250px;
     background-color: #241c15;
     padding: 12px 16px;
     border-radius: 8px;

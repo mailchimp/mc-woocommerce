@@ -1360,7 +1360,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$data = array(
 			'mailchimp_list'                => isset( $input['mailchimp_list'] ) ? $input['mailchimp_list'] : $this->getOption( 'mailchimp_list', '' ),
 			'mailchimp_auto_subscribe'      => isset( $input['mailchimp_auto_subscribe'] ) ? (string) $input['mailchimp_auto_subscribe'] : $this->getOption( 'mailchimp_auto_subscribe', '1' ),
-			'mailchimp_ongoing_sync_status' => isset( $input['mailchimp_ongoing_sync_status'] ) ? (bool) $input['mailchimp_ongoing_sync_status'] : false,
+			'mailchimp_ongoing_sync_status' => isset( $input['mailchimp_ongoing_sync_status'] ) ? (bool) $input['mailchimp_ongoing_sync_status'] : $this->getOption('mailchimp_ongoing_sync_status', '1'),
 			'mailchimp_user_tags'           => isset( $input['mailchimp_user_tags'] ) ? implode( ',', $sanitized_tags ) : $this->getOption( 'mailchimp_user_tags' ),
 			'mailchimp_cart_tracking'       => isset( $input['mailchimp_cart_tracking'] ) ? $input['mailchimp_cart_tracking'] : 'all',
 			'campaign_from_name'            => isset( $input['campaign_from_name'] ) ? $input['campaign_from_name'] : get_option( 'blogname' ),

@@ -142,6 +142,11 @@ if ( $store ) {
                             <?php esc_html_e($is_done_syncing ? 'Complete' : 'Syncing', 'mailchimp-for-woocommerce' ); ?>
                         </span>
                     </div>
+                    <div class="sync-status-text">
+                        <span>
+                            <?php esc_html_e($audience_name, 'mailchimp-for-woocommerce' ); ?>
+                        </span>
+                    </div>
                     <div class="sync-status-time <?php if ( !$last_updated_time ) { echo "mc-wc-d-none"; } ?>">
                         <span class="sync-status-time-date">
                             <?php esc_html_e('Last sync', 'mailchimp-for-woocommerce' ); ?>

@@ -988,9 +988,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * Mailchimp OAuth connection finish
 	 */
 	public function mailchimp_woocommerce_ajax_oauth_finish() {
-        mailchimp_log('admin', 'right before middleware oauth finish');
+        //mailchimp_log('admin', 'right before middleware oauth finish');
 		$this->adminOnlyMiddleware();
-        mailchimp_log('admin', 'right after middleware oauth finish');
+        //mailchimp_log('admin', 'right after middleware oauth finish');
 		$args = array(
 			'domain' => site_url(),
 			'secret' => get_site_transient( 'mailchimp-woocommerce-oauth-secret' ),
@@ -1006,7 +1006,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/finish', $pload );
 
-        mailchimp_log('admin', "finished oauth", array('response' => $response));
+        //mailchimp_log('admin', "finished oauth", array('response' => $response));
 
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
@@ -1020,7 +1020,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             $options = get_option($this->plugin_name);
             $options['mailchimp_api_key'] = $result['access_token'].'-'.$result['data_center'];
 
-            mailchimp_log('admin', "got access token - updating options", array('response' => $response['body']));
+            //mailchimp_log('admin', "got access token - updating options", array('response' => $response['body']));
 
             update_option( $this->plugin_name, $options );
 
@@ -1833,7 +1833,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @return false|mixed|null
 	 */
 	private function updateMailChimpList( $data = null, $list_id = null ) {
-        mailchimp_log('admin', 'updating mailchimp list', array('data' => $data));
+        //mailchimp_log('admin', 'updating mailchimp list', array('data' => $data));
 		if ( empty( $data ) ) {
 			$data = $this->getOptions();
 		}

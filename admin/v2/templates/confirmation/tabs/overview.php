@@ -143,7 +143,7 @@ if ( $store ) {
                         </span>
                     </div>
                     <div class="sync-status-text">
-                        <span>
+                        <span style="text-align:center;">
                             <?php esc_html_e($audience_name, 'mailchimp-for-woocommerce' ); ?>
                         </span>
                     </div>

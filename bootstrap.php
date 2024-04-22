@@ -96,7 +96,7 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production', // staging or production
-        'version' => '3.7',
+        'version' => '4.0',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => function_exists('WC') ? WC()->version : null,
@@ -240,6 +240,13 @@ function mailchimp_get_remaining_jobs_count($job_hook) {
 
 function mailchimp_submit_subscribed_only() {
     return ! (bool) mailchimp_get_option('mailchimp_ongoing_sync_status', '1');
+}
+
+/**
+ * @return bool
+ */
+function mailchimp_sync_existing_contacts_only() {
+    return mailchimp_get_option('mailchimp_auto_subscribe', '1') === '2';
 }
 
 /**
@@ -830,6 +837,19 @@ function mailchimp_get_order_count() {
     return $total;
 }
 
+function mailchimp_get_customer_count() {
+    global $wpdb;
+    $query = "SELECT COUNT(DISTINCT meta_value) FROM {$wpdb->postmeta} WHERE meta_key = '_billing_email'";
+    $emails = $wpdb->get_var($query);
+    $users_query = new WP_User_Query(
+        array(
+            'fields' => array( 'ID' ),
+            'role'   => 'customer',
+        )
+    );
+    return $users_query->get_total() + (int) $emails;
+}
+
 /**
  * @param $type
  * @return array|null|object
@@ -1168,6 +1188,9 @@ function mailchimp_delete_as_jobs() {
 }
 function mailchimp_flush_sync_pointers() {
     // clean up the initial sync pointers
+    delete_option( 'mailchimp-woocommerce-resource-last-updated' );
+    delete_option( 'mailchimp-woocommerce-sync.started_at' );
+    delete_option( 'mailchimp-woocommerce-sync.completed_at' );
     foreach (array('orders', 'products', 'coupons') as $resource_type) {
         delete_option("mailchimp-woocommerce-sync.{$resource_type}.started_at");
         delete_option("mailchimp-woocommerce-sync.{$resource_type}.completed_at");
@@ -1197,9 +1220,9 @@ function mailchimp_clean_database() {
  * @return bool
  */
 function mailchimp_has_started_syncing() {
-    $sync_started_at = get_option('mailchimp-woocommerce-sync.started_at');
-    $sync_completed_at = get_option('mailchimp-woocommerce-sync.completed_at');
-    return ($sync_completed_at < $sync_started_at);
+    return (bool) get_option('mailchimp-woocommerce-sync.started_at');
+//    $sync_completed_at = get_option('mailchimp-woocommerce-sync.completed_at');
+//    return ($sync_completed_at < $sync_started_at);
 }
 
 /**

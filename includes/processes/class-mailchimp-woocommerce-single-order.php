@@ -187,11 +187,44 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             $current_status = null;
             $pulled_member = false;
 
+            // see if this store has the auto subscribe setting enabled on initial sync
+            $plugin_options = get_option('mailchimp-woocommerce');
+            $subscribe_setting = (string) $plugin_options['mailchimp_auto_subscribe'];
+            $sync_as_non_subscribed = $subscribe_setting === '0';
+            $should_auto_subscribe = $subscribe_setting === '1';
+            $only_sync_existing = $subscribe_setting === '2';
+
+            // during the initial sync, we need to apply different logic for subscriber statuses.
+            if ($this->is_full_sync) {
+                if ($should_auto_subscribe) {
+                    // if they selected auto subscribe, we do that.
+                    $order->getCustomer()->setOptInStatus(true);
+                    $status = true;
+                } else if ($sync_as_non_subscribed) {
+                    // if they said "transactional only", we apply this status of false.
+                    $order->getCustomer()->setOptInStatus(false);
+                    $status = false;
+                } else if ($only_sync_existing) {
+                    // if they said only sync existing, we need to make sure they're already on the Mailchimp list
+                    // otherwise we block it.
+                    try {
+                        $subscriber = $api->member(mailchimp_get_list_id(), $email);
+                        mailchimp_set_transient($transient_key, $current_status = $subscriber['status']);
+                        $pulled_member = true;
+                    } catch (Exception $e) {
+                        mailchimp_set_transient($transient_key, $current_status);
+                        mailchimp_debug('filter', "#{$woo_order_number} was blocked due to only submitting existing members on initial sync.");
+                        return false;
+                    }
+                }
+            }
+
 			// if the customer did not actually check the box, this will always be false.
 	        // we needed to use this flag because when using double opt in, the status gets
 	        // overwritten to allow us to submit a pending status to the list member endpoint
 	        // which fires the double opt in.
-            if (!$original_status && mailchimp_submit_subscribed_only()) {
+            // this will not fire during the initial sync.
+            if (!$this->is_full_sync && (!$original_status && mailchimp_submit_subscribed_only())) {
                 try {
                     $subscriber = $api->member(mailchimp_get_list_id(), $email);
                     $current_status = $subscriber['status'];
@@ -209,10 +242,6 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             }
 
             if ($this->is_full_sync) {
-                // see if this store has the auto subscribe setting enabled on initial sync
-                $plugin_options = get_option('mailchimp-woocommerce');
-                $should_auto_subscribe = (bool) $plugin_options['mailchimp_auto_subscribe'];
-
                 // since we're syncing the customer for the first time, this is where we need to add the override
                 // for subscriber status. We don't get the checkbox until this plugin is actually installed and working!
                 if (!$status) {

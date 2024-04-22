@@ -84,7 +84,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	private function is_disconnecting() {
 		return isset( $_REQUEST['mailchimp_woocommerce_disconnect_store'] )
-			   && current_user_can( 'manage_options' )
+			   && current_user_can( mailchimp_get_allowed_capability() )
 			   && $_REQUEST['mailchimp_woocommerce_disconnect_store'] == 1
 			   && isset( $_REQUEST['_disconnect-nonce'] )
 			   && wp_verify_nonce( $_REQUEST['_disconnect-nonce'], '_disconnect-nonce-' . mailchimp_get_store_id() );
@@ -95,7 +95,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	private function is_resyncing() {
 		return isset( $_REQUEST['mailchimp_woocommerce_resync'] )
-			&& current_user_can( 'manage_options' )
+			&& current_user_can( mailchimp_get_allowed_capability() )
 			&& $_REQUEST['mailchimp_woocommerce_resync'] == 1
 			&& isset( $_REQUEST['_resync-nonce'] )
 			&& wp_verify_nonce( $_REQUEST['_resync-nonce'], '_resync-nonce-' . mailchimp_get_store_id() );
@@ -113,6 +113,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				wp_enqueue_style( $this->plugin_name . '-settings', plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin-settings-5.2.css', array(), $this->version );
 			}
 			wp_enqueue_style( $this->plugin_name . '-settings', plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin-settings.css', array(), $this->version . '.01' );
+			// Update v2
+			wp_enqueue_style( $this->plugin_name . '-settings-v2', plugin_dir_url( __FILE__ ) . 'v2/assets/css/styles.css', array(), $this->version);
+			// End update v2
 			wp_style_add_data( $this->plugin_name . '-settings', 'rtl', 'replace' );
 		}
 	}
@@ -132,6 +135,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			$options                   = get_option( $this->plugin_name, array() );
 			$checkbox_default_settings = ( array_key_exists( 'mailchimp_checkbox_defaults', $options ) && ! is_null( $options['mailchimp_checkbox_defaults'] ) ) ? $options['mailchimp_checkbox_defaults'] : 'check';
 			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version );
+			wp_register_script( $this->plugin_name . '-v2', plugin_dir_url( __FILE__ ) . 'v2/assets/js/scripts.js', array( 'jquery', 'swal' ), $this->version );
 			wp_localize_script(
 				$this->plugin_name,
 				'phpVars',
@@ -155,11 +159,15 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 						'support_message_ok'           => __( 'Message received', 'mailchimp-for-woocommerce' ),
 						'support_message_desc'         => __( 'Thanks, your message has been received.', 'mailchimp-for-woocommerce' ),
 						'subscribe_newsletter'         => $label,
+						'option_update_success'        => __( 'Changes Saved', 'mailchimp-for-woocommerce' ),
+						'option_update_error'          => __( 'Save error', 'mailchimp-for-woocommerce' ),
 					),
 					'current_optin_state'       => $checkbox_default_settings,
+					'ajax_url_option'               => admin_url( 'options.php' )
 				)
 			);
 			wp_enqueue_script( $this->plugin_name );
+			wp_enqueue_script( $this->plugin_name . '-v2');
 			wp_enqueue_script( 'swal', '//cdn.jsdelivr.net/npm/sweetalert2@8', '', $this->version );
 		}
 	}
@@ -194,6 +202,40 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				'id'         => 'mailchimp-for-woocommerce',
 				'title'      => __( 'Mailchimp', 'mailchimp-for-woocommerce' ),
 				'capability' => mailchimp_get_allowed_capability(),
+				'url'        => $this->plugin_name,
+			)
+		);
+	}
+
+	/**
+	 * Register the administration menu for this plugin into the WordPress Dashboard menu.
+	 *
+	 * @since    1.0.0
+	 */
+	public function add_plugin_admin_menu_2() {
+
+        $cap = mailchimp_get_allowed_capability();
+
+		// Add woocommerce menu subitem
+		add_submenu_page(
+			'woocommerce',               // Parent Slug
+			__( 'Mailchimp for WooCommerce', 'mailchimp-for-woocommerce' ),
+			__( 'Mailchimp', 'mailchimp-for-woocommerce' ),
+            $cap,
+			$this->plugin_name,
+			array( $this, 'display_plugin_setup_page') // Callback function to display content
+		);
+
+		// Add the WooCommerce navigation items if the feauture exists.
+		if ( ! class_exists( '\Automattic\WooCommerce\Admin\Features\Navigation\Menu' ) ) {
+			return;
+		}
+
+		Menu::add_plugin_item(
+			array(
+				'id'         => 'mailchimp-for-woocommerce',
+				'title'      => __( 'Mailchimp', 'mailchimp-for-woocommerce' ),
+				'capability' => $cap,
 				'url'        => $this->plugin_name,
 			)
 		);
@@ -265,7 +307,12 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @since    1.0.0
 	 */
 	public function display_plugin_setup_page() {
-		include_once 'partials/mailchimp-woocommerce-admin-tabs.php';
+		// Comment: [Old UI]
+		// include_once 'partials/mailchimp-woocommerce-admin-tabs.php';
+
+		// [New UI]
+			include_once 'v2/helpers/helper.php';
+			include_once 'v2/templates/mailchimp-woocommerce-admin-pages.php';
 	}
 
 	public function display_user_profile_info( $user ) {
@@ -349,10 +396,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				}
 			}
 
-			$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : ( $this->getOption( 'active_tab' ) ? $this->getOption( 'active_tab' ) : 'api_key' );
-			if ( $active_tab == 'sync' && get_option( 'mailchimp-woocommerce-sync.initial_sync' ) == 1 && get_option( 'mailchimp-woocommerce-sync.completed_at' ) > 0 ) {
-				$this->mailchimp_show_initial_sync_message();
-			}
+//			$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : ( $this->getOption( 'active_tab' ) ? $this->getOption( 'active_tab' ) : 'api_key' );
+//			if ( $active_tab == 'sync' && get_option( 'mailchimp-woocommerce-sync.initial_sync' ) == 1 && get_option( 'mailchimp-woocommerce-sync.completed_at' ) > 0 ) {
+//				$this->mailchimp_show_initial_sync_message();
+//			}
 			if ( isset( $_GET['log_removed'] ) && $_GET['log_removed'] == '1' ) {
 				add_settings_error( 'mailchimp_log_settings', '', __( 'Log file deleted.', 'mailchimp-for-woocommerce' ), 'info' );
 			}
@@ -456,7 +503,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 			// set permission_cap in case there's none set.
 			if ( ! isset( $options['mailchimp_permission_cap'] ) || empty( $options['mailchimp_permission_cap'] ) ) {
-				$options['mailchimp_permission_cap'] = 'manage_options';
+				$options['mailchimp_permission_cap'] = 'administrator';
 				update_option( $this->plugin_name, $options );
 			}
 
@@ -731,8 +778,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @throws MailChimp_WooCommerce_ServerError
 	 */
 	public function validate( $input ) {
-
-		$active_tab = isset( $input['mailchimp_active_tab'] ) ? $input['mailchimp_active_tab'] : null;
+		$active_tab = isset( $input['mailchimp_active_tab'] ) ? $input['mailchimp_active_tab'] : (isset( $input['mailchimp_active_settings_tab'] ) ?  $input['mailchimp_active_settings_tab']: null);
 
 		if ( empty( $active_tab ) && isset( $input['woocommerce_settings_save_general'] ) && $input['woocommerce_settings_save_general'] ) {
 			unset( $input['woocommerce_settings_save_general'] );
@@ -752,6 +798,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 			case 'api_key':
 				$data = $this->validatePostApiKey( $input );
+                if (!empty($data) && empty($data['api_ping_error'])) {
+                    mailchimp_set_transient('oauth_success', true, 10);
+                    mailchimp_flush_sync_pointers();
+                }
 				break;
 
 			case 'store_info':
@@ -770,7 +820,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 					$service = new MailChimp_Service();
 					$service->removePointers();
 					$this->startSync();
-					$this->showSyncStartedMessage();
+					//$this->showSyncStartedMessage();
 					$this->setData( 'sync.config.resync', true );
 				}
 				break;
@@ -830,11 +880,22 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	protected function validatePostApiKey( $input ) {
 		$data = array(
-			'mailchimp_api_key'               => isset( $input['mailchimp_api_key'] ) ? trim( $input['mailchimp_api_key'] ) : false,
+			'mailchimp_api_key'               => isset( $input['mailchimp_api_key'] ) ? trim( $input['mailchimp_api_key'] ) : $this->getOption('mailchimp_api_key'),
 			'mailchimp_debugging'             => isset( $input['mailchimp_debugging'] ) ? $input['mailchimp_debugging'] : false,
 			'mailchimp_account_info_id'       => null,
 			'mailchimp_account_info_username' => null,
+            'api_ping_error'                  => null,
+			'store_name'                      => get_option( 'blogname' ),
 		);
+
+        if (empty($data['mailchimp_api_key'])) {
+            mailchimp_error("admin", "The Mailchimp API key was empty while validating.");
+            add_settings_error( 'mailchimp_store_settings', $e->getCode(), $e->getMessage() );
+            unset( $data['mailchimp_api_key'] );
+            $data['active_tab']     = 'api_key';
+            $data['api_ping_error'] = "No API key detected.";
+            return $data;
+        }
 
 		$api = new MailChimp_WooCommerce_MailChimpApi( $data['mailchimp_api_key'] );
 
@@ -842,7 +903,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			$profile = $api->ping( true, true );
 			// tell our reporting system whether or not we had a valid ping.
 			$this->setData( 'validation.api.ping', true );
-			$data['active_tab'] = 'store_info';
+			$data['active_tab'] = 'newsletter_settings';
 			if ( isset( $profile ) && is_array( $profile ) && array_key_exists( 'account_id', $profile ) ) {
 				$data['mailchimp_account_info_id']       = $profile['account_id'];
 				$data['mailchimp_account_info_username'] = $profile['username'];
@@ -927,8 +988,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * Mailchimp OAuth connection finish
 	 */
 	public function mailchimp_woocommerce_ajax_oauth_finish() {
+        mailchimp_log('admin', 'right before middleware oauth finish');
 		$this->adminOnlyMiddleware();
-
+        mailchimp_log('admin', 'right after middleware oauth finish');
 		$args = array(
 			'domain' => site_url(),
 			'secret' => get_site_transient( 'mailchimp-woocommerce-oauth-secret' ),
@@ -944,6 +1006,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/finish', $pload );
 
+        mailchimp_log('admin', "finished oauth", array('response' => $response));
+
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
 			wp_send_json_error( $response );
@@ -952,6 +1016,14 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		if ( $response['response']['code'] == 200 ) {
 			delete_site_transient( 'mailchimp-woocommerce-oauth-secret' );
 			// save api_key? If yes, we can skip api key validation for validatePostApiKey();
+            $result = json_decode( $response['body'], true);
+            $options = get_option($this->plugin_name);
+            $options['mailchimp_api_key'] = $result['access_token'].'-'.$result['data_center'];
+
+            mailchimp_log('admin', "got access token - updating options", array('response' => $response['body']));
+
+            update_option( $this->plugin_name, $options );
+
 			wp_send_json_success( $response );
 		} else {
 			wp_send_json_error( $response );
@@ -1111,26 +1183,28 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	protected function validatePostStoreInfo( $input ) {
 		$data = $this->compileStoreInfoData( $input );
 
-		if ( ! $this->hasValidStoreInfo( $data ) ) {
+//		if ( ! $this->hasValidStoreInfo( $data ) ) {
+//
+//			if ( $this->hasInvalidStoreAddress( $data ) ) {
+//				$this->addInvalidAddressAlert();
+//			}
+//
+//			if ( $this->hasInvalidStorePhone( $data ) ) {
+//				$this->addInvalidPhoneAlert();
+//			}
+//
+//			if ( $this->hasInvalidStoreName( $data ) ) {
+//				$this->addInvalidStoreNameAlert();
+//			}
+//
+//			$this->setData( 'validation.store_info', false );
+//
+//			$data['active_tab'] = 'store_info';
+//
+//			return $input;
+//		}
 
-			if ( $this->hasInvalidStoreAddress( $data ) ) {
-				$this->addInvalidAddressAlert();
-			}
 
-			if ( $this->hasInvalidStorePhone( $data ) ) {
-				$this->addInvalidPhoneAlert();
-			}
-
-			if ( $this->hasInvalidStoreName( $data ) ) {
-				$this->addInvalidStoreNameAlert();
-			}
-
-			$this->setData( 'validation.store_info', false );
-
-			$data['active_tab'] = 'store_info';
-
-			return $input;
-		}
 
 		// change communication status options
 		$comm_opt = get_option( 'mailchimp-woocommerce-comm.opt', 0 );
@@ -1150,6 +1224,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			}
 		}
 
+		// run sync all products if the image size has changed
+		if ( mailchimp_get_option( 'mailchimp_product_image_key', 'medium' ) !== $data['mailchimp_product_image_key'] ) {
+			mailchimp_handle_or_queue(new MailChimp_WooCommerce_Process_Products());
+		}
+
 		$data['active_tab']          = 'newsletter_settings';
 		$data['store_currency_code'] = get_woocommerce_currency();
 
@@ -1162,26 +1241,50 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @return array
 	 */
 	protected function compileStoreInfoData( $input ) {
-		$checkbox = $this->getOption( 'mailchimp_permission_cap', 'check' );
+		$permissions = $this->getOption( 'mailchimp_permission_cap', 'manage_woocommerce' );
 
 		// see if it's posted in the form.
 		if ( isset( $input['mailchimp_permission_cap'] ) && ! empty( $input['mailchimp_permission_cap'] ) ) {
-			$checkbox = $input['mailchimp_permission_cap'];
+            $permissions = $input['mailchimp_permission_cap'];
 		}
+
+        // default value.
+        $checkbox = $this->getOption( 'mailchimp_checkbox_defaults', 'check' );
+
+        // see if it's posted in the form.
+        if ( isset( $input['mailchimp_checkbox_defaults'] ) && ! empty( $input['mailchimp_checkbox_defaults'] ) ) {
+            $checkbox = $input['mailchimp_checkbox_defaults'];
+        }
+
+        $allowed_html = array(
+            'a'  => array(
+                'href'   => array(),
+                'title'  => array(),
+                'target' => array(),
+            ),
+            'br' => array(),
+        );
+
 		return array(
 			// store basics
-			'store_name'               => trim( ( isset( $input['store_name'] ) ? $input['store_name'] : get_option( 'blogname' ) ) ),
-			'store_street'             => isset( $input['store_street'] ) ? $input['store_street'] : false,
-			'store_city'               => isset( $input['store_city'] ) ? $input['store_city'] : false,
-			'store_state'              => isset( $input['store_state'] ) ? $input['store_state'] : false,
-			'store_postal_code'        => isset( $input['store_postal_code'] ) ? $input['store_postal_code'] : false,
-			'store_country'            => isset( $input['store_country'] ) ? $input['store_country'] : false,
-			'store_phone'              => isset( $input['store_phone'] ) ? $input['store_phone'] : false,
+			'store_name'                  => trim( ( isset( $input['store_name'] ) ? $input['store_name'] : get_option( 'blogname' ) ) ),
+			'store_street'                => isset( $input['store_street'] ) ? $input['store_street'] : false,
+			'store_city'                  => isset( $input['store_city'] ) ? $input['store_city'] : false,
+			'store_state'                 => isset( $input['store_state'] ) ? $input['store_state'] : false,
+			'store_postal_code'           => isset( $input['store_postal_code'] ) ? $input['store_postal_code'] : false,
+			'store_country'               => isset( $input['store_country'] ) ? $input['store_country'] : false,
+//			'store_phone'              => isset( $input['store_phone'] ) ? $input['store_phone'] : false,
 			// locale info
-			'store_locale'             => isset( $input['store_locale'] ) ? $input['store_locale'] : false,
-			'store_timezone'           => mailchimp_get_timezone(),
-			'admin_email'              => isset( $input['admin_email'] ) && is_email( $input['admin_email'] ) ? $input['admin_email'] : $this->getOption( 'admin_email', false ),
-			'mailchimp_permission_cap' => $checkbox,
+			'store_currency_code'         => get_woocommerce_currency(),
+			'store_locale'                => isset( $input['store_locale'] ) ? $input['store_locale'] : get_locale(),
+			'store_timezone'              => mailchimp_get_timezone(),
+			'admin_email'                 => isset( $input['admin_email'] ) && is_email( $input['admin_email'] ) ? $input['admin_email'] : get_option( 'admin_email' ),
+			'mailchimp_permission_cap'    => $permissions,
+			'mailchimp_checkbox_action'   => isset( $input['mailchimp_checkbox_action'] ) ? $input['mailchimp_checkbox_action'] : $this->getOption( 'mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form' ),
+			'mailchimp_product_image_key' => isset( $input['mailchimp_product_image_key'] ) ? $input['mailchimp_product_image_key'] : 'medium',
+
+            'newsletter_label'              => ( isset( $input['newsletter_label'] ) ) ? wp_kses( $input['newsletter_label'], $allowed_html ) : $this->getOption( 'newsletter_label', __( 'Subscribe to our newsletter', 'mailchimp-for-woocommerce' ) ),
+            'mailchimp_checkbox_defaults'   => $checkbox,
 		);
 	}
 
@@ -1252,44 +1355,24 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @return array|string[]
 	 */
 	protected function validatePostNewsletterSettings( $input ) {
-		// default value.
-		$checkbox = $this->getOption( 'mailchimp_checkbox_defaults', 'check' );
-
-		// see if it's posted in the form.
-		if ( isset( $input['mailchimp_checkbox_defaults'] ) && ! empty( $input['mailchimp_checkbox_defaults'] ) ) {
-			$checkbox = $input['mailchimp_checkbox_defaults'];
-		}
 		$sanitized_tags = array_map( 'sanitize_text_field', explode( ',', $input['mailchimp_user_tags'] ) );
-
-		$allowed_html = array(
-			'a'  => array(
-				'href'   => array(),
-				'title'  => array(),
-				'target' => array(),
-			),
-			'br' => array(),
-		);
 
 		$data = array(
 			'mailchimp_list'                => isset( $input['mailchimp_list'] ) ? $input['mailchimp_list'] : $this->getOption( 'mailchimp_list', '' ),
-			'newsletter_label'              => ( isset( $input['newsletter_label'] ) ) ? wp_kses( $input['newsletter_label'], $allowed_html ) : $this->getOption( 'newsletter_label', __( 'Subscribe to our newsletter', 'mailchimp-for-woocommerce' ) ),
-			'mailchimp_auto_subscribe'      => isset( $input['mailchimp_auto_subscribe'] ) ? (bool) $input['mailchimp_auto_subscribe'] : false,
-			'mailchimp_ongoing_sync_status' => isset( $input['mailchimp_ongoing_sync_status'] ) ? (bool) $input['mailchimp_ongoing_sync_status'] : false,
-			'mailchimp_checkbox_defaults'   => $checkbox,
-			'mailchimp_checkbox_action'     => isset( $input['mailchimp_checkbox_action'] ) ? $input['mailchimp_checkbox_action'] : $this->getOption( 'mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form' ),
+			'mailchimp_auto_subscribe'      => isset( $input['mailchimp_auto_subscribe'] ) ? (string) $input['mailchimp_auto_subscribe'] : $this->getOption( 'mailchimp_auto_subscribe', '1' ),
+			'mailchimp_ongoing_sync_status' => isset( $input['mailchimp_ongoing_sync_status'] ) ? (bool) $input['mailchimp_ongoing_sync_status'] : $this->getOption('mailchimp_ongoing_sync_status', '1'),
 			'mailchimp_user_tags'           => isset( $input['mailchimp_user_tags'] ) ? implode( ',', $sanitized_tags ) : $this->getOption( 'mailchimp_user_tags' ),
-			'mailchimp_product_image_key'   => isset( $input['mailchimp_product_image_key'] ) ? $input['mailchimp_product_image_key'] : 'medium',
 			'mailchimp_cart_tracking'       => isset( $input['mailchimp_cart_tracking'] ) ? $input['mailchimp_cart_tracking'] : 'all',
-			'campaign_from_name'            => isset( $input['campaign_from_name'] ) ? $input['campaign_from_name'] : false,
-			'campaign_from_email'           => isset( $input['campaign_from_email'] ) && is_email( $input['campaign_from_email'] ) ? $input['campaign_from_email'] : false,
-			'campaign_subject'              => isset( $input['campaign_subject'] ) ? $input['campaign_subject'] : get_option( 'blogname' ),
+			'campaign_from_name'            => isset( $input['campaign_from_name'] ) ? $input['campaign_from_name'] : get_option( 'blogname' ),
+			'campaign_from_email'           => isset( $input['campaign_from_email'] ) && is_email( $input['campaign_from_email'] ) ? $input['campaign_from_email'] : $this->getOption( 'admin_email' , get_option('admin_email')),
+			'campaign_subject'              => isset( $input['campaign_subject'] ) ? $input['campaign_subject'] : esc_html__( 'Store Newsletter', 'mailchimp-for-woocommerce' ),
 			'campaign_language'             => isset( $input['campaign_language'] ) ? $input['campaign_language'] : $this->getOption( 'store_locale' , 'en'),
 			'campaign_permission_reminder'  => isset( $input['campaign_permission_reminder'] ) ? $input['campaign_permission_reminder'] : sprintf( /* translators: %s - plugin name. */esc_html__( 'You were subscribed to the newsletter from %s', 'mailchimp-for-woocommerce' ), get_option( 'blogname' ) ),
 		);
 
 		if ( ! $this->hasValidCampaignDefaults( $data ) ) {
 			$this->setData( 'validation.newsletter_settings', false );
-			add_settings_error( 'mailchimp_list_settings', '', __( 'One or more fields were not updated', 'mailchimp-for-woocommerce' ) );
+			//add_settings_error( 'mailchimp_list_settings', '', __( 'One or more fields were not updated', 'mailchimp-for-woocommerce' ) );
 			return array( 'active_tab' => 'newsletter_settings' );
 		}
 		$this->setData( 'validation.newsletter_settings', true );
@@ -1326,17 +1409,12 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				$data['mailchimp_list'] = $this->swapped_list_id;
 			}
 
-			// run sync all products if the image size has changed
-			if ( mailchimp_get_option( 'mailchimp_product_image_key', 'medium' ) !== $data['mailchimp_product_image_key'] ) {
-				 mailchimp_handle_or_queue(new MailChimp_WooCommerce_Process_Products());
-			}
-
 			// start the sync automatically if the sync is false
 			if ( $store_created && ( (bool) $this->getData( 'sync.started_at', false ) === false ) ) {
 				// tell the next page view to start the sync with a transient since the data isn't available yet
 				set_site_transient( 'mailchimp_woocommerce_start_sync', microtime(), 300 );
 
-				$this->showSyncStartedMessage();
+				//$this->showSyncStartedMessage();
 			}
 
 			$data['active_tab'] = 'sync';
@@ -1346,7 +1424,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		$this->setData( 'validation.newsletter_settings', false );
 
-		add_settings_error( 'mailchimp_newsletter_settings', '', __( 'One or more fields were not updated', 'mailchimp-for-woocommerce' ) );
+		//add_settings_error( 'mailchimp_newsletter_settings', '', __( 'One or more fields were not updated', 'mailchimp-for-woocommerce' ) );
 
 		$data['active_tab'] = 'newsletter_settings';
 
@@ -1422,6 +1500,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		if ( ( $pinged = $this->getCached( 'api-ping-check' ) ) === null ) {
 			if ( ( $pinged = $this->api()->ping( false, $throw_if_not_valid === true ) ) ) {
 				$this->setCached( 'api-ping-check', true, 120 );
+                if (mailchimp_get_option('api_ping_error')) {
+                    $options = get_option($this->plugin_name);
+                    $options['api_ping_error'] = null;
+                    update_option( $this->plugin_name, $options );
+                }
 			}
 		}
 
@@ -1462,7 +1545,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		try {
 			if ( ( $account = $this->getCached( 'api-account-name' ) ) === null ) {
 				if ( ( $account = $this->api()->getProfile() ) ) {
-					$this->setCached( 'api-account-name', $account, 120 );
+					$this->setCached( 'api-account-name', $account, 300 );
 				}
 			}
 			return $account;
@@ -1487,7 +1570,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			if ( ( $pinged = $this->getCached( 'api-lists' ) ) === null ) {
 				$pinged = $this->api()->getLists( true );
 				if ( $pinged ) {
-					$this->setCached( 'api-lists', $pinged, 120 );
+					$this->setCached( 'api-lists', $pinged, 300 );
+                    $this->safelyUpdateGDPRFields();
 				}
 				return $pinged;
 			}
@@ -1496,6 +1580,23 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			return array();
 		}
 	}
+
+    /**
+     * @return bool
+     */
+    public function safelyUpdateGDPRFields()
+    {
+        try {
+            if (($list_id = mailchimp_get_list_id())) {
+                $this->updateGDPRFields($list_id);
+                return true;
+            }
+            return false;
+        } catch (Exception $e) {
+            mailchimp_log('admin', 'safelyUpdateGDPRFields error', array('message' => $e->getMessage()));
+            return false;
+        }
+    }
 
 	/**
 	 * @return false|mixed
@@ -1513,7 +1614,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			if ( ( $lists = $this->getCached( 'api-lists' ) ) === null ) {
 				$lists = $this->api()->getLists( true );
 				if ( $lists ) {
-					$this->setCached( 'api-lists', $lists, 120 );
+					$this->setCached( 'api-lists', $lists, 300 );
+                    $this->safelyUpdateGDPRFields();
 				}
 			}
 
@@ -1522,6 +1624,28 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			return false;
 		}
 	}
+
+    /**
+     * @return false|string
+     */
+    public function getAccountName()
+    {
+        if ( ! $this->validateApiKey() ) {
+            return false;
+        }
+
+        if ( ( $account_name = $this->getData( 'account_name', false ) ) ) {
+            return $account_name;
+        }
+
+        $root = $this->api()->ping(true);
+
+        $name = is_array($root) && array_key_exists('account_name', $root) ? $root['account_name'] : false;
+
+        $this->setData('account_name', $name);
+
+        return $name;
+    }
 
 	/**
 	 * @return bool
@@ -1561,12 +1685,110 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				var productProgress = 0;
 
 				if (on_sync_tab === 'yes') {
-					var call_mailchimp_for_stats = function (showSpinner = false) {
-						let mc_last_updated = jQuery('#mailchimp_last_updated');
-						if (showSpinner ) mc_last_updated.next('.spinner').css('visibility', 'visible');
-						jQuery.get(endpoint, function(response) {
-							if (response.success) {
 
+					// This function is for the old UI
+					// var call_mailchimp_for_stats = function (showSpinner = false) {
+					// 	let mc_last_updated = jQuery('#mailchimp_last_updated');
+					// 	if (showSpinner ) mc_last_updated.next('.spinner').css('visibility', 'visible');
+					// 	jQuery.get(endpoint, function(response) {
+					// 		if (response.success) {
+
+					// 			// if the response is now finished - but the original sync status was "historical"
+					// 			// perform a page refresh because we need the re-sync buttons to show up again.
+					// 			if (response.has_finished === true && sync_status === 'historical') {
+					// 				return document.location.reload(true);
+					// 			}
+
+					// 			if (response.has_started && !response.has_finished) {
+					// 				jQuery('.sync-stats-audience .sync-loader').css('visibility', 'visible');
+					// 				jQuery('.sync-stats-audience .card_count').hide();
+
+					// 				jQuery('.sync-stats-store .card_count').hide();
+
+					// 				jQuery('.sync-stats-card .progress-bar-wrapper').show();
+
+					// 				if (response.promo_rules_page === 'complete') {
+					// 					promo_rulesProgress = 100;
+					// 					jQuery('#mailchimp_promo_rules_count').html(response.promo_rules_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0})).css('display', 'inline-block');
+					// 					jQuery('.sync-stats-card.promo_rules .progress-bar-wrapper').hide();
+					// 				} else {
+					// 					if (response.promo_rules_in_mailchimp === 0) {
+					// 						promo_rulesProgress = 0;
+					// 						promo_rulesPartial = "0 / " + response.promo_rules_in_store;
+					// 					} else {
+					// 						promo_rulesProgress = response.promo_rules_in_mailchimp / response.promo_rules_in_store * 100
+					// 						promo_rulesPartial = response.promo_rules_in_mailchimp + " / " + response.promo_rules_in_store;
+					// 					}
+					// 					if (promo_rulesProgress > 100) promo_rulesProgress = 100;
+					// 					jQuery('.mailchimp_promo_rules_count_partial').html(promo_rulesPartial);
+					// 				}
+					// 				jQuery('.sync-stats-card.promo_rules .progress-bar').width(promo_rulesProgress+"%");
+
+					// 				if (response.products_page === 'complete') {
+					// 					productsProgress = 100;
+					// 					jQuery('#mailchimp_product_count').html(response.products_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0})).css('display', 'inline-block');
+					// 					jQuery('.sync-stats-card.products .progress-bar-wrapper').hide();
+					// 				} else {
+					// 					if (response.products_in_mailchimp === 0) {
+					// 						productsProgress = 0;
+					// 						productsPartial = "0 / " + response.products_in_store;
+					// 					} else {
+					// 						productsProgress = response.products_in_mailchimp / response.products_in_store * 100
+					// 						productsPartial = response.products_in_mailchimp + " / " + response.products_in_store;
+					// 					}
+					// 					if (productsProgress > 100) productsProgress = 100;
+					// 					jQuery('.mailchimp_product_count_partial').html(productsPartial);
+					// 				}
+					// 				jQuery('.sync-stats-card.products .progress-bar').width(productsProgress+"%");
+
+					// 				if (response.orders_page === 'complete') {
+					// 					ordersProgress = 100;
+					// 					jQuery('#mailchimp_order_count').html(response.orders_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0})).css('display', 'inline-block');
+					// 					jQuery('.sync-stats-card.orders .progress-bar-wrapper').hide();
+					// 				} else {
+					// 					if (response.orders_in_mailchimp === 0) {
+					// 						ordersProgress = 0;
+					// 						ordersPartial = "0 / " + response.orders_in_store;
+					// 					} else {
+					// 						ordersProgress = response.orders_in_mailchimp / response.orders_in_store * 100
+					// 						ordersPartial = response.orders_in_mailchimp + " / " + response.orders_in_store;
+					// 					}
+					// 					if (ordersProgress > 100) ordersProgress = 100;
+					// 					jQuery('.mailchimp_order_count_partial').html(ordersPartial);
+					// 				}
+					// 				jQuery('.sync-stats-card.orders .progress-bar').width(ordersProgress+"%");
+
+					// 				mc_last_updated.html(response.date);
+
+					// 				// only call status again if sync is running.
+					// 				setTimeout(function() {
+					// 					call_mailchimp_for_stats(true);
+					// 				}, 10000);
+					// 				mc_last_updated.next('.spinner').css('visibility', 'hidden');
+					// 			}
+					// 			else {
+					// 				mc_last_updated.next('.spinner').css('visibility', 'hidden');
+					// 				jQuery('.sync-stats-card .progress-bar-wrapper').hide();
+					// 				jQuery('#mailchimp_order_count').css('display', 'inline-block');
+					// 				jQuery('#mailchimp_product_count').css('display', 'inline-block');
+					// 				jQuery('#mailchimp_promo_rules_count').css('display', 'inline-block');
+					// 			}
+					// 		}
+					// 	});
+					// };
+
+					// New UI for overview tab
+					var call_mailchimp_for_stats_new = function (showSpinner = false) {
+
+						if (showSpinner) {
+							jQuery('.sync-status-icon-wrapper span').addClass('mc-wc-d-none');
+							jQuery('.sync-status-time').addClass('mc-wc-d-none');
+							jQuery('.sync-status-icon-wrapper img').removeClass('mc-wc-d-none');
+						}
+
+						jQuery.get(endpoint, function(response) {
+                            //console.log('sync stats', response);
+							if (response.success) {
 								// if the response is now finished - but the original sync status was "historical"
 								// perform a page refresh because we need the re-sync buttons to show up again.
 								if (response.has_finished === true && sync_status === 'historical') {
@@ -1574,84 +1796,30 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 								}
 
 								if (response.has_started && !response.has_finished) {
-									jQuery('.sync-stats-audience .sync-loader').css('visibility', 'visible');
-									jQuery('.sync-stats-audience .card_count').hide();
-
-									jQuery('.sync-stats-store .card_count').hide();
-
-									jQuery('.sync-stats-card .progress-bar-wrapper').show();
-
-									if (response.promo_rules_page === 'complete') {
-										promo_rulesProgress = 100;
-										jQuery('#mailchimp_promo_rules_count').html(response.promo_rules_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0})).css('display', 'inline-block');
-										jQuery('.sync-stats-card.promo_rules .progress-bar-wrapper').hide();
-									} else {
-										if (response.promo_rules_in_mailchimp === 0) {
-											promo_rulesProgress = 0;
-											promo_rulesPartial = "0 / " + response.promo_rules_in_store;
-										} else {
-											promo_rulesProgress = response.promo_rules_in_mailchimp / response.promo_rules_in_store * 100
-											promo_rulesPartial = response.promo_rules_in_mailchimp + " / " + response.promo_rules_in_store;
-										}
-										if (promo_rulesProgress > 100) promo_rulesProgress = 100;
-										jQuery('.mailchimp_promo_rules_count_partial').html(promo_rulesPartial);
-									}
-									jQuery('.sync-stats-card.promo_rules .progress-bar').width(promo_rulesProgress+"%");
-
-									if (response.products_page === 'complete') {
-										productsProgress = 100;
-										jQuery('#mailchimp_product_count').html(response.products_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0})).css('display', 'inline-block');
-										jQuery('.sync-stats-card.products .progress-bar-wrapper').hide();
-									} else {
-										if (response.products_in_mailchimp === 0) {
-											productsProgress = 0;
-											productsPartial = "0 / " + response.products_in_store;
-										} else {
-											productsProgress = response.products_in_mailchimp / response.products_in_store * 100
-											productsPartial = response.products_in_mailchimp + " / " + response.products_in_store;
-										}
-										if (productsProgress > 100) productsProgress = 100;
-										jQuery('.mailchimp_product_count_partial').html(productsPartial);
-									}
-									jQuery('.sync-stats-card.products .progress-bar').width(productsProgress+"%");
-
-									if (response.orders_page === 'complete') {
-										ordersProgress = 100;
-										jQuery('#mailchimp_order_count').html(response.orders_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0})).css('display', 'inline-block');
-										jQuery('.sync-stats-card.orders .progress-bar-wrapper').hide();
-									} else {
-										if (response.orders_in_mailchimp === 0) {
-											ordersProgress = 0;
-											ordersPartial = "0 / " + response.orders_in_store;
-										} else {
-											ordersProgress = response.orders_in_mailchimp / response.orders_in_store * 100
-											ordersPartial = response.orders_in_mailchimp + " / " + response.orders_in_store;
-										}
-										if (ordersProgress > 100) ordersProgress = 100;
-										jQuery('.mailchimp_order_count_partial').html(ordersPartial);
-									}
-									jQuery('.sync-stats-card.orders .progress-bar').width(ordersProgress+"%");
-
-									mc_last_updated.html(response.date);
+									// Promo codes
+                                    jQuery('.sync-promo-codes .sync-number-finished').html(response.promo_rules_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0}));
+									// Products
+                                    jQuery('.sync-products .sync-number-finished').html(response.products_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0}));
+									// Orders
+                                    jQuery('.sync-orders .sync-number-finished').html(response.orders_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0}));
+									// Contacts
+									jQuery('.sync-contacts .sync-number-total span').html(response.customers_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0}));
 
 									// only call status again if sync is running.
 									setTimeout(function() {
-										call_mailchimp_for_stats(true);
-									}, 10000);
-									mc_last_updated.next('.spinner').css('visibility', 'hidden');
-								}
-								else {
-									mc_last_updated.next('.spinner').css('visibility', 'hidden');
-									jQuery('.sync-stats-card .progress-bar-wrapper').hide();
-									jQuery('#mailchimp_order_count').css('display', 'inline-block');
-									jQuery('#mailchimp_product_count').css('display', 'inline-block');
-									jQuery('#mailchimp_promo_rules_count').css('display', 'inline-block');
+										call_mailchimp_for_stats_new(showSpinner);
+									}, 15000);
+								} else {
+									jQuery('.sync-status-icon-wrapper img').addClass('mc-wc-d-none');
+									jQuery('.sync-status-time').removeClass('mc-wc-d-none');
+									jQuery('.sync-status-icon-wrapper span').removeClass('mc-wc-d-none');
+									jQuery('.sync-status-icon-wrapper span').removeClass('mc-wc-d-none');
 								}
 							}
 						});
 					};
 
-					call_mailchimp_for_stats();
+					call_mailchimp_for_stats_new();
 				}
 			});
 		</script>
@@ -1665,6 +1833,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @return false|mixed|null
 	 */
 	private function updateMailChimpList( $data = null, $list_id = null ) {
+        mailchimp_log('admin', 'updating mailchimp list', array('data' => $data));
 		if ( empty( $data ) ) {
 			$data = $this->getOptions();
 		}
@@ -1684,7 +1853,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		foreach ( $required as $requirement ) {
 			if ( ! isset( $data[ $requirement ] ) || empty( $data[ $requirement ] ) ) {
-				mailchimp_log( 'admin', 'does not have enough data to update the mailchimp list.' );
+				mailchimp_log( 'admin', 'does not have enough data to update the mailchimp list.', array('requirement' => $requirement));
+                $this->updateGDPRFields($list_id);
 				return false;
 			}
 		}
@@ -1730,22 +1900,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 			$this->setData( 'errors.mailchimp_list', false );
 
-			try {
-				if ( ! empty( $list_id ) ) {
-					$transient  = "mailchimp-woocommerce-gdpr-fields.{$list_id}";
-					$GDPRfields = mailchimp_get_api()->getGDPRFields( $list_id );
-					set_site_transient( $transient, $GDPRfields );
-					mailchimp_log(
-						'admin',
-						'updated GDPR fields',
-						array(
-							'fields' => $GDPRfields,
-						)
-					);
-				}
-			} catch ( Exception $e ) {
-				set_site_transient( $transient, array(), 60 );
-			}
+			$this->updateGDPRFields($list_id);
 
 			return $list_id;
 
@@ -1755,6 +1910,28 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			return false;
 		}
 	}
+
+    protected function updateGDPRFields($list_id)
+    {
+        try {
+            if ( ! empty( $list_id ) && !get_site_transient("mailchimp-woocommerce-gdpr-fields.{$list_id}.last_saved")) {
+                $transient  = "mailchimp-woocommerce-gdpr-fields.{$list_id}";
+                $GDPRfields = mailchimp_get_api()->getGDPRFields( $list_id );
+                set_site_transient( $transient, $GDPRfields );
+                set_site_transient("mailchimp-woocommerce-gdpr-fields.{$list_id}.last_saved", true, 120);
+                mailchimp_log(
+                    'admin',
+                    'updated GDPR fields',
+                    array(
+                        'fields' => $GDPRfields,
+                    )
+                );
+            }
+        } catch ( Exception $e ) {
+            set_site_transient( $transient, array(), 60 );
+            mailchimp_error( 'admin', 'updating GDPR fields failed '.$e->getMessage() );
+        }
+    }
 
 	/**
 	 * @param null $data
@@ -1771,15 +1948,15 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 
 		$list_id  = $this->array_get( $data, 'mailchimp_list', false );
-		$site_url = $this->getUniqueStoreID();
+		$store_id = $this->getUniqueStoreID();
 
-		if ( empty( $list_id ) || empty( $site_url ) ) {
+		if ( empty( $list_id ) || empty( $store_id ) ) {
 			return false;
 		}
 
 		$new = false;
 
-		if ( ! ( $store = $this->api()->getStore( $site_url ) ) ) {
+		if ( ! ( $store = $this->api()->getStore( $store_id ) ) ) {
 			$new   = true;
 			$store = new MailChimp_WooCommerce_Store();
 		}
@@ -1787,7 +1964,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$call     = $new ? 'addStore' : 'updateStore';
 		$time_key = $new ? 'store_created_at' : 'store_updated_at';
 
-		$store->setId( $site_url );
+		$store->setId( $store_id );
 		$store->setPlatform( 'woocommerce' );
 
 		// set the locale data
@@ -1805,7 +1982,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$store->setEmailAddress( $this->array_get( $data, 'admin_email' ) );
 
 		$store->setAddress( $this->address( $data ) );
-		$store->setPhone( $this->array_get( $data, 'store_phone' ) );
+//		$store->setPhone( $this->array_get( $data, 'store_phone' ) );
 		$store->setListId( $list_id );
 
 		try {
@@ -1822,7 +1999,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			mailchimp_update_connected_site_script();
 
 			// we need to update the list again with the campaign defaults
-            if (!$update_campaign_defaults) {
+
+            if ($update_campaign_defaults) {
 	            $this->updateMailChimpList( $data, $list_id );
             }
 
@@ -1861,39 +2039,23 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @return MailChimp_WooCommerce_Address
 	 */
 	private function address( array $data ) {
+        $nodes = array(
+            'store_street' => 'setAddress1',
+            'store_city' => 'setCity',
+            'store_state' => 'setProvince',
+            'store_country' => 'setCountry',
+            'store_postal_code' => 'setPostalCode',
+            'store_name' => 'setCompany',
+            'store_phone' => 'setPhone'
+        );
 		$address = new MailChimp_WooCommerce_Address();
-
-		if ( isset( $data['store_street'] ) && $data['store_street'] ) {
-			$address->setAddress1( $data['store_street'] );
-		}
-
-		if ( isset( $data['store_city'] ) && $data['store_city'] ) {
-			$address->setCity( $data['store_city'] );
-		}
-
-		if ( isset( $data['store_state'] ) && $data['store_state'] ) {
-			$address->setProvince( $data['store_state'] );
-		}
-
-		if ( isset( $data['store_country'] ) && $data['store_country'] ) {
-			$address->setCountry( $data['store_country'] );
-		}
-
-		if ( isset( $data['store_postal_code'] ) && $data['store_postal_code'] ) {
-			$address->setPostalCode( $data['store_postal_code'] );
-		}
-
-		if ( isset( $data['store_name'] ) && $data['store_name'] ) {
-			$address->setCompany( $data['store_name'] );
-		}
-
-		if ( isset( $data['store_phone'] ) && $data['store_phone'] ) {
-			$address->setPhone( $data['store_phone'] );
-		}
-
+        foreach ($nodes as $key => $fn) {
+            if ( isset( $data[$key] ) && $data[$key] ) {
+                $address->$fn( $data[$key] );
+            }
+        }
 		$woo_countries = new WC_Countries();
 		$address->setCountryCode( $woo_countries->get_base_country() );
-
 		return $address;
 	}
 
@@ -2044,7 +2206,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			// if error, keep option to original value
 			wp_send_json_error(
 				array(
-					'error' => __( 'Error setting tower support status', 'mailchimp-for-woocommerce' ),
+					'error' => $response_body->message,
 					'opt'   => $original_opt,
 				)
 			);

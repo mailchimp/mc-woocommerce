@@ -1,5 +1,5 @@
 == Changelog ==
-= 4.1 =
+= 4.0.1 =
 * Log changes
 * Add audience name to overview
 = 4.0 =

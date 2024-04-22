@@ -80,4 +80,5 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 
 = 4.1 =
 * Log changes
+* Add audience name to overview
 

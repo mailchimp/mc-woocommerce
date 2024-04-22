@@ -4,10 +4,10 @@ Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.9
 Tested up to: 6.5
-Stable tag: 3.7
+Stable tag: 4.0
 Requires PHP: 7.4
 WC requires at least: 4.2
-WC tested up to: 8.7
+WC tested up to: 8.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your Mailchimp audience to track sales, create targeted emails, send abandoned cart emails, and more.
@@ -82,4 +82,5 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 * Allow orders to be sent to Mailchimp even if a Wordpress user role isn't set
 * Support for custom order IDs
 * Updated dependabot issues related to block-based checkouts
+* Refreshed plugin interface 
 

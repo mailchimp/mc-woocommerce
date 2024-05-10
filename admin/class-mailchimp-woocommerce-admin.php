@@ -73,8 +73,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$webhooks = new MailChimp_WooCommerce_WebHooks_Sync;
 		$webhooks->cleanHooks(true);
 
-		// clean database
-		mailchimp_clean_database();
+        // clean database
+        mailchimp_clean_database();
 
 		return array();
 	}
@@ -989,6 +989,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * Mailchimp OAuth connection finish
 	 */
 	public function mailchimp_woocommerce_ajax_oauth_finish() {
+        global $wpdb;
+
         //mailchimp_log('admin', 'right before middleware oauth finish');
 		$this->adminOnlyMiddleware();
         //mailchimp_log('admin', 'right after middleware oauth finish');
@@ -1007,7 +1009,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/finish', $pload );
 
-        //mailchimp_log('admin', "finished oauth", array('response' => $response));
+        mailchimp_log('admin', "finished oauth");
 
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
@@ -1015,15 +1017,26 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 
 		if ( $response['response']['code'] == 200 ) {
+
+            delete_option('mailchimp-woocommerce-account_name');
+            delete_option('mailchimp-woocommerce-cached-api-lists');
+            delete_option('mailchimp-woocommerce-validation.newsletter_settings');
+            delete_option('mailchimp-woocommerce-cached-api-ping-check');
+            delete_option('mailchimp-woocommerce-validation.api.ping');
+
 			delete_site_transient( 'mailchimp-woocommerce-oauth-secret' );
 			// save api_key? If yes, we can skip api key validation for validatePostApiKey();
             $result = json_decode( $response['body'], true);
             $options = get_option($this->plugin_name);
             $options['mailchimp_api_key'] = $result['access_token'].'-'.$result['data_center'];
 
-            //mailchimp_log('admin', "got access token - updating options", array('response' => $response['body']));
-
-            update_option( $this->plugin_name, $options );
+            // update_option($this->plugin_name, $options); this used to return false!
+            // go straight to the DB and update the options to bypass any filters.
+            $wpdb->update(
+                $wpdb->options,
+                array('option_value' => maybe_serialize($options)),
+                array('option_name' => $this->plugin_name)
+            );
 
 			wp_send_json_success( $response );
 		} else {
@@ -1031,7 +1044,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 
 	}
-
 
 	public function mailchimp_woocommerce_ajax_create_account_check_username() {
 		$this->adminOnlyMiddleware();

@@ -4,6 +4,8 @@
  *
  */
 $show_connection_messages = false;
+$create_account_url = admin_url('admin.php?page=create-mailchimp-account');
+
 ?>
 
 <fieldset class="full connect-button">
@@ -12,7 +14,7 @@ $show_connection_messages = false;
 		<span><?php esc_html_e( 'Connect your store to Mailchimp', 'mailchimp-for-woocommerce' ); ?></span>
 	</legend>
 	<div class="mc-wc-actions">
-		<a class="mc-wc-btn mc-wc-btn-primary-outline create-account" href='#mc-woocommerce-create-account'><?php esc_html_e( 'Create account', 'mailchimp-for-woocommerce' ); ?></a>
+		<a class="mc-wc-btn mc-wc-btn-primary-outline create-account" href='<?php echo esc_url($create_account_url) ?>'><?php esc_html_e( 'Create account', 'mailchimp-for-woocommerce' ); ?></a>
 		<a id="mailchimp-oauth-connect" class="mc-wc-btn mc-wc-btn-primary oauth-connect"><?php esc_html_e( 'Connect', 'mailchimp-for-woocommerce' );  ?></a>
 	</div>
 	

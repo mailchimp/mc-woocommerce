@@ -231,6 +231,7 @@ class MailChimp_WooCommerce
 
 		// Add menu item
 		$this->loader->add_action('admin_menu', $plugin_admin, 'add_plugin_admin_menu_2', 71);
+        $this->loader->add_action('admin_menu', $plugin_admin, 'add_create_account_page', 72);
 
         // Add WooCommerce Navigation Bar
         // $this->loader->add_action('admin_menu', $plugin_admin, 'add_woocommerce_navigation_bar');

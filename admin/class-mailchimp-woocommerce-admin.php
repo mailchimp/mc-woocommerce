@@ -108,7 +108,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	public function enqueue_styles( $hook ) {
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin.css', array(), $this->version . '.21' );
 
-		if ( strpos( $hook, 'page_mailchimp-woocommerce' ) !== false ) {
+		if ( strpos( $hook, 'page_mailchimp-woocommerce' ) !== false || strpos( $hook, 'create-mailchimp-account' ) !== false) {
 			if ( get_bloginfo( 'version' ) < '5.3' ) {
 				wp_enqueue_style( $this->plugin_name . '-settings', plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin-settings-5.2.css', array(), $this->version );
 			}
@@ -127,13 +127,15 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @since    1.0.0
 	 */
 	public function enqueue_scripts( $hook ) {
-		if ( strpos( $hook, 'page_mailchimp-woocommerce' ) !== false ) {
+
+      if ( strpos( $hook, 'page_mailchimp-woocommerce' ) !== false || strpos( $hook, 'create-mailchimp-account' )) {
 			$label = $this->getOption( 'newsletter_label' );
 			if ( $label == '' ) {
 				$label = __( 'Subscribe to our newsletter', 'mailchimp-for-woocommerce' );
 			}
 			$options                   = get_option( $this->plugin_name, array() );
 			$checkbox_default_settings = ( array_key_exists( 'mailchimp_checkbox_defaults', $options ) && ! is_null( $options['mailchimp_checkbox_defaults'] ) ) ? $options['mailchimp_checkbox_defaults'] : 'check';
+			wp_register_script( $this->plugin_name . 'create-account', plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-create-account.js', array( 'jquery', 'swal' ), $this->version );
 			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version );
 			wp_register_script( $this->plugin_name . '-v2', plugin_dir_url( __FILE__ ) . 'v2/assets/js/scripts.js', array( 'jquery', 'swal' ), $this->version );
 			wp_localize_script(
@@ -163,14 +165,32 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 						'option_update_error'          => __( 'Save error', 'mailchimp-for-woocommerce' ),
 					),
 					'current_optin_state'       => $checkbox_default_settings,
-					'ajax_url_option'               => admin_url( 'options.php' )
-				)
+					'ajax_url_option'               => admin_url( 'options.php' ),
+					'ajaxurl' => admin_url( 'admin-ajax.php' ),
+        )
 			);
 			wp_enqueue_script( $this->plugin_name );
+			wp_enqueue_script( $this->plugin_name . 'create-account');
 			wp_enqueue_script( $this->plugin_name . '-v2');
 			wp_enqueue_script( 'swal', '//cdn.jsdelivr.net/npm/sweetalert2@8', '', $this->version );
 		}
 	}
+
+    public function create_account_page() {
+        Mailchimp_Woocommerce_Event::track('account:land_on_signup', new DateTime(), true);
+        include_once 'v2/templates/connect-accounts/create-account-page.php';
+    }
+
+    public function add_create_account_page() {
+        add_submenu_page(
+            'admin.php',
+            'Create Mailchimp Account',
+            'Create Account',
+            'manage_options',
+            'create-mailchimp-account',
+            array( $this, 'create_account_page')
+        );
+    }
 
 	/**
 	 * Register the administration menu for this plugin into the WordPress Dashboard menu.
@@ -311,8 +331,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		// include_once 'partials/mailchimp-woocommerce-admin-tabs.php';
 
 		// [New UI]
-			include_once 'v2/helpers/helper.php';
-			include_once 'v2/templates/mailchimp-woocommerce-admin-pages.php';
+      include_once 'v2/helpers/helper.php';
+      include_once 'v2/templates/mailchimp-woocommerce-admin-pages.php';
 	}
 
 	public function display_user_profile_info( $user ) {
@@ -1151,8 +1171,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	}
 
 	public function mailchimp_woocommerce_ajax_create_account_signup() {
-		$this->adminOnlyMiddleware();
-		$pload    = $this->getPostData();
+      Mailchimp_Woocommerce_Event::track('account:sign_up_button_click', new DateTime(), true);
+      $this->adminOnlyMiddleware();
+      $pload = $this->getPostData();
+      Mailchimp_Woocommerce_Event::track('account:type_in_email_field', new DateTime(), true);
+
 		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/signup/', $pload );
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
@@ -1161,15 +1184,18 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$response_body = json_decode( $response['body'] );
 		if ( $response['response']['code'] == 200 && $response_body->success == true ) {
 			wp_send_json_success( $response_body );
-		} elseif ( $response['response']['code'] == 404 ) {
+			Mailchimp_Woocommerce_Event::track('account:login_signup_success', new DateTime(), true);
+
+    } elseif ( $response['response']['code'] == 404 ) {
 			wp_send_json_error( array( 'success' => false ) );
 		} else {
+			Mailchimp_Woocommerce_Event::track('account:verify_email', new DateTime(), true);
 			$suggestion         = wp_remote_get( 'https://woocommerce.mailchimpapp.com/api/usernames/suggestions/' . $_POST['username'] );
 			$suggested_username = json_decode( $suggestion['body'] )->data;
 			wp_send_json_error(
 				array(
 					'success'    => false,
-					'suggestion' => $suggested_username[0],
+					'suggest_login' => true,
 				)
 			);
 		}
@@ -1641,8 +1667,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         $root = $this->api()->ping(true);
 
         $name = is_array($root) && array_key_exists('account_name', $root) ? $root['account_name'] : false;
+        $mailchimp_user_id = is_array($root) && array_key_exists('login_id', $root) ? $root['login_id'] : false;
 
         $this->setData('account_name', $name);
+        $this->setData('mailchimp_user_id', $mailchimp_user_id);
 
         return $name;
     }
@@ -1685,7 +1713,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				var productProgress = 0;
 
 				if (on_sync_tab === 'yes') {
-
 					// This function is for the old UI
 					// var call_mailchimp_for_stats = function (showSpinner = false) {
 					// 	let mc_last_updated = jQuery('#mailchimp_last_updated');

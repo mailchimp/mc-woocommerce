@@ -21,17 +21,17 @@ if (!$user = get_user_by('email', $admin_email)) {
 						 width="44" height="44" viewBox="0 0 96.98 96.98" xml:space="preserve">
 						<path d="M49.16,51.833L37.694,85.152c3.425,1.004,7.046,1.558,10.798,1.558c4.449,0,8.719-0.77,12.689-2.167
 							c-0.102-0.164-0.195-0.338-0.271-0.527L49.16,51.833z"/>
-									<path d="M10.272,48.488c0,15.129,8.792,28.202,21.541,34.396l-18.23-49.949C11.463,37.688,10.272,42.948,10.272,48.488z"/>
-									<path d="M74.289,46.56c0-4.723-1.695-7.993-3.149-10.541c-1.938-3.148-3.754-5.813-3.754-8.962c0-3.513,2.664-6.783,6.418-6.783
+					<path d="M10.272,48.488c0,15.129,8.792,28.202,21.541,34.396l-18.23-49.949C11.463,37.688,10.272,42.948,10.272,48.488z"/>
+					<path d="M74.289,46.56c0-4.723-1.695-7.993-3.149-10.541c-1.938-3.148-3.754-5.813-3.754-8.962c0-3.513,2.664-6.783,6.418-6.783
 							c0.17,0,0.33,0.021,0.496,0.029c-6.798-6.227-15.856-10.031-25.807-10.031c-13.354,0-25.101,6.85-31.932,17.227
 							c0.896,0.027,1.739,0.046,2.459,0.046c3.998,0,10.187-0.485,10.187-0.485c2.062-0.124,2.302,2.903,0.245,3.146
 							c0,0-2.071,0.243-4.374,0.365l13.915,41.397l8.363-25.085L41.4,30.57c-2.058-0.122-4.007-0.365-4.007-0.365
 							c-2.058-0.12-1.818-3.268,0.241-3.146c0,0,6.313,0.485,10.066,0.485c3.997,0,10.188-0.485,10.188-0.485
 							c2.062-0.122,2.303,2.903,0.243,3.146c0,0-2.073,0.243-4.374,0.365L67.57,71.653l3.812-12.738
 							C73.033,53.629,74.289,49.831,74.289,46.56z"/>
-									<path d="M82.025,30.153c0.164,1.216,0.258,2.525,0.258,3.93c0,3.878-0.723,8.238-2.905,13.689L67.703,81.523
+					<path d="M82.025,30.153c0.164,1.216,0.258,2.525,0.258,3.93c0,3.878-0.723,8.238-2.905,13.689L67.703,81.523
 							c11.361-6.626,19.006-18.936,19.006-33.033C86.71,41.844,85.011,35.596,82.025,30.153z"/>
-									<path d="M48.49,0C21.71,0,0.001,21.71,0.001,48.49S21.71,96.98,48.49,96.98s48.489-21.71,48.489-48.49S75.27,0,48.49,0z
+					<path d="M48.49,0C21.71,0,0.001,21.71,0.001,48.49S21.71,96.98,48.49,96.98s48.489-21.71,48.489-48.49S75.27,0,48.49,0z
 							 M48.492,90.997c-23.44,0-42.507-19.067-42.507-42.509c0-23.438,19.066-42.505,42.507-42.505
 							c23.437,0,42.503,19.068,42.503,42.505C90.996,71.928,71.928,90.997,48.492,90.997z"/>
 				</svg>
@@ -39,19 +39,19 @@ if (!$user = get_user_by('email', $admin_email)) {
 			<div class="">
 				<h3><?php echo esc_html__( 'Mailchimp for Woocommerce', 'mailchimp-for-woocommerce' ) ?></h3>
 				<div class="flex items-center wizard-steps">
-						<div class="current"><?php echo esc_html__( 'Sign up', 'mailchimp-for-woocommerce' ) ?></div>
-						<span class="chevron">
+					<div class="current"><?php echo esc_html__( 'Sign up', 'mailchimp-for-woocommerce' ) ?></div>
+					<span class="chevron">
 							<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
 								<path fill-rule="evenodd" clip-rule="evenodd" d="M9.05715 8.00005L6.19522 5.13812L7.13803 4.19531L10.9428 8.00005L7.13803 11.8048L6.19522 10.862L9.05715 8.00005Z" fill="#241C15" fill-opacity="0.3"/>
 							</svg>
 						</span>
-						<div class="deselected"><?php echo esc_html__( 'Activate account', 'mailchimp-for-woocommerce' ) ?></div>
-						<span class="chevron">
+					<div class="deselected"><?php echo esc_html__( 'Activate account', 'mailchimp-for-woocommerce' ) ?></div>
+					<span class="chevron">
 							<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
 								<path fill-rule="evenodd" clip-rule="evenodd" d="M9.05715 8.00005L6.19522 5.13812L7.13803 4.19531L10.9428 8.00005L7.13803 11.8048L6.19522 10.862L9.05715 8.00005Z" fill="#241C15" fill-opacity="0.3"/>
 							</svg>
 						</span>
-						<div class="deselected"><?php echo esc_html__( 'Choose plan', 'mailchimp-for-woocommerce' ) ?></div>
+					<div class="deselected"><?php echo esc_html__( 'Choose plan', 'mailchimp-for-woocommerce' ) ?></div>
 				</div>
 			</div>
 		</div>
@@ -63,7 +63,7 @@ if (!$user = get_user_by('email', $admin_email)) {
 						<div class="subtitle"><?php echo esc_html__( 'Profile details', 'mailchimp-for-woocommerce' ) ?></div>
 						<div class="mc-woocommerce-form-wrapper">
 							<fieldset>
-									<?php $user_id = get_current_user_id(); ?>
+                  <?php $user_id = get_current_user_id(); ?>
 								<input id="org" name="org" type="hidden" value="<?php echo esc_html( get_bloginfo( 'name' ) ); ?>">
 								<div class="form-row">
 									<div class="box box-half">
@@ -197,30 +197,47 @@ if (!$user = get_user_by('email', $admin_email)) {
 										<label for="<?php echo esc_attr( $this->plugin_name ); ?>[store_country]">
 											<span> <?php esc_html_e( 'Country', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-											<?php
-											global $woocommerce;
-											$countries_obj = new WC_Countries();
-											$countries     = $countries_obj->__get( 'countries' );
-											?>
+                      <?php
+                      global $woocommerce;
+                      $countries_obj = new WC_Countries();
+                      $countries     = $countries_obj->__get( 'countries' );
+                      ?>
 										<div class="mailchimp-select-wrapper">
-												<?php
-												woocommerce_form_field(
-														'country',
-														array(
-																'type'        => 'select',
-																'id'          => 'country',
-																'placeholder' => __( 'Select a Country' ),
-																'options'     => $countries,
-																'required'    => true,
-																'value'
-														),
-														isset( $options['store_country'] ) ? $options['store_country'] : WC()->countries->get_base_country()
-												);
-												?>
+                        <?php
+                        woocommerce_form_field(
+                            'country',
+                            array(
+                                'type'        => 'select',
+                                'id'          => 'country',
+                                'placeholder' => __( 'Select a Country' ),
+                                'options'     => $countries,
+                                'required'    => true,
+                                'value'
+                            ),
+                            isset( $options['store_country'] ) ? $options['store_country'] : WC()->countries->get_base_country()
+                        );
+                        ?>
 										</div>
 									</div>
 								</div>
 
+								<div class="form-row">
+									<div class="box">
+										<label for="<?php echo esc_attr( $this->plugin_name ); ?>-store-timezone-label">
+											<span><?php esc_html_e( 'Timezone', 'mailchimp-for-woocommerce' ); ?></span>
+										</label>
+										<div class="mailchimp-select-wrapper">
+											<select id="timezone" name="timezone" required>
+                          <?php $selected_timezone = isset( $options['store_timezone'] ) && ! empty( $options['store_timezone'] ) ? $options['store_timezone'] : get_option( 'timezone_string' ); ?>
+                          <?php
+                          foreach ( mailchimp_get_timezone_list() as $t ) {
+                              echo '<option value="' . esc_attr( $t['zone'] ) . '" ' . selected( $t['zone'] === $selected_timezone, true, false ) . '>' . esc_html( $t['diff_from_GMT'] . ' - ' . $t['zone'] ) . '</option>';
+                          }
+                          ?>
+											</select>
+										</div>
+									</div>
+								</div>
 								<div class="buttons-wrap">
 									<a href="#" id="mc-woocommerce-create-account-save-address" class="button create-account-save js-mc-woocommerce-details-save" disabled><?php esc_html_e( 'Save', 'mailchimp-for-woocommerce' ); ?></a>
 								</div>
@@ -283,11 +300,11 @@ if (!$user = get_user_by('email', $admin_email)) {
 														d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
 									</svg>
 								</span>
-								<?php esc_html_e( 'Activate Account', 'mailchimp-for-woocommerce' ); ?>
+                <?php esc_html_e( 'Activate Account', 'mailchimp-for-woocommerce' ); ?>
 						</button>
 					</div>
 				</form>
-				
+
 				<div class="js-mc-woocommerce-confirm-email hidden">
 					<div class="title"><?php echo esc_html__( 'Check your email', 'mailchimp-for-woocommerce' ) ?></div>
 					<p class="h4"><?php echo esc_html__( 'To start using Mailchimp, activate your account with the link sent to .', 'mailchimp-for-woocommerce' ) ?><span class="js-mc-woocommerce-email"></span></p>

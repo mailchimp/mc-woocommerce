@@ -1,8 +1,6 @@
 == Changelog ==
 = 4.0.2 =
-* adds the Changelog back to the UI
-* tested up to Woocommerce v8.9 
-* fixed connection issue when disconnecting and reconnecting
+* Changelog in UI
 * UI updates
 = 4.0.1 =
 * Log changes

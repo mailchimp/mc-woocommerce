@@ -79,6 +79,6 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 
 == Changelog ==
 = 4.0.2 =
-* adds the Changelog back to the UI
-* tested up to Woocommerce v8.9 
-* fixed connection issue when disconnecting and reconnecting
+* Changelog in UI
+* UI updates
+

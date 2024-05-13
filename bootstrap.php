@@ -71,7 +71,6 @@ spl_autoload_register(function($class) {
 
         'MailChimp_WooCommerce_Public' => 'public/class-mailchimp-woocommerce-public.php',
         'MailChimp_WooCommerce_Admin' => 'admin/class-mailchimp-woocommerce-admin.php',
-        'Mailchimp_Woocommerce_Event' => 'admin/v2/processes/class-mailchimp-woocommerce-event.php',
 
         'MailChimp_WooCommerce_Fix_Duplicate_Store' => 'includes/api/class-mailchimp-woocommerce-fix-duplicate-store.php',
         'MailChimp_WooCommerce_Logs' => 'includes/api/class-mailchimp-woocommerce-logs.php',
@@ -743,9 +742,6 @@ function mailchimp_debug($action, $message, $data = null) {
  */
 function mailchimp_log($action, $message, $data = array()) {
     if (mailchimp_environment_variables()->logging !== 'none' && function_exists('wc_get_logger')) {
-        if (is_array($data) && !empty($data)) $message .= " :: ".wc_print_r($data, true);
-        wc_get_logger()->notice("{$action} :: {$message}", array('source' => 'mailchimp_woocommerce'));
-    } else {
         if (is_array($data) && !empty($data)) $message .= " :: ".wc_print_r($data, true);
         wc_get_logger()->notice("{$action} :: {$message}", array('source' => 'mailchimp_woocommerce'));
     }
@@ -1619,90 +1615,4 @@ if (defined( 'WP_CLI' ) && WP_CLI) {
 	        WP_CLI::add_command( 'queue', 'Mailchimp_Wocoomerce_CLI' );
         }
     } catch (Exception $e) {}
-}
-
-function mailchimp_account_events()
-{
-    return [
-        'account:land_on_signup' => [
-            'event' => 'account:started',
-            'org' => 'sbseg',
-            'purpose' => 'prod',
-            'scope' => 'mc',
-            'initiative_name' => 'poppin_smu',
-            'scope_area' => 'signup',
-            'screen' => 'login_signup_page', // make this configurable ( or mandatory )
-            'object' => 'account',
-            'object_detail' => 'account_signup',
-            'action' => 'started',
-            'ui_object' => 'screen',
-            'ui_object_detail' => 'sign_up',
-            'ui_action' => 'viewed',
-            'ui_access_point' => 'center',
-        ],
-        'account:type_in_email_field' => [
-            'event' => 'account:engaged',
-            'org' => 'sbseg',
-            'purpose' => 'prod',
-            'scope' => 'mc',
-            'initiative_name' => 'poppin_smu',
-            'scope_area' => 'signup',
-            'screen' => 'login_signup_enter_field', // make this configurable ( or mandatory )
-            'object' => 'account',
-            'object_detail' => 'account_signup',
-            'action' => 'engaged',
-            'ui_object' => 'field',
-            'ui_object_detail' => 'email',
-            'ui_action' => 'filled_field',
-            'ui_access_point' => 'center',
-        ],
-        'account:sign_up_button_click' => [
-            'event' => 'account:clicked',
-            'org' => 'sbseg',
-            'purpose' => 'prod',
-            'scope' => 'mc',
-            'initiative_name' => 'poppin_smu',
-            'scope_area' => 'signup',
-            'screen' => 'login_signup_page', // make this configurable ( or mandatory )
-            'object' => 'account',
-            'object_detail' => 'account_signup',
-            'action' => 'clicked',
-            'ui_object' => 'button',
-            'ui_object_detail' => 'sign_up',
-            'ui_action' => 'clicked',
-            'ui_access_point' => 'signup_page_signup_button',
-        ],
-        'account:login_signup_success' => [
-            'event' => 'account:clicked',
-            'org' => 'sbseg',
-            'purpose' => 'prod',
-            'scope' => 'mc',
-            'initiative_name' => 'poppin_smu',
-            'scope_area' => 'signup',
-            'screen' => 'login_signup_success', // make this configurable ( or mandatory )
-            'object' => 'account',
-            'object_detail' => 'account_signup',
-            'action' => 'created',
-            'ui_object' => 'screen',
-            'ui_object_detail' => 'account_verification',
-            'ui_action' => 'viewed',
-            'ui_access_point' => 'center',
-        ],
-        'account:verify_email' => [
-            'event' => 'account:clicked',
-            'org' => 'sbseg',
-            'purpose' => 'prod',
-            'scope' => 'mc',
-            'initiative_name' => 'poppin_smu',
-            'scope_area' => 'signup',
-            'screen' => 'app_signup_confirm', // make this configurable ( or mandatory )
-            'object' => 'account',
-            'object_detail' => 'account_signup',
-            'action' => 'clicked',
-            'ui_object' => 'button',
-            'ui_object_detail' => 'account_verification',
-            'ui_action' => 'clicked',
-            'ui_access_point' => 'center',
-        ]
-    ];
 }

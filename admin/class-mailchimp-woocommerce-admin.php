@@ -1171,11 +1171,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	}
 
 	public function mailchimp_woocommerce_ajax_create_account_signup() {
-      Mailchimp_Woocommerce_Event::track('account:sign_up_button_click', new DateTime(), true);
-      $this->adminOnlyMiddleware();
-      $pload = $this->getPostData();
-      Mailchimp_Woocommerce_Event::track('account:type_in_email_field', new DateTime(), true);
-
+        Mailchimp_Woocommerce_Event::track('account:sign_up_button_click', new DateTime(), true);
+        $this->adminOnlyMiddleware();
+        $pload = $this->getPostData();
+        Mailchimp_Woocommerce_Event::track('account:type_in_email_field', new DateTime(), true);
 		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/signup/', $pload );
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
@@ -1185,17 +1184,18 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		if ( $response['response']['code'] == 200 && $response_body->success == true ) {
 			wp_send_json_success( $response_body );
 			Mailchimp_Woocommerce_Event::track('account:login_signup_success', new DateTime(), true);
-
-    } elseif ( $response['response']['code'] == 404 ) {
+        } elseif ( $response['response']['code'] == 404 ) {
 			wp_send_json_error( array( 'success' => false ) );
 		} else {
+            $username = preg_replace( '/[^A-Za-z0-9\-\@\.]/', '', $_POST['username'] );
 			Mailchimp_Woocommerce_Event::track('account:verify_email', new DateTime(), true);
-			$suggestion         = wp_remote_get( 'https://woocommerce.mailchimpapp.com/api/usernames/suggestions/' . $_POST['username'] );
+			$suggestion         = wp_remote_get( 'https://woocommerce.mailchimpapp.com/api/usernames/suggestions/' . $username );
 			$suggested_username = json_decode( $suggestion['body'] )->data;
 			wp_send_json_error(
 				array(
 					'success'    => false,
 					'suggest_login' => true,
+                    'suggested_username' => $suggested_username,
 				)
 			);
 		}
@@ -1229,8 +1229,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 //
 //			return $input;
 //		}
-
-
 
 		// change communication status options
 		$comm_opt = get_option( 'mailchimp-woocommerce-comm.opt', 0 );

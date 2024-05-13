@@ -3,6 +3,9 @@
 
 class Mailchimp_Woocommerce_Event
 {
+    // we need to do some more stuff on this before pushing
+    protected static $prevent = true;
+
     protected $event = '';
     protected $title = '';
     protected $integration_name = 'woocommerce';
@@ -54,6 +57,9 @@ class Mailchimp_Woocommerce_Event
      */
     public static function track(string $event, \DateTime $date = null, bool $fake = false)
     {
+        if (static::$prevent) {
+            return null;
+        }
         if (!($data = static::find($event)) || !is_array($data) || empty($data)) {
             mailchimp_debug('mailchimp_events', "Could not push tracking event: {$event}, not found in config.");
             return null;
@@ -153,13 +159,7 @@ class Mailchimp_Woocommerce_Event
      */
     public function endpoint()
     {
-        // TODO replace with woocommerce endpoints.
-        return match ($this->purpose) {
-            "prod" => 'https://beacon.mailchimp.com/external/integration/v2/woocommerce',
-            "production" => 'https://beacon.mailchimp.com/external/integration/v2/woocommerce',
-            "staging" => 'https://beacon-shared.mailchimp.com/external/integration/v2/woocommerce',
-            default => throw new \RuntimeException('Must set the purpose ( environment ) for events.')
-        };
+        return 'https://beacon.mailchimp.com/external/integration/v2/woocommerce';
     }
 
     public function get_submitted_data()
@@ -188,13 +188,13 @@ class Mailchimp_Woocommerce_Event
     public function compile()
     {
         $payload = [
-            'timestamp' => now(),
+            'timestamp' => time(),
             'event' => $this->event,
-            'sentAt' => $this->date ?? now(),
+            'sentAt' => $this->date ? $this->date : time(),
             'context' => [
                 'internal_mc_user' => false,
-                'user_id' => $this->user_id ?? '',
-                'login_id' => $this->login_id ?? '',
+                'user_id' => $this->user_id ? $this->user_id : '',
+                'login_id' => $this->login_id ? $this->login_id : '',
                 'company_id' => '',
                 'pseudonym_id' => '',
             ],
@@ -204,7 +204,7 @@ class Mailchimp_Woocommerce_Event
                 'scope' => $this->scope,
                 'initiative_name' => $this->initiative_name,
                 'scope_area' => $this->scope_area,
-                'screen' => $this->screen, // make this configurable ( or mandatory )
+                'screen' => $this->screen,
                 'object' => $this->object,
                 'object_detail' => $this->object_detail,
                 'action' => $this->action,
@@ -218,7 +218,6 @@ class Mailchimp_Woocommerce_Event
         ];
 
         if (empty($this->user_id)) {
-
             mailchimp_log('mailchimp_events', "mailchimp beacon :: sending anonymous event");
             // remove the user id and login id if we don't have this info yet.
             unset($payload['context']['user_id'], $payload['context']['login_id']);

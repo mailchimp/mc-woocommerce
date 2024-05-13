@@ -1,4 +1,11 @@
 == Changelog ==
+= 4.0.2 =
+* adds the Changelog back to the UI
+* tested up to Woocommerce v8.9
+* fixed connection issue when disconnecting and reconnecting
+= 4.0.1 =
+* Log changes
+* Add audience name to overview
 = 4.0 =
 * Allow orders to be sent to Mailchimp even if a Wordpress user role isn't set
 * Support for custom order IDs

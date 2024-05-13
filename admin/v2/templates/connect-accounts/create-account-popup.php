@@ -24,7 +24,7 @@
 				</svg>
 				<h3>Create your mailchimp account (<span id="step_count">1</span> of 2)</h3>
 			</div>
-			<div id="mc-woocommerce-create-account-step-1" class="mc-woocommerce-create-account-step">
+			<div id="mc-woocommerce-create-account-step-1" class="mc-woocommerce-create-account-step mc-woocommerce-form-wrapper">
 				<fieldset>
 					<?php $user_id = get_current_user_id(); ?>
 					<input id="org" name="org" type="hidden" value="<?php echo esc_html( get_bloginfo( 'name' ) ); ?>">
@@ -64,7 +64,7 @@
 					</div>
 				</fieldset>
 			</div>
-			<div id="mc-woocommerce-create-account-step-2" class="mc-woocommerce-create-account-step">
+			<div id="mc-woocommerce-create-account-step-2" class="mc-woocommerce-create-account-step mc-woocommerce-form-wrapper">
 				<fieldset>
 					<div class="box">
 						<label for="address">

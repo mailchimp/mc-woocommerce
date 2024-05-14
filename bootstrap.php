@@ -185,6 +185,10 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
 
 
 /**
+ * We will allow people to filter delay value to specific jobs.
+ * add_filter( 'mailchimp_handle_or_queue_{$resource}_delay', 'custom_handle_or_queue_resource_function', 10, 1 );
+ * where $resource is one of the following - product, order, customer, coupon
+ *
  * @param Mailchimp_Woocommerce_Job $job
  * @param int $delay
  */
@@ -203,16 +207,25 @@ function mailchimp_handle_or_queue(Mailchimp_Woocommerce_Job $job, $delay = 0)
 	// Allow sites to alter whether the order or product is synced.
 	// $job should contain at least the ID of the order/product as $job->id.
 	if ( $job instanceof \MailChimp_WooCommerce_Single_Order ) {
-		if ( apply_filters( 'mailchimp_should_push_order', $job->id ) === false ) {
+        $delay = apply_filters('mailchimp_handle_or_queue_order_delay', $delay);
+
+        if ( apply_filters( 'mailchimp_should_push_order', $job->id ) === false ) {
 			mailchimp_debug( 'action_scheduler.queue_job.order', "Order {$job->id} not pushed do to filter." );
 			return null;
 		}
 	} else if ( $job instanceof \MailChimp_WooCommerce_Single_Product ) {
-		if ( apply_filters( 'mailchimp_should_push_product', $job->id ) === false ) {
+        $delay = apply_filters('mailchimp_handle_or_queue_product_delay', $delay);
+
+        if ( apply_filters( 'mailchimp_should_push_product', $job->id ) === false ) {
 			mailchimp_debug( 'action_scheduler.queue_job.product', "Product {$job->id} not pushed do to filter." );
 			return null;
 		}
-	}
+	} else if ( $job instanceof \MailChimp_WooCommerce_User_Submit ) {
+        $delay = apply_filters('mailchimp_handle_or_queue_customer_delay', $delay);
+    } else if ( $job instanceof \MailChimp_WooCommerce_SingleCoupon ) {
+        $delay = apply_filters('mailchimp_handle_or_queue_coupon_delay', $delay);
+    }
+
 
     $as_job_id = mailchimp_as_push($job, $delay);
     

@@ -79,3 +79,4 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 
 == Changelog ==
 = 4.1 =
+- New account create flow.

@@ -1007,49 +1007,62 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	/**
 	 * Mailchimp OAuth connection finish
 	 */
-	public function mailchimp_woocommerce_ajax_oauth_finish() {
+    public function mailchimp_woocommerce_ajax_oauth_finish() {
+        global $wpdb;
+
         //mailchimp_log('admin', 'right before middleware oauth finish');
-		$this->adminOnlyMiddleware();
+        $this->adminOnlyMiddleware();
         //mailchimp_log('admin', 'right after middleware oauth finish');
-		$args = array(
-			'domain' => site_url(),
-			'secret' => get_site_transient( 'mailchimp-woocommerce-oauth-secret' ),
-			'token'  => sanitize_text_field( $_POST['token'] ),
-		);
+        $args = array(
+            'domain' => site_url(),
+            'secret' => get_site_transient( 'mailchimp-woocommerce-oauth-secret' ),
+            'token'  => sanitize_text_field( $_POST['token'] ),
+        );
 
-		$pload = array(
-			'headers' => array(
-				'Content-type' => 'application/json',
-			),
-			'body'    => json_encode( $args ),
-		);
+        $pload = array(
+            'headers' => array(
+                'Content-type' => 'application/json',
+            ),
+            'body'    => json_encode( $args ),
+        );
 
-		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/finish', $pload );
+        $response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/finish', $pload );
 
-        //mailchimp_log('admin', "finished oauth", array('response' => $response));
+        mailchimp_log('admin', "finished oauth");
 
-		// need to return the error message if this is the problem.
-		if ( $response instanceof WP_Error ) {
-			wp_send_json_error( $response );
-		}
+        // need to return the error message if this is the problem.
+        if ( $response instanceof WP_Error ) {
+            wp_send_json_error( $response );
+        }
 
-		if ( $response['response']['code'] == 200 ) {
-			delete_site_transient( 'mailchimp-woocommerce-oauth-secret' );
-			// save api_key? If yes, we can skip api key validation for validatePostApiKey();
+        if ( $response['response']['code'] == 200 ) {
+
+            delete_option('mailchimp-woocommerce-account_name');
+            delete_option('mailchimp-woocommerce-cached-api-lists');
+            delete_option('mailchimp-woocommerce-validation.newsletter_settings');
+            delete_option('mailchimp-woocommerce-cached-api-ping-check');
+            delete_option('mailchimp-woocommerce-validation.api.ping');
+
+            delete_site_transient( 'mailchimp-woocommerce-oauth-secret' );
+            // save api_key? If yes, we can skip api key validation for validatePostApiKey();
             $result = json_decode( $response['body'], true);
             $options = get_option($this->plugin_name);
             $options['mailchimp_api_key'] = $result['access_token'].'-'.$result['data_center'];
 
-            //mailchimp_log('admin', "got access token - updating options", array('response' => $response['body']));
+            // update_option($this->plugin_name, $options); this used to return false!
+            // go straight to the DB and update the options to bypass any filters.
+            $wpdb->update(
+                $wpdb->options,
+                array('option_value' => maybe_serialize($options)),
+                array('option_name' => $this->plugin_name)
+            );
 
-            update_option( $this->plugin_name, $options );
+            wp_send_json_success( $response );
+        } else {
+            wp_send_json_error( $response );
+        }
 
-			wp_send_json_success( $response );
-		} else {
-			wp_send_json_error( $response );
-		}
-
-	}
+    }
 
 
 	public function mailchimp_woocommerce_ajax_create_account_check_username() {

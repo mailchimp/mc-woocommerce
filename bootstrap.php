@@ -203,31 +203,37 @@ function mailchimp_handle_or_queue(Mailchimp_Woocommerce_Job $job, $delay = 0)
         // tell the system the order is already queued for processing in this saving process - and we don't need to process it again.
         set_site_transient( "mailchimp_order_being_processed_{$job->id}", true, 30);
     }
-
 	// Allow sites to alter whether the order or product is synced.
 	// $job should contain at least the ID of the order/product as $job->id.
-	if ( $job instanceof \MailChimp_WooCommerce_Single_Order ) {
-        $delay = apply_filters('mailchimp_handle_or_queue_order_delay', $delay);
+    $filter_delay = null;
+
+    if ( $job instanceof \MailChimp_WooCommerce_Single_Order ) {
+        $filter_delay = apply_filters('mailchimp_handle_or_queue_order_delay', $delay);
 
         if ( apply_filters( 'mailchimp_should_push_order', $job->id ) === false ) {
 			mailchimp_debug( 'action_scheduler.queue_job.order', "Order {$job->id} not pushed do to filter." );
 			return null;
 		}
 	} else if ( $job instanceof \MailChimp_WooCommerce_Single_Product ) {
-        $delay = apply_filters('mailchimp_handle_or_queue_product_delay', $delay);
+        $filter_delay = apply_filters('mailchimp_handle_or_queue_product_delay', $delay);
 
         if ( apply_filters( 'mailchimp_should_push_product', $job->id ) === false ) {
 			mailchimp_debug( 'action_scheduler.queue_job.product', "Product {$job->id} not pushed do to filter." );
 			return null;
 		}
 	} else if ( $job instanceof \MailChimp_WooCommerce_User_Submit ) {
-        $delay = apply_filters('mailchimp_handle_or_queue_customer_delay', $delay);
+        $filter_delay = apply_filters('mailchimp_handle_or_queue_customer_delay', $delay);
     } else if ( $job instanceof \MailChimp_WooCommerce_SingleCoupon ) {
-        $delay = apply_filters('mailchimp_handle_or_queue_coupon_delay', $delay);
+        $filter_delay = apply_filters('mailchimp_handle_or_queue_coupon_delay', $delay);
+
+        if ( apply_filters( 'mailchimp_should_push_coupon', $job->id ) === false ) {
+            mailchimp_debug( 'action_scheduler.queue_job.order', "Coupon {$job->id} not pushed do to filter." );
+            return null;
+        }
     }
 
-
-    $as_job_id = mailchimp_as_push($job, $delay);
+    $filter_delay = !is_null($filter_delay) && is_int($filter_delay) ? $filter_delay : $delay;
+    $as_job_id = mailchimp_as_push($job, $filter_delay);
     
     if (!is_int($as_job_id)) {
         mailchimp_log('action_scheduler.queue_fail', get_class($job) .' FAILED :: as_job_id: '.$as_job_id);

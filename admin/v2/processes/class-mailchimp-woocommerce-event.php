@@ -193,8 +193,8 @@ class Mailchimp_Woocommerce_Event
             'sentAt' => $this->date ? $this->date : time(),
             'context' => [
                 'internal_mc_user' => false,
-                'user_id' => $this->user_id ? $this->user_id : '',
-                'login_id' => $this->login_id ? $this->login_id : '',
+                'user_id' => $this->user_id ?? '',
+                'login_id' => $this->login_id ?? '',
                 'company_id' => '',
                 'pseudonym_id' => '',
             ],
@@ -204,7 +204,7 @@ class Mailchimp_Woocommerce_Event
                 'scope' => $this->scope,
                 'initiative_name' => $this->initiative_name,
                 'scope_area' => $this->scope_area,
-                'screen' => $this->screen,
+                'screen' => $this->screen, // make this configurable ( or mandatory )
                 'object' => $this->object,
                 'object_detail' => $this->object_detail,
                 'action' => $this->action,
@@ -218,6 +218,7 @@ class Mailchimp_Woocommerce_Event
         ];
 
         if (empty($this->user_id)) {
+
             mailchimp_log('mailchimp_events', "mailchimp beacon :: sending anonymous event");
             // remove the user id and login id if we don't have this info yet.
             unset($payload['context']['user_id'], $payload['context']['login_id']);

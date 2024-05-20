@@ -31,7 +31,7 @@ class Mailchimp_Woocommerce_Event
     protected $submitted_data = null;
     protected $entrypoint = null;
 
-    public function __construct(string|null $mailchimp_user_id = null, string|null $mailchimp_login_id = null)
+    public function __construct($mailchimp_user_id = null, $mailchimp_login_id = null)
     {
         $this->user_id = $mailchimp_user_id;
         $this->login_id = $mailchimp_login_id;

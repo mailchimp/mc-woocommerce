@@ -97,7 +97,7 @@ if (!$user = get_user_by('email', $admin_email)) {
 											<span> <?php esc_html_e( 'Phone number', 'mailchimp-for-woocommerce' ); ?></span>
 											<span>Optional</span>
 										</label>
-										<input required type="text" id="phone_number" name="phone_number" value="<?php echo esc_html( $user?->billing_phone ); ?>"/>
+										<input type="text" id="phone_number" name="phone_number" value="<?php echo esc_html( $user?->billing_phone ); ?>"/>
 									</div>
 								</div>
 

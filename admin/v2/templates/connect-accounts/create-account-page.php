@@ -121,7 +121,7 @@ if (!$user = get_user_by('email', $admin_email)) {
 									</div>
 								</div>
 								<div class="buttons-wrap">
-									<a href="#" id="save-account-details" class="button create-account-save js-mc-woocommerce-details-save" disabled><?php esc_html_e( 'Save', 'mailchimp-for-woocommerce' ); ?></a>
+									<a href="#" id="save-account-details" class="button create-account-save js-mc-woocommerce-details-save"><?php esc_html_e( 'Save', 'mailchimp-for-woocommerce' ); ?></a>
 									<span class="mc-woocommerce-create-account-go-spinner spinner"></span>
 								</div>
 							</fieldset>
@@ -239,7 +239,7 @@ if (!$user = get_user_by('email', $admin_email)) {
 									</div>
 								</div>
 								<div class="buttons-wrap">
-									<a href="#" id="mc-woocommerce-create-account-save-address" class="button create-account-save js-mc-woocommerce-details-save" disabled><?php esc_html_e( 'Save', 'mailchimp-for-woocommerce' ); ?></a>
+									<a href="#" id="mc-woocommerce-create-account-save-address" class="button create-account-save js-mc-woocommerce-details-save"><?php esc_html_e( 'Save', 'mailchimp-for-woocommerce' ); ?></a>
 								</div>
 
 							</fieldset>

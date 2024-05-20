@@ -24,27 +24,42 @@
 			let input = e.target
 
 			businessAddressErrors[input.name] = validateInput(input)
+
 			businessAddressValid = validateForm(businessAddressErrors, '#mc-woocommerce-business-address');
 
 			$('#mc-woocommerce-create-activate-account').attr('disabled', !businessAddressValid)
 		})
 
-		$('#mc-woocommerce-create-activate-account').attr('disabled', !detailsValid || !businessAddressValid)
+		// $('#mc-woocommerce-create-activate-account').attr('disabled', !detailsValid || !businessAddressValid)
 
 		$(document).on('click', '.js-mc-woocommerce-details-save', (e) => {
 			e.preventDefault();
+			let wrapper = $(e.target).closest('.mc-woocommerce-create-account-step');
+			let wrapperId = wrapper.attr('id')
 
 			if (!e.target.hasAttribute('disabled')) {
-				$(e.target).closest('.mc-woocommerce-create-account-step')
-					.find('.mc-woocommerce-details-wrapper')
-					.removeClass('hidden');
-				$(e.target).closest('.mc-woocommerce-create-account-step')
-					.find('.mc-woocommerce-form-wrapper')
-					.addClass('hidden');
+				let formInputs  = $(`#${wrapperId} input`);
+				let formErrors 	= getInitialErrors(formInputs);
+				let formValid 	= validateForm(formErrors, `#${wrapperId}`, true);
+
+				if (formValid) {
+					$(e.target).closest('.mc-woocommerce-create-account-step')
+						.find('.mc-woocommerce-details-wrapper')
+						.removeClass('hidden');
+
+					$(e.target).closest('.mc-woocommerce-create-account-step')
+						.find('.mc-woocommerce-form-wrapper')
+						.addClass('hidden');
+				}
+
+				$('#mc-woocommerce-create-activate-account').attr('disabled', !detailsValid || !businessAddressValid)
 			}
 		})
 		$(document).on('click', '.js-mc-woocommerce-edit-form', (e) => {
 			e.preventDefault();
+
+			$('#mc-woocommerce-create-activate-account').attr('disabled', true)
+
 			$(e.target).closest('.mc-woocommerce-details-wrapper').addClass('hidden');
 
 			$(e.target).closest('.mc-woocommerce-create-account-step')
@@ -94,6 +109,7 @@
 					$('.js-mc-woocommerce-activate-account').addClass('hidden')
 					$("#mc-woocommerce-create-activate-account").attr('disabled', false)
 					$("#mc-woocommerce-create-activate-account .mc-wc-loading").addClass('hidden')
+
 					if (response.data.suggest_login) {
 						$('.js-mc-woocommerce-suggest-to-login').removeClass('hidden');
 						$('.js-mc-woocommerce-email').text(formDataObject.email)
@@ -108,8 +124,7 @@
 	})
 
 	// display errors and disable button in case of errors
-	let validateForm = (errors, wrapperId) => {
-		let valid = Object.values(errors).filter(error => error !== null).length === 0
+	let validateForm = (errors, wrapperId, displayErrors = false) => {
 		let inputIds = Object.keys(errors);
 
 		inputIds.forEach(key => {
@@ -117,15 +132,26 @@
 			let errorElementId = `${wrapperId} #mc-woocommerce-${key}-error`
 
 			if (errors[key] !== null) {
-				$(inputElementId).closest('.box').addClass('form-error');
-				$(errorElementId).text(errors[key]);
+				if (displayErrors) {
+					$(inputElementId).closest('.box').addClass('form-error');
+					$(errorElementId).text(errors[key]);
+				}
 			} else {
 				$(inputElementId).closest('.box').removeClass('form-error');
 				$(errorElementId).text('');
 			}
-		})
 
-		$(`${wrapperId} .create-account-save`).attr('disabled', !valid)
+			if ($(`${wrapperId} input#email`).val() === $(`${wrapperId} input#confirm_email`).val()) {
+				errors['email'] = null
+				errors['confirm_email'] = null
+			}
+
+		})
+		let valid = Object.values(errors).filter(error => error !== null).length === 0
+
+		// if (valid && displayErrors) {
+		// 	$(`${wrapperId} .create-account-save`).attr('disabled', false)
+		// }
 
 		return valid;
 	}
@@ -154,6 +180,7 @@
 		if (input.name === 'email') {
 			if (input.value === '') return "Email can't be blank."
 			if (!input.value.includes('@')) return "Insert correct input"
+			if (input.value !== $('#mc-woocommerce-profile-details input#confirm_email').val()) return "Email confirmation must match confirmation email."
 		}
 		if (input.name === 'confirm_email') {
 			if (input.value !== $('#mc-woocommerce-profile-details input#email').val()) return "Email confirmation must match the field above."

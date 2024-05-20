@@ -437,8 +437,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		if ($pagenow == 'admin.php'
 				&& isset( $_GET )
 				&& isset( $_GET['page'] )
-				&& 'mailchimp-woocommerce' === $_GET['page']
-				&& 'create-mailchimp-account' ===  $_GET['page']
+        && in_array($_GET['page'], array('mailchimp-woocommerce', 'create-mailchimp-account'), true)
 		) {
             return null;
 		}

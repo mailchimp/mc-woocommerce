@@ -434,11 +434,15 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		global $pagenow;
 
         // if we're on the mc admin setup pages - don't do anything
-		if ($pagenow == 'admin.php' && isset( $_GET ) && isset( $_GET['page'] ) && 'mailchimp-woocommerce' === $_GET['page'] ) {
+		if ($pagenow == 'admin.php'
+				&& isset( $_GET )
+				&& isset( $_GET['page'] )
+        && in_array($_GET['page'], array('mailchimp-woocommerce', 'create-mailchimp-account'), true)
+		) {
             return null;
 		}
 
-        // if they've logged in oauth - but have not selected a list id yet - show the admin notice.
+		// if they've logged in oauth - but have not selected a list id yet - show the admin notice.
 		if ( (bool) (mailchimp_get_api_key() && !mailchimp_get_list_id())) {
 			$class   = 'notice notice-warning is-dismissible';
 			$message = sprintf(

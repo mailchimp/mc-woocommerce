@@ -1205,7 +1205,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             $result = json_decode( $response['body'], true);
 
             $options = get_option($this->plugin_name);
-            $options['mailchimp_api_key'] = $result['oauth_token'].'-'.$result['dc'];
+            $options['mailchimp_api_key'] = $result['data']['oauth_token'].'-'.$result['data']['dc'];
 
             // go straight to the DB and update the options to bypass any filters.
             $wpdb->update(

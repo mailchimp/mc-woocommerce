@@ -5,7 +5,8 @@
 
 $admin_email = get_option('admin_email');
 if (!$user = get_user_by('email', $admin_email)) {
-    $user = null;
+ 	$user_id = get_current_user_id();
+	$user = get_user_by('id', $user_id);
 }
 ?>
 <div id="mc-woocommerce-create-account">
@@ -63,7 +64,6 @@ if (!$user = get_user_by('email', $admin_email)) {
 						<div class="subtitle"><?php echo esc_html__( 'Profile details', 'mailchimp-for-woocommerce' ) ?></div>
 						<div class="mc-woocommerce-form-wrapper">
 							<fieldset>
-                  <?php $user_id = get_current_user_id(); ?>
 								<input id="org" name="org" type="hidden" value="<?php echo esc_html( get_bloginfo( 'name' ) ); ?>">
 								<div class="form-row">
 									<div class="box box-half">

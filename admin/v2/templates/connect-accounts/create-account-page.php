@@ -307,7 +307,7 @@ if (!$user = get_user_by('email', $admin_email)) {
 
 				<div class="js-mc-woocommerce-confirm-email hidden">
 					<div class="title"><?php echo esc_html__( 'Check your email', 'mailchimp-for-woocommerce' ) ?></div>
-					<p class="h4"><?php echo esc_html__( 'To start using Mailchimp, activate your account with the link sent to .', 'mailchimp-for-woocommerce' ) ?><span class="js-mc-woocommerce-email"></span></p>
+					<p class="h4"><?php echo esc_html__( 'To start using Mailchimp, activate your account with the link sent to ', 'mailchimp-for-woocommerce' ) ?><span class="js-mc-woocommerce-email"></span></p>
 
 					<div class="flex items-center gap-x-6">
 						<a href="https://mail.google.com/mail/u/0/" target="_blank" class="flex items-center gap-x-2">

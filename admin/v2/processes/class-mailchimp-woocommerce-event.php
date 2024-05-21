@@ -31,7 +31,7 @@ class Mailchimp_Woocommerce_Event
     protected $submitted_data = null;
     protected $entrypoint = null;
 
-    public function __construct(string|null $mailchimp_user_id = null, string|null $mailchimp_login_id = null)
+    public function __construct($mailchimp_user_id = null, $mailchimp_login_id = null)
     {
         $this->user_id = $mailchimp_user_id;
         $this->login_id = $mailchimp_login_id;
@@ -187,18 +187,18 @@ class Mailchimp_Woocommerce_Event
      */
     public function compile()
     {
-        $payload = [
+        $payload = array(
             'timestamp' => time(),
             'event' => $this->event,
             'sentAt' => $this->date ? $this->date : time(),
-            'context' => [
+            'context' => array(
                 'internal_mc_user' => false,
                 'user_id' => $this->user_id ?? '',
                 'login_id' => $this->login_id ?? '',
                 'company_id' => '',
                 'pseudonym_id' => '',
-            ],
-            'properties' => array_merge([
+            ),
+            'properties' => array_merge(array(
                 'org' => $this->org,
                 'purpose' => $this->purpose,
                 'scope' => $this->scope,
@@ -214,8 +214,8 @@ class Mailchimp_Woocommerce_Event
                 'ui_access_point' => $this->ui_access_point,
                 'integration_name' => $this->integration_name,
                 'integration_id' => $this->client_id,
-            ], $this->event_params),
-        ];
+            ), $this->event_params),
+        );
 
         if (empty($this->user_id)) {
 
@@ -248,10 +248,9 @@ class Mailchimp_Woocommerce_Event
 
     /**
      * @param string $org
-     *
-     * @return Mailchimp_Woocommerce_Event
+     * @return $this
      */
-    public function set_org(string $org): Mailchimp_Woocommerce_Event
+    public function set_org(string $org)
     {
         $this->org = $org;
 
@@ -260,10 +259,9 @@ class Mailchimp_Woocommerce_Event
 
     /**
      * @param string $purpose
-     *
-     * @return Mailchimp_Woocommerce_Event
+     * @return $this
      */
-    public function set_purpose(string $purpose): Mailchimp_Woocommerce_Event
+    public function set_purpose(string $purpose)
     {
         $this->purpose = $purpose;
 
@@ -272,10 +270,9 @@ class Mailchimp_Woocommerce_Event
 
     /**
      * @param string $scope
-     *
-     * @return Mailchimp_Woocommerce_Event
+     * @return $this
      */
-    public function set_scope(string $scope): Mailchimp_Woocommerce_Event
+    public function set_scope(string $scope)
     {
         $this->scope = $scope;
 
@@ -284,10 +281,9 @@ class Mailchimp_Woocommerce_Event
 
     /**
      * @param string $initiative_name
-     *
-     * @return Mailchimp_Woocommerce_Event
+     * @return $this
      */
-    public function set_initiative_name(string $initiative_name): Mailchimp_Woocommerce_Event
+    public function set_initiative_name(string $initiative_name)
     {
         $this->initiative_name = $initiative_name;
 
@@ -296,10 +292,9 @@ class Mailchimp_Woocommerce_Event
 
     /**
      * @param string $scope_area
-     *
-     * @return Mailchimp_Woocommerce_Event
+     * @return $this
      */
-    public function set_scope_area(string $scope_area): Mailchimp_Woocommerce_Event
+    public function set_scope_area(string $scope_area)
     {
         $this->scope_area = $scope_area;
 
@@ -308,10 +303,9 @@ class Mailchimp_Woocommerce_Event
 
     /**
      * @param string $screen
-     *
-     * @return Mailchimp_Woocommerce_Event
+     * @return $this
      */
-    public function set_screen(string $screen): Mailchimp_Woocommerce_Event
+    public function set_screen(string $screen)
     {
         $this->screen = $screen;
 
@@ -320,10 +314,9 @@ class Mailchimp_Woocommerce_Event
 
     /**
      * @param string $object
-     *
-     * @return Mailchimp_Woocommerce_Event
+     * @return $this
      */
-    public function set_object(string $object): Mailchimp_Woocommerce_Event
+    public function set_object(string $object)
     {
         $this->object = $object;
 
@@ -332,10 +325,9 @@ class Mailchimp_Woocommerce_Event
 
     /**
      * @param string $object_detail
-     *
-     * @return Mailchimp_Woocommerce_Event
+     * @return $this
      */
-    public function set_object_detail(string $object_detail): Mailchimp_Woocommerce_Event
+    public function set_object_detail(string $object_detail)
     {
         $this->object_detail = $object_detail;
 
@@ -344,10 +336,9 @@ class Mailchimp_Woocommerce_Event
 
     /**
      * @param string $action
-     *
-     * @return Mailchimp_Woocommerce_Event
+     * @return $this
      */
-    public function set_action(string $action): Mailchimp_Woocommerce_Event
+    public function set_action(string $action)
     {
         $this->action = $action;
 
@@ -356,10 +347,9 @@ class Mailchimp_Woocommerce_Event
 
     /**
      * @param string $ui_object
-     *
-     * @return Mailchimp_Woocommerce_Event
+     * @return $this
      */
-    public function set_ui_object(string $ui_object): Mailchimp_Woocommerce_Event
+    public function set_ui_object(string $ui_object)
     {
         $this->ui_object = $ui_object;
 
@@ -368,10 +358,9 @@ class Mailchimp_Woocommerce_Event
 
     /**
      * @param string $ui_object_detail
-     *
-     * @return Mailchimp_Woocommerce_Event
+     * @return $this
      */
-    public function set_ui_object_detail(string $ui_object_detail): Mailchimp_Woocommerce_Event
+    public function set_ui_object_detail(string $ui_object_detail)
     {
         $this->ui_object_detail = $ui_object_detail;
 
@@ -380,10 +369,9 @@ class Mailchimp_Woocommerce_Event
 
     /**
      * @param string $ui_action
-     *
-     * @return Mailchimp_Woocommerce_Event
+     * @return $this
      */
-    public function set_ui_action(string $ui_action): Mailchimp_Woocommerce_Event
+    public function set_ui_action(string $ui_action)
     {
         $this->ui_action = $ui_action;
 
@@ -392,10 +380,9 @@ class Mailchimp_Woocommerce_Event
 
     /**
      * @param string $ui_access_point
-     *
-     * @return Mailchimp_Woocommerce_Event
+     * @return $this
      */
-    public function set_ui_access_point(string $ui_access_point): Mailchimp_Woocommerce_Event
+    public function set_ui_access_point(string $ui_access_point)
     {
         $this->ui_access_point = $ui_access_point;
 

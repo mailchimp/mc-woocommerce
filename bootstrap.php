@@ -1642,8 +1642,8 @@ if (defined( 'WP_CLI' ) && WP_CLI) {
 
 function mailchimp_account_events()
 {
-    return [
-        'account:land_on_signup' => [
+    return array(
+        'account:land_on_signup' => array(
             'event' => 'account:started',
             'org' => 'sbseg',
             'purpose' => 'prod',
@@ -1658,8 +1658,8 @@ function mailchimp_account_events()
             'ui_object_detail' => 'sign_up',
             'ui_action' => 'viewed',
             'ui_access_point' => 'center',
-        ],
-        'account:type_in_email_field' => [
+        ),
+        'account:type_in_email_field' => array(
             'event' => 'account:engaged',
             'org' => 'sbseg',
             'purpose' => 'prod',
@@ -1674,8 +1674,8 @@ function mailchimp_account_events()
             'ui_object_detail' => 'email',
             'ui_action' => 'filled_field',
             'ui_access_point' => 'center',
-        ],
-        'account:sign_up_button_click' => [
+        ),
+        'account:sign_up_button_click' => array(
             'event' => 'account:clicked',
             'org' => 'sbseg',
             'purpose' => 'prod',
@@ -1690,8 +1690,8 @@ function mailchimp_account_events()
             'ui_object_detail' => 'sign_up',
             'ui_action' => 'clicked',
             'ui_access_point' => 'signup_page_signup_button',
-        ],
-        'account:login_signup_success' => [
+        ),
+        'account:login_signup_success' => array(
             'event' => 'account:clicked',
             'org' => 'sbseg',
             'purpose' => 'prod',
@@ -1706,8 +1706,8 @@ function mailchimp_account_events()
             'ui_object_detail' => 'account_verification',
             'ui_action' => 'viewed',
             'ui_access_point' => 'center',
-        ],
-        'account:verify_email' => [
+        ),
+        'account:verify_email' => array(
             'event' => 'account:clicked',
             'org' => 'sbseg',
             'purpose' => 'prod',
@@ -1722,6 +1722,6 @@ function mailchimp_account_events()
             'ui_object_detail' => 'account_verification',
             'ui_action' => 'clicked',
             'ui_access_point' => 'center',
-        ]
-    ];
+        )
+    );
 }

@@ -5,7 +5,8 @@
 
 $admin_email = get_option('admin_email');
 if (!$user = get_user_by('email', $admin_email)) {
-    $user = null;
+ 	$user_id = get_current_user_id();
+	$user = get_user_by('id', $user_id);
 }
 ?>
 <div id="mc-woocommerce-create-account">
@@ -63,21 +64,20 @@ if (!$user = get_user_by('email', $admin_email)) {
 						<div class="subtitle"><?php echo esc_html__( 'Profile details', 'mailchimp-for-woocommerce' ) ?></div>
 						<div class="mc-woocommerce-form-wrapper">
 							<fieldset>
-                  <?php $user_id = get_current_user_id(); ?>
 								<input id="org" name="org" type="hidden" value="<?php echo esc_html( get_bloginfo( 'name' ) ); ?>">
 								<div class="form-row">
 									<div class="box box-half">
 										<label for="first_name">
 											<span> <?php esc_html_e( 'First name', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input required type="text" id="first_name" name="first_name" value="<?php echo esc_html( $user?->first_name ); ?>"/>
+										<input required type="text" id="first_name" name="first_name" value="<?php echo esc_html( isset($user->first_name) ? $user->first_name : '' ); ?>"/>
 										<p id="mc-woocommerce-first_name-error" class="error-field"></p>
 									</div>
 									<div class="box box-half">
 										<label for="last_name">
 											<span> <?php esc_html_e( 'Last name', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input required type="text" id="last_name" name="last_name" value="<?php echo esc_html( $user?->last_name ); ?>"/>
+										<input required type="text" id="last_name" name="last_name" value="<?php echo esc_html( isset($user->last_name) ? $user->last_name : '' ); ?>"/>
 										<p id="mc-woocommerce-last_name-error" class="error-field"></p>
 									</div>
 								</div>
@@ -87,7 +87,7 @@ if (!$user = get_user_by('email', $admin_email)) {
 										<label for="business_name">
 											<span><?php esc_html_e( 'Business name', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input required type="text" id="business_name" name="business_name" value="<?php echo esc_html( $user?->billing_company ); ?>"/>
+										<input required type="text" id="business_name" name="business_name" value="<?php echo esc_html( isset($user->billing_company) ? $user->billing_company : '' ); ?>"/>
 										<p id="mc-woocommerce-business_name-error" class="error-field"></p>
 
 										<p><?php esc_html_e( 'You can always change this later in your account settings.', 'mailchimp-for-woocommerce' ); ?></p>
@@ -97,7 +97,7 @@ if (!$user = get_user_by('email', $admin_email)) {
 											<span> <?php esc_html_e( 'Phone number', 'mailchimp-for-woocommerce' ); ?></span>
 											<span>Optional</span>
 										</label>
-										<input type="text" id="phone_number" name="phone_number" value="<?php echo esc_html( $user?->billing_phone ); ?>"/>
+										<input type="text" id="phone_number" name="phone_number" value="<?php echo esc_html( isset($user->billing_phone) ? $user->billing_phone : '' ); ?>"/>
 									</div>
 								</div>
 
@@ -106,7 +106,7 @@ if (!$user = get_user_by('email', $admin_email)) {
 										<label for="email">
 											<span> <?php esc_html_e( 'Email', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input required type="email" id="email" name="email" value="<?php echo esc_html($user?->user_email) ?>"/>
+										<input required type="email" id="email" name="email" value="<?php echo esc_html( isset($user->user_email) ? $user->user_email : '' ) ?>"/>
 										<p id="mc-woocommerce-email-error" class="error-field"></p>
 
 									</div>
@@ -154,7 +154,7 @@ if (!$user = get_user_by('email', $admin_email)) {
 										<label for="address">
 											<span> <?php esc_html_e( 'Address line 1 (Street address or post office box)', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input required type="text" id="address" name="address" value="<?php echo esc_html( $user?->billing_address_1 ); ?>"/>
+										<input required type="text" id="address" name="address" value="<?php echo esc_html( isset($user->billing_address_1) ? $user->billing_address_1 : ''  ); ?>"/>
 										<p id="mc-woocommerce-address-error" class="error-field"></p>
 									</div>
 								</div>
@@ -164,7 +164,7 @@ if (!$user = get_user_by('email', $admin_email)) {
 										<label for="address2">
 											<span> <?php esc_html_e( 'Address line 2', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input type="text" id="address2" name="address2" value="<?php echo esc_html( $user?->billing_address_2 ); ?>"/>
+										<input type="text" id="address2" name="address2" value="<?php echo esc_html( isset($user->billing_address_2) ? $user->billing_address_2 : ''  ); ?>"/>
 									</div>
 								</div>
 
@@ -173,14 +173,14 @@ if (!$user = get_user_by('email', $admin_email)) {
 										<label for="city">
 											<span> <?php esc_html_e( 'City', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input required type="text" id="city" name="city" value="<?php echo esc_html( $user?->billing_city ); ?>"/>
+										<input required type="text" id="city" name="city" value="<?php echo esc_html( isset($user->billing_city) ? $user->billing_city : ''  ); ?>"/>
 										<p id="mc-woocommerce-city-error" class="error-field"></p>
 									</div>
 									<div class="box box-half">
 										<label for="state">
 											<span> <?php esc_html_e( 'State/Province/Region', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input required type="text" id="state" name="state" value="<?php echo esc_html( $user?->billing_state); ?>"/>
+										<input required type="text" id="state" name="state" value="<?php echo esc_html( isset($user->billing_state) ? $user->billing_state : '' ); ?>"/>
 										<p id="mc-woocommerce-state-error" class="error-field"></p>
 									</div>
 								</div>
@@ -190,7 +190,7 @@ if (!$user = get_user_by('email', $admin_email)) {
 										<label for="zip">
 											<span> <?php esc_html_e( 'Zip/Postal code', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input required type="text" id="zip" name="zip" value="<?php echo esc_html( $user?->billing_postcode); ?>"/>
+										<input required type="text" id="zip" name="zip" value="<?php echo esc_html( isset($user->billing_postcode) ? $user->billing_postcode : '' ); ?>"/>
 										<p id="mc-woocommerce-zip-error" class="error-field"></p>
 									</div>
 									<div class="box box-half">

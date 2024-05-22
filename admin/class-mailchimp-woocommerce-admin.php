@@ -177,7 +177,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	}
 
     public function create_account_page() {
-        Mailchimp_Woocommerce_Event::track('account:land_on_signup', new DateTime(), true);
+        Mailchimp_Woocommerce_Event::track('account:land_on_signup', new DateTime());
+        Mailchimp_Woocommerce_Event::track('connect_accounts:view_screen', new DateTime());
         include_once 'v2/templates/connect-accounts/create-account-page.php';
     }
 
@@ -950,6 +951,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function mailchimp_woocommerce_ajax_oauth_start() {
 		$this->adminOnlyMiddleware();
+		Mailchimp_Woocommerce_Event::track('connect_accounts_oauth:start', new DateTime());
 
 		$secret = uniqid();
 		$args   = array(
@@ -1013,7 +1015,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
     public function mailchimp_woocommerce_ajax_oauth_finish() {
         global $wpdb;
-
+        Mailchimp_Woocommerce_Event::track('connect_accounts_oauth:complete', new DateTime());
         //mailchimp_log('admin', 'right before middleware oauth finish');
         $this->adminOnlyMiddleware();
         //mailchimp_log('admin', 'right after middleware oauth finish');
@@ -1189,25 +1191,27 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	}
 
 	public function mailchimp_woocommerce_ajax_create_account_signup() {
-//		Mailchimp_Woocommerce_Event::track('account:sign_up_button_click', new DateTime(), true);
+		Mailchimp_Woocommerce_Event::track('account:sign_up_button_click', new DateTime());
+		Mailchimp_Woocommerce_Event::track('connect_accounts:click_signup_bottom', new DateTime());
 		$this->adminOnlyMiddleware();
 		$pload = $this->getPostData();
 
-//		Mailchimp_Woocommerce_Event::track('account:type_in_email_field', new DateTime(), true);
+//		Mailchimp_Woocommerce_Event::track('account:type_in_email_field', new DateTime());
 		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/signup/', $pload );
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
-			wp_send_json_error( $response );
-		}
-		$response_body = json_decode( $response['body'] );
-		if ( $response['response']['code'] == 200 && $response_body->success == true ) {
-			wp_send_json_success( $response_body );
-			Mailchimp_Woocommerce_Event::track('account:login_signup_success', new DateTime(), true);
+        wp_send_json_error( $response );
+    }
+      $response_body = json_decode( $response['body'] );
+      if ( $response['response']['code'] == 200 && $response_body->success == true ) {
+        wp_send_json_success( $response_body );
+        Mailchimp_Woocommerce_Event::track('account:login_signup_success', new DateTime());
+        Mailchimp_Woocommerce_Event::track('connect_accounts:create_account_complete', new DateTime());
 		} elseif ( $response['response']['code'] == 404 ) {
 			wp_send_json_error( array( 'success' => false ) );
 		} else {
 			$username = preg_replace( '/[^A-Za-z0-9\-\@\.]/', '', $_POST['data']['username'] );
-			Mailchimp_Woocommerce_Event::track('account:verify_email', new DateTime(), true);
+			Mailchimp_Woocommerce_Event::track('account:verify_email', new DateTime());
 			$suggestion         = wp_remote_get( 'https://woocommerce.mailchimpapp.com/api/usernames/suggestions/' . $username );
 			$suggested_username = json_decode( $suggestion['body'] )->data;
 			wp_send_json_error(

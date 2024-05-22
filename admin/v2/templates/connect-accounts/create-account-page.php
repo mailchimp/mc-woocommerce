@@ -8,8 +8,20 @@ if (!$user = get_user_by('email', $admin_email)) {
  	$user_id = get_current_user_id();
 	$user = get_user_by('id', $user_id);
 }
+$waiting_login = get_option('mc-woocommerce-waiting-for-login');
+$signup_initiated = $waiting_login && $waiting_login === 'waiting';
+
+$apiKey = mailchimp_get_api_key();
+$mc = new MailChimp_WooCommerce_MailChimpApi($apiKey);
+$profile = $mc->ping(true);
+$email = isset($user->email) ? $user->email : '';
+
+if ($profile) {
+	$email = $profile['email'];
+}
 ?>
 <div id="mc-woocommerce-create-account">
+	<input type="hidden" name="signup_initiated" value="<?php echo esc_attr(!!$signup_initiated) ?>" />
 	<div class="mc-woocommerce-create-account">
 		<div class="mc-woocommerce-create-account__header flex items-center">
 			<div class="flex items-center">
@@ -58,7 +70,7 @@ if (!$user = get_user_by('email', $admin_email)) {
 		</div>
 		<div class="mc-woocommerce-create-account__body">
 			<div class="mc-woocommerce-create-account__body-inner">
-				<form class="js-mc-woocommerce-activate-account">
+				<form class="js-mc-woocommerce-activate-account <?php if ($signup_initiated): ?>hidden<?php endif; ?>">
 					<div id="mc-woocommerce-profile-details" class="mc-woocommerce-create-account-step">
 						<div class="title"><?php echo esc_html__( 'Confirm your information', 'mailchimp-for-woocommerce' ) ?></div>
 						<div class="subtitle"><?php echo esc_html__( 'Profile details', 'mailchimp-for-woocommerce' ) ?></div>
@@ -305,9 +317,9 @@ if (!$user = get_user_by('email', $admin_email)) {
 					</div>
 				</form>
 
-				<div class="js-mc-woocommerce-confirm-email hidden">
+				<div class="js-mc-woocommerce-confirm-email  <?php if (!$signup_initiated): ?>hidden<?php endif; ?>">
 					<div class="title"><?php echo esc_html__( 'Check your email', 'mailchimp-for-woocommerce' ) ?></div>
-					<p class="h4"><?php echo esc_html__( 'To start using Mailchimp, activate your account with the link sent to ', 'mailchimp-for-woocommerce' ) ?><span class="js-mc-woocommerce-email"></span></p>
+					<p class="h4"><?php echo esc_html__( 'To start using Mailchimp, activate your account with the link sent to ', 'mailchimp-for-woocommerce' ) ?><span class="js-mc-woocommerce-email"><?php echo esc_html($email); ?></span></p>
 
 					<div class="flex items-center gap-x-6">
 						<a href="https://mail.google.com/mail/u/0/" target="_blank" class="flex items-center gap-x-2">

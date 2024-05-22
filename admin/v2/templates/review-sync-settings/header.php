@@ -64,7 +64,7 @@
     <div class="mc-wc-header-content-footer">
         <div class="mc-wc-header-content-footer-wrapper">
             <p class="mc-wc-descripition"><?php esc_html_e('Sync your store data using the default settings, or configure how your WooCommerce data will sync to Mailchimp.', 'mailchimp-for-woocommerce'); ?></p>
-            <input type="submit" name="mailchimp_submit" class="mc-wc-btn mc-wc-btn-primary" value="<?php esc_html_e('Sync now', 'mailchimp-for-woocommerce'); ?>" />
+            <input type="submit" name="mailchimp_submit" class="mc-wc-btn mc-wc-btn-primary" data-position="top" value="<?php esc_html_e('Sync now', 'mailchimp-for-woocommerce'); ?>" />
         </div>
     </div>
 </div>

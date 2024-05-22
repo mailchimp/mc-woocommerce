@@ -50,12 +50,10 @@ class Mailchimp_Woocommerce_Event
 
     /**
      * @param string $event
-     * @param \DateTime|null $date
-     * @param bool $fake
-     *
+     * @param DateTime|null $date
      * @return array|mixed|null
      */
-    public static function track(string $event, \DateTime $date = null, bool $fake = false)
+    public static function track(string $event, \DateTime $date = null)
     {
         if (static::$prevent) {
             return null;
@@ -84,7 +82,7 @@ class Mailchimp_Woocommerce_Event
             ->set_date($date)
             ->configure($data);
 
-        return $fake ? $payload->compile() : $payload->handle();
+        return static::$prevent ? $payload->compile() : $payload->handle();
     }
 
     /**
@@ -102,6 +100,7 @@ class Mailchimp_Woocommerce_Event
             // TODO some validation between entry and store.
             return $entry;
         }
+
         return null;
     }
 
@@ -189,7 +188,6 @@ class Mailchimp_Woocommerce_Event
     {
         $payload = array(
             'timestamp' => time(),
-            'event' => $this->event,
             'sentAt' => $this->date ? $this->date : time(),
             'context' => array(
                 'internal_mc_user' => false,
@@ -216,6 +214,8 @@ class Mailchimp_Woocommerce_Event
                 'integration_id' => $this->client_id,
             ), $this->event_params),
         );
+
+        $payload['event'] = $payload['properties']['object'] === '' ? $payload['properties']['action'] : $payload['properties']['object'] . ':' . $payload['properties']['action'];
 
         if (empty($this->user_id)) {
 

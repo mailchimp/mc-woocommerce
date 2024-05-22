@@ -171,12 +171,6 @@
 				$(inputElementId).closest('.box').removeClass('form-error');
 				$(errorElementId).text('');
 			}
-
-			if ($(`${wrapperId} input#email`).val() === $(`${wrapperId} input#confirm_email`).val()) {
-				errors['email'] = null
-				errors['confirm_email'] = null
-			}
-
 		})
 		let valid = Object.values(errors).filter(error => error !== null).length === 0
 
@@ -210,7 +204,7 @@
 		}
 		if (input.name === 'email') {
 			if (input.value === '') return "Email can't be blank."
-			if (!input.value.includes('@')) return "Insert correct input"
+			if (!input.value.includes('@') || !input.value.includes('.')) return "Insert correct email."
 			if (input.value !== $('#mc-woocommerce-profile-details input#confirm_email').val()) return "Email confirmation must match confirmation email."
 		}
 		if (input.name === 'confirm_email') {

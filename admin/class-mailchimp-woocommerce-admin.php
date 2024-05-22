@@ -1191,22 +1191,37 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	}
 
 	public function mailchimp_woocommerce_ajax_create_account_signup() {
+        global $wpdb;
 		Mailchimp_Woocommerce_Event::track('account:sign_up_button_click', new DateTime());
 		Mailchimp_Woocommerce_Event::track('connect_accounts:click_signup_bottom', new DateTime());
 		$this->adminOnlyMiddleware();
 		$pload = $this->getPostData();
 
-//		Mailchimp_Woocommerce_Event::track('account:type_in_email_field', new DateTime());
+//		Mailchimp_Woocommerce_Event::track('account:type_in_email_field', new DateTime(), true);
 		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/signup/', $pload );
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
-        wp_send_json_error( $response );
-    }
-      $response_body = json_decode( $response['body'] );
-      if ( $response['response']['code'] == 200 && $response_body->success == true ) {
-        wp_send_json_success( $response_body );
-        Mailchimp_Woocommerce_Event::track('account:login_signup_success', new DateTime());
-        Mailchimp_Woocommerce_Event::track('connect_accounts:create_account_complete', new DateTime());
+			wp_send_json_error( $response );
+		}
+		$response_body = json_decode( $response['body'] );
+		if ( $response['response']['code'] == 200 && $response_body->success == true ) {
+						Mailchimp_Woocommerce_Event::track('account:login_signup_success', new DateTime());
+						Mailchimp_Woocommerce_Event::track('connect_accounts:create_account_complete', new DateTime());
+
+            $result = json_decode( $response['body'], true);
+
+            $options = get_option($this->plugin_name);
+            $options['mailchimp_api_key'] = $result['data']['oauth_token'].'-'.$result['data']['dc'];
+
+            // go straight to the DB and update the options to bypass any filters.
+            $wpdb->update(
+                $wpdb->options,
+                array('option_value' => maybe_serialize($options)),
+                array('option_name' => $this->plugin_name)
+            );
+
+			wp_send_json_success( $response_body );
+			Mailchimp_Woocommerce_Event::track('account:login_signup_success', new DateTime(), true);
 		} elseif ( $response['response']['code'] == 404 ) {
 			wp_send_json_error( array( 'success' => false ) );
 		} else {

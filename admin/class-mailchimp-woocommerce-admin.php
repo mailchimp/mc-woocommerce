@@ -1190,14 +1190,40 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		return json_decode( $response['body'] );
 	}
 
+	public function mailchimp_woocommerce_ajax_check_login_session()
+	{
+			$apiKey = mailchimp_get_api_key();
+      $mc = new MailChimp_WooCommerce_MailChimpApi($apiKey);
+      $profile = $mc->ping(true);
+
+      if ($profile) {
+      	$logged_in  = !(empty($profile['last_login']) || is_null($profile['last_login']));
+      	if ($logged_in) {
+            delete_option('mc-woocommerce-waiting-for-login');
+        }
+
+				wp_send_json_success( array(
+						'success' => true,
+						'profile' => $profile,
+						'logged_in' => $logged_in,
+						'redirect' => admin_url('admin.php?page=mailchimp-woocommerce')
+				) );
+			} else {
+				wp_send_json_error(
+						array(
+								'success'    => false,
+						)
+				);
+			}
+  }
+
 	public function mailchimp_woocommerce_ajax_create_account_signup() {
-        global $wpdb;
+		global $wpdb;
 		Mailchimp_Woocommerce_Event::track('account:sign_up_button_click', new DateTime());
 		Mailchimp_Woocommerce_Event::track('connect_accounts:click_signup_bottom', new DateTime());
 		$this->adminOnlyMiddleware();
 		$pload = $this->getPostData();
 
-//		Mailchimp_Woocommerce_Event::track('account:type_in_email_field', new DateTime(), true);
 		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/signup/', $pload );
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
@@ -1205,7 +1231,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 		$response_body = json_decode( $response['body'] );
 		if ( $response['response']['code'] == 200 && $response_body->success == true ) {
-						Mailchimp_Woocommerce_Event::track('account:login_signup_success', new DateTime());
 						Mailchimp_Woocommerce_Event::track('connect_accounts:create_account_complete', new DateTime());
 
             $result = json_decode( $response['body'], true);
@@ -1219,9 +1244,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 array('option_value' => maybe_serialize($options)),
                 array('option_name' => $this->plugin_name)
             );
+        update_option('mc-woocommerce-waiting-for-login', 'waiting');
 
 			wp_send_json_success( $response_body );
-			Mailchimp_Woocommerce_Event::track('account:login_signup_success', new DateTime(), true);
 		} elseif ( $response['response']['code'] == 404 ) {
 			wp_send_json_error( array( 'success' => false ) );
 		} else {

@@ -1,6 +1,9 @@
 (function( $ ) {
 	$(window).on('load', function() {
 
+		if ($('#mc-woocommerce-create-account input[name=signup_initiated]').val() === '1') {
+			waitingForLogin();
+		}
 		// validate profile details
 		let profileDetailsInputs  = $('#mc-woocommerce-profile-details input');
 		let profileErrors         = getInitialErrors(profileDetailsInputs);
@@ -106,6 +109,7 @@
 				url : phpVars.ajaxurl,
 				data : data,
 				success: function(response) {
+					console.log(response);
 					$('.js-mc-woocommerce-activate-account').addClass('hidden')
 					$("#mc-woocommerce-create-activate-account").attr('disabled', false)
 					$("#mc-woocommerce-create-activate-account .mc-wc-loading").addClass('hidden')
@@ -117,11 +121,38 @@
 					} else {
 						$('.js-mc-woocommerce-confirm-email').removeClass('hidden')
 						$('.js-mc-woocommerce-email').text(formDataObject.email)
+
+						waitingForLogin()
 					}
 				}
 			});
 		})
 	})
+
+	let waitingForLogin = () => {
+		let loginTimeout;
+		loginTimeout = window.setInterval(function() {
+			var data = {
+				action:'mailchimp_woocommerce_check_login_session',
+			};
+			$.ajax({
+				type : "post",
+				dataType : "json",
+				url : phpVars.ajaxurl,
+				data : data,
+				success: function(response) {
+					if (response.data.logged_in) {
+						window.clearInterval(loginTimeout)
+						window.location.href = response.data.redirect
+					}
+
+					if (!response.success || !response.data.success) {
+						console.log(response)
+					}
+				}
+			});
+		}, 10000)
+	}
 
 	// display errors and disable button in case of errors
 	let validateForm = (errors, wrapperId, displayErrors = false) => {

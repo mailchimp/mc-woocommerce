@@ -1204,7 +1204,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 				wp_send_json_success( array(
 						'success' => true,
-						'profile' => $profile,
 						'logged_in' => $logged_in,
 						'redirect' => admin_url('admin.php?page=mailchimp-woocommerce')
 				) );

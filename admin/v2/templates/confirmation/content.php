@@ -53,22 +53,27 @@ $active_tab = isset( $_GET['tab'] ) ? esc_attr( sanitize_key( $_GET['tab'] ) ) :
 			<?php
 				switch ($active_tab) {
 					case MC_WC_STORE_INFO_TAB:
+						Mailchimp_Woocommerce_Event::track('navigation_store:view', new DateTime());
 						include_once  __DIR__ .'/tabs/store-info.php';
 						break;
 
 					case MC_WC_AUDIENCE_TAB:
+						Mailchimp_Woocommerce_Event::track('navigation_audience:view', new DateTime());
 						include_once  __DIR__ .'/tabs/audience.php';
 						break;
 
 					case MC_WC_LOGS_TAB:
+						Mailchimp_Woocommerce_Event::track('navigation_logs:view', new DateTime());
 						include_once  __DIR__ .'/tabs/logs.php';
 						break;
 
 					case MC_WC_ADVANCED_TAB:
+						Mailchimp_Woocommerce_Event::track('navigation_advanced:view', new DateTime());
 						include_once  __DIR__ .'/tabs/advanced.php';
 						break;
 
 					default:
+						Mailchimp_Woocommerce_Event::track('audience_stats:view_screen', new DateTime());
 						include_once  __DIR__ .'/tabs/overview.php';
 						break;
 				}

@@ -3,6 +3,23 @@
 
 	$(window).on('load', function() {
 
+		$(document).on('click', '.js-mailchimp-woocommerce-send-event', function(e) {
+			e.preventDefault();
+			window.open( $(this).attr('href'), '_blank');
+			let mcEvent = $(this).data('mc-event');
+
+			var data = {
+				action:'mailchimp_woocommerce_send_event',
+				mc_event: mcEvent
+			};
+
+			$.post(ajaxurl, data, function(response) {
+				if (!response.success) {
+					console.error(response);
+				}
+			});
+		})
+
 		// show/hide optional settings
 		var optionalSettings = false;
 		$('.optional-settings-button').click(function () {

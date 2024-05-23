@@ -75,6 +75,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		// clean database
 		mailchimp_clean_database();
+		Mailchimp_Woocommerce_Event::track('navigation_advanced:disconnect', new DateTime());
 
 		return array();
 	}
@@ -178,7 +179,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
     public function create_account_page() {
         Mailchimp_Woocommerce_Event::track('account:land_on_signup', new DateTime());
-        Mailchimp_Woocommerce_Event::track('connect_accounts:view_screen', new DateTime());
+        Mailchimp_Woocommerce_Event::track('connect_accounts:click_to_create_account', new DateTime());
+
         include_once 'v2/templates/connect-accounts/create-account-page.php';
     }
 
@@ -858,8 +860,13 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				$data = array(
 					'mailchimp_logging' => isset( $input['mailchimp_logging'] ) ? $input['mailchimp_logging'] : 'none',
 				);
+					if ($this->getOption('mailchimp_logging', 'none') !== $data['mailchimp_logging']) {
+							if ($data['mailchimp_logging'] === '0') {
+									Mailchimp_Woocommerce_Event::track('navigation_logs:preferences', new DateTime());
+							}
+					}
 
-				if ( isset( $_POST['mc_action'] ) && in_array( $_POST['mc_action'], array( 'view_log', 'remove_log' ) ) ) {
+          if ( isset( $_POST['mc_action'] ) && in_array( $_POST['mc_action'], array( 'view_log', 'remove_log' ) ) ) {
 					$path = 'admin.php?page=mailchimp-woocommerce&tab=logs';
 					wp_redirect( $path );
 					exit();
@@ -951,7 +958,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function mailchimp_woocommerce_ajax_oauth_start() {
 		$this->adminOnlyMiddleware();
-		Mailchimp_Woocommerce_Event::track('connect_accounts_oauth:start', new DateTime());
 
 		$secret = uniqid();
 		$args   = array(
@@ -975,6 +981,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		if ( $response['response']['code'] == 201 ) {
 			set_site_transient( 'mailchimp-woocommerce-oauth-secret', $secret, 60 * 60 );
+			Mailchimp_Woocommerce_Event::track('connect_accounts_oauth:start', new DateTime());
 			wp_send_json_success( $response );
 		} else {
 			wp_send_json_error( $response );
@@ -1015,7 +1022,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
     public function mailchimp_woocommerce_ajax_oauth_finish() {
         global $wpdb;
-        Mailchimp_Woocommerce_Event::track('connect_accounts_oauth:complete', new DateTime());
         //mailchimp_log('admin', 'right before middleware oauth finish');
         $this->adminOnlyMiddleware();
         //mailchimp_log('admin', 'right after middleware oauth finish');
@@ -1062,6 +1068,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 array('option_value' => maybe_serialize($options)),
                 array('option_name' => $this->plugin_name)
             );
+            Mailchimp_Woocommerce_Event::track('connect_accounts_oauth:complete', new DateTime());
 
             wp_send_json_success( $response );
         } else {
@@ -1199,6 +1206,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
       if ($profile) {
       	$logged_in  = !(empty($profile['last_login']) || is_null($profile['last_login']));
       	if ($logged_in) {
+            Mailchimp_Woocommerce_Event::track('connect_accounts_oauth:complete', new DateTime());
             delete_option('mc-woocommerce-waiting-for-login');
         }
 
@@ -1230,22 +1238,23 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 		$response_body = json_decode( $response['body'] );
 		if ( $response['response']['code'] == 200 && $response_body->success == true ) {
-						Mailchimp_Woocommerce_Event::track('connect_accounts:create_account_complete', new DateTime());
+				Mailchimp_Woocommerce_Event::track('connect_accounts:create_account_complete', new DateTime());
 
-            $result = json_decode( $response['body'], true);
+				$result = json_decode( $response['body'], true);
 
-            $options = get_option($this->plugin_name);
-            $options['mailchimp_api_key'] = $result['data']['oauth_token'].'-'.$result['data']['dc'];
+				$options = get_option($this->plugin_name);
+				$options['mailchimp_api_key'] = $result['data']['oauth_token'].'-'.$result['data']['dc'];
 
-            // go straight to the DB and update the options to bypass any filters.
-            $wpdb->update(
-                $wpdb->options,
-                array('option_value' => maybe_serialize($options)),
-                array('option_name' => $this->plugin_name)
-            );
+				// go straight to the DB and update the options to bypass any filters.
+				$wpdb->update(
+						$wpdb->options,
+						array('option_value' => maybe_serialize($options)),
+						array('option_name' => $this->plugin_name)
+				);
         update_option('mc-woocommerce-waiting-for-login', 'waiting');
+        Mailchimp_Woocommerce_Event::track('connect_accounts_oauth:start', new DateTime());
 
-			wp_send_json_success( $response_body );
+        wp_send_json_success( $response_body );
 		} elseif ( $response['response']['code'] == 404 ) {
 			wp_send_json_error( array( 'success' => false ) );
 		} else {
@@ -1331,7 +1340,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		// see if it's posted in the form.
 		if ( isset( $input['mailchimp_permission_cap'] ) && ! empty( $input['mailchimp_permission_cap'] ) ) {
-            $permissions = $input['mailchimp_permission_cap'];
+			if ($permissions !== $input['mailchimp_permission_cap']) {
+				Mailchimp_Woocommerce_Event::track('navigation_store:plugin_permission', new DateTime());
+			}
+			$permissions = $input['mailchimp_permission_cap'];
 		}
 
         // default value.
@@ -1350,6 +1362,18 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             ),
             'br' => array(),
         );
+
+		if (isset( $input['store_locale'] ) && $input['store_locale'] !== get_locale()) {
+				Mailchimp_Woocommerce_Event::track('navigation_store:change_locale', new DateTime());
+		}
+
+		if (isset( $input['mailchimp_checkbox_action'] )&& $input['mailchimp_checkbox_action'] !== $this->getOption( 'mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form' )) {
+				Mailchimp_Woocommerce_Event::track('navigation_store:checkout_page_settings', new DateTime());
+		}
+
+		if (isset( $input['mailchimp_product_image_key'] ) && $input['mailchimp_product_image_key'] !== $this->getOption( 'mailchimp_product_image_key', 'medium' )) {
+			Mailchimp_Woocommerce_Event::track('navigation_store:product_image_size', new DateTime());
+    }
 
 		return array(
 			// store basics
@@ -1442,6 +1466,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	protected function validatePostNewsletterSettings( $input ) {
 		$sanitized_tags = array_map( 'sanitize_text_field', explode( ',', $input['mailchimp_user_tags'] ) );
+		$active_tab = isset( $input['mailchimp_active_tab'] ) ? $input['mailchimp_active_tab'] : (isset( $input['mailchimp_active_settings_tab'] ) ?  $input['mailchimp_active_settings_tab']: null);
 
 		$data = array(
 			'mailchimp_list'                => isset( $input['mailchimp_list'] ) ? $input['mailchimp_list'] : $this->getOption( 'mailchimp_list', '' ),
@@ -1455,6 +1480,48 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			'campaign_language'             => isset( $input['campaign_language'] ) ? $input['campaign_language'] : $this->getOption( 'store_locale' , 'en'),
 			'campaign_permission_reminder'  => isset( $input['campaign_permission_reminder'] ) ? $input['campaign_permission_reminder'] : sprintf( /* translators: %s - plugin name. */esc_html__( 'You were subscribed to the newsletter from %s', 'mailchimp-for-woocommerce' ), get_option( 'blogname' ) ),
 		);
+
+      if ($this->getOption('mailchimp_auto_subscribe', '1') !== $data['mailchimp_auto_subscribe']) {
+          if ($data['mailchimp_auto_subscribe'] === '0') {
+              Mailchimp_Woocommerce_Event::track('review_settings:sync_as_non_subscribed', new DateTime());
+          } else if ($data['mailchimp_auto_subscribe'] === '1') {
+              Mailchimp_Woocommerce_Event::track('review_settings:sync_as_subscribed', new DateTime());
+          } else if ($data['mailchimp_auto_subscribe'] === '2') {
+              Mailchimp_Woocommerce_Event::track('review_settings:sync_existing_only', new DateTime());
+          }
+      }
+
+		if ($this->getOption('mailchimp_cart_tracking', 'all') !== $data['mailchimp_cart_tracking']) {
+        if ($data['mailchimp_cart_tracking'] === 'all') {
+            Mailchimp_Woocommerce_Event::track('review_settings:cart_tracking_all', new DateTime());
+        } else if ($data['mailchimp_cart_tracking'] === 'subscribed') {
+            Mailchimp_Woocommerce_Event::track('review_settings:cart_tracking_only_subs', new DateTime());
+        } else if ($data['mailchimp_cart_tracking'] === 'disabled') {
+            Mailchimp_Woocommerce_Event::track('review_settings:cart_tracking_disabled', new DateTime());
+        }
+		}
+
+		if ($this->getOption('mailchimp_ongoing_sync_status', '1') !== $data['mailchimp_ongoing_sync_status']) {
+				if ($data['mailchimp_ongoing_sync_status'] === '1' || $data['mailchimp_ongoing_sync_status'] === true) {
+						if ($active_tab === 'newsletter_settings') {
+								Mailchimp_Woocommerce_Event::track('review_settings:sync_new_non_subscribed', new DateTime());
+						} else {
+                Mailchimp_Woocommerce_Event::track('navigation_audience:sync_new_non_subscribed', new DateTime());
+            }
+				}
+		}
+
+		if ($this->getOption('mailchimp_user_tags') !== $data['mailchimp_user_tags']) {
+				if (!empty($data['mailchimp_user_tags'])) {
+            if ($active_tab === 'newsletter_settings') {
+                Mailchimp_Woocommerce_Event::track('review_settings:add_new_tag', new DateTime());
+            } else {
+                Mailchimp_Woocommerce_Event::track('navigation_audience:add_new_tag', new DateTime());
+            }
+				}
+		}
+
+		Mailchimp_Woocommerce_Event::track('review_settings:sync_now_bottom', new DateTime());
 
 		if ( ! $this->hasValidCampaignDefaults( $data ) ) {
 			$this->setData( 'validation.newsletter_settings', false );
@@ -2242,6 +2309,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$admin_email  = $this->getOptions()['admin_email'];
 
 		mailchimp_debug( 'communication_status', "setting to {$opt}" );
+		Mailchimp_Woocommerce_Event::track('navigation_advanced:opt_in_email', new DateTime());
 
 		// try to set the info on the server
 		// post to communications api
@@ -2279,6 +2347,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$opt          = $_POST['opt'];
 
 		mailchimp_debug( 'tower_status', "setting to {$opt}" );
+
+		Mailchimp_Woocommerce_Event::track('navigation_advanced:enable_support', new DateTime());
 
 		// try to set the info on the server
 		// post to communications api
@@ -2351,6 +2421,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function mailchimp_woocommerce_ajax_delete_log_file() {
 		$this->adminOnlyMiddleware();
+		Mailchimp_Woocommerce_Event::track('navigation_logs:delete', new DateTime());
 
 		if ( ! isset( $_POST['log_file'] ) || empty( $_POST['log_file'] ) ) {
 			wp_send_json_error( __( 'No log file provided', 'mailchimp-for-woocommerce' ) );
@@ -2375,6 +2446,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$requested_log_file = sanitize_text_field( $_POST['log_file'] );
 		$files              = defined( 'WC_LOG_DIR' ) ? @scandir( WC_LOG_DIR ) : array();
 
+		Mailchimp_Woocommerce_Event::track('navigation_logs:selection', new DateTime());
+
 		$logs = array();
 		if ( ! empty( $files ) ) {
 			foreach ( array_reverse( $files ) as $key => $value ) {
@@ -2394,6 +2467,28 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		wp_send_json_error( __( 'Error loading log file contents', 'mailchimp-for-woocommerce' ) );
 	}
+
+	public function mailchimp_woocommerce_send_event() {
+			$this->adminOnlyMiddleware();
+      if ( ! isset( $_POST['mc_event'] ) || empty( $_POST['mc_event'] ) ) {
+          wp_send_json_error( __( 'No event provided', 'mailchimp-for-woocommerce' ) );
+          return;
+      }
+			$mc_event = sanitize_text_field($_POST['mc_event']);
+      $payload = 'nothing';
+      if ($mc_event === 'leave_review') {
+          $payload = Mailchimp_Woocommerce_Event::track('audience_stats:leave_review', new DateTime());
+      } else if ($mc_event === 'recommendation_1') {
+          $payload = Mailchimp_Woocommerce_Event::track('audience_stats:recommendation_1', new DateTime());
+      } else if ($mc_event === 'recommendation_2') {
+          $payload = Mailchimp_Woocommerce_Event::track('audience_stats:recommendation_2', new DateTime());
+      } else if ($mc_event === 'recommendation_3') {
+          $payload = Mailchimp_Woocommerce_Event::track('audience_stats:recommendation_3', new DateTime());
+      }
+
+      wp_send_json_success(['payload' => $payload]);
+
+  }
 
 	public function defineWebHooks() {
 		// run this every time the store is saved to be sure we've got the hooks enabled.

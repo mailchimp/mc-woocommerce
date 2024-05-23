@@ -1,7 +1,9 @@
 /* Import fonts */
 @import url('../fonts/Means/fonts.css');
 @import url('../fonts/graphik/fonts.css');
-
+body #wpwrap {
+    background: linear-gradient(#F7F4FF, #ffffff);
+}
 /* Roboto */
 @font-face {
 	font-family: 'Roboto';
@@ -185,6 +187,7 @@ input.mc-wc-btn {
     width: 100%;
     max-width: 728px;
     color: var(--mc-wc-text-color);
+    margin-left: 60px;
 }
 
 .mc-wc-setting-header {

@@ -63,7 +63,6 @@ class Mailchimp_Woocommerce_Event
             return null;
         }
 
-        // TODO find the proper function in plugin.
         if (!($mc_user_id = get_option('mailchimp_user_id', null))) {
             $mc_user_id = null;
         }
@@ -142,7 +141,9 @@ class Mailchimp_Woocommerce_Event
             ));
 
             if ( $response instanceof WP_Error ) {
-                wp_send_json_error( $response );
+                mailchimp_error( 'mailchimp_events',"Could not post event data to mailchimp beacon.", $response );
+
+                return $response;
             }
 
             return json_decode( $response['body'] );

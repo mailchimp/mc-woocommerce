@@ -4,12 +4,12 @@
 class Mailchimp_Woocommerce_Event
 {
     // we need to do some more stuff on this before pushing
-    protected static $prevent = true;
+    protected static $prevent = false;
 
     protected $event = '';
     protected $title = '';
     protected $integration_name = 'woocommerce';
-    protected $client_id = 'CLIENT_ID_COMING_SOON';
+    protected $client_id = '366074603122';
     protected $org = 'sbseg';
     protected $purpose = 'prod';
     protected $scope = 'mc';

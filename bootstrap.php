@@ -2078,7 +2078,7 @@ function mailchimp_account_events() {
             'ui_action' => 'clicked',
             'ui_access_point' => 'center',
         ),
-        'navigation_audience:cart_tracking_new_non_subs' => array(
+        'navigation_audience:sync_new_non_subscribed' => array(
             'initiative_name' => 'strategic_partners',
             'scope_area' => 'embedded_app',
             'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=newsletter_settings'),

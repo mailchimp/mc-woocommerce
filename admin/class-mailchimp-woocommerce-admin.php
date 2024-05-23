@@ -76,6 +76,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		// clean database
 		mailchimp_clean_database();
 		Mailchimp_Woocommerce_Event::track('navigation_advanced:disconnect', new DateTime());
+		delete_option('mc-woocommerce-waiting-for-login');
 
 		return array();
 	}

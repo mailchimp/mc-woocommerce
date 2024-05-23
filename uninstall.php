@@ -53,6 +53,8 @@ function mailchimp_woocommerce_uninstall() {
 				$webhooks->cleanHooks(true);
             }
         }
+        delete_option('mc-woocommerce-waiting-for-login');
+
     } catch (Exception $e) {
         error_log($e->getMessage().' on '.$e->getLine().' in '.$e->getFile());
     }

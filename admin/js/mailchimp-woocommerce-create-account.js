@@ -12,10 +12,13 @@
 		profileDetailsInputs.on('input', (e) => {
 			let input = e.target
 
-			profileErrors[input.name] = validateInput(input)
-			detailsValid = validateForm(profileErrors, '#mc-woocommerce-profile-details');
+			$(input).closest('.box').removeClass('form-error');
+			$(input).closest('.box').find('.error-field').text('');
 
-			$('#mc-woocommerce-create-activate-account').attr('disabled', !detailsValid)
+			if (input.name === 'email' || input.name === 'confirm_email') {
+				$('input#confirm_email, input#email').closest('.box').removeClass('form-error');
+				$('input#confirm_email, input#email').closest('.box').find('.error-field').text('');
+			}
 		})
 
 		// validate business address
@@ -26,54 +29,31 @@
 		businessAddressInputs.on('input', (e) => {
 			let input = e.target
 
-			businessAddressErrors[input.name] = validateInput(input)
-
-			businessAddressValid = validateForm(businessAddressErrors, '#mc-woocommerce-business-address');
-
-			$('#mc-woocommerce-create-activate-account').attr('disabled', !businessAddressValid)
+			$(input).closest('.box').removeClass('form-error');
+			$(input).closest('.box').find('.error-field').text('');
 		})
 
-		// $('#mc-woocommerce-create-activate-account').attr('disabled', !detailsValid || !businessAddressValid)
-
-		$(document).on('click', '.js-mc-woocommerce-details-save', (e) => {
+		$('#mc-woocommerce-create-activate-account').click((e) => {
 			e.preventDefault();
-			let wrapper = $(e.target).closest('.mc-woocommerce-create-account-step');
-			let wrapperId = wrapper.attr('id')
 
-			if (!e.target.hasAttribute('disabled')) {
-				let formInputs  = $(`#${wrapperId} input`);
-				let formErrors 	= getInitialErrors(formInputs);
-				let formValid 	= validateForm(formErrors, `#${wrapperId}`, true);
+			profileDetailsInputs  = $('#mc-woocommerce-profile-details input');
+			profileErrors         = getInitialErrors(profileDetailsInputs);
+			detailsValid          = validateForm(profileErrors, '#mc-woocommerce-profile-details', true);
 
-				if (formValid) {
-					$(e.target).closest('.mc-woocommerce-create-account-step')
-						.find('.mc-woocommerce-details-wrapper')
-						.removeClass('hidden');
+			businessAddressInputs = $('#mc-woocommerce-business-address input, #mc-woocommerce-business-address select');
+			businessAddressErrors = getInitialErrors(businessAddressInputs);
+			businessAddressValid  = validateForm(businessAddressErrors, '#mc-woocommerce-business-address', true);
 
-					$(e.target).closest('.mc-woocommerce-create-account-step')
-						.find('.mc-woocommerce-form-wrapper')
-						.addClass('hidden');
-				}
-
-				$('#mc-woocommerce-create-activate-account').attr('disabled', !detailsValid || !businessAddressValid)
+			if (detailsValid && businessAddressValid) {
+				$('.js-mc-woocommerce-activate-account').submit();
 			}
-		})
-		$(document).on('click', '.js-mc-woocommerce-edit-form', (e) => {
-			e.preventDefault();
-
-			$('#mc-woocommerce-create-activate-account').attr('disabled', true)
-
-			$(e.target).closest('.mc-woocommerce-details-wrapper').addClass('hidden');
-
-			$(e.target).closest('.mc-woocommerce-create-account-step')
-				.find('.mc-woocommerce-form-wrapper')
-				.removeClass('hidden');
 		})
 
 		$('.js-mc-woocommerce-activate-account').submit((e) => {
 			e.preventDefault();
 			$("#mc-woocommerce-create-activate-account").attr('disabled', true)
 			$("#mc-woocommerce-create-activate-account .mc-wc-loading").removeClass('hidden')
+
 			let formData = $(e.target).serializeArray()
 			let formDataObject = {};
 			formData.map(obj => {
@@ -109,7 +89,6 @@
 				url : phpVars.ajaxurl,
 				data : data,
 				success: function(response) {
-					console.log(response);
 					$('.js-mc-woocommerce-activate-account').addClass('hidden')
 					$("#mc-woocommerce-create-activate-account").attr('disabled', false)
 					$("#mc-woocommerce-create-activate-account .mc-wc-loading").addClass('hidden')
@@ -172,13 +151,7 @@
 				$(errorElementId).text('');
 			}
 		})
-		let valid = Object.values(errors).filter(error => error !== null).length === 0
-
-		// if (valid && displayErrors) {
-		// 	$(`${wrapperId} .create-account-save`).attr('disabled', false)
-		// }
-
-		return valid;
+		return Object.values(errors).filter(error => error !== null).length === 0
 	}
 
 	// get errors on page load.

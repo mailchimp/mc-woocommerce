@@ -132,27 +132,7 @@ if ($profile) {
 										<p id="mc-woocommerce-confirm_email-error" class="error-field"></p>
 									</div>
 								</div>
-								<div class="buttons-wrap">
-									<a href="#" id="save-account-details" class="button create-account-save js-mc-woocommerce-details-save"><?php esc_html_e( 'Save', 'mailchimp-for-woocommerce' ); ?></a>
-									<span class="mc-woocommerce-create-account-go-spinner spinner"></span>
-								</div>
 							</fieldset>
-						</div>
-						<div class="mc-woocommerce-details-wrapper hidden">
-							<p class="text-row">
-								<span id="mc-woocommerce-first_name-text"></span>
-								<span id="mc-woocommerce-last_name-text"></span>
-							</p>
-							<p class="text-row">
-								<span id="mc-woocommerce-business_name-text"></span>
-							</p>
-							<p class="text-row">
-								<span id="mc-woocommerce-phone_number-text"></span>
-							</p>
-							<p class="text-row">
-								<span id="mc-woocommerce-email-text"></span>
-							</p>
-							<a href="#" class="js-mc-woocommerce-edit-form"><?php echo esc_html__( 'Edit', 'mailchimp-for-woocommerce' ) ?></a>
 						</div>
 					</div>
 
@@ -250,26 +230,7 @@ if ($profile) {
 										</div>
 									</div>
 								</div>
-								<div class="buttons-wrap">
-									<a href="#" id="mc-woocommerce-create-account-save-address" class="button create-account-save js-mc-woocommerce-details-save"><?php esc_html_e( 'Save', 'mailchimp-for-woocommerce' ); ?></a>
-								</div>
-
 							</fieldset>
-						</div>
-						<div class="mc-woocommerce-details-wrapper hidden">
-							<p class="text-row">
-								<span id="mc-woocommerce-address-text"></span>
-							</p>
-							<p class="text-row">
-								<span id="mc-woocommerce-address2-text"></span>
-							</p>
-							<p class="text-row">
-								<span id="mc-woocommerce-city-text"></span><span>, </span>
-								<span id="mc-woocommerce-state-text"></span>
-								<span id="mc-woocommerce-zip-text"></span><span>, </span>
-								<span id="mc-woocommerce-country-text"></span>
-							</p>
-							<a href="#" class="js-mc-woocommerce-edit-form"><?php echo esc_html__( 'Edit', 'mailchimp-for-woocommerce' ) ?></a>
 						</div>
 					</div>
 
@@ -303,7 +264,7 @@ if ($profile) {
 						</p>
 					</div>
 					<div class="box">
-						<button type="submit" id="mc-woocommerce-create-activate-account" class="button button-primary create-account-save" disabled>
+						<button type="submit" id="mc-woocommerce-create-activate-account" class="button button-primary create-account-save">
 								<span class="mc-wc-loading hidden">
 									<svg class="animate-spin" width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
 											<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"

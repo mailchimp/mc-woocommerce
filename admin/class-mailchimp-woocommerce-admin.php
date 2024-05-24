@@ -180,7 +180,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
     public function create_account_page() {
         Mailchimp_Woocommerce_Event::track('account:land_on_signup', new DateTime());
-        Mailchimp_Woocommerce_Event::track('connect_accounts:click_to_create_account', new DateTime());
+        Mailchimp_Woocommerce_Event::track('connect_accounts:view_screen', new DateTime());
 
         include_once 'v2/templates/connect-accounts/create-account-page.php';
     }
@@ -867,11 +867,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 							}
 					}
 
-          if ( isset( $_POST['mc_action'] ) && in_array( $_POST['mc_action'], array( 'view_log', 'remove_log' ) ) ) {
-					$path = 'admin.php?page=mailchimp-woocommerce&tab=logs';
-					wp_redirect( $path );
-					exit();
-				}
+					if ( isset( $_POST['mc_action'] ) && in_array( $_POST['mc_action'], array( 'view_log', 'remove_log' ) ) ) {
+						$path = 'admin.php?page=mailchimp-woocommerce&tab=logs';
+						wp_redirect( $path );
+						exit();
+					}
 
 				break;
 			case 'plugin_settings':
@@ -888,6 +888,15 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 					$data['active_tab'] = 'plugin_settings';
 					add_settings_error( 'mailchimp_store_settings', '', __( 'Store Disconnect Failed', 'mailchimp-for-woocommerce' ), 'warning' );
 				}
+
+				if ( $this->is_resyncing() ) {
+					// remove all the pointers to be sure
+					$service = new MailChimp_Service();
+					$service->removePointers();
+					$this->startSync();
+					$this->setData( 'sync.config.resync', true );
+				}
+
 				break;
 		}
 
@@ -2485,10 +2494,13 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
           $payload = Mailchimp_Woocommerce_Event::track('audience_stats:recommendation_2', new DateTime());
       } else if ($mc_event === 'recommendation_3') {
           $payload = Mailchimp_Woocommerce_Event::track('audience_stats:recommendation_3', new DateTime());
+      } else if ($mc_event === 'click_create_account') {
+          $payload = Mailchimp_Woocommerce_Event::track('connect_accounts:click_to_create_account', new DateTime());
+      } else if ($mc_event === 'continue_to_mailchimp') {
+          $payload = Mailchimp_Woocommerce_Event::track('connect_accounts:continue_to_mailchimp', new DateTime());
       }
 
       wp_send_json_success(['payload' => $payload]);
-
   }
 
 	public function defineWebHooks() {

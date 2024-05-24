@@ -5,7 +5,9 @@
 
 		$(document).on('click', '.js-mailchimp-woocommerce-send-event', function(e) {
 			e.preventDefault();
-			window.open( $(this).attr('href'), '_blank');
+			let target = $(this).attr('target') || '_self';
+			let href = $(this).attr('href');
+
 			let mcEvent = $(this).data('mc-event');
 
 			var data = {
@@ -14,6 +16,8 @@
 			};
 
 			$.post(ajaxurl, data, function(response) {
+				window.open( href, target);
+
 				if (!response.success) {
 					console.error(response);
 				}
@@ -159,7 +163,13 @@
 			var data = form.serialize();
 			data+="&mailchimp_woocommerce_resync=1"
 			return $.ajax({type: "POST", url: form.attr('action'), data: data}).done(function(data) {
-				window.location.reload();
+				setTimeout(function() {
+					let searchParams = new URLSearchParams(window.location.search);
+					searchParams.set('tab', 'sync');
+					let newUrl = window.location.origin + window.location.pathname + '?' + searchParams.toString()
+
+					window.location.href = newUrl
+				}, 100)
 			}).fail(function(xhr) {
 				Swal.hideLoading();
 				Swal.showValidationMessage(phpVars.l10n.resync_failed);

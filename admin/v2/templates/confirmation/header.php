@@ -31,7 +31,7 @@ $admin_email   = mailchimp_get_option( 'admin_email', get_option( 'admin_email' 
     <div class="mc-wc-header-content-footer">
         <div class="mc-wc-header-content-footer-wrapper">
             <p class="mc-wc-descripition"><?php printf( esc_html__('Most syncs take less than a few hours, but larger stores could take longer. We’ll send an email to %s when the sync is finished. Head to your Mailchimp dashboard to continue setup while your sync is in progress.', 'mailchimp-for-woocommerce'), $admin_email ); ?></p>
-            <a href="http://admin.mailchimp.com/integrations/manage?name=woocommerce&source=partner" target="_blank" class="mc-wc-btn mc-wc-btn-primary" style="padding:12px 32px;"><?php esc_html_e('Continue to Mailchimp', 'mailchimp-for-woocommerce'); ?></a>
+            <a href="http://admin.mailchimp.com/integrations/manage?name=woocommerce&source=partner" target="_blank" data-mc-event="continue_to_mailchimp" class="mc-wc-btn mc-wc-btn-primary js-mailchimp-woocommerce-send-event" style="padding:12px 32px;"><?php esc_html_e('Continue to Mailchimp', 'mailchimp-for-woocommerce'); ?></a>
         </div>
     </div>
 </div>

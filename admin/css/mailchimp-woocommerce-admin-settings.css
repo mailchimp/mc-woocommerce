@@ -1194,6 +1194,10 @@ a.button.create-account {
 	padding: 5px 0 10px;
 }
 
+#mc-woocommerce-business-address {
+	margin-top: 40px;
+}
+
 #mc-woocommerce-create-account-step-2 {
 	display: none;
 }
@@ -1320,7 +1324,7 @@ body #wpcontent {
 }
 
 .mc-woocommerce-create-account__body {
-	background: #fff;
+	background: #F6F6F4;
 }
 .mc-woocommerce-create-account__body-inner {
 	max-width: 600px;

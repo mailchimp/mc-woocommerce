@@ -1797,19 +1797,30 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             return false;
         }
 
+        // if we've set the account name
         if ( ( $account_name = $this->getData( 'account_name', false ) ) ) {
-            return $account_name;
+            // and make sure we've set the user id before returning the account name
+            if ($this->getData('mailchimp_user_id')) {
+                return $account_name;
+            }
         }
 
+        // ping the api root
         $root = $this->api()->ping(true);
 
-        $name = is_array($root) && array_key_exists('account_name', $root) ? $root['account_name'] : false;
-        $mailchimp_user_id = is_array($root) && array_key_exists('login_id', $root) ? $root['login_id'] : false;
+        // if we've got data
+        if (is_array($root)) {
+            // grab the important fields and save them
+            $name = array_key_exists('account_name', $root) ? $root['account_name'] : false;
+            $mailchimp_user_id = array_key_exists('account_id', $root) ? $root['account_id'] : false;
+            $mailchimp_login_id = array_key_exists('login_id', $root) ? $root['login_id'] : false;
+            $this->setData('account_name', $name);
+            $this->setData('mailchimp_user_id', $mailchimp_user_id);
+            $this->setData('mailchimp_login_id', $mailchimp_login_id);
+            return $name;
+        }
 
-        $this->setData('account_name', $name);
-        $this->setData('mailchimp_user_id', $mailchimp_user_id);
-
-        return $name;
+        return false;
     }
 
 	/**

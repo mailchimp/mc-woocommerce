@@ -63,11 +63,11 @@ class Mailchimp_Woocommerce_Event
             return null;
         }
 
-        if (!($mc_user_id = get_option('mailchimp_user_id', null))) {
+        if (!($mc_user_id = get_option('mailchimp-woocommerce-mailchimp_user_id', null))) {
             $mc_user_id = null;
         }
 
-        if (!($mc_login_id = mailchimp_get_store_id())) {
+        if (!($mc_login_id = get_option('mailchimp-woocommerce-mailchimp_login_id', null))) {
             $mc_login_id = null;
         }
 
@@ -192,8 +192,8 @@ class Mailchimp_Woocommerce_Event
             'sentAt' => $this->date ? $this->date : time(),
             'context' => array(
                 'internal_mc_user' => false,
-                'user_id' => $this->user_id ?? '',
-                'login_id' => $this->login_id ?? '',
+                'user_id' => $this->user_id ? $this->user_id : '',
+                'login_id' => $this->login_id ? $this->login_id : '',
                 'company_id' => '',
                 'pseudonym_id' => '',
             ),
@@ -219,7 +219,6 @@ class Mailchimp_Woocommerce_Event
         $payload['event'] = $payload['properties']['object'] === '' ? $payload['properties']['action'] : $payload['properties']['object'] . ':' . $payload['properties']['action'];
 
         if (empty($this->user_id)) {
-
             mailchimp_log('mailchimp_events', "mailchimp beacon :: sending anonymous event");
             // remove the user id and login id if we don't have this info yet.
             unset($payload['context']['user_id'], $payload['context']['login_id']);

@@ -824,20 +824,22 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 
 		switch ( $active_tab ) {
-
-			case 'api_key':
-				$data = $this->validatePostApiKey( $input );
-                if (!empty($data) && empty($data['api_ping_error'])) {
-                    mailchimp_set_transient('oauth_success', true, 10);
-                    mailchimp_flush_sync_pointers();
-                }
-				break;
-
+//			case 'api_key':
+//				$data = $this->validatePostApiKey( $input );
+//                if (!empty($data) && empty($data['api_ping_error'])) {
+//                    mailchimp_set_transient('oauth_success', true, 10);
+//                    mailchimp_flush_sync_pointers();
+//                }
+//				break;
 			case 'store_info':
 				$data = $this->validatePostStoreInfo( $input );
 				break;
 
+            case 'api_key':
 			case 'newsletter_settings':
+                if ($active_tab === 'api_key') {
+                    $input['mailchimp_active_breadcrumb'] = 'review_sync_settings';
+                }
 				$data = $this->validatePostNewsletterSettings( $input );
 				$this->defineWebHooks();
 				break;
@@ -1252,38 +1254,33 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 		$response_body = json_decode( $response['body'] );
 		if ( $response['response']['code'] == 200 && $response_body->success == true ) {
-				Mailchimp_Woocommerce_Event::track('connect_accounts:create_account_complete', new DateTime());
-
-				$result = json_decode( $response['body'], true);
-
-				$options = get_option($this->plugin_name);
-				$options['mailchimp_api_key'] = $result['data']['oauth_token'].'-'.$result['data']['dc'];
-
-				// go straight to the DB and update the options to bypass any filters.
-				$wpdb->update(
-						$wpdb->options,
-						array('option_value' => maybe_serialize($options)),
-						array('option_name' => $this->plugin_name)
-				);
-        update_option('mc-woocommerce-waiting-for-login', 'waiting');
-        Mailchimp_Woocommerce_Event::track('connect_accounts_oauth:start', new DateTime());
-
-        wp_send_json_success( $response_body );
-		} elseif ( $response['response']['code'] == 404 ) {
-			wp_send_json_error( array( 'success' => false ) );
-		} else {
-			$username = preg_replace( '/[^A-Za-z0-9\-\@\.]/', '', $_POST['data']['username'] );
-			Mailchimp_Woocommerce_Event::track('account:verify_email', new DateTime());
-			$suggestion         = wp_remote_get( 'https://woocommerce.mailchimpapp.com/api/usernames/suggestions/' . $username );
-			$suggested_username = json_decode( $suggestion['body'] )->data;
-			wp_send_json_error(
-				array(
-					'success'    => false,
-					'suggest_login' => true,
-					'suggested_username' => $suggested_username,
-				)
-			);
-		}
+            Mailchimp_Woocommerce_Event::track('connect_accounts:create_account_complete', new DateTime());
+            $result = json_decode( $response['body'], true);
+            $options = get_option($this->plugin_name);
+            $options['mailchimp_api_key'] = $result['data']['oauth_token'].'-'.$result['data']['dc'];
+            // go straight to the DB and update the options to bypass any filters.
+            $wpdb->update(
+                $wpdb->options,
+                array('option_value' => maybe_serialize($options)),
+                array('option_name' => $this->plugin_name)
+            );
+            update_option('mc-woocommerce-waiting-for-login', 'waiting');
+            wp_send_json_success( $response_body );
+        } elseif ( $response['response']['code'] == 404 ) {
+            wp_send_json_error( array( 'success' => false ) );
+        } else {
+            $username = preg_replace( '/[^A-Za-z0-9\-\@\.]/', '', $_POST['data']['username'] );
+            Mailchimp_Woocommerce_Event::track('account:verify_email', new DateTime());
+            $suggestion         = wp_remote_get( 'https://woocommerce.mailchimpapp.com/api/usernames/suggestions/' . $username );
+            $suggested_username = json_decode( $suggestion['body'] )->data;
+            wp_send_json_error(
+                array(
+                    'success'    => false,
+                    'suggest_login' => true,
+                    'suggested_username' => $suggested_username,
+                )
+            );
+        }
 	}
 
 	/**

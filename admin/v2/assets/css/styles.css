@@ -1575,6 +1575,7 @@ select#log_file {}
     box-shadow: 0 0 0 1px hsla(0, 0%, 100%, 0.1), 0 16px 24px rgba(0, 0, 0, 0.24);
     border-color: hsla(0, 0%, 100%, .5);
     display: none;
+    z-index: 10;
 }
 
 .mc-wc-notice.success {

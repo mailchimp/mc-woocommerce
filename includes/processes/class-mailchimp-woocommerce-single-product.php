@@ -38,7 +38,12 @@ class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
     public function setId($id)
     {
         if (!empty($id)) {
-            $this->id = $id instanceof WP_Post ? $id->ID : $id;
+            // when we pass in a wc product or an object that has a method called get_id we can use it.
+            if ($id instanceof WC_Product || (is_object($id) && method_exists($id, 'get_id'))) {
+                $this->id = $id->get_id();
+            } else {
+                $this->id = $id instanceof WP_Post ? $id->ID : $id;
+            }
         }
         return $this;
     }

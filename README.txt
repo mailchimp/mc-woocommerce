@@ -79,4 +79,7 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 
 == Changelog ==
 = 4.1 =
-- New account create flow.
+* Introduced a new filter for coupons (details available in the Wiki).
+* Restored the "Resync Now" button.
+* Reinstated the Mailchimp icon in the WordPress admin sidebar.
+* Updated the design of the Mailchimp account creation user experience.

@@ -1332,8 +1332,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             'br' => array(),
         );
 
+        $defaults = $this->loadWooStoreData();
+
 		if (isset( $input['store_locale'] ) && $input['store_locale'] !== get_locale()) {
             Mailchimp_Woocommerce_Event::track('navigation_store:change_locale', new DateTime());
+            $defaults['store_locale'] = $input['store_locale'];
 		}
 
 		if (isset( $input['mailchimp_checkbox_action'] )&& $input['mailchimp_checkbox_action'] !== $this->getOption( 'mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form' )) {
@@ -1344,7 +1347,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			Mailchimp_Woocommerce_Event::track('navigation_store:product_image_size', new DateTime());
         }
 
-		return array_merge($this->loadWooStoreData(), array(
+		return array_merge($defaults, array(
             'admin_email'                 => isset( $input['admin_email'] ) && is_email( $input['admin_email'] ) ? $input['admin_email'] : get_option( 'admin_email' ),
             'mailchimp_permission_cap'    => $permissions,
             'mailchimp_checkbox_action'   => isset( $input['mailchimp_checkbox_action'] ) ? $input['mailchimp_checkbox_action'] : $this->getOption( 'mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form' ),

@@ -25,6 +25,7 @@ class Mailchimp_Woocommerce_Event
     protected $ui_access_point = 'center';
     protected $event_params = [];
     protected $last_error = null;
+    /** @var null|DateTime */
     protected $date = null;
     protected $user_id = null;
     protected $login_id = null;
@@ -187,9 +188,10 @@ class Mailchimp_Woocommerce_Event
      */
     public function compile()
     {
+        $current = new DateTime('now');
         $payload = array(
-            'timestamp' => time(),
-            'sentAt' => $this->date ? $this->date : time(),
+            'timestamp' => $current->format(DateTime::ISO8601),
+            'sentAt' => $this->date ? $this->date->format(DateTime::ISO8601) : $current->format(DateTime::ISO8601),
             'context' => array(
                 'internal_mc_user' => false,
                 'user_id' => $this->user_id ? $this->user_id : '',

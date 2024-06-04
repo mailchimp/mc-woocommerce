@@ -4,7 +4,7 @@
 class Mailchimp_Woocommerce_Event
 {
     // we need to do some more stuff on this before pushing
-    protected static $prevent = false;
+    protected static $prevent = true;
 
     protected $event = '';
     protected $title = '';
@@ -128,6 +128,10 @@ class Mailchimp_Woocommerce_Event
      */
     public function handle()
     {
+        if (static::$prevent) {
+            return null;
+        }
+
         try {
             $this->last_error = null;
             $this->submitted_data = $this->compile();

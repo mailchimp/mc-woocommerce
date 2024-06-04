@@ -188,10 +188,11 @@ class Mailchimp_Woocommerce_Event
      */
     public function compile()
     {
+        $format = 'Y-m-d H:i:s';
         $current = new DateTime('now');
         $payload = array(
-            'timestamp' => $current->format(DateTime::ISO8601),
-            'sentAt' => $this->date ? $this->date->format(DateTime::ISO8601) : $current->format(DateTime::ISO8601),
+            'timestamp' => $current->format($format),
+            'sentAt' => $this->date ? $this->date->format($format) : $current->format($format),
             'context' => array(
                 'internal_mc_user' => false,
                 'user_id' => $this->user_id ? $this->user_id : '',

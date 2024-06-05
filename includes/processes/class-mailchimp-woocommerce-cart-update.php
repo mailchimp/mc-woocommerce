@@ -86,7 +86,6 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
     public function process()
     {
         try {
-
             if (!mailchimp_is_configured() || !($api = mailchimp_get_api())) {
                 mailchimp_debug(get_called_class(), 'Mailchimp is not configured properly');
                 return false;
@@ -120,10 +119,8 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
 
             $cart = new MailChimp_WooCommerce_Cart();
             $cart->setId($this->id);
-
             $cart->setCheckoutUrl($checkout_url);
             $cart->setCurrencyCode();
-
             $cart->setCustomer($customer);
 
             $order_total = 0;
@@ -147,23 +144,9 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
             $cart->setOrderTotal($order_total);
 
             try {
-                try {
-                    // if the post is successful we're all good.
-                    if ($api->addCart($store_id, $cart, false) !== false) {
-                        mailchimp_log('abandoned_cart.success', "email: {$customer->getEmailAddress()} :: checkout_url: $checkout_url");
-                    }
-                } catch (Exception $e) {
-                    // for some reason this happens on carts and we need to make sure that this doesn't prevent
-                    // the submission from going through.
-                    if (mailchimp_string_contains($e->getMessage(), 'campaign with the')) {
-                        // remove the campaign ID and re-submit
-                        $cart->removeCampaignID();
-                        if ($api->addCart($store_id, $cart, false) !== false) {
-                            mailchimp_log('abandoned_cart.success', "email: {$customer->getEmailAddress()} :: checkout_url: $checkout_url");
-                        }
-                    } else {
-                        throw $e;
-                    }
+                // if the post is successful we're all good.
+                if ($api->addCart($store_id, $cart, false) !== false) {
+                    mailchimp_log('abandoned_cart.success', "email: {$customer->getEmailAddress()} :: checkout_url: $checkout_url");
                 }
             } catch (Exception $e) {
 

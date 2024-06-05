@@ -1395,8 +1395,19 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	protected function validatePostNewsletterSettings( $input ) {
 		$sanitized_tags = array_map( 'sanitize_text_field', explode( ',', $input['mailchimp_user_tags'] ) );
-		$active_tab = isset( $input['mailchimp_active_tab'] ) ? $input['mailchimp_active_tab'] : (isset( $input['mailchimp_active_settings_tab'] ) ?  $input['mailchimp_active_settings_tab']: null);
+		$active_tab = isset( $input['mailchimp_active_tab'] ) ? $input['mailchimp_active_tab'] : (isset( $input['mailchimp_active_settings_tab'] ) ? $input['mailchimp_active_settings_tab']: null);
         $breadcrumb = isset($input['mailchimp_active_breadcrumb']) ? $input['mailchimp_active_breadcrumb'] : '';
+
+        // if we're on the review sync settings page, or the confirmation page,
+        // we have a checkbox for the ongoing sync status. When the form is submitted,
+        // it will not be present if the store owner unselects this option.
+        // we need to see if they've previously had this set to ON, and if so, this means it can be set to FALSE.
+        if (!empty($breadcrumb) && in_array($breadcrumb, array('review_sync_settings', 'confirmation'), true)) {
+            $saved_sync_status = (bool) $this->getOption('mailchimp_ongoing_sync_status');
+            if ($saved_sync_status && !isset($input['mailchimp_ongoing_sync_status'])) {
+                $input['mailchimp_ongoing_sync_status'] = '0';
+            }
+        }
 
         if ($breadcrumb === 'review_sync_settings') {
             $validate_campaign_settings = true;
@@ -1405,7 +1416,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 'mailchimp_auto_subscribe'      => isset( $input['mailchimp_auto_subscribe'] ) ? (string) $input['mailchimp_auto_subscribe'] : $this->getOption( 'mailchimp_auto_subscribe', '1' ),
                 'mailchimp_cart_tracking'       => isset( $input['mailchimp_cart_tracking'] ) ? $input['mailchimp_cart_tracking'] : 'all',
                 'mailchimp_user_tags'           => isset( $input['mailchimp_user_tags'] ) ? implode( ',', $sanitized_tags ) : $this->getOption( 'mailchimp_user_tags' ),
-                'mailchimp_ongoing_sync_status' => isset( $input['mailchimp_ongoing_sync_status'] ) ? (bool) $input['mailchimp_ongoing_sync_status'] : $this->getOption('mailchimp_ongoing_sync_status', '1'),
+                'mailchimp_ongoing_sync_status' => isset( $input['mailchimp_ongoing_sync_status'] ) ? (bool) $input['mailchimp_ongoing_sync_status'] : '0',
             ));
             Mailchimp_Woocommerce_Event::track('review_settings:sync_now_bottom', new DateTime());
         } else if ($breadcrumb === 'confirmation') {
@@ -1413,7 +1424,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             $data = array(
                 'mailchimp_cart_tracking'       => isset( $input['mailchimp_cart_tracking'] ) ? $input['mailchimp_cart_tracking'] : 'all',
                 'mailchimp_user_tags'           => isset( $input['mailchimp_user_tags'] ) ? implode( ',', $sanitized_tags ) : $this->getOption( 'mailchimp_user_tags' ),
-                'mailchimp_ongoing_sync_status' => isset( $input['mailchimp_ongoing_sync_status'] ) ? (bool) $input['mailchimp_ongoing_sync_status'] : $this->getOption('mailchimp_ongoing_sync_status', '1'),
+                'mailchimp_ongoing_sync_status' => isset( $input['mailchimp_ongoing_sync_status'] ) ? (bool) $input['mailchimp_ongoing_sync_status'] : '0',
             );
         } else {
             $validate_campaign_settings = true;
@@ -1446,7 +1457,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             }
 		}
 
-		if ($this->getOption('mailchimp_ongoing_sync_status', '1') !== $data['mailchimp_ongoing_sync_status']) {
+		if ((bool) $this->getOption('mailchimp_ongoing_sync_status', '1') !== (bool) $data['mailchimp_ongoing_sync_status']) {
             if ($data['mailchimp_ongoing_sync_status'] === '1' || $data['mailchimp_ongoing_sync_status'] === true) {
                 if ($active_tab === 'newsletter_settings') {
                     Mailchimp_Woocommerce_Event::track('review_settings:sync_new_non_subscribed', new DateTime());

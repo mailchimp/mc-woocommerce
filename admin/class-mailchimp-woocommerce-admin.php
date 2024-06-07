@@ -1370,6 +1370,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             'store_postal_code' => get_option( 'woocommerce_store_postcode' ),
             'store_country' => !empty($split_country) ? $split_country[0] : 0,
             'store_street' => $store_address.(!empty($store_address_2) ? " {$store_address_2}" : ''),
+            'store_street_2' => $store_address_2,
             'store_currency_code' => get_woocommerce_currency(),
             'store_timezone' => mailchimp_get_timezone(),
             'store_locale' => get_locale()

@@ -19,6 +19,8 @@ $email = isset($user->email) ? $user->email : '';
 if ($profile) {
 	$email = $profile['email'];
 }
+
+$store_defaults = MailChimp_WooCommerce_Admin::instance()->loadWooStoreData();
 ?>
 <div id="mc-woocommerce-create-account">
 	<input type="hidden" name="signup_initiated" value="<?php echo esc_attr(!!$signup_initiated) ?>" />
@@ -99,7 +101,7 @@ if ($profile) {
 										<label for="business_name">
 											<span><?php esc_html_e( 'Business name', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input required type="text" id="business_name" name="business_name" value="<?php echo esc_html( isset($user->billing_company) ? $user->billing_company : '' ); ?>"/>
+										<input required type="text" id="business_name" name="business_name" value="<?php echo esc_html( $store_defaults['store_name'] ); ?>"/>
 										<p id="mc-woocommerce-business_name-error" class="error-field"></p>
 
 										<p><?php esc_html_e( 'You can always change this later in your account settings.', 'mailchimp-for-woocommerce' ); ?></p>
@@ -146,7 +148,7 @@ if ($profile) {
 										<label for="address">
 											<span> <?php esc_html_e( 'Address line 1 (Street address or post office box)', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input required type="text" id="address" name="address" value="<?php echo esc_html( isset($user->billing_address_1) ? $user->billing_address_1 : ''  ); ?>"/>
+										<input required type="text" id="address" name="address" value="<?php echo esc_html( $store_defaults['store_street']  ); ?>"/>
 										<p id="mc-woocommerce-address-error" class="error-field"></p>
 									</div>
 								</div>
@@ -156,7 +158,7 @@ if ($profile) {
 										<label for="address2">
 											<span> <?php esc_html_e( 'Address line 2', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input type="text" id="address2" name="address2" value="<?php echo esc_html( isset($user->billing_address_2) ? $user->billing_address_2 : ''  ); ?>"/>
+										<input type="text" id="address2" name="address2" value="<?php echo esc_html( $store_defaults['store_street_2']  ); ?>"/>
 									</div>
 								</div>
 
@@ -165,14 +167,14 @@ if ($profile) {
 										<label for="city">
 											<span> <?php esc_html_e( 'City', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input required type="text" id="city" name="city" value="<?php echo esc_html( isset($user->billing_city) ? $user->billing_city : ''  ); ?>"/>
+										<input required type="text" id="city" name="city" value="<?php echo esc_html( $store_defaults['store_city']  ); ?>"/>
 										<p id="mc-woocommerce-city-error" class="error-field"></p>
 									</div>
 									<div class="box box-half">
 										<label for="state">
 											<span> <?php esc_html_e( 'State/Province/Region', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input required type="text" id="state" name="state" value="<?php echo esc_html( isset($user->billing_state) ? $user->billing_state : '' ); ?>"/>
+										<input required type="text" id="state" name="state" value="<?php echo esc_html( $store_defaults['store_state'] ); ?>"/>
 										<p id="mc-woocommerce-state-error" class="error-field"></p>
 									</div>
 								</div>
@@ -182,7 +184,7 @@ if ($profile) {
 										<label for="zip">
 											<span> <?php esc_html_e( 'Zip/Postal code', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input required type="text" id="zip" name="zip" value="<?php echo esc_html( isset($user->billing_postcode) ? $user->billing_postcode : '' ); ?>"/>
+										<input required type="text" id="zip" name="zip" value="<?php echo esc_html( $store_defaults['store_postal_code'] ); ?>"/>
 										<p id="mc-woocommerce-zip-error" class="error-field"></p>
 									</div>
 									<div class="box box-half">
@@ -206,7 +208,7 @@ if ($profile) {
                                 'required'    => true,
                                 'value'
                             ),
-                            isset( $options['store_country'] ) ? $options['store_country'] : WC()->countries->get_base_country()
+                            isset( $store_defaults['store_country'] ) ? $store_defaults['store_country'] : WC()->countries->get_base_country()
                         );
                         ?>
 										</div>
@@ -220,7 +222,7 @@ if ($profile) {
 										</label>
 										<div class="mailchimp-select-wrapper">
 											<select id="timezone" name="timezone" required>
-                          <?php $selected_timezone = isset( $options['store_timezone'] ) && ! empty( $options['store_timezone'] ) ? $options['store_timezone'] : get_option( 'timezone_string' ); ?>
+                          <?php $selected_timezone = isset( $store_defaults['store_timezone'] ) && ! empty( $store_defaults['store_timezone'] ) ? $store_defaults['store_timezone'] : get_option( 'timezone_string' ); ?>
                           <?php
                           foreach ( mailchimp_get_timezone_list() as $t ) {
                               echo '<option value="' . esc_attr( $t['zone'] ) . '" ' . selected( $t['zone'] === $selected_timezone, true, false ) . '>' . esc_html( $t['diff_from_GMT'] . ' - ' . $t['zone'] ) . '</option>';

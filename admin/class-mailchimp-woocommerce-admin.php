@@ -821,6 +821,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			);
 		}
 
+        $skip_api_validation = false;
+
 		switch ( $active_tab ) {
 			case 'store_info':
 				$data = $this->validatePostStoreInfo( $input );
@@ -843,10 +845,13 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 					$service->removePointers();
 					$this->startSync();
 					$this->setData( 'sync.config.resync', true );
+                    $skip_api_validation = true;
 				}
 				break;
 
 			case 'logs':
+                $skip_api_validation = true;
+
 				if ( isset( $_POST['log_file'] ) && ! empty( $_POST['log_file'] ) ) {
 					set_site_transient( 'mailchimp-woocommerce-view-log-file', sanitize_text_field( $_POST['log_file'] ), 30 );
 				}
@@ -893,7 +898,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 
 		// if no API is provided, check if the one saved on the database is still valid, ** only not if disconnect store is issued **.
-		if ( ! $this->is_disconnecting() && ! isset( $input['mailchimp_api_key'] ) && $this->getOption( 'mailchimp_api_key' ) ) {
+		if (!$skip_api_validation && ! $this->is_disconnecting() && ! isset( $input['mailchimp_api_key'] ) && $this->getOption( 'mailchimp_api_key' ) ) {
 			// set api key for validation
 			$input['mailchimp_api_key'] = $this->getOption( 'mailchimp_api_key' );
 			$api_key_valid              = $this->validatePostApiKey( $input );

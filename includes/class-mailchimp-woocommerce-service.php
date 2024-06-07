@@ -400,11 +400,13 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             return;
         }
 
-        mailchimp_debug('action', "handleProcessProductMeta {$product->get_id()} update being queued", array(
+        $id = $product->get_parent_id() > 0 ? $product->get_parent_id() : $product->get_id();
+
+        mailchimp_debug('action', "handleProcessProductMeta {$id} update being queued", array(
             'data' => $data,
         ));
 
-        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($product->get_id()), 5);
+        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($id), 5);
     }
 
 	/**

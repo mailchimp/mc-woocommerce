@@ -1486,18 +1486,31 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
  * @param string $samesite
  */
 function mailchimp_set_cookie($name, $value, $expire, $path, $domain = '', $secure = true, $httponly = false, $samesite = 'Strict') {
+
     if (PHP_VERSION_ID < 70300) {
         @setcookie($name, $value, $expire, $path . '; samesite=' . $samesite, $domain, $secure, $httponly);
         return;
     }
-    @setcookie($name, $value, [
-        'expires' => $expire,
-        'path' => $path,
-        'domain' => $domain,
-        'samesite' => $samesite,
-        'secure' => $secure,
-        'httponly' => $httponly,
+
+    // allow the cookie options to be filtered
+    $cookie_data = apply_filters('mailchimp_cookie_data', [
+        'name' => $name,
+        'options' => [
+            'expires' => $expire,
+            'path' => $path,
+            'domain' => $domain,
+            'samesite' => $samesite,
+            'secure' => $secure,
+            'httponly' => $httponly,
+        ],
     ]);
+
+    // if the filter doesn't return a valid set of options, we need to ignore this cookie.
+    if (!$cookie_data || !is_array($cookie_data) || !array_key_exists('options', $cookie_data)) {
+        return;
+    }
+
+    @setcookie($name, $value, $cookie_data['options']);
 }
 
 /**

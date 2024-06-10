@@ -85,3 +85,4 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 * Updated the design of the Mailchimp account creation user experience.
 * Fix for duplicated parent products when variation's info is edited.
 * Tested up to Woocommerce v9.0
+* Support for customization of the cookie options being set

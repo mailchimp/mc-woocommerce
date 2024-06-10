@@ -4,6 +4,8 @@
 * Restored the "Resync Now" button.
 * Reinstated the Mailchimp icon in the WordPress admin sidebar.
 * Updated the design of the Mailchimp account creation user experience.
+* Fix for duplicated parent products when variation's info is edited. 
+* Tested up to Woocommerce v9.0
 = 4.0.2 =
 * Adds the Changelog back to the UI
 * Tested up to Woocommerce v8.9

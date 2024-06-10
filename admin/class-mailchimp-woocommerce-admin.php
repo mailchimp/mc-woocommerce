@@ -1177,7 +1177,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$admin_email = $this->getOption( 'admin_email' );
 
 		if ( empty( $admin_email ) ) {
-			return null;
+            $admin_email = get_option('admin_email');
+            if (empty($admin_email)) {
+                return null;
+            }
 		}
 
 		$pload    = array(
@@ -1275,10 +1278,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	protected function validatePostStoreInfo( $input ) {
 		$data = $this->compileStoreInfoData( $input );
 
-		// change communication status options
-		$comm_opt = get_option( 'mailchimp-woocommerce-comm.opt', 0 );
-		$this->mailchimp_set_communications_status_on_server( $comm_opt, $data['admin_email'] );
-
 		$this->setData( 'validation.store_info', true );
 
 		if ( $this->hasValidMailChimpList() ) {
@@ -1353,7 +1352,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         }
 
 		return array_merge($defaults, array(
-            'admin_email'                 => isset( $input['admin_email'] ) && is_email( $input['admin_email'] ) ? $input['admin_email'] : get_option( 'admin_email' ),
+            'admin_email'                 => get_option( 'admin_email' ),
             'mailchimp_permission_cap'    => $permissions,
             'mailchimp_checkbox_action'   => isset( $input['mailchimp_checkbox_action'] ) ? $input['mailchimp_checkbox_action'] : $this->getOption( 'mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form' ),
             'mailchimp_product_image_key' => isset( $input['mailchimp_product_image_key'] ) ? $input['mailchimp_product_image_key'] : 'medium',
@@ -1369,6 +1368,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         $store_raw_country  = get_option( 'woocommerce_default_country' );
         $split_country      = explode( ":", $store_raw_country );
         return array(
+            'admin_email' => get_option( 'admin_email' ),
             'store_name' => get_option('blogname'),
             'store_city' => get_option( 'woocommerce_store_city' ),
             'store_state' => !empty($split_country) && isset( $split_country[1] ) ? $split_country[1] : '',
@@ -1961,7 +1961,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		// set the basics
 		$store->setName( $this->array_get( $data, 'store_name', get_option( 'blogname' ) ) );
 		$store->setDomain( get_option( 'siteurl' ) );
-		$store->setEmailAddress( $this->array_get( $data, 'admin_email' ) );
+		$store->setEmailAddress( $this->array_get( $data, 'admin_email', get_option('admin_email') ) );
 		$store->setAddress( $this->address( $data ) );
 		$store->setListId( $list_id );
 
@@ -2122,7 +2122,21 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$opt          = $_POST['opt'];
 		$admin_email  = $this->getOptions()['admin_email'];
 
-		mailchimp_debug( 'communication_status', "setting to {$opt}" );
+        if (empty($admin_email)) {
+            $admin_email = get_option('admin_email');
+        }
+
+        if (!is_email($admin_email)) {
+            wp_send_json_error(
+                array(
+                    'error' => __( 'Error setting communications status', 'mailchimp-for-woocommerce' ),
+                    'opt'   => $original_opt,
+                    'reason' => 'invalid email',
+                )
+            );
+        }
+
+		mailchimp_debug( 'communication_status', "setting to {$opt} for {$admin_email}" );
 		Mailchimp_Woocommerce_Event::track('navigation_advanced:opt_in_email', new DateTime());
 
 		// try to set the info on the server
@@ -2145,7 +2159,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				)
 			);
 		}
-
 		wp_die();
 	}
 

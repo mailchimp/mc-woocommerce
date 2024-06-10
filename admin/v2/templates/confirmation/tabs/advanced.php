@@ -13,8 +13,8 @@ $store_id = mailchimp_get_store_id();
 $opt           = get_option( 'mailchimp-woocommerce-comm.opt' );
 $tower_opt     = get_option( 'mailchimp-woocommerce-tower.opt' );
 $admin_email   = mailchimp_get_option( 'admin_email', get_option( 'admin_email' ) );
-$comm_enabled  = null !== $opt ? $opt : '0';
-$tower_enabled = null !== $tower_opt ? $tower_opt : '0';
+$comm_enabled  = null !== $opt ? (string) $opt : '0';
+$tower_enabled = null !== $tower_opt ? (string) $tower_opt : '0';
 ?>
 
 <input type="hidden" name="mailchimp_active_settings_tab" value="<?php echo MC_WC_ADVANCED_TAB; ?>"/>

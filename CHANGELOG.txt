@@ -1,8 +1,16 @@
 == Changelog ==
+= 4.1 =
+* Introduced a new filter for coupons (details available in the Wiki).
+* Restored the "Resync Now" button.
+* Reinstated the Mailchimp icon in the WordPress admin sidebar.
+* Updated the design of the Mailchimp account creation user experience.
+* Fix for duplicated parent products when variation's info is edited. 
+* Tested up to Woocommerce v9.0
+* Support for customization of the cookie options being set
 = 4.0.2 =
-* adds the Changelog back to the UI
-* tested up to Woocommerce v8.9
-* fixed connection issue when disconnecting and reconnecting
+* Adds the Changelog back to the UI
+* Tested up to Woocommerce v8.9
+* Fixed connection issue when disconnecting and reconnecting
 = 4.0.1 =
 * Log changes
 * Add audience name to overview

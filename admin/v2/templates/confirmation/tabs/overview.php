@@ -105,12 +105,15 @@ if ( $store ) {
                 <span>
                 <?php
                     echo sprintf(
-                        /* translators: %s - Plugin review URL. */                    wp_kses(
-                            __( 'Enjoying this plugin? <a href=%s target=_blank>Leave us a review!</a>', 'mailchimp-for-woocommerce' ),
+                        /* translators: %s - Plugin review URL. */
+												wp_kses(
+                            __( 'Enjoying this plugin? <a href=%s target=_blank class="js-mailchimp-woocommerce-send-event" data-mc-event="leave_review">Leave us a review!</a>', 'mailchimp-for-woocommerce' ),
                             array(
                                 'a' => array(
                                     'href'   => array(),
                                     'target' => '_blank',
+																		'class' 	=> 'js-mailchimp-woocommerce-send-event',
+																		'data-mc-event' => 'leave_review'
                                 ),
                             )
                         ),
@@ -142,11 +145,13 @@ if ( $store ) {
                             <?php esc_html_e($is_done_syncing ? 'Complete' : 'Syncing', 'mailchimp-for-woocommerce' ); ?>
                         </span>
                     </div>
+
                     <div class="sync-status-text">
                         <span style="text-align:center;">
                             <?php esc_html_e($audience_name, 'mailchimp-for-woocommerce' ); ?>
                         </span>
                     </div>
+
                     <div class="sync-status-time <?php if ( !$last_updated_time ) { echo "mc-wc-d-none"; } ?>">
                         <span class="sync-status-time-date">
                             <?php esc_html_e('Last sync', 'mailchimp-for-woocommerce' ); ?>
@@ -263,7 +268,7 @@ if ( $store ) {
                         );
                     ?>
                     </p>
-                    <a href="https://admin.mailchimp.com/audience/forms/dashboard" class="mc-wc-btn mc-wc-btn-primary no-linear-gradient" target="_blank"><?php echo __('Create a pop-up form', 'mailchimp-for-woocommerce' ); ?></a>
+                    <a href="https://admin.mailchimp.com/audience/forms/dashboard" data-mc-event="recommendation_1" class="mc-wc-btn mc-wc-btn-primary no-linear-gradient js-mailchimp-woocommerce-send-event" target="_blank"><?php echo __('Create a pop-up form', 'mailchimp-for-woocommerce' ); ?></a>
                 </div>
                 <div class="mc-wc-tab-content-blogs-image">
                     <img src="<?php echo esc_attr( plugin_dir_url( __FILE__ ) . '../../../assets/images/blog-image-1.png' ); ?>" alt="">
@@ -275,7 +280,7 @@ if ( $store ) {
                     <p>
                         <?php esc_html_e('Send targeted emails to customers who leave without completing their purchase. When you use Customer Journey Builder to automatically nudge customers, you could see up to 4x more orders than if you use bulk email.*', 'mailchimp-for-woocommerce' ); ?>
                     </p>
-                    <a href="https://admin.mailchimp.com/customer-journey/explore/prebuilt?id=abandoned_cart_reminder_series" class="mc-wc-btn mc-wc-btn-primary no-linear-gradient" target="_blank"><?php esc_html_e('Create abandoned cart journey', 'mailchimp-for-woocommerce' ); ?></a>
+                    <a href="https://admin.mailchimp.com/customer-journey/explore/prebuilt?id=abandoned_cart_reminder_series" data-mc-event="recommendation_2" class="mc-wc-btn mc-wc-btn-primary no-linear-gradient js-mailchimp-woocommerce-send-event" target="_blank"><?php esc_html_e('Create abandoned cart journey', 'mailchimp-for-woocommerce' ); ?></a>
                     <span><?php esc_html_e('*Requires paid plan. Functionality and features vary by plan.', 'mailchimp-for-woocommerce' ); ?>  </span>
                 </div>
                 <div class="mc-wc-tab-content-blogs-image">
@@ -288,7 +293,7 @@ if ( $store ) {
                     <p>
                         <?php esc_html_e('Get started with flexible templates, drag-and-drop design, and our built-in, expert advice. AI-assisted tools can help generate and optimize your content.', 'mailchimp-for-woocommerce' ); ?>
                     </p>
-                    <a href="https://admin.mailchimp.com/campaigns/#/create-campaign" class="mc-wc-btn mc-wc-btn-primary no-linear-gradient" target="_blank"><?php esc_html_e('Create your first email', 'mailchimp-for-woocommerce' ); ?></a>
+                    <a href="https://admin.mailchimp.com/campaigns/#/create-campaign" data-mc-event="recommendation_2" class="mc-wc-btn mc-wc-btn-primary no-linear-gradient js-mailchimp-woocommerce-send-event"  target="_blank"><?php esc_html_e('Create your first email', 'mailchimp-for-woocommerce' ); ?></a>
                 </div>
                 <div class="mc-wc-tab-content-blogs-image">
                     <img src="<?php echo esc_attr( plugin_dir_url( __FILE__ ) . '../../../assets/images/blog-image-3.png' ); ?>" alt="">

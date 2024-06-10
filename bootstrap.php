@@ -71,6 +71,7 @@ spl_autoload_register(function($class) {
 
         'MailChimp_WooCommerce_Public' => 'public/class-mailchimp-woocommerce-public.php',
         'MailChimp_WooCommerce_Admin' => 'admin/class-mailchimp-woocommerce-admin.php',
+        'Mailchimp_Woocommerce_Event' => 'admin/v2/processes/class-mailchimp-woocommerce-event.php',
 
         'MailChimp_WooCommerce_Fix_Duplicate_Store' => 'includes/api/class-mailchimp-woocommerce-fix-duplicate-store.php',
         'MailChimp_WooCommerce_Logs' => 'includes/api/class-mailchimp-woocommerce-logs.php',
@@ -96,7 +97,7 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production', // staging or production
-        'version' => '4.0.2',
+        'version' => '4.1',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => function_exists('WC') ? WC()->version : null,
@@ -184,6 +185,10 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
 
 
 /**
+ * We will allow people to filter delay value to specific jobs.
+ * add_filter( 'mailchimp_handle_or_queue_{$resource}_delay', 'custom_handle_or_queue_resource_function', 10, 1 );
+ * where $resource is one of the following - product, order, customer, coupon
+ *
  * @param Mailchimp_Woocommerce_Job $job
  * @param int $delay
  */
@@ -198,22 +203,37 @@ function mailchimp_handle_or_queue(Mailchimp_Woocommerce_Job $job, $delay = 0)
         // tell the system the order is already queued for processing in this saving process - and we don't need to process it again.
         set_site_transient( "mailchimp_order_being_processed_{$job->id}", true, 30);
     }
-
 	// Allow sites to alter whether the order or product is synced.
 	// $job should contain at least the ID of the order/product as $job->id.
-	if ( $job instanceof \MailChimp_WooCommerce_Single_Order ) {
-		if ( apply_filters( 'mailchimp_should_push_order', $job->id ) === false ) {
+    $filter_delay = null;
+
+    if ( $job instanceof \MailChimp_WooCommerce_Single_Order ) {
+        $filter_delay = apply_filters('mailchimp_handle_or_queue_order_delay', $delay);
+
+        if ( apply_filters( 'mailchimp_should_push_order', $job->id ) === false ) {
 			mailchimp_debug( 'action_scheduler.queue_job.order', "Order {$job->id} not pushed do to filter." );
 			return null;
 		}
 	} else if ( $job instanceof \MailChimp_WooCommerce_Single_Product ) {
-		if ( apply_filters( 'mailchimp_should_push_product', $job->id ) === false ) {
+        $filter_delay = apply_filters('mailchimp_handle_or_queue_product_delay', $delay);
+
+        if ( apply_filters( 'mailchimp_should_push_product', $job->id ) === false ) {
 			mailchimp_debug( 'action_scheduler.queue_job.product', "Product {$job->id} not pushed do to filter." );
 			return null;
 		}
-	}
+	} else if ( $job instanceof \MailChimp_WooCommerce_User_Submit ) {
+        $filter_delay = apply_filters('mailchimp_handle_or_queue_customer_delay', $delay);
+    } else if ( $job instanceof \MailChimp_WooCommerce_SingleCoupon ) {
+        $filter_delay = apply_filters('mailchimp_handle_or_queue_coupon_delay', $delay);
 
-    $as_job_id = mailchimp_as_push($job, $delay);
+        if ( apply_filters( 'mailchimp_should_push_coupon', $job->id ) === false ) {
+            mailchimp_debug( 'action_scheduler.queue_job.order', "Coupon {$job->id} not pushed do to filter." );
+            return null;
+        }
+    }
+
+    $filter_delay = !is_null($filter_delay) && is_int($filter_delay) ? $filter_delay : $delay;
+    $as_job_id = mailchimp_as_push($job, $filter_delay);
     
     if (!is_int($as_job_id)) {
         mailchimp_log('action_scheduler.queue_fail', get_class($job) .' FAILED :: as_job_id: '.$as_job_id);
@@ -742,6 +762,9 @@ function mailchimp_debug($action, $message, $data = null) {
  */
 function mailchimp_log($action, $message, $data = array()) {
     if (mailchimp_environment_variables()->logging !== 'none' && function_exists('wc_get_logger')) {
+        if (is_array($data) && !empty($data)) $message .= " :: ".wc_print_r($data, true);
+        wc_get_logger()->notice("{$action} :: {$message}", array('source' => 'mailchimp_woocommerce'));
+    } else {
         if (is_array($data) && !empty($data)) $message .= " :: ".wc_print_r($data, true);
         wc_get_logger()->notice("{$action} :: {$message}", array('source' => 'mailchimp_woocommerce'));
     }
@@ -1463,18 +1486,31 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
  * @param string $samesite
  */
 function mailchimp_set_cookie($name, $value, $expire, $path, $domain = '', $secure = true, $httponly = false, $samesite = 'Strict') {
+
     if (PHP_VERSION_ID < 70300) {
         @setcookie($name, $value, $expire, $path . '; samesite=' . $samesite, $domain, $secure, $httponly);
         return;
     }
-    @setcookie($name, $value, [
-        'expires' => $expire,
-        'path' => $path,
-        'domain' => $domain,
-        'samesite' => $samesite,
-        'secure' => $secure,
-        'httponly' => $httponly,
+
+    // allow the cookie options to be filtered
+    $cookie_data = apply_filters('mailchimp_cookie_data', [
+        'name' => $name,
+        'options' => [
+            'expires' => $expire,
+            'path' => $path,
+            'domain' => $domain,
+            'samesite' => $samesite,
+            'secure' => $secure,
+            'httponly' => $httponly,
+        ],
     ]);
+
+    // if the filter doesn't return a valid set of options, we need to ignore this cookie.
+    if (!$cookie_data || !is_array($cookie_data) || !array_key_exists('options', $cookie_data)) {
+        return;
+    }
+
+    @setcookie($name, $value, $cookie_data['options']);
 }
 
 /**
@@ -1615,4 +1651,579 @@ if (defined( 'WP_CLI' ) && WP_CLI) {
 	        WP_CLI::add_command( 'queue', 'Mailchimp_Wocoomerce_CLI' );
         }
     } catch (Exception $e) {}
+}
+
+function mailchimp_account_events() {
+    return array(
+        'account:land_on_signup' => array(
+            'initiative_name' => 'poppin_smu',
+            'scope_area' => 'signup',
+            'screen' => 'login_signup_page',
+            'object' => 'account',
+            'object_detail' => 'account_signup',
+            'action' => 'started',
+            'ui_object' => 'screen',
+            'ui_object_detail' => 'sign_up',
+            'ui_action' => 'viewed',
+            'ui_access_point' => 'center',
+        ),
+        'account:type_in_email_field' => array(
+            'initiative_name' => 'poppin_smu',
+            'scope_area' => 'signup',
+            'screen' => 'login_signup_enter_field',
+            'object_detail' => 'account_signup',
+            'action' => 'engaged',
+            'ui_object' => 'field',
+            'ui_object_detail' => 'email',
+            'ui_action' => 'filled_field',
+            'ui_access_point' => 'center',
+        ),
+        'account:sign_up_button_click' => array(
+            'initiative_name' => 'poppin_smu',
+            'scope_area' => 'signup',
+            'screen' => 'login_signup_page',
+            'object' => 'account',
+            'object_detail' => 'account_signup',
+            'action' => 'clicked',
+            'ui_object' => 'button',
+            'ui_object_detail' => 'sign_up',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'signup_page_signup_button',
+        ),
+        'account:login_signup_success' => array(
+            'initiative_name' => 'poppin_smu',
+            'scope_area' => 'signup',
+            'screen' => 'login_signup_success',
+            'object' => 'account',
+            'object_detail' => 'account_signup',
+            'action' => 'created',
+            'ui_object' => 'screen',
+            'ui_object_detail' => 'account_verification',
+            'ui_action' => 'viewed',
+            'ui_access_point' => 'center',
+        ),
+        'account:verify_email' => array(
+            'initiative_name' => 'poppin_smu',
+            'scope_area' => 'signup',
+            'screen' => 'app_signup_confirm',
+            'object' => 'account',
+            'object_detail' => 'account_signup',
+            'action' => 'clicked',
+            'ui_object' => 'button',
+            'ui_object_detail' => 'account_verification',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        // App Setup: Connect Accounts
+        'connect_accounts:view_screen' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=create-mailchimp-account'),
+            'object' => 'integration',
+            'object_detail' => 'connect_accounts',
+            'action' => 'viewed',
+            'ui_object' => "'",
+            'ui_object_detail' => "'",
+            'ui_action' => "'",
+            'ui_access_point' => "'",
+        ),
+        'connect_accounts:click_to_create_account' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=create-mailchimp-account'),
+            'object' => 'integration',
+            'object_detail' => 'connect_accounts',
+            'action' => 'started',
+            'ui_object' => 'button',
+            'ui_object_detail' => 'create_account',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        'connect_accounts:click_signup_top' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=create-mailchimp-account'),
+            'object' => 'integration',
+            'object_detail' => 'connect_accounts',
+            'action' => 'engaged',
+            'ui_object' => 'button',
+            'ui_object_detail' => 'sign_up',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'top',
+        ),
+        'connect_accounts:click_signup_bottom' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=create-mailchimp-account'),
+            'object' => 'integration',
+            'object_detail' => 'connect_accounts',
+            'action' => 'engaged',
+            'ui_object' => 'button',
+            'ui_object_detail' => 'sign_up',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'bottom',
+        ),
+        'connect_accounts:create_account_complete' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=create-mailchimp-account'),
+            'object' => 'integration',
+            'object_detail' => 'connect_accounts',
+            'action' => 'completed',
+            'ui_object' => 'action',
+            'ui_object_detail' => 'create_account_finish',
+            'ui_action' => 'completed',
+            'ui_access_point' => 'modal',
+        ),
+        'connect_accounts_oauth:start' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=create-mailchimp-account'),
+            'object' => 'integration',
+            'object_detail' => 'connect_accounts_oauth',
+            'action' => 'started',
+            'ui_object' => 'button',
+            'ui_object_detail' => 'connect',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        'connect_accounts_oauth:complete' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=create-mailchimp-account'),
+            'object' => 'integration',
+            'object_detail' => 'connect_accounts_oauth',
+            'action' => 'completed',
+            'ui_object' => "'",
+            'ui_object_detail' => "'",
+            'ui_action' => "'",
+            'ui_access_point' => "'",
+        ),
+        // App Setup: Review Settings
+        'review_settings:view_screen' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce'),
+            'object' => 'integration',
+            'object_detail' => 'review_settings',
+            'action' => 'viewed',
+            'ui_object' => "'",
+            'ui_object_detail' => "'",
+            'ui_action' => "'",
+            'ui_access_point' => "'",
+        ),
+        'review_settings:sync_as_subscribed' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce'),
+            'object' => 'integration',
+            'object_detail' => 'review_settings',
+            'action' => 'engaged',
+            'ui_object' => 'radio_button',
+            'ui_object_detail' => 'sync_subscribed',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        'review_settings:sync_as_non_subscribed' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce'),
+            'object' => 'integration',
+            'object_detail' => 'review_settings',
+            'action' => 'engaged',
+            'ui_object' => 'radio_button',
+            'ui_object_detail' => 'sync_non_subscribed',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        'review_settings:sync_existing_only' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce'),
+            'object' => 'integration',
+            'object_detail' => 'review_settings',
+            'action' => 'engaged',
+            'ui_object' => 'radio_button',
+            'ui_object_detail' => 'sync_existing',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        'review_settings:sync_new_non_subscribed' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce'),
+            'object' => 'integration',
+            'object_detail' => 'review_settings',
+            'action' => 'engaged',
+            'ui_object' => 'checkbox',
+            'ui_object_detail' => 'sync_new_non_subscribed',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        'review_settings:add_new_tag' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce'),
+            'object' => 'integration',
+            'object_detail' => 'review_settings',
+            'action' => 'engaged',
+            'ui_object' => 'button',
+            'ui_object_detail' => 'add',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        'review_settings:sync_now_bottom' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce'),
+            'object' => 'integration',
+            'object_detail' => 'review_settings',
+            'action' => 'engaged',
+            'ui_object' => 'button',
+            'ui_object_detail' => 'sync_now',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'bottom',
+        ),
+        'review_settings:sync_now_center' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce'),
+            'object' => 'integration',
+            'object_detail' => 'review_settings',
+            'action' => 'engaged',
+            'ui_object' => 'button',
+            'ui_object_detail' => 'sync_now',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        // App Setup: Sync Overview
+        'audience_stats:view_screen' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=sync'),
+            'object' => 'integration',
+            'object_detail' => 'audience_stats',
+            'action' => 'viewed',
+            'ui_object' => "'",
+            'ui_object_detail' => "'",
+            'ui_action' => "'",
+            'ui_access_point' => "'",
+        ),
+        'audience_stats:continue_to_mailchimp' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=sync'),
+            'object' => 'integration',
+            'object_detail' => 'audience_stats',
+            'action' => 'engaged',
+            'ui_object' => 'button',
+            'ui_object_detail' => 'continue_to_mailchimp',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'top',
+        ),
+        'audience_stats:leave_review' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=sync'),
+            'object' => 'integration',
+            'object_detail' => 'audience_stats',
+            'action' => 'engaged',
+            'ui_object' => 'button',
+            'ui_object_detail' => 'leave_us_a_review',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        'audience_stats:recommendation_1' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=sync'),
+            'object' => 'integration',
+            'object_detail' => 'audience_stats',
+            'action' => 'engaged',
+            'ui_object' => 'button',
+            'ui_object_detail' => 'recommendation_1',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        'audience_stats:recommendation_2' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=sync'),
+            'object' => 'integration',
+            'object_detail' => 'audience_stats',
+            'action' => 'engaged',
+            'ui_object' => 'button',
+            'ui_object_detail' => 'recommendation_2',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        'audience_stats:recommendation_3' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=sync'),
+            'object' => 'integration',
+            'object_detail' => 'audience_stats',
+            'action' => 'engaged',
+            'ui_object' => 'button',
+            'ui_object_detail' => 'recommendation_3',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        // App navigation
+        'navigation_store:view' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=store_info'),
+            'object' => 'integration',
+            'object_detail' => 'store_settings',
+            'action' => 'viewed',
+            'ui_object' => "'",
+            'ui_object_detail' => "'",
+            'ui_action' => "'",
+            'ui_access_point' => "'",
+        ),
+        'navigation_store:change_locale' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=store_info'),
+            'object' => 'integration',
+            'object_detail' => 'store_settings',
+            'action' => 'engaged',
+            'ui_object' => 'dropdown',
+            'ui_object_detail' => 'locale',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        'navigation_store:plugin_permission' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=store_info'),
+            'object' => 'integration',
+            'object_detail' => 'store_settings',
+            'action' => 'engaged',
+            'ui_object' => 'radio_button',
+            'ui_object_detail' => 'plugin_permission',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        'navigation_store:checkout_page_settings' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=store_info'),
+            'object' => 'integration',
+            'object_detail' => 'store_settings',
+            'action' => 'engaged',
+            'ui_object' => 'text_field',
+            'ui_object_detail' => 'checkout_page_settings',
+            'ui_action' => 'filled',
+            'ui_access_point' => 'center',
+        ),
+        'navigation_store:product_image_size' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=store_info'),
+            'object' => 'integration',
+            'object_detail' => 'store_settings',
+            'action' => 'engaged',
+            'ui_object' => 'text_field',
+            'ui_object_detail' => 'product_image_size',
+            'ui_action' => 'filled',
+            'ui_access_point' => 'center',
+        ),
+        // Audience Tab
+        'navigation_audience:view' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=newsletter_settings'),
+            'object' => 'integration',
+            'object_detail' => 'audience_settings',
+            'action' => 'viewed',
+            'ui_object' => "'",
+            'ui_object_detail' => "'",
+            'ui_action' => "'",
+            'ui_access_point' => "'",
+        ),
+        'navigation_audience:abandoned_cart' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=newsletter_settings'),
+            'object' => 'integration',
+            'object_detail' => 'audience_settings',
+            'action' => 'engaged',
+            'ui_object' => 'link',
+            'ui_object_detail' => 'abandoned_cart_automations',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        'navigation_audience:cart_tracking_all' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=newsletter_settings'),
+            'object' => 'integration',
+            'object_detail' => 'audience_settings',
+            'action' => 'engaged',
+            'ui_object' => 'radio_button',
+            'ui_object_detail' => 'cart_tracking_all',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        'navigation_audience:cart_tracking_only_subs' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=newsletter_settings'),
+            'object' => 'integration',
+            'object_detail' => 'audience_settings',
+            'action' => 'engaged',
+            'ui_object' => 'radio_button',
+            'ui_object_detail' => 'cart_tracking_only_subscribed',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        'navigation_audience:cart_tracking_disabled' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=newsletter_settings'),
+            'object' => 'integration',
+            'object_detail' => 'audience_settings',
+            'action' => 'engaged',
+            'ui_object' => 'radio_button',
+            'ui_object_detail' => 'cart_tracking_disabled',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        'navigation_audience:sync_new_non_subscribed' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=newsletter_settings'),
+            'object' => 'integration',
+            'object_detail' => 'audience_settings',
+            'action' => 'engaged',
+            'ui_object' => 'checkbox',
+            'ui_object_detail' => 'cart_tracking_disabled',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        'navigation_audience:add_new_tag' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=newsletter_settings'),
+            'object' => 'integration',
+            'object_detail' => 'audience_settings',
+            'action' => 'engaged',
+            'ui_object' => 'text_field',
+            'ui_object_detail' => 'new_tag',
+            'ui_action' => 'filled',
+            'ui_access_point' => 'center',
+        ),
+        // Logs Tab
+        'navigation_logs:view' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=logs'),
+            'object' => 'integration',
+            'object_detail' => 'log_settings',
+            'action' => 'viewed',
+            'ui_object' => "'",
+            'ui_object_detail' => "'",
+            'ui_action' => "'",
+            'ui_access_point' => "'",
+        ),
+        'navigation_logs:preferences' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=logs'),
+            'object' => 'integration',
+            'object_detail' => 'log_settings',
+            'action' => 'engaged',
+            'ui_object' => 'dropdown',
+            'ui_object_detail' => 'log_preferences',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        'navigation_logs:selection' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=logs'),
+            'object' => 'integration',
+            'object_detail' => 'log_settings',
+            'action' => 'engaged',
+            'ui_object' => 'dropdown',
+            'ui_object_detail' => 'log_selection',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        'navigation_logs:save' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=logs'),
+            'object' => 'integration',
+            'object_detail' => 'log_settings',
+            'action' => 'engaged',
+            'ui_object' => 'icon',
+            'ui_object_detail' => 'save_logs',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        'navigation_logs:delete' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=logs'),
+            'object' => 'integration',
+            'object_detail' => 'log_settings',
+            'action' => 'engaged',
+            'ui_object' => 'icon',
+            'ui_object_detail' => 'delete_logs',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        // Advanced Tab
+        'navigation_advanced:view' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=plugin_settings'),
+            'object' => 'integration',
+            'object_detail' => 'advanced_settings',
+            'action' => 'viewed',
+            'ui_object' => "'",
+            'ui_object_detail' => "'",
+            'ui_action' => "'",
+            'ui_access_point' => "'",
+        ),
+        'navigation_advanced:enable_support' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=plugin_settings'),
+            'object' => 'integration',
+            'object_detail' => 'advanced_settings',
+            'action' => 'engaged',
+            'ui_object' => 'checkbox',
+            'ui_object_detail' => 'enable_support',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        'navigation_advanced:opt_in_email' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=plugin_settings'),
+            'object' => 'integration',
+            'object_detail' => 'advanced_settings',
+            'action' => 'engaged',
+            'ui_object' => 'checkbox',
+            'ui_object_detail' => 'opt_in_email',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+        'navigation_advanced:disconnect' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce&tab=plugin_settings'),
+            'object' => 'integration',
+            'object_detail' => 'advanced_settings',
+            'action' => 'engaged',
+            'ui_object' => 'button',
+            'ui_object_detail' => 'disconnect',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+        ),
+    );
 }

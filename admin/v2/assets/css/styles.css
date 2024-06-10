@@ -1,7 +1,9 @@
 /* Import fonts */
 @import url('../fonts/Means/fonts.css');
 @import url('../fonts/graphik/fonts.css');
-
+body #wpwrap {
+    background: linear-gradient(#F7F4FF, #ffffff);
+}
 /* Roboto */
 @font-face {
 	font-family: 'Roboto';
@@ -185,6 +187,7 @@ input.mc-wc-btn {
     width: 100%;
     max-width: 728px;
     color: var(--mc-wc-text-color);
+    margin-left: 60px;
 }
 
 .mc-wc-setting-header {
@@ -1572,6 +1575,7 @@ select#log_file {}
     box-shadow: 0 0 0 1px hsla(0, 0%, 100%, 0.1), 0 16px 24px rgba(0, 0, 0, 0.24);
     border-color: hsla(0, 0%, 100%, .5);
     display: none;
+    z-index: 10;
 }
 
 .mc-wc-notice.success {

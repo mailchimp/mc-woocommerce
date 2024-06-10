@@ -4,10 +4,10 @@ Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 4.9
 Tested up to: 6.5
-Stable tag: 4.0.2
+Stable tag: 4.1
 Requires PHP: 7.4
 WC requires at least: 4.2
-WC tested up to: 8.9
+WC tested up to: 9.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your Mailchimp audience to track sales, create targeted emails, send abandoned cart emails, and more.
@@ -78,7 +78,11 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
 == Changelog ==
-= 4.0.2 =
-* adds the Changelog back to the UI
-* tested up to Woocommerce v8.9
-* fixed connection issue when disconnecting and reconnecting
+= 4.1 =
+* Introduced a new filter for coupons (details available in the Wiki).
+* Restored the "Resync Now" button.
+* Reinstated the Mailchimp icon in the WordPress admin sidebar.
+* Updated the design of the Mailchimp account creation user experience.
+* Fix for duplicated parent products when variation's info is edited.
+* Tested up to Woocommerce v9.0
+* Support for customization of the cookie options being set

@@ -37,7 +37,7 @@ export const Edit = ( { attributes, setAttributes } ) => {
 					/>
 				</PanelBody>
 			</InspectorControls>
-			<div style={{display: gdprStatus === 'hide' ? 'none' : 'flex', lineHeight: '1.5em', alignItems: 'center'}}>
+			<div style={{display: 'flex', lineHeight: '1.5em', alignItems: 'center'}}>
 				<CheckboxControl
 					id="newsletter-text"
 					checked={ checked }

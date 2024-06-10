@@ -400,11 +400,13 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             return;
         }
 
-        mailchimp_debug('action', "handleProcessProductMeta {$product->get_id()} update being queued", array(
+        $id = $product->get_parent_id() > 0 ? $product->get_parent_id() : $product->get_id();
+
+        mailchimp_debug('action', "handleProcessProductMeta {$id} update being queued", array(
             'data' => $data,
         ));
 
-        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($product->get_id()), 5);
+        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($id), 5);
     }
 
 	/**
@@ -521,6 +523,13 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 	 */
 	public function handleOrderUpdate($order_id, $order = null) {
 		if (empty($order)) $order = MailChimp_WooCommerce_HPOS::get_order($order_id);
+        if ($order && $order->get_status() === 'checkout-draft' && $order->is_created_via( 'store-api' )) {
+            if ($order->get_billing_email()) {
+                $this->set_user_from_block_checkout($order->get_billing_email());
+                $this->handleCartUpdated();
+                return;
+            }
+        }
 		mailchimp_log('handleOrderUpdate', 'order_status');
 		$this->handleOrderSaved($order_id, $order, true);
 	}

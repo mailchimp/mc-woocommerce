@@ -3,6 +3,27 @@
 
 	$(window).on('load', function() {
 
+		$(document).on('click', '.js-mailchimp-woocommerce-send-event', function(e) {
+			e.preventDefault();
+			let target = $(this).attr('target') || '_self';
+			let href = $(this).attr('href');
+
+			let mcEvent = $(this).data('mc-event');
+
+			var data = {
+				action:'mailchimp_woocommerce_send_event',
+				mc_event: mcEvent
+			};
+
+			$.post(ajaxurl, data, function(response) {
+				window.open( href, target);
+
+				if (!response.success) {
+					console.error(response);
+				}
+			});
+		})
+
 		// show/hide optional settings
 		var optionalSettings = false;
 		$('.optional-settings-button').click(function () {
@@ -142,7 +163,13 @@
 			var data = form.serialize();
 			data+="&mailchimp_woocommerce_resync=1"
 			return $.ajax({type: "POST", url: form.attr('action'), data: data}).done(function(data) {
-				window.location.reload();
+				setTimeout(function() {
+					let searchParams = new URLSearchParams(window.location.search);
+					searchParams.set('tab', 'sync');
+					let newUrl = window.location.origin + window.location.pathname + '?' + searchParams.toString()
+
+					window.location.href = newUrl
+				}, 100)
 			}).fail(function(xhr) {
 				Swal.hideLoading();
 				Swal.showValidationMessage(phpVars.l10n.resync_failed);

@@ -47,17 +47,19 @@
 			let tags_vals_array = [];
 			let tag_vals_str = String(tag);
 
+			// if we have tags
 			if (tags_hidden_vals) {
+				// split them into an array
 				tags_vals_array = tags_hidden_vals.split(', ');
 
 				// Check if the tag is in the tag list
 				if ($.inArray(tag, tags_vals_array) !== -1) {
 					return;
 				}
-
-				tags_vals_array.push(tag);
-				tag_vals_str = tags_vals_array.join(', ');
 			}
+
+			tags_vals_array.push(tag);
+			tag_vals_str = tags_vals_array.join(', ');
 
 			let eleTagged = '<div><span class="mc-wc-tag-text">' + tag + '</span><span class="mc-wc-tag-icon-del" data-value="' + tag + '"></span></div>'
 			if (show_tagged.html().trim() === '') {
@@ -121,9 +123,12 @@
 			let notice_content = $('#mc_notice_text');
 			let content = $('.mc-wc-tab-content');
 
-			//content.addClass('loading');
+			let checkbox = $("#mailchimp_woocommerce_options").find("input[type=checkbox]");
+			$.each(checkbox, function(key, val) {
+				formData.append($(val).attr('name'), $(val).is(':checked') ? '1' : '0');
+			});
 
-			notice.removeClass('error success');
+			notice.fadeOut(1000).removeClass('error success');
 			notice_content.text('');
 
 			$.ajax({

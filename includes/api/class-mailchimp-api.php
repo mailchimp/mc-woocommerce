@@ -100,6 +100,24 @@ class MailChimp_WooCommerce_MailChimpApi {
 		}
 	}
 
+    public function metadata()
+    {
+        try {
+            $token = $this->api_key;
+            if (($dc = $this->data_center)) {
+                $token = str_replace("-$dc", "", $token);
+            }
+            $metdata_response = wp_remote_get( "https://login.mailchimp.com/oauth2/metadata?oauth_token={$token}", array(
+                'headers' => array(
+                    'Accept' => 'application/json',
+                ),
+            ));
+            return json_decode( $metdata_response['body'], true );
+        } catch ( Throwable $e ) {
+            return array();
+        }
+    }
+
 	/**
 	 * @return array|bool|mixed|object|null
 	 * @throws MailChimp_WooCommerce_Error

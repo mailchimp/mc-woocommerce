@@ -45,7 +45,7 @@
         <div class="mc-wc-locale">
             <label><?php esc_html_e('Locale', 'mailchimp-for-woocommerce' ); ?></label>
             <div class="mc-wc-select-wrapper">
-                <select class="mc-wc-select mc-wc-select-not-bold" name="<?php echo esc_attr( $this->plugin_name ); ?>[store_locale]" name="mc-wc-select" required>
+                <select class="mc-wc-select mc-wc-select-not-bold" name="<?php echo esc_attr( $this->plugin_name ); ?>[store_locale]" required>
                     <option disabled selected value=""><?php esc_html_e( "Select store's locale", 'mailchimp-for-woocommerce' ); ?></option>
                     <?php
                     $selected_locale = isset( $options['store_locale'] ) && ! empty( $options['store_locale'] ) ? $options['store_locale'] : get_locale();

@@ -236,23 +236,23 @@ a.button.back-step {
 	box-sizing: border-box;
 }
 
-.tab-content-wrapper {
+.mc-woocommerce-form-wrapper {
 	background: transparent !important;
 }
 
-.tab-content-wrapper fieldset{
+.mc-woocommerce-form-wrapper fieldset{
 	background: transparent !important;
 }
 
-.tab-content-wrapper fieldset input{
+.mc-woocommerce-form-wrapper fieldset input{
 	background: white !important;
 }
 
-.tab-content-wrapper textarea{
+.mc-woocommerce-form-wrapper textarea{
 	background: white !important;
 }
 
-.tab-content-wrapper fieldset select {
+.mc-woocommerce-form-wrapper fieldset select {
 	background: white url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23555%22%2F%3E%3C%2Fsvg%3E') no-repeat right 5px top 55%;
 	background-size: auto;
 
@@ -268,46 +268,46 @@ a.button.back-step {
 	box-sizing: border-box;
 }
 
-.tab-content-wrapper a {
+.mc-woocommerce-form-wrapper a {
 	color: #8D5C87;
 	text-decoration: none;
 }
-.tab-content-wrapper a:hover {
+.mc-woocommerce-form-wrapper a:hover {
 	text-decoration: underline;
 }
 
-.tab-content-wrapper form {
+.mc-woocommerce-form-wrapper form {
 	margin: 0 auto;
 	/* padding: 3em; */
 }
 
-.tab-content-wrapper fieldset{
+.mc-woocommerce-form-wrapper fieldset{
 	background: transparent;
 	width: 100%;
 }
 
-.tab-content-wrapper fieldset .fieldset-header {
+.mc-woocommerce-form-wrapper fieldset .fieldset-header {
 	float: left;
 	padding-top: 3em;
 	width: 100%;
 	font-size: 18px !important;
 }
 
-.tab-content-wrapper fieldset .fieldset-header.no-padding {
+.mc-woocommerce-form-wrapper fieldset .fieldset-header.no-padding {
 	padding-top: 1em;
 }
 
-.tab-content-wrapper p.submit {
+.mc-woocommerce-form-wrapper p.submit {
 	margin-top: 0 !important;
 	padding-top: 35px !important;
 	margin-bottom: 45px !important;
 }
 
-.tab-content-wrapper p.submit:focus {
+.mc-woocommerce-form-wrapper p.submit:focus {
 	margin-top: 10px !important;
 }
 
-.tab-content-wrapper .required-field-mark {
+.mc-woocommerce-form-wrapper .required-field-mark {
 	color: red;
 }
 
@@ -487,18 +487,23 @@ a.button.create-account {
 	color:#fff;
 	box-shadow:0 1px 0 rgb(149, 189, 101);
 }
-
-.tab-content-wrapper label {
+.mc-woocommerce-form-wrapper label.optional {
+	display: flex;
+}
+.mc-woocommerce-form-wrapper label.optional span:last-child {
+	color: rgba(36, 28, 21, 0.65)
+}
+.mc-woocommerce-form-wrapper label {
 	display: block;
-	font-family: proxima-nova, Arial, Helvetica, sans-serif;
+	font-family: ui-sans-serif, system-ui, sans-serif, proxima-nova, Arial, Helvetica, sans-serif;
 	font-size: 14px;
-	font-weight: 600 !important;
+	font-weight: 400;
 	line-height: 30px;
 	width: 100%;
 	color: #3C3C3C;
 }
 
-.tab-content-wrapper h4 {
+.mc-woocommerce-form-wrapper h4 {
 	margin-top: 0;
 }
 
@@ -765,15 +770,26 @@ a.button.create-account {
 	border-radius: 4px;
 }
 
-.tab-content-wrapper .box.box-half,
+.mc-woocommerce-form-wrapper .box.box-half,
 .sync-content-wrapper .box.box-half,
 .sync-more-wrapper .box.box-half {
 	float: left;
 	clear: none;
 	width: 50%;
-
 }
-
+.mc-woocommerce-form-wrapper .form-row {
+	display: flex;
+	column-gap: 16px;
+}
+.mc-woocommerce-form-wrapper .form-row:not(:last-child) {
+	margin-bottom: 16px;
+}
+.mc-woocommerce-form-wrapper .form-row .box {
+	width: 100%;
+}
+.mc-woocommerce-form-wrapper .form-row .box-half {
+	width: calc(50% - 8px);
+}
 .sync-more-wrapper .box.box-half .content{
 	padding: 0 2em;
 	background: white;
@@ -807,30 +823,31 @@ a.button.create-account {
 	height: 100%;
 }
 
-.tab-content-wrapper .box.box-half.margin-large {
+.mc-woocommerce-form-wrapper .box.box-half.margin-large {
 	margin-top: 3em;
 }
 
-.tab-content-wrapper .box.box-third {
+.mc-woocommerce-form-wrapper .box.box-third {
 	float: left;
 	clear:none;
 	width: 33%;
 }
 
-.tab-content-wrapper fieldset label {
-	font-weight: 500;
-}
-
-.tab-content-wrapper fieldset label p{
+.mc-woocommerce-form-wrapper fieldset label {
 	font-weight: 400;
 }
 
-.tab-content-wrapper fieldset input[type="text"],
-.tab-content-wrapper fieldset input[type="password"],
-.tab-content-wrapper fieldset input[type="email"],
-.tab-content-wrapper fieldset textarea {
-	border: 1px solid #DBD9D2;
+.mc-woocommerce-form-wrapper fieldset label p{
+	font-weight: 400;
+}
+
+.mc-woocommerce-form-wrapper fieldset input[type="text"],
+.mc-woocommerce-form-wrapper fieldset input[type="password"],
+.mc-woocommerce-form-wrapper fieldset input[type="email"],
+.mc-woocommerce-form-wrapper fieldset textarea {
 	box-sizing: border-box;
+	height: 44px;
+	border-color: #000;
 	border-radius: 4px;
 	padding: 0.6em 1.5em;
 	width: 100%;
@@ -838,66 +855,81 @@ a.button.create-account {
 
 }
 
-.tab-content-wrapper .mailchimp-select-wrapper {
-	border: 1px solid #DBD9D2;
-	padding: 6px 6px 4px 20px;
-	-webkit-border-radius: 4px;
-	-moz-border-radius: 4px;
-	border-radius: 4px;
-	box-shadow: inset 0 1px 2px rgba(0,0,0,.07);
-	background-color: white;
-}
+.mc-woocommerce-form-wrapper .mailchimp-select-wrapper {
 
-.tab-content-wrapper .mailchimp-select-wrapper select {
-	padding: 3px 24px 3px 0px;
+}
+.mc-woocommerce-form-wrapper .mailchimp-select-wrapper .form-row {
+	margin: 0;
+}
+.mc-woocommerce-form-wrapper .woocommerce-input-wrapper {
+	width: 100%;
+}
+.mc-woocommerce-form-wrapper .mailchimp-select-wrapper select {
 	font-size: 14px;
 	font-family: "Proxima Nova Alt Light", Arial, Helvetica, sans-serif;
-	border: none;
 	-webkit-appearance: none;
 	box-shadow: none;
 	outline: none;
 	width: 100% !important;
-	max-width: 10000px;
+	max-width: 100%;
 	color: #32373c;
+
+	border: 1px solid #000;
+	padding: 6px 6px 4px 20px;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	background-color: white;
+	height: 44px;
 }
 
-.tab-content-wrapper .mailchimp-select-wrapper select option{
+.mc-woocommerce-form-wrapper .mailchimp-select-wrapper select option{
 	outline: none;
 }
 
-.tab-content-wrapper .mailchimp-select-wrapper select:disabled {
+.mc-woocommerce-form-wrapper .mailchimp-select-wrapper select:disabled {
 	color: #aaa;
 	background: none;
 }
 
-.tab-content-wrapper fieldset select:focus {
+.mc-woocommerce-form-wrapper fieldset select:focus {
 	outline: none;
 }
 
-.tab-content-wrapper fieldset input[type='checkbox']:not(#mailchimp_woocommerce_newsletter) {
+.mc-woocommerce-form-wrapper fieldset input[type='checkbox']:not(#mailchimp_woocommerce_newsletter) {
 	width: 2em;
 	height: 2em;
 	border-radius: 4px;
 	border: 1px solid #DBD9D2;
 }
 
-.tab-content-wrapper fieldset input[type='checkbox']:not(#mailchimp_woocommerce_newsletter):checked::before {
+.mc-woocommerce-form-wrapper fieldset input[type='checkbox']:not(#mailchimp_woocommerce_newsletter):checked::before {
 	color: #7FAD45;
 	margin: 0.6em 0px 0px 0.2em;
 	content: url("data:image/svg+xml;charset=UTF-8,%3csvg width='13' height='9' viewBox='0 0 13 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M10.75 0.5L12.25 2L5.26 9L0.75 4.5L2.25 3L5.26 6L10.75 0.5Z' fill='%237FAD45'/%3e%3c/svg%3e ");
 
 }
 
+.mc-woocommerce-form-wrapper .box.form-error label,
+.mc-woocommerce-form-wrapper .box.form-error {
+	color: red;
+}
 
-.tab-content-wrapper fieldset input[type='radio'],
-.sync-content-wrapper fieldset input[type='radio'] {
+.mc-woocommerce-form-wrapper .box.form-error input {
+	border-color: red;
+}
+.mc-woocommerce-form-wrapper .error-field:empty {
+	display: none !important;
+}
+.mc-woocommerce-form-wrapper fieldset input[type='radio'],
+.mc-woocommerce-form-wrapper fieldset input[type='radio'] {
 	width: 2em;
 	height: 2em;
 	border: 1px solid #DBD9D2;
 	margin-right: 10px;
 }
 
-.tab-content-wrapper fieldset input[type='radio']:checked::before,
+.mc-woocommerce-form-wrapper fieldset input[type='radio']:checked::before,
 .sync-content-wrapper fieldset input[type='radio']:checked::before {
 	background: url("data:image/svg+xml;charset=UTF-8,%3csvg width='13' height='9' viewBox='0 0 13 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M10.75 0.5L12.25 2L5.26 9L0.75 4.5L2.25 3L5.26 6L10.75 0.5Z' fill='%237FAD45'/%3e%3c/svg%3e ");
 	background-repeat: none;
@@ -906,12 +938,12 @@ a.button.create-account {
 	margin: 8px 0 0 7px;
 }
 
-.tab-content-wrapper fieldset .radio-label,
+.mc-woocommerce-form-wrapper fieldset .radio-label,
 .sync-content-wrapper fieldset .radio-label {
 	margin-bottom: 10px;
 }
 
-.tab-content-wrapper fieldset textarea {
+.mc-woocommerce-form-wrapper fieldset textarea {
 	border: 1px solid #DBD9D2;
 	box-sizing: border-box;
 	border-radius: 4px;
@@ -920,39 +952,59 @@ a.button.create-account {
 
 }
 
-.tab-content-wrapper .optional-settings-label,
-.tab-content-wrapper .optional-settings-button {
+.mc-woocommerce-form-wrapper .optional-settings-label,
+.mc-woocommerce-form-wrapper .optional-settings-button {
 	margin-top: 3em;
 	font-weight: 600;
 }
 
-.tab-content-wrapper .optional-settings-button:hover span {
+.mc-woocommerce-form-wrapper .optional-settings-button:hover span {
 	color: #628735;
 }
 
-.tab-content-wrapper .optional-settings-label span,
-.tab-content-wrapper .optional-settings-button span {
+.mc-woocommerce-form-wrapper .optional-settings-label span,
+.mc-woocommerce-form-wrapper .optional-settings-button span {
 	text-transform: uppercase;
 	color: #7FAD45 ;
 	font-size: 14px;
 	cursor: default;
 }
 
-.tab-content-wrapper .optional-settings-button span {
+.mc-woocommerce-form-wrapper .optional-settings-button span {
 	background: no-repeat left center url("data:image/svg+xml;charset=UTF-8,%3csvg width='13' height='8' viewBox='0 0 13 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M11.34 0.590027L6.75 5.17003L2.16 0.590027L0.75 2.00003L6.75 8.00003L12.75 2.00003L11.34 0.590027Z' fill='%23212121'/%3e%3c/svg%3e ");
 	padding-left: 2em;
 	cursor: pointer;
 }
 
-.tab-content-wrapper .optional-settings-button span.active {
+.mc-woocommerce-form-wrapper .optional-settings-button span.active {
 	background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg width='13' height='8' viewBox='0 0 13 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M2.16 7.40997L6.75 2.82997L11.34 7.40997L12.75 5.99997L6.75 -2.61783e-05L0.75 5.99997L2.16 7.40997Z' fill='%23212121'/%3e%3c/svg%3e ");
 }
 
-.tab-content-wrapper .optional-settings-content {
+.mc-woocommerce-form-wrapper .optional-settings-content {
 	display: block;
 }
+.mc-woocommerce-details-wrapper {
+	position: relative;
+}
+.mc-woocommerce-details-wrapper p {
+	font-size: 16px;
+	margin: 0;
+}
 
-/* Old styles from tabs.php */
+.js-mc-woocommerce-edit-form {
+	color: #007c89;
+	font-size: 16px;
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+.gap-x-2 {
+	column-gap: 10px;
+}
+.gap-x-6 {
+	column-gap: 24px;
+}
+	/* Old styles from tabs.php */
 
 #sync-status-message strong,
 #http-worker-deprecated-message strong {
@@ -1139,7 +1191,11 @@ a.button.create-account {
 }
 
 .mc-woocommerce-create-account-step {
-	padding: 5px 35px 10px 35px;
+	padding: 5px 0 10px;
+}
+
+#mc-woocommerce-business-address {
+	margin-top: 40px;
 }
 
 #mc-woocommerce-create-account-step-2 {
@@ -1233,7 +1289,121 @@ a.button.create-account {
 	background: rgb(255,255,255);
 	background: linear-gradient(0deg, rgba(255,255,255,0) 10%, rgba(255,255,255,0.6964986678265056) 36%, rgba(255,255,255,1) 100%);
 }
+body #wpcontent {
+	padding-left: 0;
+}
+.mc-woocommerce-create-account__header h3 {
+	font-family: "Means Web", serif;
+	margin-bottom: 4px;
+	margin-top: 0;
+	font-weight: 300;
+}
+.mc-woocommerce-create-account__header {
+	padding: 16px 8px;
+	background: #fff;
+	border-top: 4px solid #FFE01BFF;
+	border-bottom: 1px solid rgb(229, 231, 235);
+	column-gap: 16px;
+}
+.mc-woocommerce-create-account__header .mc-woocommerce-plus {
+	margin: 0 8px;
+}
+.wizard-steps {
+	color: rgba(36, 28, 21, 0.3);
+}
 
+.wizard-steps .current {
+	color: rgba(36, 28, 21);
+	border-bottom: 2px solid rgb(0, 124, 137);
+}
+.wizard-steps .chevron {
+	margin: 0 5px;
+}
+.wizard-steps .chevron svg {
+	display: block;
+}
+
+.mc-woocommerce-create-account__body {
+	background: #F6F6F4;
+}
+.mc-woocommerce-create-account__body-inner {
+	max-width: 600px;
+	margin: 0 auto;
+	padding-top: 128px;
+	padding-bottom: 128px;
+}
+.mc-woocommerce-create-account__body .subtitle {
+	font-family: "Means Web", serif;
+	font-size: 24px;
+	line-height: 1.4;
+	font-weight: 300;
+	padding-left: 0;
+	color: #000;
+}
+.mc-woocommerce-create-account__body .email-opener {
+	font-size: 16px;
+}
+.mc-woocommerce-create-account__body .h4 {
+	font-size: 18px;
+	margin: 0;
+	margin-bottom: 24px;
+}
+.opacity-25 {
+	opacity: 0.25;
+}
+.opacity-75 {
+	opacity: 0.75;
+}
+.mc-wc-loading {
+	animation: spin 1s linear infinite;
+}
+.mc-wc-loading svg {
+	display: block;
+}
+
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+.mc-woocommerce-create-account__body .title {
+	font-family: "Means Web", serif;
+	font-size: 32px;
+	font-weight: 300;
+	line-height: 1.4;
+	padding-bottom: 16px;
+	margin-bottom: 32px;
+	border-bottom: 1px solid rgb(229, 231, 235)	;
+}
+.button.create-account-save {
+	all: unset;
+	box-sizing: border-box;
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	padding: 12px 32px;
+	position: relative;
+	background-color: #007c89;
+	border-radius: 38px;
+	font-weight: 500;
+	color: #ffffff;
+	font-size: 13px;
+	text-align: center;
+	letter-spacing: 0;
+	line-height: 20px;
+	white-space: nowrap;
+	cursor: pointer;
+}
+.button.create-account-save:hover {
+	background-color: #019eaf;
+	text-decoration: none;
+}
+.button.create-account-save[disabled] {
+	cursor: not-allowed;
+}
 @media screen and (max-width: 960px) {
 	.mc-woocommerce-settings-subtitles-row {
 		flex-direction: column;
@@ -1259,11 +1429,11 @@ a.button.create-account {
 		float: left;
 	}
 
-	.tab-content-wrapper form{
+	.mc-woocommerce-form-wrapper form{
 		padding: 1em;
 	}
 
-	.tab-content-wrapper .mailchimp-select-wrapper select {
+	.mc-woocommerce-form-wrapper .mailchimp-select-wrapper select {
 
 		font-size: 16px;
 		line-height: 32px;
@@ -1274,8 +1444,8 @@ a.button.create-account {
 		margin-top: 28px;
 	}
 
-	.tab-content-wrapper .box.box-half,
-	.tab-content-wrapper .box.box-third,
+	.mc-woocommerce-form-wrapper .box.box-half,
+	.mc-woocommerce-form-wrapper .box.box-third,
 	.sync-more-wrapper .box.box-half,
 	.sync-content-wrapper .box.box-half {
 		width: 100%;

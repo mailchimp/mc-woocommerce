@@ -23,6 +23,7 @@
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       mailchimp-for-woocommerce
  * Domain Path:       /languages
+ * Requires Plugins: woocommerce
  * Requires at least: 4.9
  * Tested up to: 6.5
  * WC requires at least: 4.2

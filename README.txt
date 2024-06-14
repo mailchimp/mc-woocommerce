@@ -78,11 +78,4 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
 == Changelog ==
-= 4.1 =
-* Introduced a new filter for coupons (details available in the Wiki).
-* Restored the "Resync Now" button.
-* Reinstated the Mailchimp icon in the WordPress admin sidebar.
-* Updated the design of the Mailchimp account creation user experience.
-* Fix for duplicated parent products when variation's info is edited.
-* Tested up to Woocommerce v9.0
-* Support for customization of the cookie options being set
+= 4.2 =

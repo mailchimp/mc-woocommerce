@@ -120,6 +120,23 @@ input.mc-wc-btn {
     border: 0;
 }
 
+.mc-wc-btn-disconnect {
+    background: linear-gradient(180deg, #674399 0%, #8661C1 100%) !important;
+    color: #fff !important;
+    padding-block: 8.5px;
+    border: 0;
+    font-family: proxima-nova, Arial, Helvetica, sans-serif !important;
+    font-size: 14px !important;
+    line-height: 16px !important;
+    padding: 15px 35px 15px 35px !important;
+    text-transform: uppercase !important;
+    border: none !important;
+}
+
+.swal2-actions {
+    gap: 20px;
+}
+
 .mc-wc-btn.mc-wc-btn-md.mc-wc-btn-primary {
     padding: 16.65px 37.27px;
 }
@@ -1518,7 +1535,7 @@ select#log_file {}
     margin-top: 30px;
 }
 
-.mc-wc-button-disconnect .tab-content-submit:not(.create-account):not(.mc-woocommerce-disconnect-button):not(.disconnect-confirm) {
+.mc-wc-button-disconnect .tab-content-submit:not(.create-account):not(.mc-woocommerce-disconnect-button) {
     width: 161px !important;
     text-align: center;
     height: 40px !important;

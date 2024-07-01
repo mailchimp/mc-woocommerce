@@ -764,9 +764,6 @@ function mailchimp_log($action, $message, $data = array()) {
     if (mailchimp_environment_variables()->logging !== 'none' && function_exists('wc_get_logger')) {
         if (is_array($data) && !empty($data)) $message .= " :: ".wc_print_r($data, true);
         wc_get_logger()->notice("{$action} :: {$message}", array('source' => 'mailchimp_woocommerce'));
-    } else {
-        if (is_array($data) && !empty($data)) $message .= " :: ".wc_print_r($data, true);
-        wc_get_logger()->notice("{$action} :: {$message}", array('source' => 'mailchimp_woocommerce'));
     }
 }
 

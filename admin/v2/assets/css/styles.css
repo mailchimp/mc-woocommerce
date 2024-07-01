@@ -131,6 +131,7 @@ input.mc-wc-btn {
     padding: 15px 35px 15px 35px !important;
     text-transform: uppercase !important;
     border: none !important;
+    box-shadow: none !important;
 }
 
 .swal2-actions {

@@ -606,8 +606,15 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         // update the user meta with the 'is_subscribed' form element
         update_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', $subscribed);
 
+        // get user language
+		$language = get_user_meta($user_id, 'locale', true);
+		if (strpos($language, '_') !== false) {
+			$languageArray = explode('_', $language);
+			$language = $languageArray[0];
+		}
+
         if ($subscribed) {
-            $job = new MailChimp_WooCommerce_User_Submit($user_id, '1', null, null, $gdpr_fields);
+            $job = new MailChimp_WooCommerce_User_Submit($user_id, '1', null, $language, $gdpr_fields);
             mailchimp_handle_or_queue($job);
         }
     }
@@ -627,6 +634,13 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $is_subscribed = get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true);
         $gdpr_fields = get_user_meta($user_id, 'mailchimp_woocommerce_gdpr_fields', true);
 
+		// get user language
+		$language = get_user_meta($user_id, 'locale', true);
+		if (strpos($language, '_') !== false) {
+			$languageArray = explode('_', $language);
+			$language = $languageArray[0];
+		}
+
         if ( ! $is_subscribed && mailchimp_submit_subscribed_only() ) {
 	        mailchimp_debug('filter', "{$old_user_data->user_email} was blocked due to subscriber only settings");
 
@@ -637,7 +651,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             $user_id,
             $is_subscribed,
             $old_user_data,
-            null,
+			$language,
             !empty($gdpr_fields) ? $gdpr_fields : null
         );
         // only send this update if the user actually has a boolean value.

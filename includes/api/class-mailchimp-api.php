@@ -1374,6 +1374,33 @@ class MailChimp_WooCommerce_MailChimpApi {
 
 	/**
 	 * @param $store_id
+	 * @param $product_id
+	 * @param false      $throw
+	 *
+	 * @return false|MailChimp_WooCommerce_ProductVariation
+	 * @throws MailChimp_WooCommerce_Error
+	 * @throws MailChimp_WooCommerce_RateLimitError
+	 * @throws MailChimp_WooCommerce_ServerError
+	 */
+	public function getStoreProductVariant( $store_id, $product_id, $variation_id, $throw = false ) {
+		try {
+			$data = $this->get( "ecommerce/stores/$store_id/products/$product_id/variants/$variation_id" );
+
+			if ( ! is_array( $data ) ) {
+				throw new MailChimp_WooCommerce_RateLimitError( 'getting product variant api failure, retry again.' );
+			}
+			$product_variation = new MailChimp_WooCommerce_ProductVariation();
+			return $product_variation->fromArray( $data );
+		} catch ( MailChimp_WooCommerce_Error $e ) {
+			if ( $throw ) {
+				throw $e;
+			}
+			return false;
+		}
+	}
+
+	/**
+	 * @param $store_id
 	 * @param int      $page
 	 * @param int      $count
 	 *
@@ -1444,6 +1471,91 @@ class MailChimp_WooCommerce_MailChimpApi {
 				throw $e;
 			}
 			mailchimp_log( 'api.update_product.error', $e->getMessage(), array( 'submission' => $product->toArray() ) );
+			return false;
+		}
+	}
+
+	/**
+	 * @param $store_id
+	 * @param MailChimp_WooCommerce_ProductVariation $product_variation
+	 * @param bool                          $silent
+	 *
+	 * @return false|MailChimp_WooCommerce_ProductVariation
+	 * @throws MailChimp_WooCommerce_Error
+	 * @throws MailChimp_WooCommerce_RateLimitError
+	 * @throws MailChimp_WooCommerce_ServerError
+	 */
+	public function addStoreProductVariation( $store_id, MailChimp_WooCommerce_ProductVariation $product_variation, $silent = true ) {
+		try {
+			if ( ! $this->validateStoreSubmission( $product_variation ) ) {
+				return false;
+			}
+
+			if ($product_id = $product_variation->getProductId()) {
+				$data = $this->post( "ecommerce/stores/$store_id/products/$product_id/variants", $product_variation->toArray() );
+				update_option( 'mailchimp-woocommerce-resource-last-updated', time() );
+				$product_variation = new MailChimp_WooCommerce_ProductVariation();
+				return $product_variation->fromArray( $data );
+			} else {
+				mailchimp_log( 'api.add_product_variation.error', "Unable to find product for variation", array( 'submission' => $product_variation->toArray() ) );
+				return false;
+			}
+		} catch ( Exception $e ) {
+			if ( ! $silent ) {
+				throw $e;
+			}
+			mailchimp_log( 'api.add_product_variation.error', $e->getMessage(), array( 'submission' => $product_variation->toArray() ) );
+			return false;
+		}
+	}
+
+	/**
+	 * @param $store_id
+	 * @param MailChimp_WooCommerce_ProductVariation $product_variation
+	 * @param bool                          $silent
+	 *
+	 * @return false|MailChimp_WooCommerce_ProductVariation
+	 * @throws MailChimp_WooCommerce_Error
+	 * @throws MailChimp_WooCommerce_RateLimitError
+	 */
+	public function updateStoreProductVariation( $store_id, MailChimp_WooCommerce_ProductVariation $product_variation, $silent = true ) {
+		try {
+			if ( ! $this->validateStoreSubmission( $product_variation ) ) {
+				return false;
+			}
+
+			if ($product_id = $product_variation->getProductId()) {
+				$data = $this->patch("ecommerce/stores/$store_id/products/$product_id/variants/{$product_variation->getId()}", $product_variation->toArray());
+				update_option('mailchimp-woocommerce-resource-last-updated', time());
+				$product_variation = new MailChimp_WooCommerce_ProductVariation();
+				return $product_variation->fromArray($data);
+			} else {
+				mailchimp_log( 'api.update_product_variation.error', "Unable to find product for variation", array( 'submission' => $product_variation->toArray() ) );
+				return false;
+			}
+		} catch ( Exception $e ) {
+			if ( ! $silent ) {
+				throw $e;
+			}
+			mailchimp_log( 'api.update_product_variation.error', $e->getMessage(), array( 'submission' => $product_variation->toArray() ) );
+			return false;
+		}
+	}
+
+	/**
+	 * @param $store_id
+	 * @param $product_id
+	 * @param $variation_id
+	 *
+	 * @return bool
+	 */
+	public function deleteStoreProductVariation($store_id, $product_id, $variation_id) {
+		try {
+			$data = $this->delete("ecommerce/stores/$store_id/products/$product_id/variants/$variation_id");
+			mailchimp_debug('product_variation', 'DELETE PRODUCT VARIATION', $data);
+			return (bool) $data;
+		} catch ( Exception $e ) {
+			mailchimp_log( 'api.update_product_variation.error', $e->getMessage(), array( 'submission' => $variation_id ) );
 			return false;
 		}
 	}

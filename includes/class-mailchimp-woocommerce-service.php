@@ -400,13 +400,19 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             return;
         }
 
-        $id = $product->get_parent_id() > 0 ? $product->get_parent_id() : $product->get_id();
+        $id = $product->get_id();
 
         mailchimp_debug('action', "handleProcessProductMeta {$id} update being queued", array(
             'data' => $data,
         ));
 
-        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($id), 5);
+        if ($product instanceof WC_Product_Variation) {
+			mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product_Variation($id), 5);
+		} else {
+			$id = $product->get_parent_id() > 0 ? $product->get_parent_id() : $product->get_id();
+
+			mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($id), 5);
+		}
     }
 
 	/**
@@ -428,11 +434,14 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
 		// Confirm that we're working with an object that is a WooCommerce product with a certain status
 		$product = wc_get_product($object_id);
-		if ($product instanceof WC_Product &&
-            !in_array($product->get_status(), array('trash', 'auto-draft', 'draft', 'pending'))
-		) {
-		    mailchimp_debug('queue', "handling meta update for meta [{$meta_key}] on product {$object_id}");
-			mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($object_id), 5);
+		if (!in_array($product->get_status(), array('trash', 'auto-draft', 'draft', 'pending'))) {
+			if ($product instanceof WC_Product) {
+				mailchimp_debug('queue', "handling meta update for meta [{$meta_key}] on product {$object_id}");
+				mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($object_id), 5);
+			} else if ($product instanceof WC_Product_Variation){
+				mailchimp_debug('queue', "handling meta update for meta [{$meta_key}] on product variation {$object_id}");
+				mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product_Variation($object_id), 5);
+			}
 		}
 	}
 
@@ -483,9 +492,13 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             if (!mailchimp_is_configured()) {
                 return;
             }
-			$deleted = mailchimp_get_api()->deleteStoreProduct(mailchimp_get_store_id(), $variation_id);
-			if ($deleted) mailchimp_log('product.deleted', "deleted product variation {$variation_id}");
-			else mailchimp_log('product.delete_fail', "Unable to deleted product variation {$variation_id}");
+			$product = MailChimp_WooCommerce_HPOS::get_product($variation_id);
+
+			$product_id = $product ? $product->get_parent_id() : null;
+
+			$deleted = mailchimp_get_api()->deleteStoreProductVariation(mailchimp_get_store_id(), $product_id, $variation_id);
+			if ($deleted) mailchimp_log('product_variation.deleted', "deleted product variation {$variation_id}");
+			else mailchimp_log('product_variation.delete_fail', "Unable to deleted product variation {$variation_id}");
 		} catch (Exception $e) {
 			mailchimp_error('delete product variation', $e->getMessage());
 		}

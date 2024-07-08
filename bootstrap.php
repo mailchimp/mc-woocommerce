@@ -1204,19 +1204,23 @@ function mailchimp_delete_as_jobs() {
         return true;
     }
     return false;
-
 }
+
 function mailchimp_flush_sync_pointers() {
     // clean up the initial sync pointers
     delete_option( 'mailchimp-woocommerce-resource-last-updated' );
     delete_option( 'mailchimp-woocommerce-sync.started_at' );
     delete_option( 'mailchimp-woocommerce-sync.completed_at' );
     foreach (array('orders', 'products', 'coupons') as $resource_type) {
-        delete_option("mailchimp-woocommerce-sync.{$resource_type}.started_at");
-        delete_option("mailchimp-woocommerce-sync.{$resource_type}.completed_at");
-        delete_option("mailchimp-woocommerce-sync.{$resource_type}.started_at");
-        delete_option("mailchimp-woocommerce-sync.{$resource_type}.current_page");
+        mailchimp_flush_specific_resource_pointers($resource_type);
     }
+}
+
+function mailchimp_flush_specific_resource_pointers($resource_type) {
+    delete_option("mailchimp-woocommerce-sync.{$resource_type}.started_at");
+    delete_option("mailchimp-woocommerce-sync.{$resource_type}.completed_at");
+    delete_option("mailchimp-woocommerce-sync.{$resource_type}.started_at");
+    delete_option("mailchimp-woocommerce-sync.{$resource_type}.current_page");
 }
 
 /**

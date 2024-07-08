@@ -400,13 +400,19 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             return;
         }
 
-        $id = $product->get_parent_id() > 0 ? $product->get_parent_id() : $product->get_id();
+        $id = $product->get_id();
 
         mailchimp_debug('action', "handleProcessProductMeta {$id} update being queued", array(
             'data' => $data,
         ));
 
-        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($id), 5);
+        if ($product instanceof WC_Product_Variation) {
+			mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product_Variation($id), 5);
+		} else {
+			$id = $product->get_parent_id() > 0 ? $product->get_parent_id() : $product->get_id();
+
+			mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($id), 5);
+		}
     }
 
 	/**
@@ -428,11 +434,14 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
 		// Confirm that we're working with an object that is a WooCommerce product with a certain status
 		$product = wc_get_product($object_id);
-		if ($product instanceof WC_Product &&
-            !in_array($product->get_status(), array('trash', 'auto-draft', 'draft', 'pending'))
-		) {
-		    mailchimp_debug('queue', "handling meta update for meta [{$meta_key}] on product {$object_id}");
-			mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($object_id), 5);
+		if (!in_array($product->get_status(), array('trash', 'auto-draft', 'draft', 'pending'))) {
+			if ($product instanceof WC_Product) {
+				mailchimp_debug('queue', "handling meta update for meta [{$meta_key}] on product {$object_id}");
+				mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($object_id), 5);
+			} else if ($product instanceof WC_Product_Variation){
+				mailchimp_debug('queue', "handling meta update for meta [{$meta_key}] on product variation {$object_id}");
+				mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product_Variation($object_id), 5);
+			}
 		}
 	}
 
@@ -483,9 +492,13 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             if (!mailchimp_is_configured()) {
                 return;
             }
-			$deleted = mailchimp_get_api()->deleteStoreProduct(mailchimp_get_store_id(), $variation_id);
-			if ($deleted) mailchimp_log('product.deleted', "deleted product variation {$variation_id}");
-			else mailchimp_log('product.delete_fail', "Unable to deleted product variation {$variation_id}");
+			$product = MailChimp_WooCommerce_HPOS::get_product($variation_id);
+
+			$product_id = $product ? $product->get_parent_id() : null;
+
+			$deleted = mailchimp_get_api()->deleteStoreProductVariation(mailchimp_get_store_id(), $product_id, $variation_id);
+			if ($deleted) mailchimp_log('product_variation.deleted', "deleted product variation {$variation_id}");
+			else mailchimp_log('product_variation.delete_fail', "Unable to deleted product variation {$variation_id}");
 		} catch (Exception $e) {
 			mailchimp_error('delete product variation', $e->getMessage());
 		}
@@ -606,8 +619,15 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         // update the user meta with the 'is_subscribed' form element
         update_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', $subscribed);
 
+        // get user language
+		$language = get_user_meta($user_id, 'locale', true);
+		if (strpos($language, '_') !== false) {
+			$languageArray = explode('_', $language);
+			$language = $languageArray[0];
+		}
+
         if ($subscribed) {
-            $job = new MailChimp_WooCommerce_User_Submit($user_id, '1', null, null, $gdpr_fields);
+            $job = new MailChimp_WooCommerce_User_Submit($user_id, '1', null, $language, $gdpr_fields);
             mailchimp_handle_or_queue($job);
         }
     }
@@ -627,6 +647,13 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $is_subscribed = get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true);
         $gdpr_fields = get_user_meta($user_id, 'mailchimp_woocommerce_gdpr_fields', true);
 
+		// get user language
+		$language = get_user_meta($user_id, 'locale', true);
+		if (strpos($language, '_') !== false) {
+			$languageArray = explode('_', $language);
+			$language = $languageArray[0];
+		}
+
         if ( ! $is_subscribed && mailchimp_submit_subscribed_only() ) {
 	        mailchimp_debug('filter', "{$old_user_data->user_email} was blocked due to subscriber only settings");
 
@@ -637,7 +664,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             $user_id,
             $is_subscribed,
             $old_user_data,
-            null,
+			$language,
             !empty($gdpr_fields) ? $gdpr_fields : null
         );
         // only send this update if the user actually has a boolean value.

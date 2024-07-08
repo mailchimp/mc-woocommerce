@@ -258,8 +258,13 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
             // submit this if there's a proper user ID and is a subscriber.
             if ( (bool) $optin ) {
                 // probably need to add the GDPR fields and language in to this submission next.
-                $language = null;
-                mailchimp_handle_or_queue(
+				$language = get_user_meta($user_id, 'locale', true);
+				if (strpos($language, '_') !== false) {
+					$languageArray = explode('_', $language);
+					$language = $languageArray[0];
+				}
+
+				mailchimp_handle_or_queue(
                     new MailChimp_WooCommerce_User_Submit(
                         $user_id,
                         '1',

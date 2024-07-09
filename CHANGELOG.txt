@@ -1,4 +1,13 @@
 == Changelog ==
+= 4.2 =
+* Remote diagnostics setting maintenance 
+* Adds support for syncing Wordpress user/customer account language to Mailchimp contact 
+* Fix for WooCommerce coupons date_expires not syncing to Mailchimp 
+* Design update for disconnect modal 
+* Fix for issue with setting logging preference to none
+* Enhances syncing orders by starting from newest to oldest 
+* Adds WooCommerce plugin dependency feature 
+* Bump braces from 3.0.2 to 3.0.3 in /blocks
 = 4.1 =
 * Introduced a new filter for coupons (details available in the Wiki).
 * Restored the "Resync Now" button.

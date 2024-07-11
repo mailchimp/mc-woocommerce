@@ -203,7 +203,7 @@ input.mc-wc-btn {
     font-size: 14px;
     line-height: 20px;
     width: 100%;
-    max-width: 728px;
+    max-width: 810px;
     color: var(--mc-wc-text-color);
     margin-left: 60px;
 }
@@ -1670,6 +1670,10 @@ select#log_file {}
     width: 2.4rem;
     height: 2.4rem;
     padding:6px;
+}
+
+.promo-create-account:hover {
+    background: #ffec71 !important;
 }
 
 @media screen and (max-width: 782px) {

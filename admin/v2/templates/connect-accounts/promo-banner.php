@@ -64,7 +64,7 @@
         </div>
     </div>
     <div style="align-self: stretch; height: 190px; padding-bottom: 56px; padding-left: 48px; padding-right: 48px; flex-direction: column; justify-content: flex-start; align-items: flex-end; gap: 8px; display: flex">
-        <div style="align-self: stretch; height: 190px; padding-top: 32px; padding-bottom: 24px; padding-left: 32px; padding-right: 32px; background: white; box-shadow: 0px 0px 20px 3px rgba(0, 0, 0, 0.10); border: 1px solid; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 24px; display: flex">
+        <div style="align-self: stretch; height: 190px; padding-top: 32px; padding-bottom: 24px; padding-left: 32px; padding-right: 32px; background: white; box-shadow: 0px 0px 20px 3px rgba(0, 0, 0, 0.10); border: none; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 24px; display: flex">
             <div style="align-self: stretch; justify-content: space-between; align-items: flex-start; display: inline-flex">
                 <div style="width: 279px; flex-direction: column; justify-content: center; align-items: flex-start; gap: 22px; display: inline-flex">
                     <div style="align-self: stretch; height: 68px; flex-direction: column; justify-content: center; align-items: flex-start; gap: 8px; display: flex">

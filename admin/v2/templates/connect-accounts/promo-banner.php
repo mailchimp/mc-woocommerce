@@ -151,7 +151,7 @@
                                             You can downgrade your Paid Marketing Plan in the Monthly Plans or Credits page in the Billing Section.
                                             Downgrading your Paid Marketing Plan will become effective at the end of the monthly billing period.
                                             You will not receive a refund for previously billed charges.
-                                            See <a href="https://mailchimp.com" target="_blank">full offer terms</a>.
+                                            See <a href="https://mailchimp.com/legal/dollar-1month-promotion-july2024" target="_blank">full offer terms</a>.
                                             Terms, conditions, pricing, special features, and service and support options subject to change without notice.
                                         </p>
                                     </div>

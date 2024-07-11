@@ -10,54 +10,54 @@
                 <div style="width: 562px; text-align: center"><span style="color: #241C15; font-size: 16px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; line-height: 24px; word-wrap: break-word">Find out why customers see up to 24x ROI* using our Standard plan with a risk-free, 1-month trial for just $1. Or, try the </span><span style="color: #241C15; font-size: 16px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; text-decoration: underline; line-height: 24px; word-wrap: break-word">Essentials</span><span style="color: #241C15; font-size: 16px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; line-height: 24px; word-wrap: break-word"> plan for the same low price. Cancel or downgrade to a </span><span style="color: #241C15; font-size: 16px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; text-decoration: underline; line-height: 24px; word-wrap: break-word">Free</span><span style="color: #241C15; font-size: 16px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; line-height: 24px; word-wrap: break-word"> plan at any time.</span></div>
             </div>
             <div style="align-self: stretch; justify-content: flex-start; align-items: flex-start; gap: 48px; display: inline-flex">
-                <div style="flex: 1 1 0; height: 52px; justify-content: center; align-items: flex-start; gap: 12px; display: flex">
-                    <div style="border-radius: 4px; justify-content: flex-start; align-items: center; gap: 8px; display: flex">
-                        <div style="width: 16px; height: 16px; background: #FFE01B; border-radius: 100px; justify-content: center; align-items: center; gap: 10px; display: flex">
-                            <div style="width: 12px; height: 12px; position: relative">
-                                <div style="width: 7.96px; height: 6.06px; left: 2.40px; top: 3.15px; position: absolute; background: #241C15"></div>
-                            </div>
+                <div class="mc-promo-checks">
+                    <div class="mc-promo-check-wrapper">
+                        <div class="mc-promo-check">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M10.3536 3.85356L5.00004 9.20711L2.39648 6.60356L3.10359 5.89645L5.00004 7.7929L9.64648 3.14645L10.3536 3.85356Z" fill="#241C15"/>
+                            </svg>
                         </div>
-                        <div style="color: #241C15; font-size: 13px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; line-height: 20px; word-wrap: break-word">Custom-coded email templates</div>
+                        <div class="mc-promo-check-text">Custom-coded email templates</div>
                     </div>
-                    <div style="border-radius: 4px; justify-content: flex-start; align-items: center; gap: 8px; display: flex">
-                        <div style="width: 16px; height: 16px; background: #FFE01B; border-radius: 100px; justify-content: center; align-items: center; gap: 10px; display: flex">
-                            <div style="width: 12px; height: 12px; position: relative">
-                                <div style="width: 7.96px; height: 6.06px; left: 2.40px; top: 3.15px; position: absolute; background: #241C15"></div>
-                            </div>
+                    <div class="mc-promo-check-wrapper">
+                        <div class="mc-promo-check">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M10.3536 3.85356L5.00004 9.20711L2.39648 6.60356L3.10359 5.89645L5.00004 7.7929L9.64648 3.14645L10.3536 3.85356Z" fill="#241C15"/>
+                            </svg>
                         </div>
-                        <div style="color: #241C15; font-size: 13px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; line-height: 20px; word-wrap: break-word">Generative AI features</div>
+                        <div class="mc-promo-check-text">Generative AI features</div>
                     </div>
-                    <div style="border-radius: 4px; justify-content: flex-start; align-items: center; gap: 8px; display: flex">
-                        <div style="width: 16px; height: 16px; background: #FFE01B; border-radius: 100px; justify-content: center; align-items: center; gap: 10px; display: flex">
-                            <div style="width: 12px; height: 12px; position: relative">
-                                <div style="width: 7.96px; height: 6.06px; left: 2.40px; top: 3.15px; position: absolute; background: #241C15"></div>
-                            </div>
+                    <div class="mc-promo-check-wrapper">
+                        <div class="mc-promo-check">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M10.3536 3.85356L5.00004 9.20711L2.39648 6.60356L3.10359 5.89645L5.00004 7.7929L9.64648 3.14645L10.3536 3.85356Z" fill="#241C15"/>
+                            </svg>
                         </div>
-                        <div style="color: #241C15; font-size: 13px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; line-height: 20px; word-wrap: break-word">Advanced segmentation & reporting</div>
+                        <div class="mc-promo-check-text">Advanced segmentation & reporting</div>
                     </div>
-                    <div style="border-radius: 4px; justify-content: flex-start; align-items: center; gap: 8px; display: flex">
-                        <div style="width: 16px; height: 16px; background: #FFE01B; border-radius: 100px; justify-content: center; align-items: center; gap: 10px; display: flex">
-                            <div style="width: 12px; height: 12px; position: relative">
-                                <div style="width: 7.96px; height: 6.06px; left: 2.40px; top: 3.15px; position: absolute; background: #241C15"></div>
-                            </div>
+                    <div class="mc-promo-check-wrapper">
+                        <div class="mc-promo-check">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M10.3536 3.85356L5.00004 9.20711L2.39648 6.60356L3.10359 5.89645L5.00004 7.7929L9.64648 3.14645L10.3536 3.85356Z" fill="#241C15"/>
+                            </svg>
                         </div>
-                        <div style="color: #241C15; font-size: 13px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; line-height: 20px; word-wrap: break-word">Data-driven optimization tools</div>
+                        <div class="mc-promo-check-text">Data-driven optimization tools</div>
                     </div>
-                    <div style="border-radius: 4px; justify-content: flex-start; align-items: center; gap: 8px; display: flex">
-                        <div style="width: 16px; height: 16px; background: #FFE01B; border-radius: 100px; justify-content: center; align-items: center; gap: 10px; display: flex">
-                            <div style="width: 12px; height: 12px; position: relative">
-                                <div style="width: 7.96px; height: 6.06px; left: 2.40px; top: 3.15px; position: absolute; background: #241C15"></div>
-                            </div>
+                    <div class="mc-promo-check-wrapper">
+                        <div class="mc-promo-check">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M10.3536 3.85356L5.00004 9.20711L2.39648 6.60356L3.10359 5.89645L5.00004 7.7929L9.64648 3.14645L10.3536 3.85356Z" fill="#241C15"/>
+                            </svg>
                         </div>
-                        <div style="color: #241C15; font-size: 13px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; line-height: 20px; word-wrap: break-word">Enhanced automations</div>
+                        <div class="mc-promo-check-text">Enhanced automations</div>
                     </div>
-                    <div style="border-radius: 4px; justify-content: flex-start; align-items: center; gap: 8px; display: flex">
-                        <div style="width: 16px; height: 16px; background: #FFE01B; border-radius: 100px; justify-content: center; align-items: center; gap: 10px; display: flex">
-                            <div style="width: 12px; height: 12px; position: relative">
-                                <div style="width: 7.96px; height: 6.06px; left: 2.40px; top: 3.15px; position: absolute; background: #241C15"></div>
-                            </div>
+                    <div class="mc-promo-check-wrapper">
+                        <div class="mc-promo-check">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M10.3536 3.85356L5.00004 9.20711L2.39648 6.60356L3.10359 5.89645L5.00004 7.7929L9.64648 3.14645L10.3536 3.85356Z" fill="#241C15"/>
+                            </svg>
                         </div>
-                        <div style="color: #241C15; font-size: 13px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; line-height: 20px; word-wrap: break-word">Personalized onboarding</div>
+                        <div class="mc-promo-check-text">Personalized onboarding</div>
                     </div>
                 </div>
             </div>
@@ -128,20 +128,62 @@
                 <div style="width: 100%; height: 31px; position: relative; display:flex; justify-content: center;">
                     <div style="width: 100%; height: 31px; left: 0px; top: 0px; position: absolute; text-align: center; display:flex; gap:4px; justify-content: center;">
                         <div style="display:flex; flex-flow: column; align-items: center;">
-                            <a href="https://mailchimp.com" target="_blank" style="text-decoration:none; color: rgba(36, 28, 21, 0.80); font-size: 11px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; line-height: 16px; word-wrap: break-word">
-                                <span>*See Offer Terms. </span>
-                            </a>
+                            <div style="color: rgba(36, 28, 21, 0.80); font-size: 11px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; line-height: 16px; word-wrap: break-word">
+                                <span class="promo mc-wc-tooltipper">*See Offer Terms. </span>
+                                <div class="promo mc-wc-tooltipper-text">
+                                    <div class="tooltipper-container">
+                                        <button aria-label="Close Tooltip" class="tooltip__close" type="button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" focusable="false" aria-hidden="true" class="wink-icon"><path d="M12 13.414l6.293 6.293 1.414-1.414L13.414 12l6.293-6.293-1.414-1.414L12 10.586 5.707 4.293 4.293 5.707 10.586 12l-6.293 6.293 1.414 1.414L12 13.414z"></path></svg></button>
+                                        <p>
+                                            <strong>$1 for 1 month promotional period:</strong>
+                                            Offer for promotional, discounted period of one month for $1.00 for a Standard or Essentials Paid Marketing Plan (“Discounted Period”).
+                                            To activate the Discounted Period, you will be required to (1) accept the offer for the Discounted Period, and (2) provide valid payment information to us at the time of enrollment.
+                                            Discount applies to the monthly plan and the purchase of any add-on blocks for additional contacts for the duration of the Discounted Period.
+                                            Discounted Period offer does not apply to associated transaction fees or add-on/one-time fees, such as transactional email (fka Mandrill) charges, SMS Marketing, annual domains, Websites Plans, pay as you go credits, Facebook ads, Google ads, or postcards.
+                                            This offer cannot be combined with any other Mailchimp offer(s) and is available for a limited time.
+                                            Upon the expiration of the Discounted Period, you will be charged on a monthly basis at the then-current rate for the Paid Marketing Plan you have selected and your current contact tier until you cancel, change to a different paid monthly marketing plan, or change to a Free Marketing Plan.
+                                            If the payment method we have on file for you is declined, you must provide to us a new, valid payment method for the Paid Marketing Plan or we reserve the right, without further notice, to immediately suspend or cancel your continued use of the Paid Marketing Plan.
+                                            <br/><br/>
+                                            To be eligible for the 1-month Discounted Period, you must be either a new US Mailchimp customer or an existing Free Marketing Plan US customer with an account created within the last ninety (90) days and agree to the discount period.
+                                            Offer is provided through application of the 100% discount to your recurring monthly Mailchimp plan charges for each billing cycle during the Discounted Period, plus an add-on of $1.00 (USD) (or the equivalent in your local currency) for each such billing cycle.
+                                            You can pause your subscription or delete your Mailchimp account at any time via the Settings section in the Account & Billing area. Pausing your Paid Marketing Plan or deleting your Mailchimp account will become effective immediately.
+                                            Pausing your account does not pause or extend the Discounted Period.
+                                            Changing your Marketing Plan to a Premium Plan or Free Marketing Plan will result in the immediate expiration of the Discounted Period.
+                                            You can downgrade your Paid Marketing Plan in the Monthly Plans or Credits page in the Billing Section.
+                                            Downgrading your Paid Marketing Plan will become effective at the end of the monthly billing period.
+                                            You will not receive a refund for previously billed charges.
+                                            See <a href="https://mailchimp.com" target="_blank">full offer terms</a>.
+                                            Terms, conditions, pricing, special features, and service and support options subject to change without notice.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                             <svg width="95" height="1" viewBox="0 0 85 1" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M1.17771 0.5H84.2683" stroke="#241C15" stroke-linecap="square" stroke-dasharray="2 4"/>
                             </svg>
                         </div>
                         <div style="color: rgba(36, 28, 21, 0.80); font-size: 11px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; line-height: 16px; word-wrap: break-word; display:flex;">
-                            <span style="text-decoration: underline">Overages</span>&nbsp;apply if contact or email send limit is exceeded.
+                            <a href="https://mailchimp.com/help/about-additional-charges" target="_blank">Overages</a>&nbsp;apply if contact or email send limit is exceeded.
                         </div>
                         <div style="display:flex; flex-flow: column; align-items: center;">
-                            <a href="https://mailchimp.com" target="_blank" style="text-decoration: none; color: rgba(36, 28, 21, 0.80); font-size: 11px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; line-height: 16px; word-wrap: break-word">
-                                <span>Learn more</span>
-                            </a>
+                            <div style="text-decoration: none; color: rgba(36, 28, 21, 0.80); font-size: 11px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; line-height: 16px; word-wrap: break-word">
+                                <span class="promo mc-wc-tooltipper">Learn more</span>
+                                <div class="promo mc-wc-tooltipper-text">
+                                    <div class="tooltipper-container">
+                                        <button aria-label="Close Tooltip" class="tooltip__close" type="button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" focusable="false" aria-hidden="true" class="wink-icon"><path d="M12 13.414l6.293 6.293 1.414-1.414L13.414 12l6.293-6.293-1.414-1.414L12 10.586 5.707 4.293 4.293 5.707 10.586 12l-6.293 6.293 1.414 1.414L12 13.414z"></path></svg></button>
+                                        <p>
+                                            Select your audience size to calculate your price.
+                                            The monthly email send limit for Standard plans is 12 times your maximum contact count.
+                                            <br>
+                                            <br>
+                                            <strong>Non-USD Pricing:</strong>
+                                            Actual price may vary. Prices displayed are estimates based on current exchange rates.
+                                            Exact amount charged will vary and depends on the exchange rate at the time of payment processing.
+                                            Prices displayed exclude any applicable taxes and fees, which will be added to the cost of all services purchased.
+                                            For exact base pricing please refer to prices listed in USD.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                             <svg width="60" height="1" viewBox="0 0 85 1" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M1.17771 0.5H84.2683" stroke="#241C15" stroke-linecap="square" stroke-dasharray="2 4"/>
                             </svg>

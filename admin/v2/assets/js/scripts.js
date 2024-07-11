@@ -188,6 +188,14 @@
 			$('.mc_regular_price').text('$'+found.regular_price.toString());
 			$('.mc_promo_first_month_price').text('$'+found.promo_first_month_price.toString());
 		});
+
+		$('.promo.mc-wc-tooltipper').on('click', function() {
+			$(this).parent().find('.mc-wc-tooltipper-text').css('visibility', 'visible').fadeIn();
+		});
+
+		$('.tooltip__close').on('click', function() {
+			$(this).closest('.mc-wc-tooltipper-text').fadeOut();
+		});
 	});
 })( jQuery );
 

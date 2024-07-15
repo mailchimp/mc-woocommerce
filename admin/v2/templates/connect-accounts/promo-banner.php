@@ -9,9 +9,9 @@
                 </div>
                 <div style="width: 562px; text-align: center">
                     <span style="color: #241C15; font-size: 16px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; line-height: 24px; word-wrap: break-word">Find out why customers see up to 24x ROI* using our Standard plan with a risk-free, 1-month trial for just $1. Or, try the </span>
-                    <a href=https://mailchimp.com/pricing/essentials-details/" style="color: #241C15; font-size: 16px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; text-decoration: underline; line-height: 24px; word-wrap: break-word;">Essentials</a>
+                    <a target="_blank" href=https://mailchimp.com/pricing/essentials-details/" style="color: #241C15; font-size: 16px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; text-decoration: underline; line-height: 24px; word-wrap: break-word;">Essentials</a>
                     <span style="color: #241C15; font-size: 16px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; line-height: 24px; word-wrap: break-word"> plan for the same low price. Cancel or downgrade to a </span>
-                    <a href="https://mailchimp.com/pricing/free-details/" style="color: #241C15; font-size: 16px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; text-decoration: underline; line-height: 24px; word-wrap: break-word">Free</a>
+                    <a target="_blank" href="https://mailchimp.com/pricing/free-details/" style="color: #241C15; font-size: 16px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; text-decoration: underline; line-height: 24px; word-wrap: break-word">Free</a>
                     <span style="color: #241C15; font-size: 16px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; line-height: 24px; word-wrap: break-word"> plan at any time.</span>
                 </div>
             </div>

@@ -95,6 +95,7 @@ if ((MC_WC_CONFIRMATION === $active_breadcrumb && ! $is_confirmation)) {
 		$active_breadcrumb = MC_WC_REVIEW_SYNC_SETTINGS;
 	}
 }
+$promo_active = false;
 ?>
 
 <div class="mc-wc-settings-wrapper woocommerce <?php echo $active_breadcrumb; ?>">
@@ -204,5 +205,11 @@ if ((MC_WC_CONFIRMATION === $active_breadcrumb && ! $is_confirmation)) {
 			<?php endif;?>
 		</div>
 		<?php endif; ?>
+
+        <?php if($promo_active): ?>
+        <div class="promo-disclaimer">
+            *24X ROI Standard Plan: Based on all e-commerce revenue attributable to Standard plan users’ Mailchimp campaigns from April 2023 to April 2024.
+        </div>
+        <?php endif; ?>
 	</form>
 </div>

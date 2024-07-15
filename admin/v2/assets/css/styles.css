@@ -1777,6 +1777,19 @@ select#log_file {}
     background: #ffec71 !important;
 }
 
+.promo-disclaimer {
+    color: rgba(36, 28, 21, 0.80);
+    font-size: 11px;
+    font-family: 'Graphik Mailchimp Web';
+    font-weight: 400;
+    line-height: 16px;
+    word-wrap: break-word;
+    display:flex;
+    align-content: center;
+    justify-content: center;
+    padding-top:1em;
+}
+
 @media screen and (max-width: 782px) {
     #wpcontent {
         padding-right: 10px;

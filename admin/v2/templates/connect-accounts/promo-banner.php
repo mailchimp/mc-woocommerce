@@ -3,7 +3,7 @@
         <div style="flex: 1 1 0; flex-direction: column; justify-content: flex-start; align-items: center; gap: 32px; display: inline-flex">
             <div style="align-self: stretch; height: 121px; flex-direction: column; justify-content: flex-start; align-items: center; gap: 8px; display: flex">
                 <div style="align-self: stretch; text-align: center; color: #241C15; font-size: 36px; font-family: 'Means Web'; font-weight: 400; line-height: 40.50px; word-wrap: break-word">Get started today for just <div style="flex-direction: column; justify-content: flex-start; align-items: flex-start; display: inline-flex">
-                        <div style="color: #241C15; font-size: 36px; font-family: 'Means Web'; font-weight: 400; line-height: 40px; word-wrap: break-word"><span id="mc_promo_first_month_price">$1</span></div>
+                        <div style="color: #241C15; font-size: 36px; font-family: 'Means Web'; font-weight: 400; line-height: 40px; word-wrap: break-word"><span id="mc_promo_first_month_price">$1*</span></div>
                         <div style="align-self: stretch;height: 0px;border: 4px #FFE01B solid;"></div>
                     </div>
                 </div>
@@ -119,7 +119,7 @@
                                 <div style="width: 103px; color: #241C15; font-size: 13px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; line-height: 20px; word-wrap: break-word">for the 1st month</div>
                             </div>
                         </div>
-                        <div><span style="color: rgba(36, 28, 21, 0.65); font-size: 13px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; line-height: 20px; word-wrap: break-word">Then, starts at </span><span style="color: rgba(36, 28, 21, 0.65); font-size: 13px; font-family: 'Graphik Mailchimp Web'; font-weight: 500; line-height: 20px; word-wrap: break-word"><span class="mc_regular_price">$20</span>/month</span></div>
+                        <div><span style="color: rgba(36, 28, 21, 0.65); font-size: 13px; font-family: 'Graphik Mailchimp Web'; font-weight: 400; line-height: 20px; word-wrap: break-word">Then, starts at </span><span style="color: rgba(36, 28, 21, 0.65); font-size: 13px; font-family: 'Graphik Mailchimp Web'; font-weight: 500; line-height: 20px; word-wrap: break-word"><span class="mc_regular_price">$20</span>/month*</span></div>
                     </div>
                     <div style="align-self: stretch; height: 44px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 16px; display: flex">
                         <div style="align-self: stretch; height: 44px; border-radius: 38px; flex-direction: column; justify-content: center; align-items: flex-start; gap: 8px; display: flex">

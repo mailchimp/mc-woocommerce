@@ -1,4 +1,7 @@
 == Changelog ==
+= 4.2.1 =
+* Bug fix for product variations
+* Front end optimizations
 = 4.2 =
 * Remote diagnostics setting maintenance 
 * Adds support for syncing Wordpress user/customer account language to Mailchimp contact 

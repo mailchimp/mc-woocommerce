@@ -434,6 +434,12 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
 		// Confirm that we're working with an object that is a WooCommerce product with a certain status
 		$product = wc_get_product($object_id);
+
+        // this isn't working properly for some hooks.
+        if (!$product) {
+            return;
+        }
+
 		if (!in_array($product->get_status(), array('trash', 'auto-draft', 'draft', 'pending'))) {
 			if ($product instanceof WC_Product) {
 				mailchimp_debug('queue', "handling meta update for meta [{$meta_key}] on product {$object_id}");

@@ -18,7 +18,6 @@ const Block = ( { cart, extensions, text, gdprHeadline, gdprStatus, gdpr, userSu
 	const [ checked, setChecked ] = useState( status );
 	const [ gdprFields ] = useState({});
 	const { setExtensionData } = checkoutExtensionData;
-	const hideInput = gdprStatus === 'hide';
 
 	useEffect( () => {
 		setExtensionData( 'mailchimp-newsletter', 'optin', checked );
@@ -26,7 +25,7 @@ const Block = ( { cart, extensions, text, gdprHeadline, gdprStatus, gdpr, userSu
 
 	return (
 		<div className='wc-block-components-checkout-step__container'>
-			<div style={{ display: gdprStatus === 'hide' || userSubscribed ? 'none' : '' }} className='wc-block-components-checkout-step__content'>
+			<div style={{ display: userSubscribed ? 'none' : '' }} className='wc-block-components-checkout-step__content'>
 				<CheckboxControl
 					id="subscribe-to-newsletter"
 					checked={ checked }

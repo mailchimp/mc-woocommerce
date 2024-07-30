@@ -121,12 +121,6 @@
                             <?php esc_html_e( 'Visible, unchecked by default', 'mailchimp-for-woocommerce' ); ?>
                         </label>
                     </div>
-                    <div class="mc-wc-radio">
-                        <label class="mc-wc-radio-label">
-                            <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_checkbox_defaults]" value="hide"<?php echo 'hide' === $checkbox_default_settings ? ' checked="checked" ' : ''; ?>>
-                            <?php esc_html_e( 'Hidden, unchecked by default', 'mailchimp-for-woocommerce' ); ?>
-                        </label>
-                    </div>
                 </div>
             </div>
 

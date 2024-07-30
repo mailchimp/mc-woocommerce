@@ -30,8 +30,7 @@ export const Edit = ( { attributes, setAttributes } ) => {
 						selected={ gdprStatus }
 						options={ [
 							{ label: 'Visible, checked by default', value: 'check' },
-							{ label: 'Visible, unchecked by default', value: 'uncheck' },
-							{ label: 'Hidden, unchecked by default', value: 'hide' },
+							{ label: 'Visible, unchecked by default', value: 'uncheck' }
 						] }
 						onChange={ ( value ) => setAttributes( {gdprStatus: value } ) }
 					/>

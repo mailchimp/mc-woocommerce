@@ -5,7 +5,7 @@ import { useEffect, useState } from '@wordpress/element';
 import { CheckboxControl } from '@woocommerce/blocks-checkout';
 import {__} from "@wordpress/i18n";
 
-const Block = ( { cart, extensions, text, gdprHeadline, gdprStatus, gdpr, checkoutExtensionData } ) => {
+const Block = ( { cart, extensions, text, gdprHeadline, gdprStatus, gdpr, userSubscribed, checkoutExtensionData } ) => {
 
 	let defaultGDPR = {};
 	if (gdpr && gdpr.length) {
@@ -26,7 +26,7 @@ const Block = ( { cart, extensions, text, gdprHeadline, gdprStatus, gdpr, checko
 
 	return (
 		<div className='wc-block-components-checkout-step__container'>
-			<div style={{ display: gdprStatus === 'hide' ? 'none' : '' }} className='wc-block-components-checkout-step__content'>
+			<div style={{ display: gdprStatus === 'hide' || userSubscribed ? 'none' : '' }} className='wc-block-components-checkout-step__content'>
 				<CheckboxControl
 					id="subscribe-to-newsletter"
 					checked={ checked }

@@ -132,6 +132,14 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
         );
         $data['gdprStatus'] = $this->getOptinStatus();
 
+        if (is_user_logged_in()) {
+            $subscribed = is_user_logged_in() && get_user_meta(get_current_user_id(), 'mailchimp_woocommerce_is_subscribed', true);
+        } else {
+            $subscribed = false;
+        }
+
+        $data['userSubscribed'] = $subscribed === true || $subscribed === '1';
+
         $data['checkboxSettings'] = array(
             [ 'label' => 'Visible, checked by default', 'value' => 'check' ],
             [ 'label' => 'Visible, unchecked by default', 'value' => 'uncheck' ],
@@ -313,7 +321,7 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
             }
         }
 
-        return $status === true ? 'check' : 'uncheck';
+        return $status === true || $status === '1' ? 'check' : 'uncheck';
     }
 
     /**

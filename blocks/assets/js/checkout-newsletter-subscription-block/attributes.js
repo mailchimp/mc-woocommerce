@@ -8,6 +8,7 @@ const {
 	gdprHeadline,
 	gdprFields,
 	gdprStatus,
+	userSubscribed
 } = getSetting( 'mailchimp-newsletter_data', '' );
 
 export default {
@@ -26,5 +27,9 @@ export default {
 	gdprStatus: {
 		type: 'string',
 		default: gdprStatus
+	},
+	userSubscribed: {
+		type: 'bool',
+		default: userSubscribed
 	}
 };

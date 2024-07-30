@@ -140,11 +140,12 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
 
         $data['userSubscribed'] = $subscribed === true || $subscribed === '1';
 
-        $data['checkboxSettings'] = array(
-            [ 'label' => 'Visible, checked by default', 'value' => 'check' ],
-            [ 'label' => 'Visible, unchecked by default', 'value' => 'uncheck' ],
-            [ 'label' => 'Hidden, unchecked by default', 'value' => 'hide' ],
+        $checkbox_settings = array(
+            [ 'label' => esc_html__( 'Checked by default', 'mailchimp-for-woocommerce' ), 'value' => 'check' ],
+            [ 'label' => esc_html__( 'Unchecked by default', 'mailchimp-for-woocommerce' ), 'value' => 'uncheck' ],
         );
+
+        $data['checkboxSettings'] = apply_filters('mailchimp_checkout_opt_in_options', $checkbox_settings);;
 
         if (!empty($gdpr)) {
             $data['gdprHeadline'] = __( 'Please select all the ways you would like to hear from us', 'mailchimp-newsletter' );

@@ -8,7 +8,8 @@ const {
 	gdprHeadline,
 	gdprFields,
 	gdprStatus,
-	userSubscribed
+	userSubscribed,
+	checkboxSettings
 } = getSetting( 'mailchimp-newsletter_data', '' );
 
 export default {
@@ -31,5 +32,9 @@ export default {
 	userSubscribed: {
 		type: 'bool',
 		default: userSubscribed
+	},
+	checkboxSettings: {
+		type: 'array',
+		default: checkboxSettings
 	}
 };

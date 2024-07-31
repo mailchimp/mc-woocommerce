@@ -323,7 +323,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
     {
         $options = $this->getOptions();
         $options[$key] = $value;
-        update_option($this->plugin_name, $options);
+        \Mailchimp_Woocommerce_DB_Helpers::update_option($this->plugin_name, $options);
         return $this;
     }
 
@@ -342,7 +342,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
      */
     public function getOptions()
     {
-        $options = get_option($this->plugin_name);
+        $options = \Mailchimp_Woocommerce_DB_Helpers::get_option($this->plugin_name);
         return is_array($options) ? $options : array();
     }
 
@@ -353,7 +353,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
      */
     public function setData($key, $value)
     {
-        update_option($this->plugin_name.'-'.$key, $value, 'yes');
+        \Mailchimp_Woocommerce_DB_Helpers::update_option($this->plugin_name.'-'.$key, $value, 'yes');
         return $this;
     }
 
@@ -364,7 +364,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
      */
     public function getData($key, $default = null)
     {
-        return get_option($this->plugin_name.'-'.$key, $default);
+        return \Mailchimp_Woocommerce_DB_Helpers::get_option($this->plugin_name.'-'.$key, $default);
     }
 
     /**
@@ -373,7 +373,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
      */
     public function removeData($key)
     {
-        return delete_option($this->plugin_name.'-'.$key);
+        return \Mailchimp_Woocommerce_DB_Helpers::delete_option($this->plugin_name.'-'.$key);
     }
 
     /**

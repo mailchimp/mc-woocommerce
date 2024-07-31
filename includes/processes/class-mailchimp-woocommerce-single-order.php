@@ -188,7 +188,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             $pulled_member = false;
 
             // see if this store has the auto subscribe setting enabled on initial sync
-            $plugin_options = get_option('mailchimp-woocommerce');
+            $plugin_options = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce');
             $subscribe_setting = (string) $plugin_options['mailchimp_auto_subscribe'];
             $sync_as_non_subscribed = $subscribe_setting === '0';
             $should_auto_subscribe = $subscribe_setting === '1';

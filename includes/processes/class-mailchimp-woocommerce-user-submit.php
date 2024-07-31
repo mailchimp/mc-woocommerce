@@ -97,7 +97,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 			return false;
 		}
 
-		$options = get_option('mailchimp-woocommerce', array());
+		$options = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce', array());
 		$store_id = mailchimp_get_store_id();
 
 		// load up the user.
@@ -110,7 +110,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 			// just a precautionary to make sure it's available during
 			sleep(1);
 
-			$options = get_option('mailchimp-woocommerce', array());
+			$options = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce', array());
 			$store_id = mailchimp_get_store_id();
 
 			// load up the user.

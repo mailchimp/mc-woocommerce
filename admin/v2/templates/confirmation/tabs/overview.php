@@ -26,8 +26,8 @@ $mailchimp_total_subscribers   = 0;
 $mailchimp_total_unsubscribed  = 0;
 $mailchimp_total_transactional = 0;
 
-$last_updated_time = get_option( 'mailchimp-woocommerce-resource-last-updated' );
-$sync_started_at   = get_option( 'mailchimp-woocommerce-sync.started_at' );
+$last_updated_time = \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-resource-last-updated' );
+$sync_started_at   = \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.started_at' );
 
 if ( ! empty( $sync_started_at ) ) {
 	$sync_started_at = mailchimp_date_local( $sync_started_at );
@@ -35,7 +35,7 @@ if ( ! empty( $sync_started_at ) ) {
 	$sync_started_at = new DateTime();
 }
 
-$sync_completed_at = get_option( 'mailchimp-woocommerce-sync.completed_at' );
+$sync_completed_at = \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.completed_at' );
 
 if ( ! empty( $sync_completed_at ) ) {
 	$sync_completed_at = mailchimp_date_local( $sync_completed_at );

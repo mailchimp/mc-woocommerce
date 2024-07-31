@@ -9,7 +9,7 @@
 ?>
 
 <?php
-if ( (bool) get_site_transient( 'mailchimp_woocommerce_start_sync' ) ) {
+if ( (bool) \Mailchimp_Woocommerce_DB_Helpers::get_transient( 'mailchimp_woocommerce_start_sync' ) ) {
 	MailChimp_WooCommerce_Admin::connect()->startSync();
 }
 $store_id = mailchimp_get_store_id();

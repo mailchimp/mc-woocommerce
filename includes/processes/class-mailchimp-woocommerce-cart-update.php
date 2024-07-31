@@ -91,7 +91,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
                 return false;
             }
 
-            $options = get_option('mailchimp-woocommerce', array());
+            $options = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce', array());
             $store_id = mailchimp_get_store_id();
 
             $this->cart_data = json_decode($this->cart_data, true);
@@ -177,7 +177,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
             mailchimp_error('cart.error', mailchimp_error_trace($e, "RateLimited :: email {$this->email}"));
             $this->retry();
         } catch (Exception $e) {
-            update_option('mailchimp-woocommerce-cart-error', $e->getMessage());
+            \Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp-woocommerce-cart-error', $e->getMessage());
             mailchimp_error('abandoned_cart.error', $e);
         }
 

@@ -9,6 +9,9 @@ $mailchimp_woocommerce_spl_autoloader = true;
 
 spl_autoload_register(function($class) {
     $classes = array(
+        // helper classes
+        'Mailchimp_Woocommerce_DB_Helpers' => 'includes/class-mailchimp-woocommerce-db-helpers.php',
+
         // includes root
         'MailChimp_Service' => 'includes/class-mailchimp-woocommerce-service.php',
         'MailChimp_WooCommerce_Options' => 'includes/class-mailchimp-woocommerce-options.php',
@@ -93,7 +96,7 @@ spl_autoload_register(function($class) {
 function mailchimp_environment_variables() {
     global $wp_version;
 
-    $o = get_option('mailchimp-woocommerce', false);
+    $o = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce', false);
 
     return (object) array(
         'repo' => 'master',
@@ -197,12 +200,12 @@ function mailchimp_handle_or_queue(Mailchimp_Woocommerce_Job $job, $delay = 0)
 {
     if ($job instanceof MailChimp_WooCommerce_Single_Order && isset($job->id) && empty($job->gdpr_fields)) {
         // if this is a order process already queued - just skip this
-        if (get_site_transient("mailchimp_order_being_processed_{$job->id}") == true) {
+        if (\Mailchimp_Woocommerce_DB_Helpers::get_transient("mailchimp_order_being_processed_{$job->id}") == true) {
             mailchimp_debug('queue', "Not queuing up order {$job->id} because it's already queued");
             return;
         }
         // tell the system the order is already queued for processing in this saving process - and we don't need to process it again.
-        set_site_transient( "mailchimp_order_being_processed_{$job->id}", true, 30);
+        \Mailchimp_Woocommerce_DB_Helpers::set_transient( "mailchimp_order_being_processed_{$job->id}", true, 30);
     }
 	// Allow sites to alter whether the order or product is synced.
 	// $job should contain at least the ID of the order/product as $job->id.
@@ -385,7 +388,7 @@ function mailchimp_create_webhook_token(){
  * @param $url
  */
 function mailchimp_set_webhook_url( $url ) {
-    update_option('mc-mailchimp_webhook_url', $url);
+    \Mailchimp_Woocommerce_DB_Helpers::update_option('mc-mailchimp_webhook_url', $url);
 }
 /**
  * Returns webhookurl option
@@ -437,7 +440,7 @@ function mailchimp_get_store_id() {
                 //iterate thru stores, find correct store ID and save it to db
                 foreach ($stores as $mc_store) {
                     if ($mc_store->getDomain() === get_option('siteurl')) {
-                        update_option('mailchimp-woocommerce-store_id', $mc_store->getId(), 'yes');
+                        \Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp-woocommerce-store_id', $mc_store->getId(), 'yes');
                         $store_id = $mc_store->getId();
                     }
                 }
@@ -527,7 +530,7 @@ function mailchimp_get_data($key, $default = null) {
  * @return bool
  */
 function mailchimp_set_data($key, $value, $autoload = 'yes') {
-    return update_option('mailchimp-woocommerce-'.$key, $value, $autoload);
+    return \Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp-woocommerce-'.$key, $value, $autoload);
 }
 
 /**
@@ -656,7 +659,7 @@ function mailchimp_check_woocommerce_plugin_status()
         return true;
     }
     if (!is_multisite()) return false;
-    $plugins = get_site_option( 'active_sitewide_plugins');
+    $plugins = \Mailchimp_Woocommerce_DB_Helpers::get_option( 'active_sitewide_plugins');
     return isset($plugins['woocommerce/woocommerce.php']);
 }
 
@@ -984,9 +987,9 @@ function mailchimpi_refresh_connected_site_script(MailChimp_WooCommerce_Store $s
     if ($url && $fragment) {
 
         // update the options for script_url and script_fragment
-        update_option('mailchimp-woocommerce-script_url', $url);
-        update_option('mailchimp-woocommerce-script_fragment', $fragment);
-        update_option('mailchimp-woocommerce-script_updated_at', time());
+        \Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp-woocommerce-script_url', $url);
+        \Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp-woocommerce-script_fragment', $fragment);
+        \Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp-woocommerce-script_updated_at', time());
 
         // check to see if the site is connected
         if (!$api->checkConnectedSite($store->getId())) {
@@ -1064,7 +1067,8 @@ function mailchimp_get_wc_customer($email) {
  * @return mixed|null
  */
 function mailchimp_get_transient($key, $default = null) {
-    $transient = get_site_transient("mailchimp-woocommerce.{$key}");
+    $transient = \Mailchimp_Woocommerce_DB_Helpers::get_transient("mailchimp-woocommerce.{$key}");
+
     return empty($transient) ? $default : $transient;
 }
 
@@ -1076,7 +1080,7 @@ function mailchimp_get_transient($key, $default = null) {
  */
 function mailchimp_set_transient($key, $value, $seconds = 60) {
     mailchimp_delete_transient($key);
-    return set_site_transient("mailchimp-woocommerce.{$key}", array(
+    return \Mailchimp_Woocommerce_DB_Helpers::set_transient("mailchimp-woocommerce.{$key}", array(
         'value' => $value,
         'expires' => time()+$seconds,
     ), $seconds);
@@ -1087,7 +1091,7 @@ function mailchimp_set_transient($key, $value, $seconds = 60) {
  * @return bool
  */
 function mailchimp_delete_transient($key) {
-    return delete_site_transient("mailchimp-woocommerce.{$key}");
+    return \Mailchimp_Woocommerce_DB_Helpers::delete_transient("mailchimp-woocommerce.{$key}");
 }
 
 /**
@@ -1216,19 +1220,19 @@ function mailchimp_delete_as_jobs() {
 
 function mailchimp_flush_sync_pointers() {
     // clean up the initial sync pointers
-    delete_option( 'mailchimp-woocommerce-resource-last-updated' );
-    delete_option( 'mailchimp-woocommerce-sync.started_at' );
-    delete_option( 'mailchimp-woocommerce-sync.completed_at' );
+    \Mailchimp_Woocommerce_DB_Helpers::delete_option( 'mailchimp-woocommerce-resource-last-updated' );
+    \Mailchimp_Woocommerce_DB_Helpers::delete_option( 'mailchimp-woocommerce-sync.started_at' );
+    \Mailchimp_Woocommerce_DB_Helpers::delete_option( 'mailchimp-woocommerce-sync.completed_at' );
     foreach (array('orders', 'products', 'coupons') as $resource_type) {
         mailchimp_flush_specific_resource_pointers($resource_type);
     }
 }
 
 function mailchimp_flush_specific_resource_pointers($resource_type) {
-    delete_option("mailchimp-woocommerce-sync.{$resource_type}.started_at");
-    delete_option("mailchimp-woocommerce-sync.{$resource_type}.completed_at");
-    delete_option("mailchimp-woocommerce-sync.{$resource_type}.started_at");
-    delete_option("mailchimp-woocommerce-sync.{$resource_type}.current_page");
+    \Mailchimp_Woocommerce_DB_Helpers::delete_option("mailchimp-woocommerce-sync.{$resource_type}.started_at");
+    \Mailchimp_Woocommerce_DB_Helpers::delete_option("mailchimp-woocommerce-sync.{$resource_type}.completed_at");
+    \Mailchimp_Woocommerce_DB_Helpers::delete_option("mailchimp-woocommerce-sync.{$resource_type}.started_at");
+    \Mailchimp_Woocommerce_DB_Helpers::delete_option("mailchimp-woocommerce-sync.{$resource_type}.current_page");
 }
 
 /**
@@ -1244,7 +1248,7 @@ function mailchimp_clean_database() {
     $plugin_options = $wpdb->get_results( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE 'mailchimp%woocommerce%'" );
 
     foreach( $plugin_options as $option ) {
-        delete_option( $option->option_name );
+        \Mailchimp_Woocommerce_DB_Helpers::delete_option( $option->option_name );
     }
 }
 

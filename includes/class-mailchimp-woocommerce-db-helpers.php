@@ -118,6 +118,10 @@ class Mailchimp_Woocommerce_DB_Helpers
             return false;
         }
 
+        if (!$old_value) {
+            self::add_option( $option, $value );
+        }
+
         $serialized_value = maybe_serialize( $value );
 
         $update_args = array(

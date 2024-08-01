@@ -522,7 +522,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		// if the saved version is less than the current version
 		if ( version_compare( $version, $saved_version ) > 0 ) {
 			// resave the site option so this only fires once.
-			\Mailchimp_Woocommerce_DB_Helpers::update_option_option( 'mailchimp_woocommerce_version', $version );
+			\Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp_woocommerce_version', $version );
 
 			// get plugin options
 			$options = $this->getOptions();
@@ -749,7 +749,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		// tell the site options that we've already subscribed this person to marketing through the
 		// plugin update process.
-		\Mailchimp_Woocommerce_DB_Helpers::update_option_option( $site_option, true );
+		\Mailchimp_Woocommerce_DB_Helpers::update_option( $site_option, true );
 
 		try {
 			// send the post to the mailchimp server
@@ -790,7 +790,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				) $charset_collate;";
 
 			if ( ( $result = $wpdb->query( $sql ) ) > 0 ) {
-				\Mailchimp_Woocommerce_DB_Helpers::update_option_option( 'mailchimp_woocommerce_db_mailchimp_carts', true );
+				\Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp_woocommerce_db_mailchimp_carts', true );
 			}
 		}
 	}

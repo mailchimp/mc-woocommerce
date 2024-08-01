@@ -1955,7 +1955,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 */
 	public function getCachedGDPRFields( $list_id, $minutes = 5 ) {
 		$transient  = "mailchimp-woocommerce-gdpr-fields.{$list_id}";
-		$GDPRfields = \Mailchimp_Woocommerce_DB_Helpers::get_transient( $transient );
+		$GDPRfields = get_transient( $transient );
 
 		// only return the values if it's a false - or an array
 		if ( is_array( $GDPRfields ) ) {
@@ -1964,7 +1964,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 
 		try {
 			$GDPRfields = $this->getGDPRFields( $list_id );
-			\Mailchimp_Woocommerce_DB_Helpers::set_transient( $transient, $GDPRfields, 60 * $minutes );
+			set_transient( $transient, $GDPRfields, 60 * $minutes );
 		} catch ( Exception $e ) {
 			$GDPRfields = array();
 		}

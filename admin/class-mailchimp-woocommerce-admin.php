@@ -537,7 +537,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			if ( ! empty( $options['admin_email'] ) ) {
 				try {
 					// send the post to the mailchimp server
-					$comm_opt = get_option( 'mailchimp-woocommerce-comm.opt', 0 );
+					$comm_opt = \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-comm.opt', 0 );
 					$this->mailchimp_set_communications_status_on_server( $comm_opt, $options['admin_email'] );
 				} catch ( Exception $e ) {
 					mailchimp_error( 'marketing_status_update', $e->getMessage() );
@@ -549,7 +549,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			//$this->fix_is_syncing_problem();
 		}
 
-		if ( ! get_option( $this->plugin_name . '_cart_table_add_index_update' ) ) {
+		if ( ! \Mailchimp_Woocommerce_DB_Helpers::get_option( $this->plugin_name . '_cart_table_add_index_update' ) ) {
 			$check_index_sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE table_schema='{$wpdb->dbname}' AND table_name='{$wpdb->prefix}mailchimp_carts' AND index_name='primary' and column_name='email';";
 			$index_exists    = $wpdb->get_var( $check_index_sql );
 			if ( $index_exists == '1' ) {
@@ -571,7 +571,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			}
 		}
 
-		if ( ! get_option( $this->plugin_name . '_woo_currency_update' ) ) {
+		if ( ! \Mailchimp_Woocommerce_DB_Helpers::get_option( $this->plugin_name . '_woo_currency_update' ) ) {
 			if ( $this->mailchimp_update_woo_settings() ) {
 				\Mailchimp_Woocommerce_DB_Helpers::update_option( $this->plugin_name . '_woo_currency_update', true );
 			}
@@ -669,10 +669,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
     {
 	    if ((bool) mailchimp_get_data('sync.syncing' )) {
 		    $toggle_mailchimp = false;
-            if (get_option( 'mailchimp-woocommerce-sync.orders.completed_at' )) {
+            if (\Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.orders.completed_at' )) {
 			    $toggle_mailchimp = true;
 		    } else {
-	            $sync_started_at = (int) get_option( 'mailchimp-woocommerce-sync.started_at' );
+	            $sync_started_at = (int) \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.started_at' );
 	            $seconds_in_days = 86400;
 	            $now = time();
 	            $difference = $sync_started_at > 0 ? ($now - $sync_started_at) : 0;
@@ -1064,7 +1064,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             \Mailchimp_Woocommerce_DB_Helpers::delete_transient( 'mailchimp-woocommerce-oauth-secret' );
             // save api_key? If yes, we can skip api key validation for validatePostApiKey();
             $result = json_decode( $response['body'], true);
-            $options = get_option($this->plugin_name);
+            $options = \Mailchimp_Woocommerce_DB_Helpers::get_option($this->plugin_name);
             $options['mailchimp_api_key'] = $result['access_token'].'-'.$result['data_center'];
 
             // \Mailchimp_Woocommerce_DB_Helpers::update_option($this->plugin_name, $options); this used to return false!
@@ -2211,7 +2211,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		$env      = mailchimp_environment_variables();
 		$audience = ! empty( mailchimp_get_list_id() ) ? 1 : 0;
-		$synced   = get_option( 'mailchimp-woocommerce-sync.completed_at' ) > 0 ? 1 : 0;
+		$synced   = \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.completed_at' ) > 0 ? 1 : 0;
 
 		$post_data = array(
 			'store_id'         => mailchimp_get_store_id(),

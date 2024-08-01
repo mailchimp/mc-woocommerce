@@ -21,8 +21,8 @@ if ( ! empty( $files ) ) {
 	}
 }
 
-$requested_log_file = get_site_transient( 'mailchimp-woocommerce-view-log-file' );
-delete_site_transient( 'mailchimp-woocommerce-view-log-file' );
+$requested_log_file = \Mailchimp_Woocommerce_DB_Helpers::get_transient( 'mailchimp-woocommerce-view-log-file' );
+\Mailchimp_Woocommerce_DB_Helpers::delete_transient( 'mailchimp-woocommerce-view-log-file' );
 
 if ( empty( $requested_log_file ) ) {
 	$requested_log_file = ! empty( $_REQUEST['log_file'] ) && check_admin_referer( 'mailchimp_woocommerce_options', 'mailchimp_woocommerce_nonce' ) ? esc_attr( sanitize_text_field( wp_unslash( $_REQUEST['log_file'] ) ) ) : false;

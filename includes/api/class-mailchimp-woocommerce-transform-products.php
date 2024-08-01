@@ -287,7 +287,7 @@ class MailChimp_WooCommerce_Transform_Products {
 	 * @return null|string
 	 */
 	public function getProductImageKey() {
-		return mailchimp_get_option( 'mailchimp_product_image_key', 'medium' );
+		return mailchimp_\Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp_product_image_key', 'medium' );
 	}
 
 	/**

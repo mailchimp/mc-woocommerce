@@ -38,7 +38,7 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
             /// when subscriber sync hooks come in, force refresh the admin view
             $list_id = mailchimp_get_list_id();
 	        $email_hash = md5( strtolower( trim( $email ) ) );
-	        delete_site_transient( "mailchimp-woocommerce-subscribed.{$list_id}.{$email_hash}" );
+	        \Mailchimp_Woocommerce_DB_Helpers::delete_transient( "mailchimp-woocommerce-subscribed.{$list_id}.{$email_hash}" );
 
             // ignore the empty submissions or certain events or emails
             if ($this->hasInvalidEvent($hook_type, $failed, $data)) {

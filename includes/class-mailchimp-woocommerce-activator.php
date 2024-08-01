@@ -26,23 +26,23 @@ class MailChimp_WooCommerce_Activator {
 		//static::migrate_jobs();
 
 		// update the settings so we have them for use.
-        $saved_options = get_option('mailchimp-woocommerce', false);
+        $saved_options = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce', false);
 
         // if we haven't saved options previously, we will need to create the site id and update base options
         if (empty($saved_options)) {
             mailchimp_clean_database();
-            update_option('mailchimp-woocommerce', array());
+            \Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp-woocommerce', array());
             // only do this if the option has never been set before.
             if (!is_multisite()) {
-                add_option('mailchimp_woocommerce_plugin_do_activation_redirect', true);
+                \Mailchimp_Woocommerce_DB_Helpers::add_option('mailchimp_woocommerce_plugin_do_activation_redirect', true);
             }
         }
 
         // if we haven't saved the store id yet.
-        $saved_store_id = get_option('mailchimp-woocommerce-store_id', false);
+        $saved_store_id = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-store_id', false);
         if (empty($saved_store_id)) {
             // add a store id flag which will be a random hash
-            update_option('mailchimp-woocommerce-store_id', uniqid(), 'yes');
+            \Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp-woocommerce-store_id', uniqid(), 'yes');
         }
 
         if (class_exists('MailChimp_WooCommerce_MailChimpApi')) {
@@ -89,7 +89,7 @@ class MailChimp_WooCommerce_Activator {
 		dbDelta( $sql );
 
 		// set the Mailchimp woocommerce version at the time of install
-		update_site_option('mailchimp_woocommerce_version', mailchimp_environment_variables()->version);
+		\Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp_woocommerce_version', mailchimp_environment_variables()->version);
 	}
 
 	/**

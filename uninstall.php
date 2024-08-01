@@ -36,9 +36,9 @@ if (!isset($mailchimp_woocommerce_spl_autoloader) || $mailchimp_woocommerce_spl_
 
 function mailchimp_woocommerce_uninstall() {
     try {
-        if (($options = get_option('mailchimp-woocommerce', false)) && is_array($options)) {
+        if (($options = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce', false)) && is_array($options)) {
             if (isset($options['mailchimp_api_key'])) {
-                $store_id = get_option('mailchimp-woocommerce-store_id', false);
+                $store_id = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-store_id', false);
                 if (!empty($store_id)) {
                 	// disable support if they had it enabled
                 	$tower = new MailChimp_WooCommerce_Tower($store_id);
@@ -53,7 +53,7 @@ function mailchimp_woocommerce_uninstall() {
 				$webhooks->cleanHooks(true);
             }
         }
-        delete_option('mc-woocommerce-waiting-for-login');
+        \Mailchimp_Woocommerce_DB_Helpers::delete_option('mc-woocommerce-waiting-for-login');
 
     } catch (Exception $e) {
         error_log($e->getMessage().' on '.$e->getLine().' in '.$e->getFile());

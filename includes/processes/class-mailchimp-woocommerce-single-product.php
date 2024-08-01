@@ -186,7 +186,7 @@ class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
 
             mailchimp_log('product_submit.success', "{$method} :: #{$product->getId()}");
 
-            update_option('mailchimp-woocommerce-last_product_updated', $product->getId());
+            \Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp-woocommerce-last_product_updated', $product->getId());
 
             return $product;
 
@@ -215,7 +215,7 @@ class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
         if (is_null($this->api)) {
 
             $this->store_id = mailchimp_get_store_id();
-            $options = get_option('mailchimp-woocommerce', array());
+            $options = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce', array());
 
             if (!empty($this->store_id) && is_array($options) && isset($options['mailchimp_api_key'])) {
                 return $this->api = new MailChimp_WooCommerce_MailChimpApi($options['mailchimp_api_key']);

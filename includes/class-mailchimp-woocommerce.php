@@ -438,12 +438,14 @@ class MailChimp_WooCommerce
 
 
             $jobs_classes = array(
+                "MailChimp_Woocommerce_Single_Customer",
                 "MailChimp_WooCommerce_Single_Order",
                 "MailChimp_WooCommerce_SingleCoupon",
                 "MailChimp_WooCommerce_Single_Product",
                 "MailChimp_WooCommerce_Single_Product_Variation",
                 "MailChimp_WooCommerce_Cart_Update",
                 "MailChimp_WooCommerce_User_Submit",
+                "MailChimp_WooCommerce_Process_Customers",
                 "MailChimp_WooCommerce_Process_Coupons",
                 "MailChimp_WooCommerce_Process_Orders",
                 "MailChimp_WooCommerce_Process_Products",

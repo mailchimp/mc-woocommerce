@@ -343,9 +343,10 @@ class MailChimp_WooCommerce_Rest_Api
                 ];
                 break;
             case 'resync_customers':
+                MailChimp_WooCommerce_Process_Customers::push();
                 $response = [
                     'title' => "Customer resync",
-                    'description' => "WooCommerce does not have customers to sync. Only orders.",
+                    'description' => "Please note that it will take a couple minutes to start this process. Check the store logs for details.",
                     'type' => 'error',
                 ];
                 break;

@@ -53,6 +53,7 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_MailChimpApi' => 'includes/api/class-mailchimp-api.php',
         'MailChimp_WooCommerce_Api' => 'includes/api/class-mailchimp-woocommerce-api.php',
         'MailChimp_WooCommerce_CreateListSubmission' => 'includes/api/class-mailchimp-woocommerce-create-list-submission.php',
+        'MailChimp_WooCommerce_Transform_Customers' => 'includes/api/class-mailchimp-woocommerce-transform-customers.php',
         'MailChimp_WooCommerce_Transform_Coupons' => 'includes/api/class-mailchimp-woocommerce-transform-coupons.php',
         'MailChimp_WooCommerce_Transform_Orders' => 'includes/api/class-mailchimp-woocommerce-transform-orders-wc3.php',
         'MailChimp_WooCommerce_Transform_Products' => 'includes/api/class-mailchimp-woocommerce-transform-products.php',
@@ -61,10 +62,12 @@ spl_autoload_register(function($class) {
         'Mailchimp_Woocommerce_Job' => 'includes/processes/class-mailchimp-woocommerce-job.php',
         'MailChimp_WooCommerce_Abstract_Sync' => 'includes/processes/class-mailchimp-woocommerce-abstract-sync.php',
         'MailChimp_WooCommerce_Cart_Update' => 'includes/processes/class-mailchimp-woocommerce-cart-update.php',
+        'MailChimp_WooCommerce_Process_Customers' => 'includes/processes/class-mailchimp-woocommerce-process-customers.php',
         'MailChimp_WooCommerce_Process_Coupons' => 'includes/processes/class-mailchimp-woocommerce-process-coupons.php',
         'MailChimp_WooCommerce_Process_Orders' => 'includes/processes/class-mailchimp-woocommerce-process-orders.php',
         'MailChimp_WooCommerce_Process_Products' => 'includes/processes/class-mailchimp-woocommerce-process-products.php',
         'MailChimp_WooCommerce_SingleCoupon' => 'includes/processes/class-mailchimp-woocommerce-single-coupon.php',
+        'MailChimp_Woocommerce_Single_Customer' => 'includes/processes/class-mailchimp-woocommerce-single-customer.php',
         'MailChimp_WooCommerce_Single_Order' => 'includes/processes/class-mailchimp-woocommerce-single-order.php',
         'MailChimp_WooCommerce_Single_Product' => 'includes/processes/class-mailchimp-woocommerce-single-product.php',
         'MailChimp_WooCommerce_Single_Product_Variation' => 'includes/processes/class-mailchimp-woocommerce-single-product-variation.php',
@@ -882,6 +885,17 @@ function mailchimp_get_customer_count() {
 }
 
 /**
+ * @return int
+ */
+function mailchimp_get_customer_lookup_count() {
+    global $wpdb;
+    $query = "SELECT COUNT(*)
+                FROM {$wpdb->prefix}wc_customer_lookup
+                GROUP BY email;";
+    return $wpdb->get_var($query);
+}
+
+/**
  * @param $type
  * @return array|null|object
  */
@@ -1292,14 +1306,14 @@ function mailchimp_get_allowed_capability() {
 }
 
 /**
- * @param MailChimp_WooCommerce_Order $order
+ * @param MailChimp_WooCommerce_Customer $customer
  * @param null $subscribed
  *
  * @throws MailChimp_WooCommerce_Error
  * @throws MailChimp_WooCommerce_RateLimitError
  * @throws MailChimp_WooCommerce_ServerError
  */
-function mailchimp_update_member_with_double_opt_in(MailChimp_WooCommerce_Order $order, $subscribed = null)
+function mailchimp_update_member_with_double_opt_in(MailChimp_WooCommerce_Customer $customer, $subscribed = null)
 {
     if (!mailchimp_is_configured()) return;
 
@@ -1308,11 +1322,11 @@ function mailchimp_update_member_with_double_opt_in(MailChimp_WooCommerce_Order 
     // if the customer has a flag to double opt in - we need to push this data over to MailChimp as pending
     // before the order is submitted.
     if ($subscribed) {
-        if ($order->getCustomer()->requiresDoubleOptIn()) {
+        if ($customer->requiresDoubleOptIn()) {
             try {
                 $list_id = mailchimp_get_list_id();
-                $merge_fields = $order->getCustomer()->getMergeFields();
-                $email = $order->getCustomer()->getEmailAddress();
+                $merge_fields = $customer->getMergeFields();
+                $email = $customer->getEmailAddress();
 
                 try {
                     $member = $api->member($list_id, $email);
@@ -1336,7 +1350,7 @@ function mailchimp_update_member_with_double_opt_in(MailChimp_WooCommerce_Order 
             }
         } else {
             // if we've set the wordpress user correctly on the customer
-            if (($wordpress_user = $order->getCustomer()->getWordpressUser())) {
+            if (($wordpress_user = $customer->getWordpressUser())) {
                 $user_submit = new MailChimp_WooCommerce_User_Submit($wordpress_user->ID, '1', null);
                 $user_submit->handle();
             }

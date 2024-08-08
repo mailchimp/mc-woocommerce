@@ -692,19 +692,6 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     }
 
     /**
-     * Delete all the options pointing to the pages, and re-start the sync process.
-     * @return bool
-     */
-    protected function syncOrders()
-    {
-        if (!$this->isAdmin()) return false;
-        $this->removePointers(false);
-        // since the products are all good, let's sync up the orders now.
-        mailchimp_handle_or_queue(new MailChimp_WooCommerce_Process_Orders());
-        return true;
-    }
-
-    /**
      * @return bool|string
      */
     public function getCurrentUserEmail()

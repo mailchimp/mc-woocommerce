@@ -61,8 +61,8 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
             $data = array(
                 'id' => null,
                 'email_address' => $this->customer_data->email,
-                'first_name' => $this->customer_data->first_name,
-                'last_name' => $this->customer_data->last_name
+                'first_name' => $this->customer_data->first_name ?? '',
+                'last_name' => $this->customer_data->last_name ?? ''
             );
         }
 
@@ -78,7 +78,7 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
             $allowed_roles = array();
             $allowed_roles = apply_filters('mailchimp_campaign_user_roles', $allowed_roles);
             if ((count($allowed_roles) && count(array_intersect($allowed_roles, $user->roles)) === 0) || (count(array_intersect($restricted_roles, $user->roles)) !== 0)) {
-                mailchimp_log('customer_process', "Customer #{$email} skipped, user #{$this->woo_order->get_user_id()} user role is not in the list");
+                mailchimp_log('customer_process', "Customer #{$email} skipped, user role is not in the list");
                 return false;
             }
         } else {
@@ -90,6 +90,8 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
         // Configure merge tags
         $fn = trim($data['first_name']);
         $ln = trim($data['last_name']);
+
+        $merge_fields_system = array();
 
         if (!empty($fn)) $merge_fields_system['FNAME'] = $fn;
         if (!empty($ln)) $merge_fields_system['LNAME'] = $ln;
@@ -140,7 +142,7 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
 
 
             if (isset($subscriber['status'])) {
-                if ( in_array($subscriber['status'], ['subscribed', 'unsubscribed', 'archived', 'cleaned']) ) {
+                if ( in_array($subscriber['status'], ['subscribed', 'transactional', 'unsubscribed', 'archived', 'cleaned']) ) {
                     $subscriber['status'] = $subscribe_setting === '0' ? 'transactional' : 'subscribed';
                 }
 
@@ -186,9 +188,9 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
                     mailchimp_tell_system_about_user_submit($email, $status_meta);
 
                     if ($status_meta['created']) {
-                        mailchimp_log('member.sync', "Subscribed Member {$user->user_email}", array('status_if_new' => $status_if_new, 'has_doi' => $uses_doi, 'merge_fields' => $merge_fields));
+                        mailchimp_log('member.sync', "Subscribed Member {$email}", array('status_if_new' => $status_if_new, 'has_doi' => $uses_doi, 'merge_fields' => $merge_fields));
                     } else {
-                        mailchimp_log('member.sync', "{$user->user_email} is Pending Double OptIn", array('status_if_new' => $status_if_new, 'has_doi' => $uses_doi, 'status_meta' => $status_meta));
+                        mailchimp_log('member.sync', "{$email} is Pending Double OptIn", array('status_if_new' => $status_if_new, 'has_doi' => $uses_doi, 'status_meta' => $status_meta));
                     }
                 } catch (Exception $e) {
                     mailchimp_log('member.sync', $e->getMessage());

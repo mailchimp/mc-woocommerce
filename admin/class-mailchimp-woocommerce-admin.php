@@ -1367,9 +1367,14 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         $store_address_2    = get_option( 'woocommerce_store_address_2' );
         $store_raw_country  = get_option( 'woocommerce_default_country' );
         $split_country      = explode( ":", $store_raw_country );
+        $store_name         = get_option('blogname');
+        // fall back to the site url if the blog name isn't set.
+        if (empty($store_name)) {
+            $store_name = get_option('siteurl');
+        }
         return array(
             'admin_email' => get_option( 'admin_email' ),
-            'store_name' => get_option('blogname'),
+            'store_name' => $store_name,
             'store_city' => get_option( 'woocommerce_store_city' ),
             'store_state' => !empty($split_country) && isset( $split_country[1] ) ? $split_country[1] : '',
             'store_postal_code' => get_option( 'woocommerce_store_postcode' ),

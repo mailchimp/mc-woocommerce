@@ -862,26 +862,28 @@ function mailchimp_get_product_count() {
  * @return int
  */
 function mailchimp_get_order_count() {
-    $posts = mailchimp_count_posts('shop_order');
-    unset($posts['auto-draft'], $posts['trash']);
-    $total = 0;
-    foreach ($posts as $status => $count) {
-        $total += $count;
-    }
-    return $total;
+    return wc_orders_count('completed');
+//    $posts = mailchimp_count_posts('shop_order');
+//    unset($posts['auto-draft'], $posts['trash']);
+//    $total = 0;
+//    foreach ($posts as $status => $count) {
+//        $total += $count;
+//    }
+//    return $total;
 }
 
 function mailchimp_get_customer_count() {
-    global $wpdb;
-    $query = "SELECT COUNT(DISTINCT meta_value) FROM {$wpdb->postmeta} WHERE meta_key = '_billing_email'";
-    $emails = $wpdb->get_var($query);
-    $users_query = new WP_User_Query(
-        array(
-            'fields' => array( 'ID' ),
-            'role'   => 'customer',
-        )
-    );
-    return $users_query->get_total() + (int) $emails;
+    return mailchimp_get_customer_lookup_count();
+    //    global $wpdb;
+    //    $query = "SELECT COUNT(DISTINCT meta_value) FROM {$wpdb->postmeta} WHERE meta_key = '_billing_email'";
+    //    $emails = $wpdb->get_var($query);
+    //    $users_query = new WP_User_Query(
+    //        array(
+    //            'fields' => array( 'ID' ),
+    //            'role'   => 'customer',
+    //        )
+    //    );
+    //    return $users_query->get_total() + (int) $emails;
 }
 
 /**

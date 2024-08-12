@@ -8,14 +8,14 @@ class MailChimp_WooCommerce_Process_Customers extends MailChimp_WooCommerce_Abst
     protected $action = 'mailchimp_woocommerce_process_customers';
 
     /**
-     * Resync the products
+     * Resync the customers
      */
     public static function push()
     {
         $service = MailChimp_Service::instance();
         $service->removePointers(true, false);
-        $coupons_sync = new MailChimp_WooCommerce_Process_Customers();
-        $coupons_sync->createSyncManagers();
+        $customer_sync = new MailChimp_WooCommerce_Process_Customers();
+        $customer_sync->createSyncManagers();
     }
 
     /**

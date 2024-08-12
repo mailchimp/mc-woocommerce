@@ -241,9 +241,10 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 }
             }
 
+            // if this is not a full sync
             // if the order is brand new, and we already have a paid status,
             // we need to double up the post to force the confirmation + the invoice.
-            if ($new_order && $order->getFinancialStatus() === 'paid') {
+            if (!$this->is_full_sync && $new_order && $order->getFinancialStatus() === 'paid') {
                 $order->setFinancialStatus('pending');
                 $order->confirmAndPay(true);
             }

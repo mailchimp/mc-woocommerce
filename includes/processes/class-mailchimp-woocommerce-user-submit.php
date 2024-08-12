@@ -62,9 +62,6 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 		if (!empty($language)) {
 			$this->language = $language;
 		}
-
-		mailchimp_debug('member.sync', "construct this -> subscribed " . $this->subscribed);
-
 	}
 
 	/**
@@ -82,9 +79,6 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 	 */
 	public function handle()
 	{
-
-		mailchimp_debug('member.sync', "first this -> subscribed " . $this->subscribed);
-
 		if (!mailchimp_is_configured()) {
 			mailchimp_debug(get_called_class(), 'Mailchimp is not configured properly');
 			static::$handling_for = null;

@@ -133,29 +133,21 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 				'orders' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.orders.completed_at')
 			);
 
-            // allow products and coupons to be synced simultaneously
-            if ($started['customers'] && !$started['products']) {
+            // make sure customers are fully synced before syncing products
+            if ($completed['customers'] && !$started['products']) {
                 mailchimp_log('sync.full_sync_manager.queue', 'Starting PRODUCTS queueing.');
-                //create Product Sync object
+                // create product sync
                 $product_sync = new MailChimp_WooCommerce_Process_Products();
-
-                // queue first job
-                //mailchimp_handle_or_queue($product_sync);
-
-                //trigger subsequent jobs creation
+                // trigger subsequent jobs creation
                 $product_sync->createSyncManagers();
             }
 
             // allow products and coupons to be synced simultaneously
-            if ($started['products'] && !$started['coupons']) {
+            if ($completed['products'] && !$started['coupons']) {
                 mailchimp_log('sync.full_sync_manager.queue', 'Starting CUSTOMERS queueing.');
-                //create Product Sync object
+                // create Product Sync object
                 $coupons_sync = new MailChimp_WooCommerce_Process_Coupons();
-
-                // queue first job
-                //mailchimp_handle_or_queue($product_sync);
-
-                //trigger subsequent jobs creation
+                // trigger subsequent jobs creation
                 $coupons_sync->createSyncManagers();
             }
 
@@ -170,16 +162,13 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 					if (!$prevent_order_sync) {
 						// since the products are all good, let's sync up the orders now.
 						$order_sync = new MailChimp_WooCommerce_Process_Orders();
-						// // queue first job
-						//mailchimp_handle_or_queue($order_sync);
-						// //trigger subsequent jobs creation
+						// trigger subsequent jobs creation
 						$order_sync->createSyncManagers();
 					}
 
 					// since we skipped the orders feed we can delete this option.
 					\Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-sync.orders.prevent');
 				}
-				
 			}
 
 			if ($completed['orders']) {

@@ -2341,6 +2341,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @return bool
 	 */
 	protected function adminOnlyMiddleware( $message = "You're not allowed to do this" ) {
+        if (defined( 'WP_CLI' ) && WP_CLI && class_exists('WP_CLI')) {
+            return true;
+        }
 		if ( ! current_user_can( mailchimp_get_allowed_capability() ) ) {
             $error = new \Exception();
             mailchimp_debug('admin', 'tracing admin json error', $error->getTrace());

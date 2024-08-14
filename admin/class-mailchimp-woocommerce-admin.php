@@ -661,6 +661,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$options                                      = $this->getOptions();
 		$options['woocommerce_settings_save_general'] = true;
 		$options['store_currency_code']               = $code;
+        $options['store_name']                        = get_option('blogname');
 		\Mailchimp_Woocommerce_DB_Helpers::update_option( $this->plugin_name, $options );
 		return $options;
 	}

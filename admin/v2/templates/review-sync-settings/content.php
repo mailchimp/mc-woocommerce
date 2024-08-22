@@ -65,7 +65,7 @@ $ongoing_sync_subscribe = '1';
             </div>
             <p class="mc-wc-linked-audience-description">
                 <?php esc_html_e( 'Confirm the Mailchimp audience you want to associate with your WooCommerce store', 'mailchimp-for-woocommerce' ); ?>
-                <span class="mc-wc-text-md store_name"><?php echo esc_attr($store_name); ?>.</span>
+                <span class="mc-wc-text-md store_name"><?php echo !empty($store_name) ? esc_attr($store_name) : esc_attr(get_option("siteurl")); ?>.</span>
             </p>
         </div>
     </div>

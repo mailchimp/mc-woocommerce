@@ -602,8 +602,19 @@ class MailChimp_WooCommerce_Rest_Api
                 break;
             case 'promo_code':
             case 'promo-code':
-                $platform = wc_get_coupon_code_by_id($body['resource_id']);
-	            $mc = mailchimp_get_api()->getPromoRuleWithCodes($store_id, $body['resource_id']);
+                $id = $body['resource_id'];
+                $platform = wc_get_coupon_code_by_id($id);
+                if (empty($platform)) {
+                    $platform = wc_get_coupon_id_by_code($id);
+                    if (empty($platform)) {
+                        $id = $platform;
+                    }
+                }
+	            try {
+                    $mc = mailchimp_get_api()->getPromoRuleWithCodes($store_id, $id);
+                } catch (\Exception $e) {
+
+                }
                 break;
         }
 

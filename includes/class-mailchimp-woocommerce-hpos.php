@@ -21,6 +21,18 @@ class MailChimp_WooCommerce_HPOS {
 		return wc_get_order($post_id);
 	}
 
+    /**
+     * @param $args
+     * @return array|stdClass|WC_Order[]
+     */
+    public static function get_orders($args)
+    {
+        if (static::enabled()) {
+            return wc_get_orders($args);
+        }
+        return get_posts($args);
+    }
+
 	/**
 	 * @param $post_id
 	 *

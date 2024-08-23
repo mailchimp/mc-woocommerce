@@ -2147,7 +2147,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 * @throws MailChimp_WooCommerce_Error
 	 */
 	public function validateNaughtyListEmail( $email ) {
-        if (defined('DISABLE_MAILCHIMP_NAUGHTY_LIST') && !DISABLE_MAILCHIMP_NAUGHTY_LIST) {
+        if (defined('DISABLE_MAILCHIMP_NAUGHTY_LIST') && DISABLE_MAILCHIMP_NAUGHTY_LIST) {
             return false;
         }
 		if ( ! empty( $email ) && mailchimp_string_contains( $email, $this->getNaughtyList() ) ) {

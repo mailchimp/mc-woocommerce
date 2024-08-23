@@ -722,6 +722,27 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 	}
 
+    /**
+     * @param $old_value
+     * @param $new_value
+     * @return bool|void
+     *
+     */
+    public function mailchimp_update_wordpress_title($old_value, $new_value) {
+        if (mailchimp_is_configured()) {
+            $options = $this->getOptions();
+
+            $options['store_name'] = $new_value;
+            // sync the store with MC
+            try {
+                return $this->syncStore( $options );
+            } catch ( Exception $e ) {
+                mailchimp_log( 'store.sync@woo.update', 'Store cannot be synced', $e->getMessage() );
+                return false;
+            }
+        }
+    }
+
 	/**
 	 * We were considering auto subscribing people that had just updated the plugin for the first time
 	 * after releasing the marketing status block, but decided against that. The admin user must subscribe specifically.

@@ -1,4 +1,15 @@
 == Changelog ==
+= 4.3 =
+- Order HPOS function for pagination
+- start syncing customers via HPOS
+- Change sync order: customers > products > coupons > orders — and make sync actions more atomic
+- Use direct WP DB SELECT / INSERT for sync options to circumvent object caching
+- Remove the bundled version of Action Scheduler
+- Removes checkout opt-in if customers already subscribed
+- Fixes cli sync issue where historical Orders Not Syncing Correctly
+- Fixes Account Connection Issue Related to Object Caching
+- Fixes HTTP worker warning
+- Change to replace option, transient functions with direct DB queries
 = 4.2.1 =
 * Bug fix for product variations
 * Front end optimizations

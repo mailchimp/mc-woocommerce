@@ -10,6 +10,7 @@
 * Fixes Account Connection Issue Related to Object Caching
 * Fixes HTTP worker warning
 * Change to replace option, transient functions with direct DB queries
+* Fallback function to check for options autoloader
 = 4.2.1 =
 * Bug fix for product variations
 * Front end optimizations

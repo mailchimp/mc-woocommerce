@@ -89,4 +89,5 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 * Fixes Account Connection Issue Related to Object Caching
 * Fixes HTTP worker warning
 * Change to replace option, transient functions with direct DB queries
+* Fallback function to check for options autoloader
 

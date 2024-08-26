@@ -32,7 +32,7 @@ class Mailchimp_Woocommerce_DB_Helpers
 
         $serialized_value = maybe_serialize( $value );
 
-        $autoload = wp_determine_option_autoload_value( $option, $value, $serialized_value, $autoload );
+        $autoload = static::determine_option_autoload_value( $option, $value, $serialized_value, $autoload );
 
         $result = $wpdb->query( $wpdb->prepare( "INSERT INTO `$wpdb->options` (`option_name`, `option_value`, `autoload`) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE `option_name` = VALUES(`option_name`), `option_value` = VALUES(`option_value`), `autoload` = VALUES(`autoload`)", $option, $serialized_value, $autoload ) );
 
@@ -134,7 +134,7 @@ class Mailchimp_Woocommerce_DB_Helpers
         $allow_values = array( 'auto-on', 'auto-off', 'auto' );
 
         if ( in_array( $raw_autoload, $allow_values, true ) ) {
-            $autoload = wp_determine_option_autoload_value( $option, $value, $serialized_value, null );
+            $autoload = static::determine_option_autoload_value( $option, $value, $serialized_value, null );
             if ( $autoload !== $raw_autoload ) {
                 $update_args['autoload'] = $autoload;
             }
@@ -281,5 +281,29 @@ class Mailchimp_Woocommerce_DB_Helpers
         }
 
         return $result;
+    }
+
+    protected static function determine_option_autoload_value($option, $value, $serialized_value, $autoload = null)
+    {
+        if (function_exists('wp_determine_option_autoload_value')) {
+            return wp_determine_option_autoload_value( $option, $value, $serialized_value, $autoload );
+        }
+        // Check if autoload is a boolean.
+        if ( is_bool( $autoload ) ) {
+            return $autoload ? 'on' : 'off';
+        }
+        switch ( $autoload ) {
+            case 'on':
+            case 'yes':
+                return 'on';
+            case 'off':
+            case 'no':
+                return 'off';
+        }
+        $autoload = apply_filters( 'wp_default_autoload_value', null, $option, $value, $serialized_value );
+        if ( is_bool( $autoload ) ) {
+            return $autoload ? 'auto-on' : 'auto-off';
+        }
+        return 'auto';
     }
 }

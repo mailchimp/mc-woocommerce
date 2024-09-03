@@ -65,7 +65,10 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
     public function createSyncManagers()
     {
         switch ($this->getResourceType()) {
-            case 'coupons':
+            case 'customers':
+                $post_count = mailchimp_get_customer_lookup_count();
+               break;
+           case 'coupons':
                 $post_count = mailchimp_get_coupons_count();
                break;
             case 'products':
@@ -78,7 +81,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
                 mailchimp_log('sync.error', $this->getResourceType().' is not a valid resource.');
                break;
         }
-        
+
         $this->setData('sync.'.$this->getResourceType().'.started_at', time());
 
         $page = $this->getCurrentPage();
@@ -190,7 +193,11 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
 
         // iterate through the items and send each one through the pipeline based on this class.
         foreach ($page->items as $resource) {
-           switch ($this->getResourceType()) {
+
+            switch ($this->getResourceType()) {
+               case 'customers':
+                   mailchimp_handle_or_queue(new MailChimp_Woocommerce_Single_Customer($resource));
+                   break;
                 case 'coupons':
                     mailchimp_handle_or_queue(new MailChimp_WooCommerce_SingleCoupon($resource));
                    break;
@@ -323,7 +330,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
     {
         $options = $this->getOptions();
         $options[$key] = $value;
-        update_option($this->plugin_name, $options);
+        \Mailchimp_Woocommerce_DB_Helpers::update_option($this->plugin_name, $options);
         return $this;
     }
 
@@ -342,7 +349,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
      */
     public function getOptions()
     {
-        $options = get_option($this->plugin_name);
+        $options = \Mailchimp_Woocommerce_DB_Helpers::get_option($this->plugin_name);
         return is_array($options) ? $options : array();
     }
 
@@ -353,7 +360,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
      */
     public function setData($key, $value)
     {
-        update_option($this->plugin_name.'-'.$key, $value, 'yes');
+        \Mailchimp_Woocommerce_DB_Helpers::update_option($this->plugin_name.'-'.$key, $value, 'yes');
         return $this;
     }
 
@@ -364,7 +371,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
      */
     public function getData($key, $default = null)
     {
-        return get_option($this->plugin_name.'-'.$key, $default);
+        return \Mailchimp_Woocommerce_DB_Helpers::get_option($this->plugin_name.'-'.$key, $default);
     }
 
     /**
@@ -373,7 +380,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
      */
     public function removeData($key)
     {
-        return delete_option($this->plugin_name.'-'.$key);
+        return \Mailchimp_Woocommerce_DB_Helpers::delete_option($this->plugin_name.'-'.$key);
     }
 
     /**

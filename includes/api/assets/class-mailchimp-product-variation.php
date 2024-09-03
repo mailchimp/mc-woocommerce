@@ -54,6 +54,13 @@ class MailChimp_WooCommerce_ProductVariation {
 		return $this;
 	}
 
+	public function getProductId()
+	{
+		$product = MailChimp_WooCommerce_HPOS::get_product($this->id);
+
+		return $product ? $product->get_parent_id() : null;
+	}
+
 	/**
 	 * @return null
 	 */

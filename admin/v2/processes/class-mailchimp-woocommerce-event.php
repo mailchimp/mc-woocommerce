@@ -64,11 +64,11 @@ class Mailchimp_Woocommerce_Event
             return null;
         }
 
-        if (!($mc_user_id = get_option('mailchimp-woocommerce-mailchimp_user_id', null))) {
+        if (!($mc_user_id = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-mailchimp_user_id', null))) {
             $mc_user_id = null;
         }
 
-        if (!($mc_login_id = get_option('mailchimp-woocommerce-mailchimp_login_id', null))) {
+        if (!($mc_login_id = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-mailchimp_login_id', null))) {
             $mc_login_id = null;
         }
 

@@ -10,8 +10,8 @@
 <?php
 $store_id = mailchimp_get_store_id();
 
-$opt           = get_option( 'mailchimp-woocommerce-comm.opt' );
-$tower_opt     = get_option( 'mailchimp-woocommerce-tower.opt' );
+$opt           = \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-comm.opt' );
+$tower_opt     = \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-tower.opt' );
 $admin_email   = mailchimp_get_option( 'admin_email', get_option( 'admin_email' ) );
 $comm_enabled  = null !== $opt ? (string) $opt : '0';
 $tower_enabled = null !== $tower_opt ? (string) $tower_opt : '0';

@@ -42,24 +42,6 @@ class MailChimp_WooCommerce_Api {
 	}
 
 	/**
-	 * @param null $page
-	 * @param null $per
-	 * @return object|stdClass
-	 */
-	public function paginateProducts( $page = null, $per = null ) {
-		return $this->paginate( 'products', $page, $per );
-	}
-
-	/**
-	 * @param null $page
-	 * @param null $per
-	 * @return object|stdClass
-	 */
-	public function paginateOrders( $page = null, $per = null ) {
-		return $this->paginate( 'orders', $page, $per );
-	}
-
-	/**
 	 * @param $resource
 	 * @param int      $page
 	 * @param int      $per
@@ -82,11 +64,13 @@ class MailChimp_WooCommerce_Api {
 
 	/**
 	 * @param $resource
-	 * @return bool|MailChimp_WooCommerce_Transform_Orders|MailChimp_WooCommerce_Transform_Products|MailChimp_WooCommerce_Transform_Coupons
+	 * @return bool|MailChimp_WooCommerce_Transform_Orders|MailChimp_WooCommerce_Transform_Products|MailChimp_WooCommerce_Transform_Coupons|MailChimp_WooCommerce_Transform_Customers
 	 */
 	public function engine( $resource ) {
 		switch ( $resource ) {
-			case 'products':
+			case 'customers':
+				return new MailChimp_WooCommerce_Transform_Customers();
+            case 'products':
 				return new MailChimp_WooCommerce_Transform_Products();
 			case 'orders':
 				return new MailChimp_WooCommerce_Transform_Orders();

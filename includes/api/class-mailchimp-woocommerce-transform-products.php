@@ -26,7 +26,7 @@ class MailChimp_WooCommerce_Transform_Products {
 			'items'    => array(),
 		);
 
-		if ( ( ( $products = $this->getProductPostsIds( $page, $limit ) ) && ! empty( $products ) ) ) {
+		if ( ( $products = $this->getProductPostsIds( $page, $limit ) ) && ! empty( $products )) {
 			foreach ( $products as $post_id ) {
 				$response->items[] = $post_id;
 				$response->count++;
@@ -287,7 +287,7 @@ class MailChimp_WooCommerce_Transform_Products {
 	 * @return null|string
 	 */
 	public function getProductImageKey() {
-		return mailchimp_get_option( 'mailchimp_product_image_key', 'medium' );
+		return \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp_product_image_key', 'medium' );
 	}
 
 	/**

@@ -176,7 +176,7 @@ class MailChimp_WooCommerce_PromoRule {
 	 * @return $this
 	 */
 	public function setStartsAt( DateTime $date ) {
-		$this->starts_at = $date->format( DATE_ISO8601 );
+		$this->starts_at = $date->format( 'Y-m-d H:i:s' );
 
 		return $this;
 	}
@@ -193,8 +193,7 @@ class MailChimp_WooCommerce_PromoRule {
 	 * @return $this
 	 */
 	public function setEndsAt( DateTime $date ) {
-		$this->ends_at = $date->format( DATE_ISO8601 );
-
+		$this->ends_at = $date->format( 'Y-m-d H:i:s' );
 		return $this;
 	}
 

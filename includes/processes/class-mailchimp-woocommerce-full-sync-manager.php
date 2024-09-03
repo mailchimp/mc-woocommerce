@@ -23,10 +23,10 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 			
 			$this->flag_start_sync();
 			
-			$coupons_sync = new MailChimp_WooCommerce_Process_Coupons();
+			$customers_sync = new MailChimp_WooCommerce_Process_Customers();
 		
 			// start sync processes creation
-			$coupons_sync->createSyncManagers();
+			$customers_sync->createSyncManagers();
 
 		}
 
@@ -38,20 +38,21 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 
 			$job->removeSyncPointers();
 
-			update_option("{$this->plugin_name}-sync.config.resync", false);
-			update_option("{$this->plugin_name}-sync.orders.current_page", 1);
-			update_option("{$this->plugin_name}-sync.products.current_page", 1);
-			update_option("{$this->plugin_name}-sync.coupons.current_page", 1);
+			\Mailchimp_Woocommerce_DB_Helpers::update_option("{$this->plugin_name}-sync.config.resync", false);
+			\Mailchimp_Woocommerce_DB_Helpers::update_option("{$this->plugin_name}-sync.customers.current_page", 1);
+            \Mailchimp_Woocommerce_DB_Helpers::update_option("{$this->plugin_name}-sync.products.current_page", 1);
+            \Mailchimp_Woocommerce_DB_Helpers::update_option("{$this->plugin_name}-sync.coupons.current_page", 1);
+            \Mailchimp_Woocommerce_DB_Helpers::update_option("{$this->plugin_name}-sync.orders.current_page", 1);
 
-			update_option("{$this->plugin_name}-sync.syncing", true);
-			update_option("{$this->plugin_name}-sync.started_at", time());
+            \Mailchimp_Woocommerce_DB_Helpers::update_option("{$this->plugin_name}-sync.syncing", true);
+			\Mailchimp_Woocommerce_DB_Helpers::update_option("{$this->plugin_name}-sync.started_at", time());
 
 			// let this happen if they start the sync again.
 			mailchimp_delete_transient('stop_sync');
 
-			if (! get_option("{$this->plugin_name}-sync.completed_at")) {
-				update_option("{$this->plugin_name}-sync.initial_sync", 1);
-			} else delete_option("{$this->plugin_name}-sync.initial_sync");
+			if (! \Mailchimp_Woocommerce_DB_Helpers::get_option("{$this->plugin_name}-sync.completed_at")) {
+				\Mailchimp_Woocommerce_DB_Helpers::update_option("{$this->plugin_name}-sync.initial_sync", 1);
+			} else \Mailchimp_Woocommerce_DB_Helpers::delete_option("{$this->plugin_name}-sync.initial_sync");
 
 			global $wpdb;
 			try {
@@ -81,12 +82,13 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 			mailchimp_set_data('sync.completed_at', time());
 
 			// set the current sync pages back to 1 if the user hits resync.
-			mailchimp_set_data('sync.orders.current_page', 1);
+			mailchimp_set_data('sync.customers.current_page', 1);
 			mailchimp_set_data('sync.products.current_page', 1);
 			mailchimp_set_data('sync.coupons.current_page', 1);
+			mailchimp_set_data('sync.orders.current_page', 1);
 
-			$sync_started_at = get_option('mailchimp-woocommerce-sync.started_at');
-			$sync_completed_at = get_option('mailchimp-woocommerce-sync.completed_at');
+			$sync_started_at = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.started_at');
+			$sync_completed_at = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.completed_at');
 
 			$sync_total_time = $sync_completed_at - $sync_started_at;
 			$time = gmdate("H:i:s",$sync_total_time);
@@ -117,52 +119,56 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 			
 			// get started queueing processes
 			$started = array(
-				'coupons' => get_option('mailchimp-woocommerce-sync.coupons.started_at'),
-				'products' => get_option('mailchimp-woocommerce-sync.products.started_at'),
-				'orders' => get_option('mailchimp-woocommerce-sync.orders.started_at')
+                'customers' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.customers.started_at'),
+				'coupons' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.coupons.started_at'),
+				'products' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.products.started_at'),
+				'orders' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.orders.started_at')
 			);
 
 			// get completed queueing processes
 			$completed = array(
-				'coupons' => get_option('mailchimp-woocommerce-sync.coupons.completed_at'),
-				'products' => get_option('mailchimp-woocommerce-sync.products.completed_at'),
-				'orders' => get_option('mailchimp-woocommerce-sync.orders.completed_at')
+                'customers' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.customers.completed_at'),
+				'coupons' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.coupons.completed_at'),
+				'products' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.products.completed_at'),
+				'orders' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.orders.completed_at')
 			);
 
-			// allow products and coupons to be synced simultaneously
-			if ($started['coupons'] && !$started['products']) {
-				mailchimp_log('sync.full_sync_manager.queue', 'Starting PRODUCTS queueing.');
-				//create Product Sync object
-				$product_sync = new MailChimp_WooCommerce_Process_Products();
-	
-				// queue first job
-				//mailchimp_handle_or_queue($product_sync);
-				
-				//trigger subsequent jobs creation
-				$product_sync->createSyncManagers();			
-			}
+            // make sure customers are fully synced before syncing products
+            if ($completed['customers'] && !$started['products']) {
+                mailchimp_log('sync.full_sync_manager.queue', 'Starting PRODUCTS queueing.');
+                // create product sync
+                $product_sync = new MailChimp_WooCommerce_Process_Products();
+                // trigger subsequent jobs creation
+                $product_sync->createSyncManagers();
+            }
+
+            // allow products and coupons to be synced simultaneously
+            if ($completed['products'] && !$started['coupons']) {
+                mailchimp_log('sync.full_sync_manager.queue', 'Starting CUSTOMERS queueing.');
+                // create Product Sync object
+                $coupons_sync = new MailChimp_WooCommerce_Process_Coupons();
+                // trigger subsequent jobs creation
+                $coupons_sync->createSyncManagers();
+            }
 
 			// Only start orders when product jobs are all finished
-			if ($completed['products'] && !$started['orders'] ) {
+			if ($completed['coupons'] && $completed['products'] && !$started['orders'] ) {
 				// check if we have products still to be synced
 				if (mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Single_Product') == 0 && mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Process_Products') <= 0) {
 					
-					$prevent_order_sync = get_option('mailchimp-woocommerce-sync.orders.prevent', false);
+					$prevent_order_sync = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.orders.prevent', false);
 
 					// only do this if we're not strictly syncing products ( which is the default ).
 					if (!$prevent_order_sync) {
 						// since the products are all good, let's sync up the orders now.
 						$order_sync = new MailChimp_WooCommerce_Process_Orders();
-						// // queue first job
-						//mailchimp_handle_or_queue($order_sync);
-						// //trigger subsequent jobs creation
+						// trigger subsequent jobs creation
 						$order_sync->createSyncManagers();
 					}
 
 					// since we skipped the orders feed we can delete this option.
-					delete_option('mailchimp-woocommerce-sync.orders.prevent');	
+					\Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-sync.orders.prevent');
 				}
-				
 			}
 
 			if ($completed['orders']) {

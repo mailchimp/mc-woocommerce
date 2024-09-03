@@ -819,20 +819,20 @@ class MailChimp_WooCommerce_MailChimpApi {
 		}
 
 		// if we found the campaign ID already and it's been stored in the cache, return it from the cache instead.
-		if ( ( $data = get_site_transient( 'mailchimp-woocommerce-has-campaign-id-' . $campaign_id ) ) && ! empty( $data ) ) {
+		if ( ( $data = \Mailchimp_Woocommerce_DB_Helpers::get_transient( 'mailchimp-woocommerce-has-campaign-id-' . $campaign_id ) ) && ! empty( $data ) ) {
 			return $data;
 		}
-		if ( get_site_transient( 'mailchimp-woocommerce-no-campaign-id-' . $campaign_id ) ) {
+		if ( \Mailchimp_Woocommerce_DB_Helpers::get_transient( 'mailchimp-woocommerce-no-campaign-id-' . $campaign_id ) ) {
 			return false;
 		}
 		try {
 			$data = $this->get( "campaigns/$campaign_id" );
-			delete_site_transient( 'mailchimp-woocommerce-no-campaign-id-' . $campaign_id );
-			set_site_transient( 'mailchimp-woocommerce-has-campaign-id-' . $campaign_id, $data, 60 * 30 );
+			\Mailchimp_Woocommerce_DB_Helpers::delete_transient( 'mailchimp-woocommerce-no-campaign-id-' . $campaign_id );
+			\Mailchimp_Woocommerce_DB_Helpers::set_transient( 'mailchimp-woocommerce-has-campaign-id-' . $campaign_id, $data, 60 * 30 );
 			return $data;
 		} catch ( Exception $e ) {
 			mailchimp_debug( 'campaign_get.error', 'No campaign with provided ID: ' . $campaign_id . ' :: ' . $e->getMessage() . ' :: in ' . $e->getFile() . ' :: on ' . $e->getLine() );
-			set_site_transient( 'mailchimp-woocommerce-no-campaign-id-' . $campaign_id, true, 60 * 30 );
+			\Mailchimp_Woocommerce_DB_Helpers::set_transient( 'mailchimp-woocommerce-no-campaign-id-' . $campaign_id, true, 60 * 30 );
 
 			if ( ! $throw_if_invalid ) {
 				return false;
@@ -1230,7 +1230,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 			// update the member tags but fail silently just in case.
 			$this->updateMemberTags( mailchimp_get_list_id(), $email_address, true, $order );
 
-			update_option( 'mailchimp-woocommerce-resource-last-updated', time() );
+			\Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp-woocommerce-resource-last-updated', time() );
 			$order = new MailChimp_WooCommerce_Order();
 			return $order->fromArray( $data );
 		} catch ( Exception $e ) {
@@ -1374,6 +1374,33 @@ class MailChimp_WooCommerce_MailChimpApi {
 
 	/**
 	 * @param $store_id
+	 * @param $product_id
+	 * @param false      $throw
+	 *
+	 * @return false|MailChimp_WooCommerce_ProductVariation
+	 * @throws MailChimp_WooCommerce_Error
+	 * @throws MailChimp_WooCommerce_RateLimitError
+	 * @throws MailChimp_WooCommerce_ServerError
+	 */
+	public function getStoreProductVariant( $store_id, $product_id, $variation_id, $throw = false ) {
+		try {
+			$data = $this->get( "ecommerce/stores/$store_id/products/$product_id/variants/$variation_id" );
+
+			if ( ! is_array( $data ) ) {
+				throw new MailChimp_WooCommerce_RateLimitError( 'getting product variant api failure, retry again.' );
+			}
+			$product_variation = new MailChimp_WooCommerce_ProductVariation();
+			return $product_variation->fromArray( $data );
+		} catch ( MailChimp_WooCommerce_Error $e ) {
+			if ( $throw ) {
+				throw $e;
+			}
+			return false;
+		}
+	}
+
+	/**
+	 * @param $store_id
 	 * @param int      $page
 	 * @param int      $count
 	 *
@@ -1409,7 +1436,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 				return false;
 			}
 			$data = $this->post( "ecommerce/stores/$store_id/products", $product->toArray() );
-			update_option( 'mailchimp-woocommerce-resource-last-updated', time() );
+			\Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp-woocommerce-resource-last-updated', time() );
 			$product = new MailChimp_WooCommerce_Product();
 			return $product->fromArray( $data );
 		} catch ( Exception $e ) {
@@ -1436,7 +1463,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 				return false;
 			}
 			$data = $this->patch( "ecommerce/stores/$store_id/products/{$product->getId()}", $product->toArray() );
-			update_option( 'mailchimp-woocommerce-resource-last-updated', time() );
+			\Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp-woocommerce-resource-last-updated', time() );
 			$product = new MailChimp_WooCommerce_Product();
 			return $product->fromArray( $data );
 		} catch ( Exception $e ) {
@@ -1444,6 +1471,91 @@ class MailChimp_WooCommerce_MailChimpApi {
 				throw $e;
 			}
 			mailchimp_log( 'api.update_product.error', $e->getMessage(), array( 'submission' => $product->toArray() ) );
+			return false;
+		}
+	}
+
+	/**
+	 * @param $store_id
+	 * @param MailChimp_WooCommerce_ProductVariation $product_variation
+	 * @param bool                          $silent
+	 *
+	 * @return false|MailChimp_WooCommerce_ProductVariation
+	 * @throws MailChimp_WooCommerce_Error
+	 * @throws MailChimp_WooCommerce_RateLimitError
+	 * @throws MailChimp_WooCommerce_ServerError
+	 */
+	public function addStoreProductVariation( $store_id, MailChimp_WooCommerce_ProductVariation $product_variation, $silent = true ) {
+		try {
+			if ( ! $this->validateStoreSubmission( $product_variation ) ) {
+				return false;
+			}
+
+			if ($product_id = $product_variation->getProductId()) {
+				$data = $this->post( "ecommerce/stores/$store_id/products/$product_id/variants", $product_variation->toArray() );
+				\Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp-woocommerce-resource-last-updated', time() );
+				$product_variation = new MailChimp_WooCommerce_ProductVariation();
+				return $product_variation->fromArray( $data );
+			} else {
+				mailchimp_log( 'api.add_product_variation.error', "Unable to find product for variation", array( 'submission' => $product_variation->toArray() ) );
+				return false;
+			}
+		} catch ( Exception $e ) {
+			if ( ! $silent ) {
+				throw $e;
+			}
+			mailchimp_log( 'api.add_product_variation.error', $e->getMessage(), array( 'submission' => $product_variation->toArray() ) );
+			return false;
+		}
+	}
+
+	/**
+	 * @param $store_id
+	 * @param MailChimp_WooCommerce_ProductVariation $product_variation
+	 * @param bool                          $silent
+	 *
+	 * @return false|MailChimp_WooCommerce_ProductVariation
+	 * @throws MailChimp_WooCommerce_Error
+	 * @throws MailChimp_WooCommerce_RateLimitError
+	 */
+	public function updateStoreProductVariation( $store_id, MailChimp_WooCommerce_ProductVariation $product_variation, $silent = true ) {
+		try {
+			if ( ! $this->validateStoreSubmission( $product_variation ) ) {
+				return false;
+			}
+
+			if ($product_id = $product_variation->getProductId()) {
+				$data = $this->patch("ecommerce/stores/$store_id/products/$product_id/variants/{$product_variation->getId()}", $product_variation->toArray());
+				\Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp-woocommerce-resource-last-updated', time());
+				$product_variation = new MailChimp_WooCommerce_ProductVariation();
+				return $product_variation->fromArray($data);
+			} else {
+				mailchimp_log( 'api.update_product_variation.error', "Unable to find product for variation", array( 'submission' => $product_variation->toArray() ) );
+				return false;
+			}
+		} catch ( Exception $e ) {
+			if ( ! $silent ) {
+				throw $e;
+			}
+			mailchimp_log( 'api.update_product_variation.error', $e->getMessage(), array( 'submission' => $product_variation->toArray() ) );
+			return false;
+		}
+	}
+
+	/**
+	 * @param $store_id
+	 * @param $product_id
+	 * @param $variation_id
+	 *
+	 * @return bool
+	 */
+	public function deleteStoreProductVariation($store_id, $product_id, $variation_id) {
+		try {
+			$data = $this->delete("ecommerce/stores/$store_id/products/$product_id/variants/$variation_id");
+			mailchimp_debug('product_variation', 'DELETE PRODUCT VARIATION', $data);
+			return (bool) $data;
+		} catch ( Exception $e ) {
+			mailchimp_log( 'api.update_product_variation.error', $e->getMessage(), array( 'submission' => $variation_id ) );
 			return false;
 		}
 	}
@@ -1843,7 +1955,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 */
 	public function getCachedGDPRFields( $list_id, $minutes = 5 ) {
 		$transient  = "mailchimp-woocommerce-gdpr-fields.{$list_id}";
-		$GDPRfields = get_site_transient( $transient );
+		$GDPRfields = get_transient( $transient );
 
 		// only return the values if it's a false - or an array
 		if ( is_array( $GDPRfields ) ) {
@@ -1852,7 +1964,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 
 		try {
 			$GDPRfields = $this->getGDPRFields( $list_id );
-			set_site_transient( $transient, $GDPRfields, 60 * $minutes );
+			set_transient( $transient, $GDPRfields, 60 * $minutes );
 		} catch ( Exception $e ) {
 			$GDPRfields = array();
 		}
@@ -1895,7 +2007,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 		}
 		$email_hash = md5( strtolower( trim( $email ) ) );
 		$transient  = "mailchimp-woocommerce-subscribed.{$list_id}.{$email_hash}";
-		$status     = get_site_transient( $transient );
+		$status     = \Mailchimp_Woocommerce_DB_Helpers::get_transient( $transient );
 
 		if ( ! empty( $status ) ) {
 			return $status;
@@ -1908,7 +2020,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 			$status = 'not_found';
 		}
 
-		set_site_transient( $transient, $status, 60 * $minutes );
+		\Mailchimp_Woocommerce_DB_Helpers::set_transient( $transient, $status, 60 * $minutes );
 
 		return $status;
 	}
@@ -2035,6 +2147,9 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 * @throws MailChimp_WooCommerce_Error
 	 */
 	public function validateNaughtyListEmail( $email ) {
+        if (defined('DISABLE_MAILCHIMP_NAUGHTY_LIST') && DISABLE_MAILCHIMP_NAUGHTY_LIST) {
+            return false;
+        }
 		if ( ! empty( $email ) && mailchimp_string_contains( $email, $this->getNaughtyList() ) ) {
 			$this->reportSpamToTower( $email );
 			throw new MailChimp_WooCommerce_Error( "Email [{$email}] has been blocked due to spam reports." );

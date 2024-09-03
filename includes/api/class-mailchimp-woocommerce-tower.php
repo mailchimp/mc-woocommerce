@@ -59,7 +59,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 		$authenticated = mailchimp_is_configured();
 		$list_id       = mailchimp_get_list_id();
 		$url           = get_option( 'siteurl' );
-		$options       = (array) get_option( 'mailchimp-woocommerce' );
+		$options       = (array) \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce' );
 		$last_sync_at  = mailchimp_get_data('sync.last_loop_at');
 
 		try {
@@ -270,27 +270,27 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 						),
 						'product_sync_started'      => (object) array(
 							'key'   => 'product_sync_started',
-							'value' => get_option( 'mailchimp-woocommerce-sync.products.started_at' ),
+							'value' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.products.started_at' ),
 						),
 						'product_sync_completed'    => (object) array(
 							'key'   => 'product_sync_completed',
-							'value' => get_option( 'mailchimp-woocommerce-sync.products.completed_at' ),
+							'value' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.products.completed_at' ),
 						),
 						'customer_sync_started'     => (object) array(
 							'key'   => 'customer_sync_started',
-							'value' => get_option( 'mailchimp-woocommerce-sync.customers.started_at' ),
+							'value' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.customers.started_at' ),
 						),
 						'customer_sync_completed'   => (object) array(
 							'key'   => 'customer_sync_completed',
-							'value' => get_option( 'mailchimp-woocommerce-sync.customers.completed_at' ),
+							'value' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.customers.completed_at' ),
 						),
 						'order_sync_started'        => (object) array(
 							'key'   => 'order_sync_started',
-							'value' => get_option( 'mailchimp-woocommerce-sync.orders.started_at' ),
+							'value' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.orders.started_at' ),
 						),
 						'order_sync_completed'      => (object) array(
 							'key'   => 'order_sync_completed',
-							'value' => get_option( 'mailchimp-woocommerce-sync.orders.completed_at' ),
+							'value' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.orders.completed_at' ),
 						),
 						'curl_enabled' => (object) array(
 							'key' => 'curl_enabled',
@@ -326,8 +326,8 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 					'secure_url'          => $url,
 					'user_email'          => isset( $options['admin_email'] ) ? $options['admin_email'] : null,
 					'is_syncing'          => $syncing_mc,
-					'sync_started_at'     => get_option( 'mailchimp-woocommerce-sync.started_at' ),
-					'sync_completed_at'   => get_option( 'mailchimp-woocommerce-sync.completed_at' ),
+					'sync_started_at'     => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.started_at' ),
+					'sync_completed_at'   => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.completed_at' ),
 					'subscribed_to_hooks' => true,
 					'uses_custom_rules'   => false,
 					'wp_cron_enabled'     => $this->hasWPCronEnabled(),
@@ -668,14 +668,14 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 		$list_id        = mailchimp_get_list_id();
 		$is_connected   = mailchimp_is_configured();
 		$post_url       = "https://tower.vextras.com/admin-api/woocommerce/{$command}/{$store_id}";
-		$plugin_options = (array) get_option( 'mailchimp-woocommerce' );
+		$plugin_options = (array) \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce' );
 		$akamai_block   = false;
 
 		if ( (bool) $enable ) {
 			mailchimp_set_data( 'tower.token', $support_token = wp_generate_password(12, false, false) );
 		} else {
 			$support_token = mailchimp_get_data( 'tower.token' );
-			delete_option( 'mailchimp-woocommerce-tower.support_token' );
+			\Mailchimp_Woocommerce_DB_Helpers::delete_option( 'mailchimp-woocommerce-tower.support_token' );
 		}
 
 		if ( $enable ) {

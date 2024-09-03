@@ -26,6 +26,8 @@ class MailChimp_WooCommerce_Process_Orders extends MailChimp_WooCommerce_Abstrac
         $sync = new MailChimp_WooCommerce_Process_Orders();
         $sync->createSyncManagers();
         $service->setData('sync.config.resync', true);
+        \Mailchimp_Woocommerce_DB_Helpers::update_option("mailchimp-woocommerce-sync.syncing", true);
+        \Mailchimp_Woocommerce_DB_Helpers::update_option("mailchimp-woocommerce-sync.started_at", time());
     }
 
     /**

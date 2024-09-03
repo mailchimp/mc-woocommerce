@@ -120,6 +120,24 @@ input.mc-wc-btn {
     border: 0;
 }
 
+.mc-wc-btn-disconnect {
+    background: linear-gradient(180deg, #674399 0%, #8661C1 100%) !important;
+    color: #fff !important;
+    padding-block: 8.5px;
+    border: 0;
+    font-family: proxima-nova, Arial, Helvetica, sans-serif !important;
+    font-size: 14px !important;
+    line-height: 16px !important;
+    padding: 15px 35px 15px 35px !important;
+    text-transform: uppercase !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.swal2-actions {
+    gap: 20px;
+}
+
 .mc-wc-btn.mc-wc-btn-md.mc-wc-btn-primary {
     padding: 16.65px 37.27px;
 }
@@ -185,7 +203,7 @@ input.mc-wc-btn {
     font-size: 14px;
     line-height: 20px;
     width: 100%;
-    max-width: 728px;
+    max-width: 810px;
     color: var(--mc-wc-text-color);
     margin-left: 60px;
 }
@@ -1518,7 +1536,7 @@ select#log_file {}
     margin-top: 30px;
 }
 
-.mc-wc-button-disconnect .tab-content-submit:not(.create-account):not(.mc-woocommerce-disconnect-button):not(.disconnect-confirm) {
+.mc-wc-button-disconnect .tab-content-submit:not(.create-account):not(.mc-woocommerce-disconnect-button) {
     width: 161px !important;
     text-align: center;
     height: 40px !important;
@@ -1557,6 +1575,23 @@ select#log_file {}
     transition: opacity 0.8s;
 }
 
+.mc-wc-tooltipper-text {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    z-index: 1;
+    transform: translate(-50%, -100%);
+    min-width: 200px;
+    padding: 10px;
+    font-size: 15px;
+    font-weight: normal;
+    background-color: #fff;
+    border-radius: var(--mc-wc-border-radius);
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+    display:none;
+}
+
 .mc-wc-tooltip:hover .mc-wc-tooltip-text {
     opacity: 1;
     visibility: visible;
@@ -1578,6 +1613,16 @@ select#log_file {}
     z-index: 10;
 }
 
+.wink-icon {
+    display: inline-block;
+    min-width: 16px;
+    min-height: 16px;
+    max-width: 72px;
+    max-height: 72px;
+    height: 24px;
+    width: 24px;
+    fill: rgba(36, 28, 21, .65);
+}
 .mc-wc-notice.success {
     color: #fff;
 }
@@ -1647,11 +1692,102 @@ select#log_file {}
     background-color: rgba(75,196,194,0.2);
 }
 
+.mc-promo-checks {
+    flex: 1 1 0;
+    height: 52px;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 12px;
+    display: flex;
+    flex-wrap: wrap;
+}
+.mc-promo-check-wrapper {
+    border-radius: 4px;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    display: flex;
+}
+
+.mc-promo-check {
+    width: 16px;
+    height: 16px;
+    background: #FFE01B;
+    border-radius: 100px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    display: flex;
+}
+
+.mc-promo-check-text {
+    color: #241C15;
+    font-size: 13px;
+    font-family: 'Graphik Mailchimp Web';
+    font-weight: 400;
+    line-height: 20px;
+    word-wrap: break-word;
+}
+
+.mc-promo-check svg {
+    padding:2px;
+}
+
+.mc-wc-tooltipper {
+    cursor: pointer;
+}
+.promo.mc-wc-tooltipper-text {
+    width:500px;
+    text-align: left;
+    overflow: scroll;
+}
+
+.tooltipper-container {
+    max-height: 500px;
+    overflow: scroll;
+    margin-right: .25em;
+    margin-left: .25em;
+}
+
+.tooltipper-container p {
+    margin-right: 2.25em;
+    margin-left: 1em;
+}
+
+.promo.mc-wc-tooltipper-text .tooltip__close {
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    top: 0;
+    right: 0;
+    background-color: transparent;
+    border: none;
+    margin: 1rem;
+    padding: .3125rem;
+}
+
 .mc-wc-notice button svg {
     fill: #fff;
     width: 2.4rem;
     height: 2.4rem;
     padding:6px;
+}
+
+.promo-create-account:hover {
+    background: #ffec71 !important;
+}
+
+.promo-disclaimer {
+    color: rgba(36, 28, 21, 0.80);
+    font-size: 11px;
+    font-family: 'Graphik Mailchimp Web';
+    font-weight: 400;
+    line-height: 16px;
+    word-wrap: break-word;
+    display:flex;
+    align-content: center;
+    justify-content: center;
+    padding-top:1em;
 }
 
 @media screen and (max-width: 782px) {

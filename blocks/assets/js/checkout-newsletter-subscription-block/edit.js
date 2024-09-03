@@ -17,7 +17,7 @@ import { CheckboxControl  } from '@woocommerce/blocks-checkout';
 import './style.scss';
 
 export const Edit = ( { attributes, setAttributes } ) => {
-	const { text, gdprHeadline, gdpr, gdprStatus } = attributes;
+	const { text, gdprHeadline, gdpr, gdprStatus, checkboxSettings } = attributes;
 	const blockProps = useBlockProps();
 	const checked = gdprStatus === 'check';
 
@@ -28,11 +28,7 @@ export const Edit = ( { attributes, setAttributes } ) => {
 					<p>{ __('Choose how you want the opt-in to your newsletter checkbox to render at checkout', 'mailchimp-for-woocommerce') }</p>
 					<RadioControl
 						selected={ gdprStatus }
-						options={ [
-							{ label: 'Visible, checked by default', value: 'check' },
-							{ label: 'Visible, unchecked by default', value: 'uncheck' },
-							{ label: 'Hidden, unchecked by default', value: 'hide' },
-						] }
+						options={ checkboxSettings }
 						onChange={ ( value ) => setAttributes( {gdprStatus: value } ) }
 					/>
 				</PanelBody>

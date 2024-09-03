@@ -169,9 +169,9 @@ class MailChimp_WooCommerce_Rest_Api
         $store_id = mailchimp_get_store_id();
         
 //        $complete = array(
-//            'coupons' => get_option('mailchimp-woocommerce-sync.coupons.completed_at'),
-//            'products' => get_option('mailchimp-woocommerce-sync.products.completed_at'),
-//            'orders' => get_option('mailchimp-woocommerce-sync.orders.completed_at')
+//            'coupons' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.coupons.completed_at'),
+//            'products' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.products.completed_at'),
+//            'orders' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.orders.completed_at')
 //        );
 
         $promo_rules_count = mailchimp_get_coupons_count();
@@ -219,9 +219,9 @@ class MailChimp_WooCommerce_Rest_Api
             'customers_in_store' => $customer_count,
             'customers_in_mailchimp' => $mailchimp_total_customers,
             
-            // 'promo_rules_page' => get_option('mailchimp-woocommerce-sync.coupons.current_page'),
-            // 'products_page' => get_option('mailchimp-woocommerce-sync.products.current_page'),
-            // 'orders_page' => get_option('mailchimp-woocommerce-sync.orders.current_page'),
+            // 'promo_rules_page' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.coupons.current_page'),
+            // 'products_page' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.products.current_page'),
+            // 'orders_page' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.orders.current_page'),
             
             'date' => $date ? $date->format( __('D, M j, Y g:i A', 'mailchimp-for-woocommerce')) : '',
 //            'has_started' => mailchimp_has_started_syncing() || ($order_count != $mailchimp_total_orders),
@@ -239,7 +239,7 @@ class MailChimp_WooCommerce_Rest_Api
 	 */
     public function dismiss_review_banner(WP_REST_Request $request)
     {
-        return $this->mailchimp_rest_response(array('success' => delete_option('mailchimp-woocommerce-sync.initial_sync')));
+        return $this->mailchimp_rest_response(array('success' => \Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-sync.initial_sync')));
     }
 
 	/**
@@ -343,9 +343,10 @@ class MailChimp_WooCommerce_Rest_Api
                 ];
                 break;
             case 'resync_customers':
+                MailChimp_WooCommerce_Process_Customers::push();
                 $response = [
                     'title' => "Customer resync",
-                    'description' => "WooCommerce does not have customers to sync. Only orders.",
+                    'description' => "Please note that it will take a couple minutes to start this process. Check the store logs for details.",
                     'type' => 'error',
                 ];
                 break;
@@ -601,8 +602,19 @@ class MailChimp_WooCommerce_Rest_Api
                 break;
             case 'promo_code':
             case 'promo-code':
-                $platform = wc_get_coupon_code_by_id($body['resource_id']);
-	            $mc = mailchimp_get_api()->getPromoRuleWithCodes($store_id, $body['resource_id']);
+                $id = $body['resource_id'];
+                $platform = wc_get_coupon_code_by_id($id);
+                if (empty($platform)) {
+                    $platform = wc_get_coupon_id_by_code($id);
+                    if (empty($platform)) {
+                        $id = $platform;
+                    }
+                }
+	            try {
+                    $mc = mailchimp_get_api()->getPromoRuleWithCodes($store_id, $id);
+                } catch (\Exception $e) {
+
+                }
                 break;
         }
 

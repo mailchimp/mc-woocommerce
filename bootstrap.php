@@ -9,6 +9,9 @@ $mailchimp_woocommerce_spl_autoloader = true;
 
 spl_autoload_register(function($class) {
     $classes = array(
+        // helper classes
+        'Mailchimp_Woocommerce_DB_Helpers' => 'includes/class-mailchimp-woocommerce-db-helpers.php',
+
         // includes root
         'MailChimp_Service' => 'includes/class-mailchimp-woocommerce-service.php',
         'MailChimp_WooCommerce_Options' => 'includes/class-mailchimp-woocommerce-options.php',
@@ -50,6 +53,7 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_MailChimpApi' => 'includes/api/class-mailchimp-api.php',
         'MailChimp_WooCommerce_Api' => 'includes/api/class-mailchimp-woocommerce-api.php',
         'MailChimp_WooCommerce_CreateListSubmission' => 'includes/api/class-mailchimp-woocommerce-create-list-submission.php',
+        'MailChimp_WooCommerce_Transform_Customers' => 'includes/api/class-mailchimp-woocommerce-transform-customers.php',
         'MailChimp_WooCommerce_Transform_Coupons' => 'includes/api/class-mailchimp-woocommerce-transform-coupons.php',
         'MailChimp_WooCommerce_Transform_Orders' => 'includes/api/class-mailchimp-woocommerce-transform-orders-wc3.php',
         'MailChimp_WooCommerce_Transform_Products' => 'includes/api/class-mailchimp-woocommerce-transform-products.php',
@@ -58,12 +62,15 @@ spl_autoload_register(function($class) {
         'Mailchimp_Woocommerce_Job' => 'includes/processes/class-mailchimp-woocommerce-job.php',
         'MailChimp_WooCommerce_Abstract_Sync' => 'includes/processes/class-mailchimp-woocommerce-abstract-sync.php',
         'MailChimp_WooCommerce_Cart_Update' => 'includes/processes/class-mailchimp-woocommerce-cart-update.php',
+        'MailChimp_WooCommerce_Process_Customers' => 'includes/processes/class-mailchimp-woocommerce-process-customers.php',
         'MailChimp_WooCommerce_Process_Coupons' => 'includes/processes/class-mailchimp-woocommerce-process-coupons.php',
         'MailChimp_WooCommerce_Process_Orders' => 'includes/processes/class-mailchimp-woocommerce-process-orders.php',
         'MailChimp_WooCommerce_Process_Products' => 'includes/processes/class-mailchimp-woocommerce-process-products.php',
         'MailChimp_WooCommerce_SingleCoupon' => 'includes/processes/class-mailchimp-woocommerce-single-coupon.php',
+        'MailChimp_Woocommerce_Single_Customer' => 'includes/processes/class-mailchimp-woocommerce-single-customer.php',
         'MailChimp_WooCommerce_Single_Order' => 'includes/processes/class-mailchimp-woocommerce-single-order.php',
         'MailChimp_WooCommerce_Single_Product' => 'includes/processes/class-mailchimp-woocommerce-single-product.php',
+        'MailChimp_WooCommerce_Single_Product_Variation' => 'includes/processes/class-mailchimp-woocommerce-single-product-variation.php',
         'MailChimp_WooCommerce_User_Submit' => 'includes/processes/class-mailchimp-woocommerce-user-submit.php',
         'MailChimp_WooCommerce_Process_Full_Sync_Manager' => 'includes/processes/class-mailchimp-woocommerce-full-sync-manager.php',
         'MailChimp_WooCommerce_Subscriber_Sync' => 'includes/processes/class-mailchimp-woocommerce-subscriber-sync.php',
@@ -92,12 +99,12 @@ spl_autoload_register(function($class) {
 function mailchimp_environment_variables() {
     global $wp_version;
 
-    $o = get_option('mailchimp-woocommerce', false);
+    $o = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce', false);
 
     return (object) array(
         'repo' => 'master',
         'environment' => 'production', // staging or production
-        'version' => '4.1',
+        'version' => '4.3.1',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => function_exists('WC') ? WC()->version : null,
@@ -196,12 +203,12 @@ function mailchimp_handle_or_queue(Mailchimp_Woocommerce_Job $job, $delay = 0)
 {
     if ($job instanceof MailChimp_WooCommerce_Single_Order && isset($job->id) && empty($job->gdpr_fields)) {
         // if this is a order process already queued - just skip this
-        if (get_site_transient("mailchimp_order_being_processed_{$job->id}") == true) {
+        if (get_transient("mailchimp_order_being_processed_{$job->id}") == true) {
             mailchimp_debug('queue', "Not queuing up order {$job->id} because it's already queued");
             return;
         }
         // tell the system the order is already queued for processing in this saving process - and we don't need to process it again.
-        set_site_transient( "mailchimp_order_being_processed_{$job->id}", true, 30);
+        set_transient( "mailchimp_order_being_processed_{$job->id}", true, 30);
     }
 	// Allow sites to alter whether the order or product is synced.
 	// $job should contain at least the ID of the order/product as $job->id.
@@ -219,6 +226,13 @@ function mailchimp_handle_or_queue(Mailchimp_Woocommerce_Job $job, $delay = 0)
 
         if ( apply_filters( 'mailchimp_should_push_product', $job->id ) === false ) {
 			mailchimp_debug( 'action_scheduler.queue_job.product', "Product {$job->id} not pushed do to filter." );
+			return null;
+		}
+	} else if ( $job instanceof \MailChimp_WooCommerce_Single_Product_Variation ) {
+		$filter_delay = apply_filters('mailchimp_handle_or_queue_product_variation_delay', $delay);
+
+		if ( apply_filters( 'mailchimp_should_push_product_variations', $job->id ) === false ) {
+			mailchimp_debug( 'action_scheduler.queue_job.product_variation', "Product {$job->id} not pushed do to filter." );
 			return null;
 		}
 	} else if ( $job instanceof \MailChimp_WooCommerce_User_Submit ) {
@@ -377,14 +391,14 @@ function mailchimp_create_webhook_token(){
  * @param $url
  */
 function mailchimp_set_webhook_url( $url ) {
-    update_option('mc-mailchimp_webhook_url', $url);
+    \Mailchimp_Woocommerce_DB_Helpers::update_option('mc-mailchimp_webhook_url', $url);
 }
 /**
  * Returns webhookurl option
  * @return string
  */
 function mailchimp_get_webhook_url() {
-    return get_option('mc-mailchimp_webhook_url', false);
+    return \Mailchimp_Woocommerce_DB_Helpers::get_option('mc-mailchimp_webhook_url', false);
 }
 /**
  * Returns webhook url
@@ -493,7 +507,7 @@ function mailchimp_get_api() {
  * @return null
  */
 function mailchimp_get_option($key, $default = null) {
-    $options = get_option('mailchimp-woocommerce');
+    $options =\Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce');
     if (!is_array($options)) {
         return $default;
     }
@@ -509,7 +523,7 @@ function mailchimp_get_option($key, $default = null) {
  * @return mixed
  */
 function mailchimp_get_data($key, $default = null) {
-    return get_option('mailchimp-woocommerce-'.$key, $default);
+    return \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-'.$key, $default);
 }
 
 /**
@@ -519,7 +533,7 @@ function mailchimp_get_data($key, $default = null) {
  * @return bool
  */
 function mailchimp_set_data($key, $value, $autoload = 'yes') {
-    return update_option('mailchimp-woocommerce-'.$key, $value, $autoload);
+    return \Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp-woocommerce-'.$key, $value, $autoload);
 }
 
 /**
@@ -648,7 +662,7 @@ function mailchimp_check_woocommerce_plugin_status()
         return true;
     }
     if (!is_multisite()) return false;
-    $plugins = get_site_option( 'active_sitewide_plugins');
+    $plugins = \Mailchimp_Woocommerce_DB_Helpers::get_option( 'active_sitewide_plugins');
     return isset($plugins['woocommerce/woocommerce.php']);
 }
 
@@ -764,9 +778,6 @@ function mailchimp_log($action, $message, $data = array()) {
     if (mailchimp_environment_variables()->logging !== 'none' && function_exists('wc_get_logger')) {
         if (is_array($data) && !empty($data)) $message .= " :: ".wc_print_r($data, true);
         wc_get_logger()->notice("{$action} :: {$message}", array('source' => 'mailchimp_woocommerce'));
-    } else {
-        if (is_array($data) && !empty($data)) $message .= " :: ".wc_print_r($data, true);
-        wc_get_logger()->notice("{$action} :: {$message}", array('source' => 'mailchimp_woocommerce'));
     }
 }
 
@@ -851,26 +862,39 @@ function mailchimp_get_product_count() {
  * @return int
  */
 function mailchimp_get_order_count() {
-    $posts = mailchimp_count_posts('shop_order');
-    unset($posts['auto-draft'], $posts['trash']);
-    $total = 0;
-    foreach ($posts as $status => $count) {
-        $total += $count;
-    }
-    return $total;
+    return wc_orders_count('completed');
+//    $posts = mailchimp_count_posts('shop_order');
+//    unset($posts['auto-draft'], $posts['trash']);
+//    $total = 0;
+//    foreach ($posts as $status => $count) {
+//        $total += $count;
+//    }
+//    return $total;
 }
 
 function mailchimp_get_customer_count() {
+    return mailchimp_get_customer_lookup_count();
+    //    global $wpdb;
+    //    $query = "SELECT COUNT(DISTINCT meta_value) FROM {$wpdb->postmeta} WHERE meta_key = '_billing_email'";
+    //    $emails = $wpdb->get_var($query);
+    //    $users_query = new WP_User_Query(
+    //        array(
+    //            'fields' => array( 'ID' ),
+    //            'role'   => 'customer',
+    //        )
+    //    );
+    //    return $users_query->get_total() + (int) $emails;
+}
+
+/**
+ * @return int
+ */
+function mailchimp_get_customer_lookup_count() {
     global $wpdb;
-    $query = "SELECT COUNT(DISTINCT meta_value) FROM {$wpdb->postmeta} WHERE meta_key = '_billing_email'";
-    $emails = $wpdb->get_var($query);
-    $users_query = new WP_User_Query(
-        array(
-            'fields' => array( 'ID' ),
-            'role'   => 'customer',
-        )
-    );
-    return $users_query->get_total() + (int) $emails;
+    $query = "SELECT COUNT(*)
+                FROM {$wpdb->prefix}wc_customer_lookup
+                GROUP BY email;";
+    return $wpdb->get_var($query);
 }
 
 /**
@@ -921,7 +945,7 @@ function mailchimp_update_connected_site_script() {
  * @return bool|DateTime
  */
 function mailchimp_get_updated_connected_site_since_as_date_string() {
-    $updated_at = get_option('mailchimp-woocommerce-script_updated_at', false);
+    $updated_at = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-script_updated_at', false);
     if (empty($updated_at)) return '';
     try {
         $date = new DateTime();
@@ -936,7 +960,7 @@ function mailchimp_get_updated_connected_site_since_as_date_string() {
  * @return int
  */
 function mailchimp_get_updated_connected_site_since() {
-    $updated_at = get_option('mailchimp-woocommerce-script_updated_at', false);
+    $updated_at = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-script_updated_at', false);
     return empty($updated_at) ? 1000000 : (time() - $updated_at);
 }
 
@@ -979,9 +1003,9 @@ function mailchimpi_refresh_connected_site_script(MailChimp_WooCommerce_Store $s
     if ($url && $fragment) {
 
         // update the options for script_url and script_fragment
-        update_option('mailchimp-woocommerce-script_url', $url);
-        update_option('mailchimp-woocommerce-script_fragment', $fragment);
-        update_option('mailchimp-woocommerce-script_updated_at', time());
+        \Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp-woocommerce-script_url', $url);
+        \Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp-woocommerce-script_fragment', $fragment);
+        \Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp-woocommerce-script_updated_at', time());
 
         // check to see if the site is connected
         if (!$api->checkConnectedSite($store->getId())) {
@@ -999,14 +1023,14 @@ function mailchimpi_refresh_connected_site_script(MailChimp_WooCommerce_Store $s
  * @return string|false
  */
 function mailchimp_get_connected_site_script_url() {
-    return get_option('mailchimp-woocommerce-script_url', false);
+    return \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-script_url', false);
 }
 
 /**
  * @return string|false
  */
 function mailchimp_get_connected_site_script_fragment() {
-    return get_option('mailchimp-woocommerce-script_fragment', false);
+    return \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-script_fragment', false);
 }
 
 /**
@@ -1059,7 +1083,8 @@ function mailchimp_get_wc_customer($email) {
  * @return mixed|null
  */
 function mailchimp_get_transient($key, $default = null) {
-    $transient = get_site_transient("mailchimp-woocommerce.{$key}");
+    $transient = \Mailchimp_Woocommerce_DB_Helpers::get_transient("mailchimp-woocommerce.{$key}");
+
     return empty($transient) ? $default : $transient;
 }
 
@@ -1071,7 +1096,7 @@ function mailchimp_get_transient($key, $default = null) {
  */
 function mailchimp_set_transient($key, $value, $seconds = 60) {
     mailchimp_delete_transient($key);
-    return set_site_transient("mailchimp-woocommerce.{$key}", array(
+    return \Mailchimp_Woocommerce_DB_Helpers::set_transient("mailchimp-woocommerce.{$key}", array(
         'value' => $value,
         'expires' => time()+$seconds,
     ), $seconds);
@@ -1082,7 +1107,7 @@ function mailchimp_set_transient($key, $value, $seconds = 60) {
  * @return bool
  */
 function mailchimp_delete_transient($key) {
-    return delete_site_transient("mailchimp-woocommerce.{$key}");
+    return \Mailchimp_Woocommerce_DB_Helpers::delete_transient("mailchimp-woocommerce.{$key}");
 }
 
 /**
@@ -1151,7 +1176,7 @@ function mailchimp_get_subscriber_status_options($subscribed) {
 
 function mailchimp_check_if_on_sync_tab() {
     if ((isset($_GET['page']) && $_GET['page'] === 'mailchimp-woocommerce')) {
-        $options = get_option('mailchimp-woocommerce', array());
+        $options = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce', array());
         if (isset($_GET['tab'])) {
             if ($_GET['tab'] === 'sync') {
                 return true;
@@ -1207,19 +1232,23 @@ function mailchimp_delete_as_jobs() {
         return true;
     }
     return false;
-
 }
+
 function mailchimp_flush_sync_pointers() {
     // clean up the initial sync pointers
-    delete_option( 'mailchimp-woocommerce-resource-last-updated' );
-    delete_option( 'mailchimp-woocommerce-sync.started_at' );
-    delete_option( 'mailchimp-woocommerce-sync.completed_at' );
+    \Mailchimp_Woocommerce_DB_Helpers::delete_option( 'mailchimp-woocommerce-resource-last-updated' );
+    \Mailchimp_Woocommerce_DB_Helpers::delete_option( 'mailchimp-woocommerce-sync.started_at' );
+    \Mailchimp_Woocommerce_DB_Helpers::delete_option( 'mailchimp-woocommerce-sync.completed_at' );
     foreach (array('orders', 'products', 'coupons') as $resource_type) {
-        delete_option("mailchimp-woocommerce-sync.{$resource_type}.started_at");
-        delete_option("mailchimp-woocommerce-sync.{$resource_type}.completed_at");
-        delete_option("mailchimp-woocommerce-sync.{$resource_type}.started_at");
-        delete_option("mailchimp-woocommerce-sync.{$resource_type}.current_page");
+        mailchimp_flush_specific_resource_pointers($resource_type);
     }
+}
+
+function mailchimp_flush_specific_resource_pointers($resource_type) {
+    \Mailchimp_Woocommerce_DB_Helpers::delete_option("mailchimp-woocommerce-sync.{$resource_type}.started_at");
+    \Mailchimp_Woocommerce_DB_Helpers::delete_option("mailchimp-woocommerce-sync.{$resource_type}.completed_at");
+    \Mailchimp_Woocommerce_DB_Helpers::delete_option("mailchimp-woocommerce-sync.{$resource_type}.started_at");
+    \Mailchimp_Woocommerce_DB_Helpers::delete_option("mailchimp-woocommerce-sync.{$resource_type}.current_page");
 }
 
 /**
@@ -1235,7 +1264,7 @@ function mailchimp_clean_database() {
     $plugin_options = $wpdb->get_results( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE 'mailchimp%woocommerce%'" );
 
     foreach( $plugin_options as $option ) {
-        delete_option( $option->option_name );
+        \Mailchimp_Woocommerce_DB_Helpers::delete_option( $option->option_name );
     }
 }
 
@@ -1243,7 +1272,7 @@ function mailchimp_clean_database() {
  * @return bool
  */
 function mailchimp_has_started_syncing() {
-    return (bool) get_option('mailchimp-woocommerce-sync.started_at');
+    return (bool) \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.started_at');
 //    $sync_completed_at = get_option('mailchimp-woocommerce-sync.completed_at');
 //    return ($sync_completed_at < $sync_started_at);
 }
@@ -1252,8 +1281,8 @@ function mailchimp_has_started_syncing() {
  * @return bool
  */
 function mailchimp_is_done_syncing() {
-    $sync_started_at = get_option('mailchimp-woocommerce-sync.started_at');
-    $sync_completed_at = get_option('mailchimp-woocommerce-sync.completed_at');
+    $sync_started_at = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.started_at');
+    $sync_completed_at = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.completed_at');
     if ($sync_completed_at == false) return false;
     else return ($sync_completed_at >= $sync_started_at);
 }
@@ -1279,14 +1308,14 @@ function mailchimp_get_allowed_capability() {
 }
 
 /**
- * @param MailChimp_WooCommerce_Order $order
+ * @param MailChimp_WooCommerce_Customer $customer
  * @param null $subscribed
  *
  * @throws MailChimp_WooCommerce_Error
  * @throws MailChimp_WooCommerce_RateLimitError
  * @throws MailChimp_WooCommerce_ServerError
  */
-function mailchimp_update_member_with_double_opt_in(MailChimp_WooCommerce_Order $order, $subscribed = null)
+function mailchimp_update_member_with_double_opt_in(MailChimp_WooCommerce_Customer $customer, $subscribed = null)
 {
     if (!mailchimp_is_configured()) return;
 
@@ -1295,11 +1324,11 @@ function mailchimp_update_member_with_double_opt_in(MailChimp_WooCommerce_Order 
     // if the customer has a flag to double opt in - we need to push this data over to MailChimp as pending
     // before the order is submitted.
     if ($subscribed) {
-        if ($order->getCustomer()->requiresDoubleOptIn()) {
+        if ($customer->requiresDoubleOptIn()) {
             try {
                 $list_id = mailchimp_get_list_id();
-                $merge_fields = $order->getCustomer()->getMergeFields();
-                $email = $order->getCustomer()->getEmailAddress();
+                $merge_fields = $customer->getMergeFields();
+                $email = $customer->getEmailAddress();
 
                 try {
                     $member = $api->member($list_id, $email);
@@ -1323,7 +1352,7 @@ function mailchimp_update_member_with_double_opt_in(MailChimp_WooCommerce_Order 
             }
         } else {
             // if we've set the wordpress user correctly on the customer
-            if (($wordpress_user = $order->getCustomer()->getWordpressUser())) {
+            if (($wordpress_user = $customer->getWordpressUser())) {
                 $user_submit = new MailChimp_WooCommerce_User_Submit($wordpress_user->ID, '1', null);
                 $user_submit->handle();
             }

@@ -76,7 +76,7 @@ class MailChimp_WooCommerce
             return static::$logging_config;
         }
 
-        $plugin_options = get_option('mailchimp-woocommerce');
+        $plugin_options = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce');
         $is_options = is_array($plugin_options);
 
         $api_key = $is_options && array_key_exists('mailchimp_api_key', $plugin_options) ?
@@ -258,7 +258,8 @@ class MailChimp_WooCommerce
 
         // update MC store information when woocommerce general settings are saved
         $this->loader->add_action('woocommerce_settings_save_general', $plugin_admin, 'mailchimp_update_woo_settings');
-        
+        $this->loader->add_action('update_option_blogname', $plugin_admin, 'mailchimp_update_wordpress_title', 10, 2);
+
         // update MC store information if "WooCommerce Multi-Currency Extension" settings are saved
         if ( class_exists( 'WOOMULTI_CURRENCY_F' ) ) {
             $this->loader->add_action('villatheme_support_woo-multi-currency', $plugin_admin, 'mailchimp_update_woo_settings');
@@ -393,7 +394,7 @@ class MailChimp_WooCommerce
 			$this->loader->add_action('woocommerce_new_order', $service, 'handleOrderCreate', 200, 2);
             $this->loader->add_action('woocommerce_update_order', $service, 'handleOrderUpdate', 10, 2);
             $this->loader->add_action('save_post_product', $service, 'handleProductCreated', 10, 3);
-            $this->loader->add_action('woocommerce_delete_product_variation', $service, 'handleDeleteProductVariation');
+            $this->loader->add_action('woocommerce_before_delete_product_variation', $service, 'handleDeleteProductVariation');
 
 			// this needs to listen for the title and the description updates.
             $this->loader->add_action('post_updated', $service, 'handleProductUpdated', 10, 3);
@@ -438,11 +439,14 @@ class MailChimp_WooCommerce
 
 
             $jobs_classes = array(
+                "MailChimp_Woocommerce_Single_Customer",
                 "MailChimp_WooCommerce_Single_Order",
                 "MailChimp_WooCommerce_SingleCoupon",
                 "MailChimp_WooCommerce_Single_Product",
+                "MailChimp_WooCommerce_Single_Product_Variation",
                 "MailChimp_WooCommerce_Cart_Update",
                 "MailChimp_WooCommerce_User_Submit",
+                "MailChimp_WooCommerce_Process_Customers",
                 "MailChimp_WooCommerce_Process_Coupons",
                 "MailChimp_WooCommerce_Process_Orders",
                 "MailChimp_WooCommerce_Process_Products",

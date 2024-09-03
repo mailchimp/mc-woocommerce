@@ -194,7 +194,7 @@
 
 			const swalWithBootstrapButtons = Swal.mixin({
 				customClass: {
-				  confirmButton: 'button button-primary tab-content-submit disconnect-confirm',
+				  confirmButton: 'button button-default mc-wc-btn-disconnect',
 				  cancelButton: 'button button-default mc-woocommerce-resync-button disconnect-button'
 				},
 				buttonsStyling: false,

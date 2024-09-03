@@ -94,10 +94,10 @@ class MailChimp_WooCommerce_Store {
 	}
 
 	/**
-	 * @return null
+	 * @return null|string
 	 */
 	public function getName() {
-		return $this->name;
+		return !empty($this->name) ? $this->name : $this->getDomain();
 	}
 
 	/**
@@ -111,7 +111,7 @@ class MailChimp_WooCommerce_Store {
 	}
 
 	/**
-	 * @return null
+	 * @return null|string
 	 */
 	public function getDomain() {
 		return $this->domain;
@@ -128,7 +128,7 @@ class MailChimp_WooCommerce_Store {
 	}
 
 	/**
-	 * @return null
+	 * @return null|string
 	 */
 	public function getEmailAddress() {
 		return $this->email_address;
@@ -145,7 +145,7 @@ class MailChimp_WooCommerce_Store {
 	}
 
 	/**
-	 * @return null
+	 * @return null|string
 	 */
 	public function getCurrencyCode() {
 		return $this->currency_code;
@@ -165,7 +165,7 @@ class MailChimp_WooCommerce_Store {
 	}
 
 	/**
-	 * @return null
+	 * @return null|string
 	 */
 	public function getMoneyFormat() {
 		return $this->money_format;
@@ -187,7 +187,7 @@ class MailChimp_WooCommerce_Store {
 	}
 
 	/**
-	 * @return null
+	 * @return null|string
 	 */
 	public function getPrimaryLocale() {
 		return $this->primary_locale;
@@ -204,7 +204,7 @@ class MailChimp_WooCommerce_Store {
 	}
 
 	/**
-	 * @return null
+	 * @return null|string
 	 */
 	public function getTimezone() {
 		return $this->timezone;
@@ -221,7 +221,7 @@ class MailChimp_WooCommerce_Store {
 	}
 
 	/**
-	 * @return null
+	 * @return null|string
 	 */
 	public function getPhone() {
 		return $this->phone;

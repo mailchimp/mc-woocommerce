@@ -126,11 +126,17 @@ class MailChimp_WooCommerce_Public extends MailChimp_WooCommerce_Options {
         update_user_meta( $user_id, 'mailchimp_woocommerce_is_subscribed', $subscribed);
         update_user_meta( $user_id, 'mailchimp_woocommerce_gdpr_fields', $gdpr_fields);
 
+		$language = get_user_meta($user_id, 'locale', true);
+		if (strpos($language, '_') !== false) {
+			$languageArray = explode('_', $language);
+			$language = $languageArray[0];
+		}
+
         $job = new MailChimp_WooCommerce_User_Submit(
             $user_id,
             $subscribed,
             null,
-            null,
+			$language,
             !empty($gdpr_fields) ? $gdpr_fields : null
         );
 

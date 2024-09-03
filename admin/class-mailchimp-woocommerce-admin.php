@@ -61,7 +61,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 
 		if ( ( $store_id = mailchimp_get_store_id() ) && ( $mc = mailchimp_get_api() ) ) {
-			set_site_transient( 'mailchimp_disconnecting_store', true, 15 );
+			\Mailchimp_Woocommerce_DB_Helpers::set_transient( 'mailchimp_disconnecting_store', true, 15 );
 			if ( $mc->deleteStore( $store_id ) ) {
 				mailchimp_log( 'store.disconnected', 'Store id ' . mailchimp_get_store_id() . ' has been disconnected' );
 			} else {
@@ -77,7 +77,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		// clean database
 		mailchimp_clean_database();
-		delete_option('mc-woocommerce-waiting-for-login');
+		\Mailchimp_Woocommerce_DB_Helpers::delete_option('mc-woocommerce-waiting-for-login');
 
 		return array();
 	}
@@ -136,7 +136,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			if ( $label == '' ) {
 				$label = __( 'Subscribe to our newsletter', 'mailchimp-for-woocommerce' );
 			}
-			$options                   = get_option( $this->plugin_name, array() );
+			$options                   = \Mailchimp_Woocommerce_DB_Helpers::get_option( $this->plugin_name, array() );
 			$checkbox_default_settings = ( array_key_exists( 'mailchimp_checkbox_defaults', $options ) && ! is_null( $options['mailchimp_checkbox_defaults'] ) ) ? $options['mailchimp_checkbox_defaults'] : 'check';
 			wp_register_script( $this->plugin_name . 'create-account', plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-create-account.js', array( 'jquery', 'swal' ), $this->version );
 			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version );
@@ -411,13 +411,13 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			// https://wordpress.org/support/topic/the-plugin-slows-down-the-website-because-of-slow-api/#post-14339311
 			if ( mailchimp_is_configured() && ( $list_id = mailchimp_get_list_id() ) ) {
 				$transient  = "mailchimp-woocommerce-gdpr-fields.{$list_id}";
-				$GDPRfields = get_site_transient( $transient );
+				$GDPRfields = \Mailchimp_Woocommerce_DB_Helpers::get_transient( $transient );
 				if ( ! is_array( $GDPRfields ) ) {
 					try {
 						$GDPRfields = mailchimp_get_api()->getGDPRFields( $list_id );
-						set_site_transient( $transient, $GDPRfields, 600 );
+						\Mailchimp_Woocommerce_DB_Helpers::set_transient( $transient, $GDPRfields, 600 );
 					} catch ( Exception $e ) {
-						set_site_transient( $transient, array(), 60 );
+						\Mailchimp_Woocommerce_DB_Helpers::set_transient( $transient, array(), 60 );
 					}
 				}
 			}
@@ -517,12 +517,12 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$version = mailchimp_environment_variables()->version;
 
 		// grab the saved version or default to 1.0.3 since that's when we first did this.
-		$saved_version = get_site_option( 'mailchimp_woocommerce_version', '1.0.3' );
+		$saved_version = \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp_woocommerce_version', '1.0.3' );
 
 		// if the saved version is less than the current version
 		if ( version_compare( $version, $saved_version ) > 0 ) {
 			// resave the site option so this only fires once.
-			update_site_option( 'mailchimp_woocommerce_version', $version );
+			\Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp_woocommerce_version', $version );
 
 			// get plugin options
 			$options = $this->getOptions();
@@ -530,14 +530,14 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			// set permission_cap in case there's none set.
 			if ( ! isset( $options['mailchimp_permission_cap'] ) || empty( $options['mailchimp_permission_cap'] ) ) {
 				$options['mailchimp_permission_cap'] = 'administrator';
-				update_option( $this->plugin_name, $options );
+				\Mailchimp_Woocommerce_DB_Helpers::update_option( $this->plugin_name, $options );
 			}
 
 			// resend marketing status to update latest changes
 			if ( ! empty( $options['admin_email'] ) ) {
 				try {
 					// send the post to the mailchimp server
-					$comm_opt = get_option( 'mailchimp-woocommerce-comm.opt', 0 );
+					$comm_opt = \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-comm.opt', 0 );
 					$this->mailchimp_set_communications_status_on_server( $comm_opt, $options['admin_email'] );
 				} catch ( Exception $e ) {
 					mailchimp_error( 'marketing_status_update', $e->getMessage() );
@@ -549,11 +549,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			//$this->fix_is_syncing_problem();
 		}
 
-		if ( ! get_option( $this->plugin_name . '_cart_table_add_index_update' ) ) {
+		if ( ! \Mailchimp_Woocommerce_DB_Helpers::get_option( $this->plugin_name . '_cart_table_add_index_update' ) ) {
 			$check_index_sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE table_schema='{$wpdb->dbname}' AND table_name='{$wpdb->prefix}mailchimp_carts' AND index_name='primary' and column_name='email';";
 			$index_exists    = $wpdb->get_var( $check_index_sql );
 			if ( $index_exists == '1' ) {
-				update_option( $this->plugin_name . '_cart_table_add_index_update', true );
+				\Mailchimp_Woocommerce_DB_Helpers::update_option( $this->plugin_name . '_cart_table_add_index_update', true );
 			} else {
 				// remove table duplicates
 				$delete_sql = "DELETE carts_1 FROM {$wpdb->prefix}mailchimp_carts carts_1 INNER JOIN {$wpdb->prefix}mailchimp_carts carts_2 WHERE carts_1.created_at < carts_2.created_at AND carts_1.email = carts_2.email;";
@@ -562,18 +562,18 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 					// only update the option if the query returned sucessfully
 					try {
 						if ( $wpdb->query( $sql ) !== false ) {
-							update_option( $this->plugin_name . '_cart_table_add_index_update', true );
+							\Mailchimp_Woocommerce_DB_Helpers::update_option( $this->plugin_name . '_cart_table_add_index_update', true );
 						}
 					} catch ( Exception $e ) {
-						update_option( $this->plugin_name . '_cart_table_add_index_update', true );
+						\Mailchimp_Woocommerce_DB_Helpers::update_option( $this->plugin_name . '_cart_table_add_index_update', true );
 					}
 				}
 			}
 		}
 
-		if ( ! get_option( $this->plugin_name . '_woo_currency_update' ) ) {
+		if ( ! \Mailchimp_Woocommerce_DB_Helpers::get_option( $this->plugin_name . '_woo_currency_update' ) ) {
 			if ( $this->mailchimp_update_woo_settings() ) {
-				update_option( $this->plugin_name . '_woo_currency_update', true );
+				\Mailchimp_Woocommerce_DB_Helpers::update_option( $this->plugin_name . '_woo_currency_update', true );
 			}
 		}
 
@@ -622,7 +622,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$version = mailchimp_environment_variables()->version;
 
 		// grab the saved version or default to 1.0.3 since that's when we first did this.
-		$saved_version = get_site_option( 'mailchimp_woocommerce_version', '1.0.3' );
+		$saved_version = \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp_woocommerce_version', '1.0.3' );
 
 		// if the saved version is less than the current version
 		if (version_compare( $version, $saved_version ) > 0) {
@@ -661,7 +661,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$options                                      = $this->getOptions();
 		$options['woocommerce_settings_save_general'] = true;
 		$options['store_currency_code']               = $code;
-		update_option( $this->plugin_name, $options );
+        $options['store_name']                        = get_option('blogname');
+		\Mailchimp_Woocommerce_DB_Helpers::update_option( $this->plugin_name, $options );
 		return $options;
 	}
 
@@ -669,19 +670,19 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
     {
 	    if ((bool) mailchimp_get_data('sync.syncing' )) {
 		    $toggle_mailchimp = false;
-            if (get_option( 'mailchimp-woocommerce-sync.orders.completed_at' )) {
+            if (\Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.orders.completed_at' )) {
 			    $toggle_mailchimp = true;
 		    } else {
-	            $sync_started_at = (int) get_option( 'mailchimp-woocommerce-sync.started_at' );
+	            $sync_started_at = (int) \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.started_at' );
 	            $seconds_in_days = 86400;
 	            $now = time();
 	            $difference = $sync_started_at > 0 ? ($now - $sync_started_at) : 0;
                 if ($difference >= $seconds_in_days && ($sync_started_at / $seconds_in_days >= 30)) {
 		            $toggle_mailchimp = true;
-	                update_option( 'mailchimp-woocommerce-sync.products.started_at', $sync_started_at);
-	                update_option( 'mailchimp-woocommerce-sync.products.completed_at', $sync_started_at+60);
-		            update_option( 'mailchimp-woocommerce-sync.orders.started_at', $sync_started_at);
-		            update_option( 'mailchimp-woocommerce-sync.orders.completed_at', $sync_started_at+60);
+	                \Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp-woocommerce-sync.products.started_at', $sync_started_at);
+	                \Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp-woocommerce-sync.products.completed_at', $sync_started_at+60);
+		            \Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp-woocommerce-sync.orders.started_at', $sync_started_at);
+		            \Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp-woocommerce-sync.orders.completed_at', $sync_started_at+60);
 	            }
             }
 		    if ($toggle_mailchimp) {
@@ -721,6 +722,27 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 	}
 
+    /**
+     * @param $old_value
+     * @param $new_value
+     * @return bool|void
+     *
+     */
+    public function mailchimp_update_wordpress_title($old_value, $new_value) {
+        if (mailchimp_is_configured()) {
+            $options = $this->getOptions();
+
+            $options['store_name'] = $new_value;
+            // sync the store with MC
+            try {
+                return $this->syncStore( $options );
+            } catch ( Exception $e ) {
+                mailchimp_log( 'store.sync@woo.update', 'Store cannot be synced', $e->getMessage() );
+                return false;
+            }
+        }
+    }
+
 	/**
 	 * We were considering auto subscribing people that had just updated the plugin for the first time
 	 * after releasing the marketing status block, but decided against that. The admin user must subscribe specifically.
@@ -731,7 +753,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$site_option = 'mailchimp_woocommerce_updated_marketing_status';
 
 		// if we've already done this, just return null.
-		if ( get_site_option( $site_option ) ) {
+		if ( \Mailchimp_Woocommerce_DB_Helpers::get_option( $site_option ) ) {
 			return null;
 		}
 
@@ -749,7 +771,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		// tell the site options that we've already subscribed this person to marketing through the
 		// plugin update process.
-		update_site_option( $site_option, true );
+		\Mailchimp_Woocommerce_DB_Helpers::update_option( $site_option, true );
 
 		try {
 			// send the post to the mailchimp server
@@ -769,7 +791,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	protected function handle_abandoned_cart_table() {
 		global $wpdb;
 
-		if ( get_site_option( 'mailchimp_woocommerce_db_mailchimp_carts' ) ) {
+		if ( \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp_woocommerce_db_mailchimp_carts' ) ) {
 			// need to tidy up the mailchimp_cart table and make sure we don't have anything older than 30 days old.
 			$date = gmdate( 'Y-m-d H:i:s', strtotime( date( 'Y-m-d' ) . '-30 days' ) );
 			$sql  = $wpdb->prepare( "DELETE FROM {$wpdb->prefix}mailchimp_carts WHERE created_at <= %s", $date );
@@ -790,7 +812,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				) $charset_collate;";
 
 			if ( ( $result = $wpdb->query( $sql ) ) > 0 ) {
-				update_site_option( 'mailchimp_woocommerce_db_mailchimp_carts', true );
+				\Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp_woocommerce_db_mailchimp_carts', true );
 			}
 		}
 	}
@@ -812,8 +834,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			$data['store_currency_code'] = (string) $input['store_currency_code'];
 		}
 
-		if ( get_site_transient( 'mailchimp_disconnecting_store' ) ) {
-			delete_site_transient( 'mailchimp_disconnecting_store' );
+		if ( \Mailchimp_Woocommerce_DB_Helpers::get_transient( 'mailchimp_disconnecting_store' ) ) {
+			\Mailchimp_Woocommerce_DB_Helpers::delete_transient( 'mailchimp_disconnecting_store' );
 			return array(
 				'active_tab'        => 'api_key',
 				'mailchimp_api_key' => null,
@@ -853,7 +875,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 $skip_api_validation = true;
 
 				if ( isset( $_POST['log_file'] ) && ! empty( $_POST['log_file'] ) ) {
-					set_site_transient( 'mailchimp-woocommerce-view-log-file', sanitize_text_field( $_POST['log_file'] ), 30 );
+					\Mailchimp_Woocommerce_DB_Helpers::set_transient( 'mailchimp-woocommerce-view-log-file', sanitize_text_field( $_POST['log_file'] ), 30 );
 				}
 
 				$data = array(
@@ -992,7 +1014,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 
 		if ( $response['response']['code'] == 201 ) {
-			set_site_transient( 'mailchimp-woocommerce-oauth-secret', $secret, 60 * 60 );
+			\Mailchimp_Woocommerce_DB_Helpers::set_transient( 'mailchimp-woocommerce-oauth-secret', $secret, 60 * 60 );
 			wp_send_json_success( $response );
 		} else {
 			wp_send_json_error( $response );
@@ -1036,7 +1058,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         $this->adminOnlyMiddleware();
         $args = array(
             'domain' => site_url(),
-            'secret' => get_site_transient( 'mailchimp-woocommerce-oauth-secret' ),
+            'secret' => \Mailchimp_Woocommerce_DB_Helpers::get_transient( 'mailchimp-woocommerce-oauth-secret' ),
             'token'  => sanitize_text_field( $_POST['token'] ),
         );
         $pload = array(
@@ -1055,19 +1077,19 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
         if ( $response['response']['code'] == 200 ) {
 
-            delete_option('mailchimp-woocommerce-account_name');
-            delete_option('mailchimp-woocommerce-cached-api-lists');
-            delete_option('mailchimp-woocommerce-validation.newsletter_settings');
-            delete_option('mailchimp-woocommerce-cached-api-ping-check');
-            delete_option('mailchimp-woocommerce-validation.api.ping');
+            \Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-account_name');
+            \Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-cached-api-lists');
+            \Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-validation.newsletter_settings');
+            \Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-cached-api-ping-check');
+            \Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-validation.api.ping');
 
-            delete_site_transient( 'mailchimp-woocommerce-oauth-secret' );
+            \Mailchimp_Woocommerce_DB_Helpers::delete_transient( 'mailchimp-woocommerce-oauth-secret' );
             // save api_key? If yes, we can skip api key validation for validatePostApiKey();
             $result = json_decode( $response['body'], true);
-            $options = get_option($this->plugin_name);
+            $options = \Mailchimp_Woocommerce_DB_Helpers::get_option($this->plugin_name);
             $options['mailchimp_api_key'] = $result['access_token'].'-'.$result['data_center'];
 
-            // update_option($this->plugin_name, $options); this used to return false!
+            // \Mailchimp_Woocommerce_DB_Helpers::update_option($this->plugin_name, $options); this used to return false!
             // go straight to the DB and update the options to bypass any filters.
             $wpdb->update(
                 $wpdb->options,
@@ -1215,7 +1237,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         if ($profile) {
       	    $logged_in  = !(empty($profile['last_login']) || is_null($profile['last_login']));
             if ($logged_in) {
-                delete_option('mc-woocommerce-waiting-for-login');
+                \Mailchimp_Woocommerce_DB_Helpers::delete_option('mc-woocommerce-waiting-for-login');
             }
             wp_send_json_success(array(
                 'success' => true,
@@ -1251,7 +1273,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 array('option_value' => maybe_serialize($options)),
                 array('option_name' => $this->plugin_name)
             );
-            update_option('mc-woocommerce-waiting-for-login', 'waiting');
+            \Mailchimp_Woocommerce_DB_Helpers::update_option('mc-woocommerce-waiting-for-login', 'waiting');
             Mailchimp_Woocommerce_Event::track('account:verify_email', new DateTime());
             wp_send_json_success( $response_body );
         } elseif ( $response['response']['code'] == 404 ) {
@@ -1367,9 +1389,14 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         $store_address_2    = get_option( 'woocommerce_store_address_2' );
         $store_raw_country  = get_option( 'woocommerce_default_country' );
         $split_country      = explode( ":", $store_raw_country );
+        $store_name         = get_option('blogname');
+        // fall back to the site url if the blog name isn't set.
+        if (empty($store_name)) {
+            $store_name = get_option('siteurl');
+        }
         return array(
             'admin_email' => get_option( 'admin_email' ),
-            'store_name' => get_option('blogname'),
+            'store_name' => $store_name,
             'store_city' => get_option( 'woocommerce_store_city' ),
             'store_state' => !empty($split_country) && isset( $split_country[1] ) ? $split_country[1] : '',
             'store_postal_code' => get_option( 'woocommerce_store_postcode' ),
@@ -1506,7 +1533,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			// start the sync automatically if the sync is false
 			if ( $store_created && ( (bool) $this->getData( 'sync.started_at', false ) === false ) ) {
 				// tell the next page view to start the sync with a transient since the data isn't available yet
-				set_site_transient( 'mailchimp_woocommerce_start_sync', microtime(), 300 );
+				\Mailchimp_Woocommerce_DB_Helpers::set_transient( 'mailchimp_woocommerce_start_sync', microtime(), 300 );
 			}
 
 			$data['active_tab'] = 'sync';
@@ -1574,7 +1601,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 if (mailchimp_get_option('api_ping_error')) {
                     $options = get_option($this->plugin_name);
                     $options['api_ping_error'] = null;
-                    update_option( $this->plugin_name, $options );
+                    \Mailchimp_Woocommerce_DB_Helpers::update_option( $this->plugin_name, $options );
                 }
 			}
 		}
@@ -1900,11 +1927,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
     protected function updateGDPRFields($list_id)
     {
         try {
-            if ( ! empty( $list_id ) && !get_site_transient("mailchimp-woocommerce-gdpr-fields.{$list_id}.last_saved")) {
+            if ( ! empty( $list_id ) && !\Mailchimp_Woocommerce_DB_Helpers::get_transient("mailchimp-woocommerce-gdpr-fields.{$list_id}.last_saved")) {
                 $transient  = "mailchimp-woocommerce-gdpr-fields.{$list_id}";
                 $GDPRfields = mailchimp_get_api()->getGDPRFields( $list_id );
-                set_site_transient( $transient, $GDPRfields );
-                set_site_transient("mailchimp-woocommerce-gdpr-fields.{$list_id}.last_saved", true, 120);
+                \Mailchimp_Woocommerce_DB_Helpers::set_transient( $transient, $GDPRfields );
+                \Mailchimp_Woocommerce_DB_Helpers::set_transient("mailchimp-woocommerce-gdpr-fields.{$list_id}.last_saved", true, 120);
                 mailchimp_log(
                     'admin',
                     'updated GDPR fields',
@@ -1914,7 +1941,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 );
             }
         } catch ( Exception $e ) {
-            set_site_transient( $transient, array(), 60 );
+            \Mailchimp_Woocommerce_DB_Helpers::set_transient( $transient, array(), 60 );
             mailchimp_error( 'admin', 'updating GDPR fields failed '.$e->getMessage() );
         }
     }
@@ -1986,7 +2013,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				// iterate thru stores, find correct store ID and save it to db
 				foreach ( $stores as $mc_store ) {
 					if ( $mc_store->getDomain() === $store->getDomain() && $store->getPlatform() == 'woocommerce' ) {
-						update_option( 'mailchimp-woocommerce-store_id', $mc_store->getId(), 'yes' );
+						\Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp-woocommerce-store_id', $mc_store->getId(), 'yes' );
 						// update the store with the previous listID
 						$store->setListId( $mc_store->getListId() );
 						$store->setId( $mc_store->getId() );
@@ -2054,7 +2081,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function startSync() {
 		// delete the transient so this only happens one time.
-		delete_site_transient( 'mailchimp_woocommerce_start_sync' );
+		\Mailchimp_Woocommerce_DB_Helpers::delete_transient( 'mailchimp_woocommerce_start_sync' );
 		$full_sync = new MailChimp_WooCommerce_Process_Full_Sync_Manager();
 		// make sure the storeeId saved on DB is the same on Mailchimp
 		try {
@@ -2211,7 +2238,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		$env      = mailchimp_environment_variables();
 		$audience = ! empty( mailchimp_get_list_id() ) ? 1 : 0;
-		$synced   = get_option( 'mailchimp-woocommerce-sync.completed_at' ) > 0 ? 1 : 0;
+		$synced   = \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.completed_at' ) > 0 ? 1 : 0;
 
 		$post_data = array(
 			'store_id'         => mailchimp_get_store_id(),
@@ -2336,6 +2363,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @return bool
 	 */
 	protected function adminOnlyMiddleware( $message = "You're not allowed to do this" ) {
+        if (defined( 'WP_CLI' ) && WP_CLI && class_exists('WP_CLI')) {
+            return true;
+        }
 		if ( ! current_user_can( mailchimp_get_allowed_capability() ) ) {
             $error = new \Exception();
             mailchimp_debug('admin', 'tracing admin json error', $error->getTrace());

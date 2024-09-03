@@ -1,3 +1,12 @@
+<?php if (time() < 1722470400 && WC()->countries->get_base_country() === 'US'): ?>
+    <?php
+    $contact_limits = [500, 1500, 2500, 5000, 10000, 15000, 20000, 25000, 30000, 40000, 50000, 75000, 100000];
+    $create_account_url = admin_url('admin.php?page=create-mailchimp-account');
+    $promo_active = true;
+    ?>
+    <?php include_once 'promo-banner.php'; ?>
+<?php endif; ?>
+
 <div class="mc-wc-header-content connect-account">
     <div class="mc-wc-header-content-wrapper">
         <div class="mc-wc-header-content-details">

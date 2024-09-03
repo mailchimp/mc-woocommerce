@@ -11,7 +11,7 @@ $handler = MailChimp_WooCommerce_Admin::connect();
 
 /** Grab all options for this particular tab we're viewing. */
 
-$options = get_option( $this->plugin_name, array() );
+$options = \Mailchimp_Woocommerce_DB_Helpers::get_option( $this->plugin_name, array() );
 
 /** Verify that the nonce is correct for the GET and POST variables. */
 
@@ -29,7 +29,7 @@ $is_mailchimp_post 	= isset( $_POST['mailchimp_woocommerce_settings_hidden'] ) &
 $is_confirmation 	= isset( $_GET['resync'] ) ? ( esc_attr( sanitize_key( $_GET['resync'] ) ) === '1' ) : false;
 /**  If we have a transient set to start the sync on this page view, initiate it now that the values have been saved. */
 
-if ($mc_configured && ! $is_confirmation && (bool) get_site_transient( 'mailchimp_woocommerce_start_sync' ) ) {
+if ($mc_configured && ! $is_confirmation && (bool) \Mailchimp_Woocommerce_DB_Helpers::get_transient( 'mailchimp_woocommerce_start_sync' ) ) {
 	$is_confirmation 		= true;
 }
 
@@ -95,6 +95,7 @@ if ((MC_WC_CONFIRMATION === $active_breadcrumb && ! $is_confirmation)) {
 		$active_breadcrumb = MC_WC_REVIEW_SYNC_SETTINGS;
 	}
 }
+$promo_active = false;
 ?>
 
 <div class="mc-wc-settings-wrapper woocommerce <?php echo $active_breadcrumb; ?>">
@@ -204,5 +205,11 @@ if ((MC_WC_CONFIRMATION === $active_breadcrumb && ! $is_confirmation)) {
 			<?php endif;?>
 		</div>
 		<?php endif; ?>
+
+        <?php if($promo_active): ?>
+        <div class="promo-disclaimer">
+            *24X ROI Standard Plan: Based on all e-commerce revenue attributable to Standard plan users’ Mailchimp campaigns from April 2023 to April 2024.
+        </div>
+        <?php endif; ?>
 	</form>
 </div>

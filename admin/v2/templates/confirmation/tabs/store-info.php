@@ -20,6 +20,13 @@
     }
     $checkbox_default_settings = ( array_key_exists( 'mailchimp_checkbox_defaults', $options ) && ! is_null( $options['mailchimp_checkbox_defaults'] ) ) ? $options['mailchimp_checkbox_defaults'] : 'check';
 	$is_has_wc_checkout_block = has_block( 'woocommerce/checkout', (int) $checkout_page_id );
+
+    $default_opt_in_settings = array(
+        [ 'label' => esc_html__( 'Checked by default', 'mailchimp-for-woocommerce' ), 'value' => 'check' ],
+        [ 'label' => esc_html__( 'Unchecked by default', 'mailchimp-for-woocommerce' ), 'value' => 'uncheck' ],
+    );
+
+    $opt_in_settings = apply_filters('mailchimp_checkout_opt_in_options', $default_opt_in_settings);;
 ?>
 <input type="hidden" name="mailchimp_active_settings_tab" value="<?php echo MC_WC_STORE_INFO_TAB; ?>"/>
 <input type="hidden" value="<?php echo ( esc_html( isset( $current_currency_data ) ? $current_currency . ' | ' . $current_currency_data['name'] : $current_currency ) ); ?>" disabled/>
@@ -109,24 +116,14 @@
             <div class="mc-wc-permission-wrapper">
                 <label><?php esc_html_e('Checkbox display options', 'mailchimp-for-woocommerce' ); ?></label>
                 <div class="mc-wc-permission-choose">
+                    <?php foreach ($opt_in_settings as $attribute) : ?>
                     <div class="mc-wc-radio">
                         <label class="mc-wc-radio-label">
-                            <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_checkbox_defaults]" value="check"<?php echo 'check' === $checkbox_default_settings ? ' checked="checked" ' : ''; ?>>
-                            <?php esc_html_e( 'Visible, checked by default', 'mailchimp-for-woocommerce' ); ?>
+                            <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_checkbox_defaults]" value="<?php echo esc_attr($attribute['value']); ?>"<?php echo $attribute['value'] === $checkbox_default_settings ? ' checked="checked" ' : ''; ?>>
+                            <?php echo $attribute['label']; ?>
                         </label>
                     </div>
-                    <div class="mc-wc-radio">
-                        <label class="mc-wc-radio-label">
-                            <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_checkbox_defaults]" value="uncheck"<?php echo 'uncheck' === $checkbox_default_settings ? ' checked="checked" ' : ''; ?>>
-                            <?php esc_html_e( 'Visible, unchecked by default', 'mailchimp-for-woocommerce' ); ?>
-                        </label>
-                    </div>
-                    <div class="mc-wc-radio">
-                        <label class="mc-wc-radio-label">
-                            <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_checkbox_defaults]" value="hide"<?php echo 'hide' === $checkbox_default_settings ? ' checked="checked" ' : ''; ?>>
-                            <?php esc_html_e( 'Hidden, unchecked by default', 'mailchimp-for-woocommerce' ); ?>
-                        </label>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
 

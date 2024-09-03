@@ -1,4 +1,28 @@
 == Changelog ==
+= 4.3 =
+* Adds Order HPOS function for pagination
+* Now starts syncing customers via HPOS
+* Changes sync order: customers > products > coupons > orders — and make sync actions more atomic
+* Use direct WP DB SELECT / INSERT for sync options to circumvent object caching
+* Removes the bundled version of Action Scheduler
+* Removes checkout opt-in if customers already subscribed
+* Fixes cli sync issue where historical Orders Not Syncing Correctly
+* Fixes Account Connection Issue Related to Object Caching
+* Fixes HTTP worker warning
+* Change to replace option, transient functions with direct DB queries
+* Fallback function to check for options autoloader
+= 4.2.1 =
+* Bug fix for product variations
+* Front end optimizations
+= 4.2 =
+* Remote diagnostics setting maintenance 
+* Adds support for syncing Wordpress user/customer account language to Mailchimp contact 
+* Fix for WooCommerce coupons date_expires not syncing to Mailchimp 
+* Design update for disconnect modal 
+* Fix for issue with setting logging preference to none
+* Enhances syncing orders by starting from newest to oldest 
+* Adds WooCommerce plugin dependency feature 
+* Bump braces from 3.0.2 to 3.0.3 in /blocks
 = 4.1 =
 * Introduced a new filter for coupons (details available in the Wiki).
 * Restored the "Resync Now" button.

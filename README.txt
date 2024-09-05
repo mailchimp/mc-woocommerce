@@ -78,16 +78,5 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
 == Changelog ==
-= 4.3 =
-* Adds Order HPOS function for pagination
-* Now starts syncing customers via HPOS
-* Changes sync order: customers > products > coupons > orders — and make sync actions more atomic
-* Use direct WP DB SELECT / INSERT for sync options to circumvent object caching
-* Removes the bundled version of Action Scheduler
-* Removes checkout opt-in if customers already subscribed
-* Fixes cli sync issue where historical Orders Not Syncing Correctly
-* Fixes Account Connection Issue Related to Object Caching
-* Fixes HTTP worker warning
-* Change to replace option, transient functions with direct DB queries
-* Fallback function to check for options autoloader
+= 4.4 =
 

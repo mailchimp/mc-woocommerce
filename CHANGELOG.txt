@@ -1,4 +1,5 @@
 == Changelog ==
+= 4.4 =
 = 4.3 =
 * Adds Order HPOS function for pagination
 * Now starts syncing customers via HPOS

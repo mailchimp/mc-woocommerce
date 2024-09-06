@@ -661,6 +661,10 @@ function mailchimp_check_woocommerce_plugin_status()
     if (in_array('woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option('active_plugins')))) {
         return true;
     }
+    // let's detect the function and see if woocommerce is enabled for network
+    if (function_exists('is_plugin_active') && is_plugin_active('woocommerce/woocommerce.php')) {
+        return true;
+    }
     if (!is_multisite()) return false;
     $plugins = \Mailchimp_Woocommerce_DB_Helpers::get_option( 'active_sitewide_plugins');
     return isset($plugins['woocommerce/woocommerce.php']);

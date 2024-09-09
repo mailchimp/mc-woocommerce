@@ -2,12 +2,12 @@
 Contributors: ryanhungate, Mailchimp
 Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
-Requires at least: 4.9
+Requires at least: 6.2
 Tested up to: 6.6
-Stable tag: 4.3
+Stable tag: 4.4
 Requires PHP: 7.4
-WC requires at least: 4.2
-WC tested up to: 9.2
+WC requires at least: 8.2
+WC tested up to: 9.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your Mailchimp audience to track sales, create targeted emails, send abandoned cart emails, and more.
@@ -79,4 +79,8 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 
 == Changelog ==
 = 4.4 =
-
+* Bumps axios from 1.6.7 to 1.7.7 in /blocks
+* Bumps webpack from 5.88.2 to 5.94.0 in /blocks
+* Fix for Multisite users unable to activate or view plugin 
+* Removes unused admin/partial files
+* Updates to copy on account creation page 

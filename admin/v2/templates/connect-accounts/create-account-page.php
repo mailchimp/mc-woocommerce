@@ -247,12 +247,18 @@ $store_defaults = MailChimp_WooCommerce_Admin::instance()->loadWooStoreData();
                     ),
                     'br' => array(),
                 );
+
+                /**
+                 * To follow anti-spam laws, your address will appear in the footer of every email you send with Mailchimp.
+                 *
+                 */
                 ?>
                 <?php
                 echo sprintf(
                 /* translators: %s - Mailchimp legal pages */
                     wp_kses(
-                        __( 'To follow <a href=%1$s target=_blank>anti-spam laws</a>, your address will appear in the footer of every email you send with Mailchimp. Don’t have an official business address? Learn about <a href=%2$s target=_blank>alternatives</a>. By creating an account, you agree to our <a href=%2$s target=_blank>Terms</a> and have read and acknowledge the <a href=%2$s target=_blank>Global Privacy Statement</a>.', 'mailchimp-for-woocommerce' ),
+
+                        __( 'To follow <a href=%1$s target=_blank>anti-spam laws</a>, your address will appear in the footer of every email you send with Mailchimp. Don’t have an official business address? Learn about <a href=%2$s target=_blank>alternatives</a>.', 'mailchimp-for-woocommerce' ),
                         array(
                             'a' => array(
                                 'href'   => array(),
@@ -261,12 +267,28 @@ $store_defaults = MailChimp_WooCommerce_Admin::instance()->loadWooStoreData();
                         )
                     ),
                     esc_url( 'https://mailchimp.com/help/anti-spam-requirements-for-email/' ),
-                    esc_url( 'https://mailchimp.com/help/alternative-physical-address-ideas/' ),
-                    esc_url( 'https://mailchimp.com/legal/terms/' ),
-                    esc_url( 'https://www.intuit.com/privacy/statement/' )
+                    esc_url( 'https://mailchimp.com/help/alternative-physical-address-ideas/' )
                 );
                 ?>
 						</p>
+                        <p>
+                            <?php
+                            echo sprintf(
+                            /* translators: %s - Mailchimp legal pages */
+                                wp_kses(
+                                    __( 'By creating an account, you agree to our <a href=%1$s target=_blank>Terms</a> and have read and acknowledge the <a href=%2$s target=_blank>Global Privacy Statement</a>.', 'mailchimp-for-woocommerce' ),
+                                    array(
+                                        'a' => array(
+                                            'href'   => array(),
+                                            'target' => '_blank',
+                                        ),
+                                    )
+                                ),
+                                esc_url( 'https://mailchimp.com/legal/terms/' ),
+                                esc_url( 'https://www.intuit.com/privacy/statement/' )
+                            );
+                            ?>
+                        </p>
 					</div>
 					<div class="box">
 						<button type="submit" id="mc-woocommerce-create-activate-account" class="button button-primary create-account-save">

@@ -257,14 +257,15 @@ $store_defaults = MailChimp_WooCommerce_Admin::instance()->loadWooStoreData();
                 echo sprintf(
                 /* translators: %s - Mailchimp legal pages */
                     wp_kses(
-                    __( 'To follow <a href=%1$s target=_blank>anti-spam laws</a>, your address will appear in the footer of every email you send with Mailchimp. Don’t have an official business address? Learn about <a href=%2$s target=_blank>alternatives</a>.', 'mailchimp-for-woocommerce' ),
-                    array(
-                        'a' => array(
-                            'href'   => array(),
-                            'target' => '_blank',
-                        ),
-                    )
-                ),
+
+                        __( 'To follow <a href=%1$s target=_blank>anti-spam laws</a>, your address will appear in the footer of every email you send with Mailchimp. Don’t have an official business address? Learn about <a href=%2$s target=_blank>alternatives</a>.', 'mailchimp-for-woocommerce' ),
+                        array(
+                            'a' => array(
+                                'href'   => array(),
+                                'target' => '_blank',
+                            ),
+                        )
+                    ),
                     esc_url( 'https://mailchimp.com/help/anti-spam-requirements-for-email/' ),
                     esc_url( 'https://mailchimp.com/help/alternative-physical-address-ideas/' )
                 );

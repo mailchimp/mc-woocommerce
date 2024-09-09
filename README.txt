@@ -2,11 +2,11 @@
 Contributors: ryanhungate, Mailchimp
 Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
-Requires at least: 4.9
+Requires at least: 6.2
 Tested up to: 6.6
 Stable tag: 4.4
 Requires PHP: 7.4
-WC requires at least: 4.2
+WC requires at least: 8.2
 WC tested up to: 9.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html

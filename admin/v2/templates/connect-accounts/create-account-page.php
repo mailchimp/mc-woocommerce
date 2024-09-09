@@ -250,17 +250,20 @@ $store_defaults = MailChimp_WooCommerce_Admin::instance()->loadWooStoreData();
                 ?>
                 <?php
                 echo sprintf(
-                /* translators: %s - Mailchimp legal pages */                                wp_kses(
-                    __( 'By clicking the "Get Started!" button, you are creating a Mailchimp account, and you agree to Mailchimp\'s <a href=%1$s target=_blank>Terms of Use</a> and <a href=%2$s target=_blank>Privacy Policy</a>.', 'mailchimp-for-woocommerce' ),
-                    array(
-                        'a' => array(
-                            'href'   => array(),
-                            'target' => '_blank',
-                        ),
-                    )
-                ),
-                    esc_url( 'https://mailchimp.com/legal/terms' ),
-                    esc_url( 'https://mailchimp.com/legal/privacy' )
+                /* translators: %s - Mailchimp legal pages */
+                    wp_kses(
+                        __( 'To follow <a href=%1$s target=_blank>anti-spam laws</a>, your address will appear in the footer of every email you send with Mailchimp. Don’t have an official business address? Learn about <a href=%2$s target=_blank>alternatives</a>. By creating an account, you agree to our <a href=%2$s target=_blank>Terms</a> and have read and acknowledge the <a href=%2$s target=_blank>Global Privacy Statement</a>.', 'mailchimp-for-woocommerce' ),
+                        array(
+                            'a' => array(
+                                'href'   => array(),
+                                'target' => '_blank',
+                            ),
+                        )
+                    ),
+                    esc_url( 'https://mailchimp.com/help/anti-spam-requirements-for-email/' ),
+                    esc_url( 'https://mailchimp.com/help/alternative-physical-address-ideas/' ),
+                    esc_url( 'https://mailchimp.com/legal/terms/' ),
+                    esc_url( 'https://www.intuit.com/privacy/statement/' )
                 );
                 ?>
 						</p>

@@ -249,7 +249,7 @@ class Mailchimp_Woocommerce_DB_Helpers
 
         if ( ! isset( $alloptions[ $transient_option ] ) ) {
             $transient_timeout = '_transient_timeout_' . $transient;
-            wp_prime_option_caches( array( $transient_option, $transient_timeout ) );
+
             $timeout = self::get_option( $transient_timeout );
             if ( false !== $timeout && $timeout < time() ) {
                 self::delete_option( $transient_option );

@@ -78,7 +78,7 @@ $store_defaults = MailChimp_WooCommerce_Admin::instance()->loadWooStoreData();
 						<div class="subtitle"><?php echo esc_html__( 'Profile details', 'mailchimp-for-woocommerce' ) ?></div>
 						<div class="mc-woocommerce-form-wrapper">
 							<fieldset>
-								<input id="org" name="org" type="hidden" value="<?php echo esc_html( get_bloginfo( 'name' ) ); ?>">
+								<input id="org" name="org" type="hidden" value="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
 								<div class="form-row">
 									<div class="box box-half">
 										<label for="first_name">
@@ -101,7 +101,7 @@ $store_defaults = MailChimp_WooCommerce_Admin::instance()->loadWooStoreData();
 										<label for="business_name">
 											<span><?php esc_html_e( 'Business name', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input required type="text" id="business_name" name="business_name" value="<?php echo esc_html( $store_defaults['store_name'] ); ?>"/>
+										<input required type="text" id="business_name" name="business_name" value="<?php echo esc_attr( $store_defaults['store_name'] ); ?>"/>
 										<p id="mc-woocommerce-business_name-error" class="error-field"></p>
 
 										<p><?php esc_html_e( 'You can always change this later in your account settings.', 'mailchimp-for-woocommerce' ); ?></p>
@@ -111,7 +111,7 @@ $store_defaults = MailChimp_WooCommerce_Admin::instance()->loadWooStoreData();
 											<span> <?php esc_html_e( 'Phone number', 'mailchimp-for-woocommerce' ); ?></span>
 											<span>Optional</span>
 										</label>
-										<input type="text" id="phone_number" name="phone_number" value="<?php echo esc_html( isset($user->billing_phone) ? $user->billing_phone : '' ); ?>"/>
+										<input type="text" id="phone_number" name="phone_number" value="<?php echo esc_attr( isset($user->billing_phone) ? $user->billing_phone : '' ); ?>"/>
 									</div>
 								</div>
 
@@ -120,7 +120,7 @@ $store_defaults = MailChimp_WooCommerce_Admin::instance()->loadWooStoreData();
 										<label for="email">
 											<span> <?php esc_html_e( 'Email', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input required type="email" id="email" name="email" value="<?php echo esc_html( isset($user->user_email) ? $user->user_email : '' ) ?>"/>
+										<input required type="email" id="email" name="email" value="<?php echo esc_attr( isset($user->user_email) ? $user->user_email : '' ) ?>"/>
 										<p id="mc-woocommerce-email-error" class="error-field"></p>
 
 									</div>
@@ -148,7 +148,7 @@ $store_defaults = MailChimp_WooCommerce_Admin::instance()->loadWooStoreData();
 										<label for="address">
 											<span> <?php esc_html_e( 'Address line 1 (Street address or post office box)', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input required type="text" id="address" name="address" value="<?php echo esc_html( $store_defaults['store_street']  ); ?>"/>
+										<input required type="text" id="address" name="address" value="<?php echo esc_attr( $store_defaults['store_street']  ); ?>"/>
 										<p id="mc-woocommerce-address-error" class="error-field"></p>
 									</div>
 								</div>
@@ -158,7 +158,7 @@ $store_defaults = MailChimp_WooCommerce_Admin::instance()->loadWooStoreData();
 										<label for="address2">
 											<span> <?php esc_html_e( 'Address line 2', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input type="text" id="address2" name="address2" value="<?php echo esc_html( $store_defaults['store_street_2']  ); ?>"/>
+										<input type="text" id="address2" name="address2" value="<?php echo esc_attr( $store_defaults['store_street_2']  ); ?>"/>
 									</div>
 								</div>
 
@@ -167,14 +167,14 @@ $store_defaults = MailChimp_WooCommerce_Admin::instance()->loadWooStoreData();
 										<label for="city">
 											<span> <?php esc_html_e( 'City', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input required type="text" id="city" name="city" value="<?php echo esc_html( $store_defaults['store_city']  ); ?>"/>
+										<input required type="text" id="city" name="city" value="<?php echo esc_attr( $store_defaults['store_city']  ); ?>"/>
 										<p id="mc-woocommerce-city-error" class="error-field"></p>
 									</div>
 									<div class="box box-half">
 										<label for="state">
 											<span> <?php esc_html_e( 'State/Province/Region', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input required type="text" id="state" name="state" value="<?php echo esc_html( $store_defaults['store_state'] ); ?>"/>
+										<input required type="text" id="state" name="state" value="<?php echo esc_attr( $store_defaults['store_state'] ); ?>"/>
 										<p id="mc-woocommerce-state-error" class="error-field"></p>
 									</div>
 								</div>
@@ -184,7 +184,7 @@ $store_defaults = MailChimp_WooCommerce_Admin::instance()->loadWooStoreData();
 										<label for="zip">
 											<span> <?php esc_html_e( 'Zip/Postal code', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input required type="text" id="zip" name="zip" value="<?php echo esc_html( $store_defaults['store_postal_code'] ); ?>"/>
+										<input required type="text" id="zip" name="zip" value="<?php echo esc_attr( $store_defaults['store_postal_code'] ); ?>"/>
 										<p id="mc-woocommerce-zip-error" class="error-field"></p>
 									</div>
 									<div class="box box-half">
@@ -247,23 +247,48 @@ $store_defaults = MailChimp_WooCommerce_Admin::instance()->loadWooStoreData();
                     ),
                     'br' => array(),
                 );
+
+                /**
+                 * To follow anti-spam laws, your address will appear in the footer of every email you send with Mailchimp.
+                 *
+                 */
                 ?>
                 <?php
                 echo sprintf(
-                /* translators: %s - Mailchimp legal pages */                                wp_kses(
-                    __( 'By clicking the "Get Started!" button, you are creating a Mailchimp account, and you agree to Mailchimp\'s <a href=%1$s target=_blank>Terms of Use</a> and <a href=%2$s target=_blank>Privacy Policy</a>.', 'mailchimp-for-woocommerce' ),
-                    array(
-                        'a' => array(
-                            'href'   => array(),
-                            'target' => '_blank',
-                        ),
-                    )
-                ),
-                    esc_url( 'https://mailchimp.com/legal/terms' ),
-                    esc_url( 'https://mailchimp.com/legal/privacy' )
+                /* translators: %s - Mailchimp legal pages */
+                    wp_kses(
+
+                        __( 'To follow <a href=%1$s target=_blank>anti-spam laws</a>, your address will appear in the footer of every email you send with Mailchimp. Don’t have an official business address? Learn about <a href=%2$s target=_blank>alternatives</a>.', 'mailchimp-for-woocommerce' ),
+                        array(
+                            'a' => array(
+                                'href'   => array(),
+                                'target' => '_blank',
+                            ),
+                        )
+                    ),
+                    esc_url( 'https://mailchimp.com/help/anti-spam-requirements-for-email/' ),
+                    esc_url( 'https://mailchimp.com/help/alternative-physical-address-ideas/' )
                 );
                 ?>
 						</p>
+                        <p>
+                            <?php
+                            echo sprintf(
+                            /* translators: %s - Mailchimp legal pages */
+                                wp_kses(
+                                    __( 'By creating an account, you agree to our <a href=%1$s target=_blank>Terms</a> and have read and acknowledge the <a href=%2$s target=_blank>Global Privacy Statement</a>.', 'mailchimp-for-woocommerce' ),
+                                    array(
+                                        'a' => array(
+                                            'href'   => array(),
+                                            'target' => '_blank',
+                                        ),
+                                    )
+                                ),
+                                esc_url( 'https://mailchimp.com/legal/terms/' ),
+                                esc_url( 'https://www.intuit.com/privacy/statement/' )
+                            );
+                            ?>
+                        </p>
 					</div>
 					<div class="box">
 						<button type="submit" id="mc-woocommerce-create-activate-account" class="button button-primary create-account-save">

@@ -2,12 +2,12 @@
 Contributors: ryanhungate, Mailchimp
 Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
-Requires at least: 4.9
+Requires at least: 6.2
 Tested up to: 6.6
-Stable tag: 4.3
+Stable tag: 4.4
 Requires PHP: 7.4
-WC requires at least: 4.2
-WC tested up to: 9.2
+WC requires at least: 8.2
+WC tested up to: 9.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your Mailchimp audience to track sales, create targeted emails, send abandoned cart emails, and more.
@@ -78,16 +78,9 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
 == Changelog ==
-= 4.3 =
-* Adds Order HPOS function for pagination
-* Now starts syncing customers via HPOS
-* Changes sync order: customers > products > coupons > orders — and make sync actions more atomic
-* Use direct WP DB SELECT / INSERT for sync options to circumvent object caching
-* Removes the bundled version of Action Scheduler
-* Removes checkout opt-in if customers already subscribed
-* Fixes cli sync issue where historical Orders Not Syncing Correctly
-* Fixes Account Connection Issue Related to Object Caching
-* Fixes HTTP worker warning
-* Change to replace option, transient functions with direct DB queries
-* Fallback function to check for options autoloader
-
+= 4.4 =
+* Bumps axios from 1.6.7 to 1.7.7 in /blocks
+* Bumps webpack from 5.88.2 to 5.94.0 in /blocks
+* Fix for Multisite users unable to activate or view plugin 
+* Removes unused admin/partial files
+* Updates to copy on account creation page 

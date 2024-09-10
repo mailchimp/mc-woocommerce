@@ -104,7 +104,7 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production', // staging or production
-        'version' => '4.3.1',
+        'version' => '4.4',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => function_exists('WC') ? WC()->version : null,
@@ -659,6 +659,10 @@ function mailchimp_check_woocommerce_plugin_status()
     }
     // it the plugin is active, we're good.
     if (in_array('woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option('active_plugins')))) {
+        return true;
+    }
+    // let's detect the function and see if woocommerce is enabled for network
+    if (function_exists('is_plugin_active') && is_plugin_active('woocommerce/woocommerce.php')) {
         return true;
     }
     if (!is_multisite()) return false;

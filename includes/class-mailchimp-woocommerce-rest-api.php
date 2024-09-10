@@ -177,7 +177,7 @@ class MailChimp_WooCommerce_Rest_Api
         $promo_rules_count = mailchimp_get_coupons_count();
         $product_count = mailchimp_get_product_count();
         $order_count = mailchimp_get_order_count();
-        $customer_count = mailchimp_get_customer_count();
+        $customer_count = mailchimp_get_customer_lookup_count();
 
 //        $mailchimp_total_promo_rules = $complete['coupons'] ? $promo_rules_count - mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_SingleCoupon') : 0;
 //        $mailchimp_total_products = $complete['products'] ? $product_count - mailchimp_get_remaining_jobs_count('MailChimp_WooCommerce_Single_Product') : 0;

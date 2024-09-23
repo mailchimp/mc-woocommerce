@@ -2210,7 +2210,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$response_body = $job->toggle( $opt );
 
 		// if success, set internal option to check for opt and display on sync page
-		if ( $response_body && $response_body->success == true ) {
+		if ( $response_body && isset($response_body->success) && $response_body->success == true ) {
 			$this->setData( 'tower.opt', $opt );
 			wp_send_json_success( __( 'Saved', 'mailchimp-for-woocommerce' ) );
 		} else {

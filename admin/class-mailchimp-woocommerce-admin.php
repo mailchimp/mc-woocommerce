@@ -217,7 +217,13 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			58
 		);
 
-		// Add the WooCommerce navigation items if the feauture exists.
+        // check to see if the woocommerce version is >= 9.3, and skip the menu item call
+        // because this generates warnings on every page view.
+        if (defined('WC_VERSION') && version_compare( WC_VERSION, '9.3', ">=" ) ) {
+            return;
+        }
+
+		// Skip the WooCommerce navigation items if the feature doesn't exist.
 		if ( ! class_exists( '\Automattic\WooCommerce\Admin\Features\Navigation\Menu' ) ) {
 			return;
 		}
@@ -250,6 +256,12 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			$this->plugin_name,
 			array( $this, 'display_plugin_setup_page') // Callback function to display content
 		);
+
+        // check to see if the woocommerce version is >= 9.3, and skip the menu item call
+        // because this generates warnings on every page view.
+        if (defined('WC_VERSION') && version_compare( WC_VERSION, '9.3', ">=" ) ) {
+            return;
+        }
 
 		// Add the WooCommerce navigation items if the feauture exists.
 		if ( ! class_exists( '\Automattic\WooCommerce\Admin\Features\Navigation\Menu' ) ) {

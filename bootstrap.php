@@ -104,7 +104,7 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production', // staging or production
-        'version' => '4.4',
+        'version' => '4.4.1',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => function_exists('WC') ? WC()->version : null,
@@ -876,28 +876,14 @@ function mailchimp_get_order_count() {
 //    return $total;
 }
 
-function mailchimp_get_customer_count() {
-    return mailchimp_get_customer_lookup_count();
-    //    global $wpdb;
-    //    $query = "SELECT COUNT(DISTINCT meta_value) FROM {$wpdb->postmeta} WHERE meta_key = '_billing_email'";
-    //    $emails = $wpdb->get_var($query);
-    //    $users_query = new WP_User_Query(
-    //        array(
-    //            'fields' => array( 'ID' ),
-    //            'role'   => 'customer',
-    //        )
-    //    );
-    //    return $users_query->get_total() + (int) $emails;
-}
-
 /**
  * @return int
  */
 function mailchimp_get_customer_lookup_count() {
     global $wpdb;
-    $query = "SELECT COUNT(*)
-                FROM {$wpdb->prefix}wc_customer_lookup
-                GROUP BY email;";
+    $query = "SELECT COUNT(DISTINCT email) as distinct_count
+                FROM {$wpdb->prefix}wc_customer_lookup";
+
     return $wpdb->get_var($query);
 }
 

@@ -26,7 +26,7 @@ if ( ! isset( $options ) ) {
 $newsletter_settings_error = $this->getData( 'errors.mailchimp_list', false );
 
 $checkout_page_id = get_option('woocommerce_checkout_page_id');
-$mailchimp_customer_count = mailchimp_get_customer_count();
+$mailchimp_customer_count = mailchimp_get_customer_lookup_count();
 //$initial_sync_subscribe = ( array_key_exists( 'mailchimp_auto_subscribe', $options ) && ! is_null( $options['mailchimp_auto_subscribe'] ) ) ? (string) $options['mailchimp_auto_subscribe'] : '1';
 //$ongoing_sync_subscribe = ( array_key_exists( 'mailchimp_ongoing_sync_status', $options ) && ! is_null( $options['mailchimp_ongoing_sync_status'] ) ) ? (string) $options['mailchimp_ongoing_sync_status'] : '1';
 $initial_sync_subscribe = '1';

@@ -153,6 +153,10 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
                 $api->updateMemberTags(mailchimp_get_list_id(), $email, true);
 
                 mailchimp_tell_system_about_user_submit($email, $status_meta);
+
+                // update the customer record
+                $api->updateCustomer($store_id, $customer);
+
                 mailchimp_log('member.sync', "Updated Member {$email}", array(
                     'status' => $subscriber['status'],
                     'language' => $language,
@@ -171,7 +175,10 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
             $compliance_state = mailchimp_string_contains($e->getMessage(), 'compliance state');
 
             if ($compliance_state) {
-                return $this->handleComplianceState($email, $merge_fields);
+                $compliance_state_response = $this->handleComplianceState($email, $merge_fields);
+                // update the customer record
+                $api->updateCustomer($store_id, $customer);
+                return $compliance_state_response;
             }
 
             if ($e->getCode() == 404) {
@@ -186,6 +193,9 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
                     $api->updateMemberTags(mailchimp_get_list_id(), $email, true);
 
                     mailchimp_tell_system_about_user_submit($email, $status_meta);
+
+                    // update the customer record
+                    $api->updateCustomer($store_id, $customer);
 
                     if ($status_meta['created']) {
                         mailchimp_log('member.sync', "Subscribed Member {$email}", array('status_if_new' => $status_if_new, 'has_doi' => $uses_doi, 'merge_fields' => $merge_fields));

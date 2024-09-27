@@ -1176,7 +1176,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 			if ( ! $this->validateStoreSubmission( $customer ) ) {
 				return false;
 			}
-			$data     = $this->patch( "ecommerce/stores/$store_id/customers/{$customer->getId()}", $customer->toArray() );
+			$data     = $this->put( "ecommerce/stores/$store_id/customers/{$customer->getId()}", $customer->toArray() );
 			$customer = new MailChimp_WooCommerce_Customer();
 			return $customer->fromArray( $data );
 		} catch ( Exception $e ) {

@@ -205,7 +205,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	public function add_plugin_admin_menu() {
 
 		// Add woocommerce menu subitem
-        $mailchimp_icon = 'data:image/svg+xml;base64,'.$this->mailchimp_svg();
+    $mailchimp_icon = 'data:image/svg+xml;base64,'.$this->mailchimp_svg();
 
 		add_menu_page(
 			__( 'Mailchimp for WooCommerce', 'mailchimp-for-woocommerce' ),
@@ -216,7 +216,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			$mailchimp_icon,
 			58
 		);
-    }
+  }
+
 
 	/**
 	 * Include the new Navigation Bar the Admin page.

@@ -216,55 +216,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			$mailchimp_icon,
 			58
 		);
-
-		// Add the WooCommerce navigation items if the feauture exists.
-		if ( ! class_exists( '\Automattic\WooCommerce\Admin\Features\Navigation\Menu' ) ) {
-			return;
-		}
-
-		Menu::add_plugin_item(
-			array(
-				'id'         => 'mailchimp-for-woocommerce',
-				'title'      => __( 'Mailchimp', 'mailchimp-for-woocommerce' ),
-				'capability' => mailchimp_get_allowed_capability(),
-				'url'        => $this->plugin_name,
-			)
-		);
-	}
-
-	/**
-	 * Register the administration menu for this plugin into the WordPress Dashboard menu.
-	 *
-	 * @since    1.0.0
-	 */
-	public function add_plugin_admin_menu_2() {
-
-        $cap = mailchimp_get_allowed_capability();
-
-		// Add woocommerce menu subitem
-		add_submenu_page(
-			'woocommerce',               // Parent Slug
-			__( 'Mailchimp for WooCommerce', 'mailchimp-for-woocommerce' ),
-			__( 'Mailchimp', 'mailchimp-for-woocommerce' ),
-            $cap,
-			$this->plugin_name,
-			array( $this, 'display_plugin_setup_page') // Callback function to display content
-		);
-
-		// Add the WooCommerce navigation items if the feauture exists.
-		if ( ! class_exists( '\Automattic\WooCommerce\Admin\Features\Navigation\Menu' ) ) {
-			return;
-		}
-
-		Menu::add_plugin_item(
-			array(
-				'id'         => 'mailchimp-for-woocommerce',
-				'title'      => __( 'Mailchimp', 'mailchimp-for-woocommerce' ),
-				'capability' => $cap,
-				'url'        => $this->plugin_name,
-			)
-		);
-	}
+    }
 
 	/**
 	 * Include the new Navigation Bar the Admin page.

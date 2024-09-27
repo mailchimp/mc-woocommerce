@@ -318,7 +318,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 		mailchimp_debug( 'api.update_member', "Updating {$email}", $data );
 
 		try {
-			return $this->patch( "lists/$list_id/members/$hash?skip_merge_validation=true", $data );
+			return $this->put( "lists/$list_id/members/$hash?skip_merge_validation=true", $data );
 		} catch ( Exception $e ) {
 
 			// If mailchimp says is already a member lets send the update by PUT
@@ -1180,6 +1180,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 			$customer = new MailChimp_WooCommerce_Customer();
 			return $customer->fromArray( $data );
 		} catch ( Exception $e ) {
+            mailchimp_log('api', "error updating customer {$customer->getId()} - {$e->getMessage()}");
 			if ( ! $silent ) {
 				throw $e;
 			}

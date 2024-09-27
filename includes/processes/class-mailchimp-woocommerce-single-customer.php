@@ -50,7 +50,7 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
 
         $customer = new MailChimp_WooCommerce_Customer();
 
-        if ($user && is_null($wordpress_user_id)) {
+        if ($user && $wordpress_user_id) {
             $data = array(
                 'id' => $this->customer_data->user_id,
                 'email_address' => $this->customer_data->email,
@@ -59,7 +59,7 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
             );
         } else {
             $data = array(
-                'id' => null,
+                'id' => $this->customer_data->id,
                 'email_address' => $this->customer_data->email,
                 'first_name' => $this->customer_data->first_name ?? '',
                 'last_name' => $this->customer_data->last_name ?? ''
@@ -85,7 +85,14 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
             $language = get_locale();
         }
 
+        $customer->setOptInStatus(false);
         $customer->fromArray($data);
+
+        // set the address from the customer lookup table
+        $customer->getAddress()->setCity($this->customer_data->city ?? '');
+        $customer->getAddress()->setCountry($this->customer_data->country ?? '');
+        $customer->getAddress()->setProvince($this->customer_data->state ?? '');
+        $customer->getAddress()->setPostalCode($this->customer_data->postcode ?? '');
 
         // Configure merge tags
         $fn = trim($data['first_name']);
@@ -104,7 +111,6 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
             mailchimp_error("custom.merge_fields", "The filter for mailchimp_sync_user_mergetags needs to return an array, using the default setup instead.");
             $merge_fields = $merge_fields_system;
         }
-
 
         // see if this store has the auto subscribe setting enabled on initial sync
         $plugin_options = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce');
@@ -155,13 +161,15 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
                 mailchimp_tell_system_about_user_submit($email, $status_meta);
 
                 // update the customer record
-                $api->updateCustomer($store_id, $customer);
+                $updated_customer = $api->updateCustomer($store_id, $customer);
 
                 mailchimp_log('member.sync', "Updated Member {$email}", array(
                     'status' => $subscriber['status'],
                     'language' => $language,
                     'merge_fields' => $merge_fields,
                     'gdpr_fields' => [],
+                    'customer_id' => $customer->getId(),
+                    'updated_customer' => (bool) $updated_customer,
                 ));
 
                 return false;
@@ -176,6 +184,7 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
 
             if ($compliance_state) {
                 $compliance_state_response = $this->handleComplianceState($email, $merge_fields);
+                // update the customer record
                 // update the customer record
                 $api->updateCustomer($store_id, $customer);
                 return $compliance_state_response;
@@ -195,12 +204,12 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
                     mailchimp_tell_system_about_user_submit($email, $status_meta);
 
                     // update the customer record
-                    $api->updateCustomer($store_id, $customer);
+                    $updated_customer = $api->updateCustomer($store_id, $customer);
 
                     if ($status_meta['created']) {
-                        mailchimp_log('member.sync', "Subscribed Member {$email}", array('status_if_new' => $status_if_new, 'has_doi' => $uses_doi, 'merge_fields' => $merge_fields));
+                        mailchimp_log('member.sync', "Subscribed Member {$email}", array('updated_customer' => $updated_customer, 'status_if_new' => $status_if_new, 'has_doi' => $uses_doi, 'merge_fields' => $merge_fields));
                     } else {
-                        mailchimp_log('member.sync', "{$email} is Pending Double OptIn", array('status_if_new' => $status_if_new, 'has_doi' => $uses_doi, 'status_meta' => $status_meta));
+                        mailchimp_log('member.sync', "{$email} is Pending Double OptIn", array('updated_customer' => $updated_customer, 'status_if_new' => $status_if_new, 'has_doi' => $uses_doi, 'status_meta' => $status_meta));
                     }
                 } catch (Exception $e) {
                     mailchimp_log('member.sync', $e->getMessage());

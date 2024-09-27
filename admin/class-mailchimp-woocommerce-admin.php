@@ -1854,7 +1854,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 									// Orders
                                     jQuery('.sync-orders .sync-number-finished').html(response.orders_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0}));
 									// Contacts
-									jQuery('.sync-contacts .sync-number-finished span').html(response.customers_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0}));
+									jQuery('.sync-contacts .sync-number-finished').html(response.customers_in_mailchimp.toLocaleString(undefined, {maximumFractionDigits: 0}));
 
 									// only call status again if sync is running.
 									setTimeout(function() {

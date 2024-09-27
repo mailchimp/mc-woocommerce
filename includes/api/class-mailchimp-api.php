@@ -1945,6 +1945,10 @@ class MailChimp_WooCommerce_MailChimpApi {
 			return false;
 		}
 
+        if (!$customer->getId()) {
+            return false;
+        }
+
 		return true;
 	}
 

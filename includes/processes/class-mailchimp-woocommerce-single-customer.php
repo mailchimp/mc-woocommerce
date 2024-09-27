@@ -59,7 +59,7 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
             );
         } else {
             $data = array(
-                'id' => $this->customer_data->id,
+                'id' => null,
                 'email_address' => $this->customer_data->email,
                 'first_name' => $this->customer_data->first_name ?? '',
                 'last_name' => $this->customer_data->last_name ?? ''

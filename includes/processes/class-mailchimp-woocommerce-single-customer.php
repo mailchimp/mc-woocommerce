@@ -153,7 +153,10 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
                 }
 
                 // ok let's update this member
-                $api->update($list_id, $email, $subscriber['status'], $merge_fields, null, $language);
+                $result = $api->update($list_id, $email, $subscriber['status'], $merge_fields, null, $language);
+
+                // make sure we set the proper customer status before submitting
+                $customer->setOptInStatus(in_array($result['status'], array('subscribed', 'pending')));
 
                 // update the member tags but fail silently just in case.
                 $api->updateMemberTags(mailchimp_get_list_id(), $email, true);
@@ -176,7 +179,7 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
             }
 
         } catch (MailChimp_WooCommerce_RateLimitError $e) {
-            sleep(3);
+            sleep(1);
             mailchimp_error('member.sync.error', mailchimp_error_trace($e, "RateLimited :: user #{$this->id}"));
             $this->retry();
         } catch (Exception $e) {
@@ -184,7 +187,8 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
 
             if ($compliance_state) {
                 $compliance_state_response = $this->handleComplianceState($email, $merge_fields);
-                // update the customer record
+                // make sure we set the proper customer status before submitting
+                $customer->setOptInStatus(in_array($compliance_state_response['status'], array('subscribed', 'pending')));
                 // update the customer record
                 $api->updateCustomer($store_id, $customer);
                 return $compliance_state_response;
@@ -196,12 +200,15 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
                     $uses_doi = isset($status_meta['requires_double_optin']) && $status_meta['requires_double_optin'];
                     $status_if_new = $uses_doi && $should_auto_subscribe ? 'pending' : $status_meta['created'];
 
-                    $api->subscribe($list_id, $email, $status_if_new, $merge_fields, null, $language);
+                    $result = $api->subscribe($list_id, $email, $status_if_new, $merge_fields, null, $language);
 
                     // update the member tags but fail silently just in case.
                     $api->updateMemberTags(mailchimp_get_list_id(), $email, true);
 
                     mailchimp_tell_system_about_user_submit($email, $status_meta);
+
+                    // make sure we set the proper customer status before submitting
+                    $customer->setOptInStatus(in_array($result['status'], array('subscribed', 'pending')));
 
                     // update the customer record
                     $updated_customer = $api->updateCustomer($store_id, $customer);

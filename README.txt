@@ -79,3 +79,9 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 
 == Changelog ==
 = 4.4.1 =
+* Bump serve-static and express in /blocks for improved performance
+* Resolved issue with Mailchimp sync getting stuck at 200 contacts
+* Fixed deprecated warning for Menu::add_plugin_item in Mailchimp for WooCommerce 
+* Corrected customer count function to ensure accurate reporting
+* Fixed inaccuracies in overview stats display
+* Enhanced Remote Diagnostics error handling 

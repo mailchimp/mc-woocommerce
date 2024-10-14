@@ -27,18 +27,18 @@
 			<div id="mc-woocommerce-create-account-step-1" class="mc-woocommerce-create-account-step mc-woocommerce-form-wrapper">
 				<fieldset>
 					<?php $user_id = get_current_user_id(); ?>
-					<input id="org" name="org" type="hidden" value="<?php echo esc_html( get_bloginfo( 'name' ) ); ?>">
+					<input id="org" name="org" type="hidden" value="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
 					<div class="box">
 						<label for="first_name">
 							<span> <?php esc_html_e( 'First name', 'mailchimp-for-woocommerce' ); ?></span>
 						</label>
-						<input required type="text" id="first_name" name="first_name" value="<?php echo esc_html( get_user_meta( $user_id, 'first_name', true ) ); ?>"/>
+						<input required type="text" id="first_name" name="first_name" value="<?php echo esc_attr( get_user_meta( $user_id, 'first_name', true ) ); ?>"/>
 					</div>
 					<div class="box">
 						<label for="last_name">
 							<span> <?php esc_html_e( 'Last name', 'mailchimp-for-woocommerce' ); ?></span>
 						</label>
-						<input required type="text" id="last_name" name="last_name" value="<?php echo esc_html( get_user_meta( $user_id, 'last_name', true ) ); ?>"/>
+						<input required type="text" id="last_name" name="last_name" value="<?php echo esc_attr( get_user_meta( $user_id, 'last_name', true ) ); ?>"/>
 					</div>
 					<div class="box">
 						<label for="email">

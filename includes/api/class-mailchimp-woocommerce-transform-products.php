@@ -77,8 +77,6 @@ class MailChimp_WooCommerce_Transform_Products {
 
 		$variants = $variant_posts ? array_merge( array( $woo ), $variant_posts ) : array( $woo );
 
-		$is_variant = count( $variants ) > 1;
-
 		$product = new MailChimp_WooCommerce_Product();
 
 		if ( class_exists( 'SitePress' ) && function_exists( 'wpml_switch_language_action' ) ) {
@@ -94,7 +92,11 @@ class MailChimp_WooCommerce_Transform_Products {
 		$product->setHandle( urldecode($woo->get_slug() ) );
 		$product->setImageUrl( $this->getProductImage( $woo ) );
 		$product->setDescription( $woo->get_description() );
-		$product->setPublishedAtForeign( mailchimp_date_utc( $woo->get_date_created() ) );
+        if ($woo->get_date_created()) {
+            $product->setPublishedAtForeign( mailchimp_date_utc( $woo->get_date_created() ) );
+        } else {
+            mailchimp_debug('product.transform', 'failed to get created date', ['product' => $woo]);
+        }
 		$product->setTitle( $woo->get_title() );
 		$product->setUrl( urldecode( $woo->get_permalink() ) );
 

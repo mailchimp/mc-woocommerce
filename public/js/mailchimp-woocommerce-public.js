@@ -4,7 +4,7 @@ var mailchimp,
     mailchimp_username_email,
     mailchimp_registration_email,
     mailchimp_submitted_email = false,
-    mailchimpReady = function (a) { /in/.test(document.readyState) ? setTimeout("mailchimpReady(" + a + ")", 9) : a(); };
+    mailchimpReady = function (a) { /in/.test(document.readyState) ? setTimeout(()=>{mailchimpReady(a)}, 9) : a(); };
 
 function mailchimpGetCurrentUserByHash(a) {
     try {

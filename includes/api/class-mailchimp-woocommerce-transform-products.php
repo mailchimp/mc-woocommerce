@@ -84,7 +84,10 @@ class MailChimp_WooCommerce_Transform_Products {
 		if ( class_exists( 'SitePress' ) && function_exists( 'wpml_switch_language_action' ) ) {
 			$get_language_args  = array( 'element_id' => $woo->get_id(), 'element_type' => 'product' );
 			$post_language_info = apply_filters( 'wpml_element_language_details', null, $get_language_args );
-			wpml_switch_language_action( $post_language_info->language_code );
+
+            if (!empty($post_language_info->language_code)) {
+                wpml_switch_language_action( $post_language_info->language_code );
+            }
 		}
 
 		$product->setId( $woo->get_id() );

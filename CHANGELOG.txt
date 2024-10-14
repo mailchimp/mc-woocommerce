@@ -1,4 +1,5 @@
 == Changelog ==
+= 4.5 =
 = 4.4.1 =
 * Bump serve-static and express in /blocks for improved performance
 * Resolved issue with Mailchimp sync getting stuck at 200 contacts

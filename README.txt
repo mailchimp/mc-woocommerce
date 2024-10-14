@@ -78,10 +78,4 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
 == Changelog ==
-= 4.4.1 =
-* Bump serve-static and express in /blocks for improved performance
-* Resolved issue with Mailchimp sync getting stuck at 200 contacts
-* Fixed deprecated warning for Menu::add_plugin_item in Mailchimp for WooCommerce 
-* Corrected customer count function to ensure accurate reporting
-* Fixed inaccuracies in overview stats display
-* Enhanced Remote Diagnostics error handling 
+= 4.5 =

@@ -324,7 +324,7 @@ class MailChimp_WooCommerce_Store {
 				'is_syncing'     => $this->isSyncing(),
 				'platform'       => $this->getPlatform(),
 				'list_id'        => $this->getListId(),
-				'name'           => $this->getName(),
+				'name'           => html_entity_decode($this->getName()),
 				'domain'         => $this->getDomain(),
 				'email_address'  => $this->getEmailAddress(),
 				'currency_code'  => $this->getCurrencyCode(),

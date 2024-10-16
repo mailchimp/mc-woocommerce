@@ -84,14 +84,14 @@ $store_defaults = MailChimp_WooCommerce_Admin::instance()->loadWooStoreData();
 										<label for="first_name">
 											<span> <?php esc_html_e( 'First name', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input required type="text" id="first_name" name="first_name" value="<?php echo esc_html( isset($user->first_name) ? $user->first_name : '' ); ?>"/>
+										<input required type="text" id="first_name" name="first_name" value="<?php echo esc_attr( isset($user->first_name) ? $user->first_name : '' ); ?>"/>
 										<p id="mc-woocommerce-first_name-error" class="error-field"></p>
 									</div>
 									<div class="box box-half">
 										<label for="last_name">
 											<span> <?php esc_html_e( 'Last name', 'mailchimp-for-woocommerce' ); ?></span>
 										</label>
-										<input required type="text" id="last_name" name="last_name" value="<?php echo esc_html( isset($user->last_name) ? $user->last_name : '' ); ?>"/>
+										<input required type="text" id="last_name" name="last_name" value="<?php echo esc_attr( isset($user->last_name) ? $user->last_name : '' ); ?>"/>
 										<p id="mc-woocommerce-last_name-error" class="error-field"></p>
 									</div>
 								</div>

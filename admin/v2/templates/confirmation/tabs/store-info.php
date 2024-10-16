@@ -109,7 +109,7 @@
         </div>
         <?php if ( ! $is_has_wc_checkout_block ): ?>
             <div class="mc-wc-input-wrapper">
-                <input class="mc-wc-input style-2" type="text" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_checkbox_action]" value="<?php echo isset( $options['mailchimp_checkbox_action'] ) ? esc_html( $options['mailchimp_checkbox_action'] ) : 'woocommerce_after_checkout_billing_form'; ?>" />
+                <input class="mc-wc-input style-2" type="text" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_checkbox_action]" value="<?php echo isset( $options['mailchimp_checkbox_action'] ) ? esc_attr( $options['mailchimp_checkbox_action'] ) : 'woocommerce_after_checkout_billing_form'; ?>" />
                 <p class="description"><?php esc_html_e( 'Enter a WooCommerce form action', 'mailchimp-for-woocommerce' ); ?></p>
             </div>
 

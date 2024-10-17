@@ -885,7 +885,8 @@ class MailChimp_WooCommerce_Rest_Api
         }
         list($key, $secret) = $parts;
         $table = $wpdb->prefix . 'woocommerce_api_keys';
-        $api_key = $wpdb->get_row( "SELECT * FROM {$table} WHERE consumer_key = '{$key}' AND consumer_secret = '{$secret}'" );
+        $sql = $wpdb->prepare("SELECT * FROM {$table} WHERE consumer_key = %s AND consumer_secret = %s", array($key, $secret));
+        $api_key = $wpdb->get_row( $sql );
         if (empty($api_key)) {
             wp_send_json_error(array('message' => 'unauthorized'), 403);
         }

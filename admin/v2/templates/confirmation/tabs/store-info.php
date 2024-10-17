@@ -29,7 +29,7 @@
     $opt_in_settings = apply_filters('mailchimp_checkout_opt_in_options', $default_opt_in_settings);;
 ?>
 <input type="hidden" name="mailchimp_active_settings_tab" value="<?php echo MC_WC_STORE_INFO_TAB; ?>"/>
-<input type="hidden" value="<?php echo ( esc_html( isset( $current_currency_data ) ? $current_currency . ' | ' . $current_currency_data['name'] : $current_currency ) ); ?>" disabled/>
+<input type="hidden" value="<?php echo ( esc_attr( isset( $current_currency_data ) ? $current_currency . ' | ' . $current_currency_data['name'] : $current_currency ) ); ?>" disabled/>
 	<input type="hidden" value="<?php echo esc_attr( mailchimp_get_timezone( true ) ); ?>" disabled/>
 <div class="mc-wc-tab-content-wrapper store-info">
     <div class="mc-wc-tab-content-box">
@@ -109,7 +109,7 @@
         </div>
         <?php if ( ! $is_has_wc_checkout_block ): ?>
             <div class="mc-wc-input-wrapper">
-                <input class="mc-wc-input style-2" type="text" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_checkbox_action]" value="<?php echo isset( $options['mailchimp_checkbox_action'] ) ? esc_html( $options['mailchimp_checkbox_action'] ) : 'woocommerce_after_checkout_billing_form'; ?>" />
+                <input class="mc-wc-input style-2" type="text" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_checkbox_action]" value="<?php echo isset( $options['mailchimp_checkbox_action'] ) ? esc_attr( $options['mailchimp_checkbox_action'] ) : 'woocommerce_after_checkout_billing_form'; ?>" />
                 <p class="description"><?php esc_html_e( 'Enter a WooCommerce form action', 'mailchimp-for-woocommerce' ); ?></p>
             </div>
 

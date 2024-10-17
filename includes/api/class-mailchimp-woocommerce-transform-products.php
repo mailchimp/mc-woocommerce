@@ -77,21 +77,26 @@ class MailChimp_WooCommerce_Transform_Products {
 
 		$variants = $variant_posts ? array_merge( array( $woo ), $variant_posts ) : array( $woo );
 
-		$is_variant = count( $variants ) > 1;
-
 		$product = new MailChimp_WooCommerce_Product();
 
 		if ( class_exists( 'SitePress' ) && function_exists( 'wpml_switch_language_action' ) ) {
 			$get_language_args  = array( 'element_id' => $woo->get_id(), 'element_type' => 'product' );
 			$post_language_info = apply_filters( 'wpml_element_language_details', null, $get_language_args );
-			wpml_switch_language_action( $post_language_info->language_code );
+
+            if (!empty($post_language_info->language_code)) {
+                wpml_switch_language_action( $post_language_info->language_code );
+            }
 		}
 
 		$product->setId( $woo->get_id() );
 		$product->setHandle( urldecode($woo->get_slug() ) );
 		$product->setImageUrl( $this->getProductImage( $woo ) );
 		$product->setDescription( $woo->get_description() );
-		$product->setPublishedAtForeign( mailchimp_date_utc( $woo->get_date_created() ) );
+        if ($woo->get_date_created()) {
+            $product->setPublishedAtForeign( mailchimp_date_utc( $woo->get_date_created() ) );
+        } else {
+            mailchimp_debug('product.transform', 'failed to get created date', ['product' => $woo]);
+        }
 		$product->setTitle( $woo->get_title() );
 		$product->setUrl( urldecode( $woo->get_permalink() ) );
 
@@ -287,7 +292,7 @@ class MailChimp_WooCommerce_Transform_Products {
 	 * @return null|string
 	 */
 	public function getProductImageKey() {
-		return \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp_product_image_key', 'medium' );
+		return mailchimp_get_option( 'mailchimp_product_image_key', 'medium' );
 	}
 
 	/**

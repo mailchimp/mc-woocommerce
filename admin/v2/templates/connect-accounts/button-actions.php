@@ -20,7 +20,7 @@ $create_account_url = admin_url('admin.php?page=create-mailchimp-account');
         <?php endif; ?>
 	</div>
 	
-	<input type="hidden" id="<?php echo esc_attr( $this->plugin_name ); ?>-mailchimp-api-key" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_api_key]" value="<?php echo isset( $options['mailchimp_api_key'] ) ? esc_html( $options['mailchimp_api_key'] ) : ''; ?>" required/>
+	<input type="hidden" id="<?php echo esc_attr( $this->plugin_name ); ?>-mailchimp-api-key" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_api_key]" value="<?php echo isset( $options['mailchimp_api_key'] ) ? esc_attr( $options['mailchimp_api_key'] ) : ''; ?>" required/>
     <?php if ($show_connection_messages) : ?>
 	<p id="mailchimp-oauth-waiting" class="oauth-description"><?php esc_html_e( 'Connecting. A new window will open with Mailchimp\'s OAuth service. Please log-in and we will take care of the rest.', 'mailchimp-for-woocommerce' ); ?></p>
 	<p id="mailchimp-oauth-error" class="oauth-description"><?php esc_html_e( 'Error, can\'t login.', 'mailchimp-for-woocommerce' ); ?></p>

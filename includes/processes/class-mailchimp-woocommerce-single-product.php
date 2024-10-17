@@ -135,9 +135,6 @@ class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
             if( !($product_post = MailChimp_WooCommerce_HPOS::get_product($this->id)) ){
                 return false;
             }
-            /*if (!($product_post = get_post($this->id))) {
-                return false;
-            }*/
 
             try {
                 // pull the product from Mailchimp first to see what method we need to call next.

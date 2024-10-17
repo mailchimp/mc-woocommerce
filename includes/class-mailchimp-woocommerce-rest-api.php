@@ -264,17 +264,22 @@ class MailChimp_WooCommerce_Rest_Api
             switch ($status) {
                 case 'transactional':
                     $count = mailchimp_get_api()->getTransactionalCount($list_id);
+                    $meta_value = '0';
                     break;
                 case 'subscribed':
                     $count = mailchimp_get_api()->getSubscribedCount($list_id);
+                    $meta_value = '1';
                     break;
                 case 'unsubscribed':
                     $count = mailchimp_get_api()->getUnsubscribedCount($list_id);
+                    $meta_value = '0';
                     break;
                 case 'pending':
                     $count = mailchimp_get_api()->getPendingCount($list_id);
+                    $meta_value = 'pending';
                     break;
                 default:
+                    $meta_value = null;
                     $count = 0;
             }
         } catch (\Exception $e) {
@@ -285,9 +290,18 @@ class MailChimp_WooCommerce_Rest_Api
             ));
         }
 
+        $args  = array(
+            'meta_key' => 'mailchimp_woocommerce_is_subscribed',
+            'meta_value' => $meta_value,
+            'meta_compare' => '=',
+        );
+
+        $users = new WP_User_Query( $args );
+
         return $this->mailchimp_rest_response(array(
             'success' => true,
-            'count' => $count
+            'mailchimp' => $count,
+            'platform' => $users->get_total(),
         ));
     }
 

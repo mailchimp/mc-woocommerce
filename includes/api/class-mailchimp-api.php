@@ -425,6 +425,21 @@ class MailChimp_WooCommerce_MailChimpApi {
 		return $this->get( "lists/{$list_id}/members?status=transactional&count=1" )['total_items'];
 	}
 
+    /**
+     * @param $list_id
+     *
+     * @return int|mixed
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_RateLimitError
+     * @throws MailChimp_WooCommerce_ServerError
+     */
+    public function getPendingCount( $list_id ) {
+        if ( empty( $list_id ) ) {
+            return 0;
+        }
+        return $this->get( "lists/{$list_id}/members?status=pending&count=1" )['total_items'];
+    }
+
 
 	/**
 	 * @param $list_id

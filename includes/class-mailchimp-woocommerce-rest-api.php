@@ -97,6 +97,11 @@ class MailChimp_WooCommerce_Rest_Api
             'permission_callback' => '__return_true',
         ));
 
+        register_rest_route(static::$namespace, "/tower/subscriber_stats", array(
+            'methods' => 'POST',
+            'callback' => array($this, 'get_local_count_by_status'),
+            'permission_callback' => '__return_true',
+        ));
     }
 
     /**
@@ -229,6 +234,60 @@ class MailChimp_WooCommerce_Rest_Api
             'has_started' => mailchimp_has_started_syncing(),
             'has_finished' => mailchimp_is_done_syncing(),
 	        'last_loop_at' => mailchimp_get_data('sync.last_loop_at'),
+        ));
+    }
+
+    public function get_local_count_by_status(WP_REST_Request $request)
+    {
+        $this->authorizeWooToken($request);
+
+        $list_id = mailchimp_get_list_id();
+        if (empty($list_id)) {
+            return $this->mailchimp_rest_response(array(
+                'success' => false,
+                'reason' => 'list id not configured'
+            ));
+        }
+
+        $params = $request->get_params();
+        $status = $params['status'] ?? 'subscribed';
+        $allowed = array('transactional', 'subscribed', 'unsubscribed', 'pending');
+
+        if (!in_array($status, $allowed, true)) {
+            return $this->mailchimp_rest_response(array(
+                'success' => false,
+                'reason' => 'invalid status option'
+            ));
+        }
+
+        try {
+            switch ($status) {
+                case 'transactional':
+                    $count = mailchimp_get_api()->getTransactionalCount($list_id);
+                    break;
+                case 'subscribed':
+                    $count = mailchimp_get_api()->getSubscribedCount($list_id);
+                    break;
+                case 'unsubscribed':
+                    $count = mailchimp_get_api()->getUnsubscribedCount($list_id);
+                    break;
+                case 'pending':
+                    $count = mailchimp_get_api()->getPendingCount($list_id);
+                    break;
+                default:
+                    $count = 0;
+            }
+        } catch (\Exception $e) {
+            return $this->mailchimp_rest_response(array(
+                'success' => false,
+                'count' => 0,
+                'error' => $e->getMessage(),
+            ));
+        }
+
+        return $this->mailchimp_rest_response(array(
+            'success' => true,
+            'count' => $count
         ));
     }
 
@@ -804,6 +863,30 @@ class MailChimp_WooCommerce_Rest_Api
         // if we don't have a token - or we don't have the saved comparison
         // or the token doesn't equal the saved token, throw an error.
         if (empty($token) || empty($saved) || ($token !== $saved && base64_decode($token) !== $saved)) {
+            wp_send_json_error(array('message' => 'unauthorized'), 403);
+        }
+        return true;
+    }
+
+    /**
+     * @param WP_REST_Request $request
+     * @return true
+     */
+    private function authorizeWooToken(WP_REST_Request $request)
+    {
+        global $wpdb;
+        // get the auth token from either a header, or the query string
+        $token = (string) $this->getAuthToken($request);
+        // get the token and pull out both the consumer key and consumer secret split by the :
+        $parts = str_getcsv($token, ':');
+        // if we don't have 2 items, that's invalid
+        if (count($parts) !== 2) {
+            wp_send_json_error(array('message' => 'unauthorized'), 403);
+        }
+        list($key, $secret) = $parts;
+        $table = $wpdb->prefix . 'woocommerce_api_keys';
+        $api_key = $wpdb->get_row( "SELECT * FROM {$table} WHERE consumer_key = '{$key}' AND consumer_secret = '{$secret}'" );
+        if (empty($api_key)) {
             wp_send_json_error(array('message' => 'unauthorized'), 403);
         }
         return true;

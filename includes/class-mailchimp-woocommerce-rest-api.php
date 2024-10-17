@@ -898,8 +898,9 @@ class MailChimp_WooCommerce_Rest_Api
             wp_send_json_error(array('message' => 'unauthorized'), 403);
         }
         list($key, $secret) = $parts;
+        $consumer_key = wc_api_hash(sanitize_text_field($key));
         $table = $wpdb->prefix . 'woocommerce_api_keys';
-        $sql = $wpdb->prepare("SELECT * FROM {$table} WHERE consumer_key = %s AND consumer_secret = %s", array($key, $secret));
+        $sql = $wpdb->prepare("SELECT * FROM {$table} WHERE consumer_key = %s AND consumer_secret = %s", array($consumer_key, $secret));
         $api_key = $wpdb->get_row( $sql );
         if (empty($api_key)) {
             wp_send_json_error(array('message' => 'unauthorized'), 403);

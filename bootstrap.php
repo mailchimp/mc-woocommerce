@@ -149,6 +149,9 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
         else {
             $inserted = $wpdb->insert($wpdb->prefix."mailchimp_jobs", $args);
             if (!$inserted) {
+                if ($wpdb->last_error) {
+                    mailchimp_debug('database error on mailchimp_jobs insert', $wpdb->last_error);
+                }
                 try {
                     if (mailchimp_string_contains($wpdb->last_error, 'Table')) {
                         mailchimp_debug('DB Issue: `mailchimp_job` table was not found!', 'Creating Tables');

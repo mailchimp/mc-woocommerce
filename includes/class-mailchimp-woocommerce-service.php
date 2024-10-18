@@ -1206,6 +1206,9 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             $job_row = $wpdb->get_row( $sql );
 
             if (is_null($job_row) || !is_object($job_row)) {
+                if ($wpdb->last_error) {
+                    mailchimp_debug('database error on mailchimp_jobs insert', $wpdb->last_error);
+                }
                 mailchimp_error('action_scheduler.process_job.fail','Job '.current_action().' not found at '.$wpdb->prefix.'_mailchimp_jobs database table :: obj_id '.$obj_id);
                 return false;
             }

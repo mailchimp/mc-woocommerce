@@ -1298,58 +1298,6 @@ function mailchimp_get_allowed_capability() {
 }
 
 /**
- * @param MailChimp_WooCommerce_Customer $customer
- * @param null $subscribed
- *
- * @throws MailChimp_WooCommerce_Error
- * @throws MailChimp_WooCommerce_RateLimitError
- * @throws MailChimp_WooCommerce_ServerError
- */
-function mailchimp_update_member_with_double_opt_in(MailChimp_WooCommerce_Customer $customer, $subscribed = null)
-{
-    if (!mailchimp_is_configured()) return;
-
-    $api = mailchimp_get_api();
-
-    // if the customer has a flag to double opt in - we need to push this data over to MailChimp as pending
-    // before the order is submitted.
-    if ($subscribed) {
-        if ($customer->requiresDoubleOptIn()) {
-            try {
-                $list_id = mailchimp_get_list_id();
-                $merge_fields = $customer->getMergeFields();
-                $email = $customer->getEmailAddress();
-
-                try {
-                    if (!$customer->getOptInStatus()) {
-                        $api->update($list_id, $email, 'pending', $merge_fields);
-                        mailchimp_tell_system_about_user_submit($email, mailchimp_get_subscriber_status_options('pending'));
-                        mailchimp_log('double_opt_in', "Updated {$email} Using Double Opt In - previous status was '{$customer->getOptInStatus()}'", $merge_fields);
-                    }
-                } catch (Exception $e) {
-                    // if the error code is 404 - need to subscribe them because it means they were not on the list.
-                    if ($e->getCode() == 404) {
-                        $api->subscribe($list_id, $email, 'pending', $merge_fields);
-                        mailchimp_tell_system_about_user_submit($email, mailchimp_get_subscriber_status_options(false));
-                        mailchimp_log('double_opt_in', "Subscribed {$email} Using Double Opt In", $merge_fields);
-                    } else {
-                        mailchimp_error('double_opt_in.update', $e->getMessage());
-                    }
-                }
-            } catch (Exception $e) {
-                mailchimp_error('double_opt_in.create', $e->getMessage());
-            }
-        } else {
-            // if we've set the wordpress user correctly on the customer
-            if (($wordpress_user = $customer->getWordpressUser())) {
-                $user_submit = new MailChimp_WooCommerce_User_Submit($wordpress_user->ID, '1', null);
-                $user_submit->handle();
-            }
-        }
-    }
-}
-
-/**
  * @throws MailChimp_WooCommerce_Error
  * @throws MailChimp_WooCommerce_RateLimitError
  * @throws MailChimp_WooCommerce_ServerError

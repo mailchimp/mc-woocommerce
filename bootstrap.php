@@ -1321,11 +1321,10 @@ function mailchimp_update_member_with_double_opt_in(MailChimp_WooCommerce_Custom
                 $email = $customer->getEmailAddress();
 
                 try {
-                    $member = $api->member($list_id, $email);
-                    if ($member['status'] === 'transactional') {
+                    if ($customer->getOptInStatus() === 'transactional' || $customer->getOptInStatus() === '0') {
                         $api->update($list_id, $email, 'pending', $merge_fields);
                         mailchimp_tell_system_about_user_submit($email, mailchimp_get_subscriber_status_options('pending'));
-                        mailchimp_log('double_opt_in', "Updated {$email} Using Double Opt In - previous status was '{$member['status']}'", $merge_fields);
+                        mailchimp_log('double_opt_in', "Updated {$email} Using Double Opt In - previous status was '{$customer->getOptInStatus()}'", $merge_fields);
                     }
                 } catch (Exception $e) {
                     // if the error code is 404 - need to subscribe them because it means they were not on the list.
@@ -1443,30 +1442,42 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
     if ($caller !== 'cart' || !mailchimp_get_transient($caller . ".member.{$hash}")) {
         $list_id = mailchimp_get_list_id();
         try {
-            // try to get the member to update if already synced
-            $member = mailchimp_get_api()->member($list_id, $user_email);
-            // update member with new data
-            // if the member's subscriber status was transactional - and if we're passing in either one of these options below,
-            // we can attach the new status to the member.
-            if ($member['status'] === 'transactional' && in_array($status_if_new, array('subscribed', 'pending'))) {
-                $member['status'] = $status_if_new;
-            }
-            if (($member['status'] === 'transactional' && in_array($status_if_new, array('subscribed', 'pending'))) || $member['status'] === 'subscribed' || $member['status'] === 'pending') {
-                if (!empty($gdpr_fields) && is_array($gdpr_fields)) {
-                    $gdpr_fields_to_save = [];
-                    foreach ($gdpr_fields as $id => $value) {
-                        $gdpr_field['marketing_permission_id'] = $id;
-                        $gdpr_field['enabled'] = (bool) $value;
-                        $gdpr_fields_to_save[] = $gdpr_field;
-                    }
+            if (!empty($gdpr_fields) && is_array($gdpr_fields)) {
+                $gdpr_fields_to_save = [];
+                foreach ($gdpr_fields as $id => $value) {
+                    $gdpr_field['marketing_permission_id'] = $id;
+                    $gdpr_field['enabled'] = (bool) $value;
+                    $gdpr_fields_to_save[] = $gdpr_field;
                 }
             }
+
             $merge_fields = $order ? apply_filters('mailchimp_get_ecommerce_merge_tags', array(), $order) : array();
+
             if (!is_array($merge_fields)) $merge_fields = array();
-            if ($update_status && in_array($member['status'], array('unsubscribed', 'cleaned'))) {
-                $member['status'] = $status_if_new;
+
+            if ($update_status) {
+                $result = mailchimp_get_api()->update($list_id, $user_email, $status_if_new, $merge_fields, null, $language, $gdpr_fields_to_save);
+            } else {
+                // TODO this part of code never firing
+                // try to get the member to update if already synced
+                $member = mailchimp_get_api()->member($list_id, $user_email);
+
+                if (!($member['status'] === 'transactional' && in_array($status_if_new, array('subscribed', 'pending')))
+                    && !in_array($member['status'], array('subscribed', 'pending'))
+                ) {
+                    $gdpr_fields_to_save = null;
+                }
+
+                // update member with new data
+                // if the member's subscriber status was transactional - and if we're passing in either one of these options below,
+                // we can attach the new status to the member.
+                if ($member['status'] === 'transactional' && in_array($status_if_new, array('subscribed', 'pending'))) {
+                    $member['status'] = $status_if_new;
+                }
+
+                $result = mailchimp_get_api()->update($list_id, $user_email, $member['status'], $merge_fields, null, $language, $gdpr_fields_to_save);
             }
-            $result = mailchimp_get_api()->update($list_id, $user_email, $member['status'], $merge_fields, null, $language, $gdpr_fields_to_save);
+
             // set transient to prevent too many calls to update language
             mailchimp_set_transient($caller . ".member.{$hash}", true, 3600);
             mailchimp_log($caller . '.member.updated', "Updated {$user_email} subscriber status to {$result['status']} and language to {$language}");

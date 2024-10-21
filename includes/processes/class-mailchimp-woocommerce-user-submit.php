@@ -195,7 +195,10 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 
 		// pull the transient key for this job.
 		$transient_id = mailchimp_get_transient_email_key($email);
-		$status_meta = mailchimp_get_subscriber_status_options($this->subscribed);
+
+        $subscribed = $this->subscribed === '' || $this->subscribed === '0' ? 'transactional' : $this->subscribed;
+
+		$status_meta = mailchimp_get_subscriber_status_options($subscribed);
 
 		try {
 
@@ -206,16 +209,13 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 				return false;
 			}
 
-			// see if we have a member.
-			$member_data = $api->member($list_id, $email);
+            $member_data = $api->update($list_id, $email, $status_meta['created'], $merge_fields, null, $language, $gdpr_fields);
 
-			// if we're updating a member and the email is different, we need to delete the old person
+            // if we're updating a member and the email is different, we need to delete the old person
 			if (is_array($this->updated_data) && isset($this->updated_data['user_email'])) {
 				if ($this->updated_data['user_email'] !== $email) {
 					// delete the old
 					$api->deleteMember($list_id, $this->updated_data['user_email']);
-					// subscribe the new
-					$api->subscribe($list_id, $email, $status_meta['created'], $merge_fields, null, $language, $gdpr_fields);
 
 					// update the member tags but fail silently just in case.
 					$api->updateMemberTags(mailchimp_get_list_id(), $email, true);

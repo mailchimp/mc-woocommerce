@@ -198,7 +198,7 @@ class MailChimp_WooCommerce_Public extends MailChimp_WooCommerce_Options {
             }
             if (empty($cached_gdpr_fields) && !empty($user) && $user->user_email) {
                 try {
-                    $member = mailchimp_get_api()->member(mailchimp_get_list_id(), $user->user_email);
+                    $member = $api->member(mailchimp_get_list_id(), $user->user_email);
                     $current_gdpr_fields = isset($member['marketing_permissions']) ?
                         $member['marketing_permissions'] : array();
                 } catch (Exception $e) {

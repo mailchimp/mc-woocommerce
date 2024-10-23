@@ -372,6 +372,132 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 		);
 	}
 
+    public function formatEcommerceStats()
+    {
+        $api = mailchimp_get_api();
+        $store_id = mailchimp_get_store_id();
+
+        try {
+            $promo_rules_count = mailchimp_get_coupons_count();
+            $product_count  = mailchimp_get_product_count();
+            $customer_count = mailchimp_get_customer_lookup_count();
+            $order_count    = mailchimp_get_order_count();
+        } catch ( Throwable $e ) {
+            $promo_rules_count = 0;
+            $product_count = 0;
+            $customer_count = 0;
+            $order_count    = 0;
+        }
+
+        try {
+            $promo_rules = $api->getPromoRules($store_id, 1, 1, 1);
+            $mailchimp_total_promo_rules = $promo_rules['total_items'];
+            if (isset($promo_rules_count['publish']) && $mailchimp_total_promo_rules > $promo_rules_count['publish']) $mailchimp_total_promo_rules = $promo_rules_count['publish'];
+        } catch (Exception $e) { $mailchimp_total_promo_rules = 0; }
+        try {
+            $mailchimp_total_products = $api->getProductCount($store_id);
+            if ($mailchimp_total_products > $product_count) $mailchimp_total_products = $product_count;
+        } catch (Exception $e) { $mailchimp_total_products = 0; }
+        try {
+            $mailchimp_total_orders = $api->getOrderCount($store_id);
+            if ($mailchimp_total_orders > $order_count) $mailchimp_total_orders = $order_count;
+        } catch (Exception $e) { $mailchimp_total_orders = 0; }
+
+        try {
+            $mailchimp_total_customers = $api->getCustomerCount($store_id);
+            if ($mailchimp_total_customers > $customer_count) $mailchimp_total_customers = $customer_count;
+        } catch (Exception $e) { $mailchimp_total_customers = 0; }
+
+        return array(
+            'platform' => array(
+                'products' => $product_count,
+                'customers' => $customer_count,
+                'orders' => $order_count,
+            ),
+            'mailchimp' => array(
+                'products' => $mailchimp_total_products,
+                'customers' => $mailchimp_total_customers,
+                'orders' => $mailchimp_total_orders,
+            ),
+            'store' => array(
+                'metrics' => array_values(
+                    array(
+                        'shopify_hooks'             => (object) array(
+                            'key'   => 'shopify_hooks',
+                            'value' => $this->hasWebhookInstalled(),
+                        ),
+                        'shop.products'             => (object) array(
+                            'key'   => 'shop.products',
+                            'value' => $product_count,
+                        ),
+                        'shop.customers'            => (object) array(
+                            'key'   => 'shop.customers',
+                            'value' => $customer_count,
+                        ),
+                        'shop.orders'               => (object) array(
+                            'key'   => 'shop.orders',
+                            'value' => $order_count,
+                        ),
+                        'mc.products'               => (object) array(
+                            'key'   => 'mc.products',
+                            'value' => $mailchimp_total_products,
+                        ),
+                        'mc.customers'                 => (object) array(
+                            'key'   => 'mc.customers',
+                            'value' => $mailchimp_total_customers,
+                        ),
+                        'mc.orders'                 => (object) array(
+                            'key'   => 'mc.orders',
+                            'value' => $mailchimp_total_orders,
+                        ),
+                        'mc.has_chimpstatic'        => (object) array(
+                            'key'   => 'mc.has_chimpstatic',
+                            'value' => true,
+                        ),
+                        'mc.is_syncing'             => (object) array(
+                            'key'   => 'mc.is_syncing',
+                            'value' => (bool) mailchimp_get_data('sync.syncing' ),
+                        ),
+                        // this is to identify the people using selective sync.
+                        'mc.has_selective_sync'     => (object) array(
+                            'key'   => 'mc.has_selective_sync',
+                            'value' => mailchimp_submit_subscribed_only(),
+                        ),
+                        'product_sync_started'      => (object) array(
+                            'key'   => 'product_sync_started',
+                            'value' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.products.started_at' ),
+                        ),
+                        'product_sync_completed'    => (object) array(
+                            'key'   => 'product_sync_completed',
+                            'value' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.products.completed_at' ),
+                        ),
+                        'customer_sync_started'     => (object) array(
+                            'key'   => 'customer_sync_started',
+                            'value' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.customers.started_at' ),
+                        ),
+                        'customer_sync_completed'   => (object) array(
+                            'key'   => 'customer_sync_completed',
+                            'value' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.customers.completed_at' ),
+                        ),
+                        'order_sync_started'        => (object) array(
+                            'key'   => 'order_sync_started',
+                            'value' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.orders.started_at' ),
+                        ),
+                        'order_sync_completed'      => (object) array(
+                            'key'   => 'order_sync_completed',
+                            'value' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.orders.completed_at' ),
+                        ),
+                        'last_loop_at'              => (object) array(
+                            'key'   => 'last_loop_at',
+                            'value' => mailchimp_get_data('sync.last_loop_at'),
+                        ),
+                    )
+                ),
+                'meta' => $this->getMeta(),
+            ),
+        );
+    }
+
 	/**
 	 * @return bool
 	 */

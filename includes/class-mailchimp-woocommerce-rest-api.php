@@ -707,47 +707,14 @@ class MailChimp_WooCommerce_Rest_Api
     public function get_tower_sync_stats(WP_REST_Request $request)
     {
         $this->authorize('tower.token', $request);
-
         // if the queue is running in the console - we need to say tell the response why it's not going to fire this way.
         if (!mailchimp_is_configured() || !($api = mailchimp_get_api())) {
             return $this->mailchimp_rest_response(array('success' => false, 'reason' => 'not configured'));
         }
-
         $store_id = mailchimp_get_store_id();
-        $product_count = mailchimp_get_product_count();
-        $order_count = mailchimp_get_order_count();
-
-        try {
-            $products = $api->products($store_id, 1, 1);
-            $mailchimp_total_products = $products['total_items'];
-            if ($mailchimp_total_products > $product_count) {
-                $mailchimp_total_products = $product_count;
-            }
-        } catch (Exception $e) { $mailchimp_total_products = 0; }
-        try {
-            $mailchimp_total_customers = $api->getCustomerCount($store_id);
-        } catch (Exception $e) { $mailchimp_total_customers = 0; }
-        try {
-            $orders = $api->orders($store_id, 1, 1);
-            $mailchimp_total_orders = $orders['total_items'];
-            if ($mailchimp_total_orders > $order_count) {
-                $mailchimp_total_orders = $order_count;
-            }
-        } catch (Exception $e) { $mailchimp_total_orders = 0; }
-
+        $tower = new MailChimp_WooCommerce_Tower($store_id);
         // but we need to do it just in case.
-        return $this->mailchimp_rest_response(array(
-            'platform' => array(
-                'products' => $product_count,
-                'customers' => $this->get_customer_count(),
-                'orders' => $order_count,
-            ),
-            'mailchimp' => array(
-                'products' => $mailchimp_total_products,
-                'customers' => $mailchimp_total_customers,
-                'orders' => $mailchimp_total_orders,
-            ),
-        ));
+        return $this->mailchimp_rest_response($tower->formatEcommerceStats());
     }
 
 	/**

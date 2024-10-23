@@ -26,6 +26,8 @@ $mailchimp_total_subscribers   = 0;
 $mailchimp_total_unsubscribed  = 0;
 $mailchimp_total_transactional = 0;
 
+$customer_count = mailchimp_get_customer_lookup_count();
+
 $last_updated_time = \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-resource-last-updated' );
 $sync_started_at   = \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.started_at' );
 
@@ -77,6 +79,7 @@ if ( $store ) {
     }
     try {
         $mailchimp_total_customers = $mailchimp_api->getCustomerCount($store_id);
+        if ($mailchimp_total_customers > $customer_count) $mailchimp_total_customers = $customer_count;
     } catch (Exception $e) {
 
     }

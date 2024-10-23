@@ -179,14 +179,14 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
       
         if (!empty($existing_actions)) {
             mailchimp_debug('action_scheduler.reschedule_job', get_class($job) . ($delay > 0 ? ' restarts in '.$delay. ' seconds' : ' re-queued' ) . $message . $attempts);
-        } 
-        else {
-            mailchimp_log('action_scheduler.queue_job', get_class($job) . ($delay > 0 ? ' starts in '.$delay. ' seconds' : ' queued' ) . $message . $attempts);
+        } else if (!empty($action)) {
+            mailchimp_log('action_scheduler.queue_job', get_class($job) . ($delay > 0 ? ' starts in '.$delay. ' seconds' : ' queued' ) . $message . $attempts." with id {$action}");
+        } else {
+            mailchimp_debug("action_scheduler.queue_job.fail", get_class($job). " :: no action id was saved while trying to schedule action!");
         }
     
         return $action;	
-    }
-    else {
+    } else {
         $job->set_attempts(0);
         mailchimp_log('action_scheduler.fail_job', get_class($job) . ' cancelled. Too many attempts' . $message . $attempts);
         return false;
@@ -886,6 +886,16 @@ function mailchimp_get_customer_lookup_count() {
     global $wpdb;
     $query = "SELECT COUNT(DISTINCT email) as distinct_count
                 FROM {$wpdb->prefix}wc_customer_lookup";
+
+    return $wpdb->get_var($query);
+}
+
+/**
+ * @return int
+ */
+function mailchimp_get_customer_lookup_count_all() {
+    global $wpdb;
+    $query = "SELECT COUNT(email) as distinct_count FROM {$wpdb->prefix}wc_customer_lookup";
 
     return $wpdb->get_var($query);
 }

@@ -66,7 +66,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
     {
         switch ($this->getResourceType()) {
             case 'customers':
-                $post_count = mailchimp_get_customer_lookup_count();
+                $post_count = mailchimp_get_customer_lookup_count_all();
                break;
            case 'coupons':
                 $post_count = mailchimp_get_coupons_count();
@@ -87,11 +87,20 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
         $page = $this->getCurrentPage();
 
         while ($page - 1 <= ceil((int)$post_count / $this->items_per_page)) {
-            $next = new static($page);
-            mailchimp_handle_or_queue($next);
-            $this->setResourcePagePointer(($page), $this->getResourceType());
+            $this->spawn($page);
             $page++;
         }
+    }
+
+    /**
+     * @param $page
+     * @return void
+     */
+    public function spawn($page)
+    {
+        $next = new static($page);
+        mailchimp_handle_or_queue($next);
+        $this->setResourcePagePointer(($page), $this->getResourceType());
     }
 
 	/**
@@ -176,9 +185,10 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
             return false;
         }
 
+        mailchimp_debug(get_called_class().'@handle', $this->getResourceType()." :: {$page->count}");
 
-        // if we've got a 0 count, that means we're done.
-        if ($page->count <= 0) {
+        // if we've got a 0 count or less than items per page, that means we're done.
+        if ($page->count < $this->items_per_page) {
 
             mailchimp_debug(get_called_class().'@handle', $this->getResourceType().' :: completing now!');
 

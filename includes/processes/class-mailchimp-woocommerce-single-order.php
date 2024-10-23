@@ -338,16 +338,15 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
             // Maybe sync subscriber to set correct member.language
             if (!$this->is_full_sync) {
-                mailchimp_member_data_update($email, $this->user_language, 'order', $status_if_new, $order, $this->gdpr_fields, !$this->is_full_sync);
+                mailchimp_member_data_update($email, $this->user_language, 'order', $status_if_new, $order, $this->gdpr_fields);
             }
 
             mailchimp_log('order_submit.success', $log);
 
-            if ($this->is_full_sync && $new_order) {
+            if ($new_order) {
                 // if the customer has a flag to double opt in - we need to push this data over to MailChimp as pending
-                //TODO: RYAN: this is the only place getOriginalSubscriberStatus() is called, but the iterate method uses another way.
-                // mailchimp_update_member_with_double_opt_in($order, ($should_auto_subscribe || $status));
-                mailchimp_update_member_with_double_opt_in($order->getCustomer(), ((isset($should_auto_subscribe) && $should_auto_subscribe) || $order->getCustomer()->getOriginalSubscriberStatus()));
+                $status_if_new = (isset($should_auto_subscribe) && $should_auto_subscribe) || $order->getCustomer()->getOriginalSubscriberStatus();
+                mailchimp_member_data_update($email, $this->user_language, 'order', $status_if_new, $order, $this->gdpr_fields);
             }
 
             return $api_response;

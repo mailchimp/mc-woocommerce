@@ -650,7 +650,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         if ( !is_admin() ) return;
 
         // only update this person if they were marked as subscribed before
-        $is_subscribed = get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true);
+        $is_subscribed = get_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true) ?? 'transactional';
         $gdpr_fields = get_user_meta($user_id, 'mailchimp_woocommerce_gdpr_fields', true);
 
 		// get user language

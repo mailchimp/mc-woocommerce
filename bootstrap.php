@@ -1301,59 +1301,6 @@ function mailchimp_get_allowed_capability() {
 }
 
 /**
- * @param MailChimp_WooCommerce_Customer $customer
- * @param null $subscribed
- *
- * @throws MailChimp_WooCommerce_Error
- * @throws MailChimp_WooCommerce_RateLimitError
- * @throws MailChimp_WooCommerce_ServerError
- */
-function mailchimp_update_member_with_double_opt_in(MailChimp_WooCommerce_Customer $customer, $subscribed = null)
-{
-    if (!mailchimp_is_configured()) return;
-
-    $api = mailchimp_get_api();
-
-    // if the customer has a flag to double opt in - we need to push this data over to MailChimp as pending
-    // before the order is submitted.
-    if ($subscribed) {
-        if ($customer->requiresDoubleOptIn()) {
-            try {
-                $list_id = mailchimp_get_list_id();
-                $merge_fields = $customer->getMergeFields();
-                $email = $customer->getEmailAddress();
-
-                try {
-                    $member = $api->member($list_id, $email);
-                    if ($member['status'] === 'transactional') {
-                        $api->update($list_id, $email, 'pending', $merge_fields);
-                        mailchimp_tell_system_about_user_submit($email, mailchimp_get_subscriber_status_options('pending'));
-                        mailchimp_log('double_opt_in', "Updated {$email} Using Double Opt In - previous status was '{$member['status']}'", $merge_fields);
-                    }
-                } catch (Exception $e) {
-                    // if the error code is 404 - need to subscribe them because it means they were not on the list.
-                    if ($e->getCode() == 404) {
-                        $api->subscribe($list_id, $email, 'pending', $merge_fields);
-                        mailchimp_tell_system_about_user_submit($email, mailchimp_get_subscriber_status_options(false));
-                        mailchimp_log('double_opt_in', "Subscribed {$email} Using Double Opt In", $merge_fields);
-                    } else {
-                        mailchimp_error('double_opt_in.update', $e->getMessage());
-                    }
-                }
-            } catch (Exception $e) {
-                mailchimp_error('double_opt_in.create', $e->getMessage());
-            }
-        } else {
-            // if we've set the wordpress user correctly on the customer
-            if (($wordpress_user = $customer->getWordpressUser())) {
-                $user_submit = new MailChimp_WooCommerce_User_Submit($wordpress_user->ID, '1', null);
-                $user_submit->handle();
-            }
-        }
-    }
-}
-
-/**
  * @throws MailChimp_WooCommerce_Error
  * @throws MailChimp_WooCommerce_RateLimitError
  * @throws MailChimp_WooCommerce_ServerError
@@ -1424,13 +1371,12 @@ function mailchimp_settings_errors() {
  * @param string $status_if_new
  * @param null $order
  * @param null $gdpr_fields
- * @param false $update_status
  *
  * @throws MailChimp_WooCommerce_Error
  * @throws MailChimp_WooCommerce_RateLimitError
  * @throws MailChimp_WooCommerce_ServerError
  */
-function mailchimp_member_data_update($user_email = null, $language = null, $caller = '', $status_if_new = 'transactional', $order = null, $gdpr_fields = null, $update_status = false) {
+function mailchimp_member_data_update($user_email = null, $language = null, $caller = '', $status_if_new = 'transactional', $order = null, $gdpr_fields = null) {
     mailchimp_debug('debug', "mailchimp_member_data_update", array(
         'user_email' => $user_email,
         'user_language' => $language,
@@ -1446,37 +1392,29 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
     if ($caller !== 'cart' || !mailchimp_get_transient($caller . ".member.{$hash}")) {
         $list_id = mailchimp_get_list_id();
         try {
-            // try to get the member to update if already synced
-            $member = mailchimp_get_api()->member($list_id, $user_email);
-            // update member with new data
-            // if the member's subscriber status was transactional - and if we're passing in either one of these options below,
-            // we can attach the new status to the member.
-            if ($member['status'] === 'transactional' && in_array($status_if_new, array('subscribed', 'pending'))) {
-                $member['status'] = $status_if_new;
-            }
-            if (($member['status'] === 'transactional' && in_array($status_if_new, array('subscribed', 'pending'))) || $member['status'] === 'subscribed' || $member['status'] === 'pending') {
-                if (!empty($gdpr_fields) && is_array($gdpr_fields)) {
-                    $gdpr_fields_to_save = [];
-                    foreach ($gdpr_fields as $id => $value) {
-                        $gdpr_field['marketing_permission_id'] = $id;
-                        $gdpr_field['enabled'] = (bool) $value;
-                        $gdpr_fields_to_save[] = $gdpr_field;
-                    }
+            if (!empty($gdpr_fields) && is_array($gdpr_fields)) {
+                $gdpr_fields_to_save = [];
+                foreach ($gdpr_fields as $id => $value) {
+                    $gdpr_field['marketing_permission_id'] = $id;
+                    $gdpr_field['enabled'] = (bool) $value;
+                    $gdpr_fields_to_save[] = $gdpr_field;
                 }
             }
+
             $merge_fields = $order ? apply_filters('mailchimp_get_ecommerce_merge_tags', array(), $order) : array();
+
             if (!is_array($merge_fields)) $merge_fields = array();
-            if ($update_status && in_array($member['status'], array('unsubscribed', 'cleaned'))) {
-                $member['status'] = $status_if_new;
-            }
-            $result = mailchimp_get_api()->update($list_id, $user_email, $member['status'], $merge_fields, null, $language, $gdpr_fields_to_save);
+
+            $result = mailchimp_get_api()->update($list_id, $user_email, $status_if_new, $merge_fields, null, $language, $gdpr_fields_to_save);
+
             // set transient to prevent too many calls to update language
             mailchimp_set_transient($caller . ".member.{$hash}", true, 3600);
             mailchimp_log($caller . '.member.updated', "Updated {$user_email} subscriber status to {$result['status']} and language to {$language}");
         } catch (Exception $e) {
+            $merge_fields = $order ? apply_filters('mailchimp_get_ecommerce_merge_tags', array(), $order) : array();
+            if (!is_array($merge_fields)) $merge_fields = array();
+
             if ($e->getCode() == 404) {
-                $merge_fields = $order ? apply_filters('mailchimp_get_ecommerce_merge_tags', array(), $order) : array();
-                if (!is_array($merge_fields)) $merge_fields = array();
                 if (!empty($gdpr_fields) && is_array($gdpr_fields)) {
                     $gdpr_fields_to_save = [];
                     foreach ($gdpr_fields as $id => $value) {
@@ -1490,6 +1428,9 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
                 // set transient to prevent too many calls to update language
                 mailchimp_set_transient($caller . ".member.{$hash}", true, 3600);
                 mailchimp_log($caller . '.member.created', "Added {$user_email} as transactional, setting language to [{$language}]");
+            } else if (strpos($e->getMessage(), 'compliance state') !== false) {
+                mailchimp_get_api()->update($list_id, $user_email, 'pending', $merge_fields);
+                mailchimp_log($caller . '.member.sync', "Update {$user_email} Using Double Opt In", $merge_fields);
             } else {
                 mailchimp_error($caller . '.member.sync.error', $e->getMessage());
             }

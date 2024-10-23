@@ -48,25 +48,25 @@ class MailChimp_WooCommerce_Transform_Customers {
 	 * @return array|bool
 	 */
 	public function getCustomersLookup( $page = 1, $posts = 5 ) {
-        global $wpdb;
+		global $wpdb;
 
-        $offset = 0;
+		$offset = ( $page - 1 ) * $posts;
 
-		if ( $page > 1 ) {
-			$offset = ( ( $page - 1 ) * $posts );
-		}
+		$query = $wpdb->prepare(
+			"SELECT DISTINCT c.* FROM {$wpdb->prefix}wc_customer_lookup c
+			 JOIN (SELECT email FROM {$wpdb->prefix}wc_customer_lookup GROUP BY email) e
+			 ON c.email = e.email
+			 ORDER BY c.customer_id
+			 LIMIT %d OFFSET %d",
+			$posts,
+			$offset
+		);
 
-        $query = $wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}wc_customer_lookup LIMIT %d OFFSET %d",
-            $posts,
-            $offset
-        );
-
-        $customers = $wpdb->get_results($query);
+		$customers = $wpdb->get_results($query);
 
 		if ( empty( $customers ) ) {
 			sleep( 2 );
-            $customers = $wpdb->get_results($query);
+			$customers = $wpdb->get_results($query);
 
 			if ( empty( $customers ) ) {
 				return false;

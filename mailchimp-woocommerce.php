@@ -54,6 +54,11 @@ add_action( 'before_woocommerce_init', function() {
 
 		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'product_block_editor', __FILE__, true );
 
-		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, true );
+		\Automattic\WooCommere\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, true );
 	}
 } );
+
+/// if the user chas enabled the high performance bolt on
+if (defined('MAILCHIMP_HIGH_PERFORMANCE') && MAILCHIMP_HIGH_PERFORMANCE) {
+    include_once __DIR__.'/includes/function-include-action-scheduler.php';
+}

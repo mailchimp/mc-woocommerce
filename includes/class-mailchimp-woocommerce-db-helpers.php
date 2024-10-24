@@ -182,6 +182,31 @@ class Mailchimp_Woocommerce_DB_Helpers
         }
     }
 
+    /**
+     * @param $key
+     * @param $by
+     * @return bool
+     */
+    public static function increment($key, $by = 1)
+    {
+        $option = (int) static::get_option( $key, 0);
+        return static::add_option($key, $option+$by);
+    }
+
+    /**
+     * @param $key
+     * @param $by
+     * @return bool|null
+     */
+    public static function decrement($key, $by = 1)
+    {
+        $option = (int) static::get_option( $key, 0);
+        if ($option <= 0) {
+            return null;
+        }
+        return static::add_option($key, $option-$by);
+    }
+
 
     /**
      * Set site transient

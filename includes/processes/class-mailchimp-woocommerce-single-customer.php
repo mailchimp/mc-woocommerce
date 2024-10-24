@@ -161,6 +161,9 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
                 // update the customer record
                 $updated_customer = $api->updateCustomer($store_id, $customer);
 
+                // increment the sync counter
+                mailchimp_register_synced_resource('customers');
+
                 mailchimp_log('member.sync', "Updated Member {$email}", array(
                     'status' => $subscriber['status'],
                     'language' => $language,
@@ -186,6 +189,8 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
                 $customer->setOptInStatus(in_array($compliance_state_response['status'], array('subscribed', 'pending')));
                 // update the customer record
                 $api->updateCustomer($store_id, $customer);
+                // increment the sync counter
+                mailchimp_register_synced_resource('customers');
                 return $compliance_state_response;
             }
 
@@ -208,6 +213,9 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
 
                         // update the customer record
                         $updated_customer = $api->updateCustomer($store_id, $customer);
+
+                        // increment the sync counter
+                        mailchimp_register_synced_resource('customers');
 
                         if ($status_meta['created']) {
                             mailchimp_log('member.sync', "Subscribed Member {$email}", array('updated_customer' => $updated_customer, 'status_if_new' => $status_if_new, 'has_doi' => $uses_doi, 'merge_fields' => $merge_fields));

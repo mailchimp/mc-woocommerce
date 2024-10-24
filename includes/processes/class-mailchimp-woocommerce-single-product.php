@@ -182,7 +182,8 @@ class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
             $this->api()->{$method}($this->store_id, $product, false);
 
             mailchimp_log('product_submit.success', "{$method} :: #{$product->getId()}");
-
+            // increment the sync counter
+            mailchimp_register_synced_resource('products');
             \Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp-woocommerce-last_product_updated', $product->getId());
 
             return $product;

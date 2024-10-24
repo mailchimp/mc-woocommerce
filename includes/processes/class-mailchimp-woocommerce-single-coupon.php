@@ -63,6 +63,8 @@ class MailChimp_WooCommerce_SingleCoupon extends Mailchimp_Woocommerce_Job
             $api->addPromoRule($store_id, $code->getAttachedPromoRule());
             $api->addPromoCodeForRule($store_id, $code->getAttachedPromoRule(), $code);
 
+            mailchimp_register_synced_resource('coupons');
+
             mailchimp_log('promo_code_submit.success', "#{$this->id} :: code: {$code->getCode()}");
         } catch (MailChimp_WooCommerce_RateLimitError $e) {
             sleep(3);

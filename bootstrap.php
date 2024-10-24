@@ -925,6 +925,49 @@ function mailchimp_count_posts($type) {
 }
 
 /**
+ * @param $resource
+ * @param $by
+ * @return bool|null
+ */
+function mailchimp_register_synced_resource($resource, $by = 1) {
+    if (!in_array($resource, array('orders', 'products', 'customers', 'coupons'))) {
+        return null;
+    }
+    // if we're done syncing we don't want to keep increasing this number
+    if (mailchimp_is_done_syncing()) {
+        return null;
+    }
+    return Mailchimp_Woocommerce_DB_Helpers::increment("mailchimp-woocommerce-sync.{$resource}.count", $by);
+}
+
+/**
+ * @param $resource
+ * @return int
+ */
+function mailchimp_get_synced_resource_count($resource) {
+    if (!in_array($resource, array('orders', 'products', 'customers', 'coupons'))) {
+        return 0;
+    }
+    return (int) Mailchimp_Woocommerce_DB_Helpers::get_option("mailchimp-woocommerce-sync.{$resource}.count", 0);
+}
+
+/**
+ * @return object|null
+ */
+function mailchimp_get_local_sync_counts() {
+    // this will only work if they clicked on a start sync after this feature was added in October 2024
+    if (!Mailchimp_Woocommerce_DB_Helpers::get_option("mailchimp-woocommerce-sync.internal_counter")) {
+        return null;
+    }
+    return (object) array(
+        'orders' => mailchimp_get_synced_resource_count('orders'),
+        'products' => mailchimp_get_synced_resource_count('products'),
+        'customers' => mailchimp_get_synced_resource_count('customers'),
+        'coupons' => mailchimp_get_synced_resource_count('coupons'),
+    );
+}
+
+/**
  * @return bool
  * @throws MailChimp_WooCommerce_Error
  * @throws MailChimp_WooCommerce_RateLimitError

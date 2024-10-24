@@ -341,6 +341,9 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 mailchimp_member_data_update($email, $this->user_language, 'order', $status_if_new, $order, $this->gdpr_fields);
             }
 
+            // increment the sync counter
+            mailchimp_register_synced_resource('orders');
+
             mailchimp_log('order_submit.success', $log);
 
             if ($new_order) {

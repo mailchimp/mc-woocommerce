@@ -38,14 +38,24 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 
 			$job->removeSyncPointers();
 
-			\Mailchimp_Woocommerce_DB_Helpers::update_option("{$this->plugin_name}-sync.config.resync", false);
-			\Mailchimp_Woocommerce_DB_Helpers::update_option("{$this->plugin_name}-sync.customers.current_page", 1);
-            \Mailchimp_Woocommerce_DB_Helpers::update_option("{$this->plugin_name}-sync.products.current_page", 1);
-            \Mailchimp_Woocommerce_DB_Helpers::update_option("{$this->plugin_name}-sync.coupons.current_page", 1);
-            \Mailchimp_Woocommerce_DB_Helpers::update_option("{$this->plugin_name}-sync.orders.current_page", 1);
+            $pointers = array(
+                'sync.config.resync' => false,
+                'sync.customers.current_page' => 1,
+                'sync.products.current_page' => 1,
+                'sync.coupons.current_page' => 1,
+                'sync.orders.current_page' => 1,
+                'sync.orders.count' => 0,
+                'sync.products.count' => 0,
+                'sync.customers.count' => 0,
+                'sync.coupons.count' => 0,
+                'sync.syncing' => true,
+                'sync.started_at' => time(),
+                'sync.internal_counter' => true,
+            );
 
-            \Mailchimp_Woocommerce_DB_Helpers::update_option("{$this->plugin_name}-sync.syncing", true);
-			\Mailchimp_Woocommerce_DB_Helpers::update_option("{$this->plugin_name}-sync.started_at", time());
+            foreach ( $pointers as $pointer => $value ) {
+                \Mailchimp_Woocommerce_DB_Helpers::update_option("{$this->plugin_name}-{$pointer}", $value);
+            }
 
 			// let this happen if they start the sync again.
 			mailchimp_delete_transient('stop_sync');

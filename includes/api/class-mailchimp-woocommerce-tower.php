@@ -100,6 +100,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 			$stores      = $api->stores();
 			$compare_url = $this->baseDomain( $url );
 			$list_name   = $list_id ? $api->getList( $list_id )['name'] : null;
+            $mc_stores = array();
 
 			if ( is_array( $stores ) && ! empty( $stores ) ) {
 				foreach ( $stores as $mc_store ) {
@@ -127,6 +128,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 							$duplicate_store_problem = true;
 						}
 					}
+                    $mc_stores[] = $mc_store->toArray();
 				}
 			}
 
@@ -364,6 +366,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 					'automations'             => isset( $automations ) ? $automations : null,
 					'journeys'                => isset( $journeys ) ? $journeys : null,
 					'merge_fields'            => isset( $merge_fields ) ? (object) $merge_fields : null,
+                    'stores'                  => isset( $mc_stores ) ? $mc_stores : null,
 				),
 				'merge_tags' => array(),
 			),

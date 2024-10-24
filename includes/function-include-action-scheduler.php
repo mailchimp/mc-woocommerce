@@ -22,11 +22,12 @@ function mailchimp_request_additional_runners() {
             'body'        => array(
                 'action'     => 'mailchimp_create_additional_runners',
                 'instance'   => $i,
-                'eg_nonce' => wp_create_nonce( 'mailchimp_additional_runner_' . $i ),
+                'mailchimp_actionscheduler_nonce' => wp_create_nonce( 'mailchimp_additional_runner_' . $i ),
             ),
             'cookies'     => array(),
         ) );
     }
+    mailchimp_debug('actionscheduler', "increased processes by {$processes}");
 }
 
 add_action( 'action_scheduler_run_queue', 'mailchimp_request_additional_runners', 0 );
@@ -35,7 +36,7 @@ add_action( 'action_scheduler_run_queue', 'mailchimp_request_additional_runners'
  * Handle requests initiated by eg_request_additional_runners() and start a queue runner if the request is valid.
  */
 function mailchimp_create_additional_runners() {
-    if ( isset( $_POST['eg_nonce'] ) && isset( $_POST['instance'] ) && wp_verify_nonce( $_POST['eg_nonce'], 'mailchimp_additional_runner_' . $_POST['instance'] ) ) {
+    if ( isset( $_POST['mailchimp_actionscheduler_nonce'] ) && isset( $_POST['instance'] ) && wp_verify_nonce( $_POST['mailchimp_actionscheduler_nonce'], 'mailchimp_additional_runner_' . $_POST['instance'] ) ) {
         ActionScheduler_QueueRunner::instance()->run();
     }
     wp_die();

@@ -154,7 +154,7 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 
             // allow products and coupons to be synced simultaneously
             if ($completed['products'] && !$started['coupons']) {
-                mailchimp_log('sync.full_sync_manager.queue', 'Starting CUSTOMERS queueing.');
+                mailchimp_log('sync.full_sync_manager.queue', 'Starting COUPONS queueing.');
                 // create Product Sync object
                 $coupons_sync = new MailChimp_WooCommerce_Process_Coupons();
                 // trigger subsequent jobs creation

@@ -113,7 +113,7 @@ class MailChimp_WooCommerce_Transform_Coupons {
 		}
 
 		$args = array(
-			'post_type'      => array_merge( array_keys( wc_get_product_types() ), array( 'shop_coupon' ) ),
+			'post_type'      => 'shop_coupon',
 			'posts_per_page' => $posts,
 			'offset'         => $offset,
 			'orderby'        => 'ID',

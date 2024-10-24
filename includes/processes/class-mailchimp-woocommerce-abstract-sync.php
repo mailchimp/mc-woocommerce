@@ -188,7 +188,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
         mailchimp_debug(get_called_class().'@handle', $this->getResourceType()." :: {$page->count}");
 
         // if we've got a 0 count or less than items per page, that means we're done.
-        if ($page->count < $this->items_per_page) {
+        if (!$page->count) {
 
             mailchimp_debug(get_called_class().'@handle', $this->getResourceType().' :: completing now!');
 

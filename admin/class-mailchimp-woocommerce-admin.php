@@ -1939,7 +1939,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$store->setMoneyFormat( $store->getCurrencyCode() );
 
 		// set the basics
-		$store->setName( $this->array_get( $data, 'store_name', get_option( 'blogname' ) ) );
+		$store->setName( html_entity_decode($this->array_get( $data, 'store_name', get_option( 'blogname' ) )) );
 		$store->setDomain( get_option( 'siteurl' ) );
 		$store->setEmailAddress( $this->array_get( $data, 'admin_email', get_option('admin_email') ) );
 		$store->setAddress( $this->address( $data ) );

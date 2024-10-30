@@ -206,9 +206,9 @@ class MailChimp_WooCommerce_Transform_Products {
 			}
 
 			$variant->setTitle( implode( ' :: ', $title ) );
-			$variant->setVisibility( ( $woo->variation_is_visible() ? 'visible' : '' ) );
+			$variant->setVisibility( ( $woo->variation_is_visible() ? 'visible' : 'hidden' ) );
 		} else {
-			$variant->setVisibility( ( $woo->is_visible() ? 'visible' : '' ) );
+			$variant->setVisibility( ( $woo->is_visible() ? 'visible' : 'hidden' ) );
 			$variant->setTitle( $woo->get_title() );
 		}
 

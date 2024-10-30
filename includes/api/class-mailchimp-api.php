@@ -1478,7 +1478,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 			if ( ! $this->validateStoreSubmission( $product ) ) {
 				return false;
 			}
-			$data = $this->patch( "ecommerce/stores/$store_id/products/{$product->getId()}", $product->toArray() );
+			$data = $this->put( "ecommerce/stores/$store_id/products/{$product->getId()}", $product->toArray() );
 			\Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp-woocommerce-resource-last-updated', time() );
 			$product = new MailChimp_WooCommerce_Product();
 			return $product->fromArray( $data );

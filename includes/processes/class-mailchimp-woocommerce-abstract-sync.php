@@ -160,6 +160,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
 
         // set the last loop timestamp
         mailchimp_set_data( 'sync.last_loop_at', time() );
+        mailchimp_set_data( "sync.loop_at.{$this->getResourceType()}", time() );
 
         // if we're being rate limited - we need to pause here.
         if ($this->isBeingRateLimited()) {

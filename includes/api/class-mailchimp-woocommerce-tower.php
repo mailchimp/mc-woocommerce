@@ -174,13 +174,22 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 		$broken_mailchimp = $authenticated && !empty($list_id) && !$mailchimp_api_connected;
 
 		$mc_plan_name = !empty($account_info) &&
-		                isset($account_info['pricing_plan_type']) &&
-		                !empty($account_info['pricing_plan_type']) &&
-		                $account_info['pricing_plan_type'] ? $account_info['pricing_plan_type'] : 'none';
+		                !empty($account_info['pricing_plan_type']) ? $account_info['pricing_plan_type'] : 'none';
 
 		$paid_account = in_array($mc_plan_name, ['pay_as_you_go', 'monthly']);
 
 		$time = new DateTime( 'now' );
+
+        $timestamps = [
+            'sync_started'     => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.started_at' ),
+            'sync_completed'   => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.completed_at' ),
+            'customer_sync_started_at' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.customers.started_at' ),
+            'customer_sync_completed_at' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.customers.completed_at' ),
+            'product_sync_started_at' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.products.started_at' ),
+            'product_sync_completed_at' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.products.completed_at' ),
+            'order_sync_started_at' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.orders.started_at' ),
+            'order_sync_completed_at' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.orders.completed_at' ),
+        ];
 
 		return array(
 			'store'         => (object) array(
@@ -188,7 +197,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 				'domain'                => $url,
 				'secure_url'            => $url,
 				'user'                  => (object) array(
-					'email' => isset( $options['admin_email'] ) ? $options['admin_email'] : null,
+					'email' => $options['admin_email'] ?? null,
 				),
 				'average_monthly_sales' => $this->getShopSales(),
 				'address'               => (object) array(
@@ -272,27 +281,27 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 						),
 						'product_sync_started'      => (object) array(
 							'key'   => 'product_sync_started',
-							'value' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.products.started_at' ),
+							'value' => $timestamps['product_sync_started_at'],
 						),
 						'product_sync_completed'    => (object) array(
 							'key'   => 'product_sync_completed',
-							'value' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.products.completed_at' ),
+							'value' => $timestamps['product_sync_completed_at'],
 						),
 						'customer_sync_started'     => (object) array(
 							'key'   => 'customer_sync_started',
-							'value' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.customers.started_at' ),
+							'value' => $timestamps['customer_sync_started_at'],
 						),
 						'customer_sync_completed'   => (object) array(
 							'key'   => 'customer_sync_completed',
-							'value' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.customers.completed_at' ),
+							'value' => $timestamps['customer_sync_completed_at'],
 						),
 						'order_sync_started'        => (object) array(
 							'key'   => 'order_sync_started',
-							'value' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.orders.started_at' ),
+							'value' => $timestamps['order_sync_started_at'],
 						),
 						'order_sync_completed'      => (object) array(
 							'key'   => 'order_sync_completed',
-							'value' => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.orders.completed_at' ),
+							'value' => $timestamps['order_sync_completed_at'],
 						),
 						'curl_enabled' => (object) array(
 							'key' => 'curl_enabled',
@@ -320,16 +329,17 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 			),
 			'meta'          => array(
 				'timestamp'  => $time->format( 'Y-m-d H:i:s' ),
+                'timestamps' => $timestamps,
 				'platform'   => array(
 					'active'              => $store_active,
 					'plan'                => $plan,
 					'store_name'          => get_option( 'blogname' ),
 					'domain'              => $url,
 					'secure_url'          => $url,
-					'user_email'          => isset( $options['admin_email'] ) ? $options['admin_email'] : null,
+					'user_email'          => $options['admin_email'] ?? null,
 					'is_syncing'          => $syncing_mc,
-					'sync_started_at'     => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.started_at' ),
-					'sync_completed_at'   => \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.completed_at' ),
+					'sync_started_at'     => $timestamps['sync_started'],
+					'sync_completed_at'   => $timestamps['sync_completed'],
 					'subscribed_to_hooks' => true,
 					'uses_custom_rules'   => false,
 					'wp_cron_enabled'     => $this->hasWPCronEnabled(),
@@ -888,22 +898,23 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 	 */
 	protected function get_action_status_date( $status, $date_type = 'oldest' ) {
 		$order  = 'oldest' === $date_type ? 'ASC' : 'DESC';
+        $query = array(
+            'claimed'  => false,
+            'status'   => $status,
+            'per_page' => 1,
+            'order'    => $order,
+        );
 		$store  = ActionScheduler::store();
-		$action = $store->query_actions(
-			array(
-				'claimed'  => false,
-				'status'   => $status,
-				'per_page' => 1,
-				'order'    => $order,
-			)
-		);
+		$action = $store->query_actions($query);
+        $count = 0;
 		if ( ! empty( $action ) ) {
 			$date_object = $store->get_date( $action[0] );
-			$action_date = $date_object->format( 'Y-m-d H:i:s O' );
+			$action_date = $date_object->format( 'D, M j, Y g:i A' );
+            $count = number_format(floatval($store->query_actions($query, 'count')));
 		} else {
 			$action_date = '&ndash;';
 		}
-		return $action_date;
+		return "<strong>({$count})</strong> {$action_date}";
 	}
 
 	public function is_shell_enabled() {

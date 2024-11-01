@@ -532,7 +532,15 @@ class MailChimp_WooCommerce_MailChimpApi {
 
 		mailchimp_debug( 'api.update_or_create', "Update Or Create {$email}", $data );
 
-		return $this->put( "lists/$list_id/members/$hash", $data );
+		$member = $this->put( "lists/$list_id/members/$hash", $data );
+
+        /// update this for use with the admin view too.
+        if (!empty($member) && !empty($member['status'])) {
+            $transient  = "mailchimp-woocommerce-subscribed.{$list_id}.{$hash}";
+            \Mailchimp_Woocommerce_DB_Helpers::set_transient( $transient, $member['status'], 60 * 5 );
+        }
+
+        return $member;
 	}
 
 	/**

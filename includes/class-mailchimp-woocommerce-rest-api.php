@@ -803,6 +803,8 @@ class MailChimp_WooCommerce_Rest_Api
 	 */
     private function mailchimp_rest_response($data, $status = 200)
     {
+        // make sure the cache doesn't return something old.
+        nocache_headers();
         if (!is_array($data)) $data = array();
         $response = new WP_REST_Response($data);
         $response->set_status($status);

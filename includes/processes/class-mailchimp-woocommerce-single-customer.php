@@ -222,6 +222,21 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
                         } else {
                             mailchimp_log('member.sync', "{$email} is Pending Double OptIn", array('updated_customer' => $updated_customer, 'status_if_new' => $status_if_new, 'has_doi' => $uses_doi, 'status_meta' => $status_meta));
                         }
+
+                        $current_status = $new_status = $result['status'];
+
+                        if ($current_status != 'archived') {
+                            if ($result['status'] === 'transactional') {
+                                $new_status = '0';
+                            } else if ($result['status'] === 'subscribed') {
+                                $new_status = '1';
+                            }
+                            // if the wordpress user id is not empty, and the status is subscribed, we can update the
+                            // subscribed status meta so it reflects the current status of Mailchimp during a sync.
+                            if ($wordpress_user_id && $current_status) {
+                                update_user_meta($wordpress_user_id, 'mailchimp_woocommerce_is_subscribed', $new_status);
+                            }
+                        }
                     }
                 } catch (Exception $e) {
                     mailchimp_log('member.sync', $e->getMessage());

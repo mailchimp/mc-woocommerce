@@ -9,6 +9,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 	protected $data_center = 'us2';
 	protected $api_key     = null;
 	protected $auth_type   = 'key';
+    protected $allow_audience_put = true;
 
 	/** @var null|MailChimp_WooCommerce_MailChimpApi */
 	protected static $instance = null;
@@ -39,6 +40,12 @@ class MailChimp_WooCommerce_MailChimpApi {
 			$this->setApiKey( $api_key );
 		}
 	}
+
+    public function allowingCustomerPuts($bool)
+    {
+        $this->allow_audience_put = (bool) $bool;
+        return $this;
+    }
 
 	/**
 	 * @param $key
@@ -318,8 +325,13 @@ class MailChimp_WooCommerce_MailChimpApi {
 		mailchimp_debug( 'api.update_member', "Updating {$email}", $data );
 
 		try {
-			return $this->put( "lists/$list_id/members/$hash?skip_merge_validation=true", $data );
+            $endpoint = "lists/$list_id/members/$hash?skip_merge_validation=true";
+			return $this->allow_audience_put ? $this->put( $endpoint, $data ) : $this->patch( $endpoint, $data );
 		} catch ( Exception $e ) {
+            // if we're not allowing audience puts
+            if (!$this->allow_audience_put && $e->getCode() === 404) {
+                throw $e;
+            }
 
 			// If mailchimp says is already a member lets send the update by PUT
 			if ( mailchimp_string_contains( $e->getMessage(), 'is already a list member' ) ) {

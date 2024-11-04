@@ -1,5 +1,16 @@
 == Changelog ==
 = 4.5 =
+* New Features
+* Feature: Introduced a user-agent header "Mailchimp Support" to identify the plugin for support. Servers blocking external post traffic should add this to their safe user-agents.*
+* Fixed
+* Bug: Resolved issue where product images appeared blurry after plugin updates and improved product image handling.
+* Bug: Fixed PHP warning triggered when executing wpml_switch_language_action due to missing language information. Language code validation is now performed before function execution.
+* Bug: Addressed syncing issues with customers and promo codes, specifically the inability to sync more than 500 orders.
+* Bug: Resolved API Request Error related to Mailchimp's API during sync operations.
+* Bug: Corrected inaccurate overview stats shifting during sync, which incorrectly displayed order numbers.
+* Bug: Fixed an issue where esc_html was incorrectly used instead of esc_attr, causing store names to be saved with HTML entities in Mailchimp.
+* Maintenance
+* Maintenance: Implemented workaround for Content Security Policy issues related to unsafe-eval in mailchimp-woocommerce-public.min.js.
 = 4.4.1 =
 * Bump serve-static and express in /blocks for improved performance
 * Resolved issue with Mailchimp sync getting stuck at 200 contacts

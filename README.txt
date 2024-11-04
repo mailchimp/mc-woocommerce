@@ -3,8 +3,8 @@ Contributors: ryanhungate, Mailchimp
 Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 6.2
-Tested up to: 6.6
-Stable tag: 4.4.1
+Tested up to: 6.7
+Stable tag: 4.5
 Requires PHP: 7.4
 WC requires at least: 8.2
 WC tested up to: 9.3
@@ -79,3 +79,14 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 
 == Changelog ==
 = 4.5 =
+* New Features
+* Feature: Introduced a user-agent header "Mailchimp Support" to identify the plugin for support. Servers blocking external post traffic should add this to their safe user-agents.*
+* Fixed
+* Bug: Resolved issue where product images appeared blurry after plugin updates and improved product image handling.
+* Bug: Fixed PHP warning triggered when executing wpml_switch_language_action due to missing language information. Language code validation is now performed before function execution.
+* Bug: Addressed syncing issues with customers and promo codes, specifically the inability to sync more than 500 orders.
+* Bug: Resolved API Request Error related to Mailchimp's API during sync operations.
+* Bug: Corrected inaccurate overview stats shifting during sync, which incorrectly displayed order numbers.
+* Bug: Fixed an issue where esc_html was incorrectly used instead of esc_attr, causing store names to be saved with HTML entities in Mailchimp.
+* Maintenance
+* Maintenance: Implemented workaround for Content Security Policy issues related to unsafe-eval in mailchimp-woocommerce-public.min.js.

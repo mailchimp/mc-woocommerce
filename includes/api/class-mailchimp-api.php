@@ -10,6 +10,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 	protected $api_key     = null;
 	protected $auth_type   = 'key';
     protected $allow_audience_put = true;
+    protected $auto_doi = false;
 
 	/** @var null|MailChimp_WooCommerce_MailChimpApi */
 	protected static $instance = null;
@@ -41,9 +42,23 @@ class MailChimp_WooCommerce_MailChimpApi {
 		}
 	}
 
+    /**
+     * @param $bool
+     * @return $this
+     */
     public function allowingCustomerPuts($bool)
     {
         $this->allow_audience_put = (bool) $bool;
+        return $this;
+    }
+
+    /**
+     * @param $auto
+     * @return $this
+     */
+    public function useAutoDoi($auto)
+    {
+        $this->auto_doi = (bool) $auto;
         return $this;
     }
 
@@ -250,6 +265,11 @@ class MailChimp_WooCommerce_MailChimpApi {
             $status = $subscribed;
         }
 
+        if ($status === 'pending') {
+            $this->auto_doi = true;
+            $status = 'subscribed';
+        }
+
 		$data = $this->cleanListSubmission(
 			array(
 				'email_type'            => 'html',
@@ -279,7 +299,9 @@ class MailChimp_WooCommerce_MailChimpApi {
 			$result         = $this->post( "lists/$list_id/members?skip_merge_validation=true", $data );
 			mailchimp_log( 'api', "{$email} was in compliance state, sending the double opt in message" );
 			return $result;
-		}
+		} finally {
+            $this->auto_doi = false;
+        }
 	}
 
 	/**
@@ -308,6 +330,11 @@ class MailChimp_WooCommerce_MailChimpApi {
 		} else {
 			$status = $subscribed;
 		}
+
+        if ($status === 'pending') {
+            $this->auto_doi = true;
+            $status = 'subscribed';
+        }
 
 		$data = $this->cleanListSubmission(
 			array(
@@ -344,8 +371,9 @@ class MailChimp_WooCommerce_MailChimpApi {
 			$result         = $this->patch( "lists/$list_id/members/$hash?skip_merge_validation=true", $data );
 			mailchimp_log( 'api', "{$email} was in compliance state, sending the double opt in message" );
 			return $result;
-
-		}
+		} finally {
+            $this->auto_doi = false;
+        }
 	}
 
 	/**
@@ -2394,10 +2422,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 			'PATCH',
 			$url,
 			array(),
-			array(
-				'Expect:',
-				'Content-Length: ' . strlen( $json ),
-			)
+            $this->getHeadersForPostOrPut($json)
 		);
 
 		$options[ CURLOPT_POSTFIELDS ] = $json;
@@ -2425,10 +2450,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 			'POST',
 			$url,
 			array(),
-			array(
-				'Expect:',
-				'Content-Length: ' . strlen( $json ),
-			)
+            $this->getHeadersForPostOrPut($json)
 		);
 
 		$options[ CURLOPT_POSTFIELDS ] = $json;
@@ -2437,6 +2459,24 @@ class MailChimp_WooCommerce_MailChimpApi {
 
 		return $this->processCurlResponse( $curl );
 	}
+
+    /**
+     * @param $json
+     * @return string[]
+     */
+    protected function getHeadersForPostOrPut($json)
+    {
+        $headers = array(
+            'Expect:',
+            'Content-Length: ' . strlen( $json ),
+        );
+
+        if ($this->auto_doi) {
+            $headers['X-Status-Resolution-Method'] = 'auto-doi';
+        }
+
+        return $headers;
+    }
 
 	/**
 	 * @param $url
@@ -2456,10 +2496,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 			'PUT',
 			$url,
 			array(),
-			array(
-				'Expect:',
-				'Content-Length: ' . strlen( $json ),
-			)
+            $this->getHeadersForPostOrPut($json)
 		);
 
 		$options[ CURLOPT_POSTFIELDS ] = $json;

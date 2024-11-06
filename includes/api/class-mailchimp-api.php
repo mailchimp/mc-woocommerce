@@ -2472,7 +2472,7 @@ class MailChimp_WooCommerce_MailChimpApi {
         );
 
         if ($this->auto_doi) {
-            $headers['X-Status-Resolution-Method'] = 'auto-doi';
+            $headers[] = 'X-Status-Resolution-Method: auto-doi';
         }
 
         return $headers;

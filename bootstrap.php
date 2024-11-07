@@ -140,7 +140,7 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
                 'group' => 'mc-woocommerce'
             )
         ) : null;
-        
+
         if (!empty($existing_actions)) {
             try {
                 as_unschedule_action(get_class($job), array('obj_id' => $job->id), 'mc-woocommerce');
@@ -175,7 +175,17 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
             $action_args['page'] = $current_page;
         }
 
-        $action = as_schedule_single_action( strtotime( '+'.$delay.' seconds' ), get_class($job), $action_args, "mc-woocommerce");
+        // create the action to be handled in X seconds ( default time )
+        $fire_at = strtotime( '+'.$delay.' seconds' );
+        // if we have a prepend command, that means it's live traffic, put it to the front of the sync process.
+        if (isset($job->prepend_to_queue) && $job->prepend_to_queue) {
+            $sync_started_at = (int) \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.started_at');
+            if ($sync_started_at > 0) {
+                $fire_at = $sync_started_at;
+            }
+        }
+
+        $action = as_schedule_single_action( $fire_at, get_class($job), $action_args, "mc-woocommerce");
       
         if (!empty($existing_actions)) {
             mailchimp_debug('action_scheduler.reschedule_job', get_class($job) . ($delay > 0 ? ' restarts in '.$delay. ' seconds' : ' re-queued' ) . $message . $attempts);
@@ -1333,6 +1343,20 @@ function mailchimp_is_done_syncing() {
     else return ($sync_completed_at >= $sync_started_at);
 }
 
+/**
+ * @return bool
+ */
+function mailchimp_allowed_to_prepend_jobs_to_sync() {
+    return (bool) \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.internal_counter');
+}
+
+/**
+ * @return bool
+ */
+function mailchimp_should_prepend_live_traffic_to_queue() {
+    return mailchimp_allowed_to_prepend_jobs_to_sync() && !mailchimp_is_done_syncing();
+}
+
 function run_mailchimp_woocommerce() {
     $env = mailchimp_environment_variables();
     $plugin = new MailChimp_WooCommerce($env->environment, $env->version);
@@ -1424,12 +1448,13 @@ function mailchimp_settings_errors() {
  * @param string $status_if_new
  * @param null $order
  * @param null $gdpr_fields
+ * @param null|bool $live_traffic
  *
  * @throws MailChimp_WooCommerce_Error
  * @throws MailChimp_WooCommerce_RateLimitError
  * @throws MailChimp_WooCommerce_ServerError
  */
-function mailchimp_member_data_update($user_email = null, $language = null, $caller = '', $status_if_new = 'transactional', $order = null, $gdpr_fields = null) {
+function mailchimp_member_data_update($user_email = null, $language = null, $caller = '', $status_if_new = 'transactional', $order = null, $gdpr_fields = null, $live_traffic = null) {
     mailchimp_debug('debug', "mailchimp_member_data_update", array(
         'user_email' => $user_email,
         'user_language' => $language,
@@ -1458,7 +1483,18 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
 
             if (!is_array($merge_fields)) $merge_fields = array();
 
-            $result = mailchimp_get_api()->update($list_id, $user_email, $status_if_new, $merge_fields, null, $language, $gdpr_fields_to_save);
+            try {
+                $should_doi = $live_traffic === true && mailchimp_list_has_double_optin();
+            } catch (\Exception $e) {
+                $should_doi = false;
+            }
+
+            // if we're passing in a subscribed value, we can trigger the double opt in
+            if ($should_doi && ($status_if_new === true || $status_if_new === 'subscribed' || $status_if_new === '1')) {
+                $status_if_new = 'pending';
+            }
+
+            $result = mailchimp_get_api()->update($list_id, $user_email, $status_if_new, $merge_fields, null, $language, $gdpr_fields_to_save, $caller === 'cart');
 
             // set transient to prevent too many calls to update language
             mailchimp_set_transient($caller . ".member.{$hash}", true, 3600);

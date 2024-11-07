@@ -7,6 +7,24 @@ class MailChimp_WooCommerce_Transform_Orders {
 
 	protected $is_syncing = false;
 
+    /**
+     * @param $is_syncing
+     * @return $this
+     */
+    public function setSyncing($is_syncing = true)
+    {
+        $this->is_syncing = (bool) $is_syncing;
+        return $this;
+    }
+
+    /**
+     * @return bool|mixed
+     */
+    public function isSyncing()
+    {
+        return $this->is_syncing;
+    }
+
 	/**
 	 * @param int $page
 	 * @param int $limit
@@ -241,66 +259,19 @@ class MailChimp_WooCommerce_Transform_Orders {
 		$customer->setLastName( $order->get_billing_last_name() );
 		$customer->setAddress( $this->transformBillingAddress( $order ) );
 
-		// removing this because it's causing issues with the order counts
-		// if (!($stats = $this->getCustomerOrderTotals($order))) {
-		// $stats = (object) array('count' => 0, 'total' => 0);
-		// }
-		//
-		// $customer->setOrdersCount($stats->count);
-		// $customer->setTotalSpent($stats->total);
-
 		// we now hold this data inside the customer object for usage in the order handler class
 		// we only update the subscriber status on a member IF they were subscribed.
 		$subscribed_on_order = $customer->wasSubscribedOnOrder( $order->get_id() );
-		$customer->setOptInStatus( $subscribed_on_order );
+		// this basically says "if they subscribed on the order, allow it, otherwise use the wordpress meta"
+        $customer->setOptInStatus( $subscribed_on_order );
+        // if we have a wordpress meta already saying they're subscribed, we can use this as a default value.
+        $customer->applyWordpressUserSubscribeStatus();
 
-		if ($subscribed_on_order) {
-			mailchimp_debug('trace', "{$customer->getEmailAddress()} subscribed on order");
-		} else {
-			mailchimp_debug('trace', "{$customer->getEmailAddress()} was not subscribed on order");
-		}
-
-		try {
-			$doi = mailchimp_list_has_double_optin();
-		} catch ( Exception $e ) {
-			$doi = false;
-		}
-
-		$status_if_new = $doi ? false : $subscribed_on_order;
-
-		$customer->setOptInStatus( $status_if_new );
-
-		// if they didn't subscribe on the order, we need to check to make sure they're not already a subscriber
-		// if they are, we just need to make sure that we don't unsubscribe them just because they unchecked this box.
-		if ( $doi || ! $subscribed_on_order ) {
-			try {
-				$subscriber = mailchimp_get_api()->member( mailchimp_get_list_id(), $customer->getEmailAddress() );
-
-				if ( $subscriber['status'] === 'transactional' ) {
-					$customer->setOptInStatus( false );
-					// when the list requires a double opt in - flag it here.
-					if ( $doi ) {
-						mailchimp_debug('trace', "found list member {$customer->getEmailAddress()} and applied false to customer requiring double opt in");
-						$customer->requireDoubleOptIn( true );
-					} else {
-						mailchimp_debug('trace', "found list member {$customer->getEmailAddress()} and applied false to customer");
-					}
-					return $customer;
-				} elseif ( $subscriber['status'] === 'pending' ) {
-					mailchimp_debug('trace', "found list member {$customer->getEmailAddress()} and applied false to customer because they were in a pending state");
-					$customer->setOptInStatus( false );
-					return $customer;
-				}
-
-				$customer->setOptInStatus( $subscriber['status'] === 'subscribed' );
-			} catch ( Exception $e ) {
-				// if double opt in is enabled - we need to make a request now that subscribes the customer as pending
-				// so that the double opt in will actually fire.
-				if ( $doi && ( ! isset( $subscriber ) || empty( $subscriber ) ) ) {
-					$customer->requireDoubleOptIn( true );
-				}
-			}
-		}
+        // if we are only going to submit existing people on the list during a sync this call is required.
+        if ($this->is_syncing && !$customer->getOptInStatus() && mailchimp_sync_existing_contacts_only()) {
+            $customer->syncSubscriberStatusFromMailchimp();
+            mailchimp_debug("sync.logic", "customer {$customer->getEmailAddress()} was not subscribed in woo, but pulled from Mailchimp with a status of {$customer->getMailchimpStatus()}");
+        }
 
 		return $customer;
 	}

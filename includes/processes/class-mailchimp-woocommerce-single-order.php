@@ -126,6 +126,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 	    }
 
         $job = new MailChimp_WooCommerce_Transform_Orders();
+        $job->setSyncing($this->is_full_sync);
 
         try {
             $call = $api->getStoreOrder($store_id, $woo_order_number, true) ? 'updateStoreOrder' : 'addStoreOrder';
@@ -181,30 +182,12 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 return false;
             }
 
-			$original_status = $order->getCustomer()->getOriginalSubscriberStatus();
-            $transient_key = mailchimp_hash_trim_lower($email).".mc.status";
             $current_status = null;
 
-
-			// if the customer did not actually check the box, this will always be false.
-	        // we needed to use this flag because when using double opt in, the status gets
-	        // overwritten to allow us to submit a pending status to the list member endpoint
-	        // which fires the double opt in.
-            // this will not fire during the initial sync.
-            if (!$this->is_full_sync && (!$original_status && mailchimp_submit_subscribed_only())) {
-                try {
-                    $subscriber = $api->member(mailchimp_get_list_id(), $email);
-                    $current_status = $subscriber['status'];
-                    mailchimp_set_transient($transient_key, $current_status);
-                    if ($current_status != 'subscribed') {
-                        mailchimp_debug('filter', "#{$woo_order_number} was blocked due to subscriber only settings and current mailchimp status was {$current_status}");
-                        return false;
-                    }
-                } catch (Exception $e) {
-                    mailchimp_set_transient($transient_key, $current_status);
-                    mailchimp_debug('filter', "#{$woo_order_number} was blocked due to subscriber only settings");
-                    return false;
-                }
+			// for live traffic, if the customer was not opted in, and we should only submit subscribers: return false
+            if (!$this->is_full_sync && (!$order->getCustomer()->getOptInStatus() && mailchimp_submit_subscribed_only())) {
+                mailchimp_debug('filter', "#{$woo_order_number} was blocked due to subscriber only settings and current mailchimp status was {$current_status}");
+                return false;
             }
 
             // will be the same as the customer id. an md5'd hash of a lowercased email.
@@ -323,10 +306,9 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
             // if we require double opt in on the list, and the customer requires double opt in,
             // we should mark them as pending so they get the opt in email now.
-            if (mailchimp_list_has_double_optin()) {
-                $status_if_new = $order->getCustomer()->getOriginalSubscriberStatus() ? 'pending' : 'transactional';
+            if (!$this->is_full_sync && mailchimp_list_has_double_optin()) {
+                $status_if_new = $order->getCustomer()->getOptInStatus() ? 'pending' : 'transactional';
             } else {
-                // if true, subscribed - otherwise transactional
                 $status_if_new = $order->getCustomer()->getOptInStatus() ? 'subscribed' : 'transactional';
             }
 
@@ -338,7 +320,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
             // Maybe sync subscriber to set correct member.language
             if (!$this->is_full_sync) {
-                mailchimp_member_data_update($email, $this->user_language, 'order', $status_if_new, $order, $this->gdpr_fields);
+                mailchimp_member_data_update($email, $this->user_language, 'order', $status_if_new, $order, $this->gdpr_fields, true);
             }
 
             // increment the sync counter
@@ -346,10 +328,10 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
             mailchimp_log('order_submit.success', $log);
 
-            if ($new_order) {
+            if ($new_order && $this->is_full_sync) {
                 // if the customer has a flag to double opt in - we need to push this data over to MailChimp as pending
-                $status_if_new = (isset($should_auto_subscribe) && $should_auto_subscribe) || $order->getCustomer()->getOriginalSubscriberStatus();
-                mailchimp_member_data_update($email, $this->user_language, 'order', $status_if_new, $order, $this->gdpr_fields);
+                $status_if_new = (isset($should_auto_subscribe) && $should_auto_subscribe) || $order->getCustomer()->getOptInStatus();
+                mailchimp_member_data_update($email, $this->user_language, 'order', $status_if_new, $order, $this->gdpr_fields, false);
             }
 
             return $api_response;

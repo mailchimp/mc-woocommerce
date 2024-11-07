@@ -4,6 +4,7 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Job' ) ) {
 	abstract class Mailchimp_Woocommerce_Job {
 
 		private $attempts = 0;
+        public $prepend_to_queue = false;
 
 		/**
 		 * @param $attempts

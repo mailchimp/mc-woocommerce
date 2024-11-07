@@ -318,7 +318,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 * @throws MailChimp_WooCommerce_RateLimitError
 	 * @throws MailChimp_WooCommerce_ServerError
 	 */
-	public function update( $list_id, $email, $subscribed = '1', $merge_fields = array(), $list_interests = array(), $language = null, $gdpr_fields = null ) {
+	public function update( $list_id, $email, $subscribed = '1', $merge_fields = array(), $list_interests = array(), $language = null, $gdpr_fields = null, $only_if_new = false ) {
 		$hash = md5( strtolower( trim( $email ) ) );
 
 		if ( $subscribed === '1' ) {
@@ -336,18 +336,25 @@ class MailChimp_WooCommerce_MailChimpApi {
             $status = 'subscribed';
         }
 
-		$data = $this->cleanListSubmission(
-			array(
-				'email_address'         => $email,
-				'status'                => $status,
-				'merge_fields'          => $merge_fields,
-				'interests'             => $list_interests,
-				'language'              => $language,
-				'marketing_permissions' => $gdpr_fields,
-			)
-		);
+        $payload = array(
+            'email_address'         => $email,
+            'status'                => $status,
+            'merge_fields'          => $merge_fields,
+            'interests'             => $list_interests,
+            'language'              => $language,
+            'marketing_permissions' => $gdpr_fields,
+        );
+
+        if ($only_if_new === true) {
+            unset($payload['status']);
+            $payload['status_if_new'] = $status;
+        }
+
+		$data = $this->cleanListSubmission($payload);
 
 		$this->validateNaughtyListEmail( $email );
+
+        $data['added_auto_doi'] = $this->auto_doi;
 
 		mailchimp_debug( 'api.update_member', "Updating {$email}", $data );
 
@@ -2536,6 +2543,20 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 */
 	protected function applyCurlOptions( $method, $url, $params = array(), $headers = array() ) {
 		$env          = mailchimp_environment_variables();
+
+        $headers = array_merge(
+            array(
+                'content-type: application/json',
+                'accept: application/json',
+                "user-agent: MailChimp for WooCommerce/{$env->version}; PHP/{$env->php_version}; WordPress/{$env->wp_version}; Woo/{$env->wc_version};",
+            ),
+            $headers
+        );
+
+        if ($this->auto_doi) {
+            mailchimp_debug('api', "applied doi headers", $headers);
+        }
+
 		$curl_options = array(
 			CURLOPT_USERPWD        => "mailchimp:{$this->api_key}",
 			CURLOPT_CUSTOMREQUEST  => strtoupper( $method ),
@@ -2546,14 +2567,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 			CURLOPT_TIMEOUT        => 30,
 			CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
 			CURLINFO_HEADER_OUT    => true,
-			CURLOPT_HTTPHEADER     => array_merge(
-				array(
-					'content-type: application/json',
-					'accept: application/json',
-					"user-agent: MailChimp for WooCommerce/{$env->version}; PHP/{$env->php_version}; WordPress/{$env->wp_version}; Woo/{$env->wc_version};",
-				),
-				$headers
-			),
+			CURLOPT_HTTPHEADER     => $headers,
 		);
 
 		// automatically set the proper outbound IP address

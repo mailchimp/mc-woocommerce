@@ -177,7 +177,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, $landing_site, $language, $gdpr_fields);
         $handler->is_update = $newOrder ? !$newOrder : null;
         $handler->is_admin_save = is_admin();
-
+        //$handler->prepend_to_queue = mailchimp_should_prepend_live_traffic_to_queue();
+;
         mailchimp_handle_or_queue($handler, 90);
     }
 
@@ -190,6 +191,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
         $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, null, null);
         $handler->partially_refunded = true;
+        //$handler->prepend_to_queue = mailchimp_should_prepend_live_traffic_to_queue();
         mailchimp_handle_or_queue($handler);
     }
 
@@ -287,7 +289,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
                 // if they had the checkbox checked - go ahead and subscribe them if this is the first post.
                 //$handler->setStatus($this->cart_subscribe);
-
+                //$handler->prepend_to_queue = true;
                 mailchimp_handle_or_queue($handler);
             }
 
@@ -712,6 +714,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 			$language,
             !empty($gdpr_fields) ? $gdpr_fields : null
         );
+        //$job->prepend_to_queue = mailchimp_should_prepend_live_traffic_to_queue();
         // only send this update if the user actually has a boolean value.
         mailchimp_handle_or_queue($job);
     }

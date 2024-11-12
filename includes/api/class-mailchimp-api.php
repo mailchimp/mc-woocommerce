@@ -2596,6 +2596,11 @@ class MailChimp_WooCommerce_MailChimpApi {
 
 		$err  = curl_error( $curl );
 		$info = curl_getinfo( $curl );
+
+        if ($this->auto_doi) {
+            mailchimp_debug('api.debug', 'message headers', ['headers' => $info['request_header']]);
+        }
+
 		curl_close( $curl );
 
 		if ( $err ) {

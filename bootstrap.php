@@ -182,6 +182,7 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
             $sync_started_at = (int) \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.started_at');
             if ($sync_started_at > 0) {
                 $fire_at = $sync_started_at;
+                mailchimp_debug('action_scheduler. '.get_class($job), "Pushed job {$job_id} to the front of the queue for live traffic");
             }
         }
 

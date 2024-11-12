@@ -102,6 +102,18 @@ class MailChimp_WooCommerce_Rest_Api
             'callback' => array($this, 'get_local_count_by_status'),
             'permission_callback' => '__return_true',
         ));
+
+        register_rest_route(static::$namespace, "/tower/toggle_remote_support", array(
+            'methods' => 'POST',
+            'callback' => array($this, 'toggle_remote_support'),
+            'permission_callback' => '__return_true',
+        ));
+
+        register_rest_route(static::$namespace, "/tower/get_store_id", array(
+            'methods' => 'GET',
+            'callback' => array($this, 'get_store_id'),
+            'permission_callback' => '__return_true',
+        ));
     }
 
     /**
@@ -224,6 +236,47 @@ class MailChimp_WooCommerce_Rest_Api
 	        'last_loop_at' => mailchimp_get_data('sync.last_loop_at'),
             'real' => $internal ?? null,
         ));
+    }
+
+    /**
+     * @param WP_REST_Request $request
+     * @return WP_REST_Response
+     */
+    public function get_store_id(WP_REST_Request $request)
+    {
+        $this->authorizeWooToken($request);
+        return $this->mailchimp_rest_response(array(
+            'success' => true,
+            'store_id' => mailchimp_get_store_id(),
+        ));
+    }
+
+    public function toggle_remote_support(WP_REST_Request $request)
+    {
+        $this->authorizeWooToken($request);
+
+        $body = $request->get_json_params();
+        $toggle = isset($body['toggle']) ? $body['toggle'] : null;
+        if (!is_bool($toggle)) {
+            return $this->mailchimp_rest_response(array(
+                'success' => false,
+                'reason' => 'Toggle not defined. Must be a true/false value.'
+            ), 401);
+        }
+        $tower = new MailChimp_WooCommerce_Tower(mailchimp_get_store_id());
+        $result = $tower->toggle($toggle);
+        if ( $result && isset($result->success) && $result->success) {
+            \Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp-woocommerce-tower.opt', $toggle, 'yes');
+            return $this->mailchimp_rest_response(array(
+                'success' => true,
+                'store_id' => mailchimp_get_store_id(),
+                'message' => 'Enable report support.'
+            ));
+        }
+        return $this->mailchimp_rest_response(array(
+            'success' => false,
+            'reason' => 'Could not enable remote support. Call the squad.'
+        ), 401);
     }
 
     public function get_local_count_by_status(WP_REST_Request $request)

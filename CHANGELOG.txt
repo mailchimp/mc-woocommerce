@@ -1,5 +1,5 @@
 == Changelog ==
-= 4.5 =
+= 5.0 =
 * New Features
 * Feature: Introduced a user-agent header "Mailchimp Support" to identify the plugin for support. Servers blocking external post traffic should add this to their safe user-agents.*
 * Fixed

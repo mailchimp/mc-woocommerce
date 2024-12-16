@@ -120,8 +120,6 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
         $new_status = $subscribe_setting === '0' ? 'transactional' : 'subscribed';
         $status_meta = mailchimp_get_subscriber_status_options($new_status);
 
-
-
         try {
             $subscriber_status = $subscribe_setting === '0' ? 'transactional' : 'subscribed';
 

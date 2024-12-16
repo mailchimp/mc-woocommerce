@@ -249,8 +249,18 @@ class MailChimp_WooCommerce_Transform_Orders {
 	public function buildCustomerFromOrder( $order ) {
 		$customer = new MailChimp_WooCommerce_Customer();
 
+        $wordpress_user = $order->get_user();
+
+        if (empty($wordpress_user)) {
+            mailchimp_debug('order_logic', "order did not have a wordpress user id, checking by email {$order->get_billing_email()}");
+            $wordpress_user = get_user_by('email', $order->get_billing_email());
+            if ($wordpress_user) {
+                mailchimp_debug('order_logic', "found a wordpress user by email {$order->get_billing_email()}");
+            }
+        }
+
 		// attach the WordPress user to the Mailchimp customer object.
-		$customer->setWordpressUser( $order->get_user() );
+		$customer->setWordpressUser( $wordpress_user );
 
 		$customer->setId( mailchimp_hash_trim_lower( $order->get_billing_email() ) );
 		$customer->setCompany( $order->get_billing_company() );

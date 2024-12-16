@@ -90,7 +90,9 @@ class MailChimp_WooCommerce_Public extends MailChimp_WooCommerce_Options {
      */
     public function add_inline_footer_script()
     {
-        if (apply_filters( 'mailchimp_add_inline_footer_script', true)) {
+        $code_snippet_activated = (bool) \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-code-snippet', true);
+
+        if ($code_snippet_activated && apply_filters( 'mailchimp_add_inline_footer_script', true)) {
             if (($fragment = mailchimp_get_connected_site_script_fragment()) && !empty($fragment)) {
                 echo $fragment;
             }

@@ -154,6 +154,12 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
 	    $email = null;
 
+        try {
+            $has_doi_enabled = !$this->is_full_sync && mailchimp_list_has_double_optin();
+        } catch (\Exception $e) {
+            $has_doi_enabled = false;
+        }
+
         // will either add or update the order
         try {
             // transform the order
@@ -180,6 +186,11 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
             if ($this->shouldSkipOrder($email, $order->getId())) {
                 return false;
+            }
+
+            // let's use this or not use this based on the status.
+            if ($order->getCustomer()->getOptInStatus()) {
+                $api->useAutoDoi($has_doi_enabled);
             }
 
             $current_status = null;
@@ -304,13 +315,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 				}
 	        }
 
-            // if we require double opt in on the list, and the customer requires double opt in,
-            // we should mark them as pending so they get the opt in email now.
-            if (!$this->is_full_sync && mailchimp_list_has_double_optin()) {
-                $status_if_new = $order->getCustomer()->getOptInStatus() ? 'pending' : 'transactional';
-            } else {
-                $status_if_new = $order->getCustomer()->getOptInStatus() ? 'subscribed' : 'transactional';
-            }
+            $status_if_new = $order->getCustomer()->getOptInStatus() ? 'subscribed' : 'transactional';
 
             // if this is not currently in mailchimp - and we have the saved GDPR fields from
             // we can use the post meta for gdpr fields that were saved during checkout.

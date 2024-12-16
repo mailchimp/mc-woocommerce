@@ -199,6 +199,8 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
         $subscribed = $this->subscribed === '' || $this->subscribed === '0' ? 'transactional' : $this->subscribed;
 
 		$status_meta = mailchimp_get_subscriber_status_options($subscribed);
+        $uses_doi = $status_meta && $status_meta['requires_double_optin'];
+        $api->useAutoDoi($uses_doi);
 
 		try {
 
@@ -209,7 +211,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 				return false;
 			}
 
-            $member_data = $api->update($list_id, $email, $status_meta['created'], $merge_fields, null, $language, $gdpr_fields);
+            $member_data = $api->update($list_id, $email, $subscribed, $merge_fields, null, $language, $gdpr_fields);
 
             // if we're updating a member and the email is different, we need to delete the old person
 			if (is_array($this->updated_data) && isset($this->updated_data['user_email'])) {

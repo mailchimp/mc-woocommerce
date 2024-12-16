@@ -1485,21 +1485,37 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
             if (!is_array($merge_fields)) $merge_fields = array();
 
             try {
-                $should_doi = $live_traffic === true && mailchimp_list_has_double_optin();
+                $should_doi = $live_traffic && mailchimp_list_has_double_optin();
             } catch (\Exception $e) {
                 $should_doi = false;
             }
 
-            // if we're passing in a subscribed value, we can trigger the double opt in
-            if ($should_doi && ($status_if_new === true || $status_if_new === 'subscribed' || $status_if_new === '1')) {
-                $status_if_new = 'pending';
-            }
+            $result = mailchimp_get_api()
+                ->useAutoDoi($should_doi)
+                ->update(
+                    $list_id,
+                    $user_email,
+                    $status_if_new,
+                    $merge_fields,
+                    null,
+                    $language,
+                    $gdpr_fields_to_save,
+                    $caller === 'cart'
+                );
 
-            $result = mailchimp_get_api()->update($list_id, $user_email, $status_if_new, $merge_fields, null, $language, $gdpr_fields_to_save, $caller === 'cart');
+            // if we are passing over a value that's not subscribed and mailchimp returns subscribed
+            // we need to set the user meta properly.
+            if (!in_array($status_if_new, ['subscribed', 'pending'], true) && in_array($result['status'], ['subscribed', 'pending'], true)) {
+                $user = get_user_by('email', $user_email);
+                if ($user && $user->ID > 0) {
+                    mailchimp_log('integration_logic', "mailchimp_member_data_update set the user meta for {$user_email} to subscribed because it was out of sync.");
+                    update_user_meta($user->ID, 'mailchimp_woocommerce_is_subscribed', '1');
+                }
+            }
 
             // set transient to prevent too many calls to update language
             mailchimp_set_transient($caller . ".member.{$hash}", true, 3600);
-            mailchimp_log($caller . '.member.updated', "Updated {$user_email} subscriber status to {$result['status']} and language to {$language}");
+            mailchimp_log($caller . '.member.updated', "Updated {$user_email} subscriber status to {$result['status']}".(!empty($language) ? "and language to {$language}" : ""));
         } catch (Exception $e) {
             $merge_fields = $order ? apply_filters('mailchimp_get_ecommerce_merge_tags', array(), $order) : array();
             if (!is_array($merge_fields)) $merge_fields = array();

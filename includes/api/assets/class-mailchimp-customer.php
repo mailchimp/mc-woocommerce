@@ -386,7 +386,7 @@ class MailChimp_WooCommerce_Customer {
 			array(
 				'id'            => (string) $this->getId(),
 				'email_address' => (string) $this->getEmailAddress(),
-				'opt_in_status' => $this->getOptInStatus(),
+				'opt_in_status' => false, //$this->getOptInStatus(),
                 'marketing_status_updated_at' => $this->getOptInStatusTimeAsString(),
                 'company'       => (string) $this->getCompany(),
                 'first_name'    => (string) $this->getFirstName(),

@@ -176,6 +176,26 @@
 			});
 		});
 
+		$('.mc-woocommerce-toggle-chimpstatic-button').click(function(e) {
+			e.preventDefault();
+
+			Swal.fire({
+				title: phpVars.l10n.toggling_chimpstatic_in_progress,
+				onBeforeOpen: () => {
+					Swal.showLoading()
+				}
+			});
+
+			var data = {
+				action:'mailchimp_woocommerce_toggle_chimpstatic_script',
+			};
+
+			$.post(ajaxurl, data, function(response) {
+				console.log('toggled mailchimp script', data.status);
+				window.location.reload();
+			});
+		});
+
 		/*
 		* Shows dialog on store disconnect
 		* Change wp_http_referer URL in case of store disconnect

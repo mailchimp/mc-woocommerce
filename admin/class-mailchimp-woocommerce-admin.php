@@ -160,6 +160,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 						'store_disconnect_in_progress' => __( 'Disconnecting store in progress', 'mailchimp-for-woocommerce' ),
 						'login_popup_blocked'          => __( 'Login Popup is blocked!', 'mailchimp-for-woocommerce' ),
 						'login_popup_blocked_desc'     => __( 'Please allow your browser to show popups for this page', 'mailchimp-for-woocommerce' ),
+                        'toggling_chimpstatic_in_progress' => __( 'Toggling Mailchimp script in progress', 'mailchimp-for-woocommerce' ),
 						'support_message_sending'      => __( 'Sending support request', 'mailchimp-for-woocommerce' ),
 						'support_message_ok'           => __( 'Message received', 'mailchimp-for-woocommerce' ),
 						'support_message_desc'         => __( 'Thanks, your message has been received.', 'mailchimp-for-woocommerce' ),
@@ -847,6 +848,12 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 }
                 break;
 			case 'plugin_settings':
+                if ( isset( $_POST['mc_action'] ) && in_array( $_POST['mc_action'], array( 'toggle_chimpstatic_script' ) ) ) {
+                    $path = 'admin.php?page=mailchimp-woocommerce&tab=plugin_settings';
+                    wp_redirect( $path );
+                    exit();
+                }
+
 				// case disconnect
 				if ( $this->is_disconnecting() ) {
 					// Disconnect store!
@@ -2222,6 +2229,14 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			)
 		);
 	}
+
+    public function mailchimp_woocommerce_ajax_toggle_chimpstatic_script() {
+        $this->adminOnlyMiddleware();
+        $code_snippet_activated = (bool) \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-code-snippet', '1');
+        \Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp-woocommerce-code-snippet', $code_snippet_activated ? '0' : '1');
+        mailchimp_log('plugin admin', "Updated mailchimp code snippet to ".($code_snippet_activated ? '0' : '1'));
+        wp_send_json_success( array( 'success' => true, 'status' =>  $code_snippet_activated ? '0' : '1') );
+    }
 
 	/**
 	 *

@@ -178,7 +178,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $handler->is_update = $newOrder ? !$newOrder : null;
         $handler->is_admin_save = is_admin();
         $handler->prepend_to_queue = mailchimp_should_prepend_live_traffic_to_queue();
-;
+
         mailchimp_handle_or_queue($handler, 90);
     }
 
@@ -840,7 +840,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
         $rest_url = wp_parse_url( trailingslashit( rest_url( ) ) );
         $current_url = wp_parse_url( add_query_arg( array( ) ) );
-        return strpos( $current_url['path'] ?? '/', $rest_url['path'], 0 ) === 0;
+        return strpos( (string) $current_url['path'] ?? '/', (string) $rest_url['path'], 0 ) === 0;
     }
 
     /**

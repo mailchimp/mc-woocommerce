@@ -125,6 +125,22 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 		    }
 	    }
 
+        if ($this->is_full_sync) {
+            $plugin_options = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce');
+            $subscribe_setting = (string)$plugin_options['mailchimp_auto_subscribe'];
+            $should_auto_subscribe = $subscribe_setting === '1';
+            $only_sync_existing = $subscribe_setting === '2';
+            try {
+                if ($only_sync_existing) {
+                    mailchimp_debug('logic', "checking if the member {$this->woo_order->get_billing_email()} exists first before pushing the order");
+                    $api->member(mailchimp_get_list_id(), $this->woo_order->get_billing_email());
+                }
+            } catch (\Exception $e) {
+                mailchimp_log( 'order_process', "Order #{$woo_order_number} skipped, user #{$this->woo_order->get_user_id()} was not present in the audience." );
+                return false;
+            }
+        }
+
         $job = new MailChimp_WooCommerce_Transform_Orders();
         $job->setSyncing($this->is_full_sync);
 

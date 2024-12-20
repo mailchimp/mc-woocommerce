@@ -1684,6 +1684,31 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	}
 
     /**
+     * @return false|mixed
+     */
+    public function getUserID()
+    {
+        if ( ! $this->validateApiKey() ) {
+            return false;
+        }
+
+        // if we've set the account name
+        if ( ( $user_id = $this->getData( 'mailchimp_user_id', false ) ) ) {
+            return $user_id;
+        }
+
+        try {
+            $response = mailchimp_get_api()->getAccountInfo();
+            $this->setData('mailchimp_user_id', $response['user_id']);
+            $this->setData('saved_user_id', true);
+            return $response['user_id'];
+        } catch (\Exception $e) {
+            $this->setData('saved_user_id', false);
+            return false;
+        }
+    }
+
+    /**
      * @return false|string
      */
     public function getAccountName()
@@ -1694,25 +1719,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
         // if we've set the account name
         if ( ( $account_name = $this->getData( 'account_name', false ) ) ) {
-            $requested_metadata = $this->getData('mailchimp_metadata', null);
-            if (is_bool($requested_metadata)) {
-                return $account_name;
-            }
-        }
-
-        $metadata = $this->api()->metadata();
-
-        // if we've got access to the metadata
-        if (is_array($metadata) && !empty($metadata)) {
-            // grab the important fields and save them
-            $name = array_key_exists('accountname', $metadata) ? $metadata['accountname'] : false;
-            $mailchimp_user_id = array_key_exists('user_id', $metadata) ? $metadata['user_id'] : false;
-            $mailchimp_login_id = array_key_exists('login', $metadata) ? $metadata['login']['login_id'] : false;
-            $this->setData('account_name', $name);
-            $this->setData('mailchimp_metadata', true);
-            $this->setData('mailchimp_user_id', $mailchimp_user_id);
-            $this->setData('mailchimp_login_id', $mailchimp_login_id);
-            return $name;
+            return $account_name;
         }
 
         // older version here.
@@ -1722,10 +1729,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             $name = array_key_exists('account_name', $root) ? $root['account_name'] : false;
             $mailchimp_login_id = array_key_exists('login_id', $root) ? $root['login_id'] : false;
             $this->setData('account_name', $name);
-            $this->setData('mailchimp_metadata', false);
-            $this->setData('mailchimp_user_id', null);
             $this->setData('mailchimp_login_id', $mailchimp_login_id);
-
             return $name;
         }
 

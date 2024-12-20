@@ -40,6 +40,7 @@ $clicked_sync_button      	= $mc_configured && $is_mailchimp_post && MC_WC_OVERV
 $has_api_error            	= isset( $options['api_ping_error'] ) && ! empty( $options['api_ping_error'] ) ? $options['api_ping_error'] : null;
 $audience_name 				= $handler->getListName() ? $handler->getListName() : '';
 $account_name               = $handler->getAccountName();
+$mailchimp_user_id          = $handler->getUserID();
 $store_name                 = get_option( 'blogname' );
 
 // only do this if we haven't selected an audience.

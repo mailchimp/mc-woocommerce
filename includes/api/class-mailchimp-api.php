@@ -150,6 +150,16 @@ class MailChimp_WooCommerce_MailChimpApi {
 		return $this->get( '/' );
 	}
 
+    /**
+     * @return array|bool|mixed|object|null
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_RateLimitError
+     * @throws MailChimp_WooCommerce_ServerError
+     */
+    public function getAccountInfo() {
+        return $this->get( '/account-info' );
+    }
+
 	/**
 	 * @return array|bool|mixed|object|null
 	 * @throws MailChimp_WooCommerce_Error

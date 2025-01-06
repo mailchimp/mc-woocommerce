@@ -154,9 +154,12 @@ class Mailchimp_Woocommerce_Event
 
             if ( $response instanceof WP_Error ) {
                 mailchimp_error( 'mailchimp_events',"Could not post event data to mailchimp beacon.", $response );
-
                 return $response;
             }
+
+            mailchimp_debug('event_tracer', $this->object_detail, array(
+                'id' => isset($response['headers']) && isset($response['headers']['event_id']) ? $response['headers']['event_id'] : 'none'
+            ));
 
             return json_decode( $response['body'] );
         } catch (\Throwable $e) {
@@ -199,7 +202,7 @@ class Mailchimp_Woocommerce_Event
      */
     public function compile()
     {
-        $format = 'Y-m-d H:i:s';
+        $format = 'Y-m-d\TH:i:s.v\Z';
         $current = new DateTime('now');
         $payload = array(
             'timestamp' => $current->format($format),

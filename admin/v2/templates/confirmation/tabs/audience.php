@@ -9,6 +9,7 @@
 ?>
 
 <input type="hidden" name="mailchimp_active_settings_tab" value="<?php echo MC_WC_AUDIENCE_TAB; ?>"/>
+<input type="hidden" name="mailchimp_connection_status" value="connected"/>
 <div class="mc-wc-tab-content-wrapper audience">
     <div class="mc-wc-tab-content-box">
         <div class="mc-wc-tab-content-title">

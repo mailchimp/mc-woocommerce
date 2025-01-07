@@ -9,10 +9,12 @@
 			let href = $(this).attr('href');
 
 			let mcEvent = $(this).data('mc-event');
+			let mcEventContext = $(this).data('mc-tab');
 
 			var data = {
 				action:'mailchimp_woocommerce_send_event',
-				mc_event: mcEvent
+				mc_event: mcEvent,
+				mc_context: mcEventContext
 			};
 
 			$.post(ajaxurl, data, function(response) {
@@ -102,6 +104,11 @@
 			$temp.remove();
 			$('.mc-woocommerce-copy-log-button span.clipboard').hide();
 			$('.mc-woocommerce-copy-log-button span.yes').show();
+			var data = {
+				action:'mailchimp_woocommerce_send_event',
+				mc_event: 'save_log',
+			};
+			$.post(ajaxurl, data, function(response) {});
 		});
 
 		$('.mc-woocommerce-copy-log-button').mouseleave(function (e) {

@@ -296,7 +296,7 @@ if ( $store ) {
                     <p>
                         <?php esc_html_e('Get started with flexible templates, drag-and-drop design, and our built-in, expert advice. AI-assisted tools can help generate and optimize your content.', 'mailchimp-for-woocommerce' ); ?>
                     </p>
-                    <a href="https://admin.mailchimp.com/campaigns/#/create-campaign" data-mc-event="recommendation_2" class="mc-wc-btn mc-wc-btn-primary no-linear-gradient js-mailchimp-woocommerce-send-event"  target="_blank"><?php esc_html_e('Create your first email', 'mailchimp-for-woocommerce' ); ?></a>
+                    <a href="https://admin.mailchimp.com/campaigns/#/create-campaign" data-mc-event="recommendation_3" class="mc-wc-btn mc-wc-btn-primary no-linear-gradient js-mailchimp-woocommerce-send-event"  target="_blank"><?php esc_html_e('Create your first email', 'mailchimp-for-woocommerce' ); ?></a>
                 </div>
                 <div class="mc-wc-tab-content-blogs-image">
                     <img src="<?php echo esc_attr( plugin_dir_url( __FILE__ ) . '../../../assets/images/blog-image-3.png' ); ?>" alt="">

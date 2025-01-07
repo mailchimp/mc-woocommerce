@@ -21,6 +21,9 @@ if ($profile) {
 }
 
 $store_defaults = MailChimp_WooCommerce_Admin::instance()->loadWooStoreData();
+if (!$signup_initiated) {
+    Mailchimp_Woocommerce_Event::track('connect_accounts:view_create_account', new \DateTime());
+}
 ?>
 <div id="mc-woocommerce-create-account">
 	<input type="hidden" name="signup_initiated" value="<?php echo esc_attr(!!$signup_initiated) ?>" />

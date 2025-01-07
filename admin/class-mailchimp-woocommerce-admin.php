@@ -835,10 +835,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				$data = array(
 					'mailchimp_logging' => isset( $input['mailchimp_logging'] ) ? $input['mailchimp_logging'] : 'none',
 				);
-                if ($this->getOption('mailchimp_logging', 'none') !== $data['mailchimp_logging']) {
-                    if ($data['mailchimp_logging'] === '0') {
-                        Mailchimp_Woocommerce_Event::track('navigation_logs:preferences', new DateTime());
-                    }
+
+                if ($this->getOption('mailchimp_logging') !== $data['mailchimp_logging']) {
+                    Mailchimp_Woocommerce_Event::track('navigation_logs:preferences', new DateTime());
                 }
 
                 if ( isset( $_POST['mc_action'] ) && in_array( $_POST['mc_action'], array( 'view_log', 'remove_log' ) ) ) {
@@ -1211,11 +1210,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 	public function mailchimp_woocommerce_ajax_create_account_signup() {
 		global $wpdb;
-		Mailchimp_Woocommerce_Event::track('account:sign_up_button_click', new DateTime());
-		Mailchimp_Woocommerce_Event::track('connect_accounts:click_signup_bottom', new DateTime());
+		//Mailchimp_Woocommerce_Event::track('account:sign_up_button_click', new DateTime());
+		Mailchimp_Woocommerce_Event::track('connect_accounts:activate_account', new DateTime());
 		$this->adminOnlyMiddleware();
 		$pload = $this->getPostData();
-
 		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/signup/', $pload );
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
@@ -1388,8 +1386,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	protected function validatePostNewsletterSettings( $input ) {
 		$sanitized_tags = array_map( 'sanitize_text_field', explode( ',', $input['mailchimp_user_tags'] ) );
-		$active_tab = isset( $input['mailchimp_active_tab'] ) ? $input['mailchimp_active_tab'] : (isset( $input['mailchimp_active_settings_tab'] ) ? $input['mailchimp_active_settings_tab']: null);
         $breadcrumb = isset($input['mailchimp_active_breadcrumb']) ? $input['mailchimp_active_breadcrumb'] : '';
+
+        // a way to determine which screen the user is on
+        $connection_status = isset($input['mailchimp_connection_status']) ? $input['mailchimp_connection_status'] : null;
+        $connected = $connection_status === 'connected';
 
         // if we're on the review sync settings page, or the confirmation page,
         // we have a checkbox for the ongoing sync status. When the form is submitted,
@@ -1403,6 +1404,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         }
 
         if ($breadcrumb === 'review_sync_settings') {
+            // this is the initial sync
             $validate_campaign_settings = true;
             $data = array_merge($this->loadWooStoreData(), array(
                 'mailchimp_list'                => isset( $input['mailchimp_list'] ) ? $input['mailchimp_list'] : '',
@@ -1411,7 +1413,14 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 'mailchimp_user_tags'           => isset( $input['mailchimp_user_tags'] ) ? implode( ',', $sanitized_tags ) : $this->getOption( 'mailchimp_user_tags' ),
                 'mailchimp_ongoing_sync_status' => isset( $input['mailchimp_ongoing_sync_status'] ) ? (bool) $input['mailchimp_ongoing_sync_status'] : '0',
             ));
-            Mailchimp_Woocommerce_Event::track('review_settings:sync_now_bottom', new DateTime());
+            $key = !$connected ? 'review_settings' : 'navigation_audience';
+            $events = ['0' => 'sync_as_non_subscribed', '1' => 'sync_as_subscribed', '2' => 'sync_existing_only'];
+            $found = array_key_exists($data['mailchimp_auto_subscribe'], $events) ? $events[$data['mailchimp_auto_subscribe']] : null;
+            if ($found) {
+                Mailchimp_Woocommerce_Event::track("{$key}:{$found}", new DateTime());
+            }
+            // only do this when they are not connected yet.
+            !$connected && Mailchimp_Woocommerce_Event::track('review_settings:sync_now_bottom', new DateTime());
         } else if ($breadcrumb === 'confirmation') {
             $validate_campaign_settings = false;
             $data = array(
@@ -1430,44 +1439,22 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             ));
         }
 
-        if ($this->getOption('mailchimp_auto_subscribe', '1') !== $data['mailchimp_auto_subscribe']) {
-          if ($data['mailchimp_auto_subscribe'] === '0') {
-              Mailchimp_Woocommerce_Event::track('review_settings:sync_as_non_subscribed', new DateTime());
-          } else if ($data['mailchimp_auto_subscribe'] === '1') {
-              Mailchimp_Woocommerce_Event::track('review_settings:sync_as_subscribed', new DateTime());
-          } else if ($data['mailchimp_auto_subscribe'] === '2') {
-              Mailchimp_Woocommerce_Event::track('review_settings:sync_existing_only', new DateTime());
-          }
-        }
-
-		if ($this->getOption('mailchimp_cart_tracking', 'all') !== $data['mailchimp_cart_tracking']) {
-            if ($data['mailchimp_cart_tracking'] === 'all') {
-                Mailchimp_Woocommerce_Event::track('review_settings:cart_tracking_all', new DateTime());
-            } else if ($data['mailchimp_cart_tracking'] === 'subscribed') {
-                Mailchimp_Woocommerce_Event::track('review_settings:cart_tracking_only_subs', new DateTime());
-            } else if ($data['mailchimp_cart_tracking'] === 'disabled') {
-                Mailchimp_Woocommerce_Event::track('review_settings:cart_tracking_disabled', new DateTime());
+		if ($breadcrumb === 'confirmation' && $this->getOption('mailchimp_cart_tracking') !== $data['mailchimp_cart_tracking']) {
+            $cart_events = ['all' => 'cart_tracking_all', 'subscribed' => 'cart_tracking_only_subs', 'disabled' => 'cart_tracking_disabled'];
+            if ($data['mailchimp_cart_tracking'] && array_key_exists($data['mailchimp_cart_tracking'], $cart_events)) {
+                Mailchimp_Woocommerce_Event::track('navigation_audience:'.$cart_events[$data['mailchimp_cart_tracking']], new DateTime());
             }
 		}
 
-		if ((bool) $this->getOption('mailchimp_ongoing_sync_status', '1') !== (bool) $data['mailchimp_ongoing_sync_status']) {
-            if ($data['mailchimp_ongoing_sync_status'] === '1' || $data['mailchimp_ongoing_sync_status'] === true) {
-                if ($active_tab === 'newsletter_settings') {
-                    Mailchimp_Woocommerce_Event::track('review_settings:sync_new_non_subscribed', new DateTime());
-                } else {
-                    Mailchimp_Woocommerce_Event::track('navigation_audience:sync_new_non_subscribed', new DateTime());
-                }
-            }
+		if ((bool) $this->getOption('mailchimp_ongoing_sync_status') !== (bool) $data['mailchimp_ongoing_sync_status']) {
+            $type = $data['mailchimp_ongoing_sync_status'] === '1' || $data['mailchimp_ongoing_sync_status'] === true ? 'sync_new_non_subscribed' : 'sync_subscribed_only';
+            $key = !$connected ? 'review_settings' : 'navigation_audience';
+            Mailchimp_Woocommerce_Event::track("{$key}:{$type}", new DateTime());
 		}
 
-		if ($this->getOption('mailchimp_user_tags') !== $data['mailchimp_user_tags']) {
-            if (!empty($data['mailchimp_user_tags'])) {
-                if ($active_tab === 'newsletter_settings') {
-                    Mailchimp_Woocommerce_Event::track('review_settings:add_new_tag', new DateTime());
-                } else {
-                    Mailchimp_Woocommerce_Event::track('navigation_audience:add_new_tag', new DateTime());
-                }
-            }
+		if ($this->getOption('mailchimp_user_tags') !== $data['mailchimp_user_tags'] && !empty($data['mailchimp_user_tags'])) {
+            $key = !$connected ? 'review_settings' : 'navigation_audience';
+            Mailchimp_Woocommerce_Event::track("{$key}:add_new_tag", new DateTime());
 		}
 
 		$this->setData( 'validation.newsletter_settings', true );
@@ -2247,8 +2234,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function mailchimp_woocommerce_ajax_delete_log_file() {
 		$this->adminOnlyMiddleware();
-		Mailchimp_Woocommerce_Event::track('navigation_logs:delete', new DateTime());
-
 		if ( ! isset( $_POST['log_file'] ) || empty( $_POST['log_file'] ) ) {
 			wp_send_json_error( __( 'No log file provided', 'mailchimp-for-woocommerce' ) );
 			return;
@@ -2256,7 +2241,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$requested_log_file = $_POST['log_file'];
 		$log_handler        = new WC_Log_Handler_File();
 		$removed            = $log_handler->remove( str_replace( '-log', '.log', $requested_log_file ) );
-		wp_send_json_success( array( 'success' => $removed ) );
+
+        Mailchimp_Woocommerce_Event::track('navigation_logs:delete', new DateTime());
+
+        wp_send_json_success( array( 'success' => $removed ) );
 	}
 
 	/**
@@ -2294,30 +2282,29 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		wp_send_json_error( __( 'Error loading log file contents', 'mailchimp-for-woocommerce' ) );
 	}
 
-	public function mailchimp_woocommerce_send_event() {
-			$this->adminOnlyMiddleware();
-      if ( ! isset( $_POST['mc_event'] ) || empty( $_POST['mc_event'] ) ) {
+	public function mailchimp_woocommerce_send_event()
+    {
+        $this->adminOnlyMiddleware();
+        if (empty( $_POST['mc_event'])) {
           wp_send_json_error( __( 'No event provided', 'mailchimp-for-woocommerce' ) );
           return;
-      }
-			$mc_event = sanitize_text_field($_POST['mc_event']);
-      $payload = 'nothing';
-      if ($mc_event === 'leave_review') {
-          $payload = Mailchimp_Woocommerce_Event::track('audience_stats:leave_review', new DateTime());
-      } else if ($mc_event === 'recommendation_1') {
-          $payload = Mailchimp_Woocommerce_Event::track('audience_stats:recommendation_1', new DateTime());
-      } else if ($mc_event === 'recommendation_2') {
-          $payload = Mailchimp_Woocommerce_Event::track('audience_stats:recommendation_2', new DateTime());
-      } else if ($mc_event === 'recommendation_3') {
-          $payload = Mailchimp_Woocommerce_Event::track('audience_stats:recommendation_3', new DateTime());
-      } else if ($mc_event === 'click_create_account') {
-          $payload = Mailchimp_Woocommerce_Event::track('connect_accounts:click_to_create_account', new DateTime());
-      } else if ($mc_event === 'continue_to_mailchimp') {
-          $payload = Mailchimp_Woocommerce_Event::track('connect_accounts:continue_to_mailchimp', new DateTime());
-      }
-
-      wp_send_json_success(['payload' => $payload]);
-  }
+        }
+        $mc_event = sanitize_text_field($_POST['mc_event']);
+        //leave room for something like this later.
+        //$mc_context = isset($_POST['mc_context']) ? sanitize_text_field($_POST['mc_context']) : null;
+        $map = [
+          'leave_review' => 'audience_stats:leave_review',
+          'recommendation_1' => 'audience_stats:recommendation_1',
+          'recommendation_2' => 'navigation_audience:abandoned_cart',
+          'recommendation_3' => 'audience_stats:recommendation_3',
+          'click_create_account' => 'connect_accounts:click_to_create_account',
+          'continue_to_mailchimp' => 'audience_stats:continue_to_mailchimp',
+          'save_log' => 'navigation_logs:save',
+        ];
+        $payload = array_key_exists($mc_event, $map) ?
+            Mailchimp_Woocommerce_Event::track($map[$mc_event], new DateTime()) : 'nothing';
+        wp_send_json_success(['payload' => $payload]);
+    }
 
 	public function defineWebHooks() {
 		// run this every time the store is saved to be sure we've got the hooks enabled.

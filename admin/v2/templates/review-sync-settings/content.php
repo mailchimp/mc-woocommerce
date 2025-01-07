@@ -38,6 +38,7 @@ $ongoing_sync_subscribe = '1';
 	</div>
 <?php endif; ?>
 <input type="hidden" name="mailchimp_active_settings_tab" value="newsletter_settings"/>
+<input type="hidden" name="mailchimp_connection_status" value="not_connected"/>
 <div class="mc-wc-review-sync-settings-content">
     <div class="mc-wc-linked-audience">
         <div class="mc-wc-linked-audience-wrapper">
@@ -132,7 +133,7 @@ $ongoing_sync_subscribe = '1';
                     </div>
                 </div>
                 <div class="mc-wc-import-list-sync-description">
-                    <?php esc_html_e( 'Import new customers who haven’t opted in to receive your email marketing.  This setting must be active to use', 'mailchimp-for-woocommerce' ); ?> <a href="https://mailchimp.com/help/create-abandoned-cart-customer-journey/" target="_blank"><?php esc_html_e( 'Abandoned Cart automations.', 'mailchimp-for-woocommerce' ); ?></a>
+                    <?php esc_html_e( 'Import new customers who haven’t opted in to receive your email marketing.  This setting must be active to use', 'mailchimp-for-woocommerce' ); ?> <a href="https://mailchimp.com/help/create-abandoned-cart-customer-journey/" target="_blank" data-mc-event="abandoned_cart"><?php esc_html_e( 'Abandoned Cart automations.', 'mailchimp-for-woocommerce' ); ?></a>
                 </div>
             </div>
         </div>

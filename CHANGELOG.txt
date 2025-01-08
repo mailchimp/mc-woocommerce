@@ -1,4 +1,7 @@
 == Changelog ==
+= 5.1 =
+* New Features
+* Feature: Backend Optimizations/enhancements to aid in support.*
 = 5.0 =
 * New Features
 * Feature: Introduced a user-agent header "Mailchimp Support" to identify the plugin for support. Servers blocking external post traffic should add this to their safe user-agents.*

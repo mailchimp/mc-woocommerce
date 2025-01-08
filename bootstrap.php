@@ -2168,7 +2168,7 @@ function mailchimp_account_events() {
             'object_detail' => 'audience_settings',
             'action' => 'engaged',
             'ui_object' => 'checkbox',
-            'ui_object_detail' => 'sync_new_non_subscribed',
+            'ui_object_detail' => 'sync_non_subscribed',
             'ui_action' => 'clicked',
             'ui_access_point' => 'center',
         ),

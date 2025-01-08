@@ -1390,7 +1390,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
         // a way to determine which screen the user is on
         $connection_status = isset($input['mailchimp_connection_status']) ? $input['mailchimp_connection_status'] : null;
-        $connected = $connection_status === 'connected';
+        $connected = $connection_status === 'connected' || (bool) $this->getOption( 'mailchimp_list' );
 
         // if we're on the review sync settings page, or the confirmation page,
         // we have a checkbox for the ongoing sync status. When the form is submitted,

@@ -342,8 +342,8 @@ function mailchimp_list_has_double_optin($force = false) {
 
     $double_optin = mailchimp_get_transient($key);
 
-    if (!$force && ($double_optin === 'yes' || $double_optin === 'no')) {
-        return $double_optin === 'yes';
+    if (!$force && (isset($double_optin['value']) && ($double_optin['value'] === 'yes' || $double_optin['value'] === 'no'))) {
+        return $double_optin['value'] === 'yes';
     }
 
     try {

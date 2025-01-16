@@ -43,14 +43,17 @@ class MailChimp_WooCommerce_Transform_Orders {
 			'drafts'   => 0,
 			'stuffed'  => false,
 			'items'    => array(),
+            'has_next_page' => false
 		);
 
-		if ( ( ( $orders = $this->getOrderPosts( $page, $limit ) ) && ! empty( $orders ) ) ) {
-			foreach ( $orders as $post_id ) {
+		if ( ( ( $orders = $this->getOrderPosts( $page, $limit ) ) && ! empty( $orders['items'] ) ) ) {
+			foreach ( $orders['items'] as $post_id ) {
 				$response->items[] = $post_id;
 				$response->count++;
 			}
-		}
+
+            $response->has_next_page = $orders['has_next_page'];
+        }
 
 		$response->stuffed = $response->count > 0 && (int) $response->count === (int) $limit;
 		$this->is_syncing  = false;
@@ -384,10 +387,12 @@ class MailChimp_WooCommerce_Transform_Orders {
 			$offset = ( $page - 1 ) * $posts;
 		}
 
-		$params = array(
+        $limit = $posts + 1;
+
+        $params = array(
 			'post_type'      => 'shop_order',
             'post_status'    => 'wc-completed',
-			'posts_per_page' => $posts,
+			'posts_per_page' => $limit,
 			'offset'         => $offset,
 			'orderby'        => 'date',
 			'order'          => 'DESC',
@@ -396,7 +401,19 @@ class MailChimp_WooCommerce_Transform_Orders {
 
 		$orders = MailChimp_WooCommerce_HPOS::get_orders( $params );
 
-		return empty( $orders ) ? false : $orders;
+        if (empty( $orders ) ) {
+            return false;
+        }
+
+        $has_next_page = count( $orders ) > $posts;
+        if ( $has_next_page ) {
+            array_pop( $orders );
+        }
+
+		return [
+            'items' => $orders,
+            'has_next_page' => $has_next_page,
+        ];
 	}
 
 	/**

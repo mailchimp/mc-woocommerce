@@ -75,6 +75,7 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_Process_Full_Sync_Manager' => 'includes/processes/class-mailchimp-woocommerce-full-sync-manager.php',
         'MailChimp_WooCommerce_Subscriber_Sync' => 'includes/processes/class-mailchimp-woocommerce-subscriber-sync.php',
         'MailChimp_WooCommerce_WebHooks_Sync' => 'includes/processes/class-mailchimp-woocommerce-webhooks-sync.php',
+        'Mailchimp_Woocommerce_Complete_Resource_Sync' => 'includes/processes/class-mailchimp-woocommerce-complete-resource-sync.php',
 
         'MailChimp_WooCommerce_Public' => 'public/class-mailchimp-woocommerce-public.php',
         'MailChimp_WooCommerce_Admin' => 'admin/class-mailchimp-woocommerce-admin.php',
@@ -124,6 +125,7 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
     $job_id = isset($job->id) ? $job->id : ($current_page ? $job->current_page : get_class($job));
     $message = ($job_id != get_class($job)) ? ' :: '. (isset($job->current_page) ? 'page ' : 'obj_id ') . $job_id : '';
     $attempts = $job->get_attempts() > 0 ? ' attempt:' . $job->get_attempts() : '';
+
     if ($job->get_attempts() <= 5) {
 
         $args = array(
@@ -1296,15 +1298,15 @@ function mailchimp_flush_sync_pointers() {
     \Mailchimp_Woocommerce_DB_Helpers::delete_option( 'mailchimp-woocommerce-resource-last-updated' );
     \Mailchimp_Woocommerce_DB_Helpers::delete_option( 'mailchimp-woocommerce-sync.started_at' );
     \Mailchimp_Woocommerce_DB_Helpers::delete_option( 'mailchimp-woocommerce-sync.completed_at' );
-    foreach (array('orders', 'products', 'coupons') as $resource_type) {
+    foreach (array('customers', 'orders', 'products', 'coupons') as $resource_type) {
         mailchimp_flush_specific_resource_pointers($resource_type);
     }
 }
 
 function mailchimp_flush_specific_resource_pointers($resource_type) {
     \Mailchimp_Woocommerce_DB_Helpers::delete_option("mailchimp-woocommerce-sync.{$resource_type}.started_at");
+    \Mailchimp_Woocommerce_DB_Helpers::delete_option("mailchimp-woocommerce-sync.{$resource_type}-queueing.completed_at");
     \Mailchimp_Woocommerce_DB_Helpers::delete_option("mailchimp-woocommerce-sync.{$resource_type}.completed_at");
-    \Mailchimp_Woocommerce_DB_Helpers::delete_option("mailchimp-woocommerce-sync.{$resource_type}.started_at");
     \Mailchimp_Woocommerce_DB_Helpers::delete_option("mailchimp-woocommerce-sync.{$resource_type}.current_page");
 }
 

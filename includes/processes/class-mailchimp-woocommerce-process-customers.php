@@ -34,6 +34,6 @@ class MailChimp_WooCommerce_Process_Customers extends MailChimp_WooCommerce_Abst
         mailchimp_log('customers_sync.completed', 'Done with the customers queueing.');
 
         // add a timestamp for the orders sync completion
-        $this->setResourceCompleteTime();
+        $this->setResourceCompleteQueueingTime();
     }
 }

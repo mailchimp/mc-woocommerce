@@ -24,14 +24,17 @@ class MailChimp_WooCommerce_Transform_Products {
 			'count'    => 0,
 			'stuffed'  => false,
 			'items'    => array(),
+            'has_next_page' => false
 		);
 
-		if ( ( $products = $this->getProductPostsIds( $page, $limit ) ) && ! empty( $products )) {
+		if ( ( $products = $this->getProductPostsIds( $page, $limit ) ) && ! empty( $products['items'] )) {
 			foreach ( $products as $post_id ) {
 				$response->items[] = $post_id;
 				$response->count++;
 			}
-		}
+
+            $response->has_next_page = $products['has_next_page'];
+        }
 
 		$response->stuffed = $response->count > 0 && (int) $response->count === (int) $limit;
 
@@ -227,9 +230,11 @@ class MailChimp_WooCommerce_Transform_Products {
 			$offset = ( ( $page - 1 ) * $posts );
 		}
 
+        $limit = $posts + 1;
+
 		$params = array(
 			'post_type'      => array_merge( array_keys( wc_get_product_types() ), array( 'product' ) ),
-			'posts_per_page' => $posts,
+			'posts_per_page' => $limit,
 			'post_status'    => array( 'private', 'publish', 'draft' ),
 			'offset'         => $offset,
 			'orderby'        => 'ID',
@@ -239,16 +244,32 @@ class MailChimp_WooCommerce_Transform_Products {
 
 		$products = get_posts( $params );
 
+        $has_next_page = count( $products ) > $posts;
+
+        if ( $has_next_page ) {
+            array_pop( $products );
+        }
+
 		if ( empty( $products ) ) {
 			sleep( 2 );
 			$products = get_posts( $params );
-			if ( empty( $products ) ) {
+
+            $has_next_page = count( $products ) > $posts;
+
+            if ( $has_next_page ) {
+                array_pop( $products );
+            }
+
+            if ( empty( $products ) ) {
 				return false;
 			}
 		}
 
-		return $products;
-	}
+        return [
+            'items' => $products,
+            'has_next_page' => $has_next_page,
+        ];
+    }
 
 	/**
 	 * @param $id

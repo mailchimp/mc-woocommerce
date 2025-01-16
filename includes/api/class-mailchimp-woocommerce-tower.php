@@ -884,8 +884,12 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 				'timeout' => 30,
 			);
 			$response = wp_remote_post( $post_url, $payload );
+            if (isset($response['code']) && $response['code'] !== 200) {
+                return ['success' => false, 'code' => $response['code'], 'message' => $response['message']];
+            }
 			return json_decode( $response['body'] );
 		} catch ( Throwable $e ) {
+            mailchimp_error("could not toggle support", $e->getMessage());
 			return null;
 		}
 	}

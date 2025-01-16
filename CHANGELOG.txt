@@ -1,4 +1,6 @@
 == Changelog ==
+= 5.2 =
+* Fix cached value for double opt in ( optimization )
 = 5.1 =
 * New Features
 * Feature: Backend Optimizations/enhancements to aid in support.*

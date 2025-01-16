@@ -624,7 +624,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
     {
 	    if ((bool) mailchimp_get_data('sync.syncing' )) {
 		    $toggle_mailchimp = false;
-            if (\Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.orders.completed_at' )) {
+            if (\Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.orders-queueing.completed_at' )) {
 			    $toggle_mailchimp = true;
 		    } else {
 	            $sync_started_at = (int) \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce-sync.started_at' );
@@ -634,9 +634,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 if ($difference >= $seconds_in_days && ($sync_started_at / $seconds_in_days >= 30)) {
 		            $toggle_mailchimp = true;
 	                \Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp-woocommerce-sync.products.started_at', $sync_started_at);
-	                \Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp-woocommerce-sync.products.completed_at', $sync_started_at+60);
+	                \Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp-woocommerce-sync.products-queueing.completed_at', $sync_started_at+60);
 		            \Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp-woocommerce-sync.orders.started_at', $sync_started_at);
-		            \Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp-woocommerce-sync.orders.completed_at', $sync_started_at+60);
+		            \Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp-woocommerce-sync.orders-queueing.completed_at', $sync_started_at+60);
 	            }
             }
 		    if ($toggle_mailchimp) {

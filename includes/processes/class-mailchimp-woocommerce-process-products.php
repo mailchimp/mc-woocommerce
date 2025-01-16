@@ -43,6 +43,6 @@ class MailChimp_WooCommerce_Process_Products extends MailChimp_WooCommerce_Abstr
         mailchimp_log('product_sync.completed', 'Done with the product queuing');
 
         // add a timestamp for the product sync completion
-        $this->setResourceCompleteTime();
+        $this->setResourceCompleteQueueingTime();
     }
 }

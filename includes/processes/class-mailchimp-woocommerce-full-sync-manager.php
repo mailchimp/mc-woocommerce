@@ -137,10 +137,10 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 
 			// get completed queueing processes
 			$completed = array(
-                'customers' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.customers.completed_at'),
-				'coupons' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.coupons.completed_at'),
-				'products' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.products.completed_at'),
-				'orders' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.orders.completed_at')
+                'customers' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.customers-queueing.completed_at'),
+				'coupons' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.coupons-queueing.completed_at'),
+				'products' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.products-queueing.completed_at'),
+				'orders' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.orders-queueing.completed_at')
 			);
 
             // make sure customers are fully synced before syncing products

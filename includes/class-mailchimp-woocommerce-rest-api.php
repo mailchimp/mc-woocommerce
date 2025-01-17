@@ -39,6 +39,24 @@ class MailChimp_WooCommerce_Rest_Api
             'permission_callback' => array($this, 'permission_callback'),
         ));
 
+        register_rest_route(static::$namespace, '/sync/stats/customers', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'get_customer_count_stats'),
+            'permission_callback' => array($this, 'permission_callback'),
+        ));
+
+        register_rest_route(static::$namespace, '/sync/stats/orders', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'get_order_count_stats'),
+            'permission_callback' => array($this, 'permission_callback'),
+        ));
+
+        register_rest_route(static::$namespace, '/sync/stats/products', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'get_product_count_stats'),
+            'permission_callback' => array($this, 'permission_callback'),
+        ));
+
         // remove review banner
         register_rest_route(static::$namespace, "/review-banner", array(
             'methods' => 'GET',
@@ -235,6 +253,78 @@ class MailChimp_WooCommerce_Rest_Api
             'has_finished' => mailchimp_is_done_syncing(),
 	        'last_loop_at' => mailchimp_get_data('sync.last_loop_at'),
             'real' => $internal ?? null,
+        ));
+    }
+
+    /**
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     */
+    public function get_customer_count_stats(WP_REST_Request $request)
+    {
+        // if the queue is running in the console - we need to say tell the response why it's not going to fire this way.
+        if (!mailchimp_is_configured() || !($api = mailchimp_get_api())) {
+            return $this->mailchimp_rest_response(array('success' => false, 'reason' => 'not configured'));
+        }
+
+        try {
+            $mailchimp = $api->getCustomerCount(mailchimp_get_store_id());
+        } catch (Exception $e) { $mailchimp = 0; }
+
+        // but we need to do it just in case.
+        return $this->mailchimp_rest_response(array(
+            'success' => true,
+            'in_store' => mailchimp_get_customer_lookup_count(),
+            'in_mailchimp' => $mailchimp,
+        ));
+    }
+
+    /**
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     */
+    public function get_order_count_stats(WP_REST_Request $request)
+    {
+        // if the queue is running in the console - we need to say tell the response why it's not going to fire this way.
+        if (!mailchimp_is_configured() || !($api = mailchimp_get_api())) {
+            return $this->mailchimp_rest_response(array('success' => false, 'reason' => 'not configured'));
+        }
+
+        try {
+            $mailchimp = $api->getOrderCount(mailchimp_get_store_id());
+        } catch (Exception $e) { $mailchimp = 0; }
+
+        // but we need to do it just in case.
+        return $this->mailchimp_rest_response(array(
+            'success' => true,
+            'in_store' => mailchimp_get_order_count(),
+            'in_mailchimp' => $mailchimp,
+        ));
+    }
+
+    /**
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     */
+    public function get_product_count_stats(WP_REST_Request $request)
+    {
+        // if the queue is running in the console - we need to say tell the response why it's not going to fire this way.
+        if (!mailchimp_is_configured() || !($api = mailchimp_get_api())) {
+            return $this->mailchimp_rest_response(array('success' => false, 'reason' => 'not configured'));
+        }
+
+        try {
+            $mailchimp = $api->getProductCount(mailchimp_get_store_id());
+        } catch (Exception $e) { $mailchimp = 0; }
+
+        // but we need to do it just in case.
+        return $this->mailchimp_rest_response(array(
+            'success' => true,
+            'in_store' => mailchimp_get_product_count(),
+            'in_mailchimp' => $mailchimp,
         ));
     }
 

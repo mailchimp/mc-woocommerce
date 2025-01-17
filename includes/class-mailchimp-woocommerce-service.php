@@ -598,7 +598,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     public function handlePostTrashed($post_id)
     {
         if (!mailchimp_is_configured()) return;
-        switch (MailChimp_WooCommerce_HPOS::get_type($post_id)) {
+        switch (get_post_type($post_id)) {
             case 'shop_coupon':
                 try {
                     $deleted = mailchimp_get_api()->deletePromoRule(mailchimp_get_store_id(), $post_id);

@@ -454,7 +454,8 @@ class MailChimp_WooCommerce
                 "MailChimp_WooCommerce_Process_Coupons",
                 "MailChimp_WooCommerce_Process_Orders",
                 "MailChimp_WooCommerce_Process_Products",
-                "MailChimp_WooCommerce_WebHooks_Sync"
+                "MailChimp_WooCommerce_WebHooks_Sync",
+                "Mailchimp_Woocommerce_Complete_Resource_Sync"
             );
             foreach ($jobs_classes as $job_class) {
                 $this->loader->add_action($job_class, $service, 'mailchimp_process_single_job');

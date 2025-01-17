@@ -176,7 +176,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
         }
 
         $page = $this->getResources();
-        
+
         if (empty($page)) {
             mailchimp_debug(get_called_class().'@handle', 'could not find any more '.$this->getResourceType().' records ending on page '.$this->getResourcePagePointer());
             // call the completed event to process further
@@ -204,7 +204,6 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
 
         // iterate through the items and send each one through the pipeline based on this class.
         foreach ($page->items as $resource) {
-
             switch ($this->getResourceType()) {
                case 'customers':
                    mailchimp_handle_or_queue(new MailChimp_Woocommerce_Single_Customer($resource));
@@ -224,6 +223,10 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
                     mailchimp_log('sync.error', $this->getResourceType().' is not a valid resource.');
                    break;
            }
+        }
+
+        if (isset($page->has_next_page) && !$page->has_next_page) {
+            $this->setResourceCompleteTime();
         }
 
         return false;
@@ -285,14 +288,31 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
     }
 
     /**
+     * Completing queueing of the resource.
+     *
      * @param null $resource
      * @return MailChimp_WooCommerce_Abstract_Sync
      */
-    protected function setResourceCompleteTime($resource = null)
+    protected function setResourceCompleteQueueingTime($resource = null)
     {
         if (empty($resource)) $resource = $this->getResourceType();
 
-        return $this->setData('sync.'.$resource.'.completed_at', time());
+        return $this->setData('sync.'.$resource.'-queueing.completed_at', time());
+    }
+
+    /**
+     * Resources sync actual complete
+     *
+     * @param $resource
+     * @return void
+     */
+    private function setResourceCompleteTime($resource = null)
+    {
+        if (empty($resource)) $resource = $this->getResourceType();
+
+        $job = new Mailchimp_Woocommerce_Complete_Resource_Sync($resource);
+
+        mailchimp_handle_or_queue($job, 1);
     }
 
     /**
@@ -303,7 +323,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
     {
         if (empty($resource)) $resource = $this->getResourceType();
 
-        $time = $this->getData('sync.'.$resource.'.completed_at', false);
+        $time = $this->getData('sync.'.$resource.'-queueing.completed_at', false);
 
         if ($time > 0) {
             try {

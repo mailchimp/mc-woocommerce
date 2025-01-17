@@ -24,14 +24,17 @@ class MailChimp_WooCommerce_Transform_Coupons {
 			'count'    => 0,
 			'stuffed'  => false,
 			'items'    => array(),
+            'has_next_page' => false
 		);
 
-		if ( ( ( $coupons = $this->getCouponPosts( $page, $limit ) ) && ! empty( $coupons ) ) ) {
+		if ( ( ( $coupons = $this->getCouponPosts( $page, $limit ) ) && ! empty( $coupons['items'] ) ) ) {
 			foreach ( $coupons as $post_id ) {
 				$response->items[] = $post_id;
 				$response->count++;
 			}
-		}
+
+            $response->has_next_page = $coupons['has_next_page'];
+        }
 
 		$response->stuffed = $response->count > 0 && (int) $response->count === (int) $limit;
 
@@ -112,9 +115,11 @@ class MailChimp_WooCommerce_Transform_Coupons {
 			$offset = ( ( $page - 1 ) * $posts );
 		}
 
-		$args = array(
+        $limit = $posts + 1;
+
+        $args = array(
 			'post_type'      => 'shop_coupon',
-			'posts_per_page' => $posts,
+			'posts_per_page' => $limit,
 			'offset'         => $offset,
 			'orderby'        => 'ID',
 			'order'          => 'ASC',
@@ -123,16 +128,32 @@ class MailChimp_WooCommerce_Transform_Coupons {
 
 		$coupons = get_posts( $args );
 
+        $has_next_page = count( $coupons ) > $posts;
+
+        if ( $has_next_page ) {
+            array_pop( $coupons );
+        }
+
 		if ( empty( $coupons ) ) {
 
 			sleep( 2 );
 
 			$coupons = get_posts( $args );
+
+            $has_next_page = count( $coupons ) > $posts;
+
+            if ( $has_next_page ) {
+                array_pop( $coupons );
+            }
+
 			if ( empty( $coupons ) ) {
 				return false;
 			}
 		}
 
-		return $coupons;
-	}
+        return [
+            'items' => $coupons,
+            'has_next_page' => $has_next_page,
+        ];
+    }
 }

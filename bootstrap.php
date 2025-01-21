@@ -715,7 +715,6 @@ function activate_mailchimp_woocommerce() {
     // if we don't have any of these dependencies,
     // we need to display a horrible error message before the plugin is installed.
     mailchimp_check_curl_is_installed();
-    //mailchimp_check_woocommerce_is_installed();
     // good to go - activate the plugin.
     MailChimp_WooCommerce_Activator::activate();
 }

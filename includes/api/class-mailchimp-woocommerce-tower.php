@@ -817,6 +817,17 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 			\Mailchimp_Woocommerce_DB_Helpers::delete_option( 'mailchimp-woocommerce-tower.support_token' );
 		}
 
+        mailchimp_debug('tower.remote_support', "trace.step_1", array(
+            'command'       => $command,
+            'store_id'      => $store_id,
+            'list_id'       => $list_id,
+            'php_version'   => phpversion(),
+            'curl_enabled'  => function_exists( 'curl_init' ),
+            'is_connected'  => $is_connected,
+            'sync_complete' => mailchimp_is_done_syncing(),
+            'rest_url'      => MailChimp_WooCommerce_Rest_Api::url( '' ),
+        ));
+
 		if ( $enable ) {
 			$data = array(
 				'list_id'       => $list_id,
@@ -852,6 +863,12 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 					if ( ! isset( $dup_store ) ) {
 						$dup_store = false;
 					}
+                    mailchimp_error('tower.remote_support', 'trace.step_2', array(
+                        'section' => "error getting Mailchimp info",
+                        'akamai_block' => $akamai_block,
+                        'duplicate_store_problem' => $dup_store,
+                        'error' => $e->getMessage(),
+                    ));
 				}
 				$data['list_info']                 = $list_info;
 				$data['is_syncing']                = $syncing_mc;
@@ -887,6 +904,9 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
             if (isset($response['code']) && $response['code'] !== 200) {
                 return ['success' => false, 'code' => $response['code'], 'message' => $response['message']];
             }
+            mailchimp_debug('tower.remote_support', "trace.step_3", array(
+                'response' => $response,
+            ));
 			return json_decode( $response['body'] );
 		} catch ( Throwable $e ) {
             mailchimp_error("could not toggle support", $e->getMessage());

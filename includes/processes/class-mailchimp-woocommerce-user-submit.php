@@ -254,7 +254,10 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 
 			// if the status is not === 'transactional' we can update them to subscribed or pending now.
 			if (isset($member_data['status']) && $member_data['status'] === 'transactional' || $member_data['status'] === 'cleaned') {
-				// ok let's update this member
+				if ($subscribed !== 'subscribed' && $subscribed !== '1' && $subscribed !== true) {
+                    return false;
+                }
+                // ok let's update this member
 				$api->update($list_id, $email, $status_meta['updated'], $merge_fields, null, $language, $gdpr_fields);
 
 				// update the member tags but fail silently just in case.

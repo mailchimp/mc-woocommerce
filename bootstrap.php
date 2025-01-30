@@ -350,6 +350,7 @@ function mailchimp_list_has_double_optin($force = false) {
         $data = mailchimp_get_api()->getList(mailchimp_get_list_id());
         $double_optin = array_key_exists('double_optin', $data) ? ($data['double_optin'] ? 'yes' : 'no') : 'no';
         mailchimp_set_transient($key, $double_optin, 600);
+        mailchimp_debug('mailchimp.doi', 'pulled the list again');
         return $double_optin === 'yes';
     } catch (Exception $e) {
         mailchimp_error('api.list', __('Error retrieving list for double_optin check', 'mailchimp-for-woocommerce'));

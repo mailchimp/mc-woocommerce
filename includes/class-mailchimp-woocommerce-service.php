@@ -840,7 +840,11 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
         $rest_url = wp_parse_url( trailingslashit( rest_url( ) ) );
         $current_url = wp_parse_url( add_query_arg( array( ) ) );
-        return strpos( (string) $current_url['path'] ?? '/', (string) $rest_url['path'], 0 ) === 0;
+
+        $current_url_path = $current_url['path'] ?? '/';
+        $rest_url_path = $rest_url['path'] ?? '';
+
+        return strpos( (string) $current_url_path, (string) $rest_url_path, 0 ) === 0;
     }
 
     /**

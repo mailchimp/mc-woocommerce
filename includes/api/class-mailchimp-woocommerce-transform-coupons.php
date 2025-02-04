@@ -28,7 +28,7 @@ class MailChimp_WooCommerce_Transform_Coupons {
 		);
 
 		if ( ( ( $coupons = $this->getCouponPosts( $page, $limit ) ) && ! empty( $coupons['items'] ) ) ) {
-			foreach ( $coupons as $post_id ) {
+			foreach ( $coupons['items'] as $post_id ) {
 				$response->items[] = $post_id;
 				$response->count++;
 			}

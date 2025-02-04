@@ -844,7 +844,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $current_url_path = $current_url['path'] ?? '/';
         $rest_url_path = $rest_url['path'] ?? '';
 
-        return strpos( (string) $current_url_path, (string) $rest_url_path, 0 ) === 0;
+        return !empty($current_url_path) && !empty($rest_url_path) && strpos( (string) $current_url_path, (string) $rest_url_path, 0 ) === 0;
     }
 
     /**

@@ -180,7 +180,7 @@ if ( $store ) {
                 <div class="sync-contacts">
                     <div class="sync-number">
                         <span class="sync-number-finished">
-                            <?php echo $mailchimp_total_customers; ?>
+                            <?php echo number_format($mailchimp_total_customers); ?>
                         </span>
                     </div>
                     <div class="sync-text">
@@ -196,7 +196,9 @@ if ( $store ) {
                 <div class="sync-orders">
                     <div class="sync-number">
                         <span class="sync-number-finished">
-                            <?php echo $mailchimp_total_orders; ?>
+                            <?php
+                            echo number_format($mailchimp_total_orders);
+                            ?>
                         </span>
                     </div>
                     <div class="sync-text">
@@ -212,7 +214,7 @@ if ( $store ) {
                 <div class="sync-promo-codes">
                     <div class="sync-number">
                         <span class="sync-number-finished">
-                            <?php echo $mailchimp_total_promo_rules; ?>
+                            <?php echo number_format($mailchimp_total_promo_rules); ?>
                         </span>
                     </div>
                     <div class="sync-text">
@@ -228,7 +230,7 @@ if ( $store ) {
                 <div class="sync-products">
                 <div class="sync-number">
                     <span class="sync-number-finished">
-                        <?php echo $mailchimp_total_products; ?>
+                        <?php echo number_format($mailchimp_total_products); ?>
                     </span>
                 </div>
                     <div class="sync-text">

@@ -1,4 +1,5 @@
 == Changelog ==
+= 5.3 =
 = 5.2 =
 * Fix cached value for double opt in ( optimization )
 * Fix for subscription statuses changing on updates 

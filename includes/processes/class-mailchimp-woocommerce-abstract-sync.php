@@ -380,7 +380,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
      */
     public function getOptions()
     {
-        $options = \Mailchimp_Woocommerce_DB_Helpers::get_option($this->plugin_name);
+        $options = mailchimp_get_admin_options();
         return is_array($options) ? $options : array();
     }
 

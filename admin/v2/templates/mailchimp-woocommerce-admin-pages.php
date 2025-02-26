@@ -11,7 +11,7 @@ $handler = MailChimp_WooCommerce_Admin::connect();
 
 /** Grab all options for this particular tab we're viewing. */
 
-$options = \Mailchimp_Woocommerce_DB_Helpers::get_option( $this->plugin_name, array() );
+$options = mailchimp_get_admin_options();
 
 /** Verify that the nonce is correct for the GET and POST variables. */
 

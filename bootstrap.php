@@ -100,7 +100,7 @@ spl_autoload_register(function($class) {
 function mailchimp_environment_variables() {
     global $wp_version;
 
-    $o = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce', false);
+    $o = mailchimp_get_admin_options();
 
     return (object) array(
         'repo' => 'master',
@@ -397,6 +397,7 @@ function mailchimp_build_webhook_url( $key ) {
 	$qs = mailchimp_string_contains($rest_url, '/wp-json/') ? '?' : '&';
     return $rest_url.$qs."auth={$key}";
 }
+
 /**
  * Generate random string
  * @return string
@@ -524,7 +525,8 @@ function mailchimp_get_api() {
  * @return null
  */
 function mailchimp_get_option($key, $default = null) {
-    $options =\Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce');
+    $options = mailchimp_get_admin_options();
+
     if (!is_array($options)) {
         return $default;
     }
@@ -532,6 +534,22 @@ function mailchimp_get_option($key, $default = null) {
         return $default;
     }
     return $options[$key];
+}
+
+/**
+ * @param $default
+ * @return false
+ */
+function mailchimp_get_admin_options($default = array()) {
+    $options = wp_cache_get('mailchimp-woocommerce-options', 'mailchimp-woocommerce');
+
+    if (!$options) {
+        $options =\Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce', $default);
+
+        wp_cache_set('mailchimp-woocommerce-options', $options, 'mailchimp-woocommerce', 10);
+    }
+
+    return $options;
 }
 
 /**
@@ -1203,7 +1221,7 @@ function mailchimp_get_subscriber_status_options($subscribed) {
 
 function mailchimp_check_if_on_sync_tab() {
     if ((isset($_GET['page']) && $_GET['page'] === 'mailchimp-woocommerce')) {
-        $options = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce', array());
+        $options = mailchimp_get_admin_options();
         if (isset($_GET['tab'])) {
             if ($_GET['tab'] === 'sync') {
                 return true;

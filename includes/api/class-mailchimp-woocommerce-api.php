@@ -64,7 +64,7 @@ class MailChimp_WooCommerce_Api {
 
 	/**
 	 * @param $resource
-	 * @return bool|MailChimp_WooCommerce_Transform_Orders|MailChimp_WooCommerce_Transform_Products|MailChimp_WooCommerce_Transform_Coupons|MailChimp_WooCommerce_Transform_Customers
+	 * @return bool|MailChimp_WooCommerce_Transform_Orders|MailChimp_WooCommerce_Transform_Products|MailChimp_WooCommerce_Transform_Product_Categories|MailChimp_WooCommerce_Transform_Coupons|MailChimp_WooCommerce_Transform_Customers
 	 */
 	public function engine( $resource ) {
 		switch ( $resource ) {
@@ -72,6 +72,8 @@ class MailChimp_WooCommerce_Api {
 				return new MailChimp_WooCommerce_Transform_Customers();
             case 'products':
 				return new MailChimp_WooCommerce_Transform_Products();
+            case 'product_categories':
+				return new MailChimp_WooCommerce_Transform_Product_Categories();
 			case 'orders':
 				return new MailChimp_WooCommerce_Transform_Orders();
 			case 'coupons':

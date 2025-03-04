@@ -301,6 +301,7 @@ abstract class MailChimp_WooCommerce_Options
         \Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-sync.products-queueing.completed_at');
         \Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-sync.products.current_page');
         mailchimp_flush_specific_resource_pointers('products');
+        mailchimp_flush_specific_resource_pointers('product_categories');
     }
 
     public function removeOrderPointers()

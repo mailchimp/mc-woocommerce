@@ -34,6 +34,7 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_Customer' => 'includes/api/assets/class-mailchimp-customer.php',
         'MailChimp_WooCommerce_LineItem' => 'includes/api/assets/class-mailchimp-line-item.php',
         'MailChimp_WooCommerce_Order' => 'includes/api/assets/class-mailchimp-order.php',
+        'Mailchimp_WooCommerce_Product_Category' => 'includes/api/assets/class-mailchimp-product-category.php',
         'MailChimp_WooCommerce_Product' => 'includes/api/assets/class-mailchimp-product.php',
         'MailChimp_WooCommerce_ProductVariation' => 'includes/api/assets/class-mailchimp-product-variation.php',
         'MailChimp_WooCommerce_PromoCode' => 'includes/api/assets/class-mailchimp-promo-code.php',
@@ -57,6 +58,7 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_Transform_Coupons' => 'includes/api/class-mailchimp-woocommerce-transform-coupons.php',
         'MailChimp_WooCommerce_Transform_Orders' => 'includes/api/class-mailchimp-woocommerce-transform-orders-wc3.php',
         'MailChimp_WooCommerce_Transform_Products' => 'includes/api/class-mailchimp-woocommerce-transform-products.php',
+        'MailChimp_WooCommerce_Transform_Product_Categories' => 'includes/api/class-mailchimp-woocommerce-transform-product-categories.php',
 
         // includes/processes
         'Mailchimp_Woocommerce_Job' => 'includes/processes/class-mailchimp-woocommerce-job.php',
@@ -66,12 +68,16 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_Process_Coupons' => 'includes/processes/class-mailchimp-woocommerce-process-coupons.php',
         'MailChimp_WooCommerce_Process_Orders' => 'includes/processes/class-mailchimp-woocommerce-process-orders.php',
         'MailChimp_WooCommerce_Process_Products' => 'includes/processes/class-mailchimp-woocommerce-process-products.php',
+        'MailChimp_WooCommerce_Process_Product_Categories' => 'includes/processes/class-mailchimp-woocommerce-process-product-categories.php',
+
         'MailChimp_WooCommerce_SingleCoupon' => 'includes/processes/class-mailchimp-woocommerce-single-coupon.php',
         'MailChimp_Woocommerce_Single_Customer' => 'includes/processes/class-mailchimp-woocommerce-single-customer.php',
         'MailChimp_WooCommerce_Single_Order' => 'includes/processes/class-mailchimp-woocommerce-single-order.php',
         'MailChimp_WooCommerce_Single_Product' => 'includes/processes/class-mailchimp-woocommerce-single-product.php',
         'MailChimp_WooCommerce_Single_Product_Variation' => 'includes/processes/class-mailchimp-woocommerce-single-product-variation.php',
+        'Mailchimp_WooCommerce_Single_Product_Category' => 'includes/processes/class-mailchimp-woocommerce-single-product-category.php',
         'MailChimp_WooCommerce_User_Submit' => 'includes/processes/class-mailchimp-woocommerce-user-submit.php',
+
         'MailChimp_WooCommerce_Process_Full_Sync_Manager' => 'includes/processes/class-mailchimp-woocommerce-full-sync-manager.php',
         'MailChimp_WooCommerce_Subscriber_Sync' => 'includes/processes/class-mailchimp-woocommerce-subscriber-sync.php',
         'MailChimp_WooCommerce_WebHooks_Sync' => 'includes/processes/class-mailchimp-woocommerce-webhooks-sync.php',
@@ -864,6 +870,16 @@ function mailchimp_get_product_count() {
     return $total;
 }
 
+
+function mailchimp_get_product_categories_count() {
+    global $wpdb;
+
+    $query = "SELECT COUNT( * ) FROM {$wpdb->term_taxonomy} WHERE taxonomy = %s";
+    $terms = $wpdb->get_var($wpdb->prepare($query, 'product_cat'));
+
+    return $terms;
+}
+
 /**
  * @return int
  */
@@ -1284,7 +1300,7 @@ function mailchimp_flush_sync_pointers() {
     \Mailchimp_Woocommerce_DB_Helpers::delete_option( 'mailchimp-woocommerce-resource-last-updated' );
     \Mailchimp_Woocommerce_DB_Helpers::delete_option( 'mailchimp-woocommerce-sync.started_at' );
     \Mailchimp_Woocommerce_DB_Helpers::delete_option( 'mailchimp-woocommerce-sync.completed_at' );
-    foreach (array('customers', 'orders', 'products', 'coupons') as $resource_type) {
+    foreach (array('customers', 'orders', 'products', 'product_categories', 'coupons') as $resource_type) {
         mailchimp_flush_specific_resource_pointers($resource_type);
     }
 }

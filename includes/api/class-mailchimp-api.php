@@ -1696,7 +1696,46 @@ class MailChimp_WooCommerce_MailChimpApi {
 		}
 	}
 
-	/**
+    /**
+     * @param $store_id
+     * @param $category_id
+     * @param $category
+     *
+     * @return bool
+     */
+    public function updateProductCategory( $store_id, $category_id, MailChimp_WooCommerce_Product_Category $category ) {
+        try {
+            return (bool) $this->put( "ecommerce/stores/{$store_id}/collections/$category_id", $category->toArray() );
+        } catch ( MailChimp_WooCommerce_Error $e ) {
+            mailchimp_log('mc_update_cat', 'failed', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return false;
+        }
+    }
+
+    /**
+     * @param $store_id
+     * @param $category_id
+     * @param $product_ids
+     * @return bool
+     */
+    public function syncProductsToCollection($store_id, $category_id, $product_ids)
+    {
+        try {
+            $data = array(
+                'id' => $product_ids
+            );
+
+            return (bool) $this->put( "ecommerce/stores/{$store_id}/collections/$category_id/products", $data );
+        } catch ( MailChimp_WooCommerce_Error $e ) {
+            return false;
+        }
+    }
+
+
+    /**
 	 * @param $store_id
 	 * @param $product_id
 	 *

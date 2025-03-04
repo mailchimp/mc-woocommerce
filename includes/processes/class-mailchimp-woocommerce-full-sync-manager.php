@@ -132,6 +132,7 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
                 'customers' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.customers.started_at'),
 				'coupons' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.coupons.started_at'),
 				'products' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.products.started_at'),
+				'product_categories' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.product_categories.started_at'),
 				'orders' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.orders.started_at')
 			);
 
@@ -140,6 +141,7 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
                 'customers' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.customers-queueing.completed_at'),
 				'coupons' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.coupons-queueing.completed_at'),
 				'products' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.products-queueing.completed_at'),
+				'product_categories' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.product_categories-queueing.completed_at'),
 				'orders' => \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.orders-queueing.completed_at')
 			);
 
@@ -150,6 +152,14 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
                 $product_sync = new MailChimp_WooCommerce_Process_Products();
                 // trigger subsequent jobs creation
                 $product_sync->createSyncManagers();
+            }
+
+            if ($completed['products'] && !$started['product_categories']) {
+                mailchimp_log('sync.full_sync_manager.queue', 'Starting PRODUCT CATEGORIES queueing.');
+                // create product sync
+                $product_categories_sync = new MailChimp_WooCommerce_Process_Product_Categories();
+                // trigger subsequent jobs creation
+                $product_categories_sync->createSyncManagers();
             }
 
             // allow products and coupons to be synced simultaneously

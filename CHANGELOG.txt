@@ -1,5 +1,15 @@
 == Changelog ==
 = 5.3 =
+* Improved handling and mapping of extra fields in Mailchimp for WooCommerce
+* WooCommerce Product Category Sync
+* Updated compatibility with WPML 4.7
+* Improved database query performance to reduce processing time and optimize overall plugin efficiency
+* Fix issue where logs were being saved despite setting preferences to disable logging
+* Fix for trash and permanently deleted coupons
+* Removed duplicate queries
+* Updated various dependencies including cookie, express, and @wordpress/e2e-test-utils
+* Bumped `serialize-javascript` from 6.0.1 to 6.0.2 in `/blocks`
+* Bumped cookie, express, and @wordpress/e2e-test-utils-playwright**: Bumped cookie from 0.4.2 to 0.7.1, express, and @wordpress/e2e-test-utils-playwright
 = 5.2 =
 * Fix cached value for double opt in ( optimization )
 * Fix for subscription statuses changing on updates 

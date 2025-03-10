@@ -99,6 +99,13 @@ if ((MC_WC_CONFIRMATION === $active_breadcrumb && ! $is_confirmation)) {
 $promo_active = false;
 ?>
 
+<?php if ( defined( 'ICL_SITEPRESS_VERSION' )  && MC_WC_OVERVIEW_TAB === $active_tab): ?>
+    <div class="notice notice-warning is-dismissible">
+        <p><?php esc_html_e( 'Texts from embedded forms can not be translated with WPML.', 'mailchimp-for-woocommerce' ); ?></p>
+    </div>
+<?php endif; ?>
+
+
 <div class="mc-wc-settings-wrapper woocommerce <?php echo $active_breadcrumb; ?>">
 	<h2 class="mc-wc-settings-title">
         <?php echo __( 'Mailchimp for WooCommerce', 'mailchimp-for-woocommerce' ); ?>

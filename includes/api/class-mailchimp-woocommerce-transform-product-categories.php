@@ -62,6 +62,9 @@ class MailChimp_WooCommerce_Transform_Product_Categories {
                 $product_category->setUrl($term_url);
             }
 
+            /// we might need to add support for collections later.
+            $product_category->setType('category');
+
             return $product_category;
         } catch ( Exception $e ) {
             mailchimp_error('category_transformer.error', 'd', ['error' => $e->getMessage()]);

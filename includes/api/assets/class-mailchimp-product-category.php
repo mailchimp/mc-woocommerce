@@ -6,7 +6,7 @@ class Mailchimp_WooCommerce_Product_Category
     protected $name;
     protected $readable_url         = null;
     protected $description          = null;
-    protected $type                 = null;
+    protected $type                 = 'category';
     protected $parent_collection_id = null;
     protected $image_url            = null;
     protected $updated_at_foreign   = null;

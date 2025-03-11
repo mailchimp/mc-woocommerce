@@ -1725,10 +1725,10 @@ class MailChimp_WooCommerce_MailChimpApi {
     {
         try {
             $data = array(
-                'id' => $product_ids
+                'product_ids' => $product_ids
             );
 
-            return (bool) $this->put( "ecommerce/stores/{$store_id}/collections/$category_id/products", $data );
+            return (bool) $this->put( "ecommerce/stores/{$store_id}/collections/{$category_id}/products", $data );
         } catch ( MailChimp_WooCommerce_Error $e ) {
             return false;
         }

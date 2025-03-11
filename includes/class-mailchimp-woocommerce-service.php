@@ -647,7 +647,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             $categories_to_process = array_merge($added_categories, $removed_categories);
 
             foreach ($categories_to_process as $category_id) {
-                mailchimp_handle_or_queue(new Mailchimp_WooCommerce_Single_Product_Category($category_id));
+                mailchimp_handle_or_queue(new Mailchimp_WooCommerce_Single_Product_Category($category_id), 6);
 
                 mailchimp_debug('product_cat_changes', "Product ID {$product_id} assigned categories: ", [
                     'processing' => $category_id,

@@ -2568,11 +2568,6 @@ class MailChimp_WooCommerce_MailChimpApi {
 
 		curl_setopt_array( $curl, $options );
 
-        mailchimp_log('danylo.put', 'options', [
-            'options' => $options,
-            'url'     => $url,
-            'body'    => $body,
-        ]);
 		return $this->processCurlResponse( $curl );
 	}
 

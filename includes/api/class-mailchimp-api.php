@@ -1724,11 +1724,20 @@ class MailChimp_WooCommerce_MailChimpApi {
     public function syncProductsToCollection($store_id, $category_id, $product_ids)
     {
         try {
+            $product_ids = array_map(function($id) {
+                return "{$id}";
+            }, $product_ids);
             $data = array(
                 'product_ids' => $product_ids
             );
 
-            return (bool) $this->put( "ecommerce/stores/{$store_id}/collections/{$category_id}/products", $data );
+            $updating_products =  $this->put( "ecommerce/stores/{$store_id}/collections/{$category_id}/products", $data );
+            mailchimp_debug('mailchimp_api.syncProductsToCollection', 'updating', [
+                'category_id' => $category_id,
+                'products' => $data,
+                'response' => $updating_products
+            ]);
+            return $updating_products;
         } catch ( MailChimp_WooCommerce_Error $e ) {
             return false;
         }
@@ -2559,6 +2568,11 @@ class MailChimp_WooCommerce_MailChimpApi {
 
 		curl_setopt_array( $curl, $options );
 
+        mailchimp_log('danylo.put', 'options', [
+            'options' => $options,
+            'url'     => $url,
+            'body'    => $body,
+        ]);
 		return $this->processCurlResponse( $curl );
 	}
 

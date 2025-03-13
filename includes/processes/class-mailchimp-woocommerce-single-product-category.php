@@ -6,16 +6,18 @@ class Mailchimp_WooCommerce_Single_Product_Category extends Mailchimp_Woocommerc
     public $service;
     public $api;
     public $store_id;
-
+    private $handle_failed_products;
     /**
      * MailChimp_WooCommerce_Single_Product constructor.
      *
      * @param null $id
      * @param null $fallback_title
      */
-    public function __construct($id = null)
+    public function __construct($id = null, $handle_failed_products = true)
     {
         $this->setId($id);
+
+        $this->handle_failed_products = $handle_failed_products;
     }
 
     /**
@@ -68,9 +70,9 @@ class Mailchimp_WooCommerce_Single_Product_Category extends Mailchimp_Woocommerc
             }
 
             // either updating or creating the product
-            $categoryUpdated = $this->api()->updateProductCategory($this->store_id, $category->getId(), $category);
+            $category_updated = $this->api()->updateProductCategory($this->store_id, $category->getId(), $category);
 
-            if ($categoryUpdated) {
+            if ($category_updated) {
                 $product_ids = get_posts(array(
                     'post_type' => 'product',
                     'posts_per_page' => -1,
@@ -85,7 +87,22 @@ class Mailchimp_WooCommerce_Single_Product_Category extends Mailchimp_Woocommerc
                 ));
 
                 if ($product_ids) {
-                    $this->api()->syncProductsToCollection(mailchimp_get_store_id(), $category->getId(), $product_ids);
+                    $synced_products = $this->api()->syncProductsToCollection(mailchimp_get_store_id(), $category->getId(), $product_ids);
+
+                    mailchimp_debug('product_category.products_sync', "Synced products to category #{$this->id}", [
+                        'products' => $synced_products['products'],
+                        'failed_product_ids' => $synced_products['failed_product_ids']
+                    ]);
+
+                    if (count($synced_products['failed_product_ids']) > 0) {
+                        if ($this->handle_failed_products) {
+                            $this->handleFailedProductsSync($synced_products['failed_product_ids']);
+                        } else {
+                            mailchimp_debug('product_category.products_sync', 'Failed to resync products', [
+                                'failed_product_ids' => $synced_products['failed_product_ids']
+                            ]);
+                        }
+                    }
                 }
             }
 
@@ -102,6 +119,19 @@ class Mailchimp_WooCommerce_Single_Product_Category extends Mailchimp_Woocommerc
 
             throw $e;
         }
+    }
+
+    /**
+     * @param $product_ids
+     * @return void
+     */
+    public function handleFailedProductsSync($product_ids)
+    {
+        foreach ($product_ids as $product_id) {
+            mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($product_id));
+        }
+
+        mailchimp_handle_or_queue(new self($this->id, false), 1);
     }
 
     /**

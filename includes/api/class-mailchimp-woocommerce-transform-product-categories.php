@@ -63,7 +63,7 @@ class MailChimp_WooCommerce_Transform_Product_Categories {
             }
 
             /// we might need to add support for collections later.
-            $product_category->setType('category');
+            $product_category->setType('collection');
 
             return $product_category;
         } catch ( Exception $e ) {

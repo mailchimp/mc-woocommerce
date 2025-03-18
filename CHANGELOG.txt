@@ -1,6 +1,5 @@
 == Changelog ==
 = 5.3 =
-* Improved handling and mapping of extra fields in Mailchimp for WooCommerce
 * WooCommerce Product Category Sync
 * Updated compatibility with WPML 4.7
 * Improved database query performance to reduce processing time and optimize overall plugin efficiency

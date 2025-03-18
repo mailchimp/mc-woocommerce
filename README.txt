@@ -4,10 +4,10 @@ Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 6.2
 Tested up to: 6.7
-Stable tag: 5.2
+Stable tag: 5.3
 Requires PHP: 7.4
 WC requires at least: 8.2
-WC tested up to: 9.6
+WC tested up to: 9.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your Mailchimp audience to track sales, create targeted emails, send abandoned cart emails, and more.
@@ -79,7 +79,6 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 
 == Changelog ==
 = 5.3 =
-* Improved handling and mapping of extra fields in Mailchimp for WooCommerce
 * WooCommerce Product Category Sync
 * Updated compatibility with WPML 4.7
 * Improved database query performance to reduce processing time and optimize overall plugin efficiency

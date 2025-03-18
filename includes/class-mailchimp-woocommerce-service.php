@@ -621,6 +621,77 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     }
 
     /**
+     * @param $product_id
+     * @param $new_categories
+     * @param $tt_ids
+     * @param $taxonomy
+     * @param $append
+     * @param $old_categories
+     * @return false|void
+     */
+    public function handleProductCategoriesChange($product_id, $new_categories, $tt_ids, $taxonomy, $append, $old_categories)
+    {
+        try {
+            if (!mailchimp_is_configured()) {
+                return false;
+            }
+
+            if ($taxonomy !== 'product_cat') {
+                return;
+            }
+
+            // Find added and removed categories
+            $added_categories = array_diff($new_categories, $old_categories);
+            $removed_categories = array_diff($old_categories, $new_categories);
+
+            $categories_to_process = array_merge($added_categories, $removed_categories);
+
+            foreach ($categories_to_process as $category_id) {
+                mailchimp_handle_or_queue(new Mailchimp_WooCommerce_Single_Product_Category($category_id), 6);
+
+                mailchimp_debug('product_cat_changes', "Product ID {$product_id} assigned categories: ", [
+                    'processing' => $category_id,
+                ]);
+            }
+        } catch (Exception $e) {
+            mailchimp_error('product_cat.update', 'Failed to push products to category', array(
+                'message' => $e->getMessage()
+            ));
+        }
+    }
+
+    /**
+     * @param $term_id
+     * @return void
+     */
+    public function handleProductCategory($term_id) {
+        try {
+            if (!mailchimp_is_configured()) {
+                return false;
+            }
+
+            if ($term = get_term($term_id, 'product_cat')) {
+                $transformer = new MailChimp_WooCommerce_Transform_Product_Categories();
+
+                $product_category = $transformer->transform($term);
+
+                mailchimp_debug('product_cat.update',"Updating product category " , [
+                    'mc_term' => $product_category->toArray(),
+                    'term' => $term
+                ]);
+
+                mailchimp_get_api()->updateProductCategory(mailchimp_get_store_id(), $term_id, $product_category);
+
+                mailchimp_log('product_cat.update',"Updated product category $term_id");
+            }
+        } catch (Exception $e) {
+            mailchimp_error('product_cat.update', 'Failed to update product category', array(
+                'message' => $e->getMessage()
+            ));
+        }
+    }
+
+    /**
      * @param $post_id
      * @return void
      */

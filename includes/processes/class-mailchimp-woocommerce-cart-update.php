@@ -91,7 +91,6 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
                 return false;
             }
 
-            $options = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce', array());
             $store_id = mailchimp_get_store_id();
 
             $this->cart_data = json_decode($this->cart_data, true);

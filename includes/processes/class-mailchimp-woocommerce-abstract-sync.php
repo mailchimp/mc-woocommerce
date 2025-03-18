@@ -67,19 +67,22 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
         switch ($this->getResourceType()) {
             case 'customers':
                 $post_count = mailchimp_get_customer_lookup_count_all();
-               break;
+                break;
            case 'coupons':
                 $post_count = mailchimp_get_coupons_count();
-               break;
+                break;
             case 'products':
                 $post_count = mailchimp_get_product_count();
-               break;
+                break;
+           case 'product_categories':
+                $post_count = mailchimp_get_product_categories_count();
+                break;
             case 'orders':
                 $post_count = mailchimp_get_order_count();
-               break;
+                break;
            default:
                 mailchimp_log('sync.error', $this->getResourceType().' is not a valid resource.');
-               break;
+                break;
         }
 
         $this->setData('sync.'.$this->getResourceType().'.started_at', time());
@@ -208,13 +211,16 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
                case 'customers':
                    mailchimp_handle_or_queue(new MailChimp_Woocommerce_Single_Customer($resource));
                    break;
-                case 'coupons':
+               case 'coupons':
                     mailchimp_handle_or_queue(new MailChimp_WooCommerce_SingleCoupon($resource));
                    break;
-                case 'products':
+               case 'products':
                     mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($resource));
                    break;
-                case 'orders':
+               case 'product_categories':
+                    mailchimp_handle_or_queue(new Mailchimp_WooCommerce_Single_Product_Category($resource));
+                   break;
+               case 'orders':
                     $order = new MailChimp_WooCommerce_Single_Order($resource);
                     $order->set_full_sync(true);
                     mailchimp_handle_or_queue($order);
@@ -380,7 +386,7 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
      */
     public function getOptions()
     {
-        $options = \Mailchimp_Woocommerce_DB_Helpers::get_option($this->plugin_name);
+        $options = mailchimp_get_admin_options();
         return is_array($options) ? $options : array();
     }
 

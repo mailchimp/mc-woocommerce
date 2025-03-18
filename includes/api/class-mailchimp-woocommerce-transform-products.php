@@ -28,7 +28,7 @@ class MailChimp_WooCommerce_Transform_Products {
 		);
 
 		if ( ( $products = $this->getProductPostsIds( $page, $limit ) ) && ! empty( $products['items'] )) {
-			foreach ( $products as $post_id ) {
+			foreach ( $products['items'] as $post_id ) {
 				$response->items[] = $post_id;
 				$response->count++;
 			}

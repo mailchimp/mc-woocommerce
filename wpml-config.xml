@@ -1,0 +1,7 @@
+<wpml-config>
+    <gutenberg-blocks>
+        <gutenberg-block type="woocommerce/mailchimp-newsletter-subscription" translate="1">
+            <key name="text" />
+        </gutenberg-block>
+    </gutenberg-blocks>
+</wpml-config>

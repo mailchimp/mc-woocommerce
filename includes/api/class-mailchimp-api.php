@@ -1696,7 +1696,55 @@ class MailChimp_WooCommerce_MailChimpApi {
 		}
 	}
 
-	/**
+    /**
+     * @param $store_id
+     * @param $category_id
+     * @param $category
+     *
+     * @return bool
+     */
+    public function updateProductCategory( $store_id, $category_id, MailChimp_WooCommerce_Product_Category $category ) {
+        try {
+            return (bool) $this->put( "ecommerce/stores/{$store_id}/collections/$category_id", $category->toArray() );
+        } catch ( MailChimp_WooCommerce_Error $e ) {
+            mailchimp_log('mc_update_cat', 'failed', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return false;
+        }
+    }
+
+    /**
+     * @param $store_id
+     * @param $category_id
+     * @param $product_ids
+     * @return bool
+     */
+    public function syncProductsToCollection($store_id, $category_id, $product_ids)
+    {
+        try {
+            $product_ids = array_map(function($id) {
+                return "{$id}";
+            }, $product_ids);
+            $data = array(
+                'product_ids' => $product_ids
+            );
+
+            $updating_products =  $this->put( "ecommerce/stores/{$store_id}/collections/{$category_id}/products", $data );
+            mailchimp_debug('mailchimp_api.syncProductsToCollection', 'updating', [
+                'category_id' => $category_id,
+                'products' => $data,
+                'response' => $updating_products
+            ]);
+            return $updating_products;
+        } catch ( MailChimp_WooCommerce_Error $e ) {
+            return false;
+        }
+    }
+
+
+    /**
 	 * @param $store_id
 	 * @param $product_id
 	 *

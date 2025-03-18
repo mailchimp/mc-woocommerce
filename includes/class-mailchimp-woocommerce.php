@@ -76,7 +76,7 @@ class MailChimp_WooCommerce
             return static::$logging_config;
         }
 
-        $plugin_options = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce');
+        $plugin_options = mailchimp_get_admin_options(false);
         $is_options = is_array($plugin_options);
 
         $api_key = $is_options && array_key_exists('mailchimp_api_key', $plugin_options) ?
@@ -416,10 +416,16 @@ class MailChimp_WooCommerce
 
 			$this->loader->add_action('wp_trash_post', $service, 'handlePostTrashed');
             $this->loader->add_action('untrashed_post', $service, 'handlePostRestored');
+
 			//coupons
             $this->loader->add_action('woocommerce_new_coupon', $service, 'handleNewCoupon');
             $this->loader->add_action('woocommerce_coupon_options_save', $service, 'handleCouponSaved', 10, 2);
             $this->loader->add_action('woocommerce_api_create_coupon', $service, 'handleCouponSaved', 9, 2);
+
+            //product categories
+            $this->loader->add_action('created_product_cat', $service, 'handleProductCategory', 10, 1);
+            $this->loader->add_action('edited_product_cat', $service, 'handleProductCategory', 10, 1);
+            $this->loader->add_action('set_object_terms', $service, 'handleProductCategoriesChange', 10, 6);
 
             $this->loader->add_action('woocommerce_delete_coupon', $service, 'handlePostTrashed');
             $this->loader->add_action('woocommerce_trash_coupon', $service, 'handlePostTrashed');
@@ -448,12 +454,14 @@ class MailChimp_WooCommerce
                 "MailChimp_WooCommerce_SingleCoupon",
                 "MailChimp_WooCommerce_Single_Product",
                 "MailChimp_WooCommerce_Single_Product_Variation",
+                "Mailchimp_WooCommerce_Single_Product_Category",
                 "MailChimp_WooCommerce_Cart_Update",
                 "MailChimp_WooCommerce_User_Submit",
                 "MailChimp_WooCommerce_Process_Customers",
                 "MailChimp_WooCommerce_Process_Coupons",
                 "MailChimp_WooCommerce_Process_Orders",
                 "MailChimp_WooCommerce_Process_Products",
+                "MailChimp_WooCommerce_Process_Product_Categories",
                 "MailChimp_WooCommerce_WebHooks_Sync",
                 "Mailchimp_Woocommerce_Complete_Resource_Sync"
             );

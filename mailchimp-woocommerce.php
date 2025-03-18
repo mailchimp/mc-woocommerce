@@ -27,7 +27,7 @@
  * Requires at least: 6.2
  * Tested up to: 6.7
  * WC requires at least: 8.2
- * WC tested up to: 9.6
+ * WC tested up to: 9.7
  */
 
 // If this file is called directly, abort.

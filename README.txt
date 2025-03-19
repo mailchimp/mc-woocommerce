@@ -78,13 +78,4 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
 == Changelog ==
-= 5.3 =
-* WooCommerce Product Category Sync
-* Updated compatibility with WPML 4.7
-* Improved database query performance to reduce processing time and optimize overall plugin efficiency
-* Fix issue where logs were being saved despite setting preferences to disable logging
-* Fix for trash and permanently deleted coupons
-* Removed duplicate queries
-* Updated various dependencies including cookie, express, and @wordpress/e2e-test-utils
-* Bumped `serialize-javascript` from 6.0.1 to 6.0.2 in `/blocks`
-* Bumped cookie, express, and @wordpress/e2e-test-utils-playwright**: Bumped cookie from 0.4.2 to 0.7.1, express, and @wordpress/e2e-test-utils-playwright
+= 5.4 =

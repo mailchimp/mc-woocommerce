@@ -981,6 +981,15 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 	}
 
+    public function mailchimp_woocommerce_activate_account_event()
+    {
+        $this->adminOnlyMiddleware();
+
+        Mailchimp_Woocommerce_Event::track('connect_accounts:click_create_account', new DateTime());
+
+        wp_send_json_success([]);
+    }
+
 	/**
 	 * Mailchimp OAuth connection status
 	 */
@@ -2300,6 +2309,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
           'click_create_account' => 'connect_accounts:click_to_create_account',
           'continue_to_mailchimp' => 'audience_stats:continue_to_mailchimp',
           'save_log' => 'navigation_logs:save',
+          'click_connect_account' => 'connect_accounts:click_start',
         ];
         $payload = array_key_exists($mc_event, $map) ?
             Mailchimp_Woocommerce_Event::track($map[$mc_event], new DateTime()) : 'nothing';

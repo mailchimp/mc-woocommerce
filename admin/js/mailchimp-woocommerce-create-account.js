@@ -36,6 +36,12 @@
 		$('#mc-woocommerce-create-activate-account').click((e) => {
 			e.preventDefault();
 
+			var data = {
+				action: 'mailchimp_woocommerce_activate_account_event',
+			}
+
+			$.post(ajaxurl, data, function(response) {})
+
 			profileDetailsInputs  = $('#mc-woocommerce-profile-details input');
 			profileErrors         = getInitialErrors(profileDetailsInputs);
 			detailsValid          = validateForm(profileErrors, '#mc-woocommerce-profile-details', true);

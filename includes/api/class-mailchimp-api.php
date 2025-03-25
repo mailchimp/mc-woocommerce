@@ -1743,6 +1743,48 @@ class MailChimp_WooCommerce_MailChimpApi {
         }
     }
 
+    /**
+     * @param $store_id
+     * @param $category_id
+     * @param $product_id
+     * @return bool
+     */
+    public function addProductToCategory($store_id, $category_id, $product_id)
+    {
+        try {
+            $data = array(
+                'id' => "{$product_id}"
+            );
+
+            return $this->post( "ecommerce/stores/{$store_id}/collections/{$category_id}/products", $data );
+        } catch ( MailChimp_WooCommerce_Error $e ) {
+            mailchimp_error('mailchimp_api.addProductToCategory', 'failed', ['error' => $e->getMessage()]);
+
+            return false;
+        }
+    }
+
+    /**
+     * @param $store_id
+     * @param $category_id
+     * @param $product_id
+     * @return bool
+     */
+    public function removeProductFromCategory($store_id, $category_id, $product_id)
+    {
+        try {
+            $data = array(
+                'id' => "{$product_id}"
+            );
+
+            return $this->delete( "ecommerce/stores/{$store_id}/collections/{$category_id}/products", $data );
+        } catch ( MailChimp_WooCommerce_Error $e ) {
+            mailchimp_error('mailchimp_api.removeProductFromCategory', 'failed', ['error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+
 
     /**
 	 * @param $store_id

@@ -379,6 +379,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			if ( isset( $_GET['log_removed'] ) && $_GET['log_removed'] == '1' ) {
 				add_settings_error( 'mailchimp_log_settings', '', __( 'Log file deleted.', 'mailchimp-for-woocommerce' ), 'info' );
 			}
+
+            if ( isset( $_GET['mailchimp_redirect'] ) && in_array($_GET['mailchimp_redirect'], array('create-mailchimp-account') ) ) {
+                wp_redirect('admin.php?page=create-mailchimp-account');
+            }
 		}
 	}
 
@@ -1242,6 +1246,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             );
             \Mailchimp_Woocommerce_DB_Helpers::update_option('mc-woocommerce-waiting-for-login', 'waiting');
             Mailchimp_Woocommerce_Event::track('account:verify_email', new DateTime());
+            $response_body->redirect = admin_url('admin.php?page=mailchimp-woocommerce&mailchimp_redirect=create-mailchimp-account');
             wp_send_json_success( $response_body );
         } elseif ( $response['response']['code'] == 404 ) {
             wp_send_json_error( array( 'success' => false ) );

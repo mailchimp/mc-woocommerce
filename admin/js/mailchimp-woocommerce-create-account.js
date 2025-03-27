@@ -104,10 +104,7 @@
 						$('.js-mc-woocommerce-email').text(formDataObject.email)
 						$('.mailchimp-connect').attr('href', response.data.login_link)
 					} else {
-						$('.js-mc-woocommerce-confirm-email').removeClass('hidden')
-						$('.js-mc-woocommerce-email').text(formDataObject.email)
-
-						waitingForLogin()
+						window.location.href = response.data.redirect
 					}
 				}
 			});

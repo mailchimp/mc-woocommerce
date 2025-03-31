@@ -3,7 +3,7 @@ Contributors: ryanhungate, Mailchimp
 Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 6.2
-Tested up to: 6.7
+Tested up to: 6.8
 Stable tag: 5.3
 Requires PHP: 7.4
 WC requires at least: 8.2

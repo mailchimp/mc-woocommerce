@@ -1,5 +1,7 @@
 == Changelog ==
 = 5.4 =
+* Performance and User Interface improvements
+* Ability to sync Product Short Description by Default
 = 5.3 =
 * WooCommerce Product Category Sync
 * Updated compatibility with WPML 4.7

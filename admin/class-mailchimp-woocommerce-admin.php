@@ -1399,7 +1399,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @return array|string[]
 	 */
 	protected function validatePostNewsletterSettings( $input ) {
-		$sanitized_tags = array_map( 'sanitize_text_field', explode( ',', $input['mailchimp_user_tags'] ) );
+		$sanitized_tags = isset($input['mailchimp_user_tags'])
+            ? array_map( 'sanitize_text_field', explode( ',', $input['mailchimp_user_tags'] ) )
+            : [];
         $breadcrumb = isset($input['mailchimp_active_breadcrumb']) ? $input['mailchimp_active_breadcrumb'] : '';
 
         // a way to determine which screen the user is on

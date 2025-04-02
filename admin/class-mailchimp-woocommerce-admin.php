@@ -77,7 +77,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		// clean database
 		mailchimp_clean_database();
-		\Mailchimp_Woocommerce_DB_Helpers::delete_option('mc-woocommerce-waiting-for-login');
+		\Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-waiting-for-login');
 
 		return array();
 	}
@@ -350,7 +350,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		// tammullen found this.
 		if ( $pagenow == 'admin.php' && isset( $_GET ) && isset( $_GET['page'] ) && 'mailchimp-woocommerce' === $_GET['page'] ) {
-
             $this->handle_abandoned_cart_table();
 			$this->update_db_check();
 
@@ -379,10 +378,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			if ( isset( $_GET['log_removed'] ) && $_GET['log_removed'] == '1' ) {
 				add_settings_error( 'mailchimp_log_settings', '', __( 'Log file deleted.', 'mailchimp-for-woocommerce' ), 'info' );
 			}
-
-            if ( isset( $_GET['mailchimp_redirect'] ) && in_array($_GET['mailchimp_redirect'], array('create-mailchimp-account') ) ) {
-                wp_redirect('admin.php?page=create-mailchimp-account');
-            }
 		}
 	}
 
@@ -1209,7 +1204,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         if ($profile) {
       	    $logged_in  = !(empty($profile['last_login']) || is_null($profile['last_login']));
             if ($logged_in) {
-                \Mailchimp_Woocommerce_DB_Helpers::delete_option('mc-woocommerce-waiting-for-login');
+                \Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-waiting-for-login');
             }
             wp_send_json_success(array(
                 'success' => true,
@@ -1236,7 +1231,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		if ( $response['response']['code'] == 200 && $response_body->success == true ) {
             Mailchimp_Woocommerce_Event::track('connect_accounts:create_account_complete', new DateTime());
             $result = json_decode( $response['body'], true);
-            $options = get_option($this->plugin_name);
+            $options = get_option($this->plugin_name, array());
             $options['mailchimp_api_key'] = $result['data']['oauth_token'].'-'.$result['data']['dc'];
             // go straight to the DB and update the options to bypass any filters.
             $wpdb->update(
@@ -1244,9 +1239,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 array('option_value' => maybe_serialize($options)),
                 array('option_name' => $this->plugin_name)
             );
-            \Mailchimp_Woocommerce_DB_Helpers::update_option('mc-woocommerce-waiting-for-login', 'waiting');
+            \Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp-woocommerce-waiting-for-login', 'waiting');
             Mailchimp_Woocommerce_Event::track('account:verify_email', new DateTime());
-            $response_body->redirect = admin_url('admin.php?page=mailchimp-woocommerce&mailchimp_redirect=create-mailchimp-account');
+            $response_body->redirect = admin_url('admin.php?page=mailchimp-woocommerce');
             wp_send_json_success( $response_body );
         } elseif ( $response['response']['code'] == 404 ) {
             wp_send_json_error( array( 'success' => false ) );

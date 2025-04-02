@@ -111,7 +111,7 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production', // staging or production
-        'version' => '5.4',
+        'version' => '5.4.1',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => function_exists('WC') ? WC()->version : null,
@@ -1336,6 +1336,12 @@ function mailchimp_has_started_syncing() {
     return (bool) \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.started_at');
 //    $sync_completed_at = get_option('mailchimp-woocommerce-sync.completed_at');
 //    return ($sync_completed_at < $sync_started_at);
+}
+
+function mailchimp_waiting_for_account_confirmation() {
+    $waiting_login = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-waiting-for-login');
+
+    return $waiting_login === 'waiting';
 }
 
 /**

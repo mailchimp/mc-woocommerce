@@ -8,8 +8,7 @@ if (!$user = get_user_by('email', $admin_email)) {
  	$user_id = get_current_user_id();
 	$user = get_user_by('id', $user_id);
 }
-$waiting_login = get_option('mc-woocommerce-waiting-for-login');
-$signup_initiated = $waiting_login && $waiting_login === 'waiting';
+$signup_initiated = mailchimp_waiting_for_account_confirmation();
 
 $apiKey = mailchimp_get_api_key();
 $mc = new MailChimp_WooCommerce_MailChimpApi($apiKey);

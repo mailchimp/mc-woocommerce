@@ -152,9 +152,19 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
         if (!empty($existing_actions)) {
             try {
                 as_unschedule_action(get_class($job), array('obj_id' => $job->id), 'mc-woocommerce');
-            } catch (Exception $e) {}
-        }
-        else {
+
+                // updating args after unschedule to refresh data in the jo
+                $wpdb->update(
+                    $wpdb->prefix . "mailchimp_jobs",
+                    array(
+                        'job' => maybe_serialize($job),
+                        'created_at' => gmdate('Y-m-d H:i:s', time())
+                    ),
+                    array('obj_id' => $job->id)
+                );
+            } catch (Exception $e) {
+            }
+        } else {
             $inserted = $wpdb->insert($wpdb->prefix."mailchimp_jobs", $args);
             if (!$inserted) {
                 if ($wpdb->last_error) {

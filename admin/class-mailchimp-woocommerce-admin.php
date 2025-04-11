@@ -1065,6 +1065,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             );
             Mailchimp_Woocommerce_Event::track('connect_accounts_oauth:complete', new DateTime());
 
+            do_action('mailchimp_woocommerce_connected_to_mailchimp');
+
             wp_send_json_success( $response );
         } else {
             wp_send_json_error( $response );
@@ -1242,6 +1244,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             \Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp-woocommerce-waiting-for-login', 'waiting');
             Mailchimp_Woocommerce_Event::track('account:verify_email', new DateTime());
             $response_body->redirect = admin_url('admin.php?page=mailchimp-woocommerce');
+
+            do_action('mailchimp_woocommerce_connected_to_mailchimp');
+
             wp_send_json_success( $response_body );
         } elseif ( $response['response']['code'] == 404 ) {
             wp_send_json_error( array( 'success' => false ) );

@@ -45,6 +45,12 @@ class MailChimp_WooCommerce_Rest_Api
             'permission_callback' => array($this, 'permission_callback'),
         ));
 
+        register_rest_route(static::$namespace, '/sync/stats/coupons', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'get_coupons_count_stats'),
+            'permission_callback' => array($this, 'permission_callback'),
+        ));
+
         register_rest_route(static::$namespace, '/sync/stats/orders', array(
             'methods' => 'GET',
             'callback' => array($this, 'get_order_count_stats'),
@@ -54,6 +60,12 @@ class MailChimp_WooCommerce_Rest_Api
         register_rest_route(static::$namespace, '/sync/stats/products', array(
             'methods' => 'GET',
             'callback' => array($this, 'get_product_count_stats'),
+            'permission_callback' => array($this, 'permission_callback'),
+        ));
+
+        register_rest_route(static::$namespace, '/store/resync', array(
+            'methods' => 'POST',
+            'callback' => array($this, 'resync_store'),
             'permission_callback' => array($this, 'permission_callback'),
         ));
 
@@ -253,6 +265,33 @@ class MailChimp_WooCommerce_Rest_Api
             'has_finished' => mailchimp_is_done_syncing(),
 	        'last_loop_at' => mailchimp_get_data('sync.last_loop_at'),
             'real' => $internal ?? null,
+        ));
+    }
+
+    /**
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     */
+    public function get_coupons_count_stats(WP_REST_Request $request)
+    {
+        // if the queue is running in the console - we need to say tell the response why it's not going to fire this way.
+        if (!mailchimp_is_configured() || !($api = mailchimp_get_api())) {
+            return $this->mailchimp_rest_response(array('success' => false, 'reason' => 'not configured'));
+        }
+
+        try {
+            $promo_rules = $api->getPromoRules(mailchimp_get_store_id(), 1, 1, 1);
+            $mailchimp_total_promo_rules = $promo_rules['total_items'];
+            if (isset($promo_rules_count['publish']) && $mailchimp_total_promo_rules > $promo_rules_count['publish']) $mailchimp_total_promo_rules = $promo_rules_count['publish'];
+        } catch (Exception $e) { $mailchimp_total_promo_rules = 0; }
+
+
+        // but we need to do it just in case.
+        return $this->mailchimp_rest_response(array(
+            'success' => true,
+            'in_store' => mailchimp_get_coupons_count(),
+            'in_mailchimp' => $mailchimp_total_promo_rules,
         ));
     }
 
@@ -489,6 +528,24 @@ class MailChimp_WooCommerce_Rest_Api
         return $this->mailchimp_rest_response(
             $this->tower($request->get_query_params())->handle()
         );
+    }
+
+    public function resync_store(WP_REST_Request $request)
+    {
+        // if the queue is running in the console - we need to say tell the response why it's not going to fire this way.
+        if (!mailchimp_is_configured() || !(mailchimp_get_api())) {
+            return $this->mailchimp_rest_response(array('success' => false, 'reason' => 'Mailchimp not configured'));
+        }
+
+        $service = new MailChimp_Service();
+        $service->removePointers();
+        MailChimp_WooCommerce_Admin::instance()->startSync();
+        $service->setData('sync.config.resync', true);
+
+        return $this->mailchimp_rest_response(array(
+            'success' => true,
+            'message' => 'Successfully initiated the store resync'
+        ));
     }
 
 	/**

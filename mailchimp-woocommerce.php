@@ -25,9 +25,9 @@
  * Domain Path:       /languages
  * Requires Plugins: woocommerce
  * Requires at least: 6.2
- * Tested up to: 6.7
+ * Tested up to: 6.8
  * WC requires at least: 8.2
- * WC tested up to: 9.7
+ * WC tested up to: 9.8
  */
 
 // If this file is called directly, abort.

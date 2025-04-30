@@ -1054,7 +1054,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             // save api_key? If yes, we can skip api key validation for validatePostApiKey();
             $result = json_decode( $response['body'], true);
             $options = \Mailchimp_Woocommerce_DB_Helpers::get_option($this->plugin_name);
-            $options['mailchimp_api_key'] = $result['access_token'].'-'.$result['data_center'];
+            $api_key = $result['access_token'].'-'.$result['data_center'];
+            $options['mailchimp_api_key'] = $api_key;
 
             // \Mailchimp_Woocommerce_DB_Helpers::update_option($this->plugin_name, $options); this used to return false!
             // go straight to the DB and update the options to bypass any filters.
@@ -1065,7 +1066,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             );
             Mailchimp_Woocommerce_Event::track('connect_accounts_oauth:complete', new DateTime());
 
-            do_action('mailchimp_woocommerce_connected_to_mailchimp');
+            do_action('mailchimp_woocommerce_connected_to_mailchimp', $api_key);
 
             wp_send_json_success( $response );
         } else {
@@ -1234,7 +1235,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             Mailchimp_Woocommerce_Event::track('connect_accounts:create_account_complete', new DateTime());
             $result = json_decode( $response['body'], true);
             $options = get_option($this->plugin_name, array());
-            $options['mailchimp_api_key'] = $result['data']['oauth_token'].'-'.$result['data']['dc'];
+            $api_key = $result['data']['oauth_token'].'-'.$result['data']['dc'];
+            $options['mailchimp_api_key'] = $api_key;
             // go straight to the DB and update the options to bypass any filters.
             $wpdb->update(
                 $wpdb->options,
@@ -1245,7 +1247,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             Mailchimp_Woocommerce_Event::track('account:verify_email', new DateTime());
             $response_body->redirect = admin_url('admin.php?page=mailchimp-woocommerce');
 
-            do_action('mailchimp_woocommerce_connected_to_mailchimp');
+            do_action('mailchimp_woocommerce_connected_to_mailchimp', $api_key);
 
             wp_send_json_success( $response_body );
         } elseif ( $response['response']['code'] == 404 ) {

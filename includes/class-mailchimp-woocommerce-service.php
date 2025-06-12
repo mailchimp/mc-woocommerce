@@ -388,6 +388,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         if ($post_after->post_title !== $post_before->post_title
             || $post_after->post_content !== $post_before->post_content
             || $post_after->post_status !== $post_before->post_status
+            || $post_after->post_excerpt !== $post_before->post_excerpt
         ) {
             mailchimp_handle_or_queue( new MailChimp_WooCommerce_Single_Product($post_ID), 5);
         }

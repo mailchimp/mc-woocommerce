@@ -3,11 +3,11 @@ Contributors: ryanhungate, Mailchimp
 Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 6.2
-Tested up to: 6.7
+Tested up to: 6.8
 Stable tag: 5.3
 Requires PHP: 7.4
 WC requires at least: 8.2
-WC tested up to: 9.7
+WC tested up to: 9.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your Mailchimp audience to track sales, create targeted emails, send abandoned cart emails, and more.
@@ -78,13 +78,6 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
 == Changelog ==
-= 5.3 =
-* WooCommerce Product Category Sync
-* Updated compatibility with WPML 4.7
-* Improved database query performance to reduce processing time and optimize overall plugin efficiency
-* Fix issue where logs were being saved despite setting preferences to disable logging
-* Fix for trash and permanently deleted coupons
-* Removed duplicate queries
-* Updated various dependencies including cookie, express, and @wordpress/e2e-test-utils
-* Bumped `serialize-javascript` from 6.0.1 to 6.0.2 in `/blocks`
-* Bumped cookie, express, and @wordpress/e2e-test-utils-playwright**: Bumped cookie from 0.4.2 to 0.7.1, express, and @wordpress/e2e-test-utils-playwright
+= 5.4 =
+* Performance and User Interface improvements
+* Ability to sync Product Short Description

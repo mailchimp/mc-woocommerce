@@ -111,7 +111,7 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production', // staging or production
-        'version' => '5.3',
+        'version' => '5.4.1',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => function_exists('WC') ? WC()->version : null,
@@ -152,9 +152,19 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
         if (!empty($existing_actions)) {
             try {
                 as_unschedule_action(get_class($job), array('obj_id' => $job->id), 'mc-woocommerce');
-            } catch (Exception $e) {}
-        }
-        else {
+
+                // updating args after unschedule to refresh data in the jo
+                $wpdb->update(
+                    $wpdb->prefix . "mailchimp_jobs",
+                    array(
+                        'job' => maybe_serialize($job),
+                        'created_at' => gmdate('Y-m-d H:i:s', time())
+                    ),
+                    array('obj_id' => $job->id)
+                );
+            } catch (Exception $e) {
+            }
+        } else {
             $inserted = $wpdb->insert($wpdb->prefix."mailchimp_jobs", $args);
             if (!$inserted) {
                 if ($wpdb->last_error) {
@@ -1338,6 +1348,12 @@ function mailchimp_has_started_syncing() {
 //    return ($sync_completed_at < $sync_started_at);
 }
 
+function mailchimp_waiting_for_account_confirmation() {
+    $waiting_login = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-waiting-for-login');
+
+    return $waiting_login === 'waiting';
+}
+
 /**
  * @return bool
  */
@@ -1786,6 +1802,21 @@ function mailchimp_account_events() {
             'ui_access_point' => 'center',
         ),
         // App Setup: Connect Accounts
+        'connect_accounts:click_start' => [
+            'event' => 'integration:started',
+            'entry' => ['account_create_api', false],
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=create-mailchimp-account'),
+            'object' => 'integration',
+            'object_detail' => 'connect_accounts',
+            'action' => 'started',
+            'ui_object' => "button",
+            'ui_object_detail' => "create_account",
+            'ui_action' => "clicked",
+            'ui_access_point' => "center",
+            'description' => 'Connect Accounts: Clicks to create account',
+        ],
         'connect_accounts:view_screen' => array(
             'initiative_name' => 'strategic_partners',
             'scope_area' => 'embedded_app',
@@ -1798,6 +1829,19 @@ function mailchimp_account_events() {
             'ui_action' => "'",
             'ui_access_point' => "'",
         ),
+        'connect_accounts:click_create_account' => [
+            'event' => 'integration:viewed',
+            'screen' => admin_url('admin.php?page=create-mailchimp-account'),
+            'object' => 'integration',
+            'object_detail' => 'create_account_form',
+            'action' => 'engaged',
+            'ui_object' => 'button',
+            'ui_object_detail' => 'activate_account',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'center',
+            'entry' => ['account_create_api', false],
+            'description' => 'Clicked the Activate Account button in the Create account flow',
+        ],
         'connect_accounts:view_create_account' => array(
             'initiative_name' => 'strategic_partners',
             'scope_area' => 'embedded_app',

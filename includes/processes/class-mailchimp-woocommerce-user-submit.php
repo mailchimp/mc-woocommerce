@@ -85,12 +85,6 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 			return false;
 		}
 
-		if ($this->should_ignore) {
-			mailchimp_debug(get_called_class(), "{$this->id} is currently in motion - skipping this one.");
-			static::$handling_for = null;
-			return false;
-		}
-
 		$options = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce', array());
 		$store_id = mailchimp_get_store_id();
 

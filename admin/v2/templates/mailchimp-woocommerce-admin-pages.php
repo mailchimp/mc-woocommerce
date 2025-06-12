@@ -10,7 +10,6 @@
 $handler = MailChimp_WooCommerce_Admin::connect();
 
 /** Grab all options for this particular tab we're viewing. */
-
 $options = mailchimp_get_admin_options();
 
 /** Verify that the nonce is correct for the GET and POST variables. */
@@ -97,6 +96,9 @@ if ((MC_WC_CONFIRMATION === $active_breadcrumb && ! $is_confirmation)) {
 	}
 }
 $promo_active = false;
+if (mailchimp_waiting_for_account_confirmation() && $active_breadcrumb !== MC_WC_REVIEW_SYNC_SETTINGS) {
+    wp_redirect('admin.php?page=create-mailchimp-account');
+}
 ?>
 
 <?php if ( defined( 'ICL_SITEPRESS_VERSION' )  && MC_WC_OVERVIEW_TAB === $active_tab): ?>

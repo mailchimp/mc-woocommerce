@@ -36,6 +36,12 @@
 		$('#mc-woocommerce-create-activate-account').click((e) => {
 			e.preventDefault();
 
+			var data = {
+				action: 'mailchimp_woocommerce_activate_account_event',
+			}
+
+			$.post(ajaxurl, data, function(response) {})
+
 			profileDetailsInputs  = $('#mc-woocommerce-profile-details input');
 			profileErrors         = getInitialErrors(profileDetailsInputs);
 			detailsValid          = validateForm(profileErrors, '#mc-woocommerce-profile-details', true);
@@ -89,19 +95,16 @@
 				url : phpVars.ajaxurl,
 				data : data,
 				success: function(response) {
-					$('.js-mc-woocommerce-activate-account').addClass('hidden')
-					$("#mc-woocommerce-create-activate-account").attr('disabled', false)
-					$("#mc-woocommerce-create-activate-account .mc-wc-loading").addClass('hidden')
-
 					if (response.data.suggest_login) {
+						$('.js-mc-woocommerce-activate-account').addClass('hidden')
+						$("#mc-woocommerce-create-activate-account").attr('disabled', false)
+						$("#mc-woocommerce-create-activate-account .mc-wc-loading").addClass('hidden')
+
 						$('.js-mc-woocommerce-suggest-to-login').removeClass('hidden');
 						$('.js-mc-woocommerce-email').text(formDataObject.email)
 						$('.mailchimp-connect').attr('href', response.data.login_link)
 					} else {
-						$('.js-mc-woocommerce-confirm-email').removeClass('hidden')
-						$('.js-mc-woocommerce-email').text(formDataObject.email)
-
-						waitingForLogin()
+						window.location.href = response.data.redirect
 					}
 				}
 			});

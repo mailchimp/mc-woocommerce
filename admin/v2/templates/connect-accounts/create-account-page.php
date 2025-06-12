@@ -8,8 +8,7 @@ if (!$user = get_user_by('email', $admin_email)) {
  	$user_id = get_current_user_id();
 	$user = get_user_by('id', $user_id);
 }
-$waiting_login = get_option('mc-woocommerce-waiting-for-login');
-$signup_initiated = $waiting_login && $waiting_login === 'waiting';
+$signup_initiated = mailchimp_waiting_for_account_confirmation();
 
 $apiKey = mailchimp_get_api_key();
 $mc = new MailChimp_WooCommerce_MailChimpApi($apiKey);
@@ -310,7 +309,7 @@ if (!$signup_initiated) {
 
 				<div class="js-mc-woocommerce-confirm-email  <?php if (!$signup_initiated): ?>hidden<?php endif; ?>">
 					<div class="title"><?php echo esc_html__( 'Check your email', 'mailchimp-for-woocommerce' ) ?></div>
-					<p class="h4"><?php echo esc_html__( 'To start using Mailchimp, activate your account with the link sent to ', 'mailchimp-for-woocommerce' ) ?><span class="js-mc-woocommerce-email"><?php echo esc_html($email); ?></span></p>
+					<p class="h4"><?php echo esc_html__( 'To start using Mailchimp, activate your account with the link sent to ', 'mailchimp-for-woocommerce' ) ?><span><?php echo esc_html($email); ?></span></p>
 
 					<div class="flex items-center gap-x-6">
 						<a href="https://mail.google.com/mail/u/0/" target="_blank" class="flex items-center gap-x-2">

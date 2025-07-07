@@ -87,7 +87,7 @@
                         </div>
                     </div>
                     <div class="mc-wc-import-list-sync-description">
-                        <?php esc_html_e( 'Warning: this may impact the performacne of your site.  Check with your hosting provider for more information about the impact of cookies on every page view.', 'mailchimp-for-woocommerce' ); ?>
+                        <?php esc_html_e( 'Warning: this may impact the performance of your site.  Check with your hosting provider for more information about the impact of cookies on every page view.', 'mailchimp-for-woocommerce' ); ?>
                     </div>
                 </div>
             </div>

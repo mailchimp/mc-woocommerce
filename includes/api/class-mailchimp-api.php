@@ -2696,14 +2696,54 @@ class MailChimp_WooCommerce_MailChimpApi {
 
 		$err  = curl_error( $curl );
 		$info = curl_getinfo( $curl );
+		
+		// Capture request details before closing curl
+		$url = isset($info['url']) ? $info['url'] : 'UNKNOWN';
+		$request_headers = isset($info['request_header']) ? explode("\r\n", $info['request_header']) : array();
+		
+		// Extract method from curl options
+		$method = 'UNKNOWN';
+		if (curl_getinfo($curl, CURLINFO_CUSTOMREQUEST)) {
+			$method = curl_getinfo($curl, CURLINFO_CUSTOMREQUEST);
+		}
+		
+		// Try to extract request data from CURLOPT_POSTFIELDS
+		$request_data = null;
+		if ($method === 'POST' || $method === 'PUT' || $method === 'PATCH') {
+			// Unfortunately we can't get POSTFIELDS from curl handle directly
+			// This will be captured in enhanced logger through headers
+			$request_data = null;
+		}
 
         if ($this->auto_doi) {
             mailchimp_debug('api.debug', 'message headers', ['headers' => $info['request_header']]);
         }
 
 		curl_close( $curl );
+		
+		// Initialize error info array
+		$error_info = array();
 
 		if ( $err ) {
+			$error_info = array(
+				'type' => 'curl_error',
+				'message' => $err,
+				'code' => 500
+			);
+			
+			// Log with enhanced logger
+			if (class_exists('MailChimp_WooCommerce_Enhanced_Logger')) {
+				MailChimp_WooCommerce_Enhanced_Logger::log_connection_attempt(
+					$method,
+					$url,
+					$info,
+					$response,
+					$error_info,
+					$request_headers,
+					$request_data
+				);
+			}
+			
 			throw new MailChimp_WooCommerce_Error( 'CURL error :: ' . $err, 500 );
 		}
 
@@ -2714,6 +2754,25 @@ class MailChimp_WooCommerce_MailChimpApi {
 
 		// let's block these from doing anything below because the API seems to be having trouble.
 		if ( $http_code <= 99 ) {
+			$error_info = array(
+				'type' => 'api_failure',
+				'message' => 'API is failing - try again.',
+				'code' => $http_code
+			);
+			
+			// Log with enhanced logger
+			if (class_exists('MailChimp_WooCommerce_Enhanced_Logger')) {
+				MailChimp_WooCommerce_Enhanced_Logger::log_connection_attempt(
+					$method,
+					$url,
+					$info,
+					$response,
+					$error_info,
+					$request_headers,
+					$request_data
+				);
+			}
+			
 			throw new MailChimp_WooCommerce_RateLimitError( 'API is failing - try again.' );
 		}
 
@@ -2727,9 +2786,43 @@ class MailChimp_WooCommerce_MailChimpApi {
 				try {
 					$this->checkForErrors( $data );
 				} catch ( Exception $e ) {
+					// Log error from checkForErrors
+					$error_info = array(
+						'type' => 'validation_error',
+						'message' => $e->getMessage(),
+						'code' => $e->getCode(),
+						'response_data' => $data
+					);
+					
+					if (class_exists('MailChimp_WooCommerce_Enhanced_Logger')) {
+						MailChimp_WooCommerce_Enhanced_Logger::log_connection_attempt(
+							$method,
+							$url,
+							$info,
+							$response,
+							$error_info,
+							$request_headers,
+							$request_data
+						);
+					}
+					
 					throw $e;
 				}
 			}
+			
+			// Log successful request if debug logging is enabled
+			if (mailchimp_environment_variables()->logging === 'debug' && class_exists('MailChimp_WooCommerce_Enhanced_Logger')) {
+				MailChimp_WooCommerce_Enhanced_Logger::log_connection_attempt(
+					$method,
+					$url,
+					$info,
+					$response,
+					array(), // No error
+					$request_headers,
+					$request_data
+				);
+			}
+			
 			return $data;
 		}
 
@@ -2738,19 +2831,101 @@ class MailChimp_WooCommerce_MailChimpApi {
 
 		if ( $http_code >= 400 && $http_code <= 500 ) {
 			if ( $http_code == 403 ) {
+				$error_info = array(
+					'type' => 'rate_limit',
+					'message' => 'Rate limit exceeded',
+					'code' => 403,
+					'response_data' => $data
+				);
+				
+				// Log with enhanced logger
+				if (class_exists('MailChimp_WooCommerce_Enhanced_Logger')) {
+					MailChimp_WooCommerce_Enhanced_Logger::log_connection_attempt(
+						$method,
+						$url,
+						$info,
+						$response,
+						$error_info,
+						$request_headers,
+						$request_data
+					);
+				}
+				
 				throw new MailChimp_WooCommerce_RateLimitError();
 			}
 			$error_message  = isset( $data['title'] ) ? $data['title'] : '';
 			$error_message .= isset( $data['detail'] ) ? $data['detail'] : '';
+			
+			$error_info = array(
+				'type' => 'client_error',
+				'message' => $error_message,
+				'code' => $error_status,
+				'response_data' => $data
+			);
+			
+			// Log with enhanced logger
+			if (class_exists('MailChimp_WooCommerce_Enhanced_Logger')) {
+				MailChimp_WooCommerce_Enhanced_Logger::log_connection_attempt(
+					$method,
+					$url,
+					$info,
+					$response,
+					$error_info,
+					$request_headers,
+					$request_data
+				);
+			}
+			
 			throw new MailChimp_WooCommerce_Error( $error_message, $error_status );
 		}
 
 		if ( $http_code >= 500 ) {
 			$error_message = isset( $data['detail'] ) ? $data['detail'] : '';
+			
+			$error_info = array(
+				'type' => 'server_error',
+				'message' => $error_message,
+				'code' => $error_status,
+				'response_data' => $data
+			);
+			
+			// Log with enhanced logger
+			if (class_exists('MailChimp_WooCommerce_Enhanced_Logger')) {
+				MailChimp_WooCommerce_Enhanced_Logger::log_connection_attempt(
+					$method,
+					$url,
+					$info,
+					$response,
+					$error_info,
+					$request_headers,
+					$request_data
+				);
+			}
+			
 			throw new MailChimp_WooCommerce_ServerError( $error_message, $error_status );
 		}
 
 		if ( ! is_array( $data ) ) {
+			$error_info = array(
+				'type' => 'decode_error',
+				'message' => 'API response could not be decoded.',
+				'code' => $http_code,
+				'raw_response' => $response
+			);
+			
+			// Log with enhanced logger
+			if (class_exists('MailChimp_WooCommerce_Enhanced_Logger')) {
+				MailChimp_WooCommerce_Enhanced_Logger::log_connection_attempt(
+					$method,
+					$url,
+					$info,
+					$response,
+					$error_info,
+					$request_headers,
+					$request_data
+				);
+			}
+			
 			mailchimp_error(
 				'api.debug',
 				'fallback when data is empty from API',

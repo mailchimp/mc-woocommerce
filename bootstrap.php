@@ -1071,6 +1071,16 @@ function mailchimpi_refresh_connected_site_script(MailChimp_WooCommerce_Store $s
     $url = $store->getConnectedSiteScriptUrl();
     $fragment = $store->getConnectedSiteScriptFragment();
 
+    // if script data is not available from store, try connected-sites endpoint
+    if (!$url || !$fragment) {
+        $connected_site_data = $api->checkConnectedSite($store->getId());
+        
+        if ($connected_site_data && isset($connected_site_data['site_script'])) {
+            $url = isset($connected_site_data['site_script']['url']) ? $connected_site_data['site_script']['url'] : '';
+            $fragment = isset($connected_site_data['site_script']['fragment']) ? $connected_site_data['site_script']['fragment'] : '';
+        }
+    }
+
     // if it's not empty we need to set the values
     if ($url && $fragment) {
 

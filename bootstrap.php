@@ -936,7 +936,7 @@ function mailchimp_count_posts($type) {
         $posts = $wpdb->get_results( $wpdb->prepare($query, $type, 'wc-completed'));
     } else if ($type === 'product') {
         $query = "SELECT post_status, COUNT( * ) AS num_posts FROM {$wpdb->posts} WHERE post_type = %s AND post_status IN (%s, %s, %s) group BY post_status";
-        $posts = $wpdb->get_results( $wpdb->prepare($query, $type, 'private', 'publish', 'draft'));
+        $posts = $wpdb->get_results( $wpdb->prepare($query, $type, 'publish'));
     } else {
         $query = "SELECT post_status, COUNT( * ) AS num_posts FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s";
         $posts = $wpdb->get_results( $wpdb->prepare($query, $type, 'publish'));

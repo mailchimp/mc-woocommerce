@@ -2536,7 +2536,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 
 		curl_setopt_array( $curl, $options );
 
-		return $this->processCurlResponse( $curl );
+		return $this->processCurlResponse( $curl, $body );
 	}
 
 	/**
@@ -2564,7 +2564,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 
 		curl_setopt_array( $curl, $options );
 
-		return $this->processCurlResponse( $curl );
+		return $this->processCurlResponse( $curl, $body );
 	}
 
     /**
@@ -2610,7 +2610,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 
 		curl_setopt_array( $curl, $options );
 
-		return $this->processCurlResponse( $curl );
+		return $this->processCurlResponse( $curl, $body );
 	}
 
 	/**
@@ -2691,7 +2691,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 * @throws MailChimp_WooCommerce_RateLimitError
 	 * @throws MailChimp_WooCommerce_ServerError
 	 */
-	protected function processCurlResponse( $curl ) {
+	protected function processCurlResponse( $curl, $request_data = null ) {
 		$response = curl_exec( $curl );
 
 		$err  = curl_error( $curl );
@@ -2700,20 +2700,9 @@ class MailChimp_WooCommerce_MailChimpApi {
 		// Capture request details before closing curl
 		$url = isset($info['url']) ? $info['url'] : 'UNKNOWN';
 		$request_headers = isset($info['request_header']) ? explode("\r\n", $info['request_header']) : array();
-		
+
 		// Extract method from curl options
-		$method = 'UNKNOWN';
-		if (curl_getinfo($curl, CURLINFO_CUSTOMREQUEST)) {
-			$method = curl_getinfo($curl, CURLINFO_CUSTOMREQUEST);
-		}
-		
-		// Try to extract request data from CURLOPT_POSTFIELDS
-		$request_data = null;
-		if ($method === 'POST' || $method === 'PUT' || $method === 'PATCH') {
-			// Unfortunately we can't get POSTFIELDS from curl handle directly
-			// This will be captured in enhanced logger through headers
-			$request_data = null;
-		}
+        $method = $info['effective_method'] ?? 'UNKNOWN';
 
         if ($this->auto_doi) {
             mailchimp_debug('api.debug', 'message headers', ['headers' => $info['request_header']]);
@@ -2722,8 +2711,6 @@ class MailChimp_WooCommerce_MailChimpApi {
 		curl_close( $curl );
 		
 		// Initialize error info array
-		$error_info = array();
-
 		if ( $err ) {
 			$error_info = array(
 				'type' => 'curl_error',

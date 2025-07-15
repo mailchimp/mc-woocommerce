@@ -23,6 +23,8 @@ $store_defaults = MailChimp_WooCommerce_Admin::instance()->loadWooStoreData();
 if (!$signup_initiated) {
     Mailchimp_Woocommerce_Event::track('connect_accounts:view_create_account', new \DateTime());
 }
+$store_id = mailchimp_get_store_id();
+
 ?>
 <div id="mc-woocommerce-create-account">
 	<input type="hidden" name="signup_initiated" value="<?php echo esc_attr(!!$signup_initiated) ?>" />
@@ -293,16 +295,17 @@ if (!$signup_initiated) {
                         </p>
 					</div>
 					<div class="box">
+                        <div id="mc-woocommerce-error-box"></div>
 						<button type="submit" id="mc-woocommerce-create-activate-account" class="button button-primary create-account-save">
-								<span class="mc-wc-loading hidden">
-									<svg class="animate-spin" width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-											<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-															stroke-width="4"></circle>
-											<path class="opacity-75" fill="currentColor"
-														d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-									</svg>
-								</span>
-                <?php esc_html_e( 'Activate Account', 'mailchimp-for-woocommerce' ); ?>
+                            <span class="mc-wc-loading hidden">
+                                <svg class="animate-spin" width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                        stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </span>
+                            <?php esc_html_e( 'Activate Account', 'mailchimp-for-woocommerce' ); ?>
 						</button>
 					</div>
 				</form>
@@ -369,7 +372,23 @@ if (!$signup_initiated) {
 							<span class="email-opener">Open Outlook</span>
 						</a>
 					</div>
-				</div>
+
+                    <div class="mc-wc-button-disconnect">
+                        <form id="js-mc-woocommerce-switch-account">
+                            <?php wp_nonce_field( '_disconnect-nonce-' . $store_id, '_disconnect-nonce' ); ?>
+                            <button id="js-mc-woocommerce-switch-account-button" type="submit" class="button create-account-save">
+                                <span class="mc-wc-loading hidden">
+                                    <svg class="animate-spin" width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </span>
+                                <?php esc_html_e('Switch account', 'mailchimp-for-woocommerce' ); ?></button>
+                        </form>
+                    </div>
+                </div>
 				<div id="mailchimp_woocommerce_options" class="js-mc-woocommerce-suggest-to-login hidden">
 					<div class="title"><?php echo esc_html__( 'Login', 'mailchimp-for-woocommerce' ) ?></div>
 					<p class="h4"><?php echo esc_html__( 'It seems account with this email already created. You may try to login with this username.', 'mailchimp-for-woocommerce' ) ?><span class="js-mc-woocommerce-email"></span></p>

@@ -6,7 +6,6 @@
  */
 class MailChimp_WooCommerce_Enhanced_Logger {
     
-    const LOG_SOURCE = 'mailchimp_woocommerce_enhanced';
     const CONNECTION_LOG_KEY = 'mailchimp_connection_logs';
     const MAX_LOG_ENTRIES = 100;
     
@@ -36,15 +35,10 @@ class MailChimp_WooCommerce_Enhanced_Logger {
         );
         
         // Log to WooCommerce logs
-        if (function_exists('wc_get_logger')) {
-            $logger = wc_get_logger();
-            $context = array('source' => self::LOG_SOURCE);
-            
-            if (!empty($error_info)) {
-                $logger->error(self::format_log_message($log_entry), $context);
-            } else {
-                $logger->info(self::format_log_message($log_entry), $context);
-            }
+        if (!empty($error_info)) {
+            mailchimp_debug('enhanced_logger', 'ERROR', $log_entry);
+        } else {
+            mailchimp_debug('enhanced_logger', 'INFO', $log_entry);
         }
         
         // Store in transient for admin view

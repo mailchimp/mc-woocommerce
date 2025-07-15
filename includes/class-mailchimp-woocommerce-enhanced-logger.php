@@ -432,14 +432,14 @@ class MailChimp_WooCommerce_Enhanced_Logger {
         );
         
         if (!empty($log_entry['error'])) {
-            $message .= sprintf(" - ERROR: %s", json_encode($log_entry['error']));
+            $message .= sprintf(" - ERROR: %s", wc_print_r($log_entry['error'], true));
         }
         
         if (!empty($log_entry['diagnostics']['possible_causes'])) {
             $message .= sprintf(" - Possible causes: %s", implode('; ', $log_entry['diagnostics']['possible_causes']));
         }
         
-        $message .= sprintf(" - Full details: %s", json_encode($log_entry));
+        $message .= sprintf(" - Full details: %s", wc_print_r($log_entry, true));
         
         return $message;
     }

@@ -557,6 +557,10 @@ function mailchimp_get_option($key, $default = null) {
  * @return false
  */
 function mailchimp_get_admin_options($default = array()) {
+    if (wp_using_ext_object_cache()) {
+        return \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce', $default);
+    }
+
     $options = wp_cache_get('mailchimp-woocommerce-options', 'mailchimp-woocommerce');
 
     if (!$options) {

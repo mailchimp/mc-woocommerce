@@ -235,7 +235,7 @@ class MailChimp_WooCommerce_Transform_Products {
 		$params = array(
 			'post_type'      => array_merge( array_keys( wc_get_product_types() ), array( 'product' ) ),
 			'posts_per_page' => $limit,
-			'post_status'    => array( 'private', 'publish', 'draft' ),
+			'post_status'    => array( 'publish' ),
 			'offset'         => $offset,
 			'orderby'        => 'ID',
 			'order'          => 'ASC',
@@ -279,7 +279,7 @@ class MailChimp_WooCommerce_Transform_Products {
 		$variants = get_posts(
 			array(
 				'post_type'   => 'product_variation',
-				'post_status' => array( 'private', 'publish', 'draft' ),
+				'post_status' => array( 'publish' ),
 				'numberposts' => -1,
 				'post_parent' => $id,
 			)

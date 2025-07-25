@@ -331,6 +331,13 @@ function mailchimp_carts_subscribers_only() {
 }
 
 /**
+ * @return bool
+ */
+function mailchimp_landing_tracking_enabled() {
+    return (bool) mailchimp_get_option('mailchimp-woocommerce-enable-landing-tracking', false);
+}
+
+/**
  * @param $email
  * @return string|null
  */

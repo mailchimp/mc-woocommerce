@@ -123,6 +123,7 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 		public function handle(){
 			// if we have a transient telling us to stop this sync, just break out here instead of
 			// respawn and try to delete.
+
 			if (mailchimp_get_transient('stop_sync', false)) {
 				return;
 			}

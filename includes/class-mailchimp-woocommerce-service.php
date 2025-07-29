@@ -1342,7 +1342,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             }
             // get job row from db
             global $wpdb;
-            $sql = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}mailchimp_jobs	WHERE obj_id = %s", $obj_id );
+            $current_action = current_action();
+            $sql = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}mailchimp_jobs	WHERE obj_id = %s AND job LIKE %s", array($obj_id, "%{$current_action}%") );
             $job_row = $wpdb->get_row( $sql );
 
             if (is_null($job_row) || !is_object($job_row)) {
@@ -1355,7 +1356,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             // get variables
             $job = unserialize($job_row->job);
 
-            $job_id =$job_row->id;
+            $job_id = $job_row->id;
 
             // process job
             $job->handle();

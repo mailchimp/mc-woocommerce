@@ -133,6 +133,7 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
     $attempts = $job->get_attempts() > 0 ? ' attempt:' . $job->get_attempts() : '';
 
     if ($job->get_attempts() <= 5) {
+        $job_class = get_class($job);
 
         $args = array(
             'job' => maybe_serialize($job),
@@ -141,26 +142,32 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
         );
         
         $existing_actions =  function_exists('as_get_scheduled_actions') ? as_get_scheduled_actions(array(
-            'hook' => get_class($job), 
-            'status' => ActionScheduler_Store::STATUS_PENDING,  
+            'hook' => $job_class,
+            'status' => ActionScheduler_Store::STATUS_PENDING,
+            'group' => 'mc-woocommerce',
             'args' => array(
                 'obj_id' => isset($job->id) ? $job->id : null), 
-                'group' => 'mc-woocommerce'
             )
         ) : null;
 
         if (!empty($existing_actions)) {
             try {
-                as_unschedule_action(get_class($job), array('obj_id' => $job->id), 'mc-woocommerce');
+                as_unschedule_action($job_class, array('obj_id' => $job->id), 'mc-woocommerce');
 
-                // updating args after unschedule to refresh data in the jo
-                $wpdb->update(
-                    $wpdb->prefix . "mailchimp_jobs",
-                    array(
-                        'job' => maybe_serialize($job),
-                        'created_at' => gmdate('Y-m-d H:i:s', time())
-                    ),
-                    array('obj_id' => $job->id)
+                $table = $wpdb->prefix . "mailchimp_jobs";
+                $serialized_job = maybe_serialize($job);
+                $created_at = gmdate('Y-m-d H:i:s');
+
+                $wpdb->query(
+                    $wpdb->prepare(
+                        "UPDATE $table 
+                             SET job = %s, created_at = %s 
+                             WHERE obj_id = %s AND job LIKE %s",
+                        $serialized_job,
+                        $created_at,
+                        $job->id,
+                        '%' . $job_class . '%'
+                    )
                 );
             } catch (Exception $e) {
             }
@@ -188,10 +195,6 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
         $action_args = array(
             'obj_id' => $job_id,
         );
-
-        if ($current_page !== false) {
-            $action_args['page'] = $current_page;
-        }
 
         // create the action to be handled in X seconds ( default time )
         $fire_at = strtotime( '+'.$delay.' seconds' );
@@ -863,7 +866,7 @@ function mailchimp_string_contains($haystack, $needles) {
  */
 function mailchimp_get_coupons_count() {
     $posts = mailchimp_count_posts('shop_coupon');
-    unset($posts['auto-draft'], $posts['trash']);
+
     $total = 0;
     foreach ($posts as $status => $count) {
         $total += $count;
@@ -876,11 +879,12 @@ function mailchimp_get_coupons_count() {
  */
 function mailchimp_get_product_count() {
     $posts = mailchimp_count_posts('product');
-    unset($posts['auto-draft'], $posts['trash']);
+
     $total = 0;
     foreach ($posts as $status => $count) {
         $total += $count;
     }
+
     return $total;
 }
 
@@ -938,9 +942,6 @@ function mailchimp_count_posts($type) {
     if ($type === 'shop_order') {
         $query = "SELECT post_status, COUNT( * ) AS num_posts FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s";
         $posts = $wpdb->get_results( $wpdb->prepare($query, $type, 'wc-completed'));
-    } else if ($type === 'product') {
-        $query = "SELECT post_status, COUNT( * ) AS num_posts FROM {$wpdb->posts} WHERE post_type = %s AND post_status IN (%s, %s, %s) group BY post_status";
-        $posts = $wpdb->get_results( $wpdb->prepare($query, $type, 'publish'));
     } else {
         $query = "SELECT post_status, COUNT( * ) AS num_posts FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s";
         $posts = $wpdb->get_results( $wpdb->prepare($query, $type, 'publish'));
@@ -950,6 +951,7 @@ function mailchimp_count_posts($type) {
     foreach ($posts as $post) {
         $response[$post->post_status] = $post->num_posts;
     }
+
     return $response;
 }
 

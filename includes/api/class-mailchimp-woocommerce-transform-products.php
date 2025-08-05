@@ -193,9 +193,10 @@ class MailChimp_WooCommerce_Transform_Products {
         $visible = $woo->is_visible();
         $is_purchasable = $woo->is_purchasable();
         $status = $woo->get_status();
+        $is_private = $status === 'private';
         $is_draft_or_pending = in_array($status, ['draft', 'pending']);
 
-        if (!$is_purchasable) {
+        if ($is_private || !$is_purchasable) {
             $visible = false;
         } else if ( $hidden_catalog && $is_draft_or_pending ) {
             $visible = false;

@@ -378,8 +378,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             return;
         }
 
-        // 'draft', 'pending'
-        if (in_array($post_after->post_status, array('trash', 'auto-draft', 'draft', 'pending', 'private'))) {
+        /// old filter array('trash', 'auto-draft', 'draft', 'pending', 'private')
+        if (in_array($post_after->post_status, array('trash', 'auto-draft'))) {
             mailchimp_log('product.update.blocked', "product {$post_ID} was blocked because status is {$post_after->post_status}");
             return;
         }

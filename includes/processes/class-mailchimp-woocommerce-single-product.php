@@ -156,7 +156,7 @@ class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
                 return false;
             }
 
-            if (in_array($product_post->get_status(), array('trash', 'auto-draft', 'draft', 'pending', 'private'))) {
+            if (in_array($product_post->get_status(), array('trash', 'auto-draft'))) {
                 mailchimp_log('product', "skipped products sync #{$this->id} because current status is {$product_post->get_status()}");
                 return false;
             }

@@ -176,6 +176,11 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 		// allow users to hook into the merge field submission
 		$merge_fields = apply_filters('mailchimp_sync_user_mergetags', $merge_fields_system, $user);
 
+        $list_interests = null;
+
+        // allow users to hook into the list_interests
+        $list_interests = apply_filters('mailchimp_sync_user_list_interests', $list_interests, $user);
+
 		// for whatever reason if this isn't an array we need to skip it.
 		if (!is_array($merge_fields)) {
 			mailchimp_error("custom.merge_fields", "The filter for mailchimp_sync_user_mergetags needs to return an array, using the default setup instead.");
@@ -205,7 +210,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 				return false;
 			}
 
-            $member_data = $api->update($list_id, $email, $subscribed, $merge_fields, null, $language, $gdpr_fields);
+            $member_data = $api->update($list_id, $email, $subscribed, $merge_fields, $list_interests, $language, $gdpr_fields);
 
             // if we're updating a member and the email is different, we need to delete the old person
 			if (is_array($this->updated_data) && isset($this->updated_data['user_email'])) {
@@ -252,7 +257,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
                     return false;
                 }
                 // ok let's update this member
-				$api->update($list_id, $email, $status_meta['updated'], $merge_fields, null, $language, $gdpr_fields);
+                $api->update($list_id, $email, $status_meta['updated'], $merge_fields, $list_interests, $language, $gdpr_fields);
 
 				// update the member tags but fail silently just in case.
 				$api->updateMemberTags(mailchimp_get_list_id(), $email, true);
@@ -277,7 +282,7 @@ class MailChimp_WooCommerce_User_Submit extends Mailchimp_Woocommerce_Job
 				}
 
 				// ok let's update this member
-				$api->update($list_id, $email, $member_data['status'], $merge_fields, null, $language, $gdpr_fields);
+                $api->update($list_id, $email, $member_data['status'], $merge_fields, $list_interests, $language, $gdpr_fields);
 
 				// delete this admin transient if there was one
 				mailchimp_delete_transient("updating_subscriber_status.{$this->id}" );

@@ -40,7 +40,7 @@ class MailChimp_WooCommerce_HPOS {
 	/**
 	 * @param $post_id
 	 *
-	 * @return mixed
+	 * @return mixed|WC_Product
 	 */
 	public static function get_product( $post_id )
 	{

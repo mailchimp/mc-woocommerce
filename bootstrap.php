@@ -91,6 +91,7 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_Logs' => 'includes/api/class-mailchimp-woocommerce-logs.php',
         'MailChimp_WooCommerce_Tower' => 'includes/api/class-mailchimp-woocommerce-tower.php',
         'MailChimp_WooCommerce_Log_Viewer' => 'includes/api/class-mailchimp-woocommerce-log-viewer.php',
+        'MailChimp_WooCommerce_Enhanced_Logger' => 'includes/class-mailchimp-woocommerce-enhanced-logger.php',
     );
 
     // if the file exists, require it
@@ -111,7 +112,7 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production', // staging or production
-        'version' => '5.4.1',
+        'version' => '5.5',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => function_exists('WC') ? WC()->version : null,
@@ -133,6 +134,7 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
     $attempts = $job->get_attempts() > 0 ? ' attempt:' . $job->get_attempts() : '';
 
     if ($job->get_attempts() <= 5) {
+        $job_class = get_class($job);
 
         $args = array(
             'job' => maybe_serialize($job),
@@ -141,26 +143,32 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
         );
         
         $existing_actions =  function_exists('as_get_scheduled_actions') ? as_get_scheduled_actions(array(
-            'hook' => get_class($job), 
-            'status' => ActionScheduler_Store::STATUS_PENDING,  
+            'hook' => $job_class,
+            'status' => ActionScheduler_Store::STATUS_PENDING,
+            'group' => 'mc-woocommerce',
             'args' => array(
                 'obj_id' => isset($job->id) ? $job->id : null), 
-                'group' => 'mc-woocommerce'
             )
         ) : null;
 
         if (!empty($existing_actions)) {
             try {
-                as_unschedule_action(get_class($job), array('obj_id' => $job->id), 'mc-woocommerce');
+                as_unschedule_action($job_class, array('obj_id' => $job->id), 'mc-woocommerce');
 
-                // updating args after unschedule to refresh data in the jo
-                $wpdb->update(
-                    $wpdb->prefix . "mailchimp_jobs",
-                    array(
-                        'job' => maybe_serialize($job),
-                        'created_at' => gmdate('Y-m-d H:i:s', time())
-                    ),
-                    array('obj_id' => $job->id)
+                $table = $wpdb->prefix . "mailchimp_jobs";
+                $serialized_job = maybe_serialize($job);
+                $created_at = gmdate('Y-m-d H:i:s');
+
+                $wpdb->query(
+                    $wpdb->prepare(
+                        "UPDATE $table 
+                             SET job = %s, created_at = %s 
+                             WHERE obj_id = %s AND job LIKE %s",
+                        $serialized_job,
+                        $created_at,
+                        $job->id,
+                        '%' . $job_class . '%'
+                    )
                 );
             } catch (Exception $e) {
             }
@@ -188,10 +196,6 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
         $action_args = array(
             'obj_id' => $job_id,
         );
-
-        if ($current_page !== false) {
-            $action_args['page'] = $current_page;
-        }
 
         // create the action to be handled in X seconds ( default time )
         $fire_at = strtotime( '+'.$delay.' seconds' );
@@ -557,6 +561,10 @@ function mailchimp_get_option($key, $default = null) {
  * @return false
  */
 function mailchimp_get_admin_options($default = array()) {
+    if (wp_using_ext_object_cache()) {
+        return \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce', $default);
+    }
+
     $options = wp_cache_get('mailchimp-woocommerce-options', 'mailchimp-woocommerce');
 
     if (!$options) {
@@ -859,7 +867,7 @@ function mailchimp_string_contains($haystack, $needles) {
  */
 function mailchimp_get_coupons_count() {
     $posts = mailchimp_count_posts('shop_coupon');
-    unset($posts['auto-draft'], $posts['trash']);
+
     $total = 0;
     foreach ($posts as $status => $count) {
         $total += $count;
@@ -872,11 +880,12 @@ function mailchimp_get_coupons_count() {
  */
 function mailchimp_get_product_count() {
     $posts = mailchimp_count_posts('product');
-    unset($posts['auto-draft'], $posts['trash']);
+
     $total = 0;
     foreach ($posts as $status => $count) {
         $total += $count;
     }
+
     return $total;
 }
 
@@ -934,9 +943,6 @@ function mailchimp_count_posts($type) {
     if ($type === 'shop_order') {
         $query = "SELECT post_status, COUNT( * ) AS num_posts FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s";
         $posts = $wpdb->get_results( $wpdb->prepare($query, $type, 'wc-completed'));
-    } else if ($type === 'product') {
-        $query = "SELECT post_status, COUNT( * ) AS num_posts FROM {$wpdb->posts} WHERE post_type = %s AND post_status IN (%s, %s, %s) group BY post_status";
-        $posts = $wpdb->get_results( $wpdb->prepare($query, $type, 'private', 'publish', 'draft'));
     } else {
         $query = "SELECT post_status, COUNT( * ) AS num_posts FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s";
         $posts = $wpdb->get_results( $wpdb->prepare($query, $type, 'publish'));
@@ -946,6 +952,7 @@ function mailchimp_count_posts($type) {
     foreach ($posts as $post) {
         $response[$post->post_status] = $post->num_posts;
     }
+
     return $response;
 }
 
@@ -1069,6 +1076,16 @@ function mailchimpi_refresh_connected_site_script(MailChimp_WooCommerce_Store $s
 
     $url = $store->getConnectedSiteScriptUrl();
     $fragment = $store->getConnectedSiteScriptFragment();
+
+    // if script data is not available from store, try connected-sites endpoint
+    if (!$url || !$fragment) {
+        $connected_site_data = $api->checkConnectedSite($store->getId());
+        
+        if ($connected_site_data && isset($connected_site_data['site_script'])) {
+            $url = isset($connected_site_data['site_script']['url']) ? $connected_site_data['site_script']['url'] : '';
+            $fragment = isset($connected_site_data['site_script']['fragment']) ? $connected_site_data['site_script']['fragment'] : '';
+        }
+    }
 
     // if it's not empty we need to set the values
     if ($url && $fragment) {

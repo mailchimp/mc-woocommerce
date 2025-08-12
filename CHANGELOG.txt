@@ -1,4 +1,10 @@
 == Changelog ==
+= 5.5 =
+* WooCommerce block dependency updates
+* Logging enhancements
+* Better compatibility when external object cache is detected
+* Refactor Connected Sites API connection
+* Adds support for Product visibility logic for syncing
 = 5.4 =
 * Performance and User Interface improvements
 * Ability to sync Product Short Description

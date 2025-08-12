@@ -378,7 +378,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             return;
         }
 
-        // 'draft', 'pending'
+        /// old filter array('trash', 'auto-draft', 'draft', 'pending', 'private')
         if (in_array($post_after->post_status, array('trash', 'auto-draft'))) {
             mailchimp_log('product.update.blocked', "product {$post_ID} was blocked because status is {$post_after->post_status}");
             return;
@@ -468,7 +468,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             return;
         }
 
-		if (!in_array($product->get_status(), array('trash', 'auto-draft', 'draft', 'pending'))) {
+		if (!in_array($product->get_status(), array('trash', 'auto-draft', 'draft', 'pending', 'private'))) {
 			if ($product instanceof WC_Product) {
 				mailchimp_debug('queue', "handling meta update for meta [{$meta_key}] on product {$object_id}");
 				mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($object_id), 5);
@@ -523,7 +523,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 		}
 
 		// If the product is of a certain status, process it. ( old values included 'draft', 'pending')
-		if (!in_array($post->post_status, array('trash', 'auto-draft'))) {
+		if (!in_array($post->post_status, array('trash', 'auto-draft', 'draft', 'pending', 'private'))) {
 			mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($post_ID), 5);
 		}
 	}
@@ -703,7 +703,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         }
 
         // don't handle any of these statuses because they're not ready for the show
-        if (in_array($post->post_status, array('trash', 'auto-draft', 'draft', 'pending'))) {
+        if (in_array($post->post_status, array('trash', 'auto-draft', 'draft', 'pending', 'private'))) {
             return;
         }
 
@@ -1342,7 +1342,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             }
             // get job row from db
             global $wpdb;
-            $sql = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}mailchimp_jobs	WHERE obj_id = %s", $obj_id );
+            $current_action = current_action();
+            $sql = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}mailchimp_jobs	WHERE obj_id = %s AND job LIKE %s", array($obj_id, "%{$current_action}%") );
             $job_row = $wpdb->get_row( $sql );
 
             if (is_null($job_row) || !is_object($job_row)) {
@@ -1355,7 +1356,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             // get variables
             $job = unserialize($job_row->job);
 
-            $job_id =$job_row->id;
+            $job_id = $job_row->id;
 
             // process job
             $job->handle();

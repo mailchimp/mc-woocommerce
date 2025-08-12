@@ -86,7 +86,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @return bool
 	 */
 	private function is_disconnecting() {
-		return isset( $_REQUEST['mailchimp_woocommerce_disconnect_store'] )
+        return isset( $_REQUEST['mailchimp_woocommerce_disconnect_store'] )
 			   && current_user_can( mailchimp_get_allowed_capability() )
 			   && $_REQUEST['mailchimp_woocommerce_disconnect_store'] == 1
 			   && isset( $_REQUEST['_disconnect-nonce'] )
@@ -139,7 +139,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			$options                   = mailchimp_get_admin_options();
 			$checkbox_default_settings = ( array_key_exists( 'mailchimp_checkbox_defaults', $options ) && ! is_null( $options['mailchimp_checkbox_defaults'] ) ) ? $options['mailchimp_checkbox_defaults'] : 'check';
 			wp_register_script( $this->plugin_name . 'create-account', plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-create-account.js', array( 'jquery', 'swal' ), $this->version );
-			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version );
+			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version . 'test-122' );
 			wp_register_script( $this->plugin_name . '-v2', plugin_dir_url( __FILE__ ) . 'v2/assets/js/scripts.js', array( 'jquery', 'swal' ), $this->version );
 			wp_localize_script(
 				$this->plugin_name,
@@ -855,7 +855,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				// case disconnect
 				if ( $this->is_disconnecting() ) {
 					// Disconnect store!
-					if ( $this->disconnect_store() ) {
+                    if ( $this->disconnect_store() ) {
 						return array(
 							'active_tab'        => 'api_key',
 							'mailchimp_api_key' => null,
@@ -1054,7 +1054,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             // save api_key? If yes, we can skip api key validation for validatePostApiKey();
             $result = json_decode( $response['body'], true);
             $options = \Mailchimp_Woocommerce_DB_Helpers::get_option($this->plugin_name);
-            $options['mailchimp_api_key'] = $result['access_token'].'-'.$result['data_center'];
+            $api_key = $result['access_token'].'-'.$result['data_center'];
+            $options['mailchimp_api_key'] = $api_key;
 
             // \Mailchimp_Woocommerce_DB_Helpers::update_option($this->plugin_name, $options); this used to return false!
             // go straight to the DB and update the options to bypass any filters.
@@ -1065,7 +1066,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             );
             Mailchimp_Woocommerce_Event::track('connect_accounts_oauth:complete', new DateTime());
 
-            do_action('mailchimp_woocommerce_connected_to_mailchimp');
+            do_action('mailchimp_woocommerce_connected_to_mailchimp', $api_key);
 
             wp_send_json_success( $response );
         } else {
@@ -1234,7 +1235,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             Mailchimp_Woocommerce_Event::track('connect_accounts:create_account_complete', new DateTime());
             $result = json_decode( $response['body'], true);
             $options = get_option($this->plugin_name, array());
-            $options['mailchimp_api_key'] = $result['data']['oauth_token'].'-'.$result['data']['dc'];
+            $api_key = $result['data']['oauth_token'].'-'.$result['data']['dc'];
+            $options['mailchimp_api_key'] = $api_key;
             // go straight to the DB and update the options to bypass any filters.
             $wpdb->update(
                 $wpdb->options,
@@ -1245,24 +1247,47 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             Mailchimp_Woocommerce_Event::track('account:verify_email', new DateTime());
             $response_body->redirect = admin_url('admin.php?page=mailchimp-woocommerce');
 
-            do_action('mailchimp_woocommerce_connected_to_mailchimp');
+            do_action('mailchimp_woocommerce_connected_to_mailchimp', $api_key);
 
             wp_send_json_success( $response_body );
         } elseif ( $response['response']['code'] == 404 ) {
             wp_send_json_error( array( 'success' => false ) );
         } else {
+            $response_error = json_decode( $response_body->error, true );
             $username = preg_replace( '/[^A-Za-z0-9\-\@\.]/', '', $_POST['data']['username'] );
             $suggestion         = wp_remote_get( 'https://woocommerce.mailchimpapp.com/api/usernames/suggestions/' . $username );
             $suggested_username = json_decode( $suggestion['body'] )->data;
+
             wp_send_json_error(
                 array(
                     'success'    => false,
-                    'suggest_login' => true,
+                    'errors' => $response_error['errors'],
                     'suggested_username' => $suggested_username,
+                    'response' => $response,
+                    'response_body' => $response_body,
                 )
             );
         }
 	}
+
+    public function connect_account_flow_switch_account()
+    {
+        if (
+                current_user_can( mailchimp_get_allowed_capability() )
+                && isset( $_POST['data']['_disconnect-nonce'] )
+                && wp_verify_nonce( $_POST['data']['_disconnect-nonce'], '_disconnect-nonce-' . mailchimp_get_store_id() )
+            ) {
+            $this->disconnect_store();
+            \Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-waiting-for-login');
+
+            return wp_send_json_success(array(
+                'success' => true,
+                'redirect' => admin_url('admin.php?page=mailchimp-woocommerce')
+            ));
+        } else {
+            return wp_send_json_success(array('success' => false, 'message' => 'Failed to disconnect account'));
+        }
+    }
 
 	/**
 	 * @param $input

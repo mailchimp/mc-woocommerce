@@ -69,7 +69,7 @@ class MailChimp_WooCommerce_Transform_Products {
 	}
 
 	/**
-	 * @param $woo
+	 * @param WC_Product $woo
 	 * @param null    $fallback_title
 	 *
 	 * @return MailChimp_WooCommerce_Product
@@ -181,8 +181,33 @@ class MailChimp_WooCommerce_Transform_Products {
 			}
 		}
 
+        /**
+         * -- if a product is not purchasable, it's always hidden --
+         * 1. category is hidden, status is draft or pending = HIDDEN
+         * 2. category is hidden, status is not draft or pending = HIDDEN
+         * 3. category is NOT hidden, status is draft or pending = HIDDEN
+         * 4. category is NOT hidden, status is NOT draft or pending = VISIBLE
+         */
+
+        $hidden_catalog = $woo->get_catalog_visibility() === 'hidden';
+        $visible = $woo->is_visible();
+        $is_purchasable = $woo->is_purchasable();
+        $status = $woo->get_status();
+        $is_private = $status === 'private';
+        $is_draft_or_pending = in_array($status, ['draft', 'pending']);
+
+        if ($is_private || !$is_purchasable) {
+            $visible = false;
+        } else if ( $hidden_catalog && $is_draft_or_pending ) {
+            $visible = false;
+        } else if ( ! $hidden_catalog && $is_draft_or_pending) {
+            $visible = false;
+        } else if ( ! $hidden_catalog && !$is_draft_or_pending ) {
+            $visible = true;
+        }
+
 		// only set these properties if the product is currently visible or purchasable.
-		if ( $woo->is_purchasable() && $woo->is_visible() ) {
+		if ( $is_purchasable && $visible ) {
 			if ( $woo->is_in_stock() ) {
 				$variant->setInventoryQuantity( ( $woo->managing_stock() ? $woo->get_stock_quantity() : 1000000 ) );
 			} else {
@@ -209,9 +234,10 @@ class MailChimp_WooCommerce_Transform_Products {
 			}
 
 			$variant->setTitle( implode( ' :: ', $title ) );
-			$variant->setVisibility( ( $woo->variation_is_visible() ? 'visible' : 'hidden' ) );
+            $variation_visible = $woo->variation_is_visible() && $is_purchasable;
+			$variant->setVisibility( ( $visible && $variation_visible ? 'visible' : 'hidden' ) );
 		} else {
-			$variant->setVisibility( ( $woo->is_visible() ? 'visible' : 'hidden' ) );
+			$variant->setVisibility( ( $visible ? 'visible' : 'hidden' ) );
 			$variant->setTitle( $woo->get_title() );
 		}
 
@@ -235,7 +261,7 @@ class MailChimp_WooCommerce_Transform_Products {
 		$params = array(
 			'post_type'      => array_merge( array_keys( wc_get_product_types() ), array( 'product' ) ),
 			'posts_per_page' => $limit,
-			'post_status'    => array( 'private', 'publish', 'draft' ),
+			'post_status'    => array( 'publish' ),
 			'offset'         => $offset,
 			'orderby'        => 'ID',
 			'order'          => 'ASC',
@@ -279,7 +305,7 @@ class MailChimp_WooCommerce_Transform_Products {
 		$variants = get_posts(
 			array(
 				'post_type'   => 'product_variation',
-				'post_status' => array( 'private', 'publish', 'draft' ),
+				'post_status' => array( 'publish' ),
 				'numberposts' => -1,
 				'post_parent' => $id,
 			)

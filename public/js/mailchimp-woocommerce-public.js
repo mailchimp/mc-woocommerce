@@ -38,13 +38,11 @@ function mailchimpHandleBillingEmail(selector) {
         var b = void 0 !== a ? a.value : "";
         if (!mailchimp_cart.valueEmail(b) || mailchimp_submitted_email === b) { return false; }
         mailchimp_cart.setEmail(b);
-        console.log(b);
-        console.log(mailchimp_cart);
+
         var c = mailchimp_public_data.ajax_url + "?action=mailchimp_set_user_by_email";
         var d = new XMLHttpRequest;
         d.open("POST", c, !0);
         d.onload = function () {
-            console.log(d);
             var successful = d.status >= 200 && d.status < 400;
             var msg = successful ? "mailchimp.handle_billing_email.request.success" : "mailchimp.handle_billing_email.request.error";
             if (successful) {
@@ -186,8 +184,6 @@ function mailchimpHandleBillingEmail(selector) {
 }();
 
 mailchimpReady(function () {
-
-    console.log('mailchimp ready');
     // if they've told us we can't do this - we have to honor it.
     if (!mailchimp_public_data.allowed_to_set_cookies) return;
 

@@ -312,6 +312,22 @@ function mailchimp_submit_subscribed_only() {
     return ! (bool) mailchimp_get_option('mailchimp_ongoing_sync_status', '1');
 }
 
+function get_woo_session($key, $default = null)
+{
+    if (!function_exists('WC')) return $default;
+
+    if (!($woo = WC()) || empty(WC()->session)) {
+        return $default;
+    }
+
+    // not really sure why this would be the case, but if there is no session we can't get it anyway.
+    if (!is_object($woo->session) || !method_exists($woo->session, 'get')) {
+        return $default;
+    }
+
+    return $woo->session->get($key, $default);
+}
+
 /**
  * @return bool
  */

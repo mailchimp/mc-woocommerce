@@ -320,9 +320,19 @@ class MailChimp_WooCommerce_Customer {
         if (($status = $this->getWordpressUserSubscriberStatus())) {
             if (in_array($status, array('subscribed', '1', 'pending'), true)) {
                 $this->subscribed_in_wordpress = true;
+                mailchimp_debug('order_logic', "applied existing wordpress user subscription status to true for {$this->getId()}");
                 return $this->setOptInStatus(true);
             }
+            mailchimp_debug('order_logic', "did not apply existing wordpress user subscription status for {$this->getId()}");
             $this->subscribed_in_wordpress = false;
+        } else if ( !$this->getOptInStatus() && $email = $this->getEmailAddress() ) {
+            $status = mailchimp_get_subscriber_status($email);
+            if (in_array($status, array('subscribed', 'pending'), true)) {
+                $this->setOptInStatus(true);
+            }
+            mailchimp_debug('customer.subscription_statuses', 'Guest user statuses', [
+                'mailchimp_status' => $status,
+            ]);
         }
         return $this;
     }

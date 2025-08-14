@@ -258,8 +258,12 @@ class MailChimp_WooCommerce_Transform_Orders {
             mailchimp_debug('order_logic', "order did not have a wordpress user id, checking by email {$order->get_billing_email()}");
             $wordpress_user = get_user_by('email', $order->get_billing_email());
             if ($wordpress_user) {
-                mailchimp_debug('order_logic', "found a wordpress user by email {$order->get_billing_email()}");
+                mailchimp_debug('order_logic', "found a wordpress user by email {$order->get_billing_email()} order ID {$order->get_id()}");
+            } else {
+                mailchimp_debug('order_logic', "GUEST USER :: did not find an existing user by email {$order->get_billing_email()} order ID {$order->get_id()}");
             }
+        } else {
+            mailchimp_debug('order_logic', "found user from order {$order->get_billing_email()} order ID {$order->get_id()}");
         }
 
 		// attach the WordPress user to the Mailchimp customer object.

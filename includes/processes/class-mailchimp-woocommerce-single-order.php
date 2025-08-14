@@ -180,6 +180,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
         try {
             // transform the order
             $order = $job->transform($this->woo_order);
+            // all subscriber logic has now been changed
 
 			$original_woo_status = $order->getOriginalWooStatus();
 
@@ -341,28 +342,6 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
             // Maybe sync subscriber to set correct member.language
             if (!$this->is_full_sync) {
-                if ($status_if_new !== 'subscribed') {
-                    $orders = wc_get_orders(array(
-                        'customer' => $email,
-                        'limit'    => -1,
-                        'fields'   => 'ids',
-                    ));
-
-                    if (count($orders) === 1 ) {
-                        $status_if_new = mailchimp_get_subscriber_status($email);
-                        mailchimp_debug('order_submit.new_order', "Ths is first order for {$email} status changed to {$status_if_new}");
-                    } else {
-                        if (!$user) {
-                            $status_if_new = mailchimp_get_subscriber_status($email);
-
-                            mailchimp_debug('order.subscribtion_statuses', 'Guest user statuses', [
-                                'mailchimp_status' => $status_if_new,
-                                'order_subscription_status' => $order->getCustomer()->getOptInStatus() ? 'subscribed' : 'transactional',
-                            ]);
-                        }
-                    }
-                }
-
                 mailchimp_member_data_update($email, $this->user_language, 'order', $status_if_new, $order, $this->gdpr_fields, true);
             }
 

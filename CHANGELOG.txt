@@ -1,4 +1,5 @@
 == Changelog ==
+= 5.5.1 =
 = 5.5 =
 * WooCommerce block dependency updates
 * Logging enhancements

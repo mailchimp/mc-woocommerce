@@ -1453,6 +1453,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 'mailchimp_cart_tracking'       => isset( $input['mailchimp_cart_tracking'] ) ? $input['mailchimp_cart_tracking'] : 'all',
                 'mailchimp_user_tags'           => isset( $input['mailchimp_user_tags'] ) ? implode( ',', $sanitized_tags ) : $this->getOption( 'mailchimp_user_tags' ),
                 'mailchimp_ongoing_sync_status' => isset( $input['mailchimp_ongoing_sync_status'] ) ? (bool) $input['mailchimp_ongoing_sync_status'] : '0',
+                'mailchimp-woocommerce-enable-landing-tracking' => isset( $input['mailchimp-woocommerce-enable-landing-tracking'] ) ? (bool) $input['mailchimp-woocommerce-enable-landing-tracking'] : false,
             ));
             $key = !$connected ? 'review_settings' : 'navigation_audience';
             $events = ['0' => 'sync_as_non_subscribed', '1' => 'sync_as_subscribed', '2' => 'sync_existing_only'];
@@ -1468,6 +1469,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 'mailchimp_cart_tracking'       => isset( $input['mailchimp_cart_tracking'] ) ? $input['mailchimp_cart_tracking'] : 'all',
                 'mailchimp_user_tags'           => isset( $input['mailchimp_user_tags'] ) ? implode( ',', $sanitized_tags ) : $this->getOption( 'mailchimp_user_tags' ),
                 'mailchimp_ongoing_sync_status' => isset( $input['mailchimp_ongoing_sync_status'] ) ? (bool) $input['mailchimp_ongoing_sync_status'] : '0',
+                'mailchimp-woocommerce-enable-landing-tracking' => isset( $input['mailchimp-woocommerce-enable-landing-tracking'] ) ? (bool) $input['mailchimp-woocommerce-enable-landing-tracking'] : false,
             );
         } else {
             $validate_campaign_settings = true;
@@ -1477,6 +1479,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 'mailchimp_ongoing_sync_status' => isset( $input['mailchimp_ongoing_sync_status'] ) ? (bool) $input['mailchimp_ongoing_sync_status'] : $this->getOption('mailchimp_ongoing_sync_status', '1'),
                 'mailchimp_user_tags'           => isset( $input['mailchimp_user_tags'] ) ? implode( ',', $sanitized_tags ) : $this->getOption( 'mailchimp_user_tags' ),
                 'mailchimp_cart_tracking'       => isset( $input['mailchimp_cart_tracking'] ) ? $input['mailchimp_cart_tracking'] : 'all',
+                'mailchimp-woocommerce-enable-landing-tracking' => isset( $input['mailchimp-woocommerce-enable-landing-tracking'] ) ? (bool) $input['mailchimp-woocommerce-enable-landing-tracking'] : false,
             ));
         }
 

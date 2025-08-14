@@ -351,6 +351,15 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                     if (count($orders) === 1 ) {
                         $status_if_new = mailchimp_get_subscriber_status($email);
                         mailchimp_debug('order_submit.new_order', "Ths is first order for {$email} status changed to {$status_if_new}");
+                    } else {
+                        if (!$user) {
+                            $status_if_new = mailchimp_get_subscriber_status($email);
+
+                            mailchimp_debug('order.subscribtion_statuses', 'Guest user statuses', [
+                                'mailchimp_status' => $status_if_new,
+                                'order_subscription_status' => $order->getCustomer()->getOptInStatus() ? 'subscribed' : 'transactional',
+                            ]);
+                        }
                     }
                 }
 

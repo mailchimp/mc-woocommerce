@@ -325,7 +325,7 @@ class MailChimp_WooCommerce_Customer {
             }
             mailchimp_debug('order_logic', "did not apply existing wordpress user subscription status for {$this->getId()}");
             $this->subscribed_in_wordpress = false;
-        } else if ( !$this->getOptInStatus() && $email = $this->getEmailAddress() ) {
+        } else if (!$this->wordpress_user && !$this->getOptInStatus() && $email = $this->getEmailAddress() ) {
             $status = mailchimp_get_subscriber_status($email);
             if (in_array($status, array('subscribed', 'pending'), true)) {
                 $this->setOptInStatus(true);

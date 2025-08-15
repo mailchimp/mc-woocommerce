@@ -382,11 +382,17 @@ class MailChimp_WooCommerce_Enhanced_Logger {
         if (!is_array($headers)) return array();
         
         $sanitized = array();
-        $sensitive_headers = array('authorization', 'x-api-key', 'cookie', 'set-cookie');
+        $sensitive_headers = array('authorization', 'x-api-key', 'cookie', 'set-cookie', 'bearer');
         
         foreach ($headers as $key => $value) {
             $lower_key = strtolower($key);
-            if (in_array($lower_key, $sensitive_headers)) {
+            $sensitive = false;
+            foreach ($sensitive_headers as $sensitive_header) {
+                if (str_contains($lower_key, $sensitive_header)) {
+                    $sensitive = true;
+                }
+            }
+            if ($sensitive || in_array($lower_key, $sensitive_headers)) {
                 $sanitized[$key] = '[REDACTED]';
             } else {
                 $sanitized[$key] = $value;

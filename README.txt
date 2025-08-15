@@ -4,7 +4,7 @@ Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 6.2
 Tested up to: 6.8
-Stable tag: 5.5
+Stable tag: 5.5.1
 Requires PHP: 7.4
 WC requires at least: 8.2
 WC tested up to: 10.0
@@ -79,3 +79,5 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 
 == Changelog ==
 = 5.5.1 =
+* Guest checkout sync logic fix
+* Site Performance update -  Disabled mailchimp_landing_site cookie by default.

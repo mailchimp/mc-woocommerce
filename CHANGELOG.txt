@@ -1,5 +1,7 @@
 == Changelog ==
 = 5.5.1 =
+* Guest checkout sync logic fix
+* Site Performance update -  Disabled mailchimp_landing_site cookie by default.
 = 5.5 =
 * WooCommerce block dependency updates
 * Logging enhancements

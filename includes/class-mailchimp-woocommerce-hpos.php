@@ -61,8 +61,13 @@ class MailChimp_WooCommerce_HPOS {
 			return;
 		} else {
             $order_c = wc_get_order( $order_id );
-            $order_c->update_meta_data( $meta_key, $meta_value );
-            $order_c->save_meta_data();
+
+            if ($order_c) {
+                $order_c->update_meta_data( $meta_key, $meta_value );
+                $order_c->save_meta_data();
+            } else {
+                update_post_meta($order_id, $meta_key, $meta_value);
+            }
         }
     }
 

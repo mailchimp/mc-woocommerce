@@ -103,7 +103,8 @@ class MailChimp_WooCommerce_Cart {
 	 * @return $this
 	 */
 	public function setCurrencyCode() {
-		$this->currency_code = get_woocommerce_currency();
+        $default_currency = get_woocommerce_currency();
+        $this->currency_code = apply_filters('mailchimp_woocommerce_cart_currency_code', $default_currency, $this->getCheckoutURL());
 
 		return $this;
 	}
@@ -113,7 +114,8 @@ class MailChimp_WooCommerce_Cart {
 	 */
 	public function getCurrencyCode() {
 		if ( empty( $this->currency_code ) ) {
-			$this->currency_code = get_woocommerce_currency();
+            $default_currency = get_woocommerce_currency();
+            $this->currency_code = apply_filters('mailchimp_woocommerce_cart_currency_code', $default_currency, $this->getCheckoutURL());
 		}
 
 		return $this->currency_code;

@@ -280,13 +280,15 @@ class MailChimp_WooCommerce_MailChimpApi {
             $status = 'subscribed';
         }
 
-		$data = $this->cleanListSubmission(
+        $list_interests = apply_filters('mailchimp_sync_user_list_interests', $list_interests, $email);
+
+        $data = $this->cleanListSubmission(
 			array(
 				'email_type'            => 'html',
 				'email_address'         => $email,
 				'status'                => $status,
 				'merge_fields'          => $merge_fields,
-				'interests'             => $list_interests,
+                'interests'             => is_array($list_interests) ? $list_interests : array(),
 				'language'              => $language,
 				'marketing_permissions' => $gdpr_fields,
 			)
@@ -346,11 +348,13 @@ class MailChimp_WooCommerce_MailChimpApi {
             $status = 'subscribed';
         }
 
+        $list_interests = apply_filters('mailchimp_sync_user_list_interests', $list_interests, $email);
+
         $payload = array(
             'email_address'         => $email,
             'status'                => $status,
             'merge_fields'          => $merge_fields,
-            'interests'             => $list_interests,
+            'interests'             => is_array($list_interests) ? $list_interests : array(),
             'language'              => $language,
             'marketing_permissions' => $gdpr_fields,
         );
@@ -564,12 +568,14 @@ class MailChimp_WooCommerce_MailChimpApi {
 			$status_if_new = 'pending';
 		}
 
-		$data = array(
+        $list_interests = apply_filters('mailchimp_sync_user_list_interests', $list_interests, $email);
+
+        $data = array(
 			'email_address' => $email,
 			'status'        => $status,
 			'status_if_new' => $status_if_new,
 			'merge_fields'  => $merge_fields,
-			'interests'     => $list_interests,
+            'interests'     => is_array($list_interests) ? $list_interests : array(),
 			'language'      => $language,
 		);
 

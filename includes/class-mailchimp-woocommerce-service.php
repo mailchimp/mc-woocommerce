@@ -284,8 +284,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                 // get user language or default to admin main language
                 $language = $this->user_language ?: substr(get_locale(), 0, 2);
 
+                $session_id = function_exists('WC') ? WC()->session->get_customer_id() : null;
+
                 // fire up the job handler
-                $handler = new MailChimp_WooCommerce_Cart_Update($uid, $user_email, $this->cart, $language);
+                $handler = new MailChimp_WooCommerce_Cart_Update($uid, $user_email, $this->cart, $language, $session_id);
 
                 // if they had the checkbox checked - go ahead and subscribe them if this is the first post.
                 //$handler->setStatus($this->cart_subscribe);

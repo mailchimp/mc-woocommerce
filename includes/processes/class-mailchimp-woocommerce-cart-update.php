@@ -12,6 +12,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
 {
     public $id;
     public $email;
+    public $session_id;
     public $previous_email;
     public $cart_data;
     public $ip_address;
@@ -27,7 +28,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
 	 * @param array $cart_data
 	 * @param null $user_language
 	 */
-    public function __construct($uid = null, $email = null, array $cart_data = array(), $user_language = null)
+    public function __construct($uid = null, $email = null, array $cart_data = array(), $user_language = null, $session_id = null)
     {
         if ($uid) {
             $this->id = $uid;
@@ -41,6 +42,10 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
 
         if ($user_language) {
             $this->user_language = $user_language;
+        }
+
+        if ($session_id) {
+            $this->session_id = $session_id;
         }
 
         $this->assignIP();
@@ -118,6 +123,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
 
             $cart = new MailChimp_WooCommerce_Cart();
             $cart->setId($this->id);
+            $cart->setSessionId($this->session_id);
             $cart->setCheckoutUrl($checkout_url);
             $cart->setCurrencyCode();
             $cart->setCustomer($customer);

@@ -550,6 +550,19 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 		}
 	}
 
+    public function handleProductVariationUpdated($variation_id, $product)
+    {
+        try {
+            if (!mailchimp_is_configured()) {
+                return;
+            }
+
+            mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product_Variation($variation_id), 5);
+        } catch (Exception $e) {
+            mailchimp_error('update product variation', $e->getMessage());
+        }
+    }
+
     /**
      * Fire new order and order save handling/queueing events when a shop_order post is saved.
      *

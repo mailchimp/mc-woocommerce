@@ -79,7 +79,6 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 
 == Changelog ==
 = 5.6 =
-* Adds support for HPOS Data Caching 
-* Bumps tmp from 0.2.1 to 0.2.4
 * Adds support for syncing based on Mailchimp list interests with a new filter
-* Adds support for Multi-currency with a new filter 
+* Adds support for Multi-currency with a new filter
+* Fix sync on product variant update 

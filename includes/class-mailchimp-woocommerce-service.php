@@ -369,8 +369,12 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      * @param WP_Post $post_before The post object as it exists after the update
      * @return void
      */
-    public function handleProductUpdated( int $post_ID, WP_Post $post_after, WP_Post $post_before )
+    public function handleProductUpdated( int $post_ID, ?WP_Post $post_after, ?WP_Post $post_before )
     {
+        if (is_null($post_after) || is_null($post_before)) {
+            return;
+        }
+
         if ('product' !== $post_after->post_type) {
             return;
         }

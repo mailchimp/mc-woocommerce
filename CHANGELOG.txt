@@ -1,4 +1,8 @@
 == Changelog ==
+= 5.6 =
+* Adds support for syncing based on Mailchimp list interests with a new filter
+* Adds support for Multi-currency with a new filter
+* Fix sync on product variant update 
 = 5.5.1 =
 * Guest checkout sync logic fix
 * Site Performance update -  Disabled mailchimp_landing_site cookie by default.

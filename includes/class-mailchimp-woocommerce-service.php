@@ -367,8 +367,13 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      * @param WP_Post $post_before The post object as it exists after the update
      * @return void
      */
-    public function handleProductUpdated( int $post_ID, WP_Post $post_after, WP_Post $post_before )
+    public function handleProductUpdated( int $post_ID, ?WP_Post $post_after, ?WP_Post $post_before )
     {
+        // Ensure $post_after is a valid WP_Post
+        if ( ! $post_after instanceof WP_Post ) {
+            return;
+        }
+
         if ('product' !== $post_after->post_type) {
             return;
         }
@@ -378,7 +383,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             return;
         }
 
-        /// old filter array('trash', 'auto-draft', 'draft', 'pending', 'private')
+        // 'draft', 'pending'
         if (in_array($post_after->post_status, array('trash', 'auto-draft'))) {
             mailchimp_log('product.update.blocked', "product {$post_ID} was blocked because status is {$post_after->post_status}");
             return;

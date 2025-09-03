@@ -78,6 +78,7 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
 == Changelog ==
-= 5.5.1 =
-* Guest checkout sync logic fix
-* Site Performance update -  Disabled mailchimp_landing_site cookie by default.
+= 5.6 =
+* Adds support for syncing based on Mailchimp list interests with a new filter
+* Adds support for Multi-currency with a new filter
+* Fix sync on product variant update 

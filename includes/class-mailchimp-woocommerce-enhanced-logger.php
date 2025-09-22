@@ -255,7 +255,10 @@ class MailChimp_WooCommerce_Enhanced_Logger {
             if (isset($_SERVER['KINSTA_CACHE_ZONE']) && $key === 'kinsta') return $provider;
             
             // Check server variables
-            $server_vars = array($_SERVER['SERVER_SOFTWARE'], $_SERVER['SERVER_NAME'], php_uname('n'));
+            $server_name = $_SERVER['SERVER_NAME'] ?? '';
+            $server_software = $_SERVER['SERVER_SOFTWARE'] ?? '';
+
+            $server_vars = array($server_software, $server_name, php_uname('n'));
             foreach ($server_vars as $var) {
                 if (stripos($var, $key) !== false) {
                     return $provider;

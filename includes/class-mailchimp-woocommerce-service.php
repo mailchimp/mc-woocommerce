@@ -371,6 +371,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function handleProductUpdated( int $post_ID, ?WP_Post $post_after, ?WP_Post $post_before )
     {
+        mailchimp_log('product.updated', "1");
         if (is_null($post_after) || is_null($post_before)) {
             return;
         }
@@ -427,6 +428,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             'name',
             'status',
             'slug',
+            'backorders'
         ) );
 
         // if there's not a valid prop in the update, just skip this.

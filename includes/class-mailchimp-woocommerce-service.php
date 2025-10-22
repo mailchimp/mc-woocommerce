@@ -74,14 +74,6 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     }
 
     /**
-     * @param WC_Order $order
-     */
-    public function onNewPayPalOrder($order)
-    {
-        $this->onNewOrder($order->get_id());
-    }
-
-    /**
      * This should only fire on a web based order so we can do real campaign tracking here.
      *
      * @param $order_id
@@ -96,9 +88,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
         // grab the landing site cookie if we have one here.
         $landing_site = $this->getLandingSiteCookie();
-        if (empty($landing_site)) {
+        if (empty($landing_site) && is_a($order, 'WC_Order')) {
             $landing_site =  $order->get_meta('mailchimp_woocommerce_landing_site');
-            if (!$landing_site) $campaign = null;
         }
 
         // expire the landing site cookie so we can rinse and repeat tracking

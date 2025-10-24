@@ -11,6 +11,7 @@ spl_autoload_register(function($class) {
     $classes = array(
         // helper classes
         'Mailchimp_Woocommerce_DB_Helpers' => 'includes/class-mailchimp-woocommerce-db-helpers.php',
+        'Mailchimp_Woocommerce_DB_Logger' => 'includes/class-mailchimp-woocommerce-db-logger.php',
 
         // includes root
         'MailChimp_Service' => 'includes/class-mailchimp-woocommerce-service.php',
@@ -816,9 +817,10 @@ function deactivate_mailchimp_woocommerce() {
  * @param null $data
  */
 function mailchimp_debug($action, $message, $data = null) {
-    if (mailchimp_environment_variables()->logging === 'debug' && function_exists('wc_get_logger')) {
-        if (is_array($data) && !empty($data)) $message .= " :: ".wc_print_r($data, true);
-        wc_get_logger()->debug("{$action} :: {$message}", array('source' => 'mailchimp_woocommerce'));
+    if ( in_array(mailchimp_environment_variables()->logging, ['debug', 'enhanced'])  && class_exists('Mailchimp_Woocommerce_DB_Logger')) {
+        $data = is_array($data) && !empty($data) ? $data : null;
+        $mailchimp_logger = new Mailchimp_Woocommerce_DB_Logger();
+        $mailchimp_logger->insert('debug', $action, $message, $data);
     }
 }
 
@@ -828,9 +830,10 @@ function mailchimp_debug($action, $message, $data = null) {
  * @param array $data
  */
 function mailchimp_log($action, $message, $data = array()) {
-    if (mailchimp_environment_variables()->logging !== 'none' && function_exists('wc_get_logger')) {
-        if (is_array($data) && !empty($data)) $message .= " :: ".wc_print_r($data, true);
-        wc_get_logger()->notice("{$action} :: {$message}", array('source' => 'mailchimp_woocommerce'));
+    if (mailchimp_environment_variables()->logging !== 'none' && class_exists('Mailchimp_Woocommerce_DB_Logger')) {
+        $data = is_array($data) && !empty($data) ? $data : null;
+        $mailchimp_logger = new Mailchimp_Woocommerce_DB_Logger();
+        $mailchimp_logger->insert('info', $action, $message, $data);
     }
 }
 
@@ -843,8 +846,10 @@ function mailchimp_log($action, $message, $data = array()) {
 function mailchimp_error($action, $message, $data = array()) {
     if (mailchimp_environment_variables()->logging !== 'none' && function_exists('wc_get_logger')) {
         if ($message instanceof Exception) $message = mailchimp_error_trace($message);
-        if (is_array($data) && !empty($data)) $message .= " :: ".wc_print_r($data, true);
-        wc_get_logger()->error("{$action} :: {$message}", array('source' => 'mailchimp_woocommerce'));
+        $data = is_array($data) && !empty($data) ? $data : null;
+
+        $mailchimp_logger = new Mailchimp_Woocommerce_DB_Logger();
+        $mailchimp_logger->insert('debug', $action, $message, $data);
     }
 }
 
@@ -1310,6 +1315,7 @@ function mailchimp_flush_database_tables() {
         
         $wpdb->query("TRUNCATE `{$wpdb->prefix}mailchimp_carts`");
         $wpdb->query("TRUNCATE `{$wpdb->prefix}mailchimp_jobs`");
+        $wpdb->query("TRUNCATE `{$wpdb->prefix}mailchimp_logs`");
     } catch (Exception $e) {}
 }
 

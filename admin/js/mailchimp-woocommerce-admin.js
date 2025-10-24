@@ -116,48 +116,6 @@
 			$('.mc-woocommerce-copy-log-button span.yes').hide();
 		});
 
-		// delete log button
-		$('.delete-log-button').click(function (e) {
-			e.preventDefault();
-
-			Swal.fire({
-				title: phpVars.l10n.are_you_sure,
-				text: phpVars.l10n.log_delete_subtitle,
-				type: 'warning',
-				showCancelButton: true,
-				confirmButtonColor: '#3085d6',
-				cancelButtonColor: '#d33',
-				confirmButtonText: phpVars.l10n.log_delete_confirm,
-				cancelButtonText: phpVars.l10n.no_cancel,
-				customClass: {
-					confirmButton: 'button button-primary tab-content-submit disconnect-button',
-					cancelButton: 'button button-default mc-woocommerce-resync-button disconnect-button'
-				},
-				buttonsStyling: false,
-				reverseButtons: true,
-
-			}).then((result) => {
-				if (result.value) {
-					var data = {
-						action:'mailchimp_woocommerce_delete_log_file',
-						log_file: $('#log_file').val()
-					};
-
-					$('#log-viewer #log-content').css("visibility", "hidden");
-					$('#log-viewer .spinner').show().css("visibility", "visible");
-
-					$.post(ajaxurl, data, function(response) {
-						console.log('deleted log file', data.log_file);
-						if (response.success) {
-							window.location.reload();
-						}
-						$('#log-viewer .spinner').hide().css("visibility", "hidden");
-						$('#log-viewer #log-content').css("visibility", "visible");
-					});
-				}
-			})
-		});
-
 		$('.mc-woocommerce-resync-button').click(function(e) {
 			e.preventDefault();
 			Swal.fire({
@@ -800,6 +758,142 @@
 			cart_track_all.attr('disabled', false);
 			cart_track_all.parent().css({opacity: '1'});
 		});
+
+
+		/**
+		 * Scripts for logs
+		 */
+
+		$ = jQuery;
+		$(document).on('click', '.js-mailchimp-woocommerce-view-log-data', function(e) {
+			e.preventDefault();
+			let logId = $(this).data('log-id');
+
+			$(this).toggleClass('shown');
+			if (logId) {
+				if ($(this).hasClass('shown')) {
+					$(`tr[data-log-id="${logId}"]`).show();
+				} else {
+					$(`tr[data-log-id="${logId}"]`).hide();
+				}
+			}
+		})
+
+		$(document).on('click', '.js-mailchimp-woocommerce-copy-data', function (e) {
+			e.preventDefault();
+			let logId = $(this).data('log-id');
+			var copyText = $(`#log-content-${logId}`);
+			var $temp = $("<textarea>");
+			$("body").append($temp);
+			console.log($(copyText).text())
+			$temp.val($(copyText).text()).select();
+			/* Copy the text inside the text field */
+			document.execCommand("copy");
+			$temp.remove();
+			$(this).find('span.clipboard').hide();
+			$(this).find('span.yes').show();
+
+			var data = {
+				action:'mailchimp_woocommerce_send_event',
+				mc_event: 'save_log',
+			};
+			$.post(ajaxurl, data, function(response) {});
+		});
+
+		$(document).on('mouseleave', '.js-mailchimp-woocommerce-copy-data', function (e) {
+			$('.js-mailchimp-woocommerce-copy-data span.clipboard').show();
+			$('.js-mailchimp-woocommerce-copy-data span.yes').hide();
+		});
+
+		$(document).on('click', '#mc-filter-logs', function (e) {
+			e.preventDefault();
+			const level = $('#mailchimp-log-level-filter').val();
+			const dateFrom = $('#mailchimp-date-from-filter').val();
+			const dateTo = $('#mailchimp-date-to-filter').val();
+
+			const url = new URL(window.location.href);
+
+			if (level) url.searchParams.set('mc_log_level', level);
+			else url.searchParams.delete('mc_log_level');
+
+			if (dateFrom) url.searchParams.set('mc_log_date_from', dateFrom);
+			else url.searchParams.delete('mc_log_date_from');
+
+			if (dateTo) url.searchParams.set('mc_log_date_to', dateTo);
+			else url.searchParams.delete('mc_log_date_to');
+
+			window.location.href = url.toString();
+		});
+
+		$(document).on('click', '.js-mailchimp-woocommerce-next', function(e) {
+			e.preventDefault();
+
+			if (!$(this).attr('disabled')) {
+				const url = new URL(window.location.href);
+
+				const currentPage = url.searchParams.has('mc_log_page') ? url.searchParams.get('mc_log_page') : 1;
+
+				url.searchParams.set('mc_log_page', (parseInt(currentPage) + 1).toString());
+
+				window.location.href = url.toString();
+			}
+		})
+
+		$(document).on('click', '.js-mailchimp-woocommerce-prev', function(e) {
+			e.preventDefault();
+			console.log('prev clicked')
+			if (!$(this).attr('disabled')) {
+				const url = new URL(window.location.href);
+				const currentPage = url.searchParams.has('mc_log_page') ? url.searchParams.get('mc_log_page') : 1;
+
+				url.searchParams.set('mc_log_page', (parseInt(currentPage) - 1).toString());
+
+				window.location.href = url.toString();
+			}
+		})
+
+		$(document).on('change', '#mailchimp-log-per-page', function(e) {
+			const url = new URL(window.location.href);
+
+			url.searchParams.set('mc_log_per_page', $(this).val());
+
+			window.location.href = url.toString();
+		})
+
+		$(document).on('change', '#mc-log-current-page', function(e) {
+			const url = new URL(window.location.href);
+			const max = parseInt($(this).attr('max'));
+			const min = 1;
+			const value =  parseInt($(this).val())
+			if (value > max) {
+				url.searchParams.set('mc_log_page', max);
+			} else if (value < min) {
+				url.searchParams.set('mc_log_page', min);
+			} else {
+				url.searchParams.set('mc_log_page', value);
+			}
+
+			window.location.href = url.toString();
+		})
+
+		$(document).on('click', '#mc-logs-clear', function(e) {
+			e.preventDefault();
+			const loader = $(this).find('.mc-wc-loading');
+			loader.show();
+			var data = {
+				action:'mailchimp_woocommerce_clear_logs',
+				mc_event: 'save_log',
+			};
+			$.post(ajaxurl, data, function(response) {
+				console.log(response)
+				if (response.success) {
+					window.location.reload()
+				} else {
+					alert(response.data?.message)
+				}
+				loader.hide();
+			});
+		})
 	});
 })( jQuery );
 

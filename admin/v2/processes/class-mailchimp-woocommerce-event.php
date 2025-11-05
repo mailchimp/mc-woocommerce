@@ -57,7 +57,7 @@ class Mailchimp_Woocommerce_Event
      * @param bool $test
      * @return array|mixed|null
      */
-    public static function track(string $event, \DateTime $date = null, $test = false)
+    public static function track(string $event, ?\DateTime $date = null, $test = false)
     {
         if (!($data = static::find($event)) || !is_array($data) || empty($data)) {
             return null;
@@ -120,7 +120,7 @@ class Mailchimp_Woocommerce_Event
      *
      * @return $this
      */
-    public function set_date(\DateTime $date = null)
+    public function set_date(?\DateTime $date = null)
     {
         $this->date = $date;
         return $this;

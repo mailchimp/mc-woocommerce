@@ -1424,7 +1424,7 @@ input.mc-wc-input.style-2 {
 
 .mc-wc-tab-content-wrapper.logs > *:nth-child(2) {
     padding-top: 30px;
-    max-width: 562px;
+    max-width: 100%;
 }
 
 .mc-wc-logs-recent-list > p {
@@ -1439,6 +1439,14 @@ input.mc-wc-input.style-2 {
 }
 
 .mc-wc-tab-content-wrapper.logs {
+    max-width: 604px;
+}
+
+.mc-wc-tab-content-wrapper.logs {
+    max-width: 100%;
+}
+
+.mc-wc-tab-content-wrapper.logs-data {
     max-width: 604px;
 }
 

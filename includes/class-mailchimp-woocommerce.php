@@ -293,6 +293,9 @@ class MailChimp_WooCommerce
         // delete log file via ajax
         $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_delete_log_file', $plugin_admin, 'mailchimp_woocommerce_ajax_delete_log_file' );
 
+        // clear logs db via ajax
+        $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_clear_logs', $plugin_admin, 'mailchimp_woocommerce_ajax_clear_logs_db' );
+
         // toggle the chipmstatic script
         $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_toggle_chimpstatic_script', $plugin_admin, 'mailchimp_woocommerce_ajax_toggle_chimpstatic_script' );
 

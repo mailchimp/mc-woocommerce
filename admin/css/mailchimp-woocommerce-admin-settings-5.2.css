@@ -351,10 +351,6 @@ a.button.create-account {
 	background-color: #FFFF;
 }
 
-.mc-woocommerce-log-button.delete-log-button:hover span {
-	color: red;
-}
-
 .mc-woocommerce-log-button.mc-woocommerce-copy-log-button span.yes {
 	color: green;
 	display:none;

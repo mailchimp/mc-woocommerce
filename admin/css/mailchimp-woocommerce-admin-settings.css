@@ -356,10 +356,6 @@ a.button.create-account {
 	background-color: #FFFF;
 }
 
-.mc-woocommerce-log-button.delete-log-button:hover span {
-	color: red;
-}
-
 .mc-woocommerce-log-button.mc-woocommerce-copy-log-button span.yes {
 	color: green;
 	display:none;
@@ -1403,6 +1399,154 @@ body #wpcontent {
 }
 .button.create-account-save[disabled] {
 	cursor: not-allowed;
+}
+
+ .mc-wc-logs-navigation {
+	 display: flex;
+	 justify-content: space-between;
+	 align-items: flex-end;
+	 margin-bottom: 15px;
+ }
+.mc-wc-logs-navigation .mc-wc-btn {
+	padding: 5px 20px;
+}
+.mc-wc-tab-content-wrapper.logs > *:nth-child(2) {
+	max-width: 100%;
+}
+
+.mc-wc-tab-content-wrapper.logs {
+	max-width: 100%;
+}
+
+.mc-wc-tab-content-wrapper.logs .mc-wc-logs-recent-list-show table svg {
+	display: block;
+	width: 25px;
+	height: 20px;
+}
+.mc-wc-tab-content-wrapper.logs .mc-wc-logs-recent-list-show table {
+	text-align: left;
+	border-collapse: collapse;
+}
+
+.mc-wc-tab-content-wrapper.logs .mc-wc-logs-recent-list-show .logs-data {
+	width: 100%;
+	height: 350px;
+	display: block;
+	padding: 20px;
+	background: #fff;
+	border: 1px solid #e5e5e5;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, .04);
+}
+.mc-wc-tab-content-wrapper.logs .mc-wc-logs-recent-list-show table {
+	width: 100%;
+}
+.mc-wc-tab-content-wrapper.logs .mc-wc-logs-recent-list-show table td,
+.mc-wc-tab-content-wrapper.logs .mc-wc-logs-recent-list-show table th {
+	padding: 10px 10px;
+	vertical-align: top;
+	border-bottom: 1px solid #D9D9D9;
+}
+.logs-actions {
+	display: flex;
+	column-gap: 5px;
+}
+.js-mailchimp-woocommerce-view-log-data.shown {
+	position: relative;
+	color: gray;
+}
+.js-mailchimp-woocommerce-view-log-data.shown::before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	transform: rotate(45deg);
+	width: 2px;
+	height: 100%;
+	background: gray;
+	left: 50%;
+}
+.js-mailchimp-woocommerce-copy-data {
+	text-decoration: none;
+}
+
+#mailchimp-log-level-filter {
+	width: 120px;
+	min-width: 120px;
+}
+
+.mc-wc-logs-filters {
+	display: flex;
+	column-gap: 10px;
+	align-items: end;
+}
+.mc-wc-logs-filters .mc-wc-date-filters {
+	display: flex;
+	column-gap: 10px;
+}
+.mc-wc-logs-filters .mc-wc-btn{
+	padding: 5px 20px;
+}
+.mc-wc-logs-filters label span {
+	display: block;
+	font-weight: 500;
+}
+.mc-wc-log-pagination-wrap {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 20px;
+	align-items: center;
+}
+
+.mc-wc-log-pagination {
+	display: flex;
+	border: 1px solid #241C15A6;
+	border-radius: 6px;
+	overflow: hidden;
+	align-items: center;
+}
+
+.mc-wc-log-pagination a:hover {
+	background: #eaeaea;
+}
+.mc-wc-log-pagination a[disabled] {
+	opacity: 0.3;
+	cursor: not-allowed;
+}
+.mc-wc-log-pagination a svg {
+	width: 12px;
+	display: block;
+}
+.mc-wc-log-pagination a {
+	padding: 7px 9px;
+}
+
+.mc-wc-log-pagination a:first-child {
+	border-right: 1px solid #241C15A6;
+}
+
+.mc-wc-log-pagination-wrap #mailchimp-log-per-page {
+	width: 70px;
+	border-radius: 6px;
+}
+
+.mc-wc-log-pagination-wrap #mc-log-current-page {
+	width: 50px;
+	border-radius: 6px;
+}
+
+#mc-logs-clear .mc-wc-loading {
+	display: block;
+	width: 14px;
+	height: 14px;
+}
+.mc-wc-loading svg {
+	display: block;
+}
+
+#mc-logs-clear {
+	display: flex;
+	align-items: center;
+	column-gap: 5px;
 }
 @media screen and (max-width: 960px) {
 	.mc-woocommerce-settings-subtitles-row {

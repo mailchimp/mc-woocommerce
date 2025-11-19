@@ -929,18 +929,18 @@ input.mc-wc-btn {
     margin-top: 45px;
 }
 
-.sync-status-icon {
+.mc-wc-sync-status-icon {
     height: 161px;
     width: 161px;
     border-radius: 50%;
     border: 16px solid #D9D9D9;
 }
 
-.sync-status-icon-wrapper img {
+.mc-wc-sync-status-icon-wrapper img {
     width: 30px;
 }
 
-.sync-status-icon-wrapper {
+.mc-wc-sync-status-icon-wrapper {
     width: calc(100% - 32px);
     height: calc(100% - 32px);
     border-radius: 50%;
@@ -970,7 +970,7 @@ input.mc-wc-btn {
     text-align: left;
 }
 
-.sync-status-time {
+.mc-wc-sync-status-time {
     display: flex;
     flex-direction: column;
     text-align: center;

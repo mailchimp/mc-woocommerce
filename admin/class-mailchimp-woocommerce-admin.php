@@ -1874,9 +1874,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 					var call_mailchimp_for_stats_new = function (showSpinner = false) {
 
 						if (showSpinner) {
-							jQuery('.sync-status-icon-wrapper span').addClass('mc-wc-d-none');
-							jQuery('.sync-status-time').addClass('mc-wc-d-none');
-							jQuery('.sync-status-icon-wrapper img').removeClass('mc-wc-d-none');
+							jQuery('.mc-wc-sync-status-icon-wrapper span').addClass('mc-wc-d-none');
+                                jQuery('.mc-wc-sync-status-time').addClass('mc-wc-d-none');
+							jQuery('.mc-wc-sync-status-icon-wrapper img').removeClass('mc-wc-d-none');
 						}
 
 						jQuery.get(endpoint, function(response) {
@@ -1903,10 +1903,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 										call_mailchimp_for_stats_new(showSpinner);
 									}, 15000);
 								} else {
-									jQuery('.sync-status-icon-wrapper img').addClass('mc-wc-d-none');
-									jQuery('.sync-status-time').removeClass('mc-wc-d-none');
-									jQuery('.sync-status-icon-wrapper span').removeClass('mc-wc-d-none');
-									jQuery('.sync-status-icon-wrapper span').removeClass('mc-wc-d-none');
+									jQuery('.mc-wc-sync-status-icon-wrapper img').addClass('mc-wc-d-none');
+									jQuery('.mc-wc-sync-status-time').removeClass('mc-wc-d-none');
+									jQuery('.mc-wc-sync-status-icon-wrapper span').removeClass('mc-wc-d-none');
+									jQuery('.mc-wc-sync-status-icon-wrapper span').removeClass('mc-wc-d-none');
 								}
 							}
 						});

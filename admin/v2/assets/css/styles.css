@@ -934,6 +934,7 @@ input.mc-wc-btn {
     width: 161px;
     border-radius: 50%;
     border: 16px solid #D9D9D9;
+    box-sizing: content-box;
 }
 
 .mc-wc-sync-status-icon-wrapper img {
@@ -948,6 +949,7 @@ input.mc-wc-btn {
     align-items: center;
     justify-content: center;
     border: 16px solid #805BB9;
+    box-sizing: cone    ;
 }
 
 .mc-wc-tab-content-sync-status {

@@ -16,7 +16,7 @@ abstract class MailChimp_WooCommerce_Options
     protected $api;
     protected $plugin_name = 'mailchimp-woocommerce';
     protected $environment = 'production';
-    protected $version = '1.0.0';
+    protected $version = '1.0.2';
     protected $plugin_options = null;
     protected $is_admin = false;
 

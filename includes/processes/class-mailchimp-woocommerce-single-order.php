@@ -133,7 +133,11 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             try {
                 if ($only_sync_existing) {
                     mailchimp_debug('logic', "checking if the member {$this->woo_order->get_billing_email()} exists first before pushing the order");
-                    $api->member(mailchimp_get_list_id(), $this->woo_order->get_billing_email());
+                    $member = $api->member(mailchimp_get_list_id(), $this->woo_order->get_billing_email());
+
+                    if (!in_array($member['status'], ['transactional', 'subscribed'])) {
+                        return false;
+                    }
                 }
             } catch (\Exception $e) {
                 mailchimp_log( 'order_process', "Order #{$woo_order_number} skipped, user #{$this->woo_order->get_user_id()} was not present in the audience." );

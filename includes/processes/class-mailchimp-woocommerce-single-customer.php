@@ -126,7 +126,14 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
             // if we're only syncing existing users, we need to make a GET request.
             // this will throw a 404 if they don't exist on the list.
             if ($only_sync_existing) {
-                $api->member($list_id, $email);
+                $member = $api->member($list_id, $email);
+
+                if (in_array($member['status'], ['transactional', 'subscribed'])) {
+                    $subscriber_status = $member['status'] === 'transactional' ? '0' : '1';
+                    $status_meta = mailchimp_get_subscriber_status_options($subscriber_status);
+                } else {
+                    return false;
+                }
             }
 
             $subscriber = $api->update($list_id, $email, $subscriber_status, $merge_fields, null, $language);

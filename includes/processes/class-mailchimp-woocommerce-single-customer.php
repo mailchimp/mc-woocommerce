@@ -128,7 +128,7 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
             if ($only_sync_existing) {
                 $member = $api->member($list_id, $email);
 
-                if (in_array($member['status'], ['transactional', 'subscribed'])) {
+                if (in_array($member['status'], ['transactional', 'subscribed', 'pending'])) {
                     $subscriber_status = $member['status'] === 'transactional' ? '0' : '1';
                     $status_meta = mailchimp_get_subscriber_status_options($subscriber_status);
                 } else {

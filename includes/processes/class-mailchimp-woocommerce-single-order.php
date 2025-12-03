@@ -135,7 +135,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                     mailchimp_debug('logic', "checking if the member {$this->woo_order->get_billing_email()} exists first before pushing the order");
                     $member = $api->member(mailchimp_get_list_id(), $this->woo_order->get_billing_email());
 
-                    if (!in_array($member['status'], ['transactional', 'subscribed'])) {
+                    if (!in_array($member['status'], ['transactional', 'subscribed', 'pending'])) {
                         return false;
                     }
                 }

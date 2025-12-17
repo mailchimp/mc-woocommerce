@@ -106,7 +106,7 @@
 			}
 		}
 
-		$('#mailchimp_woocommerce_options .mc-wc-tab-content input:not(.mc-wc-tag-list .mc-wc-input):not(#tower_box_switch):not(#comm_box_switch):not(.mailchimp-not-option), #mailchimp_woocommerce_options .mc-wc-tab-content select:not(#log_file):not(#mailchimp-log-pref):not(.mailchimp-not-option)').change(function(e) {
+		$('#mailchimp_woocommerce_options .mc-wc-tab-content input:not(.mc-wc-tag-list .mc-wc-input):not(#tower_box_switch):not(#comm_box_switch), #mailchimp_woocommerce_options .mc-wc-tab-content select:not(#log_file):not(#mailchimp-log-pref)').change(function(e) {
 			e.preventDefault();
 
 			saveSettings();

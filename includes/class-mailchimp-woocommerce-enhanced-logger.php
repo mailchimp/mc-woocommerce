@@ -35,16 +35,11 @@ class MailChimp_WooCommerce_Enhanced_Logger {
         );
         
         // Log to WooCommerce logs
-        if (mailchimp_environment_variables()->logging === 'enhanced') {
-            $mailchimp_logger = new Mailchimp_Woocommerce_DB_Logger();
-
-            if (!empty($error_info)) {
-                $mailchimp_logger->insert('enhanced', 'enhanced_logger', 'ERROR', $log_entry);
-            } else {
-                $mailchimp_logger->insert('enhanced', 'enhanced_logger', 'INFO', $log_entry);
-            }
+        if (!empty($error_info)) {
+            mailchimp_debug('enhanced_logger', 'ERROR', $log_entry);
+        } else {
+            mailchimp_debug('enhanced_logger', 'INFO', $log_entry);
         }
-
         
         // Store in transient for admin view
         self::store_connection_log($log_entry);

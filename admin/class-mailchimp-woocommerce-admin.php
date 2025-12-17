@@ -115,7 +115,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			if ( get_bloginfo( 'version' ) < '5.3' ) {
 				wp_enqueue_style( $this->plugin_name . '-settings', plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin-settings-5.2.css', array(), $this->version );
 			}
-			wp_enqueue_style( $this->plugin_name . '-settings', plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin-settings.css', array(), $this->version . '.02' );
+			wp_enqueue_style( $this->plugin_name . '-settings', plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin-settings.css', array(), $this->version . '.01' );
 			// Update v2
 			wp_enqueue_style( $this->plugin_name . '-settings-v2', plugin_dir_url( __FILE__ ) . 'v2/assets/css/styles.css', array(), $this->version);
 			// End update v2
@@ -139,8 +139,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			$options                   = mailchimp_get_admin_options();
 			$checkbox_default_settings = ( array_key_exists( 'mailchimp_checkbox_defaults', $options ) && ! is_null( $options['mailchimp_checkbox_defaults'] ) ) ? $options['mailchimp_checkbox_defaults'] : 'check';
 			wp_register_script( $this->plugin_name . 'create-account', plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-create-account.js', array( 'jquery', 'swal' ), $this->version );
-			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version . '.02' );
-			wp_register_script( $this->plugin_name . '-v2', plugin_dir_url( __FILE__ ) . 'v2/assets/js/scripts.js', array( 'jquery', 'swal' ), $this->version . '.02' );
+			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version);
+			wp_register_script( $this->plugin_name . '-v2', plugin_dir_url( __FILE__ ) . 'v2/assets/js/scripts.js', array( 'jquery', 'swal' ), $this->version );
 			wp_localize_script(
 				$this->plugin_name,
 				'phpVars',
@@ -2273,25 +2273,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         wp_send_json_success( array( 'success' => true, 'status' =>  $code_snippet_activated ? '0' : '1') );
     }
 
-	public function mailchimp_woocommerce_ajax_clear_logs_db() {
-        $this->adminOnlyMiddleware();
-
-        try {
-            /** @var \ */
-            global $wpdb;
-
-            $result = $wpdb->query("TRUNCATE `{$wpdb->prefix}mailchimp_logs`");
-            if ($result) {
-                wp_send_json_success( array( 'message' => 'Successfully cleaned logs' , 'data' => $result) );
-            } else {
-                wp_send_json_error(array('message' => 'Unable to clean logs, try again later.'));
-            }
-        } catch (Exception $e) {
-            wp_send_json_error(array('message' => 'Unable to clean logs, try again later.'));
-        }
-
-    }
-
+	/**
+	 *
+	 */
 	public function mailchimp_woocommerce_ajax_delete_log_file() {
 		$this->adminOnlyMiddleware();
 		if ( ! isset( $_POST['log_file'] ) || empty( $_POST['log_file'] ) ) {

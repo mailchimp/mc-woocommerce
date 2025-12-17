@@ -67,7 +67,7 @@ class MailChimp_WooCommerce_Activator {
 
 		$charset_collate = $wpdb->get_charset_collate();
 
-		$mailchimp_carts_sql = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}mailchimp_carts (
+		$sql = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}mailchimp_carts (
 				id VARCHAR (255) NOT NULL,
 				email VARCHAR (100) NOT NULL,
 				user_id INT (11) DEFAULT NULL,
@@ -76,9 +76,9 @@ class MailChimp_WooCommerce_Activator {
 				PRIMARY KEY  (email)
 				) $charset_collate;";
 
-		dbDelta( $mailchimp_carts_sql );
+		dbDelta( $sql );
 		
-		$mailchimp_jobs_sql = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}mailchimp_jobs (
+		$sql = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}mailchimp_jobs (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
 			obj_id text,
 			job text NOT NULL,
@@ -86,25 +86,9 @@ class MailChimp_WooCommerce_Activator {
 			PRIMARY KEY  (id)
 			) $charset_collate;";
 
-		dbDelta( $mailchimp_jobs_sql );
+		dbDelta( $sql );
 
-        $charset_collate = $wpdb->get_charset_collate();
-
-        $mailchimp_logs_sql = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}mailchimp_logs (
-            id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-            level VARCHAR(50) NOT NULL,
-            action VARCHAR(100) DEFAULT NULL,
-            message TEXT NOT NULL,
-            data LONGTEXT DEFAULT NULL,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY  (id),
-            KEY level (level),
-            KEY action (action)
-        ) $charset_collate;";
-
-        dbDelta( $mailchimp_logs_sql );
-
-        // set the Mailchimp woocommerce version at the time of install
+		// set the Mailchimp woocommerce version at the time of install
 		\Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp_woocommerce_version', mailchimp_environment_variables()->version);
 	}
 

@@ -2804,7 +2804,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 			}
 			
 			// Log successful request if debug logging is enabled
-			if (mailchimp_environment_variables()->logging === 'enhanced' && class_exists('MailChimp_WooCommerce_Enhanced_Logger')) {
+			if (mailchimp_environment_variables()->logging === 'debug' && class_exists('MailChimp_WooCommerce_Enhanced_Logger')) {
 				MailChimp_WooCommerce_Enhanced_Logger::log_connection_attempt(
 					$method,
 					$url,

@@ -129,28 +129,15 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
             return;
         }
 
-        // Get SMS checkbox defaults
-        $sms_default_setting = $this->getOption('mailchimp_sms_checkbox_defaults', 'uncheck');
+        // Compliance: checkbox must always be unchecked by default, label and disclaimer are fixed
+        $sms_label = __('Text me with news and offers', 'mailchimp-for-woocommerce');
         
-        // If hidden, don't render
-        if ($sms_default_setting === 'hide') {
-            return;
-        }
+        $audience_name = $this->getAudienceName();
+        $prefix = !empty($audience_name) ? $audience_name . ' – ' : '';
+        $sms_disclaimer = $prefix . __('By providing your phone number, you agree to receive promotional and marketing messages, notifications, and customer service communications. Message & data rates may apply. Consent is not a condition of purchase. Message frequency may vary. You can unsubscribe at any time by replying STOP.', 'mailchimp-for-woocommerce');
 
-        $sms_label = $this->getOption('mailchimp_sms_checkbox_label');
-        if (empty($sms_label)) {
-            $sms_label = __('Text me with news and offers', 'mailchimp-for-woocommerce');
-        }
-
-        $sms_disclaimer = $this->getOption('mailchimp_sms_disclaimer_text');
-        if (empty($sms_disclaimer)) {
-            $audience_name = $this->getAudienceName();
-            $prefix = !empty($audience_name) ? $audience_name . ' – ' : '';
-            $sms_disclaimer = $prefix . __('By providing your phone number, you agree to receive promotional and marketing messages, notifications, and customer service communications. Message & data rates may apply. Consent is not a condition of purchase. Message frequency may vary. You can unsubscribe at any time by replying STOP.', 'mailchimp-for-woocommerce');
-        }
-
-        $sms_default_checked = $sms_default_setting === 'check';
-        $sms_status = $sms_default_checked;
+        // Always unchecked by default per compliance
+        $sms_status = false;
         $sms_phone = '';
         $hide_sms_for_subscriber = false;
 

@@ -78,14 +78,25 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
 == Changelog ==
-= 5.7 =
-* Fixes error when order is not created yet and removes unused function.
-* Fixes Fatal Error scheduled subscription payment processing
-* Fixes PHP warnings throwing Undefined array key “SERVER_NAME” 
-* Fixes Mailchimp backorders status issues 
-* Add better support for current PHP versions 
-* Fixes sync-status-icon positioning issue in plugins dashboard 
-* Bumps node-forge from 1.3.1 to 1.3.2 in /blocks
-* Bumps to js-yaml in /blocks
-* Bumps to playwright and @playwright/test in /blocks
-* Bumps to tar-fs from 3.0.9 to 3.1.1 in /blocks
+= 6.0 =
+* Adds WooCommerce Order Fulfillments tracking
+* Adds SMS phone number field with consent for checkout
+* Adds Bi-directional SMS contact sync
+* Adds Pixel tracking implementation
+* Adds Order creation error handling
+* Adds Customer skip sync logging
+* Fixes Fatal error in subscription payment processing
+* Fixes Cart update incorrectly setting subscriber status to transactional
+* Fixes Backorders status sync between WooCommerce and Mailchimp
+* Fixes Sync status icon positioning in admin
+* Fixes PHP deprecated parameter warnings on plugin connection
+* Fixes Undefined array key "SERVER_NAME" log warnings
+* Updates plugin metadata
+* Updates js-yaml to 4.1.1
+* Updates node-forge to 1.3.2
+* Updates qs to 6.14.1 and express to 4.22.1
+* Updates lodash to 4.17.23
+* Updates playwright to 1.56.1
+* Updates tar-fs to 3.1.1
+* Removes unused functions
+* Updates plugin metadata

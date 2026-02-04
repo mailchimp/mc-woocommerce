@@ -162,4 +162,115 @@
             </div>
         </div>
     </div>
+
+    <!-- SMS Marketing Consent Settings -->
+    <div class="mc-wc-tab-content-box has-underline">
+        <div class="mc-wc-tab-content-title">
+            <h3><?php esc_html_e( 'SMS Marketing Consent', 'mailchimp-for-woocommerce' ); ?></h3>
+        </div>
+        <div class="mc-wc-tab-content-description-small">
+            <?php esc_html_e( 'Collect SMS marketing consent at checkout and sync phone numbers to Mailchimp for SMS campaigns.', 'mailchimp-for-woocommerce' ); ?>
+        </div>
+        
+        <?php 
+            $sms_enabled = ( array_key_exists( 'mailchimp_sms_enabled', $options ) && ! is_null( $options['mailchimp_sms_enabled'] ) ) ? (bool) $options['mailchimp_sms_enabled'] : false;
+            $sms_checkbox_defaults = ( array_key_exists( 'mailchimp_sms_checkbox_defaults', $options ) && ! is_null( $options['mailchimp_sms_checkbox_defaults'] ) ) ? $options['mailchimp_sms_checkbox_defaults'] : 'uncheck';
+            $sms_checkbox_label = ( array_key_exists( 'mailchimp_sms_checkbox_label', $options ) && ! is_null( $options['mailchimp_sms_checkbox_label'] ) ) ? $options['mailchimp_sms_checkbox_label'] : '';
+            $sms_disclaimer_text = ( array_key_exists( 'mailchimp_sms_disclaimer_text', $options ) && ! is_null( $options['mailchimp_sms_disclaimer_text'] ) ) ? $options['mailchimp_sms_disclaimer_text'] : '';
+        ?>
+        
+        <!-- Enable SMS Checkbox -->
+        <div class="mc-wc-contact-import-ref-choose" style="margin-bottom: 20px;">
+            <div class="mc-wc-import-list-sync">
+                <div class="mc-wc-import-list-sync-item">
+                    <div class="mc-wc-import-list-sync-input">
+                        <div class="mc-wc-checkbox">
+                            <label class="mc-wc-checkbox-label fw-700">
+                                <input type="checkbox" id="mailchimp_sms_enabled" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_sms_enabled]" value="1" <?php if ($sms_enabled) { echo "checked"; } ?>>
+                                <?php esc_html_e( 'Enable SMS consent collection at checkout', 'mailchimp-for-woocommerce' ); ?>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mc-wc-import-list-sync-description">
+                        <?php esc_html_e( 'Note: Your Mailchimp account must have an approved SMS application to use this feature.', 'mailchimp-for-woocommerce' ); ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SMS Checkbox Default State -->
+        <div class="mc-wc-sms-settings" id="mc-wc-sms-settings" style="<?php echo $sms_enabled ? '' : 'display: none;'; ?>">
+            <div style="margin-bottom: 20px;">
+                <label class="mc-wc-tab-content-description-small fw-700" style="display: block; margin-bottom: 8px;">
+                    <?php esc_html_e( 'Default checkbox state', 'mailchimp-for-woocommerce' ); ?>
+                </label>
+                <div class="mc-wc-tracking-choose">
+                    <div class="mc-wc-radio">
+                        <label class="mc-wc-radio-label">
+                            <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_sms_checkbox_defaults]" value="check" <?php echo 'check' === $sms_checkbox_defaults ? 'checked="checked"' : ''; ?>>
+                            <?php esc_html_e( 'Checked by default', 'mailchimp-for-woocommerce' ); ?>
+                        </label>
+                    </div>
+                    <div class="mc-wc-radio">
+                        <label class="mc-wc-radio-label">
+                            <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_sms_checkbox_defaults]" value="uncheck" <?php echo 'uncheck' === $sms_checkbox_defaults ? 'checked="checked"' : ''; ?>>
+                            <?php esc_html_e( 'Unchecked by default', 'mailchimp-for-woocommerce' ); ?>
+                        </label>
+                    </div>
+                    <div class="mc-wc-radio">
+                        <label class="mc-wc-radio-label">
+                            <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_sms_checkbox_defaults]" value="hide" <?php echo 'hide' === $sms_checkbox_defaults ? 'checked="checked"' : ''; ?>>
+                            <?php esc_html_e( 'Hidden (do not display)', 'mailchimp-for-woocommerce' ); ?>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SMS Checkbox Label -->
+            <div style="margin-bottom: 20px;">
+                <label class="mc-wc-tab-content-description-small fw-700" for="mailchimp_sms_checkbox_label" style="display: block; margin-bottom: 8px;">
+                    <?php esc_html_e( 'Checkbox label text', 'mailchimp-for-woocommerce' ); ?>
+                </label>
+                <input type="text" 
+                    class="mc-wc-input" 
+                    id="mailchimp_sms_checkbox_label" 
+                    name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_sms_checkbox_label]" 
+                    value="<?php echo esc_attr( $sms_checkbox_label ); ?>" 
+                    placeholder="<?php esc_attr_e( 'Text me with news and offers', 'mailchimp-for-woocommerce' ); ?>"
+                    style="width: 100%; max-width: 500px;">
+            </div>
+
+            <!-- SMS Disclaimer Text -->
+            <div style="margin-bottom: 20px;">
+                <label class="mc-wc-tab-content-description-small fw-700" for="mailchimp_sms_disclaimer_text" style="display: block; margin-bottom: 8px;">
+                    <?php esc_html_e( 'Disclaimer text', 'mailchimp-for-woocommerce' ); ?>
+                </label>
+                <textarea 
+                    class="mc-wc-input" 
+                    id="mailchimp_sms_disclaimer_text" 
+                    name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_sms_disclaimer_text]" 
+                    placeholder="<?php esc_attr_e( 'By providing your phone number, you agree to receive promotional and marketing messages, notifications, and customer service communications. Message & data rates may apply. Consent is not a condition of purchase. Message frequency may vary. You can unsubscribe at any time by replying STOP.', 'mailchimp-for-woocommerce' ); ?>"
+                    rows="4"
+                    style="width: 100%; max-width: 500px;"><?php echo esc_textarea( $sms_disclaimer_text ); ?></textarea>
+                <p class="mc-wc-import-list-sync-description" style="margin-top: 8px;">
+                    <?php esc_html_e( 'This text appears below the phone number input field. Leave blank to use the default text. Your audience name will be automatically prepended.', 'mailchimp-for-woocommerce' ); ?>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        jQuery(document).ready(function($) {
+            var smsEnabledCheckbox = $('#mailchimp_sms_enabled');
+            var smsSettings = $('#mc-wc-sms-settings');
+            
+            smsEnabledCheckbox.on('change', function() {
+                if ($(this).is(':checked')) {
+                    smsSettings.slideDown();
+                } else {
+                    smsSettings.slideUp();
+                }
+            });
+        });
+    </script>
 </div>

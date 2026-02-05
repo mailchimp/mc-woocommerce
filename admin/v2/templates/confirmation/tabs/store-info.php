@@ -26,8 +26,8 @@
         [ 'label' => esc_html__( 'Unchecked by default', 'mailchimp-for-woocommerce' ), 'value' => 'uncheck' ],
     );
 
-    $opt_in_settings = apply_filters('mailchimp_checkout_opt_in_options', $default_opt_in_settings);;
-?>
+    $opt_in_settings = apply_filters('mailchimp_checkout_opt_in_options', $default_opt_in_settings);
+    ?>
 <input type="hidden" name="mailchimp_active_settings_tab" value="<?php echo MC_WC_STORE_INFO_TAB; ?>"/>
 <input type="hidden" value="<?php echo ( esc_attr( isset( $current_currency_data ) ? $current_currency . ' | ' . $current_currency_data['name'] : $current_currency ) ); ?>" disabled/>
 	<input type="hidden" value="<?php echo esc_attr( mailchimp_get_timezone( true ) ); ?>" disabled/>
@@ -135,6 +135,18 @@
                     <?php echo esc_html( __( 'Leave it blank to use language translation files (.po / .mo), translating the string: "Subscribe to our newsletter".', 'mailchimp-for-woocommerce' ) ); ?>
                 </p>
             </div>
+
+            <?php if (Mailchimp_Sms_Consent::isEligibleCountry()): ?>
+            <div class="mc-wc-input-wrapper">
+                <div class="mc-wc-checkbox">
+                    <label class="mc-wc-checkbox-label fw-700">
+                        <input type="checkbox" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_sms_consent_enabled]" value="1" <?php if ($options['mailchimp_sms_consent_enabled']) { echo "checked"; } ?>>
+                        <?php esc_html_e( 'Enable SMS consent in checkout', 'mailchimp-for-woocommerce' ); ?>
+                    </label>
+                </div>
+            </div>
+            <?php endif; ?>
+
         <?php endif; ?>
     </div>
 

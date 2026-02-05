@@ -12,6 +12,7 @@ class MailChimp_WooCommerce_Customer {
 
 	protected $id            = null;
 	protected $email_address = null;
+	protected $phone_number = null;
 	protected $opt_in_status = null;
 	protected $company       = null;
 	protected $first_name    = null;
@@ -59,11 +60,21 @@ class MailChimp_WooCommerce_Customer {
 		return $this;
 	}
 
+    public function getEmailHash()
+    {
+        $hash = md5(trim(strtolower($this->email_address)));
+        return $hash;
+    }
+
 	/**
 	 * @return null
 	 */
 	public function getEmailAddress() {
 		return $this->email_address;
+	}
+
+    public function getPhoneNUmber() {
+		return $this->phone_number;
 	}
 
 	/**
@@ -72,6 +83,12 @@ class MailChimp_WooCommerce_Customer {
 	 */
 	public function setEmailAddress( $email_address ) {
 		$this->email_address = $email_address;
+
+		return $this;
+	}
+
+    public function setPhoneNumber( $phone ) {
+		$this->phone_number = $phone;
 
 		return $this;
 	}
@@ -370,6 +387,7 @@ class MailChimp_WooCommerce_Customer {
                 } elseif ( $subscriber['status'] === 'archived' ) {
                     $meta_value = 'archived';
                 }
+
                 $meta_value !== null && update_user_meta($this->wordpress_user->ID, 'mailchimp_woocommerce_is_subscribed', $meta_value);
             }
         } catch (Exception $e) {

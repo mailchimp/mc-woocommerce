@@ -1374,6 +1374,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             'admin_email'                 => get_option( 'admin_email' ),
             'mailchimp_permission_cap'    => $permissions,
             'mailchimp_checkbox_action'   => isset( $input['mailchimp_checkbox_action'] ) ? $input['mailchimp_checkbox_action'] : $this->getOption( 'mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form' ),
+            'mailchimp_sms_consent_enabled'   => isset( $input['mailchimp_sms_consent_enabled'] ) ? $input['mailchimp_sms_consent_enabled'] : $this->getOption( 'mailchimp_sms_consent_enabled', false ),
             'mailchimp_product_image_key' => isset( $input['mailchimp_product_image_key'] ) ? $input['mailchimp_product_image_key'] : 'medium',
             'newsletter_label'              => ( isset( $input['newsletter_label'] ) ) ? wp_kses( $input['newsletter_label'], $allowed_html ) : $this->getOption( 'newsletter_label', __( 'Subscribe to our newsletter', 'mailchimp-for-woocommerce' ) ),
             'mailchimp_checkbox_defaults'   => $checkbox,

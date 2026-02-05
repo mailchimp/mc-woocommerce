@@ -162,4 +162,37 @@
             </div>
         </div>
     </div>
+
+    <!-- SMS Marketing Consent Settings -->
+    <div class="mc-wc-tab-content-box has-underline">
+        <div class="mc-wc-tab-content-title">
+            <h3><?php esc_html_e( 'SMS Marketing Consent', 'mailchimp-for-woocommerce' ); ?></h3>
+        </div>
+        <div class="mc-wc-tab-content-description-small">
+            <?php esc_html_e( 'Collect SMS marketing consent at checkout and sync phone numbers to Mailchimp for SMS campaigns.', 'mailchimp-for-woocommerce' ); ?>
+        </div>
+        
+        <?php 
+            $sms_enabled = ( array_key_exists( 'mailchimp_sms_enabled', $options ) && ! is_null( $options['mailchimp_sms_enabled'] ) ) ? (bool) $options['mailchimp_sms_enabled'] : false;
+        ?>
+        
+        <!-- Enable SMS Checkbox -->
+        <div class="mc-wc-contact-import-ref-choose" style="margin-bottom: 20px;">
+            <div class="mc-wc-import-list-sync">
+                <div class="mc-wc-import-list-sync-item">
+                    <div class="mc-wc-import-list-sync-input">
+                        <div class="mc-wc-checkbox">
+                            <label class="mc-wc-checkbox-label fw-700">
+                                <input type="checkbox" id="mailchimp_sms_enabled" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_sms_enabled]" value="1" <?php if ($sms_enabled) { echo "checked"; } ?>>
+                                <?php esc_html_e( 'Enable SMS consent collection at checkout', 'mailchimp-for-woocommerce' ); ?>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mc-wc-import-list-sync-description">
+                        <?php esc_html_e( 'Note: Your Mailchimp account must have an approved SMS application to use this feature. The SMS consent checkbox will appear unchecked by default at checkout with compliant label and disclaimer text.', 'mailchimp-for-woocommerce' ); ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

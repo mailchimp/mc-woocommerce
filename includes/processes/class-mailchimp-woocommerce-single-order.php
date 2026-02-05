@@ -348,6 +348,10 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             // Maybe sync subscriber to set correct member.language
             if (!$this->is_full_sync) {
                 mailchimp_member_data_update($email, $this->user_language, 'order', $status_if_new, $order, $this->gdpr_fields, true);
+                
+                // Sync SMS consent if available
+                $user_id = $this->woo_order ? $this->woo_order->get_user_id() : null;
+                mailchimp_member_sms_update($email, $this->id, $user_id, 'order');
             }
 
             // increment the sync counter

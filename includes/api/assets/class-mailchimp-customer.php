@@ -12,7 +12,7 @@ class MailChimp_WooCommerce_Customer {
 
 	protected $id            = null;
 	protected $email_address = null;
-	protected $opt_in_status = null;
+	protected $opt_in_status = false;
 	protected $company       = null;
 	protected $first_name    = null;
 	protected $last_name     = null;
@@ -33,7 +33,7 @@ class MailChimp_WooCommerce_Customer {
 		return array(
 			'id'            => 'required',
 			'email_address' => 'required|email',
-			'opt_in_status' => 'required|string',
+			'opt_in_status' => 'required',
 			'company'       => 'string',
 			'first_name'    => 'string',
 			'last_name'     => 'string',
@@ -369,6 +369,8 @@ class MailChimp_WooCommerce_Customer {
                     $meta_value = '1';
                 } elseif ( $subscriber['status'] === 'archived' ) {
                     $meta_value = 'archived';
+                } elseif ( $subscriber["status"] === "unsubscribed" ) {
+                    $meta_value = "unsubscribed";
                 }
                 $meta_value !== null && update_user_meta($this->wordpress_user->ID, 'mailchimp_woocommerce_is_subscribed', $meta_value);
             }
@@ -396,7 +398,7 @@ class MailChimp_WooCommerce_Customer {
 			array(
 				'id'            => (string) $this->getId(),
 				'email_address' => (string) $this->getEmailAddress(),
-				'opt_in_status' => false, //$this->getOptInStatus(),
+				'opt_in_status' => (bool)$this->getOptInStatus(),
                 'marketing_status_updated_at' => $this->getOptInStatusTimeAsString(),
                 'company'       => (string) $this->getCompany(),
                 'first_name'    => (string) $this->getFirstName(),

@@ -81,10 +81,10 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 = 5.7 =
 * Fixes error when order is not created yet and removes unused function.
 * Fixes Fatal Error scheduled subscription payment processing
-* Fixes PHP warnings throwing Undefined array key “SERVER_NAME” 
-* Fixes Mailchimp backorders status issues 
-* Add better support for current PHP versions 
-* Fixes sync-status-icon positioning issue in plugins dashboard 
+* Fixes PHP warnings throwing Undefined array key "SERVER_NAME"
+* Fixes Mailchimp backorders status issues
+* Add better support for current PHP versions
+* Fixes sync-status-icon positioning issue in plugins dashboard
 * Bumps node-forge from 1.3.1 to 1.3.2 in /blocks
 * Bumps to js-yaml in /blocks
 * Bumps to playwright and @playwright/test in /blocks

@@ -24,20 +24,20 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
     protected $woo_order_number = false;
     protected $is_amazon_order = false;
     protected $is_privacy_restricted = false;
-	/**
-	 * @var null|WC_Order|WC_Order_Refund
-	 */
-	protected $woo_order = null;
+    /**
+     * @var null|WC_Order|WC_Order_Refund
+     */
+    protected $woo_order = null;
 
-	/**
-	 * MailChimp_WooCommerce_Single_Order constructor.
-	 *
-	 * @param null $id
-	 * @param null $cart_session_id
-	 * @param null $landing_site
-	 * @param null $user_language
-	 * @param null $gdpr_fields
-	 */
+    /**
+     * MailChimp_WooCommerce_Single_Order constructor.
+     *
+     * @param null $id
+     * @param null $cart_session_id
+     * @param null $landing_site
+     * @param null $user_language
+     * @param null $gdpr_fields
+     */
     public function __construct($id = null, $cart_session_id = null, $landing_site = null, $user_language = null, $gdpr_fields = null)
     {
         if (!empty($id)) $this->id = $id;
@@ -58,11 +58,11 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
         return $this;
     }
 
-	/**
-	 * @param $is_full_sync
-	 *
-	 * @return $this
-	 */
+    /**
+     * @param $is_full_sync
+     *
+     * @return $this
+     */
     public function set_full_sync($is_full_sync)
     {
         $this->is_full_sync = $is_full_sync;
@@ -70,24 +70,24 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
         return $this;
     }
 
-	/**
-	 * @return false
-	 * @throws MailChimp_WooCommerce_Error
-	 * @throws MailChimp_WooCommerce_RateLimitError
-	 * @throws MailChimp_WooCommerce_ServerError
-	 */
+    /**
+     * @return false
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_RateLimitError
+     * @throws MailChimp_WooCommerce_ServerError
+     */
     public function handle()
     {
         $this->process();
         return false;
     }
 
-	/**
-	 * @return false
-	 * @throws MailChimp_WooCommerce_Error
-	 * @throws MailChimp_WooCommerce_RateLimitError
-	 * @throws MailChimp_WooCommerce_ServerError
-	 */
+    /**
+     * @return false
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_RateLimitError
+     * @throws MailChimp_WooCommerce_ServerError
+     */
     public function process()
     {
         if (!mailchimp_is_configured() || !($api = mailchimp_get_api())) {
@@ -97,14 +97,14 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
         $store_id = mailchimp_get_store_id();
 
-		// this will set the woo_order variable or return false.
+        // this will set the woo_order variable or return false.
         if (!($woo_order_number = $this->getRealOrderNumber())) {
             mailchimp_log('order_submit.failure', "There is no real order number to use for order ID {$this->id}.");
             return false;
         }
 
         $order_post_type_list = apply_filters( 'mailchimp_should_push_order_post_type_list', [
-	        'shop_order'
+            'shop_order'
         ]);
 
         if ( ! in_array( $this->woo_order->get_type(), $order_post_type_list ) ) {
@@ -112,18 +112,18 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             return false;
         }
 
-	    $wordpress_user_id = $this->woo_order->get_user_id();
-	    $user = $wordpress_user_id ? get_user_by( 'ID', $wordpress_user_id ) : false;
+        $wordpress_user_id = $this->woo_order->get_user_id();
+        $user = $wordpress_user_id ? get_user_by( 'ID', $wordpress_user_id ) : false;
 
-	    if ( $user ) {
-		    $restricted_roles = array('administrator');
-		    $allowed_roles = array();
-		    $allowed_roles = apply_filters('mailchimp_campaign_user_roles', $allowed_roles );
-		    if ( ( count( $allowed_roles ) && count( array_intersect( $allowed_roles, $user->roles ) ) === 0 ) || ( count( array_intersect( $restricted_roles, $user->roles ) ) !== 0 ) ) {
-			    mailchimp_log( 'order_process', "Order #{$woo_order_number} skipped, user #{$this->woo_order->get_user_id()} user role is not in the list" );
-			    return false;
-		    }
-	    }
+        if ( $user ) {
+            $restricted_roles = array('administrator');
+            $allowed_roles = array();
+            $allowed_roles = apply_filters('mailchimp_campaign_user_roles', $allowed_roles );
+            if ( ( count( $allowed_roles ) && count( array_intersect( $allowed_roles, $user->roles ) ) === 0 ) || ( count( array_intersect( $restricted_roles, $user->roles ) ) !== 0 ) ) {
+                mailchimp_log( 'order_process', "Order #{$woo_order_number} skipped, user #{$this->woo_order->get_user_id()} user role is not in the list" );
+                return false;
+            }
+        }
 
         if ($this->is_full_sync) {
             $plugin_options = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce');
@@ -163,7 +163,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
         $new_order = $call === 'addStoreOrder';
 
         if (!$this->is_admin_save && $new_order && $this->is_update === true) {
-			mailchimp_log('order_submit.filter', "Order ID {$this->id} was new, but skipping because this job was supposed to be an update.");
+            mailchimp_log('order_submit.filter', "Order ID {$this->id} was new, but skipping because this job was supposed to be an update.");
             return false;
         }
 
@@ -173,7 +173,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             $this->landing_site = null;
         }
 
-	    $email = null;
+        $email = null;
 
         try {
             $has_doi_enabled = !$this->is_full_sync && mailchimp_list_has_double_optin();
@@ -187,7 +187,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             $order = $job->transform($this->woo_order);
             // all subscriber logic has now been changed
 
-			$original_woo_status = $order->getOriginalWooStatus();
+            $original_woo_status = $order->getOriginalWooStatus();
 
             // don't allow this to happen.
             if ($original_woo_status === 'checkout-draft') {
@@ -217,7 +217,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
             $current_status = null;
 
-			// for live traffic, if the customer was not opted in, and we should only submit subscribers: return false
+            // for live traffic, if the customer was not opted in, and we should only submit subscribers: return false
             if (!$this->is_full_sync && (!$order->getCustomer()->getOptInStatus() && mailchimp_submit_subscribed_only())) {
                 mailchimp_debug('filter', "#{$woo_order_number} was blocked due to subscriber only settings and current mailchimp status was {$current_status}");
                 return false;
@@ -273,11 +273,11 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             $log = "$call :: #{$order->getId()} :: email: {$email}";
 
             // only do this stuff on new orders
-	        // apply the landing site if we have one.
-	        if ( $new_order && ! empty( $this->landing_site ) ) {
-	            $log .= ' :: landing site ' . $this->landing_site;
-	            $order->setLandingSite($this->landing_site);
-	        }
+            // apply the landing site if we have one.
+            if ( $new_order && ! empty( $this->landing_site ) ) {
+                $log .= ' :: landing site ' . $this->landing_site;
+                $order->setLandingSite($this->landing_site);
+            }
 
             if ($this->is_full_sync) {
                 $line_items = $order->items();
@@ -330,12 +330,12 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 $log .= " :: abandoned cart deleted [{$this->cart_session_id}]";
             }
 
-			// log the campaign id if we have this value from the API response.
-	        if ( $new_order && $api_response instanceof MailChimp_WooCommerce_Order ) {
-				if (($campaign_id = $api_response->getCampaignId()) && !empty($campaign_id)) {
-					$log .= " :: campaign id {$campaign_id}";
-				}
-	        }
+            // log the campaign id if we have this value from the API response.
+            if ( $new_order && $api_response instanceof MailChimp_WooCommerce_Order ) {
+                if (($campaign_id = $api_response->getCampaignId()) && !empty($campaign_id)) {
+                    $log .= " :: campaign id {$campaign_id}";
+                }
+            }
 
             $status_if_new = $order->getCustomer()->getOptInStatus() ? 'subscribed' : 'transactional';
 
@@ -348,7 +348,10 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             // Maybe sync subscriber to set correct member.language
             if (!$this->is_full_sync) {
                 mailchimp_member_data_update($email, $this->user_language, 'order', $status_if_new, $order, $this->gdpr_fields, true);
-                // todo implement here the phone number and sms consent sync
+
+                // Sync SMS consent if available
+                $user_id = $this->woo_order ? $this->woo_order->get_user_id() : null;
+                mailchimp_member_sms_update($email, $this->id, $user_id, 'order', $status_if_new);
             }
 
             // increment the sync counter
@@ -406,19 +409,19 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
     public function getRealOrderNumber()
     {
         try {
-	        $this->woo_order = null;
-			$this->woo_order_number = false;
+            $this->woo_order = null;
+            $this->woo_order_number = false;
             if (empty($this->id)) {
                 return false;
             }
             if ( !($woo = MailChimp_WooCommerce_HPOS::get_order($this->id)) ) {
-				mailchimp_log('order_sync.failure', "Order #{$this->id}. Can’t submit order without a valid ID");
-				return false;
+                mailchimp_log('order_sync.failure', "Order #{$this->id}. Can’t submit order without a valid ID");
+                return false;
             }
-	        $this->woo_order = $woo;
+            $this->woo_order = $woo;
             return $this->woo_order_number = $this->woo_order->get_order_number();
         } catch (Exception $e) {
-			$this->woo_order = null;
+            $this->woo_order = null;
             $this->woo_order_number = false;
             mailchimp_error('order_sync.failure', mailchimp_error_trace($e, "{$this->id} could not be loaded"));
             return false;
@@ -451,4 +454,3 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
         return false;
     }
 }
-

@@ -695,7 +695,283 @@ class MailChimp_WooCommerce_MailChimpApi {
         return $member;
 	}
 
-	/**
+    /**
+     * Subscribe a contact to SMS marketing
+     *
+     * @param string $list_id The audience/list ID
+     * @param string|null $email The contact's email address (used to identify the contact, can be null for email-less checkout)
+     * @param string $sms_phone The SMS phone number (E.164 format preferred)
+     * @param bool $subscribed Whether to subscribe (true) or mark as pending (false)
+     * @param bool $preserve_existing If true, don't change status of already subscribed contacts
+     * @return array|bool|mixed|object|null
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_RateLimitError
+     * @throws MailChimp_WooCommerce_ServerError
+     */
+    public function subscribeSms( $list_id, $email, $sms_phone, $subscribed = true, $preserve_existing = true, $email_status = '0' ) {
+        // Validate and format phone number
+        $sms_phone = $this->formatSmsPhone( $sms_phone );
+        if ( empty( $sms_phone ) ) {
+            throw new MailChimp_WooCommerce_Error( 'Invalid SMS phone number format' );
+        }
+
+        // Build the SMS channel data according to Mailchimp API
+        $sms_channel = array(
+            'sms_phone' => $sms_phone,
+            'marketing_consent' => array(
+                'status' => $subscribed ? 'confirmed' : 'pending',
+                'source' => 'Mailchimp for Woocommerce',
+            ),
+        );
+
+        // Handle email-less checkout (AC10 requirement)
+        if ( empty( $email ) ) {
+            // Use phone number as identifier for email-less subscribers
+            $data = array(
+                'sms_channel' => $sms_channel,
+            );
+            mailchimp_debug( 'api.sms_subscribe', "SMS Subscribe (no email) :: {$sms_phone}", $data );
+
+            // For email-less, we use the SMS phone endpoint
+            return $this->post( "audiences/{$list_id}/sms-subscribers", $data );
+        }
+
+        $hash = md5( strtolower( trim( $email ) ) );
+
+        // Check if we should preserve existing status (AC8 requirement)
+        if ( $preserve_existing && ! $subscribed ) {
+            // Check current status first
+            $current_status = $this->getSmsStatus( $list_id, $email );
+            if ( $current_status && isset( $current_status['marketing_consent']['status'] ) ) {
+                if ( $current_status['marketing_consent']['status'] === 'confirmed' ) {
+                    mailchimp_debug( 'api.sms_subscribe', "Preserving existing SMS subscription for {$email}" );
+                    return $current_status;
+                }
+            }
+        }
+
+        $data = array(
+            'sms_channel' => $sms_channel,
+        );
+
+
+        mailchimp_debug( 'api.sms_subscribe', "SMS Subscribe {$email} :: {$sms_phone}", $data );
+
+        try {
+            // Use the audiences contacts endpoint for SMS
+            return $this->post( "audiences/{$list_id}/contacts", $data );
+
+        } catch ( MailChimp_WooCommerce_Error $e ) {
+            // If contact already exists, try to update instead
+            if ( mailchimp_string_contains( $e->getMessage(), 'already a list member' ) ||
+                mailchimp_string_contains( $e->getMessage(), 'is already in the audience' ) ) {
+                return $this->updateSmsConsent( $list_id, $email, $sms_phone, $subscribed, $preserve_existing );
+            }
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Update SMS consent for an existing contact
+     *
+     * @param string $list_id The audience/list ID
+     * @param string $email The contact's email address
+     * @param string $sms_phone The SMS phone number
+     * @param bool $subscribed Whether subscribed or not
+     * @param bool $preserve_existing If true and not subscribing, don't change existing subscribed status
+     * @return array|bool|mixed|object|null
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_RateLimitError
+     * @throws MailChimp_WooCommerce_ServerError
+     */
+    public function updateSmsConsent( $list_id, $email, $sms_phone, $subscribed = true, $preserve_existing = true ) {
+        $sms_phone = $this->formatSmsPhone( $sms_phone );
+        if ( empty( $sms_phone ) ) {
+            throw new MailChimp_WooCommerce_Error( 'Invalid SMS phone number format' );
+        }
+
+        $hash = md5( strtolower( trim( $email ) ) );
+
+        // Check if we should preserve existing status (AC8 requirement)
+        if ( $preserve_existing && ! $subscribed ) {
+            $current_status = $this->getSmsStatus( $list_id, $email );
+            if ( $current_status && isset( $current_status['marketing_consent']['status'] ) ) {
+                if ( $current_status['marketing_consent']['status'] === 'confirmed' ) {
+                    mailchimp_debug( 'api.sms_update', "Preserving existing SMS subscription for {$email}" );
+                    return $current_status;
+                }
+            }
+        }
+
+        $sms_channel = array(
+            'sms_phone' => $sms_phone,
+            'marketing_consent' => array(
+                'status' => $subscribed ? 'confirmed' : 'unsubscribed',
+                'source' => 'Mailchimp for Woocommerce',
+            ),
+        );
+
+        $data = array(
+            'sms_channel' => $sms_channel,
+        );
+
+        mailchimp_debug( 'api.sms_update', "SMS Update {$email} :: {$sms_phone}", $data );
+
+        return $this->patch( "lists/{$list_id}/members/{$hash}", $data );
+    }
+
+    /**
+     * Unsubscribe a contact from SMS marketing
+     *
+     * @param string $list_id The audience/list ID
+     * @param string $email The contact's email address
+     * @return array|bool|mixed|object|null
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_RateLimitError
+     * @throws MailChimp_WooCommerce_ServerError
+     */
+    public function unsubscribeSms( $list_id, $email ) {
+        $hash = md5( strtolower( trim( $email ) ) );
+
+        $data = array(
+            'sms_channel' => array(
+                'marketing_consent' => array(
+                    'status' => 'unsubscribed',
+                    'source' => 'Mailchimp for Woocommerce',
+                ),
+            ),
+        );
+
+        mailchimp_debug( 'api.sms_unsubscribe', "SMS Unsubscribe {$email}", $data );
+
+        return $this->patch( "lists/{$list_id}/members/{$hash}", $data );
+    }
+
+    /**
+     * Get SMS subscription status for a contact
+     *
+     * @param string $list_id The audience/list ID
+     * @param string $email The contact's email address
+     * @return array|false SMS data or false if not subscribed
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_RateLimitError
+     * @throws MailChimp_WooCommerce_ServerError
+     */
+    public function getSmsStatus( $list_id, $email ) {
+        try {
+            $member = $this->member( $list_id, $email );
+            if ( isset( $member['sms_channel'] ) ) {
+                return $member['sms_channel'];
+            }
+            return false;
+        } catch ( Exception $e ) {
+            return false;
+        }
+    }
+
+    /**
+     * Format phone number to E.164 format
+     *
+     * @param string $phone Raw phone number
+     * @return string Formatted phone number or empty string if invalid
+     */
+    protected function formatSmsPhone( $phone ) {
+        // Remove all non-digit characters except +
+        $phone = preg_replace( '/[^\+\d]/', '', $phone );
+
+        // If it doesn't start with +, assume US and add +1
+        if ( strpos( $phone, '+' ) !== 0 ) {
+            // Remove leading 1 if present, then add +1
+            $phone = ltrim( $phone, '1' );
+            if ( strlen( $phone ) === 10 ) {
+                $phone = '+1' . $phone;
+            } else {
+                $phone = '+' . $phone;
+            }
+        }
+
+        // Validate minimum length (E.164 requires at least 8 digits)
+        $digits = preg_replace( '/[^\d]/', '', $phone );
+        if ( strlen( $digits ) < 8 || strlen( $digits ) > 15 ) {
+            return '';
+        }
+
+        return $phone;
+    }
+
+    /**
+     * Check if the merchant has an approved SMS application for the given audience
+     *
+     * @param string $list_id The audience/list ID
+     * @return array|false SMS application status or false if not approved
+     * @throws MailChimp_WooCommerce_Error
+     * @throws MailChimp_WooCommerce_RateLimitError
+     * @throws MailChimp_WooCommerce_ServerError
+     */
+    public function getSmsApplicationStatus( $list_id ) {
+        try {
+            // Try to get SMS settings for the audience
+            $result = $this->get( "lists/{$list_id}/sms" );
+
+            if ( isset( $result['sms_enabled'] ) && $result['sms_enabled'] ) {
+                return array(
+                    'enabled' => true,
+                    'sending_countries' => isset( $result['sending_countries'] ) ? $result['sending_countries'] : array(),
+                    'phone_country' => isset( $result['phone_country'] ) ? $result['phone_country'] : null,
+                );
+            }
+            return false;
+        } catch ( Exception $e ) {
+            // If 404 or other error, SMS is not enabled
+            mailchimp_debug( 'api.sms_status', "SMS not available for list {$list_id}: " . $e->getMessage() );
+            return false;
+        }
+    }
+
+    /**
+     * Get cached SMS application status (cached for 1 hour)
+     *
+     * @param string $list_id The audience/list ID
+     * @return array|false SMS application status or false if not approved
+     */
+    public function getCachedSmsApplicationStatus( $list_id ) {
+        $transient_key = "mailchimp_sms_status_{$list_id}";
+        $cached = mailchimp_get_transient( $transient_key );
+
+        if ( $cached !== false ) {
+            return $cached;
+        }
+
+        try {
+            $status = $this->getSmsApplicationStatus( $list_id );
+            // Cache for 1 hour
+            mailchimp_set_transient( $transient_key, $status !== false ? $status : 'disabled', 3600 );
+            return $status;
+        } catch ( Exception $e ) {
+            return false;
+        }
+    }
+
+    /**
+     * Check if a country is in the merchant's SMS sending countries
+     *
+     * @param string $list_id The audience/list ID
+     * @param string $country_code The 2-letter country code to check
+     * @return bool
+     */
+    public function isSmsSendingCountry( $list_id, $country_code ) {
+        $sms_status = $this->getCachedSmsApplicationStatus( $list_id );
+
+        if ( ! $sms_status || empty( $sms_status['sending_countries'] ) ) {
+            return false;
+        }
+
+        $country_code = strtoupper( $country_code );
+        return in_array( $country_code, $sms_status['sending_countries'], true );
+    }
+
+    /**
 	 * @param MailChimp_WooCommerce_CreateListSubmission $submission
 	 *
 	 * @return array|bool|mixed|object|null
@@ -2791,7 +3067,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 
 		$err  = curl_error( $curl );
 		$info = curl_getinfo( $curl );
-		
+
 		// Capture request details before closing curl
 		$url = isset($info['url']) ? $info['url'] : 'UNKNOWN';
 		$request_headers = isset($info['request_header']) ? explode("\r\n", $info['request_header']) : array();
@@ -2804,7 +3080,7 @@ class MailChimp_WooCommerce_MailChimpApi {
         }
 
 		curl_close( $curl );
-		
+
 		// Initialize error info array
 		if ( $err ) {
 			$error_info = array(
@@ -2812,7 +3088,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 				'message' => $err,
 				'code' => 500
 			);
-			
+
 			// Log with enhanced logger
 			if (class_exists('MailChimp_WooCommerce_Enhanced_Logger')) {
 				MailChimp_WooCommerce_Enhanced_Logger::log_connection_attempt(
@@ -2825,7 +3101,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 					$request_data
 				);
 			}
-			
+
 			throw new MailChimp_WooCommerce_Error( 'CURL error :: ' . $err, 500 );
 		}
 
@@ -2841,7 +3117,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 				'message' => 'API is failing - try again.',
 				'code' => $http_code
 			);
-			
+
 			// Log with enhanced logger
 			if (class_exists('MailChimp_WooCommerce_Enhanced_Logger')) {
 				MailChimp_WooCommerce_Enhanced_Logger::log_connection_attempt(
@@ -2854,7 +3130,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 					$request_data
 				);
 			}
-			
+
 			throw new MailChimp_WooCommerce_RateLimitError( 'API is failing - try again.' );
 		}
 
@@ -2875,7 +3151,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 						'code' => $e->getCode(),
 						'response_data' => $data
 					);
-					
+
 					if (class_exists('MailChimp_WooCommerce_Enhanced_Logger')) {
 						MailChimp_WooCommerce_Enhanced_Logger::log_connection_attempt(
 							$method,
@@ -2887,11 +3163,11 @@ class MailChimp_WooCommerce_MailChimpApi {
 							$request_data
 						);
 					}
-					
+
 					throw $e;
 				}
 			}
-			
+
 			// Log successful request if debug logging is enabled
 			if (mailchimp_environment_variables()->logging === 'debug' && class_exists('MailChimp_WooCommerce_Enhanced_Logger')) {
 				MailChimp_WooCommerce_Enhanced_Logger::log_connection_attempt(
@@ -2904,7 +3180,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 					$request_data
 				);
 			}
-			
+
 			return $data;
 		}
 
@@ -2919,7 +3195,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 					'code' => 403,
 					'response_data' => $data
 				);
-				
+
 				// Log with enhanced logger
 				if (class_exists('MailChimp_WooCommerce_Enhanced_Logger')) {
 					MailChimp_WooCommerce_Enhanced_Logger::log_connection_attempt(
@@ -2932,19 +3208,19 @@ class MailChimp_WooCommerce_MailChimpApi {
 						$request_data
 					);
 				}
-				
+
 				throw new MailChimp_WooCommerce_RateLimitError();
 			}
 			$error_message  = isset( $data['title'] ) ? $data['title'] : '';
 			$error_message .= isset( $data['detail'] ) ? $data['detail'] : '';
-			
+
 			$error_info = array(
 				'type' => 'client_error',
 				'message' => $error_message,
 				'code' => $error_status,
 				'response_data' => $data
 			);
-			
+
 			// Log with enhanced logger
 			if (class_exists('MailChimp_WooCommerce_Enhanced_Logger')) {
 				MailChimp_WooCommerce_Enhanced_Logger::log_connection_attempt(
@@ -2957,20 +3233,20 @@ class MailChimp_WooCommerce_MailChimpApi {
 					$request_data
 				);
 			}
-			
+
 			throw new MailChimp_WooCommerce_Error( $error_message, $error_status );
 		}
 
 		if ( $http_code >= 500 ) {
 			$error_message = isset( $data['detail'] ) ? $data['detail'] : '';
-			
+
 			$error_info = array(
 				'type' => 'server_error',
 				'message' => $error_message,
 				'code' => $error_status,
 				'response_data' => $data
 			);
-			
+
 			// Log with enhanced logger
 			if (class_exists('MailChimp_WooCommerce_Enhanced_Logger')) {
 				MailChimp_WooCommerce_Enhanced_Logger::log_connection_attempt(
@@ -2983,7 +3259,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 					$request_data
 				);
 			}
-			
+
 			throw new MailChimp_WooCommerce_ServerError( $error_message, $error_status );
 		}
 
@@ -2994,7 +3270,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 				'code' => $http_code,
 				'raw_response' => $response
 			);
-			
+
 			// Log with enhanced logger
 			if (class_exists('MailChimp_WooCommerce_Enhanced_Logger')) {
 				MailChimp_WooCommerce_Enhanced_Logger::log_connection_attempt(
@@ -3007,7 +3283,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 					$request_data
 				);
 			}
-			
+
 			mailchimp_error(
 				'api.debug',
 				'fallback when data is empty from API',

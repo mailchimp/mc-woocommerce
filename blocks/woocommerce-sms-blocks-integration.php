@@ -136,15 +136,21 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
         } else {
             $subscribed = false;
         }
-
-        $data['userSubscribed'] = $subscribed === true || $subscribed === '1';
-
         $checkbox_settings = array(
             [ 'label' => esc_html__( 'Checked by default', 'mailchimp-for-woocommerce' ), 'value' => 'check' ],
             [ 'label' => esc_html__( 'Unchecked by default', 'mailchimp-for-woocommerce' ), 'value' => 'uncheck' ],
         );
 
+        $data['userSmsSubscribed'] = $subscribed === true || $subscribed === '1';
+        $data['smsEnabled'] = $this->isSmsEnabled();
+        $data['defaultDisclaimer'] = $this->getSmsDisclaimerText();
+        $data['audienceName'] = $this->getAudienceName();
+        $data['smsSendingCountries'] = $this->getSmsSendingCountries();
         $data['checkboxSettings'] = apply_filters('mailchimp_checkout_sms_consent_options', $checkbox_settings);;
+
+        mailchimp_log('elligible_countries', 'test', [
+            'data' => $data['smsSendingCountries']
+        ]);
 
 		return $data;
 	}
@@ -214,7 +220,8 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
     {
         $meta_key = 'mailchimp_woocommerce_sms_consent_subscribed';
 
-        $optin = $request['extensions']['mailchimp-sms-consent']['optin'];
+        $optin = $request['extensions']['mailchimp-sms-consent']['smsOptin'];
+        $phone = $request['extensions']['mailchimp-sms-consent']['smsPhone'];
         // update the order meta for the subscription status to support legacy functions
 
         MailChimp_WooCommerce_HPOS::update_order_meta($order->get_id(), $meta_key, $optin);
@@ -285,6 +292,34 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
         return mailchimp_get_api();
     }
 
+    protected function isSmsEnabled() {
+        $options = \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce' );
+        return isset( $options['mailchimp_sms_consent_enabled'] ) && (bool) $options['mailchimp_sms_consent_enabled'];
+    }
+
+    /**
+     * Check if merchant has approved SMS application
+     *
+     * @return bool
+     */
+    protected function merchantHasSmsApproved() {
+        try {
+            if ( ! mailchimp_is_configured() ) {
+                return false;
+            }
+            $list_id = mailchimp_get_list_id();
+            if ( ! $list_id ) {
+                return false;
+            }
+            $api = mailchimp_get_api();
+            $sms_status = $api->getCachedSmsApplicationStatus( $list_id );
+
+            return $sms_status && ! empty( $sms_status['enabled'] );
+        } catch ( Exception $e ) {
+            return false;
+        }
+    }
+
     /**
      * @return bool
      */
@@ -311,6 +346,52 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
         }
 
         return $status === true || $status === '1' ? 'check' : 'uncheck';
+    }
+
+    protected function getSmsDisclaimerText() {
+        // Compliance: disclaimer text cannot be customized
+        $audience_name = $this->getAudienceName();
+        $prefix = ! empty( $audience_name ) ? $audience_name . ' – ' : '';
+        return $prefix . __( 'By providing your phone number, you agree to receive promotional and marketing messages, notifications, and customer service communications. Message & data rates may apply. Consent is not a condition of purchase. Message frequency may vary. You can unsubscribe at any time by replying STOP.', 'mailchimp-for-woocommerce' );
+    }
+
+    protected function getAudienceName() {
+        try {
+            if ( ! mailchimp_is_configured() ) {
+                return '';
+            }
+            $list_id = mailchimp_get_list_id();
+            if ( ! $list_id ) {
+                return '';
+            }
+            $api = mailchimp_get_api();
+            $list = $api->getList( $list_id );
+            return isset( $list['name'] ) ? $list['name'] : '';
+        } catch ( Exception $e ) {
+            return '';
+        }
+    }
+
+    protected function getSmsSendingCountries() {
+        return MailChimp_Sms_Consent::$allowedCountries;
+
+        try {
+            if ( ! mailchimp_is_configured() ) {
+                return array();
+            }
+            $list_id = mailchimp_get_list_id();
+            if ( ! $list_id ) {
+                return array();
+            }
+            $api = mailchimp_get_api();
+            $sms_status = $api->getCachedSmsApplicationStatus( $list_id );
+            if ( $sms_status && ! empty( $sms_status['sending_countries'] ) ) {
+                return $sms_status['sending_countries'];
+            }
+            return array();
+        } catch ( Exception $e ) {
+            return array();
+        }
     }
 
     /**

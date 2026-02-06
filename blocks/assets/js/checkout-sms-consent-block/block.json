@@ -12,7 +12,7 @@
 		"reusable": false
 	},
 	"parent": [
-		"woocommerce/checkout-shipping-address-block"
+		"woocommerce/checkout-contact-information-block"
 	],
 	"attributes": {
 		"lock": {

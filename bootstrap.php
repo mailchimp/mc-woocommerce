@@ -16,6 +16,7 @@ spl_autoload_register(function($class) {
         'MailChimp_Service' => 'includes/class-mailchimp-woocommerce-service.php',
         'MailChimp_WooCommerce_Options' => 'includes/class-mailchimp-woocommerce-options.php',
         'MailChimp_Newsletter' => 'includes/class-mailchimp-woocommerce-newsletter.php',
+        'MailChimp_Sms_Consent' => 'includes/class-mailchimp-woocommerce-sms-consent.php',
         'MailChimp_WooCommerce_Loader' => 'includes/class-mailchimp-woocommerce-loader.php',
         'MailChimp_WooCommerce_i18n' => 'includes/class-mailchimp-woocommerce-i18n.php',
         'MailChimp_WooCommerce_Deactivator' => 'includes/class-mailchimp-woocommerce-deactivator.php',
@@ -1548,7 +1549,17 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
                 $should_doi = false;
             }
 
-            $result = mailchimp_get_api()
+            $api = mailchimp_get_api();
+
+            if ($caller === 'cart') {
+                $status = mailchimp_get_subscriber_status($user_email);
+
+                if (in_array($status, ['transactional', 'subscribed', 'pending'])) {
+                    $status_if_new = $status;
+                }
+            }
+
+            $result = $api
                 ->useAutoDoi($should_doi)
                 ->update(
                     $list_id,

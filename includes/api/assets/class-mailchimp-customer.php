@@ -13,6 +13,7 @@ class MailChimp_WooCommerce_Customer {
 	protected $id            = null;
 	protected $email_address = null;
 	protected $opt_in_status = false;
+	protected $phone_number = null;
 	protected $company       = null;
 	protected $first_name    = null;
 	protected $last_name     = null;

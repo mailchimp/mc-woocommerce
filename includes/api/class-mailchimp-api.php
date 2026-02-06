@@ -397,6 +397,95 @@ class MailChimp_WooCommerce_MailChimpApi {
         }
 	}
 
+    public function getContacts($list_id)
+    {
+        $endpoint = "/audiences/{$list_id}/contacts";
+
+        return $this->get( $endpoint );
+    }
+
+    public function smsGetContact($list_id, $email)
+    {
+        $hash = md5( strtolower( trim( $email ) ) );
+
+        $endpoint = "/audiences/{$list_id}/contacts/{$hash}";
+
+        return $this->get( $endpoint );
+    }
+
+    public function smsConsentUpdate($list_id, $phone_number, $subscribed = '1', $merge_fields = array())
+    {
+        $hash = hash( 'sha256', trim( $phone_number ) );
+
+        if ( $subscribed === '1' ) {
+            $status = 'confirmed';
+        } else {
+            $status = 'unknown';
+        }
+
+        $payload = [
+            'sms_channel' => [
+                'sms_phone' => $phone_number,
+                'marketing_consent' => [
+                    'status' => $status,
+                    'source' => 'Mailchimp for Woocommerce'
+                ]
+            ],
+            'merge_fields' => $merge_fields,
+        ];
+
+        $data = $this->cleanListSubmission($payload);
+
+        try {
+            $endpoint = "/audiences/{$list_id}/contacts/{$hash}";
+            return $this->patch( $endpoint, $data );
+        } catch ( Exception $e ) {}
+    }
+
+    public function smsConsentPost($list_id, $phone_number, $subscribed = '1', $merge_fields = array())
+    {
+        if ( $subscribed === '1' ) {
+            $status = 'confirmed';
+        } else {
+            $status = 'unknown';
+        }
+
+        $payload = [
+            'sms_channel' => [
+                'sms_phone' => $phone_number,
+                'marketing_consent' => [
+                    'status' => $status,
+                    'source' => 'Mailchimp for Woocommerce'
+                ]
+            ],
+            'merge_fields' => $merge_fields,
+//            'update_existing' => true
+        ];
+
+        $data = $this->cleanListSubmission($payload);
+
+        try {
+            $endpoint = "audiences/{$list_id}/contacts";
+
+            $response =  $this->post( $endpoint, $data );
+            mailchimp_debug('sms-consent.post', 'success', [
+                'payload' => $data,
+                'endpoint' => $endpoint,
+                'response' => $response,
+            ]);
+
+            return $response;
+        } catch ( Exception $e ) {
+            mailchimp_debug('sms-consent.post', 'error', [
+                'payload' => $data,
+                'endpoint' => $endpoint,
+                'message' => $e->getMessage(),
+            ]);
+
+            return false;
+        }
+    }
+
 	/**
 	 * @param $data
 	 *

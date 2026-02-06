@@ -83,15 +83,6 @@ if ( $store ) {
     } catch (Exception $e) {
 
     }
-    //	try {
-//		$mailchimp_total_subscribers = $mailchimp_api->getSubscribedCount( $store->getListId() );
-//	} catch ( Exception $e ) {
-//		$mailchimp_total_subscribers = 0; }
-//	try {
-//		$mailchimp_total_transactional = $mailchimp_api->getTransactionalCount( $store->getListId() );
-//	} catch ( Exception $e ) {
-//		$mailchimp_total_transactional = 0;
-//    }
 }
 
 ?>

@@ -201,6 +201,7 @@ mailchimpReady(function () {
         var subscribed = document.querySelector('#mailchimp_woocommerce_newsletter');
         var blockSubscribed = document.querySelector("#subscribe-to-newsletter");
 
+
         if (subscribed) {
             subscribed.onchange = function() {
                 mailchimp_submitted_email = null;
@@ -212,6 +213,7 @@ mailchimpReady(function () {
                 mailchimpHandleBillingEmail('#contact-fields input[type="email"]');
             }
         }
+
 
         mailchimp_username_email = document.querySelector("#username");
         mailchimp_billing_email = document.querySelector("#billing_email");

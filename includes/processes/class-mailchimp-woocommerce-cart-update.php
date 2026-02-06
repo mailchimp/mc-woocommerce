@@ -176,7 +176,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
 
             // Maybe sync subscriber to set correct member.language
             // Pass subscriber status if user opted in via newsletter checkbox
-		$subscriber_status = $this->status ? 'subscribed' : 'transactional';
+            $subscriber_status = $this->status ? 'subscribed' : 'transactional';
             mailchimp_member_data_update($this->email, $this->user_language, 'cart', $subscriber_status);
 
         } catch (MailChimp_WooCommerce_RateLimitError $e) {

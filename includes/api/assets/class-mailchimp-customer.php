@@ -13,6 +13,8 @@ class MailChimp_WooCommerce_Customer {
 	protected $id            = null;
 	protected $email_address = null;
 	protected $opt_in_status = false;
+	protected $sms_opt_in_status = false;
+	protected $phone_number = null;
 	protected $company       = null;
 	protected $first_name    = null;
 	protected $last_name     = null;
@@ -81,6 +83,20 @@ class MailChimp_WooCommerce_Customer {
 	 */
 	public function getOptInStatus() {
 		return $this->opt_in_status;
+	}
+
+	/**
+	 * @return null
+	 */
+	public function getPhoneNumber() {
+		return $this->phone_number;
+	}
+
+    /**
+	 * @return null
+	 */
+	public function getSmsOptInStatus() {
+		return $this->sms_opt_in_status;
 	}
 
 	/**

@@ -49,14 +49,15 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
                 mailchimp_log('subscriber_sync', 'Webhook is ignoring email', compact('email'));
                 return false;
             }
+
             // Check if this is an SMS event
             $is_sms_event = in_array($hook_type, array('sms_subscribe', 'sms_unsubscribe'));
-            
+
             if ($is_sms_event) {
                 // Handle SMS subscription events
                 return $this->handleSmsEvent($hook_type, $data, $email);
             }
-            
+
             // if hook type is 'subscribe' that means we need ot subscribe them
             $subscribe = $hook_type === 'subscribe';
             // if we don't have a user by email
@@ -137,11 +138,12 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
         $failed = false;
         // Include SMS webhook types
         $allowed_hooks = array(
-            'subscribe' => true, 
+            'subscribe' => true,
             'unsubscribe' => true,
             'sms_subscribe' => true,
             'sms_unsubscribe' => true,
         );
+
         if (!is_string($hook_type) || !isset($allowed_hooks[$hook_type])) {
             $failed = true;
         }
@@ -163,7 +165,7 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
         $last_name = !empty($member['merge_fields']['LNAME']) ? $member['merge_fields']['LNAME'] : 'Customer';
         if (empty($first_name)) $first_name = null;
         if (empty($last_name)) $last_name = null;
-        // TODO maybe use the registration method and keep a record for when the user is verified later
+
         $user = wp_create_user(strtolower($email), wp_generate_password(), strtolower($email));
         // subscribe them because this function only runs for subscribers.
         update_user_meta($user, 'mailchimp_woocommerce_is_subscribed', true);
@@ -228,7 +230,7 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
     private function handleSmsEvent($hook_type, $data, $email)
     {
         $sms_subscribe = $hook_type === 'sms_subscribe';
-        
+
         // Extract SMS phone number from webhook data
         $sms_phone = '';
         if (isset($data['sms_phone_number'])) {
@@ -239,7 +241,7 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
 
         // Try to find the user by email
         $user = get_user_by('email', $email);
-        
+
         if (!$user) {
             mailchimp_log('webhook.sms', "SMS event for non-existent user :: {$hook_type} :: {$email}");
             return false;
@@ -248,7 +250,7 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
         try {
             $hashed = md5(trim(strtolower($email)));
             $handled_key = "sms_subscriber_sync.{$hashed}.handled";
-            
+
             // Check if we've already handled this recently
             $handled = mailchimp_get_transient($handled_key);
             if ($handled === $sms_subscribe) {
@@ -257,31 +259,31 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
             }
 
             // Update user meta for SMS subscription status
-            update_user_meta($user->ID, 'mailchimp_woocommerce_sms_subscribed', $sms_subscribe);
-            
+            update_user_meta($user->ID, 'mailchimp_woocommerce_sms_consent_subscribed', $sms_subscribe);
+
             // If subscribing and we have a phone number, store it
             if ($sms_subscribe && !empty($sms_phone)) {
-                update_user_meta($user->ID, 'mailchimp_woocommerce_sms_phone', $sms_phone);
+                update_user_meta($user->ID, 'mailchimp_woocommerce_sms_consent_phone', $sms_phone);
             }
-            
+
             // If unsubscribing, we keep the phone number but update the status
             if (!$sms_subscribe) {
                 // Cache the unsubscribe to prevent re-subscription issues
                 mailchimp_set_transient("{$hashed}.sms_subscriber_sync", array(
-                    'time' => time(), 
+                    'time' => time(),
                     'status' => false
                 ), 90);
             }
 
             // Cache the handled status
             mailchimp_set_transient($handled_key, $sms_subscribe, 90);
-            
+
             mailchimp_log('webhook.sms', "SMS Subscriber Sync :: {$hook_type} :: {$email}", array(
                 'sms_subscribed' => $sms_subscribe,
                 'sms_phone' => $sms_phone,
                 'user_id' => $user->ID,
             ));
-            
+
             return true;
         } catch (Exception $e) {
             mailchimp_error('webhook.sms', "SMS Subscriber Sync Error :: {$hook_type} :: {$email} :: " . $e->getMessage());

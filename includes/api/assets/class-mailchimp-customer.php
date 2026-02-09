@@ -138,6 +138,28 @@ class MailChimp_WooCommerce_Customer {
 		return $this;
 	}
 
+
+	/**
+	 * @param bool $sms_opt_in_status
+	 * @return MailChimp_WooCommerce_Customer
+	 */
+	public function setSmsOptInStatus( $sms_opt_in_status ) {
+		if ( is_bool( $sms_opt_in_status ) ) {
+			$this->sms_opt_in_status = $sms_opt_in_status;
+		} else {
+			$this->sms_opt_in_status = $sms_opt_in_status === '1' || $sms_opt_in_status === 1 || $sms_opt_in_status === true;
+		}
+		return $this;
+	}
+
+	/**
+	 * @param string|null $phone_number
+	 * @return MailChimp_WooCommerce_Customer
+	 */
+	public function setPhoneNumber( $phone_number ) {
+		$this->phone_number = $phone_number;
+		return $this;
+	}
     /**
 	 * @return null
 	 */
@@ -410,20 +432,26 @@ class MailChimp_WooCommerce_Customer {
 	public function toArray() {
 		$address = $this->getAddress()->toArray();
 
-		return mailchimp_array_remove_empty(
-			array(
-				'id'            => (string) $this->getId(),
-				'email_address' => (string) $this->getEmailAddress(),
-				'opt_in_status' => (bool)$this->getOptInStatus(),
-                'marketing_status_updated_at' => $this->getOptInStatusTimeAsString(),
-                'company'       => (string) $this->getCompany(),
-                'first_name'    => (string) $this->getFirstName(),
-				'last_name'     => (string) $this->getLastName(),
-				// 'orders_count' => (int) $this->getOrdersCount(),
-				// 'total_spent' => floatval(number_format($this->getTotalSpent(), 2, '.', '')),
-				'address'       => ( empty( $address ) ? null : $address ),
-			)
+		$array = array(
+			'id'            => (string) $this->getId(),
+			'email_address' => (string) $this->getEmailAddress(),
+			'opt_in_status' => (bool)$this->getOptInStatus(),
+			'marketing_status_updated_at' => $this->getOptInStatusTimeAsString(),
+			'company'       => (string) $this->getCompany(),
+			'first_name'    => (string) $this->getFirstName(),
+			'last_name'     => (string) $this->getLastName(),
+			// 'orders_count' => (int) $this->getOrdersCount(),
+			// 'total_spent' => floatval(number_format($this->getTotalSpent(), 2, '.', '')),
+			'address'       => ( empty( $address ) ? null : $address ),
 		);
+
+		// Add SMS fields if SMS consent is enabled
+		$sms_phone = $this->getPhoneNumber();
+		if ( $this->getSmsOptInStatus() && !empty( $sms_phone ) ) {
+			$array['phone_number'] = (string) $sms_phone;
+		}
+
+		return mailchimp_array_remove_empty( $array );
 	}
 
 	/**

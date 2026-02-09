@@ -4,7 +4,7 @@ Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 6.2
 Tested up to: 6.9
-Stable tag: 5.7
+Stable tag: 6.0
 Requires PHP: 7.4
 WC requires at least: 8.2
 WC tested up to: 10.4
@@ -78,18 +78,6 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
 == Changelog ==
-= 5.7 =
-* Fixes error when order is not created yet and removes unused function.
-* Fixes Fatal Error scheduled subscription payment processing
-* Fixes PHP warnings throwing Undefined array key "SERVER_NAME"
-* Fixes Mailchimp backorders status issues
-* Add better support for current PHP versions
-* Fixes sync-status-icon positioning issue in plugins dashboard
-* Bumps node-forge from 1.3.1 to 1.3.2 in /blocks
-* Bumps to js-yaml in /blocks
-* Bumps to playwright and @playwright/test in /blocks
-* Bumps to tar-fs from 3.0.9 to 3.1.1 in /blocks
-
 = 6.0 =
 * Adds WooCommerce Order Fulfillments tracking
 * Adds SMS phone number field with consent for checkout

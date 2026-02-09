@@ -21,6 +21,7 @@ class MailChimp_WooCommerce_Enhanced_Logger {
      * @param mixed $request_data Request body data
      */
     public static function log_connection_attempt($method, $url, $curl_info = array(), $response = null, $error_info = array(), $headers = array(), $request_data = null) {
+        if (!defined('MAILCHIMP_DEBUG') || MAILCHIMP_DEBUG !== true) return;
         $log_entry = array(
             'timestamp' => current_time('mysql'),
             'timestamp_utc' => current_time('mysql', true),

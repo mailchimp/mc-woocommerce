@@ -76,9 +76,11 @@ class MailChimp_WooCommerce_WebHooks_Sync extends Mailchimp_Woocommerce_Job
 				$href = isset($hook['url']) ? $hook['url'] : (isset($hook['href']) ? $hook['href'] : null);
 				if ($href && mailchimp_string_contains($href, $rest_url)) {
 					if (!$disconnect && !empty($token) && mailchimp_string_contains($href, $token)) {
-						$this->skip_creation = true;
-						mailchimp_log('webhooks', "Verified webhook {$hook['id']}");
-						continue;
+                        if (array_key_exists('sms_subscribe', $hook['events']) && $hook['events']['sms_subscribe']) {
+                            $this->skip_creation = true;
+                            mailchimp_log('webhooks', "Verified webhook {$hook['id']}");
+                            continue;
+                        }
 					}
 					$api->deleteWebhookByID($list, $hook['id']);
 					$deleted[] = $hook['id'];

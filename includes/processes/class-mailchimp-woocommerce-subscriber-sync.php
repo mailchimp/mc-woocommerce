@@ -22,7 +22,9 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
      */
     public function handle()
     {
-    	mailchimp_debug('subscriber_sync', "tracing mailchimp post", array('data' => $this->data));
+        if (defined('MAILCHIMP_DEBUG') && MAILCHIMP_DEBUG === true) {
+            mailchimp_debug('subscriber_sync', "tracing mailchimp post", array('data' => $this->data));
+        }
 
         try {
             // if the store is not properly connected to Mailchimp - we need to skip this.
@@ -54,6 +56,9 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
             $is_sms_event = in_array($hook_type, array('sms_subscribe', 'sms_unsubscribe'));
 
             if ($is_sms_event) {
+                if (empty($email) && array_key_exists('merges', $data) && array_key_exists('EMAIL', $data['merges'])) {
+                    $email = $data['merges']['EMAIL'];
+                }
                 // Handle SMS subscription events
                 return $this->handleSmsEvent($hook_type, $data, $email);
             }
@@ -163,6 +168,7 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
         $member = mailchimp_get_api()->member(mailchimp_get_list_id(), $email);
         $first_name = !empty($member['merge_fields']['FNAME']) ? $member['merge_fields']['FNAME'] : 'Guest';
         $last_name = !empty($member['merge_fields']['LNAME']) ? $member['merge_fields']['LNAME'] : 'Customer';
+        $sms_phone = !empty($member['merge_fields']['SMSPHONE']) ? $member['merge_fields']['SMSPHONE'] : null;
         if (empty($first_name)) $first_name = null;
         if (empty($last_name)) $last_name = null;
 
@@ -176,6 +182,9 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
                 'first_name' => $first_name,
                 'last_name' => $last_name
             ));
+        }
+        if (empty($sms) && !empty($sms_phone)) {
+            $sms = $sms_phone;
         }
         if (!empty($sms)) {
             // Update user meta for SMS subscription status

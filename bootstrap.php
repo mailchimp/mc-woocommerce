@@ -1625,9 +1625,10 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
  * @param int|null $order_id The WooCommerce order ID (optional)
  * @param int|null $user_id The WordPress user ID (optional)
  * @param string $caller The calling context for logging
+ * @param string|null $email_status The status of user's email subscription for contact upserts.
  * @return bool True if SMS was synced, false otherwise
  */
-function mailchimp_member_sms_update($user_email = null, $order_id = null, $user_id = null, $caller = 'order') {
+function mailchimp_member_sms_update($user_email = null, $order_id = null, $user_id = null, $caller = 'order', $email_status = null) {
     // Check if SMS is enabled
     $options = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce');
     if (empty($options['mailchimp_sms_consent_enabled'])) {
@@ -1678,7 +1679,7 @@ function mailchimp_member_sms_update($user_email = null, $order_id = null, $user
         }
     }
 
-    $transient_key = $caller . ".sms.member." . md5($sms_data['phone']);
+    $transient_key = $caller . ".sms.member." . md5(($sms_data['phone'].'.'.$identifier));
 
     // Check if we've already synced recently
     if (mailchimp_get_transient($transient_key)) {
@@ -1697,7 +1698,7 @@ function mailchimp_member_sms_update($user_email = null, $order_id = null, $user
 
         // Sync SMS consent to Mailchimp
         // preserve_existing = true means we won't unsubscribe someone who's already subscribed
-        $result = $api->subscribeSms($list_id, $identifier, $sms_data['phone'], $sms_data['subscribed'], true);
+        $result = $api->subscribeSms($list_id, $identifier, $sms_data['phone'], $sms_data['subscribed'], true, $email_status);
 
         mailchimp_log('sms_consent_sync', 'caller', [
             'caller' => $caller,

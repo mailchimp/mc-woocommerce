@@ -158,7 +158,7 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
 	 * @throws MailChimp_WooCommerce_RateLimitError
 	 * @throws MailChimp_WooCommerce_ServerError
 	 */
-    private function createNewCustomer($email)
+    private function createNewCustomer($email, $sms = null)
     {
         $member = mailchimp_get_api()->member(mailchimp_get_list_id(), $email);
         $first_name = !empty($member['merge_fields']['FNAME']) ? $member['merge_fields']['FNAME'] : 'Guest';
@@ -176,6 +176,13 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
                 'first_name' => $first_name,
                 'last_name' => $last_name
             ));
+        }
+        if (!empty($sms)) {
+            // Update user meta for SMS subscription status
+            update_user_meta($user, 'mailchimp_woocommerce_sms_consent_subscribed', '1');
+            update_user_meta($user, 'mailchimp_woocommerce_sms_consent_phone', $sms);
+            mailchimp_log('webhook', "CREATED CUSTOMER with SMS and email :: {$email} :: {$sms} :: {$first_name} {$last_name}");
+            return $user;
         }
         mailchimp_log('webhook', "CREATED CUSTOMER :: {$email} :: {$first_name} {$last_name}");
         return $user;
@@ -243,6 +250,9 @@ class MailChimp_WooCommerce_Subscriber_Sync extends Mailchimp_Woocommerce_Job
         $user = get_user_by('email', $email);
 
         if (!$user) {
+            // if we don't have a user by email
+            $user = $sms_subscribe && $this->shouldCreateNewCustomers() && $this->createNewCustomer($email, $sms_phone);
+            if ($user) return true;
             mailchimp_log('webhook.sms', "SMS event for non-existent user :: {$hook_type} :: {$email}");
             return false;
         }

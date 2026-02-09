@@ -729,14 +729,13 @@ class MailChimp_WooCommerce_MailChimpApi {
             // Use phone number as identifier for email-less subscribers
             $data = array(
                 'sms_channel' => $sms_channel,
+                'update_existing' => true,
             );
             mailchimp_debug( 'api.sms_subscribe', "SMS Subscribe (no email) :: {$sms_phone}", $data );
 
             // For email-less, we use the SMS phone endpoint
             return $this->post( "audiences/{$list_id}/sms-subscribers", $data );
         }
-
-        $hash = md5( strtolower( trim( $email ) ) );
 
         // Check if we should preserve existing status (AC8 requirement)
         if ( $preserve_existing && ! $subscribed ) {
@@ -750,10 +749,19 @@ class MailChimp_WooCommerce_MailChimpApi {
             }
         }
 
-        $data = array(
-            'sms_channel' => $sms_channel,
-        );
+        $email_subscribed = $email_status === 'subscribed' || $email_status === '1';
 
+        $data = array(
+            'email_channel' => [
+                'email' => $email,
+                'marketing_consent' => [
+                    'status' => $email_subscribed ? 'confirmed' : 'unknown',
+                    'source' => 'Mailchimp for Woocommerce',
+                ]
+            ],
+            'sms_channel' => $sms_channel,
+            'update_existing' => true,
+        );
 
         mailchimp_debug( 'api.sms_subscribe', "SMS Subscribe {$email} :: {$sms_phone}", $data );
 
@@ -2601,6 +2609,8 @@ class MailChimp_WooCommerce_MailChimpApi {
 			array(
 				'url'     => $url,
 				'events'  => array(
+                    'sms_subscribe' => true,
+                    'sms_unsubscribe' => true,
 					'subscribe'   => true,
 					'unsubscribe' => true,
 					'cleaned'     => true,

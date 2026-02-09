@@ -24,6 +24,10 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
     protected $woo_order_number = false;
     protected $is_amazon_order = false;
     protected $is_privacy_restricted = false;
+    /** @var bool */
+    // this is going to be a flag to run different code paths without refactoring everything yet
+    protected $using_new_audience_flow = true;
+
     /**
      * @var null|WC_Order|WC_Order_Refund
      */
@@ -305,6 +309,16 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
             mailchimp_debug('order_submit', " #{$woo_order_number}", $order->toArray());
 
+            $status_if_new = $order->getCustomer()->getOptInStatus() ? 'subscribed' : 'transactional';
+
+            // if we're using the new audience flow the contact needs to be created or updated first.
+            if ($this->using_new_audience_flow && !$this->is_full_sync) {
+                mailchimp_member_data_update($email, $this->user_language, 'order', $status_if_new, $order, $this->gdpr_fields, true);
+                // Sync SMS consent if available
+                $user_id = $this->woo_order ? $this->woo_order->get_user_id() : null;
+                mailchimp_member_sms_update($email, $this->id, $user_id, 'order', $status_if_new);
+            }
+
             try {
                 // update or create
                 $api_response = $api->$call($store_id, $order, false);
@@ -337,8 +351,6 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 }
             }
 
-            $status_if_new = $order->getCustomer()->getOptInStatus() ? 'subscribed' : 'transactional';
-
             // if this is not currently in mailchimp - and we have the saved GDPR fields from
             // we can use the post meta for gdpr fields that were saved during checkout.
             if (!$this->is_full_sync && $new_order && empty($this->gdpr_fields)) {
@@ -346,7 +358,7 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             }
 
             // Maybe sync subscriber to set correct member.language
-            if (!$this->is_full_sync) {
+            if (!$this->is_full_sync && !$this->using_new_audience_flow) {
                 mailchimp_member_data_update($email, $this->user_language, 'order', $status_if_new, $order, $this->gdpr_fields, true);
 
                 // Sync SMS consent if available

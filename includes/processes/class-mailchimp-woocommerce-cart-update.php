@@ -155,6 +155,20 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
                 }
             } catch (Exception $e) {
 
+                // this error is for first time contacts not existing on the audience.
+                if (mailchimp_string_contains($e->getMessage(), ['not found in audience'])) {
+                    $list_id = mailchimp_get_list_id();
+                    $email = $customer->getEmailAddress();
+                    mailchimp_debug('abandoned_cart.error', "Contact {$email} was not found in audience during cart update, adding to audience and retrying.");
+                    $subscriber = $api->update($list_id, $email, 'transactional', [], null, null);
+                    if ($subscriber) {
+                        // if the post is successful we're all good.
+                        $api->addCart($store_id, $cart, false);
+                        mailchimp_log('abandoned_cart.success', "email: {$customer->getEmailAddress()} was added to the audience during checkout");
+                        return true;
+                    }
+                }
+
                 mailchimp_error('abandoned_cart.error', "email: {$customer->getEmailAddress()} :: attempting product update :: {$e->getMessage()}");
 
                 // if we have an error it's most likely due to a product not being found.

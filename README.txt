@@ -82,7 +82,6 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 * Adds WooCommerce Order Fulfillments tracking
 * Adds SMS phone number field with consent for checkout
 * Adds Bi-directional SMS contact sync
-* Adds Pixel tracking implementation
 * Adds Order creation error handling
 * Adds Customer skip sync logging
 * Fixes Fatal error in subscription payment processing

@@ -88,6 +88,17 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
         $customer->setOptInStatus(false);
         $customer->fromArray($data);
 
+
+		// Retrieve and set SMS consent data if user exists
+		if ($wordpress_user_id && $user) {
+			$sms_consent = get_user_meta($wordpress_user_id, 'mailchimp_woocommerce_sms_consent_subscribed', true);
+			$sms_phone = get_user_meta($wordpress_user_id, 'mailchimp_woocommerce_sms_consent_phone', true);
+
+			if ($sms_consent && !empty($sms_phone)) {
+				$customer->setSmsOptInStatus($sms_consent);
+				$customer->setPhoneNumber($sms_phone);
+			}
+		}
         // set the address from the customer lookup table
         $customer->getAddress()->setCity($this->customer_data->city ?? '');
         $customer->getAddress()->setCountry($this->customer_data->country ?? '');

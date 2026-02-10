@@ -126,20 +126,24 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
 	 */
 	public function get_script_data()
     {
+        $active = Mailchimp_Sms_Consent::isEligibleCountry() && MailChimp_Sms_Consent::isSmsProgramActive();
+
         $data = array(
             'optinDefaultText' => __( 'Text me with news and offers', 'mailchimp-sms-consent' ),
         );
-        $data['gdprStatus'] = $this->getOptinStatus();
+
+        $data['gdprStatus'] = $active ? $this->getOptinStatus() : 'hide';
 
         if (is_user_logged_in()) {
             $subscribed = is_user_logged_in() && get_user_meta(get_current_user_id(), 'mailchimp_woocommerce_sms_consent_subscribed', true);
         } else {
             $subscribed = false;
         }
-        $checkbox_settings = array(
-            [ 'label' => esc_html__( 'Checked by default', 'mailchimp-for-woocommerce' ), 'value' => 'check' ],
-            [ 'label' => esc_html__( 'Unchecked by default', 'mailchimp-for-woocommerce' ), 'value' => 'uncheck' ],
-        );
+//        $checkbox_settings = array(
+//            [ 'label' => esc_html__( 'Checked by default', 'mailchimp-for-woocommerce' ), 'value' => 'check' ],
+//            [ 'label' => esc_html__( 'Unchecked by default', 'mailchimp-for-woocommerce' ), 'value' => 'uncheck' ],
+//        );
+        $checkbox_settings = array();
 
         $data['userSmsSubscribed'] = $subscribed === true || $subscribed === '1';
         $data['smsEnabled'] = $this->isSmsEnabled();
@@ -148,9 +152,11 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
         $data['smsSendingCountries'] = $this->getSmsSendingCountries();
         $data['checkboxSettings'] = apply_filters('mailchimp_checkout_sms_consent_options', $checkbox_settings);;
 
-        mailchimp_log('elligible_countries', 'test', [
-            'data' => $data['smsSendingCountries']
-        ]);
+        if (defined('MAILCHIMP_DEBUG') && MAILCHIMP_DEBUG === true) {
+            mailchimp_debug('eligible_countries', 'test', [
+                'data' => $data['smsSendingCountries']
+            ]);
+        }
 
 		return $data;
 	}
@@ -160,13 +166,12 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
 	 */
 	public function register_editor_blocks()
     {
-        register_block_type( dirname( __FILE__ ) . '/assets/js/checkout-sms-consent-block', array(
+        register_block_type(dirname(__FILE__) . '/assets/js/checkout-sms-consent-block', array(
             'editor_script' => 'mailchimp-sms-consent-editor',
         ));
-	}
-
-	/**
-	 * This allows dynamic (JS) blocks to access attributes in the frontend.
+    }
+	/**         }
+	 * T        mailchimp_log('sms', 'SMS consent block integration WAS initialized.');his allows dynamic (JS) blocks to access attributes in the frontend.
 	 *
 	 * @param $allowed_blocks
 	 *
@@ -327,7 +332,7 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
     {
         $mailchimp_newsletter = new MailChimp_Newsletter();
         // if the user has chosen to hide the checkbox, don't do anything.
-        if ( ( $default_setting = $mailchimp_newsletter->getOption('mailchimp_checkbox_defaults', 'check') ) === 'hide') {
+        if ( ( $default_setting = $mailchimp_newsletter->getOption('mailchimp_checkbox_defaults_sms', 'uncheck') ) === 'hide') {
             return 'hide';
         }
 
@@ -364,9 +369,8 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
             if ( ! $list_id ) {
                 return '';
             }
-            $api = mailchimp_get_api();
-            $list = $api->getList( $list_id );
-            return isset( $list['name'] ) ? $list['name'] : '';
+            $list_name = MailChimp_WooCommerce_Admin::instance()->getListName();
+            return !empty($list_name) ? $list_name : '';
         } catch ( Exception $e ) {
             return '';
         }
@@ -374,7 +378,10 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
 
     protected function getSmsSendingCountries() {
         return MailChimp_Sms_Consent::$allowedCountries;
+    }
 
+    public function getSmsProgram()
+    {
         try {
             if ( ! mailchimp_is_configured() ) {
                 return array();
@@ -384,11 +391,7 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
                 return array();
             }
             $api = mailchimp_get_api();
-            $sms_status = $api->getCachedSmsApplicationStatus( $list_id );
-            if ( $sms_status && ! empty( $sms_status['sending_countries'] ) ) {
-                return $sms_status['sending_countries'];
-            }
-            return array();
+            return $api->getCachedSmsProgram( $list_id );
         } catch ( Exception $e ) {
             return array();
         }

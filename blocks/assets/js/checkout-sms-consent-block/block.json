@@ -2,7 +2,7 @@
 	"apiVersion": 2,
 	"name": "woocommerce/mailchimp-sms-consent",
 	"version": "1.0.0",
-	"title": "Mailchimp Sms!",
+	"title": "Mailchimp SMS",
 	"category": "woocommerce",
 	"description": "Adds a sms subscription checkbox to the checkout.",
 	"supports": {

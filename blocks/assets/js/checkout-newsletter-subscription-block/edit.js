@@ -39,12 +39,9 @@ export const Edit = ( { attributes, setAttributes } ) => {
 					checked={ checked }
 					disabled={ true }
 					style={{marginTop: 0}}
-				/>
-				<RichText
-					value={ text }
-					help={__( 'Set the newsletter confirmation text.', 'mailchimp-for-woocommerce' )}
-					onChange={ ( value ) => setAttributes( { text: value } ) }
-				/>
+				>
+					<span>{ text }</span>
+				</CheckboxControl>
 			</div>
 			{
 				gdpr && gdpr.length && gdprStatus != 'hide' &&

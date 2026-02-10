@@ -168,24 +168,31 @@ class MailChimp_Sms_Consent extends MailChimp_WooCommerce_Options
     public function getSmsSendingCountries()
     {
         return self::$allowedCountries;
+    }
 
+    public function getSmsProgram()
+    {
         try {
             if (!mailchimp_is_configured()) {
-                return array();
+                return new MailChimp_WooCommerce_SmsProgram();
             }
             $list_id = mailchimp_get_list_id();
             if (!$list_id) {
-                return array();
+                return new MailChimp_WooCommerce_SmsProgram();
             }
             $api = mailchimp_get_api();
-            $sms_status = $api->getCachedSmsApplicationStatus($list_id);
-            if ($sms_status && !empty($sms_status['sending_countries'])) {
-                return $sms_status['sending_countries'];
-            }
-            return array();
+            return $api->getCachedSmsProgram($list_id);
         } catch (Exception $e) {
-            return array();
+            mailchimp_debug('api', "error getting sms program: {$e->getMessage()}");
+            return new MailChimp_WooCommerce_SmsProgram();
         }
+    }
+
+    public static function isSmsProgramActive()
+    {
+        $handler = static::instance();
+        $program = $handler->getSmsProgram();
+        return $program ? $program->isActive() : false;
     }
 
     public function isCountryEligibleForSms($country_code)

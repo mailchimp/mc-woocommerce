@@ -909,6 +909,64 @@ class MailChimp_WooCommerce_MailChimpApi {
     }
 
     /**
+     * @param $list_id
+     *
+     * @return MailChimp_WooCommerce_SmsProgram
+     */
+    public function getSmsProgram($list_id)
+    {
+        if (empty($list_id) || !mailchimp_is_configured()) {
+            return new MailChimp_WooCommerce_SmsProgram();
+        }
+
+        try {
+            $result = $this->get("lists/{$list_id}/sms-program");
+        } catch (\Throwable $e) {
+            return new MailChimp_WooCommerce_SmsProgram();
+        }
+
+        if (empty($result) || empty($result['sms_program'])) {
+            return new MailChimp_WooCommerce_SmsProgram();
+        }
+
+        // pull the first out
+        $result = reset($result['sms_program']);
+
+        if (empty($result) || !is_array($result)) {
+            return new MailChimp_WooCommerce_SmsProgram();
+        }
+
+        $program = new MailChimp_WooCommerce_SmsProgram();
+        $program->program_id = $result['program_id'];
+        $program->registration_status = $result['registration_status'];
+        $program->program_name = $result['program_name'];
+        $program->program_sms_phone_number = $result['program_sms_phone_number'];
+        $program->can_send = $result['can_send'];
+
+        $transient_key = "mailchimp_sms_program_{$list_id}";
+        mailchimp_set_transient( $transient_key, $program->serialize(), 60 * 5 );
+
+        return $program;
+    }
+
+    public function getCachedSmsProgram($list_id)
+    {
+        $transient_key = "mailchimp_sms_program_{$list_id}";
+        $cached = mailchimp_get_transient( $transient_key );
+        if (empty($data)) {
+            return $this->getSmsProgram($list_id);
+        }
+        $result = is_array($data) ? $data : unserialize($data);
+        $program = new MailChimp_WooCommerce_SmsProgram();
+        $program->program_id = $result['program_id'];
+        $program->registration_status = $result['registration_status'];
+        $program->program_name = $result['program_name'];
+        $program->program_sms_phone_number = $result['program_sms_phone_number'];
+        $program->can_send = $result['can_send'];
+        return $program;
+    }
+
+    /**
      * Check if the merchant has an approved SMS application for the given audience
      *
      * @param string $list_id The audience/list ID

@@ -136,7 +136,7 @@
                 </p>
             </div>
 
-            <?php if (Mailchimp_Sms_Consent::isEligibleCountry()): ?>
+            <?php if (Mailchimp_Sms_Consent::isEligibleCountry() && MailChimp_Sms_Consent::isSmsProgramActive()): ?>
             <div class="mc-wc-input-wrapper">
                 <div class="mc-wc-checkbox">
                     <label class="mc-wc-checkbox-label fw-700">

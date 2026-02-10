@@ -41,6 +41,7 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_PromoCode' => 'includes/api/assets/class-mailchimp-promo-code.php',
         'MailChimp_WooCommerce_PromoRule' => 'includes/api/assets/class-mailchimp-promo-rule.php',
         'MailChimp_WooCommerce_Store' => 'includes/api/assets/class-mailchimp-store.php',
+        'MailChimp_WooCommerce_SmsProgram' => 'includes/api/assets/class-mailchimp-sms-program.php',
 
         // includes/api/errors
         'MailChimp_WooCommerce_Error' => 'includes/api/errors/class-mailchimp-error.php',

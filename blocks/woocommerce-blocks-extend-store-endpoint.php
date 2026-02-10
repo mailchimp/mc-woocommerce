@@ -84,6 +84,35 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Extend_Store_Endpoint {
 					},
 				),
 			),
+            'smsPhone' => array(
+                'description' => __( 'SMS phone number for marketing consent.', 'mailchimp-for-woocommerce' ),
+                'type'        => array( 'string', 'null' ),
+                'context'     => array( 'view', 'edit' ),
+                'arg_options' => array(
+                    'validate_callback' => function( $value ) {
+                        mailchimp_log('blocks', 'validate_callback for smsPhone in newsletter', ['value' => $value]);
+                        if ( ! is_null( $value ) && ! is_string( $value ) ) {
+                            return new WP_Error( 'api-error', 'SMS phone must be a string' );
+                        }
+                        // Basic phone validation - allow + and digits
+                        if ( ! empty( $value ) ) {
+                            $cleaned = preg_replace( '/[\s\-\(\)]/', '', $value );
+                            if ( ! preg_match( '/^\+?[1-9]\d{6,14}$/', $cleaned ) ) {
+                                return new WP_Error( 'api-error', 'Invalid phone number format' );
+                            }
+                        }
+                        return true;
+                    },
+                    'sanitize_callback' => function ( $value ) {
+                        mailchimp_log('blocks', 'sanitize_callback for smsPhone in newsletter', ['value' => $value]);
+                        if ( is_string( $value ) ) {
+                            // Sanitize phone - keep only + and digits
+                            return preg_replace( '/[^\+\d]/', '', $value );
+                        }
+                        return '';
+                    },
+                ),
+            ),
 		);
 	}
 }

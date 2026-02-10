@@ -47,10 +47,10 @@ const Block = ( {
 	// Validate phone number format
 	const validatePhone = useCallback( ( phone ) => {
 		if ( checked && ! phone ) {
-			return __( 'Phone number is required for SMS consent.', 'mailchimp-for-woocommerce' );
+			return __( 'Phone number is required for SMS consent. Validate phone callback.', 'mailchimp-for-woocommerce' );
 		}
 		if ( phone && ! /^\+?[1-9]\d{6,14}$/.test( phone.replace( /[\s\-\(\)]/g, '' ) ) ) {
-			return __( 'Please enter a valid phone number.', 'mailchimp-for-woocommerce' );
+			return __( 'Please enter a valid phone number. Validate phone callback', 'mailchimp-for-woocommerce' );
 		}
 		return '';
 	}, [ checked ] );
@@ -110,7 +110,7 @@ const Block = ( {
 				>
 					<span dangerouslySetInnerHTML={ { __html: labelText } } />
 				</CheckboxControl>
-				
+
 				{ checked && (
 					<div className="mailchimp-sms-phone-field" style={{ marginTop: '12px', marginLeft: '28px' }}>
 						<ValidatedTextInput
@@ -120,7 +120,20 @@ const Block = ( {
 							value={ smsPhone }
 							onChange={ handlePhoneChange }
 							required={ true }
-							errorMessage={ phoneError }
+							customValidation={ ( inputObject ) => {
+								const value = inputObject.value;
+								if ( ! value && checked ) {
+									inputObject.setCustomValidity( 'Phone number is required for SMS consent. Custom validation failed.' );
+									return false;
+								}
+								const reg = /^\+?[1-9]\d{6,14}$/;
+								if ( value && ! reg.test( value.replace( /[\s\-()]/g, '' ) ) ) {
+									inputObject.setCustomValidity( 'Please enter a valid phone number. Custom validation failed.' );
+									return false;
+								}
+								inputObject.setCustomValidity( '' );
+								return true;
+							} }
 						/>
 						<p className="mailchimp-sms-disclaimer" style={{ 
 							fontSize: '12px', 

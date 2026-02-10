@@ -10,7 +10,11 @@ jQuery(document).ready(function($) {
         })
         const phoneInput = document.querySelector(selectors.phone);
 
-        console.log('phone input', phoneInput)
+        if (!phoneInput) {
+            console.log('SMS phone element not found:', selectors.phone);
+            return;
+        }
+        //console.log('phone input', phoneInput)
 
         setRequired(checked, phoneInput, selectors)
     }
@@ -49,7 +53,7 @@ jQuery(document).ready(function($) {
         const countrySelector = document.querySelector(selectors.country);
 
         if (!countrySelector) {
-            console.error('Element not found:', selectors.country);
+            //console.error('Element not found:', selectors.country);
             return;
         }
 
@@ -95,7 +99,6 @@ jQuery(document).ready(function($) {
         var smsConsent = document.querySelector('#mailchimp_woocommerce_sms_consent');
         var blockSmsConsent = document.querySelector("#subscribe-to-sms");
 
-
         if (smsConsent) {
             let selectors = {
                 country: '#billing_country',
@@ -109,7 +112,8 @@ jQuery(document).ready(function($) {
                 mailchimpHandleSmsConsent(selectors, e.target.checked);
             }
         } else if (blockSmsConsent) {
-            let phoneSelector = document.querySelector('#billing_phone') ? '#billing-phone' : '#shipping-phone'
+            //let phoneSelector = document.querySelector('#billing_phone') ? '#billing-phone' : '#shipping-phone'
+            let phoneSelector = '#mailchimp-sms-phone';
             let countrySelector = document.querySelector('#billing_country') ? '#billing-country' : '#shipping-country'
 
             let selectors = {

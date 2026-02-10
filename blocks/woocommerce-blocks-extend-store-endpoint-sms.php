@@ -52,6 +52,23 @@ class Mailchimp_Woocommerce_SMS_Blocks_Extend_Store_Endpoint {
 	 * @return array Registered schema.
 	 */
 	public static function extend_checkout_schema() {
+        mailchimp_debug('blocks', 'extend_checkout_schema for sms');
+
+        $sms_validator = function( $value ) {
+            mailchimp_log('blocks', 'validate_callback for smsPhone', ['value' => $value]);
+            if ( ! is_null( $value ) && ! is_string( $value ) ) {
+                return new WP_Error( 'api-error', 'SMS phone must be a string' );
+            }
+            // Basic phone validation - allow + and digits
+            if ( ! empty( $value ) ) {
+                $cleaned = preg_replace( '/[\s\-\(\)]/', '', $value );
+                if ( ! preg_match( '/^\+?[1-9]\d{6,14}$/', $cleaned ) ) {
+                    return new WP_Error( 'api-error', 'Invalid phone number format' );
+                }
+            }
+            return true;
+        };
+
 		return array(
 			'smsOptin' => array(
 				'description' => __( 'Subscribe to SMS marketing opt-in.', 'mailchimp-for-woocommerce' ),
@@ -72,32 +89,26 @@ class Mailchimp_Woocommerce_SMS_Blocks_Extend_Store_Endpoint {
 					},
 				),
 			),
-			'smsPhone' => array(
-				'description' => __( 'SMS phone number for marketing consent.', 'mailchimp-for-woocommerce' ),
-				'type'        => array( 'string', 'null' ),
-				'context'     => array( 'view', 'edit' ),
-				'arg_options' => array(
-					'validate_callback' => function( $value ) {
-						if ( ! is_null( $value ) && ! is_string( $value ) ) {
-							return new WP_Error( 'api-error', 'SMS phone must be a string' );
-						}
-						// Basic phone validation - allow + and digits
-						if ( ! empty( $value ) ) {
-							$cleaned = preg_replace( '/[\s\-\(\)]/', '', $value );
-							if ( ! preg_match( '/^\+?[1-9]\d{6,14}$/', $cleaned ) ) {
-								return new WP_Error( 'api-error', 'Invalid phone number format' );
-							}
-						}
-						return true;
-					},
-					'sanitize_callback' => function ( $value ) {
-						if ( is_string( $value ) ) {
-							// Sanitize phone - keep only + and digits
-							return preg_replace( '/[^\+\d]/', '', $value );
-						}
-						return '';
-					},
-				),
+            'smsPhone' => array(
+                'description' => __( 'SMS phone number for marketing consent.', 'mailchimp-for-woocommerce' ),
+                'type'        => array( 'string', 'null' ),
+                'context'     => array( 'view', 'edit' ),
+                'arg_options' => array(
+                    'validate_callback' => function( $value ) use ($sms_validator) {
+                        mailchimp_log('blocks', 'validate_callback for smsPhone', ['value' => $value]);
+                        $sms_validator($value);
+                    },
+                    'sanitize_callback' => function ( $value ) use ($sms_validator) {
+                        mailchimp_log('blocks', 'sanitize_callback for smsPhone', ['value' => $value]);
+                        if ( is_string( $value ) ) {
+                            // Sanitize phone - keep only + and digits
+                            $value = preg_replace( '/[^\+\d]/', '', $value );
+                            $sms_validator($value);
+                            return $value;
+                        }
+                        return '';
+                    },
+                ),
 			),
 		);
 	}

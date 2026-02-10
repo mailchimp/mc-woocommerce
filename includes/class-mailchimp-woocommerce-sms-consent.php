@@ -86,10 +86,10 @@ class MailChimp_Sms_Consent extends MailChimp_WooCommerce_Options
         $sms_html .= '</p>';
 
         // SMS Phone field (conditionally displayed via JS)
-        $sms_html .= '<div id="mailchimp-sms-phone-wrapper" class="form-row form-row-wide" style="display: ' . ($sms_status ? 'block' : 'none') . '; margin-left: 28px;">';
+        $sms_html .= '<div id="mailchimp-sms-phone-wrapper" class="form-row form-row-wide from-sms" style="display: ' . ($sms_status ? 'block' : 'none') . '; margin-left: 28px;">';
         $sms_html .= '<label for="mailchimp_woocommerce_sms_consent_phone">' . __('SMS Phone Number', 'mailchimp-for-woocommerce') . ' <abbr class="required" title="required">*</abbr></label>';
         $sms_html .= '<input type="tel" class="input-text" id="mailchimp_woocommerce_sms_consent_phone" name="mailchimp_woocommerce_sms_consent_phone" placeholder="+1 (555) 123-4567" value="' . esc_attr($sms_phone) . '">';
-        $sms_html .= '<small class="mailchimp-sms-disclaimer" style="display: block; color: #666; font-size: 12px; margin-top: 8px; line-height: 1.4;">' . esc_html($sms_disclaimer) . '</small>';
+        $sms_html .= '<small class="mailchimp-sms-disclaimer" style="display: block; color: #666; font-size: 12px; margin-top: 8px; margin-bottom: 8px; line-height: 1.4;">' . esc_html($sms_disclaimer) . '</small>';
         $sms_html .= '</div>';
 
         $sms_html .= '</div>';
@@ -107,7 +107,7 @@ class MailChimp_Sms_Consent extends MailChimp_WooCommerce_Options
                 var smsPhoneInput = $("#mailchimp_woocommerce_sms_consent_phone");
                 var smsConsentWrapper = $(".mailchimp-sms-consent");
                 var smsSendingCountries = ' . $sms_countries_json . ';
-                
+                  
                 function isCountryEligible(countryCode) {
                     // If no countries configured, allow all
                     if (!smsSendingCountries || smsSendingCountries.length === 0) {
@@ -145,11 +145,55 @@ class MailChimp_Sms_Consent extends MailChimp_WooCommerce_Options
                 $(document.body).on("updated_checkout", checkBillingCountry);
                 checkBillingCountry();
                 
+                function mailchimpValidateSmsPhone(value) {
+                    console.log("validate_callback for smsPhone", { value });
+               
+                    // 1) Type check (match PHP logic)
+                    if (value !== null && typeof value !== "string") {
+                        return {
+                            error: "api-error",
+                            message: "SMS phone must be a string"
+                        };
+                    }
+                    // 2) Only validate if not empty
+                    if (value && value.length > 0) {
+                        // Remove spaces, dashes, parentheses (same as preg_replace)
+                        const cleaned = value.replace(/[\s\-\(\)]/g, "");
+                        // 3) Same regex as PHP
+                        const phoneRegex = /^\+?[1-9]\d{6,14}$/;
+                        if (!phoneRegex.test(cleaned)) {
+                            return {
+                                error: "api-error",
+                                message: "Invalid phone number format"
+                            };
+                        }
+                    }
+                    return true;
+                }
+                
                 // Validation on checkout
                 $("form.checkout").on("checkout_place_order", function() {
-                    if (smsCheckbox.is(":checked") && !smsPhoneInput.val().trim()) {
-                        alert("' . esc_js(__('Please enter a phone number for SMS consent.', 'mailchimp-for-woocommerce')) . '");
-                        smsPhoneInput.focus();
+                  
+                  if (!smsCheckbox.is(":checked")) {
+                        console.log("no sms consent, skipping validation");
+                        return true;
+                    }
+                    if (smsCheckbox.is(":checked")) {
+                        const value_sms = smsPhoneInput.val().trim();
+                        console.log("about to check SMS phone number", value_sms);
+                        if (!value_sms) {
+                            alert("' . esc_js(__('Please enter a phone number for SMS consent. This is not good.', 'mailchimp-for-woocommerce')) . '");
+                            smsPhoneInput.focus();
+                            return false;
+                        }
+                        const result = mailchimpValidateSmsPhone(value_sms);
+                        if (result !== true) {
+                            smsPhoneInput.focus();
+                            alert(result.message || "Invalid SMS phone number.");
+                            return false;
+                        } else {
+                            console.log("SMS phone was valid", value_sms);
+                        }
                         return false;
                     }
                     return true;

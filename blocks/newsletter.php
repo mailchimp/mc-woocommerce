@@ -21,6 +21,7 @@ add_action( 'woocommerce_blocks_loaded', function() {
 		require_once dirname( __FILE__ ) . '/woocommerce-blocks-integration.php';
 		require_once dirname( __FILE__ ) . '/woocommerce-sms-blocks-integration.php';
 		require_once dirname( __FILE__ ) . '/woocommerce-blocks-extend-store-endpoint.php';
+        require_once dirname( __FILE__ ) . '/woocommerce-blocks-extend-store-endpoint-sms.php';
 
 		add_action(
 			'woocommerce_blocks_checkout_block_registration',
@@ -31,5 +32,6 @@ add_action( 'woocommerce_blocks_loaded', function() {
 		);
 
 		Mailchimp_Woocommerce_Newsletter_Blocks_Extend_Store_Endpoint::init();
+        Mailchimp_Woocommerce_Sms_Blocks_Extend_Store_Endpoint::init();
 	}
 } );

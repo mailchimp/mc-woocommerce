@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/blocks\n"
-"POT-Creation-Date: 2026-02-10 16:52:54+00:00\n"
+"POT-Creation-Date: 2026-02-10 21:18:34+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -13,11 +13,12 @@ msgstr ""
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "X-Generator: node-wp-i18n 1.2.7\n"
 
-#: woocommerce-blocks-extend-store-endpoint-sms.php:57
+#: woocommerce-blocks-extend-store-endpoint-sms.php:74
 msgid "Subscribe to SMS marketing opt-in."
 msgstr ""
 
-#: woocommerce-blocks-extend-store-endpoint-sms.php:76
+#: woocommerce-blocks-extend-store-endpoint-sms.php:93
+#: woocommerce-blocks-extend-store-endpoint.php:88
 msgid "SMS phone number for marketing consent."
 msgstr ""
 
@@ -30,12 +31,12 @@ msgid "GDPR marketing opt-in."
 msgstr ""
 
 #: woocommerce-blocks-integration-sms.php:215
-#: woocommerce-sms-blocks-integration.php:139
+#: woocommerce-sms-blocks-integration.php:132
 msgid "Text me with news and offers"
 msgstr ""
 
 #: woocommerce-blocks-integration-sms.php:227
-#: woocommerce-sms-blocks-integration.php:367
+#: woocommerce-sms-blocks-integration.php:359
 msgid ""
 "By providing your phone number, you agree to receive promotional and "
 "marketing messages, notifications, and customer service communications. "

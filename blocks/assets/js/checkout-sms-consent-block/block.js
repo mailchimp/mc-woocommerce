@@ -3,7 +3,7 @@
  */
 import {useCallback, useEffect, useState} from '@wordpress/element';
 import { CheckboxControl, ValidatedTextInput } from '@woocommerce/blocks-checkout';
-import {useSelect} from "@wordpress/data";
+import {useSelect, useDispatch} from "@wordpress/data";
 import {__} from "@wordpress/i18n";
 
 const Block = ( {text, gdprStatus, userSubscribed, checkoutExtensionData, defaultDisclaimer, smsSendingCountries, userSmsSubscribed, smsEnabled } ) => {
@@ -12,6 +12,7 @@ const Block = ( {text, gdprStatus, userSubscribed, checkoutExtensionData, defaul
 	const [ smsPhone, setSmsPhone ] = useState( '' );
 	const [ phoneError, setPhoneError ] = useState( '' );
 	const { setExtensionData } = checkoutExtensionData;
+	const { setValidationErrors, clearValidationError } = useDispatch( 'wc/store/validation' );
 
 	// Get billing country from WooCommerce checkout store
 	const billingCountry = useSelect( ( select ) => {
@@ -55,6 +56,27 @@ const Block = ( {text, gdprStatus, userSubscribed, checkoutExtensionData, defaul
 		setPhoneError( error );
 	}, [ checked, smsPhone, validatePhone ] );
 
+	// Block checkout submission via validation store
+	useEffect( () => {
+		if ( checked && ! smsPhone ) {
+			setValidationErrors( {
+				'mailchimp-sms-phone': {
+					message: __( 'Phone number is required for SMS consent.', 'mailchimp-for-woocommerce' ),
+					hidden: true,
+				}
+			} );
+		} else if ( checked && smsPhone && ! /^\+?[1-9]\d{6,14}$/.test( smsPhone.replace( /[\s\-\(\)]/g, '' ) ) ) {
+			setValidationErrors( {
+				'mailchimp-sms-phone': {
+					message: __( 'Please enter a valid phone number.', 'mailchimp-for-woocommerce' ),
+					hidden: true,
+				}
+			} );
+		} else {
+			clearValidationError( 'mailchimp-sms-phone' );
+		}
+	}, [ checked, smsPhone, setValidationErrors, clearValidationError ] );
+
 	// Reset checkbox if country becomes ineligible
 	useEffect( () => {
 		if ( billingCountry && ! isCountryEligible( billingCountry ) ) {
@@ -97,7 +119,20 @@ const Block = ( {text, gdprStatus, userSubscribed, checkoutExtensionData, defaul
 							value={ smsPhone }
 							onChange={ handlePhoneChange }
 							required={ true }
-							errorMessage={ phoneError }
+							customValidation={ ( inputObject ) => {
+								const value = inputObject.value;
+								if ( ! value && checked ) {
+									inputObject.setCustomValidity( 'Phone number is required for SMS consent.' );
+									return false;
+								}
+								const reg = /^\+?[1-9]\d{6,14}$/;
+								if ( value && ! reg.test( value.replace( /[\s\-()]/g, '' ) ) ) {
+									inputObject.setCustomValidity( 'Please enter a valid phone number. Custom validation failed.' );
+									return false;
+								}
+								inputObject.setCustomValidity( '' );
+								return true;
+							} }
 						/>
 						<p className="mailchimp-sms-disclaimer" style={{
 							fontSize: '12px',

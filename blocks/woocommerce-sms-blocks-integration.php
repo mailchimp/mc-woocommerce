@@ -170,8 +170,7 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
             'editor_script' => 'mailchimp-sms-consent-editor',
         ));
     }
-	/**         }
-	 * T        mailchimp_log('sms', 'SMS consent block integration WAS initialized.');his allows dynamic (JS) blocks to access attributes in the frontend.
+	/**
 	 *
 	 * @param $allowed_blocks
 	 *

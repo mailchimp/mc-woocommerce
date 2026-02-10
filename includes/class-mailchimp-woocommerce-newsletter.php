@@ -170,7 +170,7 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
         $sms_html .= '</p>';
         
         // SMS Phone field (conditionally displayed via JS)
-        $sms_html .= '<div id="mailchimp-sms-phone-wrapper" class="form-row form-row-wide" style="display: ' . ($sms_status ? 'block' : 'none') . '; margin-left: 28px;">';
+        $sms_html .= '<div id="mailchimp-sms-phone-wrapper" class="form-row form-row-wide from-newsletter" style="display: ' . ($sms_status ? 'block' : 'none') . '; margin-left: 28px;">';
         $sms_html .= '<label for="mailchimp_woocommerce_sms_phone">' . __('SMS Phone Number', 'mailchimp-for-woocommerce') . ' <abbr class="required" title="required">*</abbr></label>';
         $sms_html .= '<input type="tel" class="input-text" id="mailchimp_woocommerce_sms_phone" name="mailchimp_woocommerce_sms_phone" placeholder="+1 (555) 123-4567" value="' . esc_attr($sms_phone) . '">';
         $sms_html .= '<small class="mailchimp-sms-disclaimer" style="display: block; color: #666; font-size: 12px; margin-top: 8px; line-height: 1.4;">' . esc_html($sms_disclaimer) . '</small>';
@@ -229,14 +229,54 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
                 $(document.body).on("updated_checkout", checkBillingCountry);
                 checkBillingCountry();
                 
-                // Validation on checkout
-                $("form.checkout").on("checkout_place_order", function() {
-                    if (smsCheckbox.is(":checked") && !smsPhoneInput.val().trim()) {
-                        alert("' . esc_js(__('Please enter a phone number for SMS consent.', 'mailchimp-for-woocommerce')) . '");
-                        smsPhoneInput.focus();
-                        return false;
+                function mailchimpValidateSmsPhone(value) {
+                    console.log("validate_callback for smsPhone", { value });
+               
+                    // 1) Type check (match PHP logic)
+                    if (value !== null && typeof value !== "string") {
+                        return {
+                            error: "api-error",
+                            message: "SMS phone must be a string"
+                        };
+                    }
+                    // 2) Only validate if not empty
+                    if (value && value.length > 0) {
+                        // Remove spaces, dashes, parentheses (same as preg_replace)
+                        const cleaned = value.replace(/[\s\-\(\)]/g, "");
+                        // 3) Same regex as PHP
+                        const phoneRegex = /^\+?[1-9]\d{6,14}$/;
+                        if (!phoneRegex.test(cleaned)) {
+                            return {
+                                error: "api-error",
+                                message: "Invalid phone number format"
+                            };
+                        }
                     }
                     return true;
+                }
+                
+                // Validation on checkout
+                $("form.checkout").on("checkout_place_order", function() {
+                
+                    if (!smsCheckbox.is(":checked")) {
+                        console.log("no sms consent, skipping validation");
+                        return true;
+                    }
+                    console.log("checking sms consent", smsPhoneInput.val());
+                        if (!smsPhoneInput.val().trim()) {
+                            alert("' . esc_js(__('Please enter a valid phone number for SMS consent.', 'mailchimp-for-woocommerce')) . '");
+                            smsPhoneInput.focus();
+                            return false;
+                        }
+                        
+                        const result = mailchimpValidateSmsPhone(smsPhoneInput.val().trim());
+                        console.log("sms result", result);
+                        if (result !== true) {
+                            alert(result.message || "Invalid SMS phone number.");
+                            smsPhoneInput.focus();
+                            return false;
+                        }
+                        return true;
                 });
             });
         </script>';

@@ -83,7 +83,7 @@ class MailChimp_WooCommerce_Public extends MailChimp_WooCommerce_Options {
         $sms_consent_allowed = MailChimp_Sms_Consent::isAllowedToUse();
 
         if ($sms_consent_allowed) {
-            wp_register_script($this->plugin_name . '_sms_consent', plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-sms-consent.min.js', array(), $this->version. '.07');
+            wp_register_script($this->plugin_name . '_sms_consent', plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-sms-consent.min.js', array(), $this->version. '.08');
             wp_localize_script($this->plugin_name . '_sms_consent', 'mailchimp_public_data', $public_data);
             wp_enqueue_script($this->plugin_name . '_sms_consent', '', array('jquery'), $this->version, true);
         }

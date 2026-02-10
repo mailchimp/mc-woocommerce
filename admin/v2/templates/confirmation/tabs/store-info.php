@@ -141,10 +141,14 @@
                 <div class="mc-wc-checkbox">
                     <label class="mc-wc-checkbox-label fw-700">
                         <input type="checkbox" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_sms_consent_enabled]" value="1" <?php if ($options['mailchimp_sms_consent_enabled']) { echo "checked"; } ?>>
-                        <?php esc_html_e( 'Enable SMS consent in checkout', 'mailchimp-for-woocommerce' ); ?>
+                        <?php esc_html_e( 'SMS consent checkbox', 'mailchimp-for-woocommerce' ); ?>&nbsp;<span style="background-color: #E4E5E7; padding: 2px 8px 2px 8px; gap: 4px; border-radius: 4px;">BETA</span>
                     </label>
                 </div>
+                <p class="description">
+                    Add a checkbox and a phone number field to checkout to allow users to opt-in to SMS marketing. The text associated with this consent is not editable.
+                </p>
             </div>
+
             <?php endif; ?>
 
         <?php endif; ?>

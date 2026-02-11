@@ -94,6 +94,9 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_Tower' => 'includes/api/class-mailchimp-woocommerce-tower.php',
         'MailChimp_WooCommerce_Log_Viewer' => 'includes/api/class-mailchimp-woocommerce-log-viewer.php',
         'MailChimp_WooCommerce_Enhanced_Logger' => 'includes/class-mailchimp-woocommerce-enhanced-logger.php',
+
+        // pixel tracking
+        'MailChimp_WooCommerce_Pixel_Tracking' => 'includes/tracking/class-mailchimp-woocommerce-pixel-tracking.php',
     );
 
     // if the file exists, require it

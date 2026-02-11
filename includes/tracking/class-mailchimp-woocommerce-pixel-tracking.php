@@ -1,0 +1,480 @@
+<?php
+
+/**
+ * Mailchimp Pixel Tracking Integration
+ *
+ * Tracks WooCommerce e-commerce events and sends them to the Mailchimp Pixel SDK.
+ * Follows the same architectural pattern as the WooCommerce Google Analytics integration.
+ *
+ * @link       https://mailchimp.com
+ * @since      1.0.0
+ * @package    MailChimp_WooCommerce
+ * @subpackage MailChimp_WooCommerce/includes/tracking
+ */
+
+/**
+ * Mailchimp Pixel Tracking Class
+ *
+ * Hooks into WooCommerce events and prepares data for the Mailchimp Pixel SDK.
+ * Data is stored in $script_data and output to window.mcPixel.data in the footer.
+ *
+ * @package    MailChimp_WooCommerce
+ * @subpackage MailChimp_WooCommerce/includes/tracking
+ */
+class MailChimp_WooCommerce_Pixel_Tracking
+{
+
+    /**
+     * Singleton instance
+     *
+     * @var MailChimp_WooCommerce_Pixel_Tracking|null
+     */
+    protected static $_instance = null;
+
+    /**
+     * Script data storage
+     *
+     * @var array
+     */
+    protected $script_data = array();
+
+    /**
+     * Get singleton instance
+     *
+     * @return MailChimp_WooCommerce_Pixel_Tracking
+     */
+    public static function instance()
+    {
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self();
+        }
+        return self::$_instance;
+    }
+
+    /**
+     * Constructor - Register all hooks
+     */
+    public function __construct()
+    {
+        $this->attach_event_data();
+    }
+
+    /**
+     * Attach event data hooks
+     *
+     * Hooks into WooCommerce actions/filters to capture event data
+     */
+    protected function attach_event_data()
+    {
+        // Product detail page - single product viewed
+        add_action('woocommerce_after_single_product', array( $this, 'track_product_view' ));
+
+        // Add to cart (non-AJAX) - store product data for added_to_cart event
+        add_action('woocommerce_add_to_cart', array( $this, 'track_add_to_cart' ), 10, 6);
+
+        // Product loop - pre-load all products on listing pages for AJAX add to cart
+        add_filter('woocommerce_loop_add_to_cart_link', array( $this, 'preload_listing_products' ), 10, 2);
+
+        // Cart page view
+        add_action('wp', array( $this, 'track_cart_view' ));
+
+        // Checkout page
+        add_action('woocommerce_before_checkout_form', array( $this, 'track_checkout_started' ));
+
+        // Order complete / Purchase
+        add_action('woocommerce_thankyou', array( $this, 'track_purchase' ));
+
+        // Category/archive pages
+        add_action('woocommerce_after_shop_loop', array( $this, 'track_category_view' ));
+
+        // Search
+        add_action('pre_get_posts', array( $this, 'track_search' ));
+    }
+
+    /**
+     * Track product view on single product page
+     */
+    public function track_product_view()
+    {
+        global $product;
+        if ($product && is_product()) {
+            $this->append_script_data('product', $this->get_formatted_product($product));
+            $this->append_script_data('events', 'PRODUCT_VIEWED');
+        }
+    }
+
+    /**
+     * Track add to cart event
+     *
+     * @param string $cart_item_key Cart item key
+     * @param int    $product_id Product ID
+     * @param int    $quantity Quantity added
+     * @param int    $variation_id Variation ID
+     * @param array  $variation Variation data
+     * @param array  $cart_item_data Cart item data
+     */
+    public function track_add_to_cart($cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data)
+    {
+        $product = wc_get_product($variation_id ? $variation_id : $product_id);
+        if ($product) {
+            $this->append_script_data('added_to_cart', $this->get_formatted_product($product, $quantity));
+        }
+    }
+
+    /**
+     * Pre-load products on listing pages (for AJAX add to cart)
+     *
+     * @param  string     $button Add to cart button HTML
+     * @param  WC_Product $product Product object
+     * @return string Button HTML (unchanged)
+     */
+    public function preload_listing_products($button, $product)
+    {
+        $this->append_script_data('products', $this->get_formatted_product($product));
+        return $button;
+    }
+
+    /**
+     * Track cart view
+     */
+    public function track_cart_view()
+    {
+        if (is_cart() && ! WC()->cart->is_empty()) {
+            $cart_data = $this->get_formatted_cart();
+            $this->append_script_data('cart', $cart_data);
+            $this->append_script_data('events', 'CART_VIEWED');
+        }
+    }
+
+    /**
+     * Track checkout started
+     */
+    public function track_checkout_started()
+    {
+        if (! WC()->cart->is_empty()) {
+            $checkout_data = $this->get_formatted_checkout();
+            $this->append_script_data('checkout', $checkout_data);
+            $this->append_script_data('events', 'CHECKOUT_STARTED');
+        }
+    }
+
+    /**
+     * Track purchase/order completion
+     *
+     * @param int $order_id Order ID
+     */
+    public function track_purchase($order_id)
+    {
+        if (! $order_id) {
+            return;
+        }
+
+        $order = wc_get_order($order_id);
+        if (! $order) {
+            return;
+        }
+
+        $order_data = $this->get_formatted_order($order);
+        $this->append_script_data('order', $order_data);
+        $this->append_script_data('events', 'PURCHASED');
+    }
+
+    /**
+     * Track category view
+     */
+    public function track_category_view()
+    {
+        if (is_product_category() || is_shop()) {
+            $category_data = array();
+
+            if (is_product_category()) {
+                $term = get_queried_object();
+                if ($term) {
+                    $category_data = array(
+                        'categoryId'   => $term->term_id,
+                        'categoryName' => $term->name,
+                    );
+                }
+            } elseif (is_shop()) {
+                $category_data = array(
+                    'categoryId'   => 'shop',
+                    'categoryName' => 'Shop',
+                );
+            }
+
+            if (! empty($category_data)) {
+                $this->append_script_data('category', $category_data);
+                $this->append_script_data('events', 'PRODUCT_CATEGORY_VIEWED');
+            }
+        }
+    }
+
+    /**
+     * Track search
+     *
+     * @param WP_Query $query WordPress query object
+     */
+    public function track_search($query)
+    {
+        if (! is_admin() && $query->is_main_query() && $query->is_search() && isset($query->query_vars['s'])) {
+            $search_query = $query->query_vars['s'];
+            $search_data  = array(
+                'query'        => $search_query,
+                'resultsCount' => $query->found_posts,
+            );
+            $this->append_script_data('search', $search_data);
+            $this->append_script_data('events', 'SEARCH_SUBMITTED');
+        }
+    }
+
+    /**
+     * Format product for Pixel SDK
+     *
+     * @param  WC_Product $product Product object
+     * @param  int        $quantity Quantity (optional)
+     * @return array Formatted product data
+     */
+    protected function get_formatted_product($product, $quantity = null)
+    {
+        $parent_id = $product->get_parent_id();
+        $image_id  = $product->get_image_id();
+
+        $formatted = array(
+            'id'         => (string) $product->get_id(),
+            'productId'  => (string) ( $parent_id ? $parent_id : $product->get_id() ),
+            'title'      => $product->get_name(),
+            'price'      => (float) $product->get_price(),
+            'currency'   => get_woocommerce_currency(),
+            'sku'        => $product->get_sku() ? $product->get_sku() : '',
+            'imageUrl'   => $image_id ? wp_get_attachment_url($image_id) : '',
+            'productUrl' => get_permalink($product->get_id()),
+            'vendor'     => '',
+            'categories' => $this->get_product_categories($product),
+        );
+
+        if ($quantity !== null) {
+            $formatted['quantity'] = (int) $quantity;
+        }
+
+        return $formatted;
+    }
+
+    /**
+     * Get product categories
+     *
+     * @param  WC_Product $product Product object
+     * @return array Category names
+     */
+    protected function get_product_categories($product)
+    {
+        $product_id = $product->get_parent_id() ? $product->get_parent_id() : $product->get_id();
+        $terms      = get_the_terms($product_id, 'product_cat');
+
+        if (! $terms || is_wp_error($terms)) {
+            return array();
+        }
+
+        return array_map(
+            function ($term) {
+                return $term->name;
+            },
+            array_slice($terms, 0, 5)
+        );
+    }
+
+    /**
+     * Format cart line item for Pixel SDK
+     *
+     * @param  array $item Cart item
+     * @return array Formatted cart line item
+     */
+    protected function get_formatted_cart_item($item)
+    {
+        return array(
+            'item'     => $this->get_formatted_product($item['data']),
+            'quantity' => (int) $item['quantity'],
+            'price'    => (float) $item['line_total'],
+            'currency' => get_woocommerce_currency(),
+        );
+    }
+
+    /**
+     * Get formatted cart data
+     *
+     * @return array Formatted cart
+     */
+    protected function get_formatted_cart()
+    {
+        $cart = WC()->cart;
+
+        $line_items = array();
+        foreach ($cart->get_cart() as $cart_item) {
+            $line_items[] = $this->get_formatted_cart_item($cart_item);
+        }
+
+        return array(
+            'id'         => $this->get_cart_id(),
+            'lineItems'  => $line_items,
+            'totalPrice' => (float) $cart->get_total('edit'),
+            'currency'   => get_woocommerce_currency(),
+        );
+    }
+
+    /**
+     * Get formatted checkout data
+     *
+     * @return array Formatted checkout
+     */
+    protected function get_formatted_checkout()
+    {
+        $cart = WC()->cart;
+
+        $line_items = array();
+        foreach ($cart->get_cart() as $cart_item) {
+            $line_items[] = $this->get_formatted_cart_item($cart_item);
+        }
+
+        return array(
+            'id'             => 'checkout_' . $this->get_cart_id(),
+            'cartId'         => $this->get_cart_id(),
+            'lineItems'      => $line_items,
+            'subtotalPrice'  => (float) $cart->get_subtotal(),
+            'totalTax'       => (float) $cart->get_total_tax(),
+            'totalShipping'  => (float) $cart->get_shipping_total(),
+            'totalPrice'     => (float) $cart->get_total('edit'),
+            'currency'       => get_woocommerce_currency(),
+        );
+    }
+
+    /**
+     * Format order line item for Pixel SDK
+     *
+     * @param  WC_Order_Item_Product $item Order item
+     * @return array Formatted order line item
+     */
+    protected function get_formatted_order_item($item)
+    {
+        $product = $item->get_product();
+        if (! $product) {
+            return null;
+        }
+
+        return array(
+            'item'     => $this->get_formatted_product($product),
+            'quantity' => (int) $item->get_quantity(),
+            'price'    => (float) $item->get_total(),
+            'currency' => get_woocommerce_currency(),
+        );
+    }
+
+    /**
+     * Get formatted order data
+     *
+     * @param  WC_Order $order Order object
+     * @return array Formatted order
+     */
+    protected function get_formatted_order($order)
+    {
+        $line_items = array();
+        foreach ($order->get_items() as $item) {
+            $formatted_item = $this->get_formatted_order_item($item);
+            if ($formatted_item) {
+                $line_items[] = $formatted_item;
+            }
+        }
+
+        return array(
+            'id'             => (string) $order->get_id(),
+            'lineItems'      => $line_items,
+            'subtotalPrice'  => (float) $order->get_subtotal(),
+            'totalTax'       => (float) $order->get_total_tax(),
+            'totalShipping'  => (float) $order->get_shipping_total(),
+            'totalPrice'     => (float) $order->get_total(),
+            'currency'       => $order->get_currency(),
+            'customerId'     => $order->get_customer_id() ? (string) $order->get_customer_id() : '',
+        );
+    }
+
+    /**
+     * Get cart ID from WooCommerce session
+     *
+     * @return string Cart ID
+     */
+    protected function get_cart_id()
+    {
+        if (! WC()->session) {
+            return '';
+        }
+        return WC()->session->get_customer_id();
+    }
+
+    /**
+     * Append data to script data array
+     *
+     * @param string $type Data type (products, cart, order, etc.)
+     * @param mixed  $data Data to append
+     */
+    public function append_script_data($type, $data)
+    {
+        if (! isset($this->script_data[ $type ])) {
+            $this->script_data[ $type ] = array();
+        }
+
+        // For events, just collect them in an array
+        if ($type === 'events') {
+            if (! in_array($data, $this->script_data[ $type ], true)) {
+                $this->script_data[ $type ][] = $data;
+            }
+        } elseif ($type === 'products') {
+            // For products array, append each product
+            $this->script_data[ $type ][] = $data;
+        } else {
+            // For single objects (product, cart, order), store directly
+            $this->script_data[ $type ] = $data;
+        }
+    }
+
+    /**
+     * Get all script data as JSON
+     *
+     * @return string JSON-encoded script data
+     */
+    public function get_script_data()
+    {
+        return wp_json_encode($this->script_data, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES);
+    }
+
+    /**
+     * Output inline script data to footer
+     *
+     * Outputs window.mcPixel.data for JavaScript to consume
+     */
+    public function inline_script_data()
+    {
+        if (empty($this->script_data)) {
+            return;
+        }
+
+        ?>
+        <script type="text/javascript">
+        window.mcPixel = window.mcPixel || {};
+        window.mcPixel.data = <?php echo $this->get_script_data(); ?>;
+        window.mcPixel.cartId = '<?php echo esc_js($this->get_cart_id()); ?>';
+        </script>
+        <?php
+    }
+
+    /**
+     * Enqueue tracking script
+     */
+    public function enqueue_tracking_script()
+    {
+        wp_enqueue_script(
+            'mailchimp-woocommerce-pixel-tracking',
+            plugin_dir_url(dirname(__DIR__)) . 'public/js/mailchimp-woocommerce-pixel-tracking.js',
+            array( 'jquery' ),
+            '1.0.0',
+            true
+        );
+    }
+}

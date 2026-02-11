@@ -320,6 +320,7 @@ class MailChimp_WooCommerce
             // Mailchimp Pixel addition
             $pixel_tracking = MailChimp_WooCommerce_Pixel_Tracking::instance();
             $this->loader->add_action('wp_enqueue_scripts', $pixel_tracking, 'enqueue_tracking_script');
+            $this->loader->add_action('wp_enqueue_scripts', $pixel_tracking, 'enqueue_block_tracking_script');
             $this->loader->add_action('wp_footer', $pixel_tracking, 'inline_script_data');
         }
 

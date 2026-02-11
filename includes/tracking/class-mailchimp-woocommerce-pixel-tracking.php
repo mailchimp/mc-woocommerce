@@ -78,14 +78,17 @@ class MailChimp_WooCommerce_Pixel_Tracking
         // Cart page view
         add_action('wp', array( $this, 'track_cart_view' ));
 
-        // Checkout page
+        // Checkout page - shortcode-based
         add_action('woocommerce_before_checkout_form', array( $this, 'track_checkout_started' ));
+
+        // Checkout page - block-based (detect via has_block on wp action)
+        add_action('wp', array( $this, 'track_checkout_started_block' ));
 
         // Order complete / Purchase
         add_action('woocommerce_thankyou', array( $this, 'track_purchase' ));
 
-        // Category/archive pages
-        add_action('woocommerce_after_shop_loop', array( $this, 'track_category_view' ));
+        // Category/archive pages - use wp hook for universal support (blocks + shortcodes)
+        add_action('wp', array( $this, 'track_category_view' ));
 
         // Search
         add_action('pre_get_posts', array( $this, 'track_search' ));
@@ -447,19 +450,19 @@ class MailChimp_WooCommerce_Pixel_Tracking
     /**
      * Output inline script data to footer
      *
-     * Outputs window.mcPixel.data for JavaScript to consume
+     * Always outputs window.mcPixel with cartId so block JS can access it.
+     * Only outputs data if there are events to send.
      */
     public function inline_script_data()
     {
-        if (empty($this->script_data)) {
-            return;
-        }
-
         ?>
         <script type="text/javascript">
         window.mcPixel = window.mcPixel || {};
-        window.mcPixel.data = <?php echo $this->get_script_data(); ?>;
+        window.mcPixel._handled = {};
         window.mcPixel.cartId = '<?php echo esc_js($this->get_cart_id()); ?>';
+        <?php if (! empty($this->script_data)) : ?>
+        window.mcPixel.data = <?php echo $this->get_script_data(); ?>;
+        <?php endif; ?>
         </script>
         <?php
     }
@@ -474,6 +477,70 @@ class MailChimp_WooCommerce_Pixel_Tracking
             plugin_dir_url(dirname(__DIR__)) . 'public/js/mailchimp-woocommerce-pixel-tracking.js',
             array( 'jquery' ),
             '1.0.0',
+            true
+        );
+    }
+
+    /**
+     * Track checkout started on block checkout pages.
+     *
+     * Detects block checkout via has_block() and populates checkout data
+     * server-side so the standard JS (or block JS as fallback) can fire CHECKOUT_STARTED.
+     */
+    public function track_checkout_started_block()
+    {
+        if (! function_exists('has_block') || ! function_exists('wc_get_page_id')) {
+            return;
+        }
+
+        $checkout_page_id = wc_get_page_id('checkout');
+        if (! $checkout_page_id || $checkout_page_id < 1) {
+            return;
+        }
+
+        if (! is_page($checkout_page_id)) {
+            return;
+        }
+
+        // Only handle block checkout — shortcode checkout is handled by woocommerce_before_checkout_form
+        $post = get_post($checkout_page_id);
+        if (! $post || ! has_block('woocommerce/checkout', $post)) {
+            return;
+        }
+
+        if (! WC()->cart || WC()->cart->is_empty()) {
+            return;
+        }
+
+        $checkout_data = $this->get_formatted_checkout();
+        $this->append_script_data('checkout', $checkout_data);
+        $this->append_script_data('events', 'CHECKOUT_STARTED');
+    }
+
+    /**
+     * Enqueue block pixel tracking script.
+     *
+     * Registers and enqueues the compiled block pixel tracking JS
+     * with auto-detected dependencies from the webpack asset file.
+     */
+    public function enqueue_block_tracking_script()
+    {
+        $script_path = dirname(__DIR__, 2) . '/blocks/build/pixel-tracking.js';
+        $asset_path  = dirname(__DIR__, 2) . '/blocks/build/pixel-tracking.asset.php';
+
+        if (! file_exists($script_path)) {
+            return;
+        }
+
+        $asset = file_exists($asset_path)
+            ? require $asset_path
+            : array( 'dependencies' => array( 'wp-hooks' ), 'version' => '1.0.0' );
+
+        wp_enqueue_script(
+            'mailchimp-woocommerce-pixel-tracking-blocks',
+            plugin_dir_url(dirname(__DIR__)) . 'blocks/build/pixel-tracking.js',
+            $asset['dependencies'],
+            $asset['version'],
             true
         );
     }

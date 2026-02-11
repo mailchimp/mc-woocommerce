@@ -143,6 +143,7 @@
 					case 'CHECKOUT_STARTED':
 						if (data.checkout) {
 							this.sendCheckoutStarted(data.checkout);
+							window.mcPixel._handled.checkout = true;
 						}
 						break;
 					case 'PURCHASED':
@@ -153,11 +154,13 @@
 					case 'PRODUCT_CATEGORY_VIEWED':
 						if (data.category) {
 							this.sendCategoryViewed(data.category);
+							window.mcPixel._handled.category = true;
 						}
 						break;
 					case 'SEARCH_SUBMITTED':
 						if (data.search) {
 							this.sendSearchSubmitted(data.search);
+							window.mcPixel._handled.search = true;
 						}
 						break;
 				}
@@ -368,6 +371,8 @@
 					product.quantity = quantity;
 
 					self.sendProductAddedToCart(product);
+					window.mcPixel._handled.addToCart = true;
+					setTimeout(function () { window.mcPixel._handled.addToCart = false; }, 1000);
 				} else {
 					console.warn('Mailchimp Pixel: Product not found in pre-loaded data', productId);
 				}
@@ -377,6 +382,8 @@
 			if (window.mcPixel && window.mcPixel.data && window.mcPixel.data.added_to_cart) {
 				const product = window.mcPixel.data.added_to_cart;
 				this.sendProductAddedToCart(product);
+				window.mcPixel._addToCartTracked = true;
+				setTimeout(function () { window.mcPixel._addToCartTracked = false; }, 1000);
 			}
 		},
 
@@ -406,6 +413,8 @@
 					// Delay slightly to let WooCommerce process the removal
 					setTimeout(function () {
 						self.sendProductRemovedFromCart(product);
+						window.mcPixel._handled.removeFromCart = true;
+						setTimeout(function () { window.mcPixel._handled.removeFromCart = false; }, 1000);
 					}, 100);
 				}
 			});
@@ -420,6 +429,8 @@
 						const product = self.findProductById(productId);
 						if (product) {
 							self.sendProductRemovedFromCart(product);
+							window.mcPixel._removeFromCartTracked = true;
+							setTimeout(function () { window.mcPixel._removeFromCartTracked = false; }, 1000);
 						}
 					}
 				}

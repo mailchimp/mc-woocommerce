@@ -32,6 +32,8 @@ module.exports = {
 
 		'sms-consent-block': path.resolve( process.cwd(), 'assets', 'js', 'checkout-sms-consent-block', 'index.js' ),
 		'sms-consent-block-frontend': path.resolve( process.cwd(), 'assets', 'js', 'checkout-sms-consent-block', 'frontend.js' ),
+
+		'pixel-tracking': path.resolve( process.cwd(), 'assets', 'js', 'pixel-tracking', 'index.js' ),
 	},
 	plugins: [
 		...defaultConfig.plugins.filter(

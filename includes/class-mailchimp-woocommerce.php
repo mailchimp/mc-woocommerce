@@ -316,10 +316,12 @@ class MailChimp_WooCommerce
 		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_scripts');
         $this->loader->add_action('wp_footer', $plugin_public, 'add_inline_footer_script');
 
-        // Mailchimp Pixel addition
-        $pixel_tracking = MailChimp_WooCommerce_Pixel_Tracking::instance();
-        $this->loader->add_action('wp_enqueue_scripts', $pixel_tracking, 'enqueue_tracking_script');
-        $this->loader->add_action('wp_footer', $pixel_tracking, 'inline_script_data');
+        if (!defined('MAILCHIMP_PIXEL_ENABLED') || MAILCHIMP_PIXEL_ENABLED === true) {
+            // Mailchimp Pixel addition
+            $pixel_tracking = MailChimp_WooCommerce_Pixel_Tracking::instance();
+            $this->loader->add_action('wp_enqueue_scripts', $pixel_tracking, 'enqueue_tracking_script');
+            $this->loader->add_action('wp_footer', $pixel_tracking, 'inline_script_data');
+        }
 
         $this->loader->add_action('woocommerce_after_checkout_form', $plugin_public, 'add_JS_checkout');
         $this->loader->add_action('woocommerce_register_form', $plugin_public, 'add_JS_checkout');

@@ -354,7 +354,6 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
 
     protected function getSmsDisclaimerText() {
         // Compliance: disclaimer text cannot be customized
-        // {Audience name} - By providing your phone number, you agree to receive promotional and marketing messages (e.g. abandoned carts), notifications, and customer service communications from {Audience name}. Message and data rates map apply. Consent is not a condition of purchase. Message frequency varies. Text HELP for help. Text STOP to cancel. See Terms and Privacy Policy.
         $audience_name = $this->getAudienceName();
         $prefix = ! empty( $audience_name ) ? $audience_name . ' – ' : '';
         $in_sentence = ! empty( $audience_name ) ? $audience_name : 'us';

@@ -50,7 +50,8 @@ class MailChimp_Sms_Consent extends MailChimp_WooCommerce_Options
 
         $audience_name = $this->getAudienceName();
         $prefix = !empty($audience_name) ? $audience_name . ' – ' : '';
-        $sms_disclaimer = $prefix . __('By providing your phone number, you agree to receive promotional and marketing messages, notifications, and customer service communications. Message & data rates may apply. Consent is not a condition of purchase. Message frequency may vary. You can unsubscribe at any time by replying STOP.', 'mailchimp-for-woocommerce');
+        $in_sentence = !empty($audience_name) ? $audience_name : 'us';
+        $sms_disclaimer = $prefix . __('By providing your phone number, you agree to receive promotional and marketing messages (e.g. abandoned carts), notifications, and customer service communications from '.$in_sentence.'. Message and data rates map apply. Consent is not a condition of purchase. Message frequency varies. Text HELP for help. Text STOP to cancel. See Terms and Privacy Policy.', 'mailchimp-for-woocommerce');
 
         // Always unchecked by default per compliance
         $sms_status = false;

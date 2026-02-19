@@ -18,6 +18,14 @@
  * Hooks into WooCommerce events and prepares data for the Mailchimp Pixel SDK.
  * Data is stored in $script_data and output to window.mcPixel.data in the footer.
  *
+ * Events supported:
+ * PRODUCT_VIEWED
+ * CART_VIEWED
+ * CHECKOUT_STARTED
+ * PURCHASED
+ * PRODUCT_CATEGORY_VIEWED
+ * SEARCH_SUBMITTED
+ *
  * @package    MailChimp_WooCommerce
  * @subpackage MailChimp_WooCommerce/includes/tracking
  */

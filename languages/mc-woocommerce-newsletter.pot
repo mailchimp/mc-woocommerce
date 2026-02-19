@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/blocks\n"
-"POT-Creation-Date: 2026-02-10 21:18:34+00:00\n"
+"POT-Creation-Date: 2026-02-19 16:48:48+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -33,16 +33,6 @@ msgstr ""
 #: woocommerce-blocks-integration-sms.php:215
 #: woocommerce-sms-blocks-integration.php:132
 msgid "Text me with news and offers"
-msgstr ""
-
-#: woocommerce-blocks-integration-sms.php:227
-#: woocommerce-sms-blocks-integration.php:359
-msgid ""
-"By providing your phone number, you agree to receive promotional and "
-"marketing messages, notifications, and customer service communications. "
-"Message & data rates may apply. Consent is not a condition of purchase. "
-"Message frequency may vary. You can unsubscribe at any time by replying "
-"STOP."
 msgstr ""
 
 #: woocommerce-blocks-integration.php:131

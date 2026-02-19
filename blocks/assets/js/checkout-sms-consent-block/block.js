@@ -127,7 +127,7 @@ const Block = ( {text, gdprStatus, userSubscribed, checkoutExtensionData, defaul
 								}
 								const reg = /^\+?[1-9]\d{6,14}$/;
 								if ( value && ! reg.test( value.replace( /[\s\-()]/g, '' ) ) ) {
-									inputObject.setCustomValidity( 'Please enter a valid phone number. Custom validation failed.' );
+									inputObject.setCustomValidity( 'Please enter a valid phone number.' );
 									return false;
 								}
 								inputObject.setCustomValidity( '' );

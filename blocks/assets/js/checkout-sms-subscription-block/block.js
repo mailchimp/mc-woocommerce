@@ -92,12 +92,11 @@ const Block = ( {
 
 	// Default label text
 	const labelText = text || __( 'Text me with news and offers', 'mailchimp-for-woocommerce' );
-	
+
+	const in_sentence = audienceName || 'us';
 	// Default disclaimer text with audience name placeholder
-	const defaultDisclaimer = audienceName 
-		? `${audienceName} – ` + __( 'By providing your phone number, you agree to receive promotional and marketing messages, notifications, and customer service communications. Message & data rates may apply. Consent is not a condition of purchase. Message frequency may vary. You can unsubscribe at any time by replying STOP.', 'mailchimp-for-woocommerce' )
-		: __( 'By providing your phone number, you agree to receive promotional and marketing messages, notifications, and customer service communications. Message & data rates may apply. Consent is not a condition of purchase. Message frequency may vary. You can unsubscribe at any time by replying STOP.', 'mailchimp-for-woocommerce' );
-	
+	const defaultDisclaimer = `${audienceName} – ` + __( 'By providing your phone number, you agree to receive promotional and marketing messages (e.g. abandoned carts), notifications, and customer service communications from '+in_sentence+'. Message and data rates map apply. Consent is not a condition of purchase. Message frequency varies. Text HELP for help. Text STOP to cancel. See Terms and Privacy Policy.', 'mailchimp-for-woocommerce' )
+
 	const disclaimer = disclaimerText || defaultDisclaimer;
 
 	return (
@@ -123,12 +122,12 @@ const Block = ( {
 							customValidation={ ( inputObject ) => {
 								const value = inputObject.value;
 								if ( ! value && checked ) {
-									inputObject.setCustomValidity( 'Phone number is required for SMS consent. Custom validation failed.' );
+									inputObject.setCustomValidity( 'Phone number is required for SMS consent.' );
 									return false;
 								}
 								const reg = /^\+?[1-9]\d{6,14}$/;
 								if ( value && ! reg.test( value.replace( /[\s\-()]/g, '' ) ) ) {
-									inputObject.setCustomValidity( 'Please enter a valid phone number. Custom validation failed.' );
+									inputObject.setCustomValidity( 'Please enter a valid phone number.' );
 									return false;
 								}
 								inputObject.setCustomValidity( '' );

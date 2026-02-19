@@ -170,6 +170,7 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
             'editor_script' => 'mailchimp-sms-consent-editor',
         ));
     }
+
 	/**
 	 *
 	 * @param $allowed_blocks
@@ -223,6 +224,11 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
     public static function order_processed($order, $request)
     {
         $meta_key = 'mailchimp_woocommerce_sms_consent_subscribed';
+
+        mailchimp_debug('order_processed', 'hook with extensions', [
+            'order' => $order->get_id(),
+            'request' => $request['extensions']
+        ]);
 
         $optin = $request['extensions']['mailchimp-sms-consent']['smsOptin'];
         $phone = $request['extensions']['mailchimp-sms-consent']['smsPhone'];

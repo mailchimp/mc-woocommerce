@@ -20,7 +20,7 @@ class Mailchimp_Woocommerce_SMS_Blocks_Extend_Store_Endpoint {
 	 *
 	 * @var string
 	 */
-	const IDENTIFIER = 'mailchimp-sms';
+	const IDENTIFIER = 'mailchimp-sms-consent';
 
 	/**
 	 * Bootstraps the class and hooks required data.
@@ -52,10 +52,8 @@ class Mailchimp_Woocommerce_SMS_Blocks_Extend_Store_Endpoint {
 	 * @return array Registered schema.
 	 */
 	public static function extend_checkout_schema() {
-        mailchimp_debug('blocks', 'extend_checkout_schema for sms');
-
         $sms_validator = function( $value ) {
-            mailchimp_log('blocks', 'validate_callback for smsPhone', ['value' => $value]);
+            //mailchimp_log('blocks', 'validate_callback for smsPhone', ['value' => $value]);
             if ( ! is_null( $value ) && ! is_string( $value ) ) {
                 return new WP_Error( 'api-error', 'SMS phone must be a string' );
             }
@@ -66,7 +64,7 @@ class Mailchimp_Woocommerce_SMS_Blocks_Extend_Store_Endpoint {
                     return new WP_Error( 'api-error', 'Invalid phone number format' );
                 }
             }
-            return true;
+            return false;
         };
 
 		return array(
@@ -95,15 +93,23 @@ class Mailchimp_Woocommerce_SMS_Blocks_Extend_Store_Endpoint {
                 'context'     => array( 'view', 'edit' ),
                 'arg_options' => array(
                     'validate_callback' => function( $value ) use ($sms_validator) {
-                        mailchimp_log('blocks', 'validate_callback for smsPhone', ['value' => $value]);
-                        $sms_validator($value);
+                        //mailchimp_log('blocks', 'validate_callback for smsPhone', ['value' => $value]);
+                        if (($error = $sms_validator($value))) {
+                            return $error;
+                        }
+                        //mailchimp_log('blocks', 'validate_callback for smsPhone after', ['value' => $value]);
+                        return true;
                     },
                     'sanitize_callback' => function ( $value ) use ($sms_validator) {
-                        mailchimp_log('blocks', 'sanitize_callback for smsPhone', ['value' => $value]);
+                        //mailchimp_log('blocks', 'sanitize_callback for smsPhone', ['value' => $value]);
                         if ( is_string( $value ) ) {
                             // Sanitize phone - keep only + and digits
                             $value = preg_replace( '/[^\+\d]/', '', $value );
-                            $sms_validator($value);
+                            if (($error = $sms_validator($value))) {
+                                //mailchimp_log('blocks', 'validate_callback for smsPhone error', ['value' => $value]);
+                                return $error;
+                            }
+                            //mailchimp_log('blocks', 'sanitize_callback for smsPhone after', ['value' => $value]);
                             return $value;
                         }
                         return '';

@@ -82,6 +82,13 @@ const Block = ( {text, gdprStatus, userSubscribed, checkoutExtensionData, defaul
 		if ( billingCountry && ! isCountryEligible( billingCountry ) ) {
 			setChecked( false );
 			setSmsPhone( '' );
+			setValidationErrors( {
+				'mailchimp-sms-phone': {
+					message: __( 'This country is currently not available for SMS.', 'mailchimp-for-woocommerce' ),
+					hidden: true,
+				}
+			} );
+			console.log('Resetting SMS consent to false because billing country is not eligible: ' + billingCountry);
 		}
 	}, [ billingCountry, isCountryEligible ] );
 

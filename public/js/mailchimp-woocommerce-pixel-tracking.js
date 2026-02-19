@@ -130,6 +130,12 @@
 			// Send events based on what was set by PHP
 			events.forEach((eventType) => {
 				switch (eventType) {
+					case 'IDENTITY':
+						//console.log('Mailchimp Pixel: identity event', data.identity || null);
+						if (data.identity && data.identity.email) {
+							this.sendIdentityEvent(data.identity.email);
+						}
+						break;
 					case 'PRODUCT_VIEWED':
 						if (data.product) {
 							this.sendProductViewed(data.product);
@@ -271,6 +277,14 @@
 				checkout: checkout
 			}).catch((error) => {
 				console.error('Mailchimp Pixel: Error tracking CHECKOUT_STARTED', error);
+			});
+		},
+
+		sendIdentityEvent: function(email) {
+			if (!this.isPixelSDKReady()) return;
+			window.$mcSite.pixel.api.identify({
+				type: 'EMAIL',
+				value: email
 			});
 		},
 

@@ -209,6 +209,9 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
         // this should allow us to do the same thing as previous without the javascript hook
         $service = MailChimp_Service::instance();
         $service->set_user_from_block_checkout($order->get_billing_email());
+        // hook the identity in here
+        MailChimp_WooCommerce_Pixel_Tracking::instance()->track_identity($order->get_billing_email());
+        // handle the cart update.
         $service->handleCartUpdated();
     }
 

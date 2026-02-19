@@ -100,6 +100,31 @@ class MailChimp_WooCommerce_Pixel_Tracking
 
         // Search
         add_action('pre_get_posts', array( $this, 'track_search' ));
+
+        // user email from standard checkout
+        add_action('wp_ajax_mailchimp_set_user_by_email', array( $this, 'set_user_by_email'));
+        add_action('wp_ajax_nopriv_mailchimp_set_user_by_email', array( $this, 'set_user_by_email'));
+    }
+
+    public function set_user_by_email()
+    {
+        if ($this->doingAjax() && isset($_POST['email']) && ! empty($_POST['email'])) {
+            $this->track_identity($_POST['email']);
+        }
+    }
+
+    public function track_identity($email)
+    {
+        if (empty($email)) {
+            return;
+        }
+        $email = trim(str_replace(' ','+', $email));
+        if (is_email($email)) {
+            $this->append_script_data('identity', array(
+                'email' => $email,
+            ));
+            $this->append_script_data('events', 'IDENTITY');
+        }
     }
 
     /**
@@ -166,6 +191,13 @@ class MailChimp_WooCommerce_Pixel_Tracking
             $checkout_data = $this->get_formatted_checkout();
             $this->append_script_data('checkout', $checkout_data);
             $this->append_script_data('events', 'CHECKOUT_STARTED');
+            if (($customer = WC()->cart->get_customer())) {
+                if ($customer->get_email()) {
+                    $this->track_identity($customer->get_email());
+                } else if ($customer->get_billing_email()) {
+                    $this->track_identity($customer->get_billing_email());
+                }
+            }
         }
     }
 
@@ -185,7 +217,12 @@ class MailChimp_WooCommerce_Pixel_Tracking
             return;
         }
 
+        // hook the identity in here
+        mailchimp_log('identity', 'tracking identity through order purchased hook', $order->get_billing_email());
+        $this->track_identity($order->get_billing_email());
+
         $order_data = $this->get_formatted_order($order);
+
         $this->append_script_data('order', $order_data);
         $this->append_script_data('events', 'PURCHASED');
     }
@@ -520,6 +557,14 @@ class MailChimp_WooCommerce_Pixel_Tracking
             return;
         }
 
+        if (($customer = WC()->cart->get_customer())) {
+            if ($customer->get_email()) {
+                $this->track_identity($customer->get_email());
+            } else if ($customer->get_billing_email()) {
+                $this->track_identity($customer->get_billing_email());
+            }
+        }
+
         $checkout_data = $this->get_formatted_checkout();
         $this->append_script_data('checkout', $checkout_data);
         $this->append_script_data('events', 'CHECKOUT_STARTED');
@@ -551,5 +596,28 @@ class MailChimp_WooCommerce_Pixel_Tracking
             $asset['version'],
             true
         );
+    }
+
+    /**
+     * @return bool
+     */
+    protected function doingAjax()
+    {
+        return defined('DOING_AJAX') && DOING_AJAX;
+    }
+
+    /**
+     * @param $key
+     * @param $default
+     * @return mixed
+     */
+    protected function cookie($key, $default = null)
+    {
+        // if we're not allowed to use cookies, just return the default
+        if (!mailchimp_allowed_to_use_cookie($key)) {
+            return $default;
+        }
+
+        return isset($_COOKIE[$key]) ? $_COOKIE[$key] : $default;
     }
 }

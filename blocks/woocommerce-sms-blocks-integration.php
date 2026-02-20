@@ -26,12 +26,26 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
 	 */
 	public function initialize()
     {
+        $this->enqueue_style();
 		$this->register_frontend_scripts();
         $this->register_editor_scripts();
 		$this->register_editor_blocks();
 		add_filter( '__experimental_woocommerce_blocks_add_data_attributes_to_block', [ $this, 'add_attributes_to_frontend_blocks' ], 10, 1 );
         add_action('woocommerce_before_order_object_save', [$this, 'capture_from_store_api'], 1);
 	}
+
+    public function enqueue_style()
+    {
+        $style_path  = '/build/style-sms-consent-block.css';
+        $style_url  = plugins_url($style_path, __FILE__);
+
+        wp_enqueue_style(
+            'mailchimp-sms-consent-style',
+            $style_url,
+            [],
+            file_exists(dirname(__FILE__) . $style_path) ? filemtime(dirname(__FILE__) . $style_path) : null
+        );
+    }
 
 	/**
 	 * @return bool
@@ -139,18 +153,13 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
         } else {
             $subscribed = false;
         }
-//        $checkbox_settings = array(
-//            [ 'label' => esc_html__( 'Checked by default', 'mailchimp-for-woocommerce' ), 'value' => 'check' ],
-//            [ 'label' => esc_html__( 'Unchecked by default', 'mailchimp-for-woocommerce' ), 'value' => 'uncheck' ],
-//        );
-        $checkbox_settings = array();
 
         $data['userSmsSubscribed'] = $subscribed === true || $subscribed === '1';
         $data['smsEnabled'] = $this->isSmsEnabled();
+        //$data['usingSmsConsent'] = true;
         $data['defaultDisclaimer'] = $this->getSmsDisclaimerText();
         $data['audienceName'] = $this->getAudienceName();
         $data['smsSendingCountries'] = $this->getSmsSendingCountries();
-        $data['checkboxSettings'] = apply_filters('mailchimp_checkout_sms_consent_options', $checkbox_settings);;
 
         if (defined('MAILCHIMP_DEBUG') && MAILCHIMP_DEBUG === true) {
             mailchimp_debug('eligible_countries', 'test', [
@@ -223,18 +232,35 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
      */
     public static function order_processed($order, $request)
     {
-        $meta_key = 'mailchimp_woocommerce_sms_consent_subscribed';
-
         mailchimp_debug('order_processed', 'hook with extensions', [
             'order' => $order->get_id(),
             'request' => $request['extensions']
         ]);
 
         $optin = $request['extensions']['mailchimp-sms-consent']['smsOptin'];
-        $phone = $request['extensions']['mailchimp-sms-consent']['smsPhone'];
+        $sms_phone = isset( $request['extensions']['mailchimp-sms-consent']['smsPhone'] )
+            ? sanitize_text_field( $request['extensions']['mailchimp-sms-consent']['smsPhone'] )
+            : '';
         // update the order meta for the subscription status to support legacy functions
 
-        MailChimp_WooCommerce_HPOS::update_order_meta($order->get_id(), $meta_key, $optin);
+        // Only store if they opted in and provided a phone number
+        if ( $optin && ! empty( $sms_phone ) ) {
+            // Update order meta
+            $opt_key = 'mailchimp_woocommerce_sms_consent_subscribed';
+            $phone_key = 'mailchimp_woocommerce_sms_consent_phone';
+
+            MailChimp_WooCommerce_HPOS::update_order_meta( $order->get_id(), $opt_key, true );
+            MailChimp_WooCommerce_HPOS::update_order_meta( $order->get_id(), $phone_key, $sms_phone );
+
+            // Update user meta if logged in
+            if ( $user_id = $order->get_user_id() ) {
+                update_user_meta( $user_id, $opt_key, true );
+                update_user_meta( $user_id, $phone_key, $sms_phone );
+                mailchimp_debug('sms', 'existing user opted in on order', ['user_id' => $user_id, 'order_id' => $order->get_id()]);
+            } else {
+                mailchimp_debug('sms', 'new order sms opted in', ['user_id' => $user_id, 'order_id' => $order->get_id()]);
+            }
+        }
 
         $tracking = MailChimp_Service::instance()->onNewOrder($order->get_id());
         // queue up the single order to be processed.

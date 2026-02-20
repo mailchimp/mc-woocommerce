@@ -5,13 +5,12 @@ import { getSetting } from '@woocommerce/settings';
 
 const {
 	optinDefaultText,
-	gdprStatus,
-	checkboxSettings,
 	audienceName,
 	defaultDisclaimer,
 	smsSendingCountries,
 	userSmsSubscribed,
-	smsEnabled
+	smsEnabled,
+	usingSmsConsent
 } = getSetting( 'mailchimp-sms-consent_data', '' );
 
 export default {
@@ -27,10 +26,6 @@ export default {
 		type: 'string',
 		default: defaultDisclaimer,
 	},
-	gdprStatus: {
-		type: 'string',
-		default: gdprStatus
-	},
 	userSmsSubscribed: {
 		type: 'bool',
 		default: userSmsSubscribed
@@ -39,12 +34,12 @@ export default {
 		type: 'bool',
 		default: smsEnabled
 	},
-	checkboxSettings: {
-		type: 'array',
-		default: checkboxSettings
+	usingSmsConsent: {
+		type: 'bool',
+		default: usingSmsConsent || false
 	},
 	smsSendingCountries: {
 		type: 'array',
 		default: smsSendingCountries
-	},
+	}
 };

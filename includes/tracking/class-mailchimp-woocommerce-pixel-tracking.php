@@ -98,12 +98,18 @@ class MailChimp_WooCommerce_Pixel_Tracking
         // Category/archive pages - use wp hook for universal support (blocks + shortcodes)
         add_action('wp', array( $this, 'track_category_view' ));
 
+        // to handle ajax'y calls
+        add_action('wp', [$this, 'hydrate_script_data_from_session'], 5);
+
         // Search
         add_action('pre_get_posts', array( $this, 'track_search' ));
 
         // user email from standard checkout
         add_action('wp_ajax_mailchimp_set_user_by_email', array( $this, 'set_user_by_email'));
         add_action('wp_ajax_nopriv_mailchimp_set_user_by_email', array( $this, 'set_user_by_email'));
+
+        // for the session based add to cart stuff
+        add_filter('woocommerce_add_to_cart_fragments', [$this, 'inject_added_to_cart_fragment']);
     }
 
     public function set_user_by_email()
@@ -153,8 +159,45 @@ class MailChimp_WooCommerce_Pixel_Tracking
     {
         $product = wc_get_product($variation_id ? $variation_id : $product_id);
         if ($product) {
-            $this->append_script_data('added_to_cart', $this->get_formatted_product($product, $quantity));
+            $this->append_script_data('added_to_cart', $payload = $this->get_formatted_product($product, $quantity));
+            // Add this: persist for AJAX responses too
+            // NEW: make it available to AJAX response
+            if (WC()->session) {
+                // Queue for next page view
+                $queued = WC()->session->get('mc_pixel_queued', [
+                    'events' => [],
+                ]);
+
+                if (!in_array('PRODUCT_ADDED_TO_CART', $queued['events'], true)) {
+                    $queued['events'][] = 'PRODUCT_ADDED_TO_CART';
+                }
+                $queued['added_to_cart'] = $payload;
+
+                WC()->session->set('mc_pixel_queued', $queued);
+            }
         }
+    }
+
+    public function hydrate_script_data_from_session()
+    {
+        if (!WC()->session) return;
+
+        $queued = WC()->session->get('mc_pixel_queued');
+        if (empty($queued)) return;
+
+        // Merge into your existing script_data structure
+        if (!empty($queued['events'])) {
+            foreach ($queued['events'] as $evt) {
+                $this->append_script_data('events', $evt);
+            }
+        }
+
+        if (!empty($queued['added_to_cart'])) {
+            $this->append_script_data('added_to_cart', $queued['added_to_cart']);
+        }
+
+        // Clear after use
+        WC()->session->__unset('mc_pixel_queued');
     }
 
     /**

@@ -14,12 +14,39 @@ jQuery(document).ready(function($) {
             console.log('SMS phone element not found:', selectors.phone);
             return;
         }
-        //console.log('phone input', phoneInput)
 
-        setRequired(checked, phoneInput, selectors)
+        setRequired(checked, phoneInput, selectors);
+    }
+
+    function applyPhoneFormatting(phoneInput, selectors) {
+        if (window.libphonenumber && !$('#sms_consent_block_frontend').length) {
+            console.log('applying phone formatting', phoneInput);
+            const countrySelector = document.querySelector(selectors.country);
+            const selectedCounty = countrySelector?.value || "US";
+            const formatter = new window.libphonenumber.AsYouType(selectedCounty);
+
+            phoneInput.addEventListener("input", (e) => {
+                formatter.reset();
+                e.target.value = formatter.input(e.target.value);
+            });
+
+            phoneInput.addEventListener("blur", () => {
+                const phone = window.libphonenumber.parsePhoneNumberFromString(phoneInput.value, selectedCounty);
+                if (phone?.isValid()) {
+                    console.log("E164:", phone.number);
+                } else {
+                    console.log("Invalid phone number:", phoneInput.value);
+                }
+            });
+        } else {
+            console.log('libphonenumber not found');
+        }
     }
 
     function setRequired(required, phoneInput, selectors) {
+        if (!phoneInput) {
+            return;
+        }
         const phoneRow  = phoneInput.closest(selectors.row);
         const label     = phoneRow.querySelector(selectors.label);
 
@@ -27,17 +54,21 @@ jQuery(document).ready(function($) {
         phoneInput.setAttribute('aria-required', required ? 'true' : 'false');
 
         // Remove existing optional/required span
-        const existingSpan = label.querySelector('.optional, .required');
-        if (existingSpan) {
-            existingSpan.remove();
+        if (label) {
+            const existingSpan = label.querySelector('.optional, .required');
+            if (existingSpan) {
+                existingSpan.remove();
+            }
         }
 
         // Create correct span
         const span = document.createElement('span');
         span.className = required ? 'required' : 'optional';
         span.textContent = required ? '*' : '(optional)';
-        label.textContent = label.textContent.replace('(optional)', '')
-        label.appendChild(span);
+        if (label) {
+            label.textContent = label.textContent.replace('(optional)', '')
+            label.appendChild(span);
+        }
 
         // WooCommerce validation class
         phoneRow.classList.toggle('validate-required', required);
@@ -46,6 +77,8 @@ jQuery(document).ready(function($) {
 
         // Trigger WC checkout update
         document.body.dispatchEvent(new Event('update_checkout'));
+
+        applyPhoneFormatting(phoneInput, selectors);
     }
 
     function validateSmsConsent(selectors)
@@ -53,7 +86,7 @@ jQuery(document).ready(function($) {
         const countrySelector = document.querySelector(selectors.country);
 
         if (!countrySelector) {
-            //console.error('Element not found:', selectors.country);
+            console.error('Element not found:', selectors.country);
             return;
         }
 
@@ -75,13 +108,10 @@ jQuery(document).ready(function($) {
     function validateCountry(country, selectors) {
         const phoneInput = document.querySelector(selectors.phone)
 
-
         if (mailchimp_public_data.sms_allowed_countries.includes(country)) {
             setRequired($(selectors.checkbox).is(':checked'), phoneInput, selectors)
             $(selectors.checkbox).closest('.form-row').show()
-
             console.log('country', selectors.checkbox, $(selectors.checkbox).is(':checked'))
-
         } else {
             setRequired(false, phoneInput, selectors)
             $(selectors.checkbox).prop('checked', false);
@@ -113,21 +143,21 @@ jQuery(document).ready(function($) {
             }
         } else if (blockSmsConsent) {
             //let phoneSelector = document.querySelector('#billing_phone') ? '#billing-phone' : '#shipping-phone'
-            let phoneSelector = '#mailchimp-sms-phone';
-            let countrySelector = document.querySelector('#billing_country') ? '#billing-country' : '#shipping-country'
-
-            let selectors = {
-                country: countrySelector,
-                checkbox: '#subscribe-to-sms',
-                phone: phoneSelector,
-                row: '.wc-block-components-text-input',
-                label: 'label'
-            }
-            validateSmsConsent(selectors)
-
-            blockSmsConsent.onchange = function(e) {
-                mailchimpHandleSmsConsent(selectors,  e.target.checked);
-            }
+            // let phoneSelector = '#mailchimp-sms-phone';
+            // let countrySelector = document.querySelector('#billing_country') ? '#billing-country' : '#shipping-country'
+            //
+            // let selectors = {
+            //     country: countrySelector,
+            //     checkbox: '#subscribe-to-sms',
+            //     phone: phoneSelector,
+            //     row: '.wc-block-components-text-input',
+            //     label: 'label'
+            // }
+            // validateSmsConsent(selectors)
+            //
+            // blockSmsConsent.onchange = function(e) {
+            //     mailchimpHandleSmsConsent(selectors,  e.target.checked);
+            // }
         }
     })
 })

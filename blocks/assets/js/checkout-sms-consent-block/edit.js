@@ -6,39 +6,53 @@ import {
 	useBlockProps,
 	InspectorControls,
 } from '@wordpress/block-editor';
-import { PanelBody, RadioControl, Disabled } from '@wordpress/components';
+import { PanelBody, Disabled } from '@wordpress/components';
 import { CheckboxControl  } from '@woocommerce/blocks-checkout';
-import { useEffect, useState, useCallback } from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
 
 
 /**
  * Internal dependencies
  */
 import './style.scss';
+import {useState} from "@wordpress/element";
 
 
 export const Edit = ( { attributes, setAttributes } ) => {
-	const { text, gdprStatus, checkboxSettings, defaultDisclaimer} = attributes;
+	const { text, defaultDisclaimer, smsEnabled, usingSmsConsent} = attributes;
 	const blockProps = useBlockProps();
-	const checked = gdprStatus === 'check';
+	const [ smsSettingsText, setSmsSettingsText ] = useState( usingSmsConsent ? 'SMS is enabled' : 'SMS is disabled' );
 
-	if (gdprStatus === 'hide') return '';
+	if (!smsEnabled) return '';
 
 	return (
 		<div { ...blockProps }>
+			<InspectorControls>
+				<PanelBody title={ __( 'Block options', 'mailchimp-for-woocommerce' ) }>
+					<p>{ __('Enable or disable SMS marketing on checkout.', 'mailchimp-for-woocommerce') }</p>
+					<CheckboxControl
+						id="sms-settings-text"
+						checked={ usingSmsConsent }
+						onChange={ ( value ) => {
+							setSmsSettingsText( value ? 'SMS is enabled' : 'SMS is disabled' );
+							setAttributes( {usingSmsConsent: value } )
+						}}
+					>
+						<span>{ smsSettingsText }</span>
+					</CheckboxControl>
+				</PanelBody>
+			</InspectorControls>
 			<Disabled>
-				<div className="wc-block-components-checkout-step__container mailchimp-sms-consent">
+				<div style={{ marginTop: '12px', opacity: usingSmsConsent ? '1' : '.25' }} className="wc-block-components-checkout-step__container mailchimp-sms-consent">
 					<div className="wc-block-components-checkout-step__content">
 						<CheckboxControl
 							id="newsletter-text"
-							checked={ checked }
+							checked={ false }
 							disabled={ true }
 							style={{marginTop: 0}}
 						>
-							<span>{ text }</span>
+							<span>{ usingSmsConsent ? text : 'SMS is currently disabled (only admins can see this)' }</span>
 						</CheckboxControl>
-						<div style={{ marginTop: '12px' }}>
+						<div style={{ marginTop: '12px', display: usingSmsConsent ? 'inherit' : 'none' }}>
 							<div style={{
 								padding: '8px 12px',
 								border: '1px solid #ccc',

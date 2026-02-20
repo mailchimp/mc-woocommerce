@@ -130,6 +130,12 @@
 			// Send events based on what was set by PHP
 			events.forEach((eventType) => {
 				switch (eventType) {
+					case 'PRODUCT_ADDED_TO_CART':
+						if (data.added_to_cart) {
+							this.sendProductAddedToCart(data.added_to_cart);
+							window.mcPixel._handled.addToCart = true;
+						}
+						break;
 					case 'IDENTITY':
 						//console.log('Mailchimp Pixel: identity event', data.identity || null);
 						if (data.identity && data.identity.email) {
@@ -364,32 +370,53 @@
 			$(document.body).on('added_to_cart', function (event, fragments, cart_hash, $button) {
 				if (!self.isPixelSDKReady()) return;
 
-				// Try to get product ID from button
-				let productId = null;
+				// 1) Prefer server-provided payload (authoritative: variation + qty)
+				setTimeout(function () {
+					const el = document.querySelector('.mc-pixel-atc-payload');
+					const raw = el && el.getAttribute('data-mc-pixel-atc');
 
-				if ($button && $button.length > 0) {
-					productId = $button.data('product_id') || $button.attr('data-product_id');
-				}
+					if (raw) {
+						try {
+							const payload = JSON.parse(raw);
 
-				if (!productId) {
-					console.warn('Mailchimp Pixel: Could not determine product ID from added_to_cart event');
-					return;
-				}
+							if (payload.cartId) {
+								window.mcPixel = window.mcPixel || {};
+								window.mcPixel.cartId = payload.cartId;
+							}
 
-				// Look up product from pre-loaded data
-				const product = self.findProductById(productId);
+							if (payload.added_to_cart) {
+								self.sendProductAddedToCart(payload.added_to_cart);
+								window.mcPixel._handled.addToCart = true;
+								setTimeout(function () { window.mcPixel._handled.addToCart = false; }, 1000);
+								return; // done
+							}
+						} catch (e) {
+							// fall through
+						}
+					}
 
-				if (product) {
-					// Get quantity from button if available
-					const quantity = $button && $button.data('quantity') ? parseInt($button.data('quantity'), 10) : 1;
-					product.quantity = quantity;
+					// 2) Fallback to your current client inference (button + preload)
+					let productId = null;
+					if ($button && $button.length > 0) {
+						productId = $button.data('product_id') || $button.attr('data-product_id');
+					}
+					if (!productId) {
+						console.warn('Mailchimp Pixel: Could not determine product ID from added_to_cart event');
+						return;
+					}
 
-					self.sendProductAddedToCart(product);
-					window.mcPixel._handled.addToCart = true;
-					setTimeout(function () { window.mcPixel._handled.addToCart = false; }, 1000);
-				} else {
-					console.warn('Mailchimp Pixel: Product not found in pre-loaded data', productId);
-				}
+					const product = self.findProductById(productId);
+					if (product) {
+						const quantity = $button && $button.data('quantity') ? parseInt($button.data('quantity'), 10) : 1;
+						product.quantity = quantity;
+
+						self.sendProductAddedToCart(product);
+						window.mcPixel._handled.addToCart = true;
+						setTimeout(function () { window.mcPixel._handled.addToCart = false; }, 1000);
+					} else {
+						console.warn('Mailchimp Pixel: Product not found in pre-loaded data', productId);
+					}
+				}, 0);
 			});
 
 			// Also handle non-AJAX add to cart from PHP data

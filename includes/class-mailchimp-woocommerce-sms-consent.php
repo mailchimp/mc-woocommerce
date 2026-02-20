@@ -90,6 +90,7 @@ class MailChimp_Sms_Consent extends MailChimp_WooCommerce_Options
         $sms_html .= '<div id="mailchimp-sms-phone-wrapper" class="form-row form-row-wide from-sms" style="display: ' . ($sms_status ? 'block' : 'none') . '; margin-left: 28px;">';
         $sms_html .= '<label for="mailchimp_woocommerce_sms_consent_phone">' . __('SMS Phone Number', 'mailchimp-for-woocommerce') . ' <abbr class="required" title="required">*</abbr></label>';
         $sms_html .= '<input type="tel" class="input-text" id="mailchimp_woocommerce_sms_consent_phone" name="mailchimp_woocommerce_sms_consent_phone" placeholder="+1 (555) 123-4567" value="' . esc_attr($sms_phone) . '">';
+        $sms_html .= '<span id="sms_required" class="sms-phone-error" style="display: none; font-size:small; color: red;"></span>';
         $sms_html .= '<small class="mailchimp-sms-disclaimer" style="display: block; color: #666; font-size: 12px; margin-top: 8px; margin-bottom: 8px; line-height: 1.4;">' . esc_html($sms_disclaimer) . '</small>';
         $sms_html .= '</div>';
 
@@ -123,18 +124,73 @@ class MailChimp_Sms_Consent extends MailChimp_WooCommerce_Options
                         smsConsentWrapper.slideUp();
                         smsCheckbox.prop("checked", false);
                         smsPhoneInput.prop("required", false).val("");
+                        bindPhone(smsPhoneInput, true);
                     } else {
                         smsConsentWrapper.slideDown();
+                        bindPhone(smsPhoneInput);
                     }
                 }
+               
                 
+                function bindPhone($el, off) {
+                  if (!window.libphonenumber) {
+                      console.log("libphonenumber not loaded, skipping phone formatting");
+                      return;
+                  }
+                  if (!$el) {
+                    console.log("no phone input element to bind", $el);
+                    return;
+                  }
+                  if (off) {
+                    $el.off("input.phoneFormat");
+                  }
+                  console.log("applying phone formatting", $el);
+                  $el.each(function () {
+                    const selectedCountry = $("#billing_country").val();
+                    const formatter = new window.libphonenumber.AsYouType(selectedCountry);
+                    $(this).data("formatter", formatter);
+                  });
+                
+                  $el.off("input.phoneFormat").on("input.phoneFormat", function () {
+                    const formatter = $(this).data("formatter");
+                    formatter.reset();
+                    this.value = formatter.input(this.value);
+                  });
+                  
+                  $el.off("blur.phoneValidate").on("blur.phoneValidate", function () {
+                      const sms_required = $("#sms_required");
+                      sms_required.fadeOut();
+                      const result = validatePhone(this.value);
+                      console.log("validating phone", result, this.value);
+                      if (result.ok) {
+                        this.value = result.e164;
+                      } else {
+                        sms_required.text("Invalid SMS Phone: " + result.reason).fadeIn();
+                      }
+                    });
+                }
+                
+                function validatePhone(value) {
+                  const selectedCountry = $("#billing_country").val();
+                  console.log("validating phone", value, selectedCountry);
+                  const phone = window.libphonenumber.parsePhoneNumberFromString(value, selectedCountry);
+                
+                  if (!phone) return { ok: false, reason: "invalid number format" };
+                  if (!phone.isPossible()) return { ok: false, reason: "number looks too short/long" };
+                  if (!phone.isValid()) return { ok: false, reason: "phone number is not valid" };
+                
+                  return { ok: true, e164: phone.number };
+                }
+                                               
                 function toggleSmsPhone() {
                     if (smsCheckbox.is(":checked")) {
                         smsPhoneWrapper.slideDown();
                         smsPhoneInput.prop("required", true);
+                        bindPhone(smsPhoneInput, false);
                     } else {
                         smsPhoneWrapper.slideUp();
                         smsPhoneInput.prop("required", false).val("");
+                        bindPhone(smsPhoneInput, true);
                     }
                 }
                 
@@ -145,32 +201,6 @@ class MailChimp_Sms_Consent extends MailChimp_WooCommerce_Options
                 $("#billing_country").on("change", checkBillingCountry);
                 $(document.body).on("updated_checkout", checkBillingCountry);
                 checkBillingCountry();
-                
-                function mailchimpValidateSmsPhone(value) {
-                    console.log("validate_callback for smsPhone", { value });
-               
-                    // 1) Type check (match PHP logic)
-                    if (value !== null && typeof value !== "string") {
-                        return {
-                            error: "api-error",
-                            message: "SMS phone must be a string"
-                        };
-                    }
-                    // 2) Only validate if not empty
-                    if (value && value.length > 0) {
-                        // Remove spaces, dashes, parentheses (same as preg_replace)
-                        const cleaned = value.replace(/[\s\-\(\)]/g, "");
-                        // 3) Same regex as PHP
-                        const phoneRegex = /^\+?[1-9]\d{6,14}$/;
-                        if (!phoneRegex.test(cleaned)) {
-                            return {
-                                error: "api-error",
-                                message: "Invalid phone number format"
-                            };
-                        }
-                    }
-                    return true;
-                }
                 
                 // Validation on checkout
                 $("form.checkout").on("checkout_place_order", function() {
@@ -183,19 +213,20 @@ class MailChimp_Sms_Consent extends MailChimp_WooCommerce_Options
                         const value_sms = smsPhoneInput.val().trim();
                         console.log("about to check SMS phone number", value_sms);
                         if (!value_sms) {
-                            alert("' . esc_js(__('Please enter a phone number for SMS consent. This is not good.', 'mailchimp-for-woocommerce')) . '");
+                            //alert("' . esc_js(__('Please enter a phone number for SMS consent. This is not good.', 'mailchimp-for-woocommerce')) . '");
+                            $("#sms_required").text("Invalid SMS Phone").fadeIn();
                             smsPhoneInput.focus();
                             return false;
                         }
-                        const result = mailchimpValidateSmsPhone(value_sms);
-                        if (result !== true) {
+                        const result = validatePhone(value_sms);
+                        if (!result.ok) {
                             smsPhoneInput.focus();
-                            alert(result.message || "Invalid SMS phone number.");
+                            $("#sms_required").text("Invalid SMS Phone: "+result.reason).fadeIn();
                             return false;
                         } else {
                             console.log("SMS phone was valid", value_sms);
                         }
-                        return false;
+                         return true;
                     }
                     return true;
                 });

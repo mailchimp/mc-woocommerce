@@ -919,32 +919,36 @@ class MailChimp_WooCommerce_MailChimpApi {
             return new MailChimp_WooCommerce_SmsProgram();
         }
 
+        $transient_key = "mailchimp_sms_program_{$list_id}";
+        $program = new MailChimp_WooCommerce_SmsProgram();
+
         try {
             $result = $this->get("lists/{$list_id}/sms-program");
         } catch (\Throwable $e) {
-            return new MailChimp_WooCommerce_SmsProgram();
+            mailchimp_set_transient( $transient_key, $program->serialize(), 60 * 10 );
+            return $program;
         }
 
         if (empty($result) || empty($result['sms_program'])) {
-            return new MailChimp_WooCommerce_SmsProgram();
+            mailchimp_set_transient( $transient_key, $program->serialize(), 60 * 10 );
+            return $program;
         }
 
         // pull the first out
         $result = reset($result['sms_program']);
 
         if (empty($result) || !is_array($result)) {
-            return new MailChimp_WooCommerce_SmsProgram();
+            mailchimp_set_transient( $transient_key, $program->serialize(), 60 * 10 );
+            return $program;
         }
 
-        $program = new MailChimp_WooCommerce_SmsProgram();
         $program->program_id = $result['program_id'];
         $program->registration_status = $result['registration_status'];
         $program->program_name = $result['program_name'];
         $program->program_sms_phone_number = $result['program_sms_phone_number'];
         $program->can_send = $result['can_send'];
 
-        $transient_key = "mailchimp_sms_program_{$list_id}";
-        mailchimp_set_transient( $transient_key, $program->serialize(), 60 * 5 );
+        mailchimp_set_transient( $transient_key, $program->serialize(), 60 * 10 );
 
         return $program;
     }
@@ -952,17 +956,18 @@ class MailChimp_WooCommerce_MailChimpApi {
     public function getCachedSmsProgram($list_id)
     {
         $transient_key = "mailchimp_sms_program_{$list_id}";
-        $cached = mailchimp_get_transient( $transient_key );
+        $data = mailchimp_get_transient( $transient_key );
         if (empty($data)) {
             return $this->getSmsProgram($list_id);
         }
         $result = is_array($data) ? $data : unserialize($data);
         $program = new MailChimp_WooCommerce_SmsProgram();
-        $program->program_id = $result['program_id'];
-        $program->registration_status = $result['registration_status'];
-        $program->program_name = $result['program_name'];
-        $program->program_sms_phone_number = $result['program_sms_phone_number'];
-        $program->can_send = $result['can_send'];
+        $program->program_id = $result['program_id'] ?? null;
+        $program->registration_status = $result['registration_status'] ?? null;
+        $program->program_name = $result['program_name'] ?? null;
+        $program->program_sms_phone_number = $result['program_sms_phone_number'] ?? null;
+        $program->can_send = $result['can_send'] ?? null;
+
         return $program;
     }
 
@@ -978,7 +983,7 @@ class MailChimp_WooCommerce_MailChimpApi {
     public function getSmsApplicationStatus( $list_id ) {
         try {
             // Try to get SMS settings for the audience
-            $result = $this->get( "lists/{$list_id}/sms" );
+            $result = $this->get( "lists/{$list_id}/sms-program" );
 
             if ( isset( $result['sms_enabled'] ) && $result['sms_enabled'] ) {
                 return array(

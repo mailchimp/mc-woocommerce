@@ -30,15 +30,15 @@
 		 */
 		init: function () {
 			const self = this;
-
 			this.waitForPixelSDK(PIXEL_SDK_WAIT_CONFIG)
 				.then(function () {
 					self.sendPageEvents();
-					self.attachAjaxAddToCartHandler();
-					self.attachCartRemoveHandler();
+					self.attachCartEventListeners();
+					self.interceptStoreApiRequests();
+					console.log('Mailchimp Pixel SDK loaded.');
 				})
-				.catch(function () {
-					console.log('Mailchimp Pixel SDK not loaded within timeout. Tracking disabled.');
+				.catch(function (e) {
+					console.log('Mailchimp Pixel SDK not loaded within timeout. Tracking disabled.', e);
 				});
 		},
 
@@ -70,7 +70,7 @@
 
 				function scheduleCheck() {
 					if (isSDKReady()) {
-						// FIXME: temporary wait to accomodate for not being able to detect ready state
+						// FIXME: temporary wait to accommodate for not being able to detect ready state
 						console.warn('Pixel SDK - remediation for pixel ready issue')
 						setTimeout(function () {
 							resolve();
@@ -117,6 +117,15 @@
 		},
 
 		/**
+		 * Get the REST API base URL from the localized config.
+		 *
+		 * @return {string} REST base URL
+		 */
+		getRestBase: function () {
+			return (window.mcPixelConfig && window.mcPixelConfig.restBase) || '/wp-json/mailchimp-for-woocommerce/v1/';
+		},
+
+		/**
 		 * Send page-level events based on pre-populated data
 		 */
 		sendPageEvents: function () {
@@ -137,7 +146,6 @@
 						}
 						break;
 					case 'IDENTITY':
-						//console.log('Mailchimp Pixel: identity event', data.identity || null);
 						if (data.identity && data.identity.email) {
 							this.sendIdentityEvent(data.identity.email);
 						}
@@ -359,124 +367,131 @@
 		},
 
 		/**
-		 * Attach AJAX add to cart handler
-		 *
-		 * Listens for the 'added_to_cart' event triggered by WooCommerce
+		 * Fetch the last add-to-cart data from the PHP session and send the pixel event.
+		 * Guarded by the _handled.addToCart deduplication flag.
 		 */
-		attachAjaxAddToCartHandler: function () {
-			const self = this;
+		fetchAndTrackAddToCart: async function () {
+			if (!this.isPixelSDKReady()) return;
+			if (window.mcPixel && window.mcPixel._handled && window.mcPixel._handled.addToCart) return;
 
-			// Listen for WooCommerce's added_to_cart event (AJAX add to cart)
-			$(document.body).on('added_to_cart', function (event, fragments, cart_hash, $button) {
-				if (!self.isPixelSDKReady()) return;
+			try {
+				const res = await fetch(this.getRestBase() + 'pixel/atc', {
+					method: 'GET',
+					credentials: 'same-origin',
+					headers: { 'Accept': 'application/json' },
+				});
 
-				// 1) Prefer server-provided payload (authoritative: variation + qty)
-				setTimeout(function () {
-					const el = document.querySelector('.mc-pixel-atc-payload');
-					const raw = el && el.getAttribute('data-mc-pixel-atc');
+				if (!res.ok) return;
 
-					if (raw) {
-						try {
-							const payload = JSON.parse(raw);
+				const product = await res.json();
+				if (!product) return;
 
-							if (payload.cartId) {
-								window.mcPixel = window.mcPixel || {};
-								window.mcPixel.cartId = payload.cartId;
-							}
-
-							if (payload.added_to_cart) {
-								self.sendProductAddedToCart(payload.added_to_cart);
-								window.mcPixel._handled.addToCart = true;
-								setTimeout(function () { window.mcPixel._handled.addToCart = false; }, 1000);
-								return; // done
-							}
-						} catch (e) {
-							// fall through
-						}
-					}
-
-					// 2) Fallback to your current client inference (button + preload)
-					let productId = null;
-					if ($button && $button.length > 0) {
-						productId = $button.data('product_id') || $button.attr('data-product_id');
-					}
-					if (!productId) {
-						console.warn('Mailchimp Pixel: Could not determine product ID from added_to_cart event');
-						return;
-					}
-
-					const product = self.findProductById(productId);
-					if (product) {
-						const quantity = $button && $button.data('quantity') ? parseInt($button.data('quantity'), 10) : 1;
-						product.quantity = quantity;
-
-						self.sendProductAddedToCart(product);
-						window.mcPixel._handled.addToCart = true;
-						setTimeout(function () { window.mcPixel._handled.addToCart = false; }, 1000);
-					} else {
-						console.warn('Mailchimp Pixel: Product not found in pre-loaded data', productId);
-					}
-				}, 0);
-			});
-
-			// Also handle non-AJAX add to cart from PHP data
-			if (window.mcPixel && window.mcPixel.data && window.mcPixel.data.added_to_cart) {
-				const product = window.mcPixel.data.added_to_cart;
 				this.sendProductAddedToCart(product);
-				window.mcPixel._addToCartTracked = true;
-				setTimeout(function () { window.mcPixel._addToCartTracked = false; }, 1000);
+
+				window.mcPixel = window.mcPixel || {};
+				window.mcPixel._handled = window.mcPixel._handled || {};
+				window.mcPixel._handled.addToCart = true;
+				setTimeout(function () { window.mcPixel._handled.addToCart = false; }, 2000);
+			} catch (e) {
+				// no-op
 			}
 		},
 
 		/**
-		 * Attach cart remove handler
-		 *
-		 * Listens for cart item removal events
+		 * Fetch the last remove-from-cart data from the PHP session and send the pixel event.
+		 * Guarded by the _handled.removeFromCart deduplication flag.
 		 */
-		attachCartRemoveHandler: function () {
+		fetchAndTrackRemoveFromCart: async function () {
+			if (!this.isPixelSDKReady()) return;
+			if (window.mcPixel && window.mcPixel._handled && window.mcPixel._handled.removeFromCart) return;
+
+			try {
+				const res = await fetch(this.getRestBase() + 'pixel/rfc', {
+					method: 'GET',
+					credentials: 'same-origin',
+					headers: { 'Accept': 'application/json' },
+				});
+
+				if (!res.ok) return;
+
+				const product = await res.json();
+				if (!product) return;
+
+				this.sendProductRemovedFromCart(product);
+
+				window.mcPixel = window.mcPixel || {};
+				window.mcPixel._handled = window.mcPixel._handled || {};
+				window.mcPixel._handled.removeFromCart = true;
+				setTimeout(function () { window.mcPixel._handled.removeFromCart = false; }, 2000);
+			} catch (e) {
+				// no-op
+			}
+		},
+
+		/**
+		 * Attach DOM and jQuery event listeners for cart add/remove.
+		 * These serve as fallback triggers alongside the fetch interceptor.
+		 */
+		attachCartEventListeners: function () {
 			const self = this;
 
-			// Listen for clicks on remove links in cart
-			$(document.body).on('click', '.woocommerce-cart-form .remove', function (e) {
-				if (!self.isPixelSDKReady()) return;
-
-				const $removeLink = $(this);
-				const productId = $removeLink.data('product_id');
-
-				if (!productId) {
-					return;
-				}
-
-				// Look up product from pre-loaded data or current cart
-				const product = self.findProductById(productId);
-
-				if (product) {
-					// Delay slightly to let WooCommerce process the removal
-					setTimeout(function () {
-						self.sendProductRemovedFromCart(product);
-						window.mcPixel._handled.removeFromCart = true;
-						setTimeout(function () { window.mcPixel._handled.removeFromCart = false; }, 1000);
-					}, 100);
-				}
+			// Classic themes (jQuery events fired by WooCommerce's add-to-cart.js)
+			$(document.body).on('added_to_cart', function () {
+				self.fetchAndTrackAddToCart();
+			});
+			$(document.body).on('removed_from_cart', function () {
+				self.fetchAndTrackRemoveFromCart();
 			});
 
-			// Listen for WooCommerce's removed_from_cart event
-			$(document.body).on('removed_from_cart', function (event, fragments, cart_hash, $button) {
-				if (!self.isPixelSDKReady()) return;
+			// WC Blocks DOM CustomEvents
+			document.body.addEventListener('wc-blocks_added_to_cart', function () {
+				self.fetchAndTrackAddToCart();
+			});
+			document.body.addEventListener('wc-blocks_removed_from_cart', function () {
+				self.fetchAndTrackRemoveFromCart();
+			});
+		},
 
-				if ($button && $button.length > 0) {
-					const productId = $button.data('product_id');
-					if (productId) {
-						const product = self.findProductById(productId);
-						if (product) {
-							self.sendProductRemovedFromCart(product);
-							window.mcPixel._removeFromCartTracked = true;
-							setTimeout(function () { window.mcPixel._removeFromCartTracked = false; }, 1000);
+		/**
+		 * Intercept window.fetch to detect WooCommerce Store API cart mutations.
+		 *
+		 * This is the most reliable method for catching add-to-cart and remove-from-cart
+		 * in block-based WooCommerce setups, where DOM events may not fire consistently.
+		 * Watches for successful POST requests to the Store API cart endpoints.
+		 */
+		interceptStoreApiRequests: function () {
+			const self = this;
+			const originalFetch = window.fetch;
+
+			window.fetch = function (input, init) {
+				var promise = originalFetch.apply(this, arguments);
+
+				promise.then(function (response) {
+					try {
+						if (!response.ok) return;
+
+						var method = (init && init.method) ? init.method.toUpperCase() :
+							(input instanceof Request ? input.method.toUpperCase() : 'GET');
+						if (method !== 'POST') return;
+
+						var url = typeof input === 'string' ? input :
+							(input instanceof Request ? input.url : String(input));
+
+						if (/wc\/store\/v1\/cart\/add-item/.test(url)) {
+							setTimeout(function () { self.fetchAndTrackAddToCart(); }, 500);
+						} else if (/wc\/store\/v1\/cart\/remove-item/.test(url)) {
+							setTimeout(function () { self.fetchAndTrackRemoveFromCart(); }, 500);
 						}
+					} catch (e) {
+						// Silently ignore interceptor errors
 					}
-				}
-			});
-		}
+				}).catch(function () {
+					// Ignore - the original caller handles fetch errors
+				});
+
+				return promise;
+			};
+		},
 	};
 
 	// Initialize when DOM is ready

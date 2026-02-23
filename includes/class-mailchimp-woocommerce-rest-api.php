@@ -144,6 +144,24 @@ class MailChimp_WooCommerce_Rest_Api
             'callback' => array($this, 'get_store_id'),
             'permission_callback' => '__return_true',
         ));
+
+        register_rest_route(static::$namespace, '/pixel/atc', [
+            'methods'  => 'GET',
+            'permission_callback' => '__return_true',
+            'callback' => function () {
+                return MailChimp_WooCommerce_Pixel_Tracking::instance()
+                    ->get_last_added_to_cart_from_session();
+            }
+        ]);
+
+        register_rest_route(static::$namespace, '/pixel/rfc', [
+            'methods'  => 'GET',
+            'permission_callback' => '__return_true',
+            'callback' => function () {
+                return MailChimp_WooCommerce_Pixel_Tracking::instance()
+                    ->get_last_removed_from_cart_from_session();
+            }
+        ]);
     }
 
     /**

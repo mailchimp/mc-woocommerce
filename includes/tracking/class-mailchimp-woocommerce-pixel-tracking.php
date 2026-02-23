@@ -39,6 +39,8 @@ class MailChimp_WooCommerce_Pixel_Tracking
      */
     protected static $_instance = null;
 
+    protected $track_on_next_page_load = false;
+
     /**
      * Script data storage
      *
@@ -65,6 +67,7 @@ class MailChimp_WooCommerce_Pixel_Tracking
     public function __construct()
     {
         $this->attach_event_data();
+        $this->track_on_next_page_load = (bool) apply_filters('mailchimp_woocommerce_track_on_next_page_load', false);
     }
 
     /**
@@ -79,6 +82,9 @@ class MailChimp_WooCommerce_Pixel_Tracking
 
         // Add to cart (non-AJAX) - store product data for added_to_cart event
         add_action('woocommerce_add_to_cart', array( $this, 'track_add_to_cart' ), 10, 6);
+
+        // woo cart item removed
+        add_action('woocommerce_cart_item_removed', array( $this, 'track_remove_from_cart'), 10, 2);
 
         // Product loop - pre-load all products on listing pages for AJAX add to cart
         add_filter('woocommerce_loop_add_to_cart_link', array( $this, 'preload_listing_products' ), 10, 2);
@@ -99,7 +105,9 @@ class MailChimp_WooCommerce_Pixel_Tracking
         add_action('wp', array( $this, 'track_category_view' ));
 
         // to handle ajax'y calls
-        add_action('wp', [$this, 'hydrate_script_data_from_session'], 5);
+        if ($this->track_on_next_page_load) {
+            add_action('wp', [$this, 'hydrate_script_data_from_session'], 5);
+        }
 
         // Search
         add_action('pre_get_posts', array( $this, 'track_search' ));
@@ -107,9 +115,6 @@ class MailChimp_WooCommerce_Pixel_Tracking
         // user email from standard checkout
         add_action('wp_ajax_mailchimp_set_user_by_email', array( $this, 'set_user_by_email'));
         add_action('wp_ajax_nopriv_mailchimp_set_user_by_email', array( $this, 'set_user_by_email'));
-
-        // for the session based add to cart stuff
-        add_filter('woocommerce_add_to_cart_fragments', [$this, 'inject_added_to_cart_fragment']);
     }
 
     public function set_user_by_email()
@@ -160,22 +165,79 @@ class MailChimp_WooCommerce_Pixel_Tracking
         $product = wc_get_product($variation_id ? $variation_id : $product_id);
         if ($product) {
             $this->append_script_data('added_to_cart', $payload = $this->get_formatted_product($product, $quantity));
-            // Add this: persist for AJAX responses too
             // NEW: make it available to AJAX response
             if (WC()->session) {
-                // Queue for next page view
-                $queued = WC()->session->get('mc_pixel_queued', [
-                    'events' => [],
-                ]);
-
-                if (!in_array('PRODUCT_ADDED_TO_CART', $queued['events'], true)) {
-                    $queued['events'][] = 'PRODUCT_ADDED_TO_CART';
+                if ($this->track_on_next_page_load) {
+                    $this->track_cart_on_next_page_load($payload);
                 }
-                $queued['added_to_cart'] = $payload;
-
-                WC()->session->set('mc_pixel_queued', $queued);
+                WC()->session->set('mc_pixel_last_atc', $payload);
             }
         }
+    }
+
+    /**
+     * Not using this right now but we might - it's a "next page" event.
+     * @param $payload
+     * @return void
+     */
+    protected function track_cart_on_next_page_load($payload)
+    {
+        if (WC()->session) {
+            // Queue for next page view
+            $queued = WC()->session->get('mc_pixel_queued', [
+                'events' => [],
+            ]);
+            if (!in_array('PRODUCT_ADDED_TO_CART', $queued['events'], true)) {
+                $queued['events'][] = 'PRODUCT_ADDED_TO_CART';
+            }
+            $queued['added_to_cart'] = $payload;
+            WC()->session->set('mc_pixel_queued', $queued);
+        }
+    }
+
+    /**
+     * The rest route is registered in class-mailchimp-woocommerce-rest-api.php
+     * @return mixed|WP_Error|WP_HTTP_Response|WP_REST_Response
+     */
+    public function get_last_added_to_cart_from_session()
+    {
+        if (!WC()->session) return rest_ensure_response(null);
+        $payload = WC()->session->get('mc_pixel_last_atc');
+        WC()->session->__unset('mc_pixel_last_atc');
+        return rest_ensure_response($payload);
+    }
+
+    /**
+     * The rest route is registered in class-mailchimp-woocommerce-rest-api.php
+     * @return mixed|WP_Error|WP_HTTP_Response|WP_REST_Response
+     */
+    public function get_last_removed_from_cart_from_session()
+    {
+        if (! WC()->session) return rest_ensure_response(null);
+        $payload = WC()->session->get('mc_pixel_last_rfc');
+        WC()->session->__unset('mc_pixel_last_rfc');
+        return rest_ensure_response($payload);
+    }
+
+    public function track_remove_from_cart($cart_item_key, $cart) {
+        if (! WC()->session) return;
+
+        // Woo stores removed item data here after removal.
+        $removed = $cart->removed_cart_contents[ $cart_item_key ] ?? null;
+        if (! $removed) return;
+
+        $product_id   = $removed['product_id'] ?? 0;
+        $variation_id = $removed['variation_id'] ?? 0;
+        $qty          = (int) ($removed['quantity'] ?? 1);
+
+        $pid = $variation_id ? $variation_id : $product_id;
+        $product = wc_get_product($pid);
+        if (! $product) return;
+
+        // Use your existing formatter
+        $payload = static::instance()->get_formatted_product($product, $qty);
+
+        WC()->session->set('mc_pixel_last_rfc', $payload);
     }
 
     public function hydrate_script_data_from_session()
@@ -218,7 +280,7 @@ class MailChimp_WooCommerce_Pixel_Tracking
      */
     public function track_cart_view()
     {
-        if (is_cart() && ! WC()->cart->is_empty()) {
+        if (is_cart() && WC()->cart && ! WC()->cart->is_empty()) {
             $cart_data = $this->get_formatted_cart();
             $this->append_script_data('cart', $cart_data);
             $this->append_script_data('events', 'CART_VIEWED');
@@ -567,6 +629,10 @@ class MailChimp_WooCommerce_Pixel_Tracking
             '1.0.0',
             true
         );
+
+        wp_localize_script('mailchimp-woocommerce-pixel-tracking', 'mcPixelConfig', array(
+            'restBase' => esc_url_raw(rest_url('mailchimp-for-woocommerce/v1/')),
+        ));
     }
 
     /**

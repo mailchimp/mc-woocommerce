@@ -332,13 +332,16 @@ class MailChimp_Sms_Consent extends MailChimp_WooCommerce_Options
         $this->handleSmsStatus($order_id);
     }
 
-    public static function isEligibleCountry()
+    public static function getCountry()
     {
         $store_raw_country  = get_option( 'woocommerce_default_country' );
         $split_country      = explode( ":", $store_raw_country );
-        $country = !empty($split_country) && isset( $split_country[0] ) ? $split_country[0] : '';
+        return !empty($split_country) && isset( $split_country[0] ) ? $split_country[0] : '';
+    }
 
-        return in_array($country, static::$allowedCountries);
+    public static function isEligibleCountry()
+    {
+        return in_array(static::getCountry(), static::$allowedCountries);
     }
 
     public static function isAllowedToUse()

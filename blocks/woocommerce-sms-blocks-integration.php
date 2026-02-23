@@ -140,7 +140,10 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
 	 */
 	public function get_script_data()
     {
-        $active = Mailchimp_Sms_Consent::isEligibleCountry() && MailChimp_Sms_Consent::isSmsProgramActive();
+        $eligible = Mailchimp_Sms_Consent::isEligibleCountry();
+        $sms_program_active = MailChimp_Sms_Consent::isSmsProgramActive();
+
+        $active = $eligible && $sms_program_active;
 
         $data = array(
             'optinDefaultText' => __( 'Text me with news and offers', 'mailchimp-sms-consent' ),
@@ -153,10 +156,11 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
         } else {
             $subscribed = false;
         }
-
+        $data['storeCountry'] = MailChimp_Sms_Consent::getCountry();
+        $data['eligibleCountry'] = $eligible;
+        $data['smsProgramActive'] = $sms_program_active;
         $data['userSmsSubscribed'] = $subscribed === true || $subscribed === '1';
-        $data['smsEnabled'] = $this->isSmsEnabled();
-        //$data['usingSmsConsent'] = true;
+        $data['smsEnabled'] = $active;
         $data['defaultDisclaimer'] = $this->getSmsDisclaimerText();
         $data['audienceName'] = $this->getAudienceName();
         $data['smsSendingCountries'] = $this->getSmsSendingCountries();
@@ -328,34 +332,6 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
         return mailchimp_get_api();
     }
 
-    protected function isSmsEnabled() {
-        $options = \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp-woocommerce' );
-        return isset( $options['mailchimp_sms_consent_enabled'] ) && (bool) $options['mailchimp_sms_consent_enabled'];
-    }
-
-    /**
-     * Check if merchant has approved SMS application
-     *
-     * @return bool
-     */
-    protected function merchantHasSmsApproved() {
-        try {
-            if ( ! mailchimp_is_configured() ) {
-                return false;
-            }
-            $list_id = mailchimp_get_list_id();
-            if ( ! $list_id ) {
-                return false;
-            }
-            $api = mailchimp_get_api();
-            $sms_status = $api->getCachedSmsApplicationStatus( $list_id );
-
-            return $sms_status && ! empty( $sms_status['enabled'] );
-        } catch ( Exception $e ) {
-            return false;
-        }
-    }
-
     /**
      * @return bool
      */
@@ -416,16 +392,16 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
     {
         try {
             if ( ! mailchimp_is_configured() ) {
-                return array();
+                return null;
             }
             $list_id = mailchimp_get_list_id();
             if ( ! $list_id ) {
-                return array();
+                return null;
             }
             $api = mailchimp_get_api();
             return $api->getCachedSmsProgram( $list_id );
         } catch ( Exception $e ) {
-            return array();
+            return null;
         }
     }
 

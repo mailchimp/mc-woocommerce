@@ -956,11 +956,13 @@ class MailChimp_WooCommerce_MailChimpApi {
     public function getCachedSmsProgram($list_id)
     {
         $transient_key = "mailchimp_sms_program_{$list_id}";
-        $data = mailchimp_get_transient( $transient_key );
+        $data = mailchimp_get_transient_value( $transient_key );
         if (empty($data)) {
             return $this->getSmsProgram($list_id);
         }
+
         $result = is_array($data) ? $data : unserialize($data);
+
         $program = new MailChimp_WooCommerce_SmsProgram();
         $program->program_id = $result['program_id'] ?? null;
         $program->registration_status = $result['registration_status'] ?? null;

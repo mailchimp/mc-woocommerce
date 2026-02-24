@@ -1630,7 +1630,7 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
  * 2. The SMS program is active in Mailchimp (cached for 10 minutes via the API layer).
  * 3. The merchant opted in via EITHER:
  *    a. Classic checkout: the admin option "mailchimp_sms_consent_enabled" is toggled on.
- *    b. Block checkout: the SMS consent block is present on the checkout page.
+ *    b. Block checkout: the "usingSmsConsent" attribute is true on the SMS block.
  *
  * @return bool
  */
@@ -1651,17 +1651,75 @@ function mailchimp_sms_consent_enabled() {
         return true;
     }
 
-    // Block checkout path — the SMS block is present on the checkout page.
-    if (function_exists('has_block') && function_exists('wc_get_page_id')) {
-        $checkout_page_id = wc_get_page_id('checkout');
-        if ($checkout_page_id && $checkout_page_id > 0) {
-            $checkout_post = get_post($checkout_page_id);
-            if ($checkout_post && has_block('woocommerce/mailchimp-sms-consent', $checkout_post)) {
+    // Block checkout path — check the block's "usingSmsConsent" attribute.
+    return mailchimp_sms_block_enabled_in_checkout();
+}
+
+/**
+ * Check whether the SMS consent block is present on the checkout page
+ * and has its "usingSmsConsent" attribute set to true.
+ *
+ * Parses the checkout page's post_content to read the saved block attributes,
+ * since has_block() only checks for presence, not attribute values.
+ *
+ * @return bool
+ */
+function mailchimp_sms_block_enabled_in_checkout() {
+    $blocks = mailchimp_parse_checkout_page_blocks();
+    if (empty($blocks)) return false;
+    return mailchimp_find_sms_block_attribute($blocks, 'usingSmsConsent');
+}
+
+function mailchimp_parse_checkout_page_blocks()
+{
+    if (!function_exists('parse_blocks') || !function_exists('wc_get_page_id')) {
+        return false;
+    }
+    $checkout_page_id = wc_get_page_id('checkout');
+    if (!$checkout_page_id || $checkout_page_id < 1) {
+        return false;
+    }
+
+    $checkout_post = get_post($checkout_page_id);
+    if (!$checkout_post || empty($checkout_post->post_content)) {
+        return false;
+    }
+
+    return parse_blocks($checkout_post->post_content);
+}
+
+function mailchimp_find_sms_block()
+{
+    $blocks = mailchimp_parse_checkout_page_blocks();
+    foreach ($blocks as $block) {
+        if ($block['blockName'] !== 'woocommerce/mailchimp-sms-consent') {
+            continue;
+        }
+        return $block;
+    }
+    return false;
+}
+
+/**
+ * Recursively search parsed blocks for the SMS consent block
+ * and return the value of the given attribute.
+ *
+ * @param array $blocks Parsed blocks from parse_blocks().
+ * @param string $attribute The attribute key to look for.
+ * @return bool
+ */
+function mailchimp_find_sms_block_attribute($blocks, $attribute) {
+    foreach ($blocks as $block) {
+        if ($block['blockName'] === 'woocommerce/mailchimp-sms-consent') {
+            return !empty($block['attrs'][$attribute]);
+        }
+        if (!empty($block['innerBlocks'])) {
+            $result = mailchimp_find_sms_block_attribute($block['innerBlocks'], $attribute);
+            if ($result) {
                 return true;
             }
         }
     }
-
     return false;
 }
 

@@ -156,6 +156,9 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
         } else {
             $subscribed = false;
         }
+
+        //$data['isEnabledFromBlocks'] = mailchimp_sms_block_enabled_in_checkout();
+
         $data['storeCountry'] = MailChimp_Sms_Consent::getCountry();
         $data['eligibleCountry'] = $eligible;
         $data['smsProgramActive'] = $sms_program_active;

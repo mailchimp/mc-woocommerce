@@ -346,10 +346,7 @@ class MailChimp_Sms_Consent extends MailChimp_WooCommerce_Options
 
     public static function isAllowedToUse()
     {
-        $options = mailchimp_get_admin_options();
-        $sms_consent_enabled = $options['mailchimp_sms_consent_enabled'] ?? false;
-
-        return  static::isEligibleCountry() && $sms_consent_enabled;
+        return mailchimp_sms_consent_enabled();
     }
 
     /**

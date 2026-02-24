@@ -1619,6 +1619,53 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
 
 
 /**
+ * Check if SMS consent is enabled for this store.
+ *
+ * Consolidates all the checks needed to determine if the SMS consent feature
+ * should be active — used by both classic and block checkout, as well as
+ * order/customer processing hooks.
+ *
+ * Three conditions must be met:
+ * 1. The store country is eligible for SMS.
+ * 2. The SMS program is active in Mailchimp (cached for 10 minutes via the API layer).
+ * 3. The merchant opted in via EITHER:
+ *    a. Classic checkout: the admin option "mailchimp_sms_consent_enabled" is toggled on.
+ *    b. Block checkout: the SMS consent block is present on the checkout page.
+ *
+ * @return bool
+ */
+function mailchimp_sms_consent_enabled() {
+    if (!MailChimp_Sms_Consent::isEligibleCountry()) {
+        return false;
+    }
+
+    // The SMS program must be active in Mailchimp.
+    // isSmsProgramActive() already uses a 10-minute transient cache via getCachedSmsProgram().
+    if (!MailChimp_Sms_Consent::isSmsProgramActive()) {
+        return false;
+    }
+
+    // Classic checkout path — admin toggled the option on.
+    $options = mailchimp_get_admin_options();
+    if (!empty($options['mailchimp_sms_consent_enabled'])) {
+        return true;
+    }
+
+    // Block checkout path — the SMS block is present on the checkout page.
+    if (function_exists('has_block') && function_exists('wc_get_page_id')) {
+        $checkout_page_id = wc_get_page_id('checkout');
+        if ($checkout_page_id && $checkout_page_id > 0) {
+            $checkout_post = get_post($checkout_page_id);
+            if ($checkout_post && has_block('woocommerce/mailchimp-sms-consent', $checkout_post)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+/**
  * Sync SMS consent data to Mailchimp for a member
  *
  * IMPORTANT: This function respects AC8 - if a customer places an order WITHOUT
@@ -1633,9 +1680,7 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
  * @return bool True if SMS was synced, false otherwise
  */
 function mailchimp_member_sms_update($user_email = null, $order_id = null, $user_id = null, $caller = 'order', $email_status = null) {
-    // Check if SMS is enabled
-    $options = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce');
-    if (empty($options['mailchimp_sms_consent_enabled'])) {
+    if (!mailchimp_sms_consent_enabled()) {
         return false;
     }
 

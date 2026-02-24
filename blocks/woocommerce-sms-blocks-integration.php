@@ -236,6 +236,14 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
      */
     public static function order_processed($order, $request)
     {
+        if (!mailchimp_sms_consent_enabled()) {
+            return;
+        }
+
+        if (!isset($request['extensions']['mailchimp-sms-consent'])) {
+            return;
+        }
+
         mailchimp_debug('order_processed', 'hook with extensions', [
             'order' => $order->get_id(),
             'request' => $request['extensions']
@@ -289,6 +297,10 @@ class Mailchimp_Woocommerce_Sms_Blocks_Integration implements IntegrationInterfa
      */
     public static function order_customer_processed( $order )
     {
+        if (!mailchimp_sms_consent_enabled()) {
+            return;
+        }
+
         // extract a new order object to take the relevant meta fields
         $wc_order   = wc_get_order( $order->get_id() );
         $meta_key   = 'mailchimp_woocommerce_sms_consent_subscribed';

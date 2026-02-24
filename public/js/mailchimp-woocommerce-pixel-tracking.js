@@ -24,6 +24,12 @@
 	 * Mailchimp Pixel Tracking Handler
 	 */
 	const MailchimpPixelTracking = {
+		// Debounce timers for cart fetch calls
+		_atcTimer: null,
+		_rfcTimer: null,
+		_atcFetching: false,
+		_rfcFetching: false,
+
 		/**
 		 * Initialize tracking.
 		 * Waits for Pixel SDK with exponential backoff, then sends page events and attaches handlers.
@@ -142,14 +148,18 @@
 				switch (eventType) {
 					case 'PRODUCT_ADDED_TO_CART':
 						if (data.added_to_cart) {
-							this.sendProductAddedToCart(data.added_to_cart);
-							window.mcPixel._handled.addToCart = true;
+							var atcItems = Array.isArray(data.added_to_cart) ? data.added_to_cart : [data.added_to_cart];
+							for (var ai = 0; ai < atcItems.length; ai++) {
+								this.sendProductAddedToCart(atcItems[ai]);
+							}
 						}
 						break;
 					case 'PRODUCT_REMOVED_FROM_CART':
 						if (data.removed_from_cart) {
-							this.sendProductRemovedFromCart(data.removed_from_cart);
-							window.mcPixel._handled.removeFromCart = true;
+							var rfcItems = Array.isArray(data.removed_from_cart) ? data.removed_from_cart : [data.removed_from_cart];
+							for (var ri = 0; ri < rfcItems.length; ri++) {
+								this.sendProductRemovedFromCart(rfcItems[ri]);
+							}
 						}
 						break;
 					case 'IDENTITY':
@@ -162,14 +172,14 @@
 						// The cart action implies the view, so firing both is redundant.
 						if (data.product) {
 							const viewedId = String(data.product.productId || data.product.id);
-							const atc = data.added_to_cart;
-							const rfc = data.removed_from_cart;
-							const atcId = atc ? String(atc.productId || atc.id) : null;
-							const rfcId = rfc ? String(rfc.productId || rfc.id) : null;
+							const atcArr = Array.isArray(data.added_to_cart) ? data.added_to_cart : (data.added_to_cart ? [data.added_to_cart] : []);
+							const rfcArr = Array.isArray(data.removed_from_cart) ? data.removed_from_cart : (data.removed_from_cart ? [data.removed_from_cart] : []);
+							const atcMatch = atcArr.some(function (p) { return String(p.productId || p.id) === viewedId; });
+							const rfcMatch = rfcArr.some(function (p) { return String(p.productId || p.id) === viewedId; });
 
 							if (
-								(events.includes('PRODUCT_ADDED_TO_CART') && atcId === viewedId) ||
-								(events.includes('PRODUCT_REMOVED_FROM_CART') && rfcId === viewedId)
+								(events.includes('PRODUCT_ADDED_TO_CART') && atcMatch) ||
+								(events.includes('PRODUCT_REMOVED_FROM_CART') && rfcMatch)
 							) {
 								//console.log('Mailchimp Pixel: Skipping PRODUCT_VIEWED (superseded by cart event for same product)');
 								break;
@@ -389,15 +399,27 @@
 		},
 
 		/**
-		 * Fetch the last add-to-cart data from the PHP session and send the pixel event.
-		 * Guarded by the _handled.addToCart deduplication flag.
+		 * Debounced fetch for add-to-cart events.
+		 * Each call resets the timer so rapid-fire triggers coalesce into one
+		 * fetch that drains the entire PHP queue.
+		 * If a fetch is already in flight, schedule another drain after it completes.
 		 */
-		fetchAndTrackAddToCart: async function () {
+		fetchAndTrackAddToCart: function () {
+			var self = this;
 			if (!this.isPixelSDKReady()) return;
-			if (window.mcPixel && window.mcPixel._handled && window.mcPixel._handled.addToCart) return;
+
+			clearTimeout(this._atcTimer);
+			this._atcTimer = setTimeout(function () {
+				self._drainAddToCartQueue();
+			}, 600);
+		},
+
+		_drainAddToCartQueue: async function () {
+			if (this._atcFetching) return;
+			this._atcFetching = true;
 
 			try {
-				const res = await fetch(this.getRestBase() + 'pixel/atc', {
+				var res = await fetch(this.getRestBase() + 'pixel/atc', {
 					method: 'GET',
 					credentials: 'same-origin',
 					headers: { 'Accept': 'application/json' },
@@ -405,30 +427,40 @@
 
 				if (!res.ok) return;
 
-				const product = await res.json();
-				if (!product) return;
+				var data = await res.json();
+				if (!data) return;
 
-				this.sendProductAddedToCart(product);
-
-				window.mcPixel = window.mcPixel || {};
-				window.mcPixel._handled = window.mcPixel._handled || {};
-				window.mcPixel._handled.addToCart = true;
-				setTimeout(function () { window.mcPixel._handled.addToCart = false; }, 2000);
+				var items = Array.isArray(data) ? data : [data];
+				for (var i = 0; i < items.length; i++) {
+					this.sendProductAddedToCart(items[i]);
+				}
 			} catch (e) {
 				// no-op
+			} finally {
+				this._atcFetching = false;
 			}
 		},
 
 		/**
-		 * Fetch the last remove-from-cart data from the PHP session and send the pixel event.
-		 * Guarded by the _handled.removeFromCart deduplication flag.
+		 * Debounced fetch for remove-from-cart events.
+		 * Same debounce pattern as add-to-cart.
 		 */
-		fetchAndTrackRemoveFromCart: async function () {
+		fetchAndTrackRemoveFromCart: function () {
+			var self = this;
 			if (!this.isPixelSDKReady()) return;
-			if (window.mcPixel && window.mcPixel._handled && window.mcPixel._handled.removeFromCart) return;
+
+			clearTimeout(this._rfcTimer);
+			this._rfcTimer = setTimeout(function () {
+				self._drainRemoveFromCartQueue();
+			}, 600);
+		},
+
+		_drainRemoveFromCartQueue: async function () {
+			if (this._rfcFetching) return;
+			this._rfcFetching = true;
 
 			try {
-				const res = await fetch(this.getRestBase() + 'pixel/rfc', {
+				var res = await fetch(this.getRestBase() + 'pixel/rfc', {
 					method: 'GET',
 					credentials: 'same-origin',
 					headers: { 'Accept': 'application/json' },
@@ -436,17 +468,17 @@
 
 				if (!res.ok) return;
 
-				const product = await res.json();
-				if (!product) return;
+				var data = await res.json();
+				if (!data) return;
 
-				this.sendProductRemovedFromCart(product);
-
-				window.mcPixel = window.mcPixel || {};
-				window.mcPixel._handled = window.mcPixel._handled || {};
-				window.mcPixel._handled.removeFromCart = true;
-				setTimeout(function () { window.mcPixel._handled.removeFromCart = false; }, 2000);
+				var items = Array.isArray(data) ? data : [data];
+				for (var i = 0; i < items.length; i++) {
+					this.sendProductRemovedFromCart(items[i]);
+				}
 			} catch (e) {
 				// no-op
+			} finally {
+				this._rfcFetching = false;
 			}
 		},
 
@@ -499,10 +531,10 @@
 						var url = typeof input === 'string' ? input :
 							(input instanceof Request ? input.url : String(input));
 
-						if (/wc\/store\/v1\/cart\/add-item/.test(url)) {
-							setTimeout(function () { self.fetchAndTrackAddToCart(); }, 500);
+						if (/wc\/store\/v1\/cart\/add-item/.test(url) || /wc\/store\/v1\/cart\/update-item/.test(url)) {
+							self.fetchAndTrackAddToCart();
 						} else if (/wc\/store\/v1\/cart\/remove-item/.test(url)) {
-							setTimeout(function () { self.fetchAndTrackRemoveFromCart(); }, 500);
+							self.fetchAndTrackRemoveFromCart();
 						}
 					} catch (e) {
 						// Silently ignore interceptor errors

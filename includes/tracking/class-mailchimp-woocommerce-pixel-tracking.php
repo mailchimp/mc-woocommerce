@@ -86,6 +86,9 @@ class MailChimp_WooCommerce_Pixel_Tracking
         // woo cart item removed
         add_action('woocommerce_cart_item_removed', array( $this, 'track_remove_from_cart'), 10, 2);
 
+        // Cart quantity updated (e.g. incrementing quantity on cart page / block cart)
+        add_action('woocommerce_after_cart_item_quantity_update', array( $this, 'track_quantity_update' ), 10, 4);
+
         // Product loop - pre-load all products on listing pages for AJAX add to cart
         add_filter('woocommerce_loop_add_to_cart_link', array( $this, 'preload_listing_products' ), 10, 2);
 
@@ -166,12 +169,14 @@ class MailChimp_WooCommerce_Pixel_Tracking
         if ($product) {
             $this->append_script_data('events', 'PRODUCT_ADDED_TO_CART');
             $this->append_script_data('added_to_cart', $payload = $this->get_formatted_product($product, $quantity));
-            // NEW: make it available to AJAX response
+            // Make it available to AJAX response — queue supports multiple adds
             if (WC()->session) {
                 if ($this->track_on_next_page_load) {
                     $this->track_cart_on_next_page_load($payload);
                 }
-                WC()->session->set('mc_pixel_last_atc', $payload);
+                $queue = WC()->session->get('mc_pixel_atc_queue', []);
+                $queue[] = $payload;
+                WC()->session->set('mc_pixel_atc_queue', $queue);
             }
         }
     }
@@ -191,33 +196,75 @@ class MailChimp_WooCommerce_Pixel_Tracking
             if (!in_array('PRODUCT_ADDED_TO_CART', $queued['events'], true)) {
                 $queued['events'][] = 'PRODUCT_ADDED_TO_CART';
             }
-            $queued['added_to_cart'] = $payload;
+            if (!isset($queued['added_to_cart'])) {
+                $queued['added_to_cart'] = [];
+            }
+            $queued['added_to_cart'][] = $payload;
             WC()->session->set('mc_pixel_queued', $queued);
         }
     }
 
     /**
      * The rest route is registered in class-mailchimp-woocommerce-rest-api.php
+     * Returns all queued add-to-cart payloads and clears the queue.
+     *
      * @return mixed|WP_Error|WP_HTTP_Response|WP_REST_Response
      */
     public function get_last_added_to_cart_from_session()
     {
         if (!WC()->session) return rest_ensure_response(null);
-        $payload = WC()->session->get('mc_pixel_last_atc');
-        WC()->session->__unset('mc_pixel_last_atc');
-        return rest_ensure_response($payload);
+        $queue = WC()->session->get('mc_pixel_atc_queue', []);
+        WC()->session->__unset('mc_pixel_atc_queue');
+        // Also clear the next-page-load queue for add-to-cart events
+        // so hydrate_script_data_from_session doesn't re-fire them.
+        $this->clear_queued_events('added_to_cart', 'PRODUCT_ADDED_TO_CART');
+        if (empty($queue)) return rest_ensure_response(null);
+        return rest_ensure_response($queue);
     }
 
     /**
      * The rest route is registered in class-mailchimp-woocommerce-rest-api.php
+     * Returns all queued remove-from-cart payloads and clears the queue.
+     *
      * @return mixed|WP_Error|WP_HTTP_Response|WP_REST_Response
      */
     public function get_last_removed_from_cart_from_session()
     {
         if (! WC()->session) return rest_ensure_response(null);
-        $payload = WC()->session->get('mc_pixel_last_rfc');
-        WC()->session->__unset('mc_pixel_last_rfc');
-        return rest_ensure_response($payload);
+        $queue = WC()->session->get('mc_pixel_rfc_queue', []);
+        WC()->session->__unset('mc_pixel_rfc_queue');
+        // Also clear the next-page-load queue for remove-from-cart events
+        $this->clear_queued_events('removed_from_cart', 'PRODUCT_REMOVED_FROM_CART');
+        if (empty($queue)) return rest_ensure_response(null);
+        return rest_ensure_response($queue);
+    }
+
+    /**
+     * Remove a specific event type and its payload from the next-page-load queue.
+     * Called when the REST endpoint has already handled the events via AJAX,
+     * so hydrate_script_data_from_session doesn't re-fire them.
+     *
+     * @param string $payload_key The data key (e.g. 'added_to_cart', 'removed_from_cart')
+     * @param string $event_name  The event name (e.g. 'PRODUCT_ADDED_TO_CART')
+     */
+    protected function clear_queued_events($payload_key, $event_name)
+    {
+        if (!WC()->session) return;
+
+        $queued = WC()->session->get('mc_pixel_queued');
+        if (empty($queued)) return;
+
+        unset($queued[$payload_key]);
+
+        if (!empty($queued['events'])) {
+            $queued['events'] = array_values(array_diff($queued['events'], [$event_name]));
+        }
+
+        if (empty($queued['events'])) {
+            WC()->session->__unset('mc_pixel_queued');
+        } else {
+            WC()->session->set('mc_pixel_queued', $queued);
+        }
     }
 
     public function track_remove_from_cart($cart_item_key, $cart) {
@@ -240,8 +287,10 @@ class MailChimp_WooCommerce_Pixel_Tracking
         $this->append_script_data('events', 'PRODUCT_REMOVED_FROM_CART');
         $this->append_script_data('removed_from_cart', $payload);
 
-        // Store for AJAX REST endpoint
-        WC()->session->set('mc_pixel_last_rfc', $payload);
+        // Queue for AJAX REST endpoint — supports multiple removes
+        $queue = WC()->session->get('mc_pixel_rfc_queue', []);
+        $queue[] = $payload;
+        WC()->session->set('mc_pixel_rfc_queue', $queue);
 
         // Queue for next page load (traditional POST redirect)
         if ($this->track_on_next_page_load) {
@@ -249,8 +298,52 @@ class MailChimp_WooCommerce_Pixel_Tracking
             if (!in_array('PRODUCT_REMOVED_FROM_CART', $queued['events'], true)) {
                 $queued['events'][] = 'PRODUCT_REMOVED_FROM_CART';
             }
-            $queued['removed_from_cart'] = $payload;
+            if (!isset($queued['removed_from_cart'])) {
+                $queued['removed_from_cart'] = [];
+            }
+            $queued['removed_from_cart'][] = $payload;
             WC()->session->set('mc_pixel_queued', $queued);
+        }
+    }
+
+    /**
+     * Track cart item quantity update (e.g. user increments qty on cart page).
+     * Treated as an add-to-cart event so the pixel fires for the updated quantity.
+     *
+     * @param string $cart_item_key Cart item key
+     * @param int    $quantity New quantity
+     * @param int    $old_quantity Previous quantity
+     * @param array  $cart Cart instance
+     */
+    public function track_quantity_update($cart_item_key, $quantity, $old_quantity, $cart)
+    {
+        if (! WC()->session) return;
+        if ($quantity <= $old_quantity) return; // only track increases
+
+        $cart_item = $cart->get_cart_item($cart_item_key);
+        if (! $cart_item) return;
+
+        $product_id   = $cart_item['product_id'] ?? 0;
+        $variation_id = $cart_item['variation_id'] ?? 0;
+
+        $pid = $variation_id ? $variation_id : $product_id;
+        $product = wc_get_product($pid);
+        if (! $product) return;
+
+        $added_qty = $quantity - $old_quantity;
+        $payload = $this->get_formatted_product($product, $added_qty);
+
+        $this->append_script_data('events', 'PRODUCT_ADDED_TO_CART');
+        $this->append_script_data('added_to_cart', $payload);
+
+        // Queue for AJAX REST endpoint
+        $queue = WC()->session->get('mc_pixel_atc_queue', []);
+        $queue[] = $payload;
+        WC()->session->set('mc_pixel_atc_queue', $queue);
+
+        // Queue for next page load
+        if ($this->track_on_next_page_load) {
+            $this->track_cart_on_next_page_load($payload);
         }
     }
 
@@ -269,15 +362,25 @@ class MailChimp_WooCommerce_Pixel_Tracking
         }
 
         if (!empty($queued['added_to_cart'])) {
-            $this->append_script_data('added_to_cart', $queued['added_to_cart']);
+            // added_to_cart is now an array of payloads
+            foreach ((array) $queued['added_to_cart'] as $item) {
+                $this->append_script_data('added_to_cart', $item);
+            }
         }
 
         if (!empty($queued['removed_from_cart'])) {
-            $this->append_script_data('removed_from_cart', $queued['removed_from_cart']);
+            // removed_from_cart is now an array of payloads
+            foreach ((array) $queued['removed_from_cart'] as $item) {
+                $this->append_script_data('removed_from_cart', $item);
+            }
         }
 
-        // Clear after use
+        // Clear all queues — the page-load path is handling these events now,
+        // so wipe the REST endpoint queues to prevent the JS fetch from
+        // sending the same events a second time.
         WC()->session->__unset('mc_pixel_queued');
+        WC()->session->__unset('mc_pixel_atc_queue');
+        WC()->session->__unset('mc_pixel_rfc_queue');
     }
 
     /**
@@ -591,14 +694,21 @@ class MailChimp_WooCommerce_Pixel_Tracking
             $this->script_data[ $type ] = array();
         }
 
-        // For events, just collect them in an array
+        // For events, just collect them in an array (deduplicated)
         if ($type === 'events') {
             if (! in_array($data, $this->script_data[ $type ], true)) {
                 $this->script_data[ $type ][] = $data;
             }
         } elseif ($type === 'products') {
-            // For products array, append each product
+            // Products list: always append (no dedup needed for listing preloads)
             $this->script_data[ $type ][] = $data;
+        } elseif (in_array($type, ['added_to_cart', 'removed_from_cart'], true)) {
+            // Cart mutation queues: dedup identical payloads.
+            // Prevents double-fire when track_add_to_cart writes to script_data
+            // AND hydrate_script_data_from_session re-adds the same item from session.
+            if (!in_array($data, $this->script_data[ $type ])) {
+                $this->script_data[ $type ][] = $data;
+            }
         } else {
             // For single objects (product, cart, order), store directly
             $this->script_data[ $type ] = $data;

@@ -134,7 +134,7 @@ const Block = ( {text, userSubscribed, checkoutExtensionData, defaultDisclaimer,
 				</CheckboxControl>
 
 				{ checked && (
-					<div className="mailchimp-sms-phone-field wc-block-components-text-input"
+					<div className="mailchimp-sms-phone-field"
 						 style={{marginTop: '12px'}}>
 
 						<PhoneInputWithCountrySelect

@@ -138,11 +138,18 @@
 
 			// Send events based on what was set by PHP
 			events.forEach((eventType) => {
+				//console.log('Mailchimp Pixel: Sending event', eventType, data);
 				switch (eventType) {
 					case 'PRODUCT_ADDED_TO_CART':
 						if (data.added_to_cart) {
 							this.sendProductAddedToCart(data.added_to_cart);
 							window.mcPixel._handled.addToCart = true;
+						}
+						break;
+					case 'PRODUCT_REMOVED_FROM_CART':
+						if (data.removed_from_cart) {
+							this.sendProductRemovedFromCart(data.removed_from_cart);
+							window.mcPixel._handled.removeFromCart = true;
 						}
 						break;
 					case 'IDENTITY':
@@ -151,7 +158,22 @@
 						}
 						break;
 					case 'PRODUCT_VIEWED':
+						// Skip if an add-to-cart or remove-from-cart already fired for the same product.
+						// The cart action implies the view, so firing both is redundant.
 						if (data.product) {
+							const viewedId = String(data.product.productId || data.product.id);
+							const atc = data.added_to_cart;
+							const rfc = data.removed_from_cart;
+							const atcId = atc ? String(atc.productId || atc.id) : null;
+							const rfcId = rfc ? String(rfc.productId || rfc.id) : null;
+
+							if (
+								(events.includes('PRODUCT_ADDED_TO_CART') && atcId === viewedId) ||
+								(events.includes('PRODUCT_REMOVED_FROM_CART') && rfcId === viewedId)
+							) {
+								//console.log('Mailchimp Pixel: Skipping PRODUCT_VIEWED (superseded by cart event for same product)');
+								break;
+							}
 							this.sendProductViewed(data.product);
 						}
 						break;

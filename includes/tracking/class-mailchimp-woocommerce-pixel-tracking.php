@@ -66,8 +66,8 @@ class MailChimp_WooCommerce_Pixel_Tracking
      */
     public function __construct()
     {
+        $this->track_on_next_page_load = (bool) apply_filters('mailchimp_woocommerce_track_on_next_page_load', true);
         $this->attach_event_data();
-        $this->track_on_next_page_load = (bool) apply_filters('mailchimp_woocommerce_track_on_next_page_load', false);
     }
 
     /**
@@ -164,6 +164,7 @@ class MailChimp_WooCommerce_Pixel_Tracking
     {
         $product = wc_get_product($variation_id ? $variation_id : $product_id);
         if ($product) {
+            $this->append_script_data('events', 'PRODUCT_ADDED_TO_CART');
             $this->append_script_data('added_to_cart', $payload = $this->get_formatted_product($product, $quantity));
             // NEW: make it available to AJAX response
             if (WC()->session) {
@@ -234,10 +235,23 @@ class MailChimp_WooCommerce_Pixel_Tracking
         $product = wc_get_product($pid);
         if (! $product) return;
 
-        // Use your existing formatter
-        $payload = static::instance()->get_formatted_product($product, $qty);
+        $payload = $this->get_formatted_product($product, $qty);
 
+        $this->append_script_data('events', 'PRODUCT_REMOVED_FROM_CART');
+        $this->append_script_data('removed_from_cart', $payload);
+
+        // Store for AJAX REST endpoint
         WC()->session->set('mc_pixel_last_rfc', $payload);
+
+        // Queue for next page load (traditional POST redirect)
+        if ($this->track_on_next_page_load) {
+            $queued = WC()->session->get('mc_pixel_queued', ['events' => []]);
+            if (!in_array('PRODUCT_REMOVED_FROM_CART', $queued['events'], true)) {
+                $queued['events'][] = 'PRODUCT_REMOVED_FROM_CART';
+            }
+            $queued['removed_from_cart'] = $payload;
+            WC()->session->set('mc_pixel_queued', $queued);
+        }
     }
 
     public function hydrate_script_data_from_session()
@@ -256,6 +270,10 @@ class MailChimp_WooCommerce_Pixel_Tracking
 
         if (!empty($queued['added_to_cart'])) {
             $this->append_script_data('added_to_cart', $queued['added_to_cart']);
+        }
+
+        if (!empty($queued['removed_from_cart'])) {
+            $this->append_script_data('removed_from_cart', $queued['removed_from_cart']);
         }
 
         // Clear after use

@@ -734,7 +734,7 @@ class MailChimp_WooCommerce_MailChimpApi {
             mailchimp_debug( 'api.sms_subscribe', "SMS Subscribe (no email) :: {$sms_phone}", $data );
 
             // For email-less, we use the SMS phone endpoint
-            return $this->post( "audiences/{$list_id}/sms-subscribers", $data );
+            return $this->post( "audiences/{$list_id}/contacts", $data );
         }
 
         // Check if we should preserve existing status (AC8 requirement)

@@ -17,6 +17,7 @@ if (!isset($sms_handler)) {
     $sms_handler = MailChimp_Sms_Consent::instance();
 }
 $allowed_sms_country = $sms_handler->isEligibleCountry();
+$sms_enabled = $sms_handler->isSmsEnabled();
 //$sms_handler->getSmsProgram();
 //$customer_count    = mailchimp_get_customer_count();
 //$product_count     = mailchimp_get_product_count();
@@ -248,7 +249,7 @@ if ( $store ) {
             <h3><?php esc_html_e('Here’s what we recommend you do next...', 'mailchimp-for-woocommerce' ); ?></h3>
         </div>
         <div class="mc-wc-tab-content-blogs">
-            <?php if ($allowed_sms_country): ?>
+            <?php if ($allowed_sms_country && !$sms_enabled): ?>
             <!-- Suggestion sms -->
             <div class="mc-wc-tab-content-blogs-item">
                 <div class="mc-wc-tab-content-blogs-detail">

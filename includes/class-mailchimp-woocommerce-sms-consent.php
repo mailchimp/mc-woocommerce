@@ -14,7 +14,45 @@ class MailChimp_Sms_Consent extends MailChimp_WooCommerce_Options
     /** @var null|static */
     protected static $_instance = null;
 
-    public static $allowedCountries = ['AU', 'AT', 'CA', 'FR', 'DE', 'IE', 'IT', 'ES', 'CH', 'NL', 'US', 'GB'];
+    public static $allowedCountries = [
+        'AU',
+        'AT',
+        'CA',
+        'FR',
+        'DE',
+        'IE',
+        'IT',
+        'ES',
+        'CH',
+        'NL',
+        'US',
+        'GB',
+        'AL', // Albania
+        'BE', // Belgium
+        'HR', // Croatia
+        'DK', // Denmark
+        'EE', // Estonia
+        'FO', // Faroe Islands
+        'FI', // Finland
+        'GI', // Gibraltar
+        'GR', // Greece
+        'GG', // Guernsey
+        'IS', // Iceland
+        'IM', // Isle of Man
+        'JE', // Jersey
+        'LV', // Latvia
+        'LT', // Lithuania
+        'LU', // Luxembourg
+        'MT', // Malta
+        'MD', // Moldova
+        'NO', // Norway
+        'PL', // Poland
+        'PT', // Portugal
+        'SM', // San Marino
+        'SK', // Slovakia
+        'SI', // Slovenia
+        'SE' // Sweden
+    ];
 
     /**
      * @return MailChimp_Sms_Consent
@@ -238,7 +276,11 @@ class MailChimp_Sms_Consent extends MailChimp_WooCommerce_Options
 
     public function isSmsEnabled()
     {
-        return (bool) $this->getOption('mailchimp_sms_consent_enabled', false);
+        $using_blocks = mailchimp_checkout_using_blocks();
+
+        if (!$using_blocks) return (bool) $this->getOption('mailchimp_sms_consent_enabled', false);
+
+        return mailchimp_sms_block_enabled_in_checkout();
     }
 
     public function getSmsSendingCountries()

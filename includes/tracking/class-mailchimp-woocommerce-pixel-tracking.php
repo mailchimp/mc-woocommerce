@@ -115,6 +115,9 @@ class MailChimp_WooCommerce_Pixel_Tracking
         // Search
         add_action('pre_get_posts', array( $this, 'track_search' ));
 
+        // Identify logged-in customers on every page
+        add_action('wp', array( $this, 'track_logged_in_customer' ));
+
         // user email from standard checkout
         add_action('wp_ajax_mailchimp_set_user_by_email', array( $this, 'set_user_by_email'));
         add_action('wp_ajax_nopriv_mailchimp_set_user_by_email', array( $this, 'set_user_by_email'));
@@ -124,6 +127,19 @@ class MailChimp_WooCommerce_Pixel_Tracking
     {
         if ($this->doingAjax() && isset($_POST['email']) && ! empty($_POST['email'])) {
             $this->track_identity($_POST['email']);
+        }
+    }
+
+    /**
+     * Identify logged-in customers on every page load
+     */
+    public function track_logged_in_customer()
+    {
+        if (is_user_logged_in() && ($customer = WC()->customer)) {
+            $email = $customer->get_email() ?: $customer->get_billing_email();
+            if ($email) {
+                $this->track_identity($email);
+            }
         }
     }
 

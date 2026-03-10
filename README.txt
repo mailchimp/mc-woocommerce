@@ -3,11 +3,11 @@ Contributors: ryanhungate, Mailchimp
 Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 6.2
-Tested up to: 6.8
-Stable tag: 5.5.1
+Tested up to: 6.9
+Stable tag: 6.0
 Requires PHP: 7.4
 WC requires at least: 8.2
-WC tested up to: 10.0
+WC tested up to: 10.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your Mailchimp audience to track sales, create targeted emails, send abandoned cart emails, and more.
@@ -78,6 +78,24 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
 == Changelog ==
-= 5.5.1 =
-* Guest checkout sync logic fix
-* Site Performance update -  Disabled mailchimp_landing_site cookie by default.
+= 6.0 =
+* Adds WooCommerce Order Fulfillments tracking
+* Adds SMS phone number field with consent for checkout
+* Adds Bi-directional SMS contact sync
+* Adds Order creation error handling
+* Adds Customer skip sync logging
+* Fixes Fatal error in subscription payment processing
+* Fixes Cart update incorrectly setting subscriber status to transactional
+* Fixes Backorders status sync between WooCommerce and Mailchimp
+* Fixes Sync status icon positioning in admin
+* Fixes PHP deprecated parameter warnings on plugin connection
+* Fixes Undefined array key "SERVER_NAME" log warnings
+* Updates plugin metadata
+* Updates js-yaml to 4.1.1
+* Updates node-forge to 1.3.2
+* Updates qs to 6.14.1 and express to 4.22.1
+* Updates lodash to 4.17.23
+* Updates playwright to 1.56.1
+* Updates tar-fs to 3.1.1
+* Removes unused functions
+* Updates plugin metadata

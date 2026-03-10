@@ -83,7 +83,7 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Extend_Store_Endpoint {
 						return true;
 					},
 				),
-			),
+			)
 		);
 	}
 }

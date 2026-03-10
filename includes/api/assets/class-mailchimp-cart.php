@@ -12,6 +12,7 @@ class MailChimp_WooCommerce_Cart {
 
 	protected $store_id;
 	protected $id;
+	protected $session_id;
 	protected $customer;
 	protected $checkout_url;
 	protected $currency_code;
@@ -25,6 +26,12 @@ class MailChimp_WooCommerce_Cart {
 	 */
 	public function setId( $unique_id ) {
 		$this->id = $unique_id;
+
+		return $this;
+	}
+
+    public function setSessionId( $session_id ) {
+		$this->session_id = $session_id;
 
 		return $this;
 	}
@@ -103,7 +110,8 @@ class MailChimp_WooCommerce_Cart {
 	 * @return $this
 	 */
 	public function setCurrencyCode() {
-		$this->currency_code = get_woocommerce_currency();
+        $default_currency = get_woocommerce_currency();
+        $this->currency_code = apply_filters('mailchimp_woocommerce_cart_currency_code', $default_currency, $this->session_id);
 
 		return $this;
 	}
@@ -113,7 +121,8 @@ class MailChimp_WooCommerce_Cart {
 	 */
 	public function getCurrencyCode() {
 		if ( empty( $this->currency_code ) ) {
-			$this->currency_code = get_woocommerce_currency();
+            $default_currency = get_woocommerce_currency();
+            $this->currency_code = apply_filters('mailchimp_woocommerce_cart_currency_code', $default_currency, $this->session_id);
 		}
 
 		return $this->currency_code;

@@ -210,7 +210,7 @@ class MailChimp_WooCommerce_ProductVariation {
 				'price'              => $this->getPrice(),
 				'inventory_quantity' => (int) $this->getInventoryQuantity(),
 				'image_url'          => (string) $this->getImageUrl(),
-				'backorders'         => $this->getBackorders() ? 'true' : 'false',
+				'backorders'         => $this->getBackorders() ? '1' : '0',
 				'visibility'         => (string) $this->getVisibility(),
 			)
 		);

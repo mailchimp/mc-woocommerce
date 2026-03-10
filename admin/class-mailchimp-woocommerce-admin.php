@@ -139,7 +139,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			$options                   = mailchimp_get_admin_options();
 			$checkbox_default_settings = ( array_key_exists( 'mailchimp_checkbox_defaults', $options ) && ! is_null( $options['mailchimp_checkbox_defaults'] ) ) ? $options['mailchimp_checkbox_defaults'] : 'check';
 			wp_register_script( $this->plugin_name . 'create-account', plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-create-account.js', array( 'jquery', 'swal' ), $this->version );
-			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version . 'test-122' );
+			wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/mailchimp-woocommerce-admin.js', array( 'jquery', 'swal' ), $this->version);
 			wp_register_script( $this->plugin_name . '-v2', plugin_dir_url( __FILE__ ) . 'v2/assets/js/scripts.js', array( 'jquery', 'swal' ), $this->version );
 			wp_localize_script(
 				$this->plugin_name,
@@ -1374,6 +1374,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             'admin_email'                 => get_option( 'admin_email' ),
             'mailchimp_permission_cap'    => $permissions,
             'mailchimp_checkbox_action'   => isset( $input['mailchimp_checkbox_action'] ) ? $input['mailchimp_checkbox_action'] : $this->getOption( 'mailchimp_checkbox_action', 'woocommerce_after_checkout_billing_form' ),
+            'mailchimp_sms_consent_enabled'   => isset( $input['mailchimp_sms_consent_enabled'] ) ? $input['mailchimp_sms_consent_enabled'] : $this->getOption( 'mailchimp_sms_consent_enabled', false ),
             'mailchimp_product_image_key' => isset( $input['mailchimp_product_image_key'] ) ? $input['mailchimp_product_image_key'] : 'medium',
             'newsletter_label'              => ( isset( $input['newsletter_label'] ) ) ? wp_kses( $input['newsletter_label'], $allowed_html ) : $this->getOption( 'newsletter_label', __( 'Subscribe to our newsletter', 'mailchimp-for-woocommerce' ) ),
             'mailchimp_checkbox_defaults'   => $checkbox,
@@ -1874,9 +1875,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 					var call_mailchimp_for_stats_new = function (showSpinner = false) {
 
 						if (showSpinner) {
-							jQuery('.sync-status-icon-wrapper span').addClass('mc-wc-d-none');
-							jQuery('.sync-status-time').addClass('mc-wc-d-none');
-							jQuery('.sync-status-icon-wrapper img').removeClass('mc-wc-d-none');
+							jQuery('.mc-wc-sync-status-icon-wrapper span').addClass('mc-wc-d-none');
+                                jQuery('.mc-wc-sync-status-time').addClass('mc-wc-d-none');
+							jQuery('.mc-wc-sync-status-icon-wrapper img').removeClass('mc-wc-d-none');
 						}
 
 						jQuery.get(endpoint, function(response) {
@@ -1903,10 +1904,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 										call_mailchimp_for_stats_new(showSpinner);
 									}, 15000);
 								} else {
-									jQuery('.sync-status-icon-wrapper img').addClass('mc-wc-d-none');
-									jQuery('.sync-status-time').removeClass('mc-wc-d-none');
-									jQuery('.sync-status-icon-wrapper span').removeClass('mc-wc-d-none');
-									jQuery('.sync-status-icon-wrapper span').removeClass('mc-wc-d-none');
+									jQuery('.mc-wc-sync-status-icon-wrapper img').addClass('mc-wc-d-none');
+									jQuery('.mc-wc-sync-status-time').removeClass('mc-wc-d-none');
+									jQuery('.mc-wc-sync-status-icon-wrapper span').removeClass('mc-wc-d-none');
+									jQuery('.mc-wc-sync-status-icon-wrapper span').removeClass('mc-wc-d-none');
 								}
 							}
 						});

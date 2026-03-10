@@ -12,6 +12,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
 {
     public $id;
     public $email;
+    public $session_id;
     public $previous_email;
     public $cart_data;
     public $ip_address;
@@ -27,7 +28,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
 	 * @param array $cart_data
 	 * @param null $user_language
 	 */
-    public function __construct($uid = null, $email = null, array $cart_data = array(), $user_language = null)
+    public function __construct($uid = null, $email = null, array $cart_data = array(), $user_language = null, $session_id = null)
     {
         if ($uid) {
             $this->id = $uid;
@@ -41,6 +42,10 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
 
         if ($user_language) {
             $this->user_language = $user_language;
+        }
+
+        if ($session_id) {
+            $this->session_id = $session_id;
         }
 
         $this->assignIP();
@@ -118,6 +123,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
 
             $cart = new MailChimp_WooCommerce_Cart();
             $cart->setId($this->id);
+            $cart->setSessionId($this->session_id);
             $cart->setCheckoutUrl($checkout_url);
             $cart->setCurrencyCode();
             $cart->setCustomer($customer);
@@ -149,6 +155,20 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
                 }
             } catch (Exception $e) {
 
+                // this error is for first time contacts not existing on the audience.
+                if (mailchimp_string_contains($e->getMessage(), ['not found in audience'])) {
+                    $list_id = mailchimp_get_list_id();
+                    $email = $customer->getEmailAddress();
+                    mailchimp_debug('abandoned_cart.error', "Contact {$email} was not found in audience during cart update, adding to audience and retrying.");
+                    $subscriber = $api->update($list_id, $email, 'transactional', [], null, null);
+                    if ($subscriber) {
+                        // if the post is successful we're all good.
+                        $api->addCart($store_id, $cart, false);
+                        mailchimp_log('abandoned_cart.success', "email: {$customer->getEmailAddress()} was added to the audience during checkout");
+                        return true;
+                    }
+                }
+
                 mailchimp_error('abandoned_cart.error', "email: {$customer->getEmailAddress()} :: attempting product update :: {$e->getMessage()}");
 
                 // if we have an error it's most likely due to a product not being found.
@@ -169,8 +189,9 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
             }
 
             // Maybe sync subscriber to set correct member.language
-            // TODO this function is doing nothing except pushing the log message with no actual process
-            mailchimp_member_data_update($this->email, $this->user_language, 'cart');
+            // Pass subscriber status if user opted in via newsletter checkbox
+            $subscriber_status = $this->status ? 'subscribed' : 'transactional';
+            mailchimp_member_data_update($this->email, $this->user_language, 'cart', $subscriber_status);
 
         } catch (MailChimp_WooCommerce_RateLimitError $e) {
             sleep(3);

@@ -144,6 +144,24 @@ class MailChimp_WooCommerce_Rest_Api
             'callback' => array($this, 'get_store_id'),
             'permission_callback' => '__return_true',
         ));
+
+        register_rest_route(static::$namespace, '/pixel/atc', [
+            'methods'  => 'GET',
+            'permission_callback' => '__return_true',
+            'callback' => function () {
+                return MailChimp_WooCommerce_Pixel_Tracking::instance()
+                    ->get_last_added_to_cart_from_session();
+            }
+        ]);
+
+        register_rest_route(static::$namespace, '/pixel/rfc', [
+            'methods'  => 'GET',
+            'permission_callback' => '__return_true',
+            'callback' => function () {
+                return MailChimp_WooCommerce_Pixel_Tracking::instance()
+                    ->get_last_removed_from_cart_from_session();
+            }
+        ]);
     }
 
     /**
@@ -1025,6 +1043,7 @@ class MailChimp_WooCommerce_Rest_Api
         );
         // this is just a safeguard against people trying to do wonky things.
         if (!in_array($key, $allowed_keys, true)) {
+            mailchimp_log('authorize', "invalid token type: {$key}");
             wp_send_json_error(array('message' => 'unauthorized token type'), 403);
         }
         // get the auth token from either a header, or the query string
@@ -1035,6 +1054,7 @@ class MailChimp_WooCommerce_Rest_Api
         // if we don't have a token - or we don't have the saved comparison
         // or the token doesn't equal the saved token, throw an error.
         if (empty($token) || empty($saved) || ($token !== $saved && base64_decode($token) !== $saved)) {
+            mailchimp_log('authorize', "unauthorized access on subscriber sync");
             wp_send_json_error(array('message' => 'unauthorized'), 403);
         }
         return true;
@@ -1053,6 +1073,7 @@ class MailChimp_WooCommerce_Rest_Api
         $parts = str_getcsv($token, ':');
         // if we don't have 2 items, that's invalid
         if (count($parts) !== 2) {
+            mailchimp_debug('authorize', "token invalid format", ['token_present' => !empty($token)]);
             wp_send_json_error(array('message' => 'unauthorized'), 403);
         }
         list($key, $secret) = $parts;
@@ -1061,6 +1082,7 @@ class MailChimp_WooCommerce_Rest_Api
         $sql = $wpdb->prepare("SELECT * FROM {$table} WHERE consumer_key = %s AND consumer_secret = %s", array($consumer_key, $secret));
         $api_key = $wpdb->get_row( $sql );
         if (empty($api_key)) {
+            mailchimp_debug('authorize', "token not found", ['token_present' => !empty($token)]);
             wp_send_json_error(array('message' => 'unauthorized'), 403);
         }
         return true;

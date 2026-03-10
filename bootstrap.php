@@ -16,6 +16,7 @@ spl_autoload_register(function($class) {
         'MailChimp_Service' => 'includes/class-mailchimp-woocommerce-service.php',
         'MailChimp_WooCommerce_Options' => 'includes/class-mailchimp-woocommerce-options.php',
         'MailChimp_Newsletter' => 'includes/class-mailchimp-woocommerce-newsletter.php',
+        'MailChimp_Sms_Consent' => 'includes/class-mailchimp-woocommerce-sms-consent.php',
         'MailChimp_WooCommerce_Loader' => 'includes/class-mailchimp-woocommerce-loader.php',
         'MailChimp_WooCommerce_i18n' => 'includes/class-mailchimp-woocommerce-i18n.php',
         'MailChimp_WooCommerce_Deactivator' => 'includes/class-mailchimp-woocommerce-deactivator.php',
@@ -40,6 +41,7 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_PromoCode' => 'includes/api/assets/class-mailchimp-promo-code.php',
         'MailChimp_WooCommerce_PromoRule' => 'includes/api/assets/class-mailchimp-promo-rule.php',
         'MailChimp_WooCommerce_Store' => 'includes/api/assets/class-mailchimp-store.php',
+        'MailChimp_WooCommerce_SmsProgram' => 'includes/api/assets/class-mailchimp-sms-program.php',
 
         // includes/api/errors
         'MailChimp_WooCommerce_Error' => 'includes/api/errors/class-mailchimp-error.php',
@@ -92,6 +94,9 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_Tower' => 'includes/api/class-mailchimp-woocommerce-tower.php',
         'MailChimp_WooCommerce_Log_Viewer' => 'includes/api/class-mailchimp-woocommerce-log-viewer.php',
         'MailChimp_WooCommerce_Enhanced_Logger' => 'includes/class-mailchimp-woocommerce-enhanced-logger.php',
+
+        // pixel tracking
+        'MailChimp_WooCommerce_Pixel_Tracking' => 'includes/tracking/class-mailchimp-woocommerce-pixel-tracking.php',
     );
 
     // if the file exists, require it
@@ -112,7 +117,7 @@ function mailchimp_environment_variables() {
     return (object) array(
         'repo' => 'master',
         'environment' => 'production', // staging or production
-        'version' => '5.5.1',
+        'version' => '6.0',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => function_exists('WC') ? WC()->version : null,
@@ -310,6 +315,22 @@ function mailchimp_get_remaining_jobs_count($job_hook) {
 
 function mailchimp_submit_subscribed_only() {
     return ! (bool) mailchimp_get_option('mailchimp_ongoing_sync_status', '1');
+}
+
+function get_woo_session($key, $default = null)
+{
+    if (!function_exists('WC')) return $default;
+
+    if (!($woo = WC()) || empty(WC()->session)) {
+        return $default;
+    }
+
+    // not really sure why this would be the case, but if there is no session we can't get it anyway.
+    if (!is_object($woo->session) || !method_exists($woo->session, 'get')) {
+        return $default;
+    }
+
+    return $woo->session->get($key, $default);
 }
 
 /**
@@ -1532,7 +1553,17 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
                 $should_doi = false;
             }
 
-            $result = mailchimp_get_api()
+            $api = mailchimp_get_api();
+
+            if ($caller === 'cart') {
+                $status = mailchimp_get_subscriber_status($user_email);
+
+                if (in_array($status, ['transactional', 'subscribed', 'pending'])) {
+                    $status_if_new = $status;
+                }
+            }
+
+            $result = $api
                 ->useAutoDoi($should_doi)
                 ->update(
                     $list_id,
@@ -1583,6 +1614,216 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
                 mailchimp_error($caller . '.member.sync.error', $e->getMessage());
             }
         }
+    }
+}
+
+
+/**
+ * Check if SMS consent is enabled for this store.
+ *
+ * Consolidates all the checks needed to determine if the SMS consent feature
+ * should be active — used by both classic and block checkout, as well as
+ * order/customer processing hooks.
+ *
+ * Three conditions must be met:
+ * 1. The store country is eligible for SMS.
+ * 2. The SMS program is active in Mailchimp (cached for 10 minutes via the API layer).
+ * 3. The merchant opted in via EITHER:
+ *    a. Classic checkout: the admin option "mailchimp_sms_consent_enabled" is toggled on.
+ *    b. Block checkout: the "usingSmsConsent" attribute is true on the SMS block.
+ *
+ * @return bool
+ */
+function mailchimp_sms_consent_enabled() {
+    if (!MailChimp_Sms_Consent::isEligibleCountry()) {
+        return false;
+    }
+
+    // The SMS program must be active in Mailchimp.
+    // isSmsProgramActive() already uses a 10-minute transient cache via getCachedSmsProgram().
+    if (!MailChimp_Sms_Consent::isSmsProgramActive()) {
+        return false;
+    }
+
+    // Classic checkout path — admin toggled the option on.
+    $options = mailchimp_get_admin_options();
+    if (!empty($options['mailchimp_sms_consent_enabled'])) {
+        return true;
+    }
+
+    // Block checkout path — check the block's "usingSmsConsent" attribute.
+    return mailchimp_sms_block_enabled_in_checkout();
+}
+
+/**
+ * Check whether the SMS consent block is present on the checkout page
+ * and has its "usingSmsConsent" attribute set to true.
+ *
+ * Parses the checkout page's post_content to read the saved block attributes,
+ * since has_block() only checks for presence, not attribute values.
+ *
+ * @return bool
+ */
+function mailchimp_sms_block_enabled_in_checkout() {
+    $blocks = mailchimp_parse_checkout_page_blocks();
+    if (empty($blocks)) return false;
+    return mailchimp_find_sms_block_attribute($blocks, 'usingSmsConsent');
+}
+
+function mailchimp_parse_checkout_page_blocks()
+{
+    if (!function_exists('parse_blocks') || !function_exists('wc_get_page_id')) {
+        return false;
+    }
+    $checkout_page_id = wc_get_page_id('checkout');
+    if (!$checkout_page_id || $checkout_page_id < 1) {
+        return false;
+    }
+
+    $checkout_post = get_post($checkout_page_id);
+    if (!$checkout_post || empty($checkout_post->post_content)) {
+        return false;
+    }
+
+    return parse_blocks($checkout_post->post_content);
+}
+
+function mailchimp_find_sms_block()
+{
+    $blocks = mailchimp_parse_checkout_page_blocks();
+    foreach ($blocks as $block) {
+        if ($block['blockName'] !== 'woocommerce/mailchimp-sms-consent') {
+            continue;
+        }
+        return $block;
+    }
+    return false;
+}
+
+/**
+ * Recursively search parsed blocks for the SMS consent block
+ * and return the value of the given attribute.
+ *
+ * @param array $blocks Parsed blocks from parse_blocks().
+ * @param string $attribute The attribute key to look for.
+ * @return bool
+ */
+function mailchimp_find_sms_block_attribute($blocks, $attribute) {
+    foreach ($blocks as $block) {
+        if ($block['blockName'] === 'woocommerce/mailchimp-sms-consent') {
+            return !empty($block['attrs'][$attribute]);
+        }
+        if (!empty($block['innerBlocks'])) {
+            $result = mailchimp_find_sms_block_attribute($block['innerBlocks'], $attribute);
+            if ($result) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+/**
+ * Sync SMS consent data to Mailchimp for a member
+ *
+ * IMPORTANT: This function respects AC8 - if a customer places an order WITHOUT
+ * checking SMS consent, we should NOT change their existing SMS subscription status.
+ * We only sync when the customer explicitly opts in.
+ *
+ * @param string|null $user_email The user's email address (can be null for email-less checkout)
+ * @param int|null $order_id The WooCommerce order ID (optional)
+ * @param int|null $user_id The WordPress user ID (optional)
+ * @param string $caller The calling context for logging
+ * @param string|null $email_status The status of user's email subscription for contact upserts.
+ * @return bool True if SMS was synced, false otherwise
+ */
+function mailchimp_member_sms_update($user_email = null, $order_id = null, $user_id = null, $caller = 'order', $email_status = null) {
+    if (!mailchimp_sms_consent_enabled()) {
+        return false;
+    }
+
+    $sms_data = null;
+
+    // Try to get SMS data from order first
+    if ($order_id) {
+        $sms_data = MailChimp_Sms_Consent::getSmsDataFromOrder($order_id);
+    }
+
+    // If no order SMS data, try from user
+    if (!$sms_data && $user_id) {
+        $sms_data = MailChimp_Sms_Consent::getSmsDataFromUser($user_id);
+    }
+
+    // If still no SMS data, try current user if logged in
+    if (!$sms_data && is_user_logged_in()) {
+        $sms_data = MailChimp_Sms_Consent::getSmsDataFromUser(get_current_user_id());
+    }
+
+    // No SMS consent data found - this is expected when customer doesn't check the box
+    // Per AC8: Do NOT change existing SMS subscription status in this case
+    if (!$sms_data || empty($sms_data['phone'])) {
+        mailchimp_debug('sms.sync', "No SMS consent data found - preserving existing status");
+        return false;
+    }
+
+    // Only sync if they explicitly opted in (AC8 compliance)
+    if (empty($sms_data['subscribed'])) {
+        mailchimp_debug('sms.sync', "SMS consent not checked - preserving existing status");
+        return false;
+    }
+
+    $list_id = mailchimp_get_list_id();
+    if (!$list_id) {
+        return false;
+    }
+
+    // Handle email-less checkout (AC10)
+    $identifier = $user_email;
+    if (empty($identifier) && $order_id) {
+        $order = wc_get_order($order_id);
+        if ($order) {
+            $identifier = $order->get_billing_email();
+        }
+    }
+
+    $transient_key = $caller . ".sms.member." . md5(($sms_data['phone'].'.'.$identifier));
+
+    // Check if we've already synced recently
+    if (mailchimp_get_transient($transient_key)) {
+        mailchimp_debug('sms.sync', "Skipping SMS sync for phone {$sms_data['phone']} - recently synced");
+        return true;
+    }
+
+    try {
+        $api = mailchimp_get_api();
+
+        mailchimp_debug('sms.sync', "Syncing SMS consent", array(
+            'email' => $identifier,
+            'phone' => $sms_data['phone'],
+            'subscribed' => $sms_data['subscribed'],
+        ));
+
+        // Sync SMS consent to Mailchimp
+        // preserve_existing = true means we won't unsubscribe someone who's already subscribed
+        $result = $api->subscribeSms($list_id, $identifier, $sms_data['phone'], $sms_data['subscribed'], true, $email_status);
+
+        mailchimp_log('sms_consent_sync', 'caller', [
+            'caller' => $caller,
+            'user_id' => $user_id,
+            'sms_data' => $sms_data,
+            'email' => $identifier,
+            'result' => $result
+        ]);
+
+        // Set transient to prevent duplicate calls
+        mailchimp_set_transient($transient_key, true, 3600);
+
+        mailchimp_log($caller . '.sms.synced', "SMS consent synced :: phone: {$sms_data['phone']}" . ($identifier ? " :: email: {$identifier}" : " (email-less)"));
+        return true;
+
+    } catch (Exception $e) {
+        mailchimp_error($caller . '.sms.sync.error', $e->getMessage() . " :: phone: {$sms_data['phone']}");
+        return false;
     }
 }
 

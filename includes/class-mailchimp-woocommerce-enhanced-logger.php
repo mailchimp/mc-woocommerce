@@ -21,6 +21,7 @@ class MailChimp_WooCommerce_Enhanced_Logger {
      * @param mixed $request_data Request body data
      */
     public static function log_connection_attempt($method, $url, $curl_info = array(), $response = null, $error_info = array(), $headers = array(), $request_data = null) {
+        if (!defined('MAILCHIMP_DEBUG') || MAILCHIMP_DEBUG !== true) return;
         $log_entry = array(
             'timestamp' => current_time('mysql'),
             'timestamp_utc' => current_time('mysql', true),
@@ -255,7 +256,10 @@ class MailChimp_WooCommerce_Enhanced_Logger {
             if (isset($_SERVER['KINSTA_CACHE_ZONE']) && $key === 'kinsta') return $provider;
             
             // Check server variables
-            $server_vars = array($_SERVER['SERVER_SOFTWARE'], $_SERVER['SERVER_NAME'], php_uname('n'));
+            $server_name = $_SERVER['SERVER_NAME'] ?? '';
+            $server_software = $_SERVER['SERVER_SOFTWARE'] ?? '';
+
+            $server_vars = array($server_software, $server_name, php_uname('n'));
             foreach ($server_vars as $var) {
                 if (stripos($var, $key) !== false) {
                     return $provider;

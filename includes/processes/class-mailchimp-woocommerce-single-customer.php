@@ -88,6 +88,17 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
         $customer->setOptInStatus(false);
         $customer->fromArray($data);
 
+
+		// Retrieve and set SMS consent data if user exists
+		if ($wordpress_user_id && $user) {
+			$sms_consent = get_user_meta($wordpress_user_id, 'mailchimp_woocommerce_sms_consent_subscribed', true);
+			$sms_phone = get_user_meta($wordpress_user_id, 'mailchimp_woocommerce_sms_consent_phone', true);
+
+			if ($sms_consent && !empty($sms_phone)) {
+				$customer->setSmsOptInStatus($sms_consent);
+				$customer->setPhoneNumber($sms_phone);
+			}
+		}
         // set the address from the customer lookup table
         $customer->getAddress()->setCity($this->customer_data->city ?? '');
         $customer->getAddress()->setCountry($this->customer_data->country ?? '');
@@ -126,7 +137,15 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
             // if we're only syncing existing users, we need to make a GET request.
             // this will throw a 404 if they don't exist on the list.
             if ($only_sync_existing) {
-                $api->member($list_id, $email);
+                $member = $api->member($list_id, $email);
+
+                if (in_array($member['status'], ['transactional', 'subscribed', 'pending'])) {
+                    $subscriber_status = $member['status'] === 'transactional' ? '0' : '1';
+                    $status_meta = mailchimp_get_subscriber_status_options($subscriber_status);
+                } else {
+                    mailchimp_log('customer.sync-only-existing', "Skipped {$email} because it has status {$member['status']} in mailchimp");
+                    return false;
+                }
             }
 
             $subscriber = $api->update($list_id, $email, $subscriber_status, $merge_fields, null, $language);

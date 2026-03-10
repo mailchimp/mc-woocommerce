@@ -89,17 +89,19 @@ class Mailchimp_WooCommerce_Single_Product_Category extends Mailchimp_Woocommerc
                 if ($product_ids) {
                     $synced_products = $this->api()->syncProductsToCollection(mailchimp_get_store_id(), $category->getId(), $product_ids);
 
+                    $failed_product_ids = $synced_products['failed_product_ids'] ?? [];
+
                     mailchimp_debug('product_category.products_sync', "Synced products to category #{$this->id}", [
                         'products' => $synced_products['products'],
-                        'failed_product_ids' => $synced_products['failed_product_ids']
+                        'failed_product_ids' => $failed_product_ids
                     ]);
 
-                    if (count($synced_products['failed_product_ids']) > 0) {
+                    if ($failed_product_ids && count($failed_product_ids) > 0) {
                         if ($this->handle_failed_products) {
-                            $this->handleFailedProductsSync($synced_products['failed_product_ids']);
+                            $this->handleFailedProductsSync($failed_product_ids);
                         } else {
                             mailchimp_debug('product_category.products_sync', 'Failed to resync products', [
-                                'failed_product_ids' => $synced_products['failed_product_ids']
+                                'failed_product_ids' => $failed_product_ids
                             ]);
                         }
                     }

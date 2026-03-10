@@ -57,7 +57,7 @@ class Mailchimp_Woocommerce_Event
      * @param bool $test
      * @return array|mixed|null
      */
-    public static function track(string $event, \DateTime $date = null, $test = false)
+    public static function track(string $event, ?\DateTime $date = null, $test = false)
     {
         if (!($data = static::find($event)) || !is_array($data) || empty($data)) {
             return null;
@@ -120,7 +120,7 @@ class Mailchimp_Woocommerce_Event
      *
      * @return $this
      */
-    public function set_date(\DateTime $date = null)
+    public function set_date(?\DateTime $date = null)
     {
         $this->date = $date;
         return $this;
@@ -157,9 +157,11 @@ class Mailchimp_Woocommerce_Event
                 return $response;
             }
 
-            mailchimp_debug('event_tracer', $this->object_detail, array(
-                'id' => isset($response['headers']) && isset($response['headers']['event_id']) ? $response['headers']['event_id'] : 'none'
-            ));
+            if (defined('MAILCHIMP_DEBUG') && MAILCHIMP_DEBUG === true) {
+                mailchimp_debug('event_tracer', $this->object_detail, array(
+                    'id' => isset($response['headers']) && isset($response['headers']['event_id']) ? $response['headers']['event_id'] : 'none'
+                ));
+            }
 
             return json_decode( $response['body'] );
         } catch (\Throwable $e) {
@@ -236,7 +238,9 @@ class Mailchimp_Woocommerce_Event
         $payload['event'] = $payload['properties']['object'] === '' ? $payload['properties']['action'] : $payload['properties']['object'] . ':' . $payload['properties']['action'];
 
         if (empty($this->user_id)) {
-            mailchimp_log('mailchimp_events', "mailchimp beacon :: sending anonymous event");
+            if (defined('MAILCHIMP_DEBUG') && MAILCHIMP_DEBUG === true) {
+                mailchimp_debug('mailchimp_events', "mailchimp beacon :: sending anonymous event");
+            }
             // remove the user id and login id if we don't have this info yet.
             unset($payload['context']['user_id'], $payload['context']['login_id']);
             $payload['properties']['user_id_required'] = false;
@@ -250,7 +254,9 @@ class Mailchimp_Woocommerce_Event
             $payload['context']['_mc_anon_id'] = md5(trim(strtolower($this->anonymous_id)));
         }
 
-        mailchimp_debug('mailchimp_events', "mailchimp beacon tracking payload {$this->event}", $payload);
+        if (defined('MAILCHIMP_DEBUG') && MAILCHIMP_DEBUG === true) {
+            mailchimp_debug('mailchimp_events', "mailchimp beacon tracking payload {$this->event}", $payload);
+        }
 
         return $payload;
     }

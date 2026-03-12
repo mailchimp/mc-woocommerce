@@ -444,7 +444,9 @@ class MailChimp_WooCommerce_Pixel_Tracking
         }
 
         // hook the identity in here
-        mailchimp_log('identity', 'tracking identity through order purchased hook', $order->get_billing_email());
+        mailchimp_log('identity', 'tracking identity through order purchased hook', [
+            'email' => $order->get_billing_email(),
+        ]);
         $this->track_identity($order->get_billing_email());
 
         $order_data = $this->get_formatted_order($order);

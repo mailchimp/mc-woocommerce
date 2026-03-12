@@ -210,7 +210,8 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             $email = $order->getCustomer()->getEmailAddress();
             // see if we have a bad email
 
-            if ($this->shouldSkipOrder($email, $order->getId())) {
+            $sms_consent_enabled = mailchimp_sms_consent_enabled();
+            if (!$sms_consent_enabled && $this->shouldSkipOrder($email, $order->getId())) {
                 return false;
             }
 

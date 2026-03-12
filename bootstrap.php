@@ -1688,6 +1688,13 @@ function mailchimp_parse_checkout_page_blocks()
     return parse_blocks($checkout_post->post_content);
 }
 
+function mailchimp_checkout_using_blocks()
+{
+    $checkout_page_id = get_option('woocommerce_checkout_page_id');
+
+    return has_block( 'woocommerce/checkout', (int) $checkout_page_id );
+}
+
 function mailchimp_find_sms_block()
 {
     $blocks = mailchimp_parse_checkout_page_blocks();

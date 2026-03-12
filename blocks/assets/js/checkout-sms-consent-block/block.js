@@ -139,6 +139,7 @@ const Block = ( {text, userSubscribed, checkoutExtensionData, defaultDisclaimer,
 
 						<PhoneInputWithCountrySelect
 							id="mailchimp-sms-phone"
+							className="wc-block-components-text-input"
 							defaultCountry={billingCountry || 'US'}
 							countries={smsSendingCountries}
 							label={__('SMS Phone Number', 'mailchimp-for-woocommerce')}

@@ -827,6 +827,20 @@ function mailchimp_debug($action, $message, $data = null) {
     }
 }
 
+function mailchimp_enhanced_log($action, $message, $data = null) {
+    if (mailchimp_environment_variables()->logging === 'debug' && function_exists('wc_get_logger')) {
+        if (is_array($data) && !empty($data)) $message .= " :: ".wc_print_r($data, true);
+        wc_get_logger()->warning("{$action} :: {$message}", array('source' => 'mailchimp_woocommerce'));
+    }
+}
+
+function mailchimp_enhanced_error($action, $message, $data = null) {
+    if (mailchimp_environment_variables()->logging === 'debug' && function_exists('wc_get_logger')) {
+        if (is_array($data) && !empty($data)) $message .= " :: ".wc_print_r($data, true);
+        wc_get_logger()->emergency("{$action} :: {$message}", array('source' => 'mailchimp_woocommerce'));
+    }
+}
+
 /**
  * @param $action
  * @param $message

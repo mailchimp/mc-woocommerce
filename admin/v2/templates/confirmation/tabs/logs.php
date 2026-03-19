@@ -35,7 +35,7 @@ if ( ! empty( $requested_log_file ) && isset( $logs[ sanitize_title( $requested_
 	$viewed_log = null;
 }
 $handle = ! empty( $viewed_log ) ? substr( $viewed_log, 0, strlen( $viewed_log ) > 37 ? strlen( $viewed_log ) - 37 : strlen( $viewed_log ) - 4 ) : '';
-
+$logging_source = get_option('woocommerce_logs_default_handler');
 ?>
 <input type="hidden" name="mailchimp_active_settings_tab" value="<?php echo MC_WC_LOGS_TAB; ?>"/>
 <div class="mc-wc-tab-content-wrapper logs">
@@ -67,6 +67,21 @@ $handle = ! empty( $viewed_log ) ? substr( $viewed_log, 0, strlen( $viewed_log )
         </div>
     </div>
 
+
+    <?php if ($logging_source === 'WC_Log_Handler_DB') : ?>
+        <div class="mc-wc-tab-content-box">
+            <p><?php
+            echo sprintf(
+                    esc_html__(
+                        'Woocommerce is using database as a source for logs,  %1$svisit logs page%2$s.',
+                        'mailchimp-for-woocommerce'
+                    ),
+                    '<a href="' . admin_url( 'admin.php?page=wc-status&tab=logs&source=mailchimp_woocommerce' ) . '">',
+                    '</a>'
+                );
+            ?></p>
+        </div>
+    <?php else : ?>
     <div class="mc-wc-tab-content-box">
         <div class="mc-wc-logs-recent-list">
             <p><?php esc_html_e('Recent logs', 'mailchimp-for-woocommerce' ); ?></p>
@@ -136,3 +151,4 @@ $handle = ! empty( $viewed_log ) ? substr( $viewed_log, 0, strlen( $viewed_log )
         </div>
     </div>
 </div>
+    <?php endif; ?>

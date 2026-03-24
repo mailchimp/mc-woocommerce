@@ -96,7 +96,7 @@ class Mailchimp_WooCommerce_Single_Product_Category extends Mailchimp_Woocommerc
                         'failed_product_ids' => $failed_product_ids
                     ]);
 
-                    if (count($failed_product_ids) > 0) {
+                    if ($failed_product_ids && count($failed_product_ids) > 0) {
                         if ($this->handle_failed_products) {
                             $this->handleFailedProductsSync($failed_product_ids);
                         } else {

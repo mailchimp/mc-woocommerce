@@ -177,6 +177,16 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             $this->landing_site = null;
         }
 
+        // if this is not currently in mailchimp - and we have the saved GDPR fields from
+        // we can use the post meta for gdpr fields that were saved during checkout.
+        if (!$this->is_full_sync && $new_order && empty($this->gdpr_fields)) {
+            $this->gdpr_fields = $this->woo_order->get_meta('mailchimp_woocommerce_gdpr_fields');
+            mailchimp_debug('order_submit', "GDPR fields are not set on a new order so we are pulling them from order meta", [
+                'order_id' => $this->id,
+                'gdpr_fields' => $this->gdpr_fields
+            ]);
+        }
+
         $email = null;
 
         try {
@@ -349,12 +359,6 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
                 if (($campaign_id = $api_response->getCampaignId()) && !empty($campaign_id)) {
                     $log .= " :: campaign id {$campaign_id}";
                 }
-            }
-
-            // if this is not currently in mailchimp - and we have the saved GDPR fields from
-            // we can use the post meta for gdpr fields that were saved during checkout.
-            if (!$this->is_full_sync && $new_order && empty($this->gdpr_fields)) {
-                $this->gdpr_fields = $this->woo_order->get_meta('mailchimp_woocommerce_gdpr_fields');
             }
 
             // Maybe sync subscriber to set correct member.language

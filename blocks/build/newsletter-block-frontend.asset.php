@@ -1,1 +1,1 @@
-<?php return array('dependencies' => array('react', 'wc-blocks-checkout', 'wc-blocks-shared-hocs', 'wc-settings', 'wp-element', 'wp-i18n', 'wp-polyfill'), 'version' => '7aa258ddc4b395ba31fd');
+<?php return array('dependencies' => array('react-jsx-runtime', 'wc-blocks-checkout', 'wc-blocks-shared-hocs', 'wc-settings', 'wp-element', 'wp-i18n', 'wp-polyfill'), 'version' => 'ff2088c6ddfed08ef5c9');

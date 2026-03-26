@@ -157,10 +157,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
 		// on order save
         if ($is_subscribed) {
-            MailChimp_WooCommerce_HPOS::update_order_meta($order_id, 'mailchimp_woocommerce_is_subscribed', $is_subscribed);
+            MailChimp_WooCommerce_HPOS::update_order_meta($order_id, 'mailchimp_woocommerce_is_subscribed', true);
 	        if ($order = MailChimp_WooCommerce_HPOS::get_order($order_id)) {
 				if ($user_id = $order->get_user_id()) {
-					update_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', $is_subscribed);
+					update_user_meta($user_id, 'mailchimp_woocommerce_is_subscribed', true);
 				}
 	        }
         }

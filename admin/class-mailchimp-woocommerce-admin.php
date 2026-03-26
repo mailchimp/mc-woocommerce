@@ -572,6 +572,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	}
 
 	public function update_plugin_check() {
+        // only do this on admin pages.
+        if (!is_admin()) return;
+
 		$version = mailchimp_environment_variables()->version;
 
 		// grab the saved version or default to 1.0.3 since that's when we first did this.

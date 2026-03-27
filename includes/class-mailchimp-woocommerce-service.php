@@ -281,7 +281,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                 $handler = new MailChimp_WooCommerce_Cart_Update($uid, $user_email, $this->cart, $language, $session_id);
 
                 // if they had the checkbox checked - go ahead and subscribe them if this is the first post.
-                $handler->setStatus($this->cart_subscribe);
+                // this is not appropriate for capturing email marketing status without consent.
+                //$handler->setStatus($this->cart_subscribe);
                 $handler->prepend_to_queue = true;
                 mailchimp_handle_or_queue($handler);
             }

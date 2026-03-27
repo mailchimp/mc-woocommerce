@@ -1,4 +1,6 @@
 == Changelog ==
+= 6.0.2 =
+* Update cart subscription defaults
 = 6.0.1 =
 * Fix order syncing issues related to SMS sending countries
 * Fix GDPR fields saved in order meta

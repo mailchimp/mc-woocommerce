@@ -1588,7 +1588,7 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
 
             // set transient to prevent too many calls to update language
             mailchimp_set_transient($caller . ".member.{$hash}", true, 3600);
-            mailchimp_log($caller . '.member.updated', "Updated {$user_email} subscriber status to {$result['status']}".(!empty($language) ? "and language to {$language}" : ""));
+            mailchimp_log($caller . '.member.updated', "{$user_email} subscriber status is {$result['status']}".(!empty($language) ? " and language is {$language}" : ""));
         } catch (Exception $e) {
             $merge_fields = $order ? apply_filters('mailchimp_get_ecommerce_merge_tags', array(), $order) : array();
             if (!is_array($merge_fields)) $merge_fields = array();
@@ -1609,7 +1609,7 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
                 mailchimp_log($caller . '.member.created', "Added {$user_email} as transactional, setting language to [{$language}]");
             } else if (strpos($e->getMessage(), 'compliance state') !== false) {
                 mailchimp_get_api()->update($list_id, $user_email, 'pending', $merge_fields);
-                mailchimp_log($caller . '.member.sync', "Update {$user_email} Using Double Opt In", $merge_fields);
+                mailchimp_log($caller . '.member.sync', "{$user_email} was in a compliance state - using double opt-in, set status to pending", $merge_fields);
             } else {
                 mailchimp_error($caller . '.member.sync.error', $e->getMessage());
             }

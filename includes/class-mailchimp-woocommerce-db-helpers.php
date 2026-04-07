@@ -15,6 +15,9 @@ class Mailchimp_Woocommerce_DB_Helpers
     public static function add_option($option, $value = '', $autoload = null) {
         global $wpdb;
 
+        // make sure we unset the values if it were there before.
+        unset(self::$option_cache[$option]);
+
         if ( is_scalar( $option ) ) {
             $option = trim( $option );
         }
@@ -113,6 +116,9 @@ class Mailchimp_Woocommerce_DB_Helpers
     public static function update_option($option, $value) {
         global $wpdb;
 
+        // make sure we unset the values if it were there before.
+        unset(self::$option_cache[$option]);
+
         if ( is_scalar( $option ) ) {
             $option = trim( $option );
         }
@@ -173,6 +179,9 @@ class Mailchimp_Woocommerce_DB_Helpers
      */
     public static function delete_option($option) {
         global $wpdb;
+
+        // make sure we unset the values if it were there before.
+        unset(self::$option_cache[$option]);
 
         if ( is_scalar( $option ) ) {
             $option = trim( $option );

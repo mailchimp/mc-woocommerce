@@ -28,6 +28,15 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
         return static::$_instance;
     }
 
+    public function applyNewsletterFieldToRegisterForm($form)
+    {
+        $show_field = apply_filters('mailchimp_woocommerce_account_register_newsletter_field', true);
+
+        if ($show_field) {
+            $this->applyNewsletterField($form);
+        }
+    }
+
 	/**
 	 * @param $checkout
 	 */

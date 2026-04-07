@@ -37,9 +37,9 @@ class MailChimp_WooCommerce_Enhanced_Logger {
         
         // Log to WooCommerce logs
         if (!empty($error_info)) {
-            mailchimp_debug('enhanced_logger', 'ERROR', $log_entry);
+            mailchimp_enhanced_error('enhanced_logger', 'ERROR', $log_entry);
         } else {
-            mailchimp_debug('enhanced_logger', 'INFO', $log_entry);
+            mailchimp_enhanced_log('enhanced_logger', 'INFO', $log_entry);
         }
         
         // Store in transient for admin view

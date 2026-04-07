@@ -2,6 +2,7 @@
 
 class Mailchimp_Woocommerce_DB_Helpers
 {
+    protected static $option_cache = [];
 
     /**
      * Add site option
@@ -57,33 +58,49 @@ class Mailchimp_Woocommerce_DB_Helpers
             $option = trim( $option );
         }
 
-        if ( empty( $option ) ) {
+        if (empty($option)) {
             return false;
         }
 
         $passed_default = func_num_args() > 1;
 
-        $suppress = $wpdb->suppress_errors();
-        $row      = $wpdb->get_row( $wpdb->prepare( "SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1", $option ) );
-        $wpdb->suppress_errors( $suppress );
+        if (array_key_exists($option, self::$option_cache)) {
+            return self::$option_cache[$option];
+        }
 
-        if ( is_object( $row ) ) {
+        $suppress = $wpdb->suppress_errors();
+        $row = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1",
+                $option
+            )
+        );
+        $wpdb->suppress_errors($suppress);
+
+        if (is_object($row)) {
             $value = $row->option_value;
         } else {
-            /** This filter is documented in wp-includes/option.php */
-            return apply_filters( "default_option_{$option}", $default_value, $option, $passed_default );
+            $value = apply_filters("default_option_{$option}", $default_value, $option, $passed_default);
+
+            self::$option_cache[$option] = $value;
+            return $value;
         }
 
-        // If home is not set, use siteurl.
-        if ( 'home' === $option && '' === $value ) {
-            return self::get_option( 'siteurl' );
+        if ($option === 'home' && $value === '') {
+            $value = self::get_option('siteurl');
+            self::$option_cache[$option] = $value;
+            return $value;
         }
 
-        if ( in_array( $option, array( 'siteurl', 'home', 'category_base', 'tag_base' ), true ) ) {
-            $value = untrailingslashit( $value );
+        if (in_array($option, ['siteurl', 'home', 'category_base', 'tag_base'], true)) {
+            $value = untrailingslashit($value);
         }
 
-        return apply_filters( "option_{$option}", maybe_unserialize( $value ), $option );
+        $value = apply_filters("option_{$option}", maybe_unserialize($value), $option);
+
+        self::$option_cache[$option] = $value;
+
+        return $value;
     }
 
     /**

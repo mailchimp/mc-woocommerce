@@ -79,7 +79,7 @@ class MailChimp_WooCommerce_PromoCode {
 			'code'               => 'required',
 			'redemption_url'     => 'required',
 			'usage_count'        => 'integer',
-			'created_at_foreign' => 'date',
+            'created_at_foreign' => 'date',
 			'updated_at_foreign' => 'date',
 		);
 	}

@@ -90,6 +90,9 @@ class MailChimp_WooCommerce_Transform_Coupons {
 			$rule->setEndsAt( $exp );
 		}
 
+        $rule->setCreatedAt( $resource->get_date_created() );
+        $rule->setUpdatedAt( $resource->get_date_modified() );
+
 		$code = new MailChimp_WooCommerce_PromoCode();
 
 		$code->setId( $resource->get_id() );

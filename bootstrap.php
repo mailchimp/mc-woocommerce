@@ -122,6 +122,7 @@ function mailchimp_environment_variables() {
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => function_exists('WC') ? WC()->version : null,
         'logging' => ($o && is_array($o) && isset($o['mailchimp_logging'])) ? $o['mailchimp_logging'] : 'standard',
+        'initial_sync' => \Mailchimp_Woocommerce_DB_Helpers::get_option("mailchimp-woocommerce-sync.initial_sync", false)
     );
 }
 

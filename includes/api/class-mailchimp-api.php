@@ -3099,6 +3099,10 @@ class MailChimp_WooCommerce_MailChimpApi {
             $headers
         );
 
+        if ($env->initial_sync) {
+            $headers[] = 'X-Data-Mode: historical';
+        }
+
         if ($this->auto_doi) {
             mailchimp_debug('api', "applied doi headers", $headers);
         }

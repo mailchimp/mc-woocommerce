@@ -296,12 +296,13 @@ class MailChimp_WooCommerce_PromoRule {
 
 		return $this;
 	}
-	/**
-	 * @param DateTime $time
-	 * @return $this
-	 */
-	public function setUpdatedAt( DateTime $time ) {
-		$this->updated_at_foreign = $time->format( DATE_ISO8601 );
+
+    /**
+     * @param DateTime|null $time
+     * @return $this
+     */
+	public function setUpdatedAt( ?\DateTime $time ) {
+		$this->updated_at_foreign = $time ? $time->format( DATE_ISO8601 ) : "";
 
 		return $this;
 	}
@@ -313,12 +314,12 @@ class MailChimp_WooCommerce_PromoRule {
 		return $this->updated_at_foreign;
 	}
 
-	/**
-	 * @param DateTime $time
-	 * @return $this
-	 */
-	public function setCreatedAt( DateTime $time ) {
-		$this->created_at_foreign = $time->format( DATE_ISO8601 );
+    /**
+     * @param DateTime|null $time
+     * @return $this
+     */
+	public function setCreatedAt( ?\DateTime $time ) {
+		$this->created_at_foreign = $time ? $time->format( DATE_ISO8601 ) : "";
 
 		return $this;
 	}

@@ -331,14 +331,26 @@ abstract class MailChimp_WooCommerce_Options
         \Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-errors.store_info');
         \Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-validation.api.ping');
 
-        // New (transient-backed) cache entries.
+        // Transient-backed caches.
         delete_transient('mailchimp-woocommerce-cached-api-lists');
         delete_transient('mailchimp-woocommerce-cached-api-ping-check');
+        delete_transient('mailchimp_woocommerce_store_id_verified');
+
+        // One-time-check throttle transients. Clearing these forces the
+        // next admin request to re-verify/retry any schema or migration
+        // work that was rate-limited.
+        delete_transient('mailchimp_woocommerce_jobs_table_verified');
+        delete_transient('mailchimp_woocommerce_cart_index_check_backoff');
+        delete_transient('mailchimp_woocommerce_carts_gc_ran');
+        delete_transient('mailchimp_woocommerce_carts_create_backoff');
+        delete_transient('mailchimp_woocommerce_currency_sync_backoff');
 
         // Legacy rows written by the previous getCached/setCached implementation
-        // that stored serialized arrays directly in wp_options. Harmless if
-        // they're already gone.
+        // that stored serialized arrays directly in wp_options. Also includes
+        // the old store-id-last-verified timestamp option that has been
+        // replaced by a transient. Harmless if they're already gone.
         \Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-cached-api-lists');
         \Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-cached-api-ping-check');
+        \Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-store-id-last-verified');
     }
 }

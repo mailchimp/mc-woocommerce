@@ -19,7 +19,15 @@
         $permission_cap_settings = 'manage_woocommerce';
     }
     $checkbox_default_settings = ( array_key_exists( 'mailchimp_checkbox_defaults', $options ) && ! is_null( $options['mailchimp_checkbox_defaults'] ) ) ? $options['mailchimp_checkbox_defaults'] : 'check';
-	$is_has_wc_checkout_block = has_block( 'woocommerce/checkout', (int) $checkout_page_id );
+    // has_block() pulls the full post + parses block markup every call —
+    // cheap after the first read per request but worth memoizing here
+    // because the store_info tab has multiple block-aware branches that
+    // would otherwise re-parse.
+    static $is_has_wc_checkout_block_cache = null;
+    if ( $is_has_wc_checkout_block_cache === null ) {
+        $is_has_wc_checkout_block_cache = has_block( 'woocommerce/checkout', (int) $checkout_page_id );
+    }
+    $is_has_wc_checkout_block = $is_has_wc_checkout_block_cache;
 
     $default_opt_in_settings = array(
         [ 'label' => esc_html__( 'Checked by default', 'mailchimp-for-woocommerce' ), 'value' => 'check' ],

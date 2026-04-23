@@ -360,17 +360,20 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				}
 			}
 
-			// this is where we need to cache this data for a longer period of time and only during admin page views.
-			// https://wordpress.org/support/topic/the-plugin-slows-down-the-website-because-of-slow-api/#post-14339311
+			// Cache GDPR fields for 10 minutes to avoid hammering the API.
+			// Uses native get_transient/set_transient (object-cache-aware —
+			// single Redis op with native TTL when available, no wp_options
+			// writes). Single shared transient with updateGDPRFields() so
+			// only one write path maintains the cache.
 			if ( mailchimp_is_configured() && ( $list_id = mailchimp_get_list_id() ) ) {
 				$transient  = "mailchimp-woocommerce-gdpr-fields.{$list_id}";
-				$GDPRfields = \Mailchimp_Woocommerce_DB_Helpers::get_transient( $transient );
+				$GDPRfields = get_transient( $transient );
 				if ( ! is_array( $GDPRfields ) ) {
 					try {
 						$GDPRfields = mailchimp_get_api()->getGDPRFields( $list_id );
-						\Mailchimp_Woocommerce_DB_Helpers::set_transient( $transient, $GDPRfields, 600 );
+						set_transient( $transient, is_array( $GDPRfields ) ? $GDPRfields : array(), 600 );
 					} catch ( Exception $e ) {
-						\Mailchimp_Woocommerce_DB_Helpers::set_transient( $transient, array(), 60 );
+						set_transient( $transient, array(), 60 );
 					}
 				}
 			}
@@ -506,7 +509,19 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			//$this->fix_is_syncing_problem();
 		}
 
-		if ( ! \Mailchimp_Woocommerce_DB_Helpers::get_option( $this->plugin_name . '_cart_table_add_index_update' ) ) {
+		// Carts-table one-time cleanup: add PRIMARY KEY on email column and
+		// de-dupe any existing rows. The outer option flag prevents re-runs
+		// after success, but if DELETE or ALTER TABLE silently returns false
+		// the flag never gets set — so we'd re-run the full check and
+		// cleanup on every admin request forever. Backoff transient
+		// ensures we retry at most once per hour in the failure case.
+		if ( ! \Mailchimp_Woocommerce_DB_Helpers::get_option( $this->plugin_name . '_cart_table_add_index_update' )
+			&& ! get_transient( 'mailchimp_woocommerce_cart_index_check_backoff' ) ) {
+			// Set backoff immediately so a failure doesn't retry until the
+			// hour is up. Success path still removes the need to retry at
+			// all via the option flag.
+			set_transient( 'mailchimp_woocommerce_cart_index_check_backoff', 1, HOUR_IN_SECONDS );
+
 			$check_index_sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE table_schema='{$wpdb->dbname}' AND table_name='{$wpdb->prefix}mailchimp_carts' AND index_name='primary' and column_name='email';";
 			$index_exists    = $wpdb->get_var( $check_index_sql );
 			if ( $index_exists == '1' ) {
@@ -528,15 +543,32 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			}
 		}
 
-		if ( ! \Mailchimp_Woocommerce_DB_Helpers::get_option( $this->plugin_name . '_woo_currency_update' ) ) {
+		// One-time WooCommerce currency sync with Mailchimp. Success sets
+		// the option flag and never runs again. Failure used to retry on
+		// every admin request — mailchimp_update_woo_settings() calls
+		// syncStore() which hits the Mailchimp API, so uncontrolled
+		// retries meant an API call per admin page load. 1h backoff keeps
+		// the retry cadence sane.
+		if ( ! \Mailchimp_Woocommerce_DB_Helpers::get_option( $this->plugin_name . '_woo_currency_update' )
+			&& ! get_transient( 'mailchimp_woocommerce_currency_sync_backoff' ) ) {
+			set_transient( 'mailchimp_woocommerce_currency_sync_backoff', 1, HOUR_IN_SECONDS );
 			if ( $this->mailchimp_update_woo_settings() ) {
 				\Mailchimp_Woocommerce_DB_Helpers::update_option( $this->plugin_name . '_woo_currency_update', true );
 			}
 		}
 
-		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}mailchimp_jobs';" ) != $wpdb->prefix . 'mailchimp_jobs' ) {
-			MailChimp_WooCommerce_Activator::create_queue_tables();
-			MailChimp_WooCommerce_Activator::migrate_jobs();
+		// Jobs-table existence check. SHOW TABLES hits information_schema on
+		// every admin request, which in practice is wasted work — once we've
+		// confirmed the table exists, re-checking hourly is more than
+		// sufficient to detect a manual drop or corruption. Transient with
+		// 1h TTL stays in Redis/object cache so the actual DB query runs at
+		// most once an hour.
+		if ( ! get_transient( 'mailchimp_woocommerce_jobs_table_verified' ) ) {
+			if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}mailchimp_jobs';" ) != $wpdb->prefix . 'mailchimp_jobs' ) {
+				MailChimp_WooCommerce_Activator::create_queue_tables();
+				MailChimp_WooCommerce_Activator::migrate_jobs();
+			}
+			set_transient( 'mailchimp_woocommerce_jobs_table_verified', 1, HOUR_IN_SECONDS );
 		}
 
 		if ( defined( 'DISABLE_WP_HTTP_WORKER' ) || defined( 'MAILCHIMP_USE_CURL' ) || defined( 'MAILCHIMP_REST_LOCALHOST' ) || defined( 'MAILCHIMP_REST_IP' ) || defined( 'MAILCHIMP_DISABLE_QUEUE' ) && true === MAILCHIMP_DISABLE_QUEUE ) {
@@ -752,28 +784,48 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		global $wpdb;
 
 		if ( \Mailchimp_Woocommerce_DB_Helpers::get_option( 'mailchimp_woocommerce_db_mailchimp_carts' ) ) {
-			// need to tidy up the mailchimp_cart table and make sure we don't have anything older than 30 days old.
-			$date = gmdate( 'Y-m-d H:i:s', strtotime( date( 'Y-m-d' ) . '-30 days' ) );
-			$sql  = $wpdb->prepare( "DELETE FROM {$wpdb->prefix}mailchimp_carts WHERE created_at <= %s", $date );
-			$wpdb->query( $sql );
-		} else {
-
-			// create the table for the first time now.
-			$charset_collate = $wpdb->get_charset_collate();
-			$table           = "{$wpdb->prefix}mailchimp_carts";
-
-			$sql = "CREATE TABLE IF NOT EXISTS $table (
-				id VARCHAR (255) NOT NULL,
-				email VARCHAR (100) NOT NULL,
-				user_id INT (11) DEFAULT NULL,
-                cart text NOT NULL,
-                created_at datetime NOT NULL,
-				PRIMARY KEY  (email)
-				) $charset_collate;";
-
-			if ( ( $result = $wpdb->query( $sql ) ) > 0 ) {
-				\Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp_woocommerce_db_mailchimp_carts', true );
+			// Garbage-collect rows older than 30 days. Previously this
+			// DELETE ran on every Mailchimp admin page load, which is
+			// absurdly over-eager for a TTL-based cleanup — throttling to
+			// once per day is plenty fresh (the cart logic itself doesn't
+			// care about rows that are already past the 30-day cutoff).
+			if ( ! get_transient( 'mailchimp_woocommerce_carts_gc_ran' ) ) {
+				set_transient( 'mailchimp_woocommerce_carts_gc_ran', 1, DAY_IN_SECONDS );
+				$date = gmdate( 'Y-m-d H:i:s', strtotime( date( 'Y-m-d' ) . '-30 days' ) );
+				$sql  = $wpdb->prepare( "DELETE FROM {$wpdb->prefix}mailchimp_carts WHERE created_at <= %s", $date );
+				$wpdb->query( $sql );
 			}
+			return;
+		}
+
+		// Create-table branch — gated by the option flag on success, but
+		// if CREATE TABLE returns 0 rows affected (e.g. table already
+		// exists from a previous attempt but the flag write failed), the
+		// old code re-ran this on every request. Backoff transient caps
+		// retries at once per hour.
+		if ( get_transient( 'mailchimp_woocommerce_carts_create_backoff' ) ) {
+			return;
+		}
+		set_transient( 'mailchimp_woocommerce_carts_create_backoff', 1, HOUR_IN_SECONDS );
+
+		$charset_collate = $wpdb->get_charset_collate();
+		$table           = "{$wpdb->prefix}mailchimp_carts";
+
+		$sql = "CREATE TABLE IF NOT EXISTS $table (
+			id VARCHAR (255) NOT NULL,
+			email VARCHAR (100) NOT NULL,
+			user_id INT (11) DEFAULT NULL,
+            cart text NOT NULL,
+            created_at datetime NOT NULL,
+			PRIMARY KEY  (email)
+			) $charset_collate;";
+
+		if ( ( $result = $wpdb->query( $sql ) ) !== false ) {
+			// CREATE TABLE IF NOT EXISTS returns 0 on "already exists" and
+			// still counts as success — set the flag either way so we
+			// don't retry endlessly just because the table was already
+			// there from a previous incomplete attempt.
+			\Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp_woocommerce_db_mailchimp_carts', true );
 		}
 	}
 
@@ -1594,9 +1646,14 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			return false;
 		}
 
+		// Ping is a liveness check — short-ish TTL is appropriate so outages
+		// are detected promptly, but 2min was too aggressive and caused
+		// constant expire/rewrite churn on admin sessions. 10min catches
+		// any real outage quickly enough for the UI to react without
+		// hammering the API or the options table.
 		if ( ( $pinged = $this->getCached( 'api-ping-check' ) ) === null ) {
 			if ( ( $pinged = $this->api()->ping( false, $throw_if_not_valid === true ) ) ) {
-				$this->setCached( 'api-ping-check', true, 120 );
+				$this->setCached( 'api-ping-check', true, 10 * MINUTE_IN_SECONDS );
                 if (mailchimp_get_option('api_ping_error')) {
                     $options = get_option($this->plugin_name);
                     $options['api_ping_error'] = null;
@@ -1640,9 +1697,13 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 
 		try {
+			// Account profile essentially never changes after initial connect
+			// (name, id, etc.). Cache for 24h. Settings-save handlers and
+			// explicit disconnect/reconnect flows already bust this via
+			// removeMiscPointers() so staleness isn't a practical concern.
 			if ( ( $account = $this->getCached( 'api-account-name' ) ) === null ) {
 				if ( ( $account = $this->api()->getProfile() ) ) {
-					$this->setCached( 'api-account-name', $account, 300 );
+					$this->setCached( 'api-account-name', $account, DAY_IN_SECONDS );
 				}
 			}
 			return $account;
@@ -1664,10 +1725,16 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 
 		try {
+			// Mailchimp audiences change rarely — new audience creation,
+			// renames, etc. 1h TTL is plenty fresh for the settings UI and
+			// cuts the "expire-and-rewrite" churn dramatically on busy
+			// admin sessions. Users who change a list remote-side can force
+			// a refresh by re-loading settings via the disconnect/reconnect
+			// flow, which clears this transient.
 			if ( ( $pinged = $this->getCached( 'api-lists' ) ) === null ) {
 				$pinged = $this->api()->getLists( true );
 				if ( $pinged ) {
-					$this->setCached( 'api-lists', $pinged, 300 );
+					$this->setCached( 'api-lists', $pinged, HOUR_IN_SECONDS );
                     $this->safelyUpdateGDPRFields();
 				}
 				return $pinged;
@@ -1711,7 +1778,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			if ( ( $lists = $this->getCached( 'api-lists' ) ) === null ) {
 				$lists = $this->api()->getLists( true );
 				if ( $lists ) {
-					$this->setCached( 'api-lists', $lists, 300 );
+					$this->setCached( 'api-lists', $lists, HOUR_IN_SECONDS );
                     $this->safelyUpdateGDPRFields();
 				}
 			}
@@ -1929,23 +1996,31 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
     protected function updateGDPRFields($list_id)
     {
+        if ( empty( $list_id ) ) {
+            return;
+        }
+
+        $transient = "mailchimp-woocommerce-gdpr-fields.{$list_id}";
+
+        // Single source of truth — coordinate with setup() via the SAME
+        // transient and TTL. If it's still warm, skip the API call and the
+        // write entirely. The old `.last_saved` marker + separate "no TTL"
+        // write path used to trigger a duplicate API call + 4+ transient
+        // writes every few minutes; a single TTL'd transient replaces all
+        // of that.
+        if ( get_transient( $transient ) !== false ) {
+            return;
+        }
+
         try {
-            if ( ! empty( $list_id ) && !\Mailchimp_Woocommerce_DB_Helpers::get_transient("mailchimp-woocommerce-gdpr-fields.{$list_id}.last_saved")) {
-                $transient  = "mailchimp-woocommerce-gdpr-fields.{$list_id}";
-                $GDPRfields = mailchimp_get_api()->getGDPRFields( $list_id );
-                \Mailchimp_Woocommerce_DB_Helpers::set_transient( $transient, $GDPRfields );
-                \Mailchimp_Woocommerce_DB_Helpers::set_transient("mailchimp-woocommerce-gdpr-fields.{$list_id}.last_saved", true, 120);
-                mailchimp_log(
-                    'admin',
-                    'updated GDPR fields',
-                    array(
-                        'fields' => $GDPRfields,
-                    )
-                );
-            }
+            $GDPRfields = mailchimp_get_api()->getGDPRFields( $list_id );
+            set_transient( $transient, is_array( $GDPRfields ) ? $GDPRfields : array(), 600 );
+            mailchimp_log( 'admin', 'updated GDPR fields', array( 'fields' => $GDPRfields ) );
         } catch ( Exception $e ) {
-            \Mailchimp_Woocommerce_DB_Helpers::set_transient( $transient, array(), 60 );
-            mailchimp_error( 'admin', 'updating GDPR fields failed '.$e->getMessage() );
+            // Negative-cache the failure for 60s so we don't hammer the API
+            // during an outage. Next refresh cycle will retry.
+            set_transient( $transient, array(), 60 );
+            mailchimp_error( 'admin', 'updating GDPR fields failed ' . $e->getMessage() );
         }
     }
 

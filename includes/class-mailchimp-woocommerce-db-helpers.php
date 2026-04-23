@@ -5,16 +5,101 @@ class Mailchimp_Woocommerce_DB_Helpers
     protected static $option_cache = [];
 
     /**
+     * Per-request memo of option names whose row is confirmed absent in the
+     * DB. Lets repeated get_option() calls for a missing row skip the SELECT
+     * while still letting each caller apply its own default — no cross-caller
+     * default contamination (the bug that got us into this mess the first
+     * time). Invalidated by bust_cache() on any write.
+     */
+    protected static $missing_rows = [];
+
+    /**
      * TEMP LOGGING — gated by the MAILCHIMP_LOG_OPTIONS constant. Define it
      * as true in wp-config.php to enable add/update/delete tracing; leave
      * undefined (or false) in production. Remove along with the call sites
      * once the add/update flow is verified.
      */
+    /**
+     * Reentrancy guard. mailchimp_log() / mailchimp_debug() ultimately call
+     * mailchimp_environment_variables() which calls get_option() which calls
+     * trace_read() which calls mailchimp_log() — infinite loop, stack
+     * overflow, white screen. While this flag is true, the helper's own
+     * logging and tracing are suppressed so we don't recurse back through
+     * the option pipeline.
+     */
+    protected static $in_logging = false;
+
     protected static function log_op($channel, $event, array $context) {
         if ( ! defined( 'MAILCHIMP_LOG_OPTIONS' ) || ! MAILCHIMP_LOG_OPTIONS ) {
             return;
         }
-        mailchimp_log( $channel, $event, $context );
+        if ( self::$in_logging ) {
+            return;
+        }
+        if ( ! function_exists( 'mailchimp_log' ) ) {
+            return; // bootstrap hasn't finished loading yet
+        }
+        self::$in_logging = true;
+        try {
+            mailchimp_log( $channel, $event, $context );
+        } finally {
+            self::$in_logging = false;
+        }
+    }
+
+    /**
+     * TEMP TRACER — gated by the MAILCHIMP_TRACE_OPTIONS constant. When
+     * enabled, logs every get_option() call through the helper with the
+     * source (cache_hit / missing_memo / db_query), the currently-firing
+     * WP hook, and a caller frame. Use this to identify which code paths
+     * read which options and WHEN during the request lifecycle so you can
+     * tune the preload lists.
+     *
+     * Define MAILCHIMP_TRACE_OPTIONS = true in wp-config.php to enable.
+     * Leave undefined/false in production — a single trace pays for a
+     * debug_backtrace and a log write per read.
+     */
+    protected static function trace_read($option, $source) {
+        if ( ! defined( 'MAILCHIMP_TRACE_OPTIONS' ) || ! MAILCHIMP_TRACE_OPTIONS ) {
+            return;
+        }
+        // Reentrancy guard — mailchimp_log() indirectly calls get_option()
+        // via mailchimp_environment_variables(), which would re-enter this
+        // function and recurse until the stack blows up.
+        if ( self::$in_logging ) {
+            return;
+        }
+        if ( ! function_exists( 'mailchimp_log' ) ) {
+            return; // bootstrap hasn't finished loading yet
+        }
+
+        $hook = function_exists( 'current_filter' ) ? current_filter() : '';
+        $caller = '';
+
+        // Walk back past trace_read and get_option to the real caller.
+        $frames = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 6 );
+        foreach ( $frames as $frame ) {
+            if ( ! isset( $frame['function'] ) ) continue;
+            if ( $frame['function'] === 'trace_read' ) continue;
+            if ( $frame['function'] === 'get_option' && isset( $frame['class'] ) && $frame['class'] === __CLASS__ ) continue;
+            $file = isset( $frame['file'] ) ? basename( $frame['file'] ) : '?';
+            $line = isset( $frame['line'] ) ? $frame['line'] : '?';
+            $fn   = ( isset( $frame['class'] ) ? $frame['class'] . '::' : '' ) . $frame['function'];
+            $caller = "{$fn} ({$file}:{$line})";
+            break;
+        }
+
+        self::$in_logging = true;
+        try {
+            mailchimp_log( 'db_helpers.trace', 'get_option', array(
+                'option' => $option,
+                'source' => $source,      // cache_hit | missing_memo | db_query
+                'hook'   => $hook ?: '(no active hook)',
+                'caller' => $caller,
+            ) );
+        } finally {
+            self::$in_logging = false;
+        }
     }
 
     /**
@@ -64,6 +149,7 @@ class Mailchimp_Woocommerce_DB_Helpers
     protected static function bust_cache($option, $new_value = null, $prime = false) {
         // Always clear our per-request static cache — it's local to this class.
         unset(self::$option_cache[$option]);
+        unset(self::$missing_rows[$option]);
 
         // Everything below touches the shared WP object cache, so gate it on
         // ownership to avoid stepping on other plugins / core.
@@ -179,8 +265,22 @@ class Mailchimp_Woocommerce_DB_Helpers
         $passed_default = func_num_args() > 1;
 
         if (array_key_exists($option, self::$option_cache)) {
-            return self::$option_cache[$option];
+            self::trace_read($option, 'cache_hit');
+            // Apply option_{$option} filter on every read — matches WP core
+            // get_option(). Preloaded values are cached raw (unfiltered) so
+            // this is the one place the filter gets applied for them.
+            return apply_filters( "option_{$option}", self::$option_cache[$option], $option );
         }
+
+        // If we've already confirmed this row doesn't exist earlier in this
+        // request, skip the DB round-trip and let each caller apply its own
+        // default via the default_option_{$option} filter.
+        if (isset(self::$missing_rows[$option])) {
+            self::trace_read($option, 'missing_memo');
+            return apply_filters("default_option_{$option}", $default_value, $option, $passed_default);
+        }
+
+        self::trace_read($option, 'db_query');
 
         $suppress = $wpdb->suppress_errors();
         $row = $wpdb->get_row(
@@ -194,11 +294,10 @@ class Mailchimp_Woocommerce_DB_Helpers
         if (is_object($row)) {
             $value = $row->option_value;
         } else {
-            // Row is missing. Return the (filtered) default but DO NOT cache
-            // it — caching a default would mask "row missing" on subsequent
-            // calls and makes the cached value depend on whichever default
-            // the first caller happened to pass. Let each caller get its
-            // own default until the row actually exists.
+            // Row is missing. Memoize the absence (not the default value) so
+            // we don't repeat the SELECT for this option later in the same
+            // request. Each caller still gets its own default applied.
+            self::$missing_rows[$option] = true;
             return apply_filters("default_option_{$option}", $default_value, $option, $passed_default);
         }
 
@@ -212,11 +311,217 @@ class Mailchimp_Woocommerce_DB_Helpers
             $value = untrailingslashit($value);
         }
 
-        $value = apply_filters("option_{$option}", maybe_unserialize($value), $option);
-
+        // Cache the raw unserialized value; apply option_{$option} filter
+        // on the way out so every read (cache hit or DB fetch) sees the
+        // same filter pipeline. This mirrors WP core get_option() and
+        // avoids any risk of a pre-init filter callback causing
+        // _load_textdomain_just_in_time doing_it_wrong notices from
+        // preload warming.
+        $value = maybe_unserialize( $value );
         self::$option_cache[$option] = $value;
 
-        return $value;
+        return apply_filters( "option_{$option}", $value, $option );
+    }
+
+    /**
+     * Warm the per-request option cache with a batch of owned option rows in
+     * a single SELECT, so subsequent get_option() calls for those keys are
+     * served from memory instead of the DB.
+     *
+     * Use this on admin pages (or any request that is known to read many
+     * options) to collapse N lookups into one. Non-owned option names are
+     * silently skipped — we can't guarantee cache coherence for options that
+     * don't flow through this class on writes.
+     *
+     * Keys already in self::$option_cache or already memoized as missing are
+     * skipped, so calling preload() repeatedly with overlapping key sets is
+     * safe and cheap.
+     *
+     * @param array $options list of option names to preload
+     * @return int number of option rows actually fetched from the DB
+     */
+    public static function preload(array $options) {
+        global $wpdb;
+
+        $to_fetch = array();
+        foreach ($options as $option) {
+            if (!is_string($option) || $option === '') continue;
+            if (!self::is_owned_option($option)) continue;
+            if (array_key_exists($option, self::$option_cache)) continue;
+            if (isset(self::$missing_rows[$option])) continue;
+            $to_fetch[$option] = true; // dedupe
+        }
+
+        if (empty($to_fetch)) {
+            return 0;
+        }
+
+        $to_fetch = array_keys($to_fetch);
+        $placeholders = implode(',', array_fill(0, count($to_fetch), '%s'));
+
+        $rows = $wpdb->get_results( $wpdb->prepare(
+            "SELECT option_name, option_value FROM $wpdb->options WHERE option_name IN ($placeholders)",
+            $to_fetch
+        ) );
+
+        $found = array();
+        if (is_array($rows)) {
+            foreach ($rows as $row) {
+                // Store the raw unserialized value — do NOT apply
+                // option_{$option} filters here. Preload runs on
+                // plugins_loaded @ 1 which is BEFORE init, and any filter
+                // callback that calls __() triggers WP 6.7+'s
+                // _load_textdomain_just_in_time doing_it_wrong notice.
+                //
+                // The filter is applied lazily in get_option() on every
+                // read — matching WP core's get_option() semantics, which
+                // also re-applies the filter on every cache-hit.
+                self::$option_cache[ $row->option_name ] = maybe_unserialize( $row->option_value );
+                $found[ $row->option_name ] = true;
+            }
+        }
+
+        // Everything we asked for that didn't come back is confirmed missing
+        // for the rest of this request.
+        foreach ($to_fetch as $option) {
+            if (!isset($found[$option])) {
+                self::$missing_rows[$option] = true;
+            }
+        }
+
+        // Only log a preload that actually did work. Calls that find every
+        // key already cached still hit this method but cost nothing, so
+        // dropping them from the log keeps signal:noise high.
+        if ( count( $to_fetch ) > 0 ) {
+            self::log_op('db_helpers.preload', 'preload.result', array(
+                'requested' => count($to_fetch),
+                'found'     => count($found),
+                'missing'   => count($to_fetch) - count($found),
+            ));
+        }
+
+        return count($found);
+    }
+
+    /**
+     * Warm the caches for a batch of transient keys in a single SELECT.
+     *
+     * Why this is needed: get_transient($key) internally calls WP core's
+     * get_option('_transient_' . $key) and get_option('_transient_timeout_'
+     * . $key). Core's get_option consults WP's own wp_cache_* layer — NOT
+     * our helper's $option_cache static. So populating our helper's static
+     * cache has no effect on transient reads.
+     *
+     * What this does: fetches the value+timeout rows for each transient in
+     * one batched query, then populates WP core's options cache group via
+     * wp_cache_set(). Subsequent native get_transient() calls for those
+     * keys read from cache with zero DB activity, regardless of whether a
+     * Redis drop-in is active — because wp_cache_* is WP's canonical cache
+     * layer that every reader consults first.
+     *
+     * Expired transients are intentionally NOT primed. WP core's native
+     * path cleans them up on the next read.
+     *
+     * @param array $keys transient keys (without the "_transient_" prefix)
+     * @return int number of transients actually primed into the cache
+     */
+    public static function preload_transients(array $keys) {
+        global $wpdb;
+
+        if (empty($keys)) {
+            return 0;
+        }
+
+        // Expand each logical transient key into the two wp_options row
+        // names WP core stores them under.
+        $row_names = array();
+        $valid_keys = array();
+        foreach ($keys as $key) {
+            if (!is_string($key) || $key === '') continue;
+            $valid_keys[] = $key;
+            $row_names[] = '_transient_' . $key;
+            $row_names[] = '_transient_timeout_' . $key;
+        }
+
+        if (empty($row_names)) {
+            return 0;
+        }
+
+        // Skip rows already in WP's options cache — avoids wasting a query
+        // when an earlier preload (or another plugin) has already warmed
+        // them. wp_cache_get returns false on true miss.
+        $to_fetch = array();
+        foreach ($row_names as $row_name) {
+            if ( wp_cache_get( $row_name, 'options' ) === false ) {
+                $to_fetch[] = $row_name;
+            }
+        }
+
+        if (empty($to_fetch)) {
+            return 0;
+        }
+
+        $to_fetch = array_values( array_unique( $to_fetch ) );
+        $placeholders = implode( ',', array_fill( 0, count( $to_fetch ), '%s' ) );
+
+        $rows = $wpdb->get_results( $wpdb->prepare(
+            "SELECT option_name, option_value FROM $wpdb->options WHERE option_name IN ($placeholders)",
+            $to_fetch
+        ) );
+
+        $by_name = array();
+        if (is_array($rows)) {
+            foreach ($rows as $row) {
+                $by_name[ $row->option_name ] = $row->option_value;
+            }
+        }
+
+        $primed = 0;
+        foreach ($valid_keys as $key) {
+            $value_name   = '_transient_' . $key;
+            $timeout_name = '_transient_timeout_' . $key;
+            $value_raw    = isset( $by_name[ $value_name ] )   ? $by_name[ $value_name ]   : null;
+            $timeout_raw  = isset( $by_name[ $timeout_name ] ) ? $by_name[ $timeout_name ] : null;
+
+            // Expired transient: leave the cache cold. WP core will delete
+            // the stale rows on the next get_transient() call. Priming
+            // expired data would cause core to trigger DB deletes on read,
+            // which is worse than not priming.
+            if ( $timeout_raw !== null && (int) $timeout_raw < time() ) {
+                continue;
+            }
+
+            // Missing transient: nothing to cache. Don't negatively-prime
+            // either — WP core's "no row" path is already cheap after one
+            // miss (alloptions check) for non-autoloaded options, and
+            // negatively-priming complicates set_transient's semantics.
+            if ( $value_raw === null ) {
+                continue;
+            }
+
+            // Prime WP core's options cache with the raw (still-serialized)
+            // values. Core's get_option() applies maybe_unserialize on its
+            // way out, so storing the raw string matches what core would
+            // have cached after its own DB fetch.
+            wp_cache_set( $value_name, $value_raw, 'options' );
+            if ( $timeout_raw !== null ) {
+                wp_cache_set( $timeout_name, $timeout_raw, 'options' );
+            }
+
+            // Also populate our helper's static cache in case anything
+            // reads the raw transient row through our helper's get_option.
+            self::$option_cache[ $value_name ] = maybe_unserialize( $value_raw );
+
+            $primed++;
+        }
+
+        self::log_op( 'db_helpers.preload', 'preload_transients.result', array(
+            'requested' => count( $valid_keys ),
+            'fetched'   => count( $to_fetch ) / 2,
+            'primed'    => $primed,
+        ) );
+
+        return $primed;
     }
 
     /**
@@ -226,7 +531,7 @@ class Mailchimp_Woocommerce_DB_Helpers
      * @param $value
      * @return bool
      */
-    public static function update_option($option, $value) {
+    public static function update_option($option, $value, $autoload = null) {
         global $wpdb;
 
         if ( is_scalar( $option ) ) {
@@ -264,7 +569,7 @@ class Mailchimp_Woocommerce_DB_Helpers
                 'value'  => $value,
                 'reason' => 'row_missing',
             ]);
-            return self::add_option( $option, $value );
+            return self::add_option( $option, $value, $autoload );
         }
 
         $old_value = self::get_option( $option );
@@ -290,11 +595,20 @@ class Mailchimp_Woocommerce_DB_Helpers
         $raw_autoload = $wpdb->get_var( $wpdb->prepare( "SELECT autoload FROM $wpdb->options WHERE option_name = %s LIMIT 1", $option ) );
         $allow_values = array( 'auto-on', 'auto-off', 'auto' );
 
-
-        if ( in_array( $raw_autoload, $allow_values, true ) ) {
-            $autoload = static::determine_option_autoload_value( $option, $value, $serialized_value, null );
-            if ( $autoload !== $raw_autoload ) {
-                $update_args['autoload'] = $autoload;
+        // If the caller explicitly asked for an autoload value, honor it —
+        // this is what the third argument was meant to do and didn't, because
+        // update_option() used to only accept two params.
+        if ( $autoload !== null ) {
+            $resolved_autoload = static::determine_option_autoload_value( $option, $value, $serialized_value, $autoload );
+            if ( $resolved_autoload !== $raw_autoload ) {
+                $update_args['autoload'] = $resolved_autoload;
+            }
+        } elseif ( in_array( $raw_autoload, $allow_values, true ) ) {
+            // Caller didn't pass one — re-evaluate if the current stored
+            // autoload is an "auto*" value (i.e. previously auto-decided).
+            $resolved_autoload = static::determine_option_autoload_value( $option, $value, $serialized_value, null );
+            if ( $resolved_autoload !== $raw_autoload ) {
+                $update_args['autoload'] = $resolved_autoload;
             }
         }
 
@@ -434,48 +748,12 @@ class Mailchimp_Woocommerce_DB_Helpers
      * @return bool
      */
     public static function set_transient( $transient, $value, $expiration = 0 ) {
-        $expiration = (int) $expiration;
-
-        // Filters a specific transient before its value is set.
-        $value = apply_filters( "pre_set_transient_{$transient}", $value, $expiration, $transient );
-
-        //Filters the expiration for a transient before its value is set.
-        $expiration = apply_filters( "expiration_of_transient_{$transient}", $expiration, $value, $transient );
-
-        $transient_timeout = '_transient_timeout_' . $transient;
-        $transient_option  = '_transient_' . $transient;
-
-        if ( false === self::get_option( $transient_option ) ) {
-            $autoload = true;
-            if ( $expiration ) {
-                $autoload = false;
-                self::add_option( $transient_timeout, time() + $expiration, false );
-            }
-            $result = self::add_option( $transient_option, $value,  $autoload );
-        } else {
-            /*
-             * If expiration is requested, but the transient has no timeout option,
-             * delete, then re-create transient rather than update.
-             */
-            $update = true;
-
-            if ( $expiration ) {
-                if ( false === self::get_option( $transient_timeout ) ) {
-                    self::delete_option( $transient_option );
-                    self::add_option( $transient_timeout, time() + $expiration, false );
-                    $result = self::add_option( $transient_option, $value, false );
-                    $update = false;
-                } else {
-                    self::update_option( $transient_timeout, time() + $expiration );
-                }
-            }
-
-            if ( $update ) {
-                $result = self::update_option( $transient_option, $value );
-            }
-        }
-
-        return $result;
+        // Delegate to WP core. With an external object cache (Redis, etc.)
+        // this is a single cache-layer write with native TTL and zero
+        // wp_options I/O. Without one, core handles the same _transient_* /
+        // _transient_timeout_* row pair we were managing by hand, but with
+        // fewer round-trips and proper locking.
+        return set_transient( $transient, $value, (int) $expiration );
     }
 
     /**
@@ -484,27 +762,8 @@ class Mailchimp_Woocommerce_DB_Helpers
      * @param $transient
      * @return mixed
      */
-    public static function get_transient($transient) {
-        $transient_option = '_transient_' . $transient;
-
-        $alloptions = wp_load_alloptions();
-
-        if ( ! isset( $alloptions[ $transient_option ] ) ) {
-            $transient_timeout = '_transient_timeout_' . $transient;
-
-            $timeout = self::get_option( $transient_timeout );
-            if ( false !== $timeout && $timeout < time() ) {
-                self::delete_option( $transient_option );
-                self::delete_option( $transient_timeout );
-                $value = false;
-            }
-        }
-
-        if ( ! isset( $value ) ) {
-            $value = self::get_option( $transient_option );
-        }
-
-        return apply_filters( "transient_{$transient}", $value, $transient );
+    public static function get_transient( $transient ) {
+        return get_transient( $transient );
     }
 
     /**
@@ -513,16 +772,8 @@ class Mailchimp_Woocommerce_DB_Helpers
      * @param $transient
      * @return bool
      */
-    public static function delete_transient($transient) {
-        $option_timeout = '_transient_timeout_' . $transient;
-        $option         = '_transient_' . $transient;
-        $result         = self::delete_option( $option );
-
-        if ( $result ) {
-            self::delete_option( $option_timeout );
-        }
-
-        return $result;
+    public static function delete_transient( $transient ) {
+        return delete_transient( $transient );
     }
 
     protected static function determine_option_autoload_value($option, $value, $serialized_value, $autoload = null)

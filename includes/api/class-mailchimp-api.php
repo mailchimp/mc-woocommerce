@@ -909,8 +909,41 @@ class MailChimp_WooCommerce_MailChimpApi {
     }
 
     /**
-     * @param $list_id
+     * Transient key used for the SMS-program cache for a given list.
+     * Centralised so the cache-read and cache-write paths can't drift apart.
+     */
+    protected function smsProgramTransientKey($list_id)
+    {
+        return "mailchimp_sms_program_{$list_id}";
+    }
+
+    /**
+     * Hydrate an SMS program object from a cached array payload.
+     */
+    protected function hydrateSmsProgram(array $result)
+    {
+        $program = new MailChimp_WooCommerce_SmsProgram();
+        $program->program_id               = $result['program_id']               ?? null;
+        $program->registration_status      = $result['registration_status']      ?? null;
+        $program->program_name             = $result['program_name']             ?? null;
+        $program->program_sms_phone_number = $result['program_sms_phone_number'] ?? null;
+        $program->can_send                 = $result['can_send']                 ?? null;
+        return $program;
+    }
+
+    /**
+     * Fetch the SMS program from the API, cache the outcome, and return it.
      *
+     * Uses native WP transients so with an object cache drop-in (Redis Object
+     * Cache etc.) the read and write are single operations against Redis
+     * with no wp_options I/O. Without an object cache, this is still two DB
+     * writes (transient + timeout) vs. the ~5 the previous wrapper was
+     * generating per call.
+     *
+     * Single-exit: the cache is written exactly once per invocation, not on
+     * every return branch.
+     *
+     * @param $list_id
      * @return MailChimp_WooCommerce_SmsProgram
      */
     public function getSmsProgram($list_id)
@@ -919,58 +952,62 @@ class MailChimp_WooCommerce_MailChimpApi {
             return new MailChimp_WooCommerce_SmsProgram();
         }
 
-        $transient_key = "mailchimp_sms_program_{$list_id}";
-        $program = new MailChimp_WooCommerce_SmsProgram();
+        $transient_key = $this->smsProgramTransientKey($list_id);
+        $payload       = array();   // empty = "no program available"
+        $ttl           = 60 * 10;   // 10 min for a valid program
+        $negative_ttl  = 60 * 2;    // 2 min for a missing/empty program so
+                                    // newly-enabled programs are discovered
+                                    // faster than the positive TTL window.
 
         try {
             $result = $this->get("lists/{$list_id}/sms-program");
         } catch (\Throwable $e) {
-            mailchimp_set_transient( $transient_key, $program->serialize(), 60 * 10 );
-            return $program;
+            $result = null;
         }
 
-        if (empty($result) || empty($result['sms_program'])) {
-            mailchimp_set_transient( $transient_key, $program->serialize(), 60 * 10 );
-            return $program;
+        if ( ! empty( $result['sms_program'] ) ) {
+            $first = reset( $result['sms_program'] );
+            if ( is_array( $first ) && ! empty( $first ) ) {
+                $payload = array(
+                    'program_id'               => $first['program_id']               ?? null,
+                    'registration_status'      => $first['registration_status']      ?? null,
+                    'program_name'             => $first['program_name']             ?? null,
+                    'program_sms_phone_number' => $first['program_sms_phone_number'] ?? null,
+                    'can_send'                 => $first['can_send']                 ?? null,
+                );
+            }
         }
 
-        // pull the first out
-        $result = reset($result['sms_program']);
+        set_transient( $transient_key, $payload, empty( $payload ) ? $negative_ttl : $ttl );
 
-        if (empty($result) || !is_array($result)) {
-            mailchimp_set_transient( $transient_key, $program->serialize(), 60 * 10 );
-            return $program;
-        }
-
-        $program->program_id = $result['program_id'];
-        $program->registration_status = $result['registration_status'];
-        $program->program_name = $result['program_name'];
-        $program->program_sms_phone_number = $result['program_sms_phone_number'];
-        $program->can_send = $result['can_send'];
-
-        mailchimp_set_transient( $transient_key, $program->serialize(), 60 * 10 );
-
-        return $program;
+        return $this->hydrateSmsProgram( $payload );
     }
 
+    /**
+     * Cache-first read of the SMS program. Single native get_transient call
+     * — one Redis op on cache hit, no DB. On miss, delegates to
+     * getSmsProgram() which handles both the API fetch and the cache write.
+     *
+     * @param $list_id
+     * @return MailChimp_WooCommerce_SmsProgram
+     */
     public function getCachedSmsProgram($list_id)
     {
-        $transient_key = "mailchimp_sms_program_{$list_id}";
-        $data = mailchimp_get_transient_value( $transient_key );
-        if (empty($data)) {
-            return $this->getSmsProgram($list_id);
+        if ( empty( $list_id ) ) {
+            return new MailChimp_WooCommerce_SmsProgram();
         }
 
-        $result = is_array($data) ? $data : unserialize($data);
+        $cached = get_transient( $this->smsProgramTransientKey( $list_id ) );
 
-        $program = new MailChimp_WooCommerce_SmsProgram();
-        $program->program_id = $result['program_id'] ?? null;
-        $program->registration_status = $result['registration_status'] ?? null;
-        $program->program_name = $result['program_name'] ?? null;
-        $program->program_sms_phone_number = $result['program_sms_phone_number'] ?? null;
-        $program->can_send = $result['can_send'] ?? null;
+        // get_transient returns false on miss. An explicitly-cached empty
+        // payload (negative cache) is an empty array — distinguishable from
+        // a miss, so we don't hammer the API when a list legitimately has
+        // no SMS program.
+        if ( $cached === false ) {
+            return $this->getSmsProgram( $list_id );
+        }
 
-        return $program;
+        return $this->hydrateSmsProgram( is_array( $cached ) ? $cached : array() );
     }
 
     /**

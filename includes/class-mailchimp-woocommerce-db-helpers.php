@@ -116,9 +116,6 @@ class Mailchimp_Woocommerce_DB_Helpers
     public static function update_option($option, $value) {
         global $wpdb;
 
-        // make sure we unset the values if it were there before.
-        unset(self::$option_cache[$option]);
-
         if ( is_scalar( $option ) ) {
             $option = trim( $option );
         }
@@ -151,10 +148,10 @@ class Mailchimp_Woocommerce_DB_Helpers
             'option_value' => $serialized_value,
         );
 
-
         // Retrieve the current autoload value to reevaluate it in case it was set automatically.
         $raw_autoload = $wpdb->get_var( $wpdb->prepare( "SELECT autoload FROM $wpdb->options WHERE option_name = %s LIMIT 1", $option ) );
         $allow_values = array( 'auto-on', 'auto-off', 'auto' );
+
 
         if ( in_array( $raw_autoload, $allow_values, true ) ) {
             $autoload = static::determine_option_autoload_value( $option, $value, $serialized_value, null );
@@ -162,6 +159,9 @@ class Mailchimp_Woocommerce_DB_Helpers
                 $update_args['autoload'] = $autoload;
             }
         }
+
+        // make sure we unset the values if it were there before.
+        unset(self::$option_cache[$option]);
 
         $result = $wpdb->update( $wpdb->options, $update_args, array( 'option_name' => $option ) );
         if ( ! $result ) {

@@ -44,7 +44,7 @@ class MailChimp_WooCommerce_SmsProgram {
      */
     public function isUnspecified()
     {
-        return strtoupper($this->registration_status) === static::STATUS_UNSPECIFIED;
+        return !empty($this->registration_status) && strtoupper($this->registration_status) === static::STATUS_UNSPECIFIED;
     }
 
     /**
@@ -52,7 +52,7 @@ class MailChimp_WooCommerce_SmsProgram {
      */
     public function isUnverified()
     {
-        return strtoupper($this->registration_status) === static::STATUS_BRAND_UNVERIFIED;
+        return !empty($this->registration_status) && strtoupper($this->registration_status) === static::STATUS_BRAND_UNVERIFIED;
     }
 
     /**
@@ -60,7 +60,7 @@ class MailChimp_WooCommerce_SmsProgram {
      */
     public function isNotStarted()
     {
-        return strtoupper($this->registration_status) === static::STATUS_NOT_STARTED;
+        return !empty($this->registration_status) && strtoupper($this->registration_status) === static::STATUS_NOT_STARTED;
     }
 
     /**
@@ -68,7 +68,7 @@ class MailChimp_WooCommerce_SmsProgram {
      */
     public function isDraft()
     {
-        return strtoupper($this->registration_status) === static::STATUS_DRAFT;
+        return !empty($this->registration_status) && strtoupper($this->registration_status) === static::STATUS_DRAFT;
     }
 
     /**
@@ -76,7 +76,7 @@ class MailChimp_WooCommerce_SmsProgram {
      */
     public function isPending()
     {
-        return strtoupper($this->registration_status) === static::STATUS_PENDING_APPROVAL;
+        return !empty($this->registration_status) && strtoupper($this->registration_status) === static::STATUS_PENDING_APPROVAL;
     }
 
     /**
@@ -84,7 +84,7 @@ class MailChimp_WooCommerce_SmsProgram {
      */
     public function isProcessing()
     {
-        return strtoupper($this->registration_status) === static::STATUS_PROCESSING;
+        return !empty($this->registration_status) && strtoupper($this->registration_status) === static::STATUS_PROCESSING;
     }
 
     /**
@@ -92,7 +92,7 @@ class MailChimp_WooCommerce_SmsProgram {
      */
     public function isRejected()
     {
-        return strtoupper($this->registration_status) === static::STATUS_REJECTED;
+        return !empty($this->registration_status) && ($this->registration_status) === static::STATUS_REJECTED;
     }
 
     /**
@@ -100,7 +100,7 @@ class MailChimp_WooCommerce_SmsProgram {
      */
     public function isActive()
     {
-        return strtoupper($this->registration_status) === static::STATUS_ACTIVE;
+        return !empty($this->registration_status) && ($this->registration_status) === static::STATUS_ACTIVE;
     }
 
     public function toArray()

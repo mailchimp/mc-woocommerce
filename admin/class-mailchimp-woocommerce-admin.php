@@ -475,7 +475,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		// if the saved version is less than the current version
 		if ( version_compare( $version, $saved_version ) > 0 ) {
 			// resave the site option so this only fires once.
-			\Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp_woocommerce_version', $version );
+			$updated_option = \Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp_woocommerce_version', $version );
+
+            mailchimp_log('plugin_updater', 'Updating database from version ' . $saved_version . ' to ' . $version, [
+                'updated_db' => $updated_option,
+            ]);
 
 			// get plugin options
 			$options = $this->getOptions();
@@ -587,7 +591,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 			$this->update_db_check();
 
-			mailchimp_log('webhooks', 'Ran plugin updater');
+            mailchimp_log('webhooks', 'Ran plugin updater from version ' . $saved_version . ' to ' . $version);
 		}
 	}
 

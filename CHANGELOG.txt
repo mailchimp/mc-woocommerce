@@ -1,9 +1,8 @@
 == Changelog ==
 = 6.1 =
-* Adds WooCommerce Pixel Events
 * Adds Order attributes in WooCommerce Orders UI
 * Adds data_mode request body parameter and header for initial sync requests
-* Removes newsletter subscribe checkbox from login form
+* Adds filter to remove subscribe checkbox from login form
 * Fixes fatal error on PHP 8.3 for Mailchimp_WooCommerce_Single_Product_Category hook
 * Fixes duplicate database queries for mailchimp-woocommerce option
 * Updates dependencies

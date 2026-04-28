@@ -27,6 +27,12 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	protected $swapped_list_id  = null;
 	protected $swapped_store_id = null;
 
+	// In-request guard for validate() — set to true around server-side
+	// update_option() calls (oauth_finish, create_account_signup) where the
+	// caller's $input is authoritative and the sanitize filter must NOT
+	// rewrite it via getOptions(). See validate().
+	protected $bypass_options_validation = false;
+
 	/** @var null|static */
 	protected static $_instance = null;
 
@@ -53,7 +59,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	/**
 	 * @return array
 	 */
-	private function disconnect_store() {
+	private function disconnect_store($clean_hooks = true) {
 		// remove user from our marketing status audience
 		try {
 			mailchimp_remove_communication_status();
@@ -69,15 +75,32 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			}
 		}
 
-        Mailchimp_Woocommerce_Event::track('navigation_advanced:disconnect', new DateTime());
-
-        // delete the webhooks on store disconnects.
-		$webhooks = new MailChimp_WooCommerce_WebHooks_Sync;
-		$webhooks->cleanHooks(true);
+        if ($clean_hooks) {
+            Mailchimp_Woocommerce_Event::track('navigation_advanced:disconnect', new DateTime());
+            // delete the webhooks on store disconnects.
+            $webhooks = new MailChimp_WooCommerce_WebHooks_Sync;
+            $webhooks->cleanHooks(true);
+        }
 
 		// clean database
 		mailchimp_clean_database();
-		\Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-waiting-for-login');
+
+		// Cached connection state outlives the wp_options rows we just removed:
+		// the options array is memoized in wp_cache for 10s by
+		// mailchimp_get_admin_options(), this Options instance keeps its own
+		// $plugin_options copy for the rest of the request, and connection
+		// transients (oauth secret, ping check, cached lists, store-id verify,
+		// connection log) live under _transient_* keys that the LIKE query in
+		// mailchimp_clean_database() doesn't match — and aren't in wp_options
+		// at all when an external object cache is in use. Evict them so a
+		// reconnect doesn't see the previous account.
+		wp_cache_delete( 'mailchimp-woocommerce-options', 'mailchimp-woocommerce' );
+		$this->plugin_options = null;
+		$this->removeMiscPointers();
+		\Mailchimp_Woocommerce_DB_Helpers::delete_transient( 'mailchimp-woocommerce-oauth-secret' );
+		if ( class_exists( 'MailChimp_WooCommerce_Enhanced_Logger' ) ) {
+			MailChimp_WooCommerce_Enhanced_Logger::clear_connection_logs();
+		}
 
 		return array();
 	}
@@ -484,13 +507,55 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 'updated_db' => $updated_option,
             ]);
 
-			// get plugin options
-			$options = $this->getOptions();
+			// RAW DB read — bypass every cache layer in the read path. The
+			// helper's static $option_cache, the wp_cache 10s TTL in
+			// mailchimp_get_admin_options(), and the singleton's
+			// $plugin_options memo can each serve a stale or empty array if
+			// anything earlier in the request poisoned them (e.g. preload at
+			// plugins_loaded@1 ran before the row was written, memoized as
+			// missing, then this code at plugins_loaded@10 still sees the
+			// memoized miss). At this critical migration step we need ground
+			// truth from the DB, not what the cache thinks the DB has.
+			$raw_row = $wpdb->get_var( $wpdb->prepare(
+				"SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1",
+				$this->plugin_name
+			) );
+			$options = is_string( $raw_row ) ? maybe_unserialize( $raw_row ) : array();
+			if ( ! is_array( $options ) ) {
+				$options = array();
+			}
 
-			// set permission_cap in case there's none set.
-			if ( ! isset( $options['mailchimp_permission_cap'] ) || empty( $options['mailchimp_permission_cap'] ) ) {
+			// Diagnostic — confirms what update_db_check actually sees at the
+			// moment it decides whether to merge defaults into the blob. If
+			// has_api_key is false here we know the read came back empty and
+			// the guarded write below correctly skips, instead of wiping a
+			// just-saved api_key.
+			mailchimp_log( 'plugin_updater', 'update_db_check read options blob', array(
+				'row_present'       => $raw_row !== null,
+				'option_keys'       => is_array( $options ) ? array_keys( $options ) : null,
+				'has_api_key'       => ! empty( $options['mailchimp_api_key'] ),
+				'has_permission_cap' => ! empty( $options['mailchimp_permission_cap'] ),
+				'auth_from'         => isset( $options['mailchimp_auth_from'] ) ? $options['mailchimp_auth_from'] : null,
+			) );
+
+			// set permission_cap in case there's none set — but ONLY if we
+			// have a real options blob with an api_key. An empty array (or
+			// one missing the api_key) during a fresh connect means the row
+			// is mid-write or our read was poisoned; merging defaults into
+			// that and writing it back would silently destroy the api_key.
+			// Skip the write and let the next run pick it up.
+			if ( ! empty( $options['mailchimp_api_key'] )
+				&& ( ! isset( $options['mailchimp_permission_cap'] ) || empty( $options['mailchimp_permission_cap'] ) ) ) {
 				$options['mailchimp_permission_cap'] = 'administrator';
-				\Mailchimp_Woocommerce_DB_Helpers::update_option( $this->plugin_name, $options );
+				$write_result = \Mailchimp_Woocommerce_DB_Helpers::update_option( $this->plugin_name, $options );
+				mailchimp_log( 'plugin_updater', 'update_db_check wrote permission_cap', array(
+					'write_result' => $write_result,
+					'api_key_preserved' => ! empty( $options['mailchimp_api_key'] ),
+				) );
+			} else {
+				mailchimp_log( 'plugin_updater', 'update_db_check skipped permission_cap write', array(
+					'reason' => empty( $options['mailchimp_api_key'] ) ? 'no_api_key_in_blob' : 'permission_cap_already_set',
+				) );
 			}
 
 			// resend marketing status to update latest changes
@@ -839,6 +904,17 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 */
 	public function validate( $input ) {
 
+		// Server-side writes (oauth_finish, create_account_signup) set this
+		// guard before calling update_option() because their $input is
+		// already the authoritative blob to persist. Without this bypass,
+		// the fall-through `return $this->getOptions()` at the bottom would
+		// discard the input and write whatever getOptions() returned —
+		// which, right after disconnect_store(), is an empty array. That's
+		// how the api_key was getting silently stripped before insertion.
+		if ( $this->bypass_options_validation ) {
+			return is_array( $input ) ? $input : array();
+		}
+
 		$active_tab = isset( $input['mailchimp_active_tab'] ) ? $input['mailchimp_active_tab'] : (isset( $input['mailchimp_active_settings_tab'] ) ?  $input['mailchimp_active_settings_tab']: null);
 
 		if ( empty( $active_tab ) && isset( $input['woocommerce_settings_save_general'] ) && $input['woocommerce_settings_save_general'] ) {
@@ -848,11 +924,28 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		if ( \Mailchimp_Woocommerce_DB_Helpers::get_transient( 'mailchimp_disconnecting_store' ) ) {
 			\Mailchimp_Woocommerce_DB_Helpers::delete_transient( 'mailchimp_disconnecting_store' );
+            mailchimp_log('store.disconnect', 'Store is disconnected, returning to connection screen.');
 			return array(
 				'active_tab'        => 'api_key',
 				'mailchimp_api_key' => null,
 				'mailchimp_list'    => null,
 			);
+		}
+
+		// Server-side oauth-finish / create-account-signup paths save the API
+		// key directly to the options blob and set this flag. The page reload
+		// after those callbacks POSTs the settings form with a JS-supplied
+		// mailchimp_api_key field that may be empty/stale on a fresh connect
+		// — letting it through here would clobber the just-saved key. Pull
+		// the authoritative value from the DB and consume the flag so the
+		// next normal save isn't affected.
+		if ( \Mailchimp_Woocommerce_DB_Helpers::get_transient( 'mailchimp_woocommerce_api_key_locked' ) ) {
+			\Mailchimp_Woocommerce_DB_Helpers::delete_transient( 'mailchimp_woocommerce_api_key_locked' );
+			$saved = \Mailchimp_Woocommerce_DB_Helpers::get_option( $this->plugin_name, array() );
+			if ( is_array( $saved ) && ! empty( $saved['mailchimp_api_key'] ) ) {
+                mailchimp_log('store.connect', 'API key is being updated from server-side oauth-finish / create-account-signup.');
+				$input['mailchimp_api_key'] = $saved['mailchimp_api_key'];
+			}
 		}
 
         $skip_api_validation = false;
@@ -939,6 +1032,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		// if no API is provided, check if the one saved on the database is still valid, ** only not if disconnect store is issued **.
 		if (!$skip_api_validation && ! $this->is_disconnecting() && ! isset( $input['mailchimp_api_key'] ) && $this->getOption( 'mailchimp_api_key' ) ) {
 			// set api key for validation
+            mailchimp_log('plugin_admin', "setting api key from memory during plugin options update");
 			$input['mailchimp_api_key'] = $this->getOption( 'mailchimp_api_key' );
 			$api_key_valid              = $this->validatePostApiKey( $input );
 
@@ -1080,7 +1174,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * Mailchimp OAuth connection finish
 	 */
     public function mailchimp_woocommerce_ajax_oauth_finish() {
-        global $wpdb;
         $this->adminOnlyMiddleware();
         $args = array(
             'domain' => site_url(),
@@ -1094,41 +1187,67 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             'body'    => json_encode( $args ),
         );
         $response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/finish', $pload );
-        mailchimp_log('admin', "finished oauth");
 
         // need to return the error message if this is the problem.
         if ( $response instanceof WP_Error ) {
+            mailchimp_error('admin', "finished oauth error", ['error' => $response->get_error_message()]);
             wp_send_json_error( $response );
         }
 
+        mailchimp_log('admin', "finished oauth", ['response_code' => $response['response']['code']]);
+
         if ( $response['response']['code'] == 200 ) {
 
-            \Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-account_name');
-            \Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-cached-api-lists');
-            \Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-validation.newsletter_settings');
-            \Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-cached-api-ping-check');
-            \Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-validation.api.ping');
+            // remove everything and start over.
+            $this->disconnect_store(false);
+
+            // disconnect_store() sets the 'mailchimp_disconnecting_store'
+            // transient (15s TTL) to flag the form-based disconnect flow.
+            // For this AJAX reconnect path the disconnect is already done
+            // and we're about to write the new key — but the page reload
+            // following this call POSTs the settings form well within 15s,
+            // and validate() would see the lingering transient and return
+            // [mailchimp_api_key => null], wiping the row we're about to
+            // save. Clear it now so the next validate() pass sees the
+            // reconnected state, not a stale disconnect-in-progress flag.
+            \Mailchimp_Woocommerce_DB_Helpers::delete_transient( 'mailchimp_disconnecting_store' );
 
             \Mailchimp_Woocommerce_DB_Helpers::delete_transient( 'mailchimp-woocommerce-oauth-secret' );
             // save api_key? If yes, we can skip api key validation for validatePostApiKey();
             $result = json_decode( $response['body'], true);
-            $options = \Mailchimp_Woocommerce_DB_Helpers::get_option($this->plugin_name);
-            $api_key = $result['access_token'].'-'.$result['data_center'];
-            $options['mailchimp_api_key'] = $api_key;
+            $options = [
+                'mailchimp_auth_from' => 'oauth',
+                'mailchimp_api_key' => $result['access_token'].'-'.$result['data_center']
+            ];
+            // disconnect_store() above deletes the wp_options row, so a raw
+            // $wpdb->update() here would match 0 rows and silently no-op.
+            // The DB helper's update_option() now does an existence check and
+            // routes missing rows to add_option(), which gives us the upsert
+            // we need without going behind WP's back. The bypass guard
+            // around it suppresses our own validate() sanitize filter — see
+            // $this->bypass_options_validation for why.
+            $this->bypass_options_validation = true;
+            $updated = \Mailchimp_Woocommerce_DB_Helpers::update_option( $this->plugin_name, $options, 'yes' );
+            $this->bypass_options_validation = false;
 
-            // \Mailchimp_Woocommerce_DB_Helpers::update_option($this->plugin_name, $options); this used to return false!
-            // go straight to the DB and update the options to bypass any filters.
-            $wpdb->update(
-                $wpdb->options,
-                array('option_value' => maybe_serialize($options)),
-                array('option_name' => $this->plugin_name)
-            );
+            // Lock the API key against form-driven overrides for the next
+            // validate() pass. The page reload after this AJAX call POSTs the
+            // settings form, which still ships a mailchimp_api_key field via
+            // JS (id: mailchimp-woocommerce-mailchimp-api-key). If that field
+            // is empty/stale on a fresh connect, validatePostApiKey() would
+            // overwrite the server-saved key. The flag tells validate() to
+            // ignore the form value and trust what we just wrote here.
+            \Mailchimp_Woocommerce_DB_Helpers::set_transient( 'mailchimp_woocommerce_api_key_locked', true, 5 * MINUTE_IN_SECONDS );
+
+            mailchimp_log('admin', "oauth finished, updated options", ['updated' => $updated]);
+
             Mailchimp_Woocommerce_Event::track('connect_accounts_oauth:complete', new DateTime());
 
-            do_action('mailchimp_woocommerce_connected_to_mailchimp', $api_key);
+            do_action('mailchimp_woocommerce_connected_to_mailchimp', $options['mailchimp_api_key']);
 
             wp_send_json_success( $response );
         } else {
+            mailchimp_error('admin', "finished oauth error", ['error' => $response->get_error_message()]);
             wp_send_json_error( $response );
         }
 
@@ -1279,7 +1398,6 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
     }
 
 	public function mailchimp_woocommerce_ajax_create_account_signup() {
-		global $wpdb;
 		//Mailchimp_Woocommerce_Event::track('account:sign_up_button_click', new DateTime());
 		Mailchimp_Woocommerce_Event::track('connect_accounts:activate_account', new DateTime());
 		$this->adminOnlyMiddleware();
@@ -1287,26 +1405,50 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/signup/', $pload );
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
+            mailchimp_error('admin', "create account error", ['error' => $response->get_error_message()]);
 			wp_send_json_error( $response );
 		}
+        mailchimp_log('admin', "create account", ['response_code' => $response['response']['code']]);
 		$response_body = json_decode( $response['body'] );
 		if ( $response['response']['code'] == 200 && $response_body->success == true ) {
-            Mailchimp_Woocommerce_Event::track('connect_accounts:create_account_complete', new DateTime());
+            $this->disconnect_store(false);
+            // Same reason as the oauth-finish path: clear the lingering
+            // 'mailchimp_disconnecting_store' transient (15s TTL) that
+            // disconnect_store() just set, otherwise the post-reload form
+            // POST will hit validate() within the TTL window and get back
+            // [mailchimp_api_key => null], wiping the row we're about to
+            // write.
+            \Mailchimp_Woocommerce_DB_Helpers::delete_transient( 'mailchimp_disconnecting_store' );
             $result = json_decode( $response['body'], true);
-            $options = get_option($this->plugin_name, array());
-            $api_key = $result['data']['oauth_token'].'-'.$result['data']['dc'];
-            $options['mailchimp_api_key'] = $api_key;
-            // go straight to the DB and update the options to bypass any filters.
-            $wpdb->update(
-                $wpdb->options,
-                array('option_value' => maybe_serialize($options)),
-                array('option_name' => $this->plugin_name)
-            );
+            $options = [
+                'mailchimp_auth_from' => 'create_account',
+                'mailchimp_api_key' => $result['data']['oauth_token'].'-'.$result['data']['dc']
+            ];
+            // disconnect_store() above deletes the wp_options row; the helper's
+            // update_option() does an existence check and routes missing rows
+            // to add_option() so the new key gets inserted instead of silently
+            // no-op'd by an UPDATE that matches nothing.
+            // Bypass our own sanitize_option_mailchimp-woocommerce filter
+            // (validate()) for this server-side write — see
+            // $this->bypass_options_validation. Without it, validate()
+            // would discard $options and write whatever getOptions()
+            // returns, which is empty right after disconnect_store().
+            $this->bypass_options_validation = true;
+            $updated = \Mailchimp_Woocommerce_DB_Helpers::update_option( $this->plugin_name, $options, 'yes' );
+            $this->bypass_options_validation = false;
+            // Same lock as the oauth-finish path — the page reload POSTs the
+            // settings form with a JS-supplied api_key field that can be
+            // empty on a fresh connect. validate() consumes this flag and
+            // pulls the api_key from the just-saved DB row instead.
+            \Mailchimp_Woocommerce_DB_Helpers::set_transient( 'mailchimp_woocommerce_api_key_locked', true, 5 * MINUTE_IN_SECONDS );
+            mailchimp_log('admin', "create account finished, updated options", ['updated' => $updated]);
             \Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp-woocommerce-waiting-for-login', 'waiting');
+            // todo we need to make a profile or metadata call here and save this to the DB before triggering these events.
+            Mailchimp_Woocommerce_Event::track('connect_accounts:create_account_complete', new DateTime());
             Mailchimp_Woocommerce_Event::track('account:verify_email', new DateTime());
             $response_body->redirect = admin_url('admin.php?page=mailchimp-woocommerce');
 
-            do_action('mailchimp_woocommerce_connected_to_mailchimp', $api_key);
+            do_action('mailchimp_woocommerce_connected_to_mailchimp', $options['mailchimp_api_key']);
 
             wp_send_json_success( $response_body );
         } elseif ( $response['response']['code'] == 404 ) {
@@ -1336,6 +1478,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 && isset( $_POST['data']['_disconnect-nonce'] )
                 && wp_verify_nonce( $_POST['data']['_disconnect-nonce'], '_disconnect-nonce-' . mailchimp_get_store_id() )
             ) {
+            mailchimp_log('admin', "disconnect account flow about to switch account");
             $this->disconnect_store();
             \Mailchimp_Woocommerce_DB_Helpers::delete_option('mailchimp-woocommerce-waiting-for-login');
 

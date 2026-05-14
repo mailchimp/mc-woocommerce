@@ -57,11 +57,27 @@ class MailChimp_WooCommerce_SingleCoupon extends Mailchimp_Woocommerce_Job
             $api = mailchimp_get_api();
             $store_id = mailchimp_get_store_id();
 
+            mailchimp_debug('promo_code_submit.trace', 'start', array(
+                'coupon_id' => $this->id,
+            ));
+
             $transformer = new MailChimp_WooCommerce_Transform_Coupons();
             $code = $transformer->transform($this->id);
 
+            mailchimp_debug('promo_code_submit.trace', 'transformed WooCommerce coupon', array(
+                'coupon_id' => $this->id,
+                'promo_code' => $code->getCode(),
+                'promo_rule_id' => $code->getAttachedPromoRule()->getId(),
+            ));
+
             $api->addPromoRule($store_id, $code->getAttachedPromoRule());
             $api->addPromoCodeForRule($store_id, $code->getAttachedPromoRule(), $code);
+
+            mailchimp_debug('promo_code_submit.trace', 'completed Mailchimp coupon sync', array(
+                'coupon_id' => $this->id,
+                'promo_code' => $code->getCode(),
+                'promo_rule_id' => $code->getAttachedPromoRule()->getId(),
+            ));
 
             mailchimp_register_synced_resource('coupons');
 

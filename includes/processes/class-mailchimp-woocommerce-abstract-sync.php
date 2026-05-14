@@ -88,8 +88,23 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
         $this->setData('sync.'.$this->getResourceType().'.started_at', time());
 
         $page = $this->getCurrentPage();
+        $total_pages = ceil((int)$post_count / $this->items_per_page);
 
-        while ($page - 1 <= ceil((int)$post_count / $this->items_per_page)) {
+        mailchimp_debug('sync.pagination.trace', 'creating sync managers', array(
+            'resource_type' => $this->getResourceType(),
+            'record_count' => (int) $post_count,
+            'items_per_page' => (int) $this->items_per_page,
+            'start_page' => (int) $page,
+            'total_pages' => (int) $total_pages,
+        ));
+
+        while ($page - 1 <= $total_pages) {
+            mailchimp_debug('sync.pagination.trace', 'queueing page sync manager', array(
+                'resource_type' => $this->getResourceType(),
+                'page' => (int) $page,
+                'total_pages' => (int) $total_pages,
+            ));
+
             $this->spawn($page);
             $page++;
         }
@@ -104,6 +119,11 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
         $next = new static($page);
         mailchimp_handle_or_queue($next);
         $this->setResourcePagePointer(($page), $this->getResourceType());
+
+        mailchimp_debug('sync.pagination.trace', 'queued page sync manager', array(
+            'resource_type' => $this->getResourceType(),
+            'page' => (int) $page,
+        ));
     }
 
 	/**
@@ -178,10 +198,20 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
             }
         }
 
+        mailchimp_debug('sync.pagination.trace', 'loading page resources', array(
+            'resource_type' => $this->getResourceType(),
+            'page' => (int) $this->getCurrentPage(),
+            'items_per_page' => (int) $this->items_per_page,
+        ));
+
         $page = $this->getResources();
 
         if (empty($page)) {
             mailchimp_debug(get_called_class().'@handle', 'could not find any more '.$this->getResourceType().' records ending on page '.$this->getResourcePagePointer());
+            mailchimp_debug('sync.pagination.trace', 'empty page response', array(
+                'resource_type' => $this->getResourceType(),
+                'page' => (int) $this->getCurrentPage(),
+            ));
             // call the completed event to process further
             $this->resourceComplete($this->getResourceType());
             $this->complete();
@@ -190,6 +220,12 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
         }
 
         mailchimp_debug(get_called_class().'@handle', $this->getResourceType()." :: {$page->count}");
+        mailchimp_debug('sync.pagination.trace', 'loaded page resources', array(
+            'resource_type' => $this->getResourceType(),
+            'page' => (int) $this->getCurrentPage(),
+            'count' => (int) $page->count,
+            'has_next_page' => isset($page->has_next_page) ? (bool) $page->has_next_page : null,
+        ));
 
         // if we've got a 0 count or less than items per page, that means we're done.
         if (!$page->count) {
@@ -206,24 +242,30 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
         }
 
         // iterate through the items and send each one through the pipeline based on this class.
+        $queued_count = 0;
         foreach ($page->items as $resource) {
             switch ($this->getResourceType()) {
                case 'customers':
                    mailchimp_handle_or_queue(new MailChimp_Woocommerce_Single_Customer($resource));
+                   $queued_count++;
                    break;
                case 'coupons':
                     mailchimp_handle_or_queue(new MailChimp_WooCommerce_SingleCoupon($resource));
+                   $queued_count++;
                    break;
                case 'products':
                     mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($resource));
+                   $queued_count++;
                    break;
                case 'product_categories':
                     mailchimp_handle_or_queue(new Mailchimp_WooCommerce_Single_Product_Category($resource));
+                   $queued_count++;
                    break;
                case 'orders':
                     $order = new MailChimp_WooCommerce_Single_Order($resource);
                     $order->set_full_sync(true);
                     mailchimp_handle_or_queue($order);
+                   $queued_count++;
                    break;
                default:
                     mailchimp_log('sync.error', $this->getResourceType().' is not a valid resource.');
@@ -231,8 +273,18 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
            }
         }
 
+        mailchimp_debug('sync.pagination.trace', 'queued page resources', array(
+            'resource_type' => $this->getResourceType(),
+            'page' => (int) $this->getCurrentPage(),
+            'queued_count' => (int) $queued_count,
+        ));
+
         if (isset($page->has_next_page) && !$page->has_next_page) {
             $this->setResourceCompleteTime();
+            mailchimp_debug('sync.pagination.trace', 'last page reached', array(
+                'resource_type' => $this->getResourceType(),
+                'page' => (int) $this->getCurrentPage(),
+            ));
         }
 
         return false;
@@ -253,6 +305,12 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
             $this->setResourcePagePointer($current_page);
             $this->setData('sync.config.resync', false);
         }
+
+        mailchimp_debug('sync.pagination.trace', 'requesting paginated resources', array(
+            'resource_type' => $this->getResourceType(),
+            'page' => (int) $current_page,
+            'items_per_page' => (int) $this->items_per_page,
+        ));
 
         return $this->api()->paginate($this->getResourceType(), $current_page, $this->items_per_page);
     }

@@ -101,6 +101,13 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
 
         $store_id = mailchimp_get_store_id();
 
+        mailchimp_debug('order_submit.trace', 'start', array(
+            'order_id' => $this->id,
+            'is_full_sync' => (bool) $this->is_full_sync,
+            'is_update' => (bool) $this->is_update,
+            'is_admin_save' => (bool) $this->is_admin_save,
+        ));
+
         // this will set the woo_order variable or return false.
         if (!($woo_order_number = $this->getRealOrderNumber())) {
             mailchimp_log('order_submit.failure', "There is no real order number to use for order ID {$this->id}.");
@@ -189,6 +196,17 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
         try {
             // transform the order
             $order = $job->transform($this->woo_order);
+
+            mailchimp_debug('order_submit.trace', 'transformed WooCommerce order', array(
+                'order_id' => $this->id,
+                'order_number' => $woo_order_number,
+                'mailchimp_order_id' => $order->getId(),
+                'line_item_count' => count($order->items()),
+                'financial_status' => $order->getFinancialStatus(),
+                'original_woo_status' => $order->getOriginalWooStatus(),
+                'customer_id' => $this->woo_order->get_user_id(),
+            ));
+
             // all subscriber logic has now been changed
 
             $original_woo_status = $order->getOriginalWooStatus();
@@ -322,6 +340,14 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             try {
                 // update or create
                 $api_response = $api->$call($store_id, $order, false);
+
+                mailchimp_debug('order_submit.trace', 'completed Mailchimp order sync', array(
+                    'order_id' => $this->id,
+                    'order_number' => $woo_order_number,
+                    'mailchimp_order_id' => $order->getId(),
+                    'method' => $call,
+                    'line_item_count' => count($order->items()),
+                ));
             } catch (Exception $e) {
                 // if for whatever reason we get a product not found error, we need to iterate
                 // through the order items, and use a "create mode only" on each product

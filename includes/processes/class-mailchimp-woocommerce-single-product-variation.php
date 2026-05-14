@@ -154,9 +154,24 @@ class MailChimp_WooCommerce_Single_Product_Variation extends Mailchimp_Woocommer
 		$method = "no action";
 
 		try {
+			mailchimp_debug('product_variant_submit.trace', 'start', array(
+				'variation_id' => $this->id,
+				'parent_product_id' => $this->parent_product_id,
+				'mode' => $this->mode,
+				'fallback_title' => !empty($this->fallback_title),
+				'from_order_item' => (bool) $this->order_item,
+			));
+
 			if( !($variant_post = MailChimp_WooCommerce_HPOS::get_product($this->id)) ){
 				return false;
 			}
+
+			mailchimp_debug('product_variant_submit.trace', 'loaded WooCommerce variation', array(
+				'variation_id' => $this->id,
+				'parent_product_id' => $this->parent_product_id,
+				'status' => $variant_post->get_status(),
+				'type' => $variant_post->get_type(),
+			));
 
 			try {
 				// pull the product variation from Mailchimp first to see what method we need to call next.
@@ -187,6 +202,13 @@ class MailChimp_WooCommerce_Single_Product_Variation extends Mailchimp_Woocommer
 
 			$product_variant = $this->transformer()->variant($variant_post, $this->fallback_title);
 
+			mailchimp_debug('product_variant_submit.trace', 'transformed WooCommerce variation', array(
+				'variation_id' => $this->id,
+				'parent_product_id' => $this->parent_product_id,
+				'mailchimp_variant_id' => $product_variant->getId(),
+				'title_present' => (bool) $product_variant->getTitle(),
+			));
+
 			if (empty($product_variant->getTitle()) && !empty($this->fallback_title)) {
 				$product_variant->setTitle($this->fallback_title);
 			}
@@ -200,6 +222,13 @@ class MailChimp_WooCommerce_Single_Product_Variation extends Mailchimp_Woocommer
 
 			// either updating or creating the product
 			$this->api()->{$method}($this->store_id, $product_variant, false);
+
+			mailchimp_debug('product_variant_submit.trace', 'completed Mailchimp variation sync', array(
+				'variation_id' => $this->id,
+				'parent_product_id' => $this->parent_product_id,
+				'mailchimp_variant_id' => $product_variant->getId(),
+				'method' => $method,
+			));
 
 			mailchimp_log('product_variant_submit.success', "{$method} :: #{$product_variant->getId()}");
 

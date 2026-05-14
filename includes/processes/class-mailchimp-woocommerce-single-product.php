@@ -132,10 +132,24 @@ class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
 
         try {
 
+            mailchimp_debug('product_submit.trace', 'start', array(
+                'product_id' => $this->id,
+                'mode' => $this->mode,
+                'fallback_title' => !empty($this->fallback_title),
+                'from_order_item' => (bool) $this->order_item,
+            ));
+
             if( !($product_post = MailChimp_WooCommerce_HPOS::get_product($this->id)) ){
                 mailchimp_log('product', "tried to load product by ID {$this->id} but did not find it.");
                 return false;
             }
+
+            mailchimp_debug('product_submit.trace', 'loaded WooCommerce product', array(
+                'product_id' => $this->id,
+                'status' => $product_post->get_status(),
+                'type' => $product_post->get_type(),
+                'parent_id' => $product_post->get_parent_id(),
+            ));
 
             // if qe instructed this job to build from the order item, let's do that instead of the product post.
             if ($this->order_item) {
@@ -144,6 +158,12 @@ class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
             } else {
                 $product = $this->transformer()->transform($product_post, $this->fallback_title);
             }
+
+            mailchimp_debug('product_submit.trace', 'transformed WooCommerce product', array(
+                'product_id' => $this->id,
+                'mailchimp_product_id' => $product->getId(),
+                'title_present' => (bool) $product->getTitle(),
+            ));
 
             if (empty($product->getTitle()) && !empty($this->fallback_title)) {
                 $product->setTitle($this->fallback_title);
@@ -163,6 +183,12 @@ class MailChimp_WooCommerce_Single_Product extends Mailchimp_Woocommerce_Job
 
             // either updating or creating the product
             $this->api()->updateStoreProduct($this->store_id, $product, false);
+
+            mailchimp_debug('product_submit.trace', 'completed Mailchimp product upsert', array(
+                'product_id' => $this->id,
+                'mailchimp_product_id' => $product->getId(),
+                'method' => $method,
+            ));
 
             mailchimp_log('product_submit.success', "{$method} :: #{$product->getId()}");
             // increment the sync counter

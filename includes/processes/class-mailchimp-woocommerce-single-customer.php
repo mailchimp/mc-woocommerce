@@ -40,6 +40,11 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
         $store_id = mailchimp_get_store_id();
         $list_id = mailchimp_get_list_id();
 
+        mailchimp_debug('customer_submit.trace', 'start', array(
+            'customer_id' => $this->id,
+            'wordpress_user_id' => $this->customer_data->user_id,
+        ));
+
         if (!$store_id || !$list_id) {
             mailchimp_debug(get_called_class(), 'StoreID or ListID are not configured');
             return false;
@@ -152,6 +157,12 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
 
             $current_status = $subscriber['status'];
 
+            mailchimp_debug('customer_submit.trace', 'updated Mailchimp audience member', array(
+                'customer_id' => $this->id,
+                'wordpress_user_id' => $wordpress_user_id,
+                'status' => $current_status,
+            ));
+
             // make sure we set the proper customer status before submitting
             $customer->setOptInStatus(in_array($current_status, array('subscribed', 'pending')));
 
@@ -162,6 +173,13 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
 
             // update the customer record
             $updated_customer = $api->updateCustomer($store_id, $customer);
+
+            mailchimp_debug('customer_submit.trace', 'completed Mailchimp customer sync', array(
+                'customer_id' => $this->id,
+                'wordpress_user_id' => $wordpress_user_id,
+                'mailchimp_customer_id' => $customer->getId(),
+                'updated_customer' => (bool) $updated_customer,
+            ));
 
             // increment the sync counter
             mailchimp_register_synced_resource('customers');

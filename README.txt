@@ -4,10 +4,10 @@ Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 6.2
 Tested up to: 7.0
-Stable tag: 6.1.1
+Stable tag: 6.2
 Requires PHP: 7.4
 WC requires at least: 8.2
-WC tested up to: 10.8
+WC tested up to: 11.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your Mailchimp audience to track sales, create targeted emails, send abandoned cart emails, and more.
@@ -78,5 +78,13 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
 == Changelog ==
-= 6.1.1 =
-* Rest api updates
+= 6.2 =
+* Added editable checkbox label for mailchimp_woocommerce_newsletter_field.
+* Added loader UI for OAuth page.
+* Implemented caching for GDPR API data.
+* Optimized CSS enqueuing to avoid wasteful loading.
+* Fixed issue where admin-created customers overwrite Mailchimp contact subscription status.
+* Fixed issue where API traffic is logged as historical-sync data after first sync begins.
+* Fixed issue where deleted carts trigger Abandoned Cart emails and cart resurrection.
+* Added support for custom order types registered via wc_register_order_type (HPOS).
+* Blocks dependency updates.

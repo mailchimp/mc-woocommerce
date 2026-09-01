@@ -751,6 +751,9 @@ class MailChimp_WooCommerce_Pixel_Tracking
      */
     public function inline_script_data()
     {
+        if (! $this->should_enqueue_tracking()) {
+            return;
+        }
         ?>
         <script type="text/javascript">
         window.mcPixel = window.mcPixel || {};
@@ -764,10 +767,38 @@ class MailChimp_WooCommerce_Pixel_Tracking
     }
 
     /**
+     * Whether the pixel tracking scripts should load.
+     *
+     * The tracking JS waits for the Pixel SDK that the connected site code
+     * snippet loads, so it is only useful when that snippet is present:
+     * code snippet setting active and a script fragment on file. Mirrors
+     * the condition MailChimp_WooCommerce_Public::add_inline_footer_script()
+     * uses to print the snippet itself.
+     *
+     * @return bool
+     */
+    public function should_enqueue_tracking()
+    {
+        $code_snippet_activated = (bool) \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-code-snippet', true);
+
+        if (! $code_snippet_activated) {
+            return false;
+        }
+
+        $fragment = mailchimp_get_connected_site_script_fragment();
+
+        return ! empty($fragment);
+    }
+
+    /**
      * Enqueue tracking script
      */
     public function enqueue_tracking_script()
     {
+        if (! $this->should_enqueue_tracking()) {
+            return;
+        }
+
         wp_enqueue_script(
             'mailchimp-woocommerce-pixel-tracking',
             plugin_dir_url(dirname(__DIR__)) . 'public/js/mailchimp-woocommerce-pixel-tracking.js',
@@ -833,6 +864,10 @@ class MailChimp_WooCommerce_Pixel_Tracking
      */
     public function enqueue_block_tracking_script()
     {
+        if (! $this->should_enqueue_tracking()) {
+            return;
+        }
+
         $script_path = dirname(__DIR__, 2) . '/blocks/build/pixel-tracking.js';
         $asset_path  = dirname(__DIR__, 2) . '/blocks/build/pixel-tracking.asset.php';
 

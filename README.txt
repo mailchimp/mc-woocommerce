@@ -79,4 +79,7 @@ If you are unable to sync or connect with Mailchimp, you can open a ticket on ou
 
 == Changelog ==
 = 6.3 =
-* Adds support for product variation ids on pixel
+* Prevents campaign tracking errors when the WooCommerce session is unavailable
+* Ignores malformed campaign email and REST route query parameters instead of throwing PHP errors
+* Preserves variation and parent product IDs in pixel events, including cart items added after page load
+* Cancels pending cart updates and removes saved job payloads when a cart is deleted

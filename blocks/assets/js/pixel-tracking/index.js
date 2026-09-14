@@ -152,7 +152,9 @@ function formatBlockProduct( product ) {
 	// ProductSchema exposes `parent` (the parent product id) for variations.
 	// Cache it so cart items — whose schema has no parent — can resolve later.
 	const id = String( product.id );
-	const parentId = product.parent ? String( product.parent ) : '';
+	const identity = ( product.extensions || {} )[ 'mailchimp-pixel' ] || {};
+	const parent = identity.product_id || product.parent;
+	const parentId = parent ? String( parent ) : '';
 	rememberParentId( id, parentId );
 
 	return {
@@ -187,13 +189,18 @@ function formatCartItem( cartItem ) {
 	const divisor = Math.pow( 10, currencyMinorUnit );
 	const price = prices.price ? parseInt( prices.price, 10 ) / divisor : 0;
 
-	// CartItemSchema has no parent product id — `id` is the variation id for
-	// variable products — so fall back to the map PHP seeded from the cart.
+	// The Store API extension stays current when items are added after page load.
+	// Retain the render-time map for responses without extension data.
 	const id = String( cartItem.id );
+	const identity = ( cartItem.extensions || {} )[ 'mailchimp-pixel' ] || {};
+	const productId = identity.product_id
+		? String( identity.product_id )
+		: getParentId( id ) || id;
+	rememberParentId( id, productId );
 
 	return {
 		id: id,
-		productId: getParentId( id ) || id,
+		productId,
 		title: cartItem.name || '',
 		price: price,
 		currency: ( prices.currency_code || '' ).toUpperCase(),

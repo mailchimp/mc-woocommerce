@@ -1040,7 +1040,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             }
         }
 
-        if (isset($_GET['mc_eid'])) {
+        if (isset($_GET['mc_eid']) && is_string($_GET['mc_eid'])) {
             mailchimp_set_cookie('mailchimp_email_id', trim($_GET['mc_eid']), $cookie_duration, '/' );
         }
 
@@ -1092,6 +1092,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     function is_rest() {
         if (defined('REST_REQUEST') && REST_REQUEST
             || isset($_GET['rest_route'])
+            && is_string($_GET['rest_route'])
             && strpos( $_GET['rest_route'] , '/', 0 ) === 0)
             return true;
 

@@ -5,6 +5,10 @@ $bootstrap = file_get_contents(dirname(__DIR__, 2) . '/bootstrap.php');
 $start = strpos($bootstrap, 'function mailchimp_delete_job_by_id(');
 $end = strpos($bootstrap, '/**', $start);
 eval(substr($bootstrap, $start, $end - $start));
+require dirname(__DIR__, 2) . '/includes/processes/class-mailchimp-woocommerce-job.php';
+$start = strpos($bootstrap, 'function mailchimp_call_live_hook(');
+$end = strpos($bootstrap, '/**', $start);
+eval(substr($bootstrap, $start, $end - $start));
 class MailChimp_WooCommerce_Options {}
 require dirname(__DIR__, 2) . '/includes/class-mailchimp-woocommerce-service.php';
 function mailchimp_log(...$args) {}

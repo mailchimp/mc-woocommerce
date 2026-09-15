@@ -2153,7 +2153,8 @@ class MailChimp_WooCommerce_MailChimpApi {
 			/** @var MailChimp_WooCommerce_LineItem $order_item */
 			// get the line item name from the order detail just in case we need that title for the product.
 			$job = new MailChimp_WooCommerce_Single_Product( $order_item->getProductId(), $order_item->getFallbackTitle() );
-			if ( $missing_products[ $order_item->getId() ] = $job->createModeOnly()->fromOrderItem( $order_item )->handle() ) {
+			$job->set_eligible_at(Mailchimp_Woocommerce_Job::active_eligible_at());
+			if ( $missing_products[ $order_item->getId() ] = $job->createModeOnly()->fromOrderItem( $order_item )->handle_with_context() ) {
 				mailchimp_debug( 'missing_products.fallback', "Product {$order_item->getId()} had to be re-pushed into Mailchimp" );
 			}
 		}
@@ -3155,6 +3156,11 @@ class MailChimp_WooCommerce_MailChimpApi {
             ),
             $headers
         );
+
+        $eligible_at = Mailchimp_Woocommerce_Job::active_eligible_at();
+        if ($eligible_at !== null && in_array(strtoupper($method), array('POST', 'PUT', 'PATCH', 'DELETE'), true)) {
+            $headers[] = 'X-Object-Notified-At: ' . $eligible_at;
+        }
 
         if ($this->is_syncing) {
             $headers[] = 'X-Data-Mode: historical';

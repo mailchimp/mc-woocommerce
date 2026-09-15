@@ -79,7 +79,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
     public function handle()
     {
         if (($result = $this->process())) {
-            mailchimp_log('ac.success', 'Added', array('api_response' => $result->toArray()));
+            mailchimp_log('ac.success', 'Added', array('api_response' => $result));
         }
 
         return false;

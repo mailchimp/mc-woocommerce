@@ -649,6 +649,51 @@ function mailchimp_handle_or_queue(Mailchimp_Woocommerce_Job $job, $delay = 0)
     }
 }
 
+
+/**
+ * Remove pending actions and their persisted payloads for one job class/object.
+ * Already-running actions cannot be unscheduled.
+ *
+ * @return bool
+ */
+function mailchimp_delete_job_by_id($id, $job_class = null)
+{
+    if (empty($id) || empty($job_class)) {
+        return false;
+    }
+
+    global $wpdb;
+    $success = true;
+    try {
+        if (function_exists('as_unschedule_all_actions')) {
+            as_unschedule_all_actions($job_class, array('obj_id' => $id), 'mc-woocommerce');
+        }
+    } catch (\Exception $e) {
+        $success = false;
+        mailchimp_log('action_scheduler.delete_job_by_id', 'Failed to cancel pending actions', array(
+            'job_class' => $job_class,
+            'exception' => $e->getMessage(),
+        ));
+    }
+
+    // Action Scheduler stores only obj_id; the payload lives in mailchimp_jobs.
+    // Match the serialized object's class prefix, not a class name in its data.
+    $class_prefix = 'O:' . strlen($job_class) . ':"' . $job_class . '":';
+    $deleted = $wpdb->query($wpdb->prepare(
+        "DELETE FROM {$wpdb->prefix}mailchimp_jobs WHERE obj_id = %s AND job LIKE %s",
+        $id,
+        $wpdb->esc_like($class_prefix) . '%'
+    ));
+    if ($deleted === false) {
+        mailchimp_log('action_scheduler.delete_job_by_id', 'Failed to delete persisted jobs', array(
+            'job_class' => $job_class,
+        ));
+        return false;
+    }
+
+    return $success;
+}
+
 /**
  * @param $job_hook
  *

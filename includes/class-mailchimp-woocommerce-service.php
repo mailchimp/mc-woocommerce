@@ -283,6 +283,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         // nothing in Mailchimp to delete. wc_clear_cart_after_payment() empties the cart on every
         // single order-received page load, so without this we would fire a DELETE on each refresh.
         if ($this->validated_cart_db && !$this->getCart($uid)) {
+            mailchimp_delete_job_by_id($uid, 'MailChimp_WooCommerce_Cart_Update');
             return false;
         }
 
@@ -292,7 +293,6 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         // drop the local row too, otherwise a later ?mc_cart_id= click re-hydrates the emptied
         // cart into the woo session and pushes it straight back up to Mailchimp.
         $this->deleteCart($uid);
-
         if ($this->api()->deleteCartByID($this->getUniqueStoreID(), $uid)) {
             mailchimp_log('ac.cart_emptied', "Deleted cart [$user_email] :: ID [$uid]");
         }
@@ -358,12 +358,17 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             // delete the previous records.
             if (!empty($previous) && $previous !== $user_email) {
 
-                if ($this->api()->deleteCartByID($unique_sid, $previous_email = mailchimp_hash_trim_lower($previous))) {
+                $previous_email = mailchimp_hash_trim_lower($previous);
+                $this->deleteCart($previous_email);
+                if ($this->api()->deleteCartByID($unique_sid, $previous_email)) {
                     mailchimp_log('ac.cart_swap', "Deleted cart [$previous] :: ID [$previous_email]");
                 }
+            }
 
-                // going to delete the cart because we are switching.
-                $this->deleteCart($previous_email);
+            // Discard queued snapshots before the remote call can fail.
+            if (empty($this->cart)) {
+                $this->deleteCart($uid);
+                $this->cart_was_deleted = true;
             }
 
             // delete the current cart record if there is one
@@ -388,11 +393,6 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                 $handler->setStatus($this->cart_subscribe);
                 $handler->prepend_to_queue = true;
                 mailchimp_handle_or_queue($handler);
-            } else {
-                // the cart is empty - the remote delete above already ran, but the local row has to
-                // go as well or a ?mc_cart_id= click will re-hydrate the emptied cart and re-post it.
-                $this->deleteCart($uid);
-                $this->cart_was_deleted = true;
             }
 
             return !is_null($updated) ? $updated : true;
@@ -1440,6 +1440,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 	 */
     protected function deleteCart($uid)
     {
+        mailchimp_delete_job_by_id($uid, 'MailChimp_WooCommerce_Cart_Update');
+
         if (!$this->validated_cart_db) return false;
 
         global $wpdb;

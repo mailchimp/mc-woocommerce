@@ -171,7 +171,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $handler->is_admin_save = is_admin();
         $handler->prepend_to_queue = mailchimp_should_prepend_live_traffic_to_queue();
 
-        mailchimp_handle_or_queue($handler, 90);
+        mailchimp_handle_or_queue($handler, 90, true);
     }
 
     /**
@@ -184,7 +184,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, null, null);
         $handler->partially_refunded = true;
         $handler->prepend_to_queue = mailchimp_should_prepend_live_traffic_to_queue();
-        mailchimp_handle_or_queue($handler);
+        mailchimp_handle_or_queue($handler, 0, true);
     }
 
     /**
@@ -293,7 +293,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         // drop the local row too, otherwise a later ?mc_cart_id= click re-hydrates the emptied
         // cart into the woo session and pushes it straight back up to Mailchimp.
         $this->deleteCart($uid);
-        if ($this->api()->deleteCartByID($this->getUniqueStoreID(), $uid)) {
+        if (mailchimp_call_live_hook(array($this->api(), 'deleteCartByID'), array($this->getUniqueStoreID(), $uid))) {
             mailchimp_log('ac.cart_emptied', "Deleted cart [$user_email] :: ID [$uid]");
         }
 
@@ -360,7 +360,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
                 $previous_email = mailchimp_hash_trim_lower($previous);
                 $this->deleteCart($previous_email);
-                if ($this->api()->deleteCartByID($unique_sid, $previous_email)) {
+                if (mailchimp_call_live_hook(array($this->api(), 'deleteCartByID'), array($unique_sid, $previous_email))) {
                     mailchimp_log('ac.cart_swap', "Deleted cart [$previous] :: ID [$previous_email]");
                 }
             }
@@ -372,7 +372,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             }
 
             // delete the current cart record if there is one
-            $this->api()->deleteCartByID($unique_sid, $uid);
+            mailchimp_call_live_hook(array($this->api(), 'deleteCartByID'), array($unique_sid, $uid));
 
             if ($this->cart && !empty($this->cart)) {
 
@@ -392,7 +392,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                 // if they had the checkbox checked - go ahead and subscribe them if this is the first post.
                 $handler->setStatus($this->cart_subscribe);
                 $handler->prepend_to_queue = true;
-                mailchimp_handle_or_queue($handler);
+                mailchimp_handle_or_queue($handler, 0, true);
             }
 
             return !is_null($updated) ? $updated : true;
@@ -418,7 +418,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         if (!mailchimp_is_configured()) return;
 
         if ($coupon instanceof WC_Coupon) {
-            mailchimp_handle_or_queue(new MailChimp_WooCommerce_SingleCoupon($post_id));
+            mailchimp_handle_or_queue(new MailChimp_WooCommerce_SingleCoupon($post_id), 0, true);
         }
     }
 
@@ -453,7 +453,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     public function handleAPICouponTrashed($object, $response, $request)
     {
         try {
-            $deleted = mailchimp_get_api()->deletePromoRule(mailchimp_get_store_id(), $request['id']);
+            $deleted = mailchimp_call_live_hook(array(mailchimp_get_api(), 'deletePromoRule'), array(mailchimp_get_store_id(), $request['id']));
             if ($deleted) mailchimp_log('api.promo_code.deleted', "deleted promo code {$request['id']}");
             else mailchimp_log('api.promo_code.delete_fail', "Unable to delete promo code {$request['id']}");
         } catch (Exception $e) {
@@ -497,7 +497,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             || $post_after->post_status !== $post_before->post_status
             || $post_after->post_excerpt !== $post_before->post_excerpt
         ) {
-            mailchimp_handle_or_queue( new MailChimp_WooCommerce_Single_Product($post_ID), 5);
+            mailchimp_handle_or_queue( new MailChimp_WooCommerce_Single_Product($post_ID), 5, true);
         }
     }
 
@@ -543,11 +543,11 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         ));
 
         if ($product instanceof WC_Product_Variation) {
-			mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product_Variation($id), 5);
+			mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product_Variation($id), 5, true);
 		} else {
 			$id = $product->get_parent_id() > 0 ? $product->get_parent_id() : $product->get_id();
 
-			mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($id), 5);
+			mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($id), 5, true);
 		}
     }
 
@@ -579,10 +579,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 		if (!in_array($product->get_status(), array('trash', 'auto-draft', 'draft', 'pending', 'private'))) {
 			if ($product instanceof WC_Product) {
 				mailchimp_debug('queue', "handling meta update for meta [{$meta_key}] on product {$object_id}");
-				mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($object_id), 5);
+				mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($object_id), 5, true);
 			} else if ($product instanceof WC_Product_Variation){
 				mailchimp_debug('queue', "handling meta update for meta [{$meta_key}] on product variation {$object_id}");
-				mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product_Variation($object_id), 5);
+				mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product_Variation($object_id), 5, true);
 			}
 		}
 	}
@@ -632,7 +632,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
 		// If the product is of a certain status, process it. ( old values included 'draft', 'pending')
 		if (!in_array($post->post_status, array('trash', 'auto-draft', 'draft', 'pending', 'private'))) {
-			mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($post_ID), 5);
+			mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($post_ID), 5, true);
 		}
 	}
 
@@ -650,7 +650,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
 			$product_id = $product ? $product->get_parent_id() : null;
 
-			$deleted = mailchimp_get_api()->deleteStoreProductVariation(mailchimp_get_store_id(), $product_id, $variation_id);
+			$deleted = mailchimp_call_live_hook(array(mailchimp_get_api(), 'deleteStoreProductVariation'), array(mailchimp_get_store_id(), $product_id, $variation_id));
 			if ($deleted) mailchimp_log('product_variation.deleted', "deleted product variation {$variation_id}");
 			else mailchimp_log('product_variation.delete_fail', "Unable to deleted product variation {$variation_id}");
 		} catch (Exception $e) {
@@ -665,7 +665,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                 return;
             }
 
-            mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product_Variation($variation_id), 5);
+            mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product_Variation($variation_id), 5, true);
         } catch (Exception $e) {
             mailchimp_error('update product variation', $e->getMessage());
         }
@@ -723,7 +723,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         switch (get_post_type($post_id)) {
             case 'shop_coupon':
                 try {
-                    $deleted = mailchimp_get_api()->deletePromoRule(mailchimp_get_store_id(), $post_id);
+                    $deleted = mailchimp_call_live_hook(array(mailchimp_get_api(), 'deletePromoRule'), array(mailchimp_get_store_id(), $post_id));
                     if ($deleted) mailchimp_log('promo_code.deleted', "deleted promo code {$post_id}");
                     else mailchimp_log('promo_code.delete_fail', "Unable to delete promo code {$post_id}");
                 } catch (Exception $e) {
@@ -732,7 +732,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                 break;
             case 'product':
                 try {
-                    $deleted = mailchimp_get_api()->deleteStoreProduct(mailchimp_get_store_id(), $post_id);
+                    $deleted = mailchimp_call_live_hook(array(mailchimp_get_api(), 'deleteStoreProduct'), array(mailchimp_get_store_id(), $post_id));
                     if ($deleted) mailchimp_log('product.deleted', "deleted product {$post_id}");
                     else mailchimp_log('product.delete_fail', "Unable to deleted product {$post_id}");
                 } catch (Exception $e) {
@@ -769,7 +769,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             $categories_to_process = array_merge($added_categories, $removed_categories);
 
             foreach ($categories_to_process as $category_id) {
-                mailchimp_handle_or_queue(new Mailchimp_WooCommerce_Single_Product_Category($category_id), 6);
+                mailchimp_handle_or_queue(new Mailchimp_WooCommerce_Single_Product_Category($category_id), 6, true);
 
                 mailchimp_debug('product_cat_changes', "Product ID {$product_id} assigned categories: ", [
                     'processing' => $category_id,
@@ -802,7 +802,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                     'term' => $term
                 ]);
 
-                mailchimp_get_api()->updateProductCategory(mailchimp_get_store_id(), $term_id, $product_category);
+                mailchimp_call_live_hook(array(mailchimp_get_api(), 'updateProductCategory'), array(mailchimp_get_store_id(), $term_id, $product_category));
 
                 mailchimp_log('product_cat.update',"Updated product category $term_id");
             }
@@ -833,7 +833,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                 $this->handleCouponRestored($post_id);
                 break;
             case 'product':
-                mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
+                mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5, true);
                 break;
         }
     }
@@ -877,7 +877,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
         if ($subscribed) {
             $job = new MailChimp_WooCommerce_User_Submit($user_id, '1', null, $language, $gdpr_fields);
-            mailchimp_handle_or_queue($job);
+            mailchimp_handle_or_queue($job, 0, true);
         }
     }
 
@@ -920,7 +920,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         );
         $job->prepend_to_queue = mailchimp_should_prepend_live_traffic_to_queue();
         // only send this update if the user actually has a boolean value.
-        mailchimp_handle_or_queue($job);
+        mailchimp_handle_or_queue($job, 0, true);
     }
 
     /**
@@ -1550,7 +1550,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             $job_id = $job_row->id;
 
             // process job
-            $job->handle();
+            $job->handle_with_context();
 
             // delete processed job
             $sql = $wpdb->prepare("DELETE FROM {$wpdb->prefix}mailchimp_jobs WHERE id = %s AND obj_id = %s", array($job_id, $obj_id));

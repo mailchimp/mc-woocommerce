@@ -130,10 +130,14 @@ class Mailchimp_WooCommerce_Single_Product_Category extends Mailchimp_Woocommerc
     public function handleFailedProductsSync($product_ids)
     {
         foreach ($product_ids as $product_id) {
-            mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($product_id));
+            $job = new MailChimp_WooCommerce_Single_Product($product_id);
+            $job->set_eligible_at($this->get_eligible_at());
+            mailchimp_handle_or_queue($job);
         }
 
-        mailchimp_handle_or_queue(new self($this->id, false), 1);
+        $job = new self($this->id, false);
+        $job->set_eligible_at($this->get_eligible_at());
+        mailchimp_handle_or_queue($job, 1);
     }
 
     /**

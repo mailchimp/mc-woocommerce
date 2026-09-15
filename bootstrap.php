@@ -482,10 +482,11 @@ add_action('rest_api_init', 'mailchimp_preload_for_rest', 1);
 /**
  * @param Mailchimp_Woocommerce_Job $job
  * @param int $delay
+ * @param bool $live_hook True only at a live event handler, never for bulk/manual work.
  *
  * @return false|int|string
  */
-function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {			
+function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0, $live_hook = false ) {
     global $wpdb;
     $current_page = isset($job->current_page) && $job->current_page >= 0 ? $job->current_page : false;
     $job_id = isset($job->id) ? $job->id : ($current_page ? $job->current_page : get_class($job));
@@ -494,6 +495,10 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
 
     if ($job->get_attempts() <= 5) {
         $job_class = get_class($job);
+        // Capture before serialization and before queue-priority backdating.
+        if ($live_hook && $job->get_attempts() === 0) {
+            $job->set_eligible_at(strtotime( '+'.$delay.' seconds' ));
+        }
 
         $args = array(
             'job' => maybe_serialize($job),
@@ -593,8 +598,9 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
  *
  * @param Mailchimp_Woocommerce_Job $job
  * @param int $delay
+ * @param bool $live_hook True only at a live event handler, never for bulk/manual work.
  */
-function mailchimp_handle_or_queue(Mailchimp_Woocommerce_Job $job, $delay = 0)
+function mailchimp_handle_or_queue(Mailchimp_Woocommerce_Job $job, $delay = 0, $live_hook = false)
 {
     if ($job instanceof MailChimp_WooCommerce_Single_Order && isset($job->id) && empty($job->gdpr_fields)) {
         // if this is a order process already queued - just skip this
@@ -642,13 +648,22 @@ function mailchimp_handle_or_queue(Mailchimp_Woocommerce_Job $job, $delay = 0)
     }
 
     $filter_delay = !is_null($filter_delay) && is_int($filter_delay) ? $filter_delay : $delay;
-    $as_job_id = mailchimp_as_push($job, $filter_delay);
+    $as_job_id = mailchimp_as_push($job, $filter_delay, $live_hook);
     
     if (!is_int($as_job_id)) {
         mailchimp_log('action_scheduler.queue_fail', get_class($job) .' FAILED :: as_job_id: '.$as_job_id);
     }
 }
 
+
+/**
+ * Immediate mutations from live service hooks have no intentional queue delay.
+ * Keep their timestamp out of subsequent manual/historical API calls.
+ */
+function mailchimp_call_live_hook($callback, $args = array())
+{
+    return Mailchimp_Woocommerce_Job::with_eligible_at(time(), $callback, $args);
+}
 
 /**
  * Remove pending actions and their persisted payloads for one job class/object.

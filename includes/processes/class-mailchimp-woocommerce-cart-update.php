@@ -177,8 +177,9 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
                 foreach ($products as $item) {
                     /** @var MailChimp_WooCommerce_LineItem $item */
                     $transformer = new MailChimp_WooCommerce_Single_Product($item->getProductID());
+                    $transformer->set_eligible_at($this->get_eligible_at());
                     if (!$transformer->api()->getStoreProduct($store_id, $item->getProductId())) {
-                        $transformer->handle();
+                        $transformer->handle_with_context();
                     }
                 }
 

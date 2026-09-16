@@ -492,6 +492,12 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
     $message = ($job_id != get_class($job)) ? ' :: '. (isset($job->current_page) ? 'page ' : 'obj_id ') . $job_id : '';
     $attempts = $job->get_attempts() > 0 ? ' attempt:' . $job->get_attempts() : '';
 
+    // here is how we can set this on every job.
+    if (!$job->get_notified_at()) {
+        $job->set_notified_at(time()+$delay);
+    }
+
+
     if ($job->get_attempts() <= 5) {
         $job_class = get_class($job);
 
@@ -642,6 +648,7 @@ function mailchimp_handle_or_queue(Mailchimp_Woocommerce_Job $job, $delay = 0)
     }
 
     $filter_delay = !is_null($filter_delay) && is_int($filter_delay) ? $filter_delay : $delay;
+
     $as_job_id = mailchimp_as_push($job, $filter_delay);
     
     if (!is_int($as_job_id)) {
@@ -649,6 +656,18 @@ function mailchimp_handle_or_queue(Mailchimp_Woocommerce_Job $job, $delay = 0)
     }
 }
 
+
+/**
+ * Queue a job triggered by a live WooCommerce/WP hook, so its requests carry
+ * X-Object-Notified-At. Never use for initial sync jobs.
+ *
+ * @param Mailchimp_Woocommerce_Job $job
+ * @param int $delay
+ */
+function mailchimp_handle_or_queue_live(Mailchimp_Woocommerce_Job $job, $delay = 0)
+{
+    mailchimp_handle_or_queue($job->mark_live_event(), $delay);
+}
 
 /**
  * Remove pending actions and their persisted payloads for one job class/object.

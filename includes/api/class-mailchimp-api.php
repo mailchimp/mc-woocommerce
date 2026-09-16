@@ -16,6 +16,19 @@ class MailChimp_WooCommerce_MailChimpApi {
 	/** @var null|MailChimp_WooCommerce_MailChimpApi */
 	protected static $instance = null;
 
+	// static, not per-instance: several jobs build their own API objects.
+	/** @var null|int */
+	protected static $job_notified_at = null;
+
+	/**
+	 * Set by the job runner for the duration of one job; null clears it.
+	 *
+	 * @param int|null $timestamp
+	 */
+	public static function setJobNotifiedAt( $timestamp ) {
+		static::$job_notified_at = ! empty( $timestamp ) ? (int) $timestamp : null;
+	}
+
 	/**
 	 * @return null|MailChimp_WooCommerce_MailChimpApi
 	 */
@@ -3158,6 +3171,10 @@ class MailChimp_WooCommerce_MailChimpApi {
 
         if ($this->is_syncing) {
             $headers[] = 'X-Data-Mode: historical';
+        }
+
+        if (static::$job_notified_at) {
+            $headers[] = 'X-Object-Notified-At: ' . static::$job_notified_at;
         }
 
         if ($this->auto_doi) {

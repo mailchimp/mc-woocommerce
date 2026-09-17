@@ -1905,7 +1905,8 @@ function mailchimp_should_prepend_live_traffic_to_queue() {
 
 /**
  * Tower's kill switch for the Zendesk support chat. Asks Tower at most once
- * an hour; a failed check disables the chat and retries after 5 minutes.
+ * every 30 minutes (Tower caches its answer for the same window); a failed
+ * check disables the chat and retries after 5 minutes.
  *
  * @return bool
  */
@@ -1918,7 +1919,7 @@ function mailchimp_support_chat_enabled() {
 
     try {
         $enabled = mailchimp_request_support_chat_status_from_tower();
-        mailchimp_set_transient('support_chat_enabled', $enabled, HOUR_IN_SECONDS);
+        mailchimp_set_transient('support_chat_enabled', $enabled, 30 * MINUTE_IN_SECONDS);
     } catch (Throwable $e) {
         $enabled = false;
         mailchimp_set_transient('support_chat_enabled', $enabled, 5 * MINUTE_IN_SECONDS);
@@ -1933,9 +1934,27 @@ function mailchimp_support_chat_enabled() {
  * @throws Exception when Tower can't be reached or returns an unusable response.
  */
 function mailchimp_request_support_chat_status_from_tower() {
-    // TODO: stub until Tower's endpoint exists. Replace with a short-timeout
-    // wp_remote_get to Tower and throw on a WP_Error / non-200 response.
-    return true;
+    // short timeout - this runs while the plugin settings page renders.
+    $response = wp_remote_get('https://tower.vextras.com/api/woocommerce/support-chat', array(
+        'timeout' => 5,
+        'headers' => array('Accept' => 'application/json'),
+    ));
+
+    if (is_wp_error($response)) {
+        throw new Exception($response->get_error_message());
+    }
+
+    if (wp_remote_retrieve_response_code($response) !== 200) {
+        throw new Exception('Tower returned HTTP ' . wp_remote_retrieve_response_code($response));
+    }
+
+    $body = json_decode(wp_remote_retrieve_body($response), true);
+
+    if (!is_array($body) || !isset($body['enabled']) || !is_bool($body['enabled'])) {
+        throw new Exception('Tower returned an unusable support chat status');
+    }
+
+    return $body['enabled'];
 }
 
 function run_mailchimp_woocommerce() {

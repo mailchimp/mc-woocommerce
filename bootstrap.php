@@ -203,6 +203,7 @@ function mailchimp_admin_preload_base_keys() {
         'mailchimp-woocommerce-mailchimp_user_id',
         'mailchimp-woocommerce-saved_user_id',
         'mailchimp-woocommerce-account_name',
+        'mailchimp-woocommerce-mailchimp_plan',
         'mailchimp-woocommerce-comm.opt',
         'mailchimp-woocommerce-sync.started_at',
         'mailchimp-woocommerce-sync.completed_at',
@@ -1899,6 +1900,41 @@ function mailchimp_allowed_to_prepend_jobs_to_sync() {
  */
 function mailchimp_should_prepend_live_traffic_to_queue() {
     return mailchimp_allowed_to_prepend_jobs_to_sync() && !mailchimp_is_done_syncing();
+}
+
+/**
+ * Tower's kill switch for the Zendesk support chat. Asks Tower at most once
+ * an hour; a failed check disables the chat and retries after 5 minutes.
+ *
+ * @return bool
+ */
+function mailchimp_support_chat_enabled() {
+    $enabled = mailchimp_get_transient_value('support_chat_enabled');
+
+    if (is_bool($enabled)) {
+        return $enabled;
+    }
+
+    try {
+        $enabled = mailchimp_request_support_chat_status_from_tower();
+        mailchimp_set_transient('support_chat_enabled', $enabled, HOUR_IN_SECONDS);
+    } catch (Throwable $e) {
+        $enabled = false;
+        mailchimp_set_transient('support_chat_enabled', $enabled, 5 * MINUTE_IN_SECONDS);
+        mailchimp_debug('support_chat', 'Tower status check failed', array('error' => $e->getMessage()));
+    }
+
+    return $enabled;
+}
+
+/**
+ * @return bool
+ * @throws Exception when Tower can't be reached or returns an unusable response.
+ */
+function mailchimp_request_support_chat_status_from_tower() {
+    // TODO: stub until Tower's endpoint exists. Replace with a short-timeout
+    // wp_remote_get to Tower and throw on a WP_Error / non-200 response.
+    return true;
 }
 
 function run_mailchimp_woocommerce() {

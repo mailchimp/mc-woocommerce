@@ -201,6 +201,25 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			wp_enqueue_script( $this->plugin_name . 'create-account');
 			wp_enqueue_script( $this->plugin_name . '-v2');
 			wp_enqueue_script( 'swal', '//cdn.jsdelivr.net/npm/sweetalert2@8', '', $this->version );
+
+			// local loader only - the Zendesk script itself is injected after the merchant clicks the support button.
+			if ( mailchimp_support_chat_enabled() ) {
+				wp_enqueue_script( $this->plugin_name . '-support-chat', plugin_dir_url( __FILE__ ) . 'v2/assets/js/support-chat.js', array(), $this->version, true );
+				wp_localize_script(
+					$this->plugin_name . '-support-chat',
+					'mailchimpSupportChat',
+					array(
+						'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
+						'nonce'      => wp_create_nonce( 'mailchimp_woocommerce_support_chat' ),
+						'scriptUrl'  => 'https://static.zdassets.com/ekr/snippet.js?key=ffade7d4-a84e-4ff5-b892-d61e2c7f55ed',
+						'l10n'       => array(
+							'loading'    => __( 'Connecting to support...', 'mailchimp-for-woocommerce' ),
+							'failed'     => __( 'Support chat could not load. Please disable any ad or script blockers and try again.', 'mailchimp-for-woocommerce' ),
+							'chat_label' => __( 'Mailchimp app support', 'mailchimp-for-woocommerce' ),
+						),
+					)
+				);
+			}
 		}
 	}
 
@@ -1096,6 +1115,12 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 $mailchimp_login_id = array_key_exists('login_id', $profile) ? $profile['login_id'] : false;
                 $this->setData('account_name', $name);
                 $this->setData('mailchimp_login_id', $mailchimp_login_id);
+                // an account switch must not keep the previous account's plan
+                if ( ! empty( $profile['pricing_plan_type'] ) ) {
+                    $this->setData( 'mailchimp_plan', $profile['pricing_plan_type'] );
+                } else {
+                    \Mailchimp_Woocommerce_DB_Helpers::delete_option( "{$this->plugin_name}-mailchimp_plan" );
+                }
 			}
 			$data['api_ping_error'] = false;
 		} catch ( Exception $e ) {
@@ -1343,6 +1368,59 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				)
 			);
 		}
+	}
+
+	/**
+	 * Identity for the Zendesk support chat. Only called after the merchant
+	 * clicks the support button - nothing is sent to Zendesk before that.
+	 */
+	public function mailchimp_woocommerce_ajax_support_chat_identity() {
+		check_ajax_referer( 'mailchimp_woocommerce_support_chat', 'nonce' );
+		$this->adminOnlyMiddleware();
+
+		if ( ! mailchimp_support_chat_enabled() ) {
+			wp_send_json_error( array( 'message' => 'Support chat is currently unavailable.' ) );
+		}
+
+		$user      = wp_get_current_user();
+		$connected = mailchimp_get_api_key() && $this->validateApiKey();
+		$plan      = $connected ? $this->getPlanName() : null;
+		$user_id   = $connected ? ( $this->getUserID() ?: null ) : null;
+
+		$store_name = $this->getOption( 'store_name' );
+
+		wp_send_json_success(
+			array(
+				'woo'       => array(
+					'name'        => $store_name ? $store_name : get_option( 'blogname' ),
+					'domain'      => wp_parse_url( home_url(), PHP_URL_HOST ),
+					'owner'       => $user->display_name,
+					'email'       => $user->user_email,
+					'sync_status' => $this->getSupportSyncStatus(),
+				),
+				'mailchimp' => array(
+					'store_id' => mailchimp_get_store_id(),
+					'user_id'  => $user_id,
+					'plan'     => $plan,
+				),
+			)
+		);
+	}
+
+	/**
+	 * @return string
+	 */
+	protected function getSupportSyncStatus() {
+		if ( ! mailchimp_is_configured() ) {
+			return 'setup_required';
+		}
+		if ( ! mailchimp_has_started_syncing() ) {
+			return 'not_synced';
+		}
+		if ( mailchimp_get_data( 'sync.syncing' ) || ! mailchimp_get_data( 'sync.completed_at' ) ) {
+			return 'syncing';
+		}
+		return 'synced';
 	}
 
 	/**
@@ -1996,6 +2074,38 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         }
 
         return false;
+    }
+
+    /**
+     * Mailchimp pricing plan, fetched once and stored. Refreshed whenever the
+     * account is (re)connected; cleared on disconnect.
+     *
+     * @return string|null
+     */
+    public function getPlanName()
+    {
+        if ( ( $plan = $this->getData( 'mailchimp_plan', false ) ) ) {
+            return $plan;
+        }
+
+        if ( ! $this->validateApiKey() ) {
+            return null;
+        }
+
+        try {
+            $profile = $this->api()->getProfile();
+        } catch ( Throwable $e ) {
+            mailchimp_debug( 'admin', 'unable to load Mailchimp plan', array( 'error' => $e->getMessage() ) );
+            return null;
+        }
+
+        if ( empty( $profile['pricing_plan_type'] ) ) {
+            return null;
+        }
+
+        $this->setData( 'mailchimp_plan', $profile['pricing_plan_type'] );
+
+        return $profile['pricing_plan_type'];
     }
 
 	public function inject_sync_ajax_call() {

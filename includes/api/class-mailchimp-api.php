@@ -2873,7 +2873,8 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 */
 	private function allowedToSubmitSpam() {
 		// check to see if we've already set the transient.
-		$status = mailchimp_get_transient( 'tower' );
+		// the raw transient is a ['value' => ...] wrapper, so unwrap it before comparing.
+		$status = mailchimp_get_transient_value( 'tower' );
 
 		// if we've got it - just return it now.
 		if ( ! empty( $status ) ) {
@@ -2883,10 +2884,10 @@ class MailChimp_WooCommerce_MailChimpApi {
 		// call the API to see if we need to block traffic or not
 		// this only impacts reporting spam metrics, does not impact local site blocking
 		$response = wp_remote_get( 'https://tower.vextras.com/api/traffic' );
-		$body     = json_decode( $response['body'] );
-		$status   = $body ? $body->status : 'red';
+		$body     = is_wp_error( $response ) ? null : json_decode( wp_remote_retrieve_body( $response ) );
+		$status   = $body && ! empty( $body->status ) ? $body->status : 'red';
 
-		// set this for 5 minutes.
+		// set this for 2 minutes - a failed check is cached as red too, so Tower isn't hit on every report.
 		mailchimp_set_transient( 'tower', $status, 120 );
 
 		return $status === 'green';

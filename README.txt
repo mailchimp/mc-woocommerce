@@ -77,6 +77,12 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 = My question is not listed =
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
+== External services ==
+
+= Zendesk support chat =
+The plugin settings page has a "Connect to support" button that opens a live chat with our support team, powered by Zendesk. Nothing is loaded from Zendesk until you click that button. When you do, the Zendesk chat widget is loaded from static.zdassets.com and the following is shared with Zendesk and our support team: your WordPress display name and email address, your store name and domain, your Mailchimp store ID, user ID and plan, and your sync status.
+Zendesk [Terms of Service](https://www.zendesk.com/company/agreements-and-terms/main-services-agreement/) and [Privacy Policy](https://www.zendesk.com/company/agreements-and-terms/privacy-notice/).
+
 == Changelog ==
 = 6.3 =
 * Prevents campaign tracking errors when the WooCommerce session is unavailable

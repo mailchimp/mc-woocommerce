@@ -279,6 +279,7 @@ class MailChimp_WooCommerce
         $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_switch_account', $plugin_admin, 'connect_account_flow_switch_account' );
         $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_check_login_session', $plugin_admin, 'mailchimp_woocommerce_ajax_check_login_session' );
         $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_support_form', $plugin_admin, 'mailchimp_woocommerce_ajax_support_form' );
+        $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_support_chat_identity', $plugin_admin, 'mailchimp_woocommerce_ajax_support_chat_identity' );
 
         // add Shop Manager capability to save options
         $this->loader->add_action('option_page_capability_mailchimp-woocommerce', $plugin_admin, 'mailchimp_woocommerce_option_page_capability');

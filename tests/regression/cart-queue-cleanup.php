@@ -13,6 +13,7 @@ function mailchimp_is_configured() { return true; }
 function mailchimp_email_is_privacy_protected($email) { return false; }
 function mailchimp_hash_trim_lower($email) { return md5(strtolower(trim($email))); }
 function doing_action($action) { return false; }
+function wp_get_current_user() { return (object) array('ID' => 0, 'user_email' => ''); }
 function as_unschedule_all_actions($hook, $args, $group) {
     if ($GLOBALS['cancel_throws']) { throw new RuntimeException('scheduler unavailable'); }
     $GLOBALS['actions'] = array_filter($GLOBALS['actions'], function ($action) use ($hook, $args, $group) {
@@ -43,10 +44,10 @@ class CartCleanupService extends MailChimp_Service {
     public $has_cart = true;
     public $remote_calls = 0;
     public $remote_throws = false;
-    public function __construct() { $this->validated_cart_db = true; }
+    public function __construct() { $this->validated_cart_db = true; $this->cart_token = str_repeat('a', 32); }
     public function getCurrentUserEmail() { return 'test@example.test'; }
     public function getUniqueStoreID() { return 'store'; }
-    protected function getCart($uid) { return $this->has_cart ? (object) array('id' => $uid) : false; }
+    protected function getCart($uid) { return $this->has_cart ? (object) array('id' => $uid, 'token' => str_repeat('a', 32)) : false; }
     public function api() { return $this; }
     public function deleteCartByID($store, $id) {
         ++$this->remote_calls;

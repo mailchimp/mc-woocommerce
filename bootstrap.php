@@ -161,6 +161,7 @@ function mailchimp_preload_early_keys() {
         'mailchimp_woocommerce_version',                         // version compare
         'mailchimp-woocommerce-sync.initial_sync',               // mailchimp_environment_variables
         'mailchimp-woocommerce_cart_table_add_index_update',     // update_db_check flag
+        'mailchimp-woocommerce_cart_table_token_update',         // update_db_check flag
         'mailchimp-woocommerce_woo_currency_update',             // update_db_check flag
         'mailchimp_woocommerce_db_mailchimp_carts',              // MailChimp_Service::wooIsRunning (fires on woocommerce_init)
     );
@@ -2121,7 +2122,8 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
                 // set transient to prevent too many calls to update language
                 mailchimp_set_transient($caller . ".member.{$hash}", true, 3600);
                 mailchimp_log($caller . '.member.created', "Added {$user_email} as transactional, setting language to [{$language}]");
-            } else if (strpos($e->getMessage(), 'compliance state') !== false) {
+            } else if ($caller !== 'cart' && strpos($e->getMessage(), 'compliance state') !== false) {
+                // not for carts: a cart isn't consent, so it must never re-invite a contact who unsubscribed.
                 mailchimp_get_api()->update($list_id, $user_email, 'pending', $merge_fields);
                 mailchimp_log($caller . '.member.sync', "Update {$user_email} Using Double Opt In", $merge_fields);
             } else {

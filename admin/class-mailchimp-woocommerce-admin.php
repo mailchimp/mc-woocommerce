@@ -606,6 +606,19 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			}
 		}
 
+		// Carts-table one-time migration: add the ownership token column. Rows saved before this
+		// have no token, so only a logged-in owner can change them until they're re-saved.
+		// Same option flag + hourly backoff pattern as the index update below.
+		if ( ! \Mailchimp_Woocommerce_DB_Helpers::get_option( $this->plugin_name . '_cart_table_token_update' )
+			&& ! get_transient( 'mailchimp_woocommerce_cart_token_check_backoff' ) ) {
+			set_transient( 'mailchimp_woocommerce_cart_token_check_backoff', 1, HOUR_IN_SECONDS );
+
+			$column_exists = $wpdb->get_var( "SHOW COLUMNS FROM {$wpdb->prefix}mailchimp_carts LIKE 'token'" );
+			if ( $column_exists || $wpdb->query( "ALTER TABLE {$wpdb->prefix}mailchimp_carts ADD COLUMN token VARCHAR(64) DEFAULT NULL" ) !== false ) {
+				\Mailchimp_Woocommerce_DB_Helpers::update_option( $this->plugin_name . '_cart_table_token_update', true );
+			}
+		}
+
 		// Carts-table one-time cleanup: add PRIMARY KEY on email column and
 		// de-dupe any existing rows. The outer option flag prevents re-runs
 		// after success, but if DELETE or ALTER TABLE silently returns false

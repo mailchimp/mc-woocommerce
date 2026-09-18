@@ -84,13 +84,21 @@ class MailChimp_WooCommerce_Pixel_Tracking
         // Two hooks on purpose, because neither covers the other's case.
         //
         // 'woocommerce_after_single_product' fires only from the classic
-        // content-single-product.php template - which builder themes (Bricks, Elementor,
-        // Divi) never load, so their product views went untracked entirely. But it is
-        // also what catches [product_page id=X], where that template is rendered on some
-        // other page and is_product() is false.
+        // content-single-product.php template. That is what catches [product_page id=X]
+        // and the Single Product block, which render that template on a page where
+        // is_product() is false - the query says nothing, only the global does.
         //
-        // 'wp' covers the builder case: it needs the query, not the template. Whichever
-        // fires first records the view; the second is a no-op for the same product.
+        // But a page builder that renders the product page itself may never reach that
+        // template. Bricks is the confirmed case: its hooks are opt-in, and its own docs
+        // tell the user to hand-place {do_action:woocommerce_after_single_product} in the
+        // template, so a default Bricks store fires nothing and the view is lost. (For
+        // contrast, Elementor does fire these - elementor/elementor#20132 has them landing
+        // in the wrong position, which does not matter to us because we only append to
+        // script_data and never echo.)
+        //
+        // 'wp' covers that: it is core WordPress, so it fires whatever renders the page,
+        // and it needs the query rather than the template. Whichever hook gets there
+        // first records the view; the second is a no-op for the same product.
         add_action('wp', array( $this, 'track_product_view' ));
         add_action('woocommerce_after_single_product', array( $this, 'track_product_view_from_template' ));
 
@@ -251,10 +259,22 @@ class MailChimp_WooCommerce_Pixel_Tracking
     {
         $map      = array();
         $children = $product->get_children();
-        $limit    = (int) apply_filters('mailchimp_woocommerce_pixel_variation_limit', 50, $product);
+
+        // Default to WooCommerce's own inlining threshold rather than a number of our own,
+        // so we ship variation data on exactly the products WooCommerce already ships it
+        // for - and a store that tuned that down for page weight gets the same treatment
+        // here without having to configure it twice.
+        $default = (int) apply_filters('woocommerce_ajax_variation_threshold', 30, $product);
+        $limit   = (int) apply_filters('mailchimp_woocommerce_pixel_variation_limit', $default, $product);
 
         if ($limit > 0 && count($children) > $limit) {
             return $map;
+        }
+
+        // One query for all variation posts instead of one per wc_get_product() below.
+        // Same thing WooCommerce does before it loops variations to build a price hash.
+        if (is_callable('_prime_post_caches')) {
+            _prime_post_caches($children);
         }
 
         foreach ($children as $child_id) {

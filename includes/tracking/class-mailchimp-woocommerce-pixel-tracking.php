@@ -39,8 +39,11 @@ class MailChimp_WooCommerce_Pixel_Tracking
      */
     protected static $_instance = null;
 
-    /** @var int Product id already recorded as viewed, so the two hooks don't duplicate work */
+    /** @var int Product id already recorded as viewed, so the two paths don't duplicate work */
     protected $tracked_product_view = 0;
+
+    /** @var int Product id the query identified, resolved in the footer or not at all */
+    protected $pending_product_view = 0;
 
     protected $track_on_next_page_load = false;
 
@@ -81,26 +84,30 @@ class MailChimp_WooCommerce_Pixel_Tracking
     protected function attach_event_data()
     {
         // Product detail page - single product viewed
-        // Two hooks on purpose, because neither covers the other's case.
-        //
-        // 'woocommerce_after_single_product' fires only from the classic
-        // content-single-product.php template. That is what catches [product_page id=X]
-        // and the Single Product block, which render that template on a page where
-        // is_product() is false - the query says nothing, only the global does.
-        //
-        // But a page builder that renders the product page itself may never reach that
-        // template. Bricks is the confirmed case: its hooks are opt-in, and its own docs
-        // tell the user to hand-place {do_action:woocommerce_after_single_product} in the
-        // template, so a default Bricks store fires nothing and the view is lost. (For
-        // contrast, Elementor does fire these - elementor/elementor#20132 has them landing
-        // in the wrong position, which does not matter to us because we only append to
-        // script_data and never echo.)
-        //
-        // 'wp' covers that: it is core WordPress, so it fires whatever renders the page,
-        // and it needs the query rather than the template. Whichever hook gets there
-        // first records the view; the second is a no-op for the same product.
-        add_action('wp', array( $this, 'track_product_view' ));
+        // The classic template hook stays exactly as it was - it is still what records
+        // the view on any store that renders content-single-product.php, and it is the
+        // only thing that catches [product_page id=X], where that template is rendered
+        // on a page whose query knows nothing about the product.
         add_action('woocommerce_after_single_product', array( $this, 'track_product_view_from_template' ));
+
+        // The fallback below exists for builders that never reach that template. Bricks
+        // is the confirmed case: its WooCommerce hooks are opt-in, and its own docs tell
+        // the user to hand-place {do_action:woocommerce_after_single_product}, so a
+        // default Bricks store fires nothing and the view is lost entirely. (Elementor
+        // does fire these - elementor/elementor#20132 only has them landing in the wrong
+        // position, which cannot affect us because we append to script_data, never echo.)
+        //
+        // It is deliberately split in two so a normal store is untouched:
+        //
+        //   'wp'              - note the id and nothing else. No product is loaded, no
+        //                       filter of anyone else's is fired, no global is written.
+        //   'wp_footer' (5)   - the page has fully rendered by now, so if the template
+        //                       hook did its job this is a no-op and execution order is
+        //                       byte-identical to before. Only when nothing recorded a
+        //                       view do we load the product, and doing that in the footer
+        //                       is no earlier than any other footer script would.
+        add_action('wp', array( $this, 'detect_product_view' ));
+        add_action('wp_footer', array( $this, 'track_pending_product_view' ), 5);
 
         // Add to cart (non-AJAX) - store product data for added_to_cart event
         add_action('woocommerce_add_to_cart', array( $this, 'track_add_to_cart' ), 10, 6);
@@ -182,19 +189,29 @@ class MailChimp_WooCommerce_Pixel_Tracking
     /**
      * Track product view on single product page
      */
-    public function track_product_view()
+    public function detect_product_view()
     {
-        if (! function_exists('is_product') || ! is_product()) {
+        if (function_exists('is_product') && is_product()) {
+            // an int, nothing more - the product is not loaded until the footer, and only
+            // then if the classic template hook never recorded the view itself
+            $this->pending_product_view = (int) get_queried_object_id();
+        }
+    }
+
+    /**
+     * Last-chance product view for stores whose template never fired the hook.
+     *
+     * Runs in the footer, after the page has rendered, so on a store where
+     * woocommerce_after_single_product did fire this does nothing at all and the
+     * plugin behaves exactly as it did before the fallback existed.
+     */
+    public function track_pending_product_view()
+    {
+        if (! $this->pending_product_view || $this->tracked_product_view) {
             return;
         }
 
-        // On 'wp' the loop hasn't set the $product global yet, so fall back to the queried
-        // object. Read the global, never write it - something else owns that.
-        global $product;
-
-        $this->record_product_view(
-            $product instanceof WC_Product ? $product : wc_get_product(get_queried_object_id())
-        );
+        $this->record_product_view(wc_get_product($this->pending_product_view));
     }
 
     /**

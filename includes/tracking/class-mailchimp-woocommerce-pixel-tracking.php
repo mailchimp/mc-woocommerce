@@ -39,6 +39,9 @@ class MailChimp_WooCommerce_Pixel_Tracking
      */
     protected static $_instance = null;
 
+    /** @var int Product id already recorded as viewed, so the two hooks don't duplicate work */
+    protected $tracked_product_view = 0;
+
     protected $track_on_next_page_load = false;
 
     /**
@@ -78,7 +81,18 @@ class MailChimp_WooCommerce_Pixel_Tracking
     protected function attach_event_data()
     {
         // Product detail page - single product viewed
-        add_action('woocommerce_after_single_product', array( $this, 'track_product_view' ));
+        // Two hooks on purpose, because neither covers the other's case.
+        //
+        // 'woocommerce_after_single_product' fires only from the classic
+        // content-single-product.php template - which builder themes (Bricks, Elementor,
+        // Divi) never load, so their product views went untracked entirely. But it is
+        // also what catches [product_page id=X], where that template is rendered on some
+        // other page and is_product() is false.
+        //
+        // 'wp' covers the builder case: it needs the query, not the template. Whichever
+        // fires first records the view; the second is a no-op for the same product.
+        add_action('wp', array( $this, 'track_product_view' ));
+        add_action('woocommerce_after_single_product', array( $this, 'track_product_view_from_template' ));
 
         // Add to cart (non-AJAX) - store product data for added_to_cart event
         add_action('woocommerce_add_to_cart', array( $this, 'track_add_to_cart' ), 10, 6);
@@ -162,18 +176,59 @@ class MailChimp_WooCommerce_Pixel_Tracking
      */
     public function track_product_view()
     {
-        global $product;
-        if ($product && is_product()) {
-            $this->append_script_data('product', $this->get_formatted_product($product));
-            $this->append_script_data('events', 'PRODUCT_VIEWED');
+        if (! function_exists('is_product') || ! is_product()) {
+            return;
+        }
 
-            // A variable product renders before the customer has chosen anything, so the
-            // payload above can only describe the parent - which is why the variation id
-            // lands on add-to-cart but never on the view. Ship the variations with the
-            // page so the browser can swap in the right one once WooCommerce resolves it.
-            if (is_callable(array($product, 'is_type')) && $product->is_type('variable')) {
-                $this->append_script_data('product_variations', (object) $this->get_viewed_variations($product));
-            }
+        // On 'wp' the loop hasn't set the $product global yet, so fall back to the queried
+        // object. Read the global, never write it - something else owns that.
+        global $product;
+
+        $this->record_product_view(
+            $product instanceof WC_Product ? $product : wc_get_product(get_queried_object_id())
+        );
+    }
+
+    /**
+     * Track product view from the classic single-product template.
+     *
+     * Kept alongside the 'wp' hook for [product_page id=X] and the Single Product block,
+     * which render this template on a page where is_product() is false - so the query
+     * says nothing and only the global identifies what is on screen.
+     */
+    public function track_product_view_from_template()
+    {
+        global $product;
+
+        $this->record_product_view($product);
+    }
+
+    /**
+     * Record a product view once, whichever hook got here first.
+     *
+     * @param WC_Product|mixed $product Product being viewed
+     */
+    protected function record_product_view($product)
+    {
+        if (! $product instanceof WC_Product) {
+            return;
+        }
+
+        // both hooks fire on a classic product page - don't rebuild the variation map
+        if ($this->tracked_product_view === $product->get_id()) {
+            return;
+        }
+        $this->tracked_product_view = $product->get_id();
+
+        $this->append_script_data('product', $this->get_formatted_product($product));
+        $this->append_script_data('events', 'PRODUCT_VIEWED');
+
+        // A variable product renders before the customer has chosen anything, so the
+        // payload above can only describe the parent - which is why the variation id
+        // lands on add-to-cart but never on the view. Ship the variations with the
+        // page so the browser can swap in the right one once WooCommerce resolves it.
+        if ($product->is_type('variable')) {
+            $this->append_script_data('product_variations', (object) $this->get_viewed_variations($product));
         }
     }
 

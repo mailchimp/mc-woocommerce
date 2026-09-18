@@ -166,7 +166,60 @@ class MailChimp_WooCommerce_Pixel_Tracking
         if ($product && is_product()) {
             $this->append_script_data('product', $this->get_formatted_product($product));
             $this->append_script_data('events', 'PRODUCT_VIEWED');
+
+            // A variable product renders before the customer has chosen anything, so the
+            // payload above can only describe the parent - which is why the variation id
+            // lands on add-to-cart but never on the view. Ship the variations with the
+            // page so the browser can swap in the right one once WooCommerce resolves it.
+            if (is_callable(array($product, 'is_type')) && $product->is_type('variable')) {
+                $this->append_script_data('product_variations', (object) $this->get_viewed_variations($product));
+            }
         }
+    }
+
+    /**
+     * Pre-render the variations of the product being viewed, keyed by variation id.
+     *
+     * WooCommerce's found_variation event hands the browser a variation id plus display
+     * fields, but not the catalog data the pixel sends (sku, categories, the permalink
+     * WC_Product_Variation builds off the parent). Formatting them here keeps a viewed
+     * variation byte-identical to the same variation added to the cart.
+     *
+     * Capped for the same reason WooCommerce stops inlining its own variation form data:
+     * a product with hundreds of variations would bloat every render. Past the cap the JS
+     * patches the parent payload from the event instead, so the id is still correct.
+     *
+     * @param  WC_Product_Variable $product Product being viewed
+     * @return array Map of variation ID => formatted product
+     */
+    protected function get_viewed_variations($product)
+    {
+        $map      = array();
+        $children = $product->get_children();
+        $limit    = (int) apply_filters('mailchimp_woocommerce_pixel_variation_limit', 50, $product);
+
+        if ($limit > 0 && count($children) > $limit) {
+            return $map;
+        }
+
+        foreach ($children as $child_id) {
+            $variation = wc_get_product($child_id);
+            if ($variation && $variation->is_type('variation')) {
+                $map[(string) $variation->get_id()] = $this->get_formatted_product($variation);
+            }
+        }
+
+        /**
+         * Filter the variation payloads shipped with a product view.
+         *
+         * Lets an integration add variations we skipped past the cap, or correct a
+         * payload its own pricing/naming rules own. Keys must be variation ids as
+         * strings - the JS looks up whatever the browser reports by exact key.
+         *
+         * @param array      $map     Map of variation ID => formatted product
+         * @param WC_Product $product Parent product being viewed
+         */
+        return apply_filters('mailchimp_woocommerce_pixel_product_variations', $map, $product);
     }
 
     /**
@@ -825,6 +878,10 @@ class MailChimp_WooCommerce_Pixel_Tracking
 
     /**
      * Enqueue tracking script
+     *
+     * Versioned off the plugin version, not a literal: the file is served with a
+     * one-year max-age, so a hardcoded ?ver= means a shipped change to this script
+     * never reaches a browser or CDN that already cached the old one.
      */
     public function enqueue_tracking_script()
     {
@@ -832,7 +889,7 @@ class MailChimp_WooCommerce_Pixel_Tracking
             'mailchimp-woocommerce-pixel-tracking',
             plugin_dir_url(dirname(__DIR__)) . 'public/js/mailchimp-woocommerce-pixel-tracking.js',
             array( 'jquery' ),
-            '1.0.0',
+            mailchimp_environment_variables()->version,
             true
         );
 

@@ -2053,6 +2053,12 @@ select#log_file {}
     gap: 10px;
 }
 
+/* display:flex above beats the UA [hidden] rule, so hand the corner back explicitly
+   when the real Zendesk launcher takes over */
+.mc-wc-support-chat[hidden] {
+    display: none;
+}
+
 .mc-wc-support-chat-button {
     position: relative;
     display: inline-flex;

@@ -235,8 +235,9 @@ if (mailchimp_waiting_for_account_confirmation() && $active_breadcrumb !== MC_WC
 			<span class="mc-wc-support-chat-spinner" aria-hidden="true"></span>
 		</button>
 		<span id="mc-wc-support-chat-tooltip" class="mc-wc-support-chat-tooltip" role="tooltip">
+
 			<strong class="mc-wc-support-chat-label"><?php esc_html_e( 'Chat with support', 'mailchimp-for-woocommerce' ); ?></strong>
-			<span><?php esc_html_e( 'Loads Zendesk chat and shares your store and Mailchimp account details with our support team.', 'mailchimp-for-woocommerce' ); ?></span>
+			<span><?php esc_html_e( 'Share your store and Mailchimp account details with our support team.', 'mailchimp-for-woocommerce' ); ?></span>
 		</span>
 	</div>
 	<?php endif; ?>

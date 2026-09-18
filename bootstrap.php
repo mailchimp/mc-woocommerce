@@ -3146,6 +3146,19 @@ function mailchimp_account_events() {
             'ui_action' => 'clicked',
             'ui_access_point' => 'center',
         ),
+        // remote diagnostics turned on for them by opening the support chat, not by the checkbox
+        'support_chat:enable_support' => array(
+            'initiative_name' => 'strategic_partners',
+            'scope_area' => 'embedded_app',
+            'screen' => admin_url('admin.php?page=mailchimp-woocommerce'),
+            'object' => 'integration',
+            'object_detail' => 'support_chat',
+            'action' => 'engaged',
+            'ui_object' => 'button',
+            'ui_object_detail' => 'enable_support',
+            'ui_action' => 'clicked',
+            'ui_access_point' => 'bottom_right',
+        ),
         'navigation_advanced:opt_in_email' => array(
             'initiative_name' => 'strategic_partners',
             'scope_area' => 'embedded_app',

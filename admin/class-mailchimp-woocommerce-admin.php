@@ -1402,22 +1402,65 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		$store_name = $this->getOption( 'store_name' );
 
+		// opening the chat hands the squad a ticket they can't work without diagnostics
+		$remote_support = $this->maybe_enable_remote_support_for_chat();
+
 		wp_send_json_success(
 			array(
-				'woo'       => array(
+				'remote_support' => $remote_support,
+				'woo'            => array(
 					'name'        => $store_name ? $store_name : get_option( 'blogname' ),
 					'domain'      => wp_parse_url( home_url(), PHP_URL_HOST ),
 					'owner'       => $user->display_name,
 					'email'       => $user->user_email,
 					'sync_status' => $this->getSupportSyncStatus(),
 				),
-				'mailchimp' => array(
+				'mailchimp'      => array(
 					'store_id' => mailchimp_get_store_id(),
 					'user_id'  => $user_id,
 					'plan'     => $plan,
 				),
 			)
 		);
+	}
+
+	/**
+	 * Turn on remote diagnostics when the merchant opens the support chat - the same
+	 * switch the Advanced tab exposes, flipped for them so support isn't blind.
+	 *
+	 * Tower only needs to hear about this once: if the option is already on we do
+	 * nothing, and a refused toggle is held off for a few minutes so retry clicks
+	 * don't hammer Tower.
+	 *
+	 * @return bool whether remote support is on when we return.
+	 */
+	protected function maybe_enable_remote_support_for_chat() {
+		if ( (bool) $this->getData( 'tower.opt', 0 ) ) {
+			return true;
+		}
+
+		if ( mailchimp_get_transient_value( 'support_chat_tower_attempted' ) ) {
+			return false;
+		}
+		mailchimp_set_transient( 'support_chat_tower_attempted', true, 5 * MINUTE_IN_SECONDS );
+
+		try {
+			$tower    = new MailChimp_WooCommerce_Tower( mailchimp_get_store_id() );
+			$response = $tower->toggle( true );
+		} catch ( Exception $e ) {
+			mailchimp_debug( 'support_chat', 'remote support toggle failed', array( 'error' => $e->getMessage() ) );
+			return false;
+		}
+
+		if ( ! $response || ! isset( $response->success ) || true !== (bool) $response->success ) {
+			mailchimp_debug( 'support_chat', 'remote support toggle was refused by Tower' );
+			return false;
+		}
+
+		$this->setData( 'tower.opt', 1 );
+		Mailchimp_Woocommerce_Event::track( 'support_chat:enable_support', new DateTime() );
+
+		return true;
 	}
 
 	/**

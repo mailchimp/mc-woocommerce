@@ -5,6 +5,10 @@
  * The click fetches the store identity from admin-ajax first, hands it to Zendesk
  * before the snippet boots (settings + identify/prefill), then opens the chat.
  *
+ * Every plugin tab is a full page load, so once the merchant has started a chat we
+ * remember it and reload the widget on the next page by ourselves - Zendesk then
+ * restores the conversation from its own session. Ending the chat forgets it again.
+ *
  * Our button and the Zendesk launcher live in the same corner, so only one of them
  * is ever on screen: ours shows by default and steps aside once the real widget is up.
  */
@@ -22,6 +26,35 @@
 	// the frames Zendesk mounts on <body>: Classic launcher/widget, messaging, and the
 	// newer data-product tagged ones. Any of them being on screen means Zendesk is up.
 	var ZENDESK_FRAMES = 'iframe#launcher, iframe#webWidget, iframe#webMessenger, iframe[data-product="web_widget"]';
+
+	// how long a started chat keeps reloading on its own if it is never ended
+	var STORAGE_KEY = 'mailchimp-woocommerce.support-chat';
+	var REMEMBER_FOR = 12 * 60 * 60 * 1000;
+
+	// storage can be off or throw (private windows, blocked site data) - the chat
+	// still works then, it just starts over on the next page like it used to
+	function rememberChat() {
+		try {
+			window.localStorage.setItem(STORAGE_KEY, String(Date.now()));
+		} catch (e) {}
+	}
+
+	function forgetChat() {
+		try {
+			window.localStorage.removeItem(STORAGE_KEY);
+		} catch (e) {}
+	}
+
+	function chatRemembered() {
+		try {
+			var startedAt = parseInt(window.localStorage.getItem(STORAGE_KEY), 10);
+			if (startedAt && Date.now() - startedAt < REMEMBER_FOR) {
+				return true;
+			}
+			forgetChat();
+		} catch (e) {}
+		return false;
+	}
 
 	function zE() {
 		return window.zE.apply(null, arguments);
@@ -100,6 +133,8 @@
 		zE('webWidget:on', 'chat:start', function () {
 			zE('webWidget', 'chat:addTags', chatTags(id));
 		});
+		// the conversation is over - stop bringing the widget back on every page
+		zE('webWidget:on', 'chat:end', forgetChat);
 	}
 
 	function load() {
@@ -257,6 +292,7 @@
 			event.preventDefault();
 			setState('loading');
 			load().then(function () {
+				rememberChat();
 				setState('ready');
 				bindWidgetEvents();
 				zE('webWidget', 'show');
@@ -267,6 +303,23 @@
 				setState('failed');
 			});
 		});
+
+		// the merchant already started a chat on an earlier page - bring it back without a
+		// click. No open(): Zendesk restores the widget open or minimised as they left it.
+		if (!window.zE && chatRemembered()) {
+			setState('loading');
+			load().then(function () {
+				setState('ready');
+				bindWidgetEvents();
+				zE('webWidget', 'show');
+				queueSync();
+			}).catch(function (error) {
+				// quietly fall back to our button - an error they never asked for would just confuse
+				console.error('Mailchimp support chat:', error);
+				forgetChat();
+				setState('ready');
+			});
+		}
 
 		// covers a Zendesk widget that is already up when we load (another plugin, or a
 		// page load while the merchant's chat session is still open)

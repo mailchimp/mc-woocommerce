@@ -205,7 +205,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			// local loader only - the Zendesk script itself is injected after the merchant clicks the support button.
 			$support_chat_script_url = mailchimp_support_chat_script_url();
 			if ( $support_chat_script_url ) {
-				wp_enqueue_script( $this->plugin_name . '-support-chat', plugin_dir_url( __FILE__ ) . 'v2/assets/js/support-chat.js', array(), $this->version, true );
+				wp_enqueue_script( $this->plugin_name . '-support-chat', plugin_dir_url( __FILE__ ) . 'v2/assets/js/support-chat.js', array(), $this->version.'-chat', true );
 				wp_localize_script(
 					$this->plugin_name . '-support-chat',
 					'mailchimpSupportChat',
@@ -213,6 +213,10 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 						'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
 						'nonce'      => wp_create_nonce( 'mailchimp_woocommerce_support_chat' ),
 						'scriptUrl'  => $support_chat_script_url,
+						// lets a chat opened on an earlier page come back without admin-ajax, and
+						// keeps the identity server side instead of in the browser's localStorage
+						'userId'     => get_current_user_id(),
+						'identity'   => $this->get_support_chat_identity(),
 						'l10n'       => array(
 							'loading'    => __( 'Connecting to support...', 'mailchimp-for-woocommerce' ),
 							'failed'     => __( 'Support chat could not load. Please disable any ad or script blockers and try again.', 'mailchimp-for-woocommerce' ),
@@ -1403,65 +1407,45 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		$store_name = $this->getOption( 'store_name' );
 
-		// opening the chat hands the squad a ticket they can't work without diagnostics
-		$remote_support = $this->maybe_enable_remote_support_for_chat();
-
-		wp_send_json_success(
-			array(
-				'remote_support' => $remote_support,
-				'woo'            => array(
-					'name'        => $store_name ? $store_name : get_option( 'blogname' ),
-					'domain'      => wp_parse_url( home_url(), PHP_URL_HOST ),
-					'owner'       => $user->display_name,
-					'email'       => $user->user_email,
-					'sync_status' => $this->getSupportSyncStatus(),
-				),
-				'mailchimp'      => array(
-					'store_id' => mailchimp_get_store_id(),
-					'user_id'  => $user_id,
-					'plan'     => $plan,
-				),
-			)
+		$identity = array(
+			'woo'       => array(
+				'name'        => $store_name ? $store_name : get_option( 'blogname' ),
+				'domain'      => wp_parse_url( home_url(), PHP_URL_HOST ),
+				'owner'       => $user->display_name,
+				'email'       => $user->user_email,
+				'sync_status' => $this->getSupportSyncStatus(),
+			),
+			'mailchimp' => array(
+				'store_id' => mailchimp_get_store_id(),
+				'user_id'  => $user_id,
+				'plan'     => $plan,
+			),
 		);
+
+		// the next plugin page rebuilds the chat from this instead of asking again
+		mailchimp_set_transient( $this->support_chat_identity_key(), $identity, 12 * HOUR_IN_SECONDS );
+
+		wp_send_json_success( $identity );
 	}
 
 	/**
-	 * Turn on remote diagnostics when the merchant opens the support chat - the same
-	 * switch the Advanced tab exposes, flipped for them so support isn't blind.
+	 * The identity the current user's chat booted with, while it's still being restored
+	 * across page loads. Per WordPress user, so a shared browser never hands one admin's
+	 * details to the next.
 	 *
-	 * Tower only needs to hear about this once: if the option is already on we do
-	 * nothing, and a refused toggle is held off for a few minutes so retry clicks
-	 * don't hammer Tower.
-	 *
-	 * @return bool whether remote support is on when we return.
+	 * @return array|null
 	 */
-	protected function maybe_enable_remote_support_for_chat() {
-		if ( (bool) $this->getData( 'tower.opt', 0 ) ) {
-			return true;
-		}
+	protected function get_support_chat_identity() {
+		$identity = mailchimp_get_transient_value( $this->support_chat_identity_key() );
 
-		if ( mailchimp_get_transient_value( 'support_chat_tower_attempted' ) ) {
-			return false;
-		}
-		mailchimp_set_transient( 'support_chat_tower_attempted', true, 5 * MINUTE_IN_SECONDS );
+		return is_array( $identity ) ? $identity : null;
+	}
 
-		try {
-			$tower    = new MailChimp_WooCommerce_Tower( mailchimp_get_store_id() );
-			$response = $tower->toggle( true );
-		} catch ( Exception $e ) {
-			mailchimp_debug( 'support_chat', 'remote support toggle failed', array( 'error' => $e->getMessage() ) );
-			return false;
-		}
-
-		if ( ! $response || ! isset( $response->success ) || true !== (bool) $response->success ) {
-			mailchimp_debug( 'support_chat', 'remote support toggle was refused by Tower' );
-			return false;
-		}
-
-		$this->setData( 'tower.opt', 1 );
-		Mailchimp_Woocommerce_Event::track( 'support_chat:enable_support', new DateTime() );
-
-		return true;
+	/**
+	 * @return string
+	 */
+	protected function support_chat_identity_key() {
+		return 'support_chat_identity_' . get_current_user_id();
 	}
 
 	/**

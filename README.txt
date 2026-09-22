@@ -85,7 +85,12 @@ Zendesk [Terms of Service](https://www.zendesk.com/company/agreements-and-terms/
 
 == Changelog ==
 = 6.3 =
-* Prevents campaign tracking errors when the WooCommerce session is unavailable
-* Ignores malformed campaign email and REST route query parameters instead of throwing PHP errors
-* Preserves variation and parent product IDs in pixel events, including cart items added after page load
-* Cancels pending cart updates and removes saved job payloads when a cart is deleted
+* Adds a "Connect to support" button to the plugin settings page that opens a Zendesk live chat when clicked
+* Adds product-view pixel tracking on page-builder product templates, including Bricks
+* Adds the selected variation to product-view pixel events on variable products
+* Adds X-Object-Notified-At header to live sync requests for end-to-end latency tracking
+* Restricts saved carts so only the cart's owner can read, update or remove them
+* Fixes issue where pending cart updates recreate a cart after it is emptied or deleted
+* Fixes issue where pixel events lose variation and parent product IDs for cart items added after page load
+* Fixes PHP errors caused by malformed campaign email and REST route query parameters
+* Fixes campaign tracking error when the WooCommerce session is unavailable

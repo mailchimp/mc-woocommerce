@@ -1904,36 +1904,46 @@ function mailchimp_should_prepend_live_traffic_to_queue() {
 }
 
 /**
- * Tower's kill switch for the Zendesk support chat. Asks Tower at most once
- * every 30 minutes (Tower caches its answer for the same window); a failed
- * check disables the chat and retries after 5 minutes.
+ * Tower's kill switch for the Zendesk support chat.
  *
  * @return bool
  */
 function mailchimp_support_chat_enabled() {
-    $enabled = mailchimp_get_transient_value('support_chat_enabled');
-
-    if (is_bool($enabled)) {
-        return $enabled;
-    }
-
-    try {
-        $enabled = mailchimp_request_support_chat_status_from_tower();
-        mailchimp_set_transient('support_chat_enabled', $enabled, 30 * MINUTE_IN_SECONDS);
-    } catch (Throwable $e) {
-        $enabled = false;
-        mailchimp_set_transient('support_chat_enabled', $enabled, 5 * MINUTE_IN_SECONDS);
-        mailchimp_debug('support_chat', 'Tower status check failed', array('error' => $e->getMessage()));
-    }
-
-    return $enabled;
+    return mailchimp_support_chat_script_url() !== null;
 }
 
 /**
- * @return bool
+ * The Zendesk script Tower wants us to load, or null when the chat is off. Asks
+ * Tower at most once every 30 minutes (Tower caches its answer for the same
+ * window); a failed check disables the chat and retries after 5 minutes.
+ *
+ * @return string|null
+ */
+function mailchimp_support_chat_script_url() {
+    // an empty string is a cached "off" - null is a cache miss
+    $url = mailchimp_get_transient_value('support_chat_script_url');
+
+    if (is_string($url)) {
+        return $url !== '' ? $url : null;
+    }
+
+    try {
+        $url = (string) mailchimp_request_support_chat_script_url_from_tower();
+        mailchimp_set_transient('support_chat_script_url', $url, 30 * MINUTE_IN_SECONDS);
+    } catch (Throwable $e) {
+        $url = '';
+        mailchimp_set_transient('support_chat_script_url', $url, 5 * MINUTE_IN_SECONDS);
+        mailchimp_debug('support_chat', 'Tower status check failed', array('error' => $e->getMessage()));
+    }
+
+    return $url !== '' ? $url : null;
+}
+
+/**
+ * @return string|null the script URL, or null when Tower has the chat turned off.
  * @throws Exception when Tower can't be reached or returns an unusable response.
  */
-function mailchimp_request_support_chat_status_from_tower() {
+function mailchimp_request_support_chat_script_url_from_tower() {
     // short timeout - this runs while the plugin settings page renders.
     $response = wp_remote_get('https://tower.vextras.com/api/woocommerce/support-chat', array(
         'timeout' => 5,
@@ -1950,11 +1960,20 @@ function mailchimp_request_support_chat_status_from_tower() {
 
     $body = json_decode(wp_remote_retrieve_body($response), true);
 
-    if (!is_array($body) || !isset($body['enabled']) || !is_bool($body['enabled'])) {
+    if (!is_array($body) || !array_key_exists('script_url', $body)) {
         throw new Exception('Tower returned an unusable support chat status');
     }
 
-    return $body['enabled'];
+    if ($body['script_url'] === null) {
+        return null;
+    }
+
+    // this gets injected into wp-admin, so only ever load it over https
+    if (!is_string($body['script_url']) || strpos($body['script_url'], 'https://') !== 0 || !filter_var($body['script_url'], FILTER_VALIDATE_URL)) {
+        throw new Exception('Tower returned an unusable support chat script URL');
+    }
+
+    return $body['script_url'];
 }
 
 function run_mailchimp_woocommerce() {

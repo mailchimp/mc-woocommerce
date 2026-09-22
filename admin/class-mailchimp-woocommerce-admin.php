@@ -203,7 +203,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			wp_enqueue_script( 'swal', '//cdn.jsdelivr.net/npm/sweetalert2@8', '', $this->version );
 
 			// local loader only - the Zendesk script itself is injected after the merchant clicks the support button.
-			if ( mailchimp_support_chat_enabled() ) {
+			$support_chat_script_url = mailchimp_support_chat_script_url();
+			if ( $support_chat_script_url ) {
 				wp_enqueue_script( $this->plugin_name . '-support-chat', plugin_dir_url( __FILE__ ) . 'v2/assets/js/support-chat.js', array(), $this->version, true );
 				wp_localize_script(
 					$this->plugin_name . '-support-chat',
@@ -211,7 +212,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 					array(
 						'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
 						'nonce'      => wp_create_nonce( 'mailchimp_woocommerce_support_chat' ),
-						'scriptUrl'  => 'https://static.zdassets.com/ekr/snippet.js?key=ffade7d4-a84e-4ff5-b892-d61e2c7f55ed',
+						'scriptUrl'  => $support_chat_script_url,
 						'l10n'       => array(
 							'loading'    => __( 'Connecting to support...', 'mailchimp-for-woocommerce' ),
 							'failed'     => __( 'Support chat could not load. Please disable any ad or script blockers and try again.', 'mailchimp-for-woocommerce' ),

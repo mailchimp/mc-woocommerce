@@ -409,7 +409,8 @@ class MailChimp_WooCommerce_MailChimpApi {
 			// If mailchimp says is already a member lets send the update by PUT
 			if ( mailchimp_string_contains( $e->getMessage(), 'is already a list member' ) ) {
 				return $this->applyPutRequestOnSubscriber( $list_id, $email, $data );
-			} elseif ( $data['status'] !== 'subscribed' || ! mailchimp_string_contains( $e->getMessage(), 'compliance state' ) ) {
+			} elseif ( ( $data['status'] ?? null ) !== 'subscribed' || ! mailchimp_string_contains( $e->getMessage(), 'compliance state' ) ) {
+				// an only_if_new payload carries status_if_new instead of status
 				throw $e;
 			}
 

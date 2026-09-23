@@ -3,11 +3,11 @@ Contributors: ryanhungate, Mailchimp
 Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 6.2
-Tested up to: 7.0
+Tested up to: 7.1
 Stable tag: 6.2
 Requires PHP: 7.4
 WC requires at least: 8.2
-WC tested up to: 11.0
+WC tested up to: 11.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your Mailchimp audience to track sales, create targeted emails, send abandoned cart emails, and more.
@@ -77,14 +77,20 @@ At this time, the synchronization of product categories from WooCommerce to Mail
 = My question is not listed =
 If you are unable to sync or connect with Mailchimp, you can open a ticket on our [Github plugin page](https://github.com/mailchimp/mc-woocommerce/issues). Please provide the version of the plugin and PHP you're using, any fatal errors in the WooCommerce logs (WooCommerce -> Status -> Logs) you're seeing, along with relevant information to the problem you're experiencing.
 
+== External services ==
+
+= Zendesk support chat =
+The plugin settings page has a "Connect to support" button that opens a live chat with our support team, powered by Zendesk. Nothing is loaded from Zendesk until you click that button. When you do, the Zendesk chat widget is loaded from static.zdassets.com and the following is shared with Zendesk and our support team: your WordPress display name and email address, your store name and domain, your Mailchimp store ID, user ID and plan, and your sync status.
+Zendesk [Terms of Service](https://www.zendesk.com/company/agreements-and-terms/main-services-agreement/) and [Privacy Policy](https://www.zendesk.com/company/agreements-and-terms/privacy-notice/).
+
 == Changelog ==
-= 6.2 =
-* Adds support for custom order types registered via wc_register_order_type (HPOS)
-* Adds editable checkbox label for mailchimp_woocommerce_newsletter_field
-* Adds loader UI for OAuth page
-* Caches GDPR API data
-* Optimizes CSS enqueuing to avoid wasteful loading
-* Fixes issue where admin-created customers overwrite Mailchimp contact subscription status
-* Fixes issue where API traffic is logged as historical-sync data after first sync begins
-* Fixes issue where deleted carts trigger Abandoned Cart emails and cart resurrection
-* Blocks dependency updates
+= 6.3 =
+* Adds a "Connect to support" button to the plugin settings page that opens a Zendesk live chat when clicked
+* Adds product-view pixel tracking on page-builder product templates, including Bricks
+* Adds the selected variation to product-view pixel events on variable products
+* Adds X-Object-Notified-At header to live sync requests for end-to-end latency tracking
+* Restricts saved carts so only the cart's owner can read, update or remove them
+* Fixes issue where pending cart updates recreate a cart after it is emptied or deleted
+* Fixes issue where pixel events lose variation and parent product IDs for cart items added after page load
+* Fixes PHP errors caused by malformed campaign email and REST route query parameters
+* Fixes campaign tracking error when the WooCommerce session is unavailable

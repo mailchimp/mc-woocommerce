@@ -18,6 +18,8 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
     public $ip_address;
     public $user_language;
     public $status = false;
+    // the cart's ownership token - the recovery link needs it to restore the cart on another device.
+    public $cart_token;
 
 
 	/**
@@ -51,6 +53,17 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
         $this->assignIP();
     }
 
+    /**
+     * @param string|null $token
+     * @return $this
+     */
+    public function setCartToken($token)
+    {
+        $this->cart_token = $token;
+
+        return $this;
+    }
+
     public function setStatus($status)
     {
         $this->status = (bool) $status;
@@ -79,7 +92,7 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
     public function handle()
     {
         if (($result = $this->process())) {
-            mailchimp_log('ac.success', 'Added', array('api_response' => $result->toArray()));
+            mailchimp_log('ac.success', 'Added', array('api_response' => $result));
         }
 
         return false;
@@ -110,11 +123,10 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
 
             $checkout_url = wc_get_checkout_url();
 
-            if (mailchimp_string_contains($checkout_url, '?')) {
-                $checkout_url .= '&mc_cart_id='.$this->id;
-            } else {
-                $checkout_url .= '?mc_cart_id='.$this->id;
-            }
+            $checkout_url = add_query_arg(array_filter(array(
+                'mc_cart_id' => $this->id,
+                'mc_cart_token' => $this->cart_token,
+            )), $checkout_url);
 
             $customer = new MailChimp_WooCommerce_Customer();
             $customer->setId($this->id);

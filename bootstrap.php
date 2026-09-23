@@ -135,7 +135,7 @@ function mailchimp_environment_variables($refresh = false) {
     $cached = (object) array(
         'repo' => 'master',
         'environment' => 'production', // staging or production
-        'version' => '6.2',
+        'version' => '6.3',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => function_exists('WC') ? WC()->version : null,
@@ -161,6 +161,7 @@ function mailchimp_preload_early_keys() {
         'mailchimp_woocommerce_version',                         // version compare
         'mailchimp-woocommerce-sync.initial_sync',               // mailchimp_environment_variables
         'mailchimp-woocommerce_cart_table_add_index_update',     // update_db_check flag
+        'mailchimp-woocommerce_cart_table_token_update',         // update_db_check flag
         'mailchimp-woocommerce_woo_currency_update',             // update_db_check flag
         'mailchimp_woocommerce_db_mailchimp_carts',              // MailChimp_Service::wooIsRunning (fires on woocommerce_init)
     );
@@ -203,6 +204,7 @@ function mailchimp_admin_preload_base_keys() {
         'mailchimp-woocommerce-mailchimp_user_id',
         'mailchimp-woocommerce-saved_user_id',
         'mailchimp-woocommerce-account_name',
+        'mailchimp-woocommerce-mailchimp_plan',
         'mailchimp-woocommerce-comm.opt',
         'mailchimp-woocommerce-sync.started_at',
         'mailchimp-woocommerce-sync.completed_at',
@@ -492,6 +494,12 @@ function mailchimp_as_push( Mailchimp_Woocommerce_Job $job, $delay = 0 ) {
     $message = ($job_id != get_class($job)) ? ' :: '. (isset($job->current_page) ? 'page ' : 'obj_id ') . $job_id : '';
     $attempts = $job->get_attempts() > 0 ? ' attempt:' . $job->get_attempts() : '';
 
+    // here is how we can set this on every job.
+    if (!$job->get_notified_at()) {
+        $job->set_notified_at(time()+$delay);
+    }
+
+
     if ($job->get_attempts() <= 5) {
         $job_class = get_class($job);
 
@@ -642,11 +650,69 @@ function mailchimp_handle_or_queue(Mailchimp_Woocommerce_Job $job, $delay = 0)
     }
 
     $filter_delay = !is_null($filter_delay) && is_int($filter_delay) ? $filter_delay : $delay;
+
     $as_job_id = mailchimp_as_push($job, $filter_delay);
     
     if (!is_int($as_job_id)) {
         mailchimp_log('action_scheduler.queue_fail', get_class($job) .' FAILED :: as_job_id: '.$as_job_id);
     }
+}
+
+
+/**
+ * Queue a job triggered by a live WooCommerce/WP hook, so its requests carry
+ * X-Object-Notified-At. Never use for initial sync jobs.
+ *
+ * @param Mailchimp_Woocommerce_Job $job
+ * @param int $delay
+ */
+function mailchimp_handle_or_queue_live(Mailchimp_Woocommerce_Job $job, $delay = 0)
+{
+    mailchimp_handle_or_queue($job->mark_live_event(), $delay);
+}
+
+/**
+ * Remove pending actions and their persisted payloads for one job class/object.
+ * Already-running actions cannot be unscheduled.
+ *
+ * @return bool
+ */
+function mailchimp_delete_job_by_id($id, $job_class = null)
+{
+    if (empty($id) || empty($job_class)) {
+        return false;
+    }
+
+    global $wpdb;
+    $success = true;
+    try {
+        if (function_exists('as_unschedule_all_actions')) {
+            as_unschedule_all_actions($job_class, array('obj_id' => $id), 'mc-woocommerce');
+        }
+    } catch (\Exception $e) {
+        $success = false;
+        mailchimp_log('action_scheduler.delete_job_by_id', 'Failed to cancel pending actions', array(
+            'job_class' => $job_class,
+            'exception' => $e->getMessage(),
+        ));
+    }
+
+    // Action Scheduler stores only obj_id; the payload lives in mailchimp_jobs.
+    // Match the serialized object's class prefix, not a class name in its data.
+    $class_prefix = 'O:' . strlen($job_class) . ':"' . $job_class . '":';
+    $deleted = $wpdb->query($wpdb->prepare(
+        "DELETE FROM {$wpdb->prefix}mailchimp_jobs WHERE obj_id = %s AND job LIKE %s",
+        $id,
+        $wpdb->esc_like($class_prefix) . '%'
+    ));
+    if ($deleted === false) {
+        mailchimp_log('action_scheduler.delete_job_by_id', 'Failed to delete persisted jobs', array(
+            'job_class' => $job_class,
+        ));
+        return false;
+    }
+
+    return $success;
 }
 
 /**
@@ -1837,6 +1903,79 @@ function mailchimp_should_prepend_live_traffic_to_queue() {
     return mailchimp_allowed_to_prepend_jobs_to_sync() && !mailchimp_is_done_syncing();
 }
 
+/**
+ * Tower's kill switch for the Zendesk support chat.
+ *
+ * @return bool
+ */
+function mailchimp_support_chat_enabled() {
+    return mailchimp_support_chat_script_url() !== null;
+}
+
+/**
+ * The Zendesk script Tower wants us to load, or null when the chat is off. Asks
+ * Tower at most once every 30 minutes (Tower caches its answer for the same
+ * window); a failed check disables the chat and retries after 5 minutes.
+ *
+ * @return string|null
+ */
+function mailchimp_support_chat_script_url() {
+    // an empty string is a cached "off" - null is a cache miss
+    $url = mailchimp_get_transient_value('support_chat_script_url');
+
+    if (is_string($url)) {
+        return $url !== '' ? $url : null;
+    }
+
+    try {
+        $url = (string) mailchimp_request_support_chat_script_url_from_tower();
+        mailchimp_set_transient('support_chat_script_url', $url, 30 * MINUTE_IN_SECONDS);
+    } catch (Throwable $e) {
+        $url = '';
+        mailchimp_set_transient('support_chat_script_url', $url, 5 * MINUTE_IN_SECONDS);
+        mailchimp_debug('support_chat', 'Tower status check failed', array('error' => $e->getMessage()));
+    }
+
+    return $url !== '' ? $url : null;
+}
+
+/**
+ * @return string|null the script URL, or null when Tower has the chat turned off.
+ * @throws Exception when Tower can't be reached or returns an unusable response.
+ */
+function mailchimp_request_support_chat_script_url_from_tower() {
+    // short timeout - this runs while the plugin settings page renders.
+    $response = wp_remote_get('https://tower.vextras.com/api/woocommerce/support-chat', array(
+        'timeout' => 5,
+        'headers' => array('Accept' => 'application/json'),
+    ));
+
+    if (is_wp_error($response)) {
+        throw new Exception($response->get_error_message());
+    }
+
+    if (wp_remote_retrieve_response_code($response) !== 200) {
+        throw new Exception('Tower returned HTTP ' . wp_remote_retrieve_response_code($response));
+    }
+
+    $body = json_decode(wp_remote_retrieve_body($response), true);
+
+    if (!is_array($body) || !array_key_exists('script_url', $body)) {
+        throw new Exception('Tower returned an unusable support chat status');
+    }
+
+    if ($body['script_url'] === null) {
+        return null;
+    }
+
+    // this gets injected into wp-admin, so only ever load it over https
+    if (!is_string($body['script_url']) || strpos($body['script_url'], 'https://') !== 0 || !filter_var($body['script_url'], FILTER_VALIDATE_URL)) {
+        throw new Exception('Tower returned an unusable support chat script URL');
+    }
+
+    return $body['script_url'];
+}
+
 function run_mailchimp_woocommerce() {
     $env = mailchimp_environment_variables();
     $plugin = new MailChimp_WooCommerce($env->environment, $env->version);
@@ -2021,7 +2160,8 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
                 // set transient to prevent too many calls to update language
                 mailchimp_set_transient($caller . ".member.{$hash}", true, 3600);
                 mailchimp_log($caller . '.member.created', "Added {$user_email} as transactional, setting language to [{$language}]");
-            } else if (strpos($e->getMessage(), 'compliance state') !== false) {
+            } else if ($caller !== 'cart' && strpos($e->getMessage(), 'compliance state') !== false) {
+                // not for carts: a cart isn't consent, so it must never re-invite a contact who unsubscribed.
                 mailchimp_get_api()->update($list_id, $user_email, 'pending', $merge_fields);
                 mailchimp_log($caller . '.member.sync', "Update {$user_email} Using Double Opt In", $merge_fields);
             } else {

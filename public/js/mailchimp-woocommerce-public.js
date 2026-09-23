@@ -6,27 +6,6 @@ var mailchimp,
     mailchimp_submitted_email = false,
     mailchimpReady = function (a) { /in/.test(document.readyState) ? setTimeout(()=>{mailchimpReady(a)}, 9) : a(); };
 
-function mailchimpGetCurrentUserByHash(a) {
-    try {
-        if (!mailchimp_public_data.allowed_to_set_cookies) return;
-        var b = mailchimp_public_data.ajax_url + "?action=mailchimp_get_user_by_hash&hash=" + a, c = new XMLHttpRequest;
-        c.open("POST", b, !0), c.onload = function () {
-            if (c.status >= 200 && c.status < 400) {
-                var a = JSON.parse(c.responseText);
-                if (!a) return;
-                mailchimp_cart.valueEmail(a.email) && mailchimp_cart.setEmail(a.email);
-            }
-        };
-        c.onerror = function () {
-            console.log("mailchimp.get_email_by_hash.request.error", c.responseText)
-        };
-        c.setRequestHeader("Content-Type", "application/json");
-        c.setRequestHeader("Accept", "application/json");
-        c.send();
-    } catch (a) {
-        console.log("mailchimp.get_email_by_hash.error", a)
-    }
-}
 function mailchimpHandleBillingEmail(selector) {
     try {
         if (!mailchimp_public_data.allowed_to_set_cookies) return;
@@ -196,7 +175,6 @@ mailchimpReady(function () {
 
     try {
         var b = mailchimp.utils.getQueryStringVars();
-        void 0 !== b.mc_cart_id && mailchimpGetCurrentUserByHash(b.mc_cart_id);
 
         var subscribed = document.querySelector('#mailchimp_woocommerce_newsletter');
         var blockSubscribed = document.querySelector("#subscribe-to-newsletter");

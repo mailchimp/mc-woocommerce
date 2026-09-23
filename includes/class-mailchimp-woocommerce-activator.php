@@ -72,6 +72,7 @@ class MailChimp_WooCommerce_Activator {
 				email VARCHAR (100) NOT NULL,
 				user_id INT (11) DEFAULT NULL,
                 cart text NOT NULL,
+                token VARCHAR (64) DEFAULT NULL,
                 created_at datetime NOT NULL,
 				PRIMARY KEY  (email)
 				) $charset_collate;";

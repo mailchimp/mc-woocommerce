@@ -18,6 +18,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     protected $cart_was_submitted = false;
     protected $cart_was_deleted = false;
     protected $cart = array();
+    protected $cart_token = null;
     protected $validated_cart_db = false;
     // this is used during rest api requests to force the user update through the is_admin function
     protected $force_user_update = false;
@@ -171,7 +172,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $handler->is_admin_save = is_admin();
         $handler->prepend_to_queue = mailchimp_should_prepend_live_traffic_to_queue();
 
-        mailchimp_handle_or_queue($handler, 90);
+        mailchimp_handle_or_queue_live($handler, 90);
     }
 
     /**
@@ -184,7 +185,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $handler = new MailChimp_WooCommerce_Single_Order($order_id, null, null, null);
         $handler->partially_refunded = true;
         $handler->prepend_to_queue = mailchimp_should_prepend_live_traffic_to_queue();
-        mailchimp_handle_or_queue($handler);
+        mailchimp_handle_or_queue_live($handler);
     }
 
     /**
@@ -192,7 +193,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
      */
     public function clearCartData()
     {
-        if ($user_email = $this->getCurrentUserEmail()) {
+        if (($user_email = $this->getCurrentUserEmail()) && $this->canModifyCart($user_email)) {
             $this->deleteCart(mailchimp_hash_trim_lower($user_email));
             $this->cart_was_deleted = true;
         }
@@ -277,12 +278,18 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             return false;
         }
 
+        // the email comes from a cookie the browser controls - only the cart's owner may delete it.
+        if (!$this->canModifyCart($user_email)) {
+            return false;
+        }
+
         $uid = mailchimp_hash_trim_lower($user_email);
 
         // trackCart() writes the local row every time we post a cart, so no row means there is
         // nothing in Mailchimp to delete. wc_clear_cart_after_payment() empties the cart on every
         // single order-received page load, so without this we would fire a DELETE on each refresh.
         if ($this->validated_cart_db && !$this->getCart($uid)) {
+            mailchimp_delete_job_by_id($uid, 'MailChimp_WooCommerce_Cart_Update');
             return false;
         }
 
@@ -292,7 +299,6 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         // drop the local row too, otherwise a later ?mc_cart_id= click re-hydrates the emptied
         // cart into the woo session and pushes it straight back up to Mailchimp.
         $this->deleteCart($uid);
-
         if ($this->api()->deleteCartByID($this->getUniqueStoreID(), $uid)) {
             mailchimp_log('ac.cart_emptied', "Deleted cart [$user_email] :: ID [$uid]");
         }
@@ -349,6 +355,14 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                 }
             }
 
+            // the email comes from the request or a cookie, so on its own it proves nothing - only the
+            // cart's owner may overwrite or delete it. The response to the browser stays the same either
+            // way, so this can't be used to probe which addresses have a saved cart.
+            if (!$this->canModifyCart($user_email)) {
+                mailchimp_debug('carts', "blocked cart update for {$user_email} :: this browser does not own that cart");
+                return !is_null($updated) ? $updated : false;
+            }
+
             $previous = $this->getPreviousEmailFromSession();
 
             $uid = mailchimp_hash_trim_lower($user_email);
@@ -356,14 +370,19 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             $unique_sid = $this->getUniqueStoreID();
 
             // delete the previous records.
-            if (!empty($previous) && $previous !== $user_email) {
+            if (!empty($previous) && $previous !== $user_email && $this->canModifyCart($previous)) {
 
-                if ($this->api()->deleteCartByID($unique_sid, $previous_email = mailchimp_hash_trim_lower($previous))) {
+                $previous_email = mailchimp_hash_trim_lower($previous);
+                $this->deleteCart($previous_email);
+                if ($this->api()->deleteCartByID($unique_sid, $previous_email)) {
                     mailchimp_log('ac.cart_swap', "Deleted cart [$previous] :: ID [$previous_email]");
                 }
+            }
 
-                // going to delete the cart because we are switching.
-                $this->deleteCart($previous_email);
+            // Discard queued snapshots before the remote call can fail.
+            if (empty($this->cart)) {
+                $this->deleteCart($uid);
+                $this->cart_was_deleted = true;
             }
 
             // delete the current cart record if there is one
@@ -372,27 +391,24 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             if ($this->cart && !empty($this->cart)) {
 
                 // track the cart locally so we can repopulate things for cross device compatibility.
-                $this->trackCart($uid, $user_email);
+                $token = $this->resolveCartToken($uid);
+                $this->trackCart($uid, $user_email, $token);
 
                 $this->cart_was_submitted = true;
 
                 // get user language or default to admin main language
                 $language = $this->user_language ?: substr(get_locale(), 0, 2);
 
-                $session_id = function_exists('WC') ? WC()->session->get_customer_id() : null;
+                $session_id = function_exists('WC') && WC()->session ? WC()->session->get_customer_id() : null;
 
                 // fire up the job handler
                 $handler = new MailChimp_WooCommerce_Cart_Update($uid, $user_email, $this->cart, $language, $session_id);
 
                 // if they had the checkbox checked - go ahead and subscribe them if this is the first post.
                 $handler->setStatus($this->cart_subscribe);
+                $handler->setCartToken($token);
                 $handler->prepend_to_queue = true;
-                mailchimp_handle_or_queue($handler);
-            } else {
-                // the cart is empty - the remote delete above already ran, but the local row has to
-                // go as well or a ?mc_cart_id= click will re-hydrate the emptied cart and re-post it.
-                $this->deleteCart($uid);
-                $this->cart_was_deleted = true;
+                mailchimp_handle_or_queue_live($handler);
             }
 
             return !is_null($updated) ? $updated : true;
@@ -418,7 +434,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         if (!mailchimp_is_configured()) return;
 
         if ($coupon instanceof WC_Coupon) {
-            mailchimp_handle_or_queue(new MailChimp_WooCommerce_SingleCoupon($post_id));
+            mailchimp_handle_or_queue_live(new MailChimp_WooCommerce_SingleCoupon($post_id));
         }
     }
 
@@ -497,7 +513,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             || $post_after->post_status !== $post_before->post_status
             || $post_after->post_excerpt !== $post_before->post_excerpt
         ) {
-            mailchimp_handle_or_queue( new MailChimp_WooCommerce_Single_Product($post_ID), 5);
+            mailchimp_handle_or_queue_live( new MailChimp_WooCommerce_Single_Product($post_ID), 5);
         }
     }
 
@@ -543,11 +559,11 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         ));
 
         if ($product instanceof WC_Product_Variation) {
-			mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product_Variation($id), 5);
+			mailchimp_handle_or_queue_live(new MailChimp_WooCommerce_Single_Product_Variation($id), 5);
 		} else {
 			$id = $product->get_parent_id() > 0 ? $product->get_parent_id() : $product->get_id();
 
-			mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($id), 5);
+			mailchimp_handle_or_queue_live(new MailChimp_WooCommerce_Single_Product($id), 5);
 		}
     }
 
@@ -579,10 +595,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 		if (!in_array($product->get_status(), array('trash', 'auto-draft', 'draft', 'pending', 'private'))) {
 			if ($product instanceof WC_Product) {
 				mailchimp_debug('queue', "handling meta update for meta [{$meta_key}] on product {$object_id}");
-				mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($object_id), 5);
+				mailchimp_handle_or_queue_live(new MailChimp_WooCommerce_Single_Product($object_id), 5);
 			} else if ($product instanceof WC_Product_Variation){
 				mailchimp_debug('queue', "handling meta update for meta [{$meta_key}] on product variation {$object_id}");
-				mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product_Variation($object_id), 5);
+				mailchimp_handle_or_queue_live(new MailChimp_WooCommerce_Single_Product_Variation($object_id), 5);
 			}
 		}
 	}
@@ -632,7 +648,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
 		// If the product is of a certain status, process it. ( old values included 'draft', 'pending')
 		if (!in_array($post->post_status, array('trash', 'auto-draft', 'draft', 'pending', 'private'))) {
-			mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($post_ID), 5);
+			mailchimp_handle_or_queue_live(new MailChimp_WooCommerce_Single_Product($post_ID), 5);
 		}
 	}
 
@@ -665,7 +681,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                 return;
             }
 
-            mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product_Variation($variation_id), 5);
+            mailchimp_handle_or_queue_live(new MailChimp_WooCommerce_Single_Product_Variation($variation_id), 5);
         } catch (Exception $e) {
             mailchimp_error('update product variation', $e->getMessage());
         }
@@ -769,7 +785,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             $categories_to_process = array_merge($added_categories, $removed_categories);
 
             foreach ($categories_to_process as $category_id) {
-                mailchimp_handle_or_queue(new Mailchimp_WooCommerce_Single_Product_Category($category_id), 6);
+                mailchimp_handle_or_queue_live(new Mailchimp_WooCommerce_Single_Product_Category($category_id), 6);
 
                 mailchimp_debug('product_cat_changes', "Product ID {$product_id} assigned categories: ", [
                     'processing' => $category_id,
@@ -833,7 +849,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                 $this->handleCouponRestored($post_id);
                 break;
             case 'product':
-                mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($post_id), 5);
+                mailchimp_handle_or_queue_live(new MailChimp_WooCommerce_Single_Product($post_id), 5);
                 break;
         }
     }
@@ -877,7 +893,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
         if ($subscribed) {
             $job = new MailChimp_WooCommerce_User_Submit($user_id, '1', null, $language, $gdpr_fields);
-            mailchimp_handle_or_queue($job);
+            mailchimp_handle_or_queue_live($job);
         }
     }
 
@@ -920,7 +936,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         );
         $job->prepend_to_queue = mailchimp_should_prepend_live_traffic_to_queue();
         // only send this update if the user actually has a boolean value.
-        mailchimp_handle_or_queue($job);
+        mailchimp_handle_or_queue_live($job);
     }
 
     /**
@@ -1009,11 +1025,15 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
         $cookie_duration = $this->getCookieDuration();
 
-        // if we have a query string of the mc_cart_id in the URL, that means we are sending a campaign from MC
-        if (isset($_GET['mc_cart_id']) && !isset($_GET['removed_item'])) {
+        // if we have a query string of the mc_cart_id in the URL, that means we are sending a campaign from MC.
+        // The id is derived from the email, so it's only honored together with the cart's secret token,
+        // which is only ever handed out in that cart's recovery link.
+        if (isset($_GET['mc_cart_id'], $_GET['mc_cart_token']) && is_string($_GET['mc_cart_id']) && is_string($_GET['mc_cart_token']) && !isset($_GET['removed_item'])) {
 
             // try to pull the cart from the database.
-            if (($cart = $this->getCart($_GET['mc_cart_id'])) && !empty($cart)) {
+            $cart = $this->getCart($_GET['mc_cart_id']);
+
+            if ($cart && !empty($cart->token) && hash_equals((string) $cart->token, $_GET['mc_cart_token'])) {
 
                 // set the current user email
                 $this->user_email = trim(str_replace(' ','+', $cart->email));
@@ -1023,14 +1043,15 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                     mailchimp_set_cookie('mailchimp_user_previous_email',$this->user_email, $cookie_duration, '/');
                 }
 
-                // cookie the current email
+                // cookie the current email, and the token so this device can keep updating the cart.
                 mailchimp_set_cookie('mailchimp_user_email', $this->user_email, $cookie_duration, '/' );
+                $this->setCartToken($cart->token);
 
-                $cart_data = unserialize($cart->cart);
+                $cart_data = unserialize($cart->cart, array('allowed_classes' => false));
 
                 if (!empty($cart_data)) {
                     // set the cart data.
-                    $this->setWooSession('cart', unserialize($cart->cart));
+                    $this->setWooSession('cart', $cart_data);
 
                     mailchimp_debug('carts', "manually setting cart data for {$this->user_email}", array(
                         'cart_id' => $_GET['mc_cart_id'],
@@ -1040,13 +1061,13 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             }
         }
 
-        if (isset($_GET['mc_eid'])) {
+        if (isset($_GET['mc_eid']) && is_string($_GET['mc_eid'])) {
             mailchimp_set_cookie('mailchimp_email_id', trim($_GET['mc_eid']), $cookie_duration, '/' );
         }
 
         if (isset($_GET['mc_cid'])) {
             $campaign = sanitize_text_field( wp_unslash($_GET['mc_cid']));
-            if ( function_exists('WC') && $campaign) {
+            if ( function_exists('WC') && WC()->session && $campaign) {
                 WC()->session->set( 'mc_cid', $campaign );
             }
 
@@ -1092,6 +1113,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     function is_rest() {
         if (defined('REST_REQUEST') && REST_REQUEST
             || isset($_GET['rest_route'])
+            && is_string($_GET['rest_route'])
             && strpos( $_GET['rest_route'] , '/', 0 ) === 0)
             return true;
 
@@ -1281,19 +1303,6 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         return $this;
     }
 
-    /**
-     *
-     */
-    public function get_user_by_hash()
-    {
-        if ($this->doingAjax() && isset($_GET['hash'])) {
-            if (($cart = $this->getCart($_GET['hash']))) {
-                $this->respondJSON(array('success' => true, 'email' => $cart->email));
-            }
-        }
-        $this->respondJSON(array('success' => false, 'email' => false));
-    }
-
 	/**
 	 * @param $email
 	 *
@@ -1439,6 +1448,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 	 */
     protected function deleteCart($uid)
     {
+        mailchimp_delete_job_by_id($uid, 'MailChimp_WooCommerce_Cart_Update');
+
         if (!$this->validated_cart_db) return false;
 
         global $wpdb;
@@ -1450,11 +1461,109 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     }
 
     /**
-     * @param $uid
-     * @param $email
+     * Whether this request may overwrite or delete the saved cart for $email.
+     *
+     * Cart records are keyed on the email, and the email arrives from the request or from a cookie the
+     * browser sets itself, so it proves nothing. Ownership is proven by the cart's secret token (issued
+     * to the browser that first saved the cart, and carried to other devices by the recovery link), or
+     * by being logged in as the account that owns that email. An address nobody has saved a cart for yet
+     * can be claimed by whoever uses it first - the same as typing an email into a guest checkout.
+     *
+     * @param string $email
      * @return bool
      */
-    protected function trackCart($uid, $email)
+    protected function canModifyCart($email)
+    {
+        if (empty($email)) {
+            return false;
+        }
+
+        $user = wp_get_current_user();
+        if ($user && $user->ID > 0 && strtolower(trim($user->user_email)) === strtolower(trim($email))) {
+            return true;
+        }
+
+        // without the local table there is no record of who owns a cart, so don't touch anyone's.
+        if (!$this->validated_cart_db) {
+            return false;
+        }
+
+        if (!($saved = $this->getCart(mailchimp_hash_trim_lower($email)))) {
+            return true;
+        }
+
+        $token = $this->getCartToken();
+
+        return !empty($saved->token) && !empty($token) && hash_equals((string) $saved->token, $token);
+    }
+
+    /**
+     * The token to store on the cart for $uid: keep the row's existing token so other devices holding
+     * the recovery link stay valid, otherwise reuse this browser's token or mint a new one. Only call
+     * this after canModifyCart() has passed.
+     *
+     * @param string $uid
+     * @return string
+     */
+    protected function resolveCartToken($uid)
+    {
+        $saved = $this->getCart($uid);
+
+        if ($saved && !empty($saved->token)) {
+            $token = (string) $saved->token;
+        } else if (!($token = $this->getCartToken())) {
+            $token = wp_generate_password(32, false);
+        }
+
+        if ($token !== $this->getCartToken()) {
+            $this->setCartToken($token);
+        }
+
+        return $token;
+    }
+
+    /**
+     * @return string|null
+     */
+    protected function getCartToken()
+    {
+        if (!empty($this->cart_token)) {
+            return $this->cart_token;
+        }
+
+        // same consent gate as the email cookie it pairs with.
+        if ($this->is_admin || !mailchimp_allowed_to_use_cookie('mailchimp_user_email')) {
+            return null;
+        }
+
+        $token = isset($_COOKIE['mailchimp_cart_token']) ? $_COOKIE['mailchimp_cart_token'] : null;
+
+        return is_string($token) && preg_match('/^[A-Za-z0-9]{32}$/', $token) ? $token : null;
+    }
+
+    /**
+     * @param string $token
+     * @return $this
+     */
+    protected function setCartToken($token)
+    {
+        $this->cart_token = $token;
+
+        if (mailchimp_allowed_to_use_cookie('mailchimp_user_email') && !headers_sent()) {
+            // httponly - the browser's scripts never need it.
+            mailchimp_set_cookie('mailchimp_cart_token', $token, $this->getCookieDuration(), '/', '', true, true);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param $uid
+     * @param $email
+     * @param string $token the cart's ownership token, see resolveCartToken()
+     * @return bool
+     */
+    protected function trackCart($uid, $email, $token)
     {
         if (!$this->validated_cart_db) return false;
 
@@ -1482,8 +1591,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $user_id = get_current_user_id();
 
         if (($saved_cart = $wpdb->get_row($sql)) && is_object($saved_cart)) {
-            $statement = "UPDATE {$table} SET `cart` = '%s', `email` = '%s', `user_id` = %s WHERE `id` = '%s'";
-            $sql = $wpdb->prepare($statement, array(maybe_serialize($this->cart), $email, $user_id, $uid));
+            $statement = "UPDATE {$table} SET `cart` = '%s', `email` = '%s', `user_id` = %s, `token` = '%s' WHERE `id` = '%s'";
+            $sql = $wpdb->prepare($statement, array(maybe_serialize($this->cart), $email, $user_id, $token, $uid));
             try {
                 $wpdb->query($sql);
                 delete_transient($transient_key);
@@ -1497,6 +1606,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                     'email' => $email,
                     'user_id' => (int) $user_id,
                     'cart'  => maybe_serialize($this->cart),
+                    'token' => $token,
                     'created_at'   => gmdate('Y-m-d H:i:s', time()),
                 ));
                 delete_transient($transient_key);
@@ -1546,6 +1656,11 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
             $job_id = $job_row->id;
 
+            // live jobs tell Mailchimp when they were scheduled to run
+            MailChimp_WooCommerce_MailChimpApi::setJobNotifiedAt(
+                $job instanceof Mailchimp_Woocommerce_Job && $job->is_live_event ? $job->get_notified_at() : null
+            );
+
             // process job
             $job->handle();
 
@@ -1558,6 +1673,9 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             $message = !empty($e->getMessage()) ? ' - ' . $e->getMessage() :'';
 
             mailchimp_debug('action_scheduler.process_job.fail', (isset($job) ? get_class($job) : '') . ' :: obj_id '.$obj_id . ' :: ' .get_class($e) . $message);
+        } finally {
+            // Action Scheduler runs many jobs per request - don't leak into the next one.
+            MailChimp_WooCommerce_MailChimpApi::setJobNotifiedAt(null);
         }
         return false;
     }

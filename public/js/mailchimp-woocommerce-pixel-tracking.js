@@ -21,6 +21,18 @@
 	};
 
 	/**
+	 * How long PRODUCT_VIEWED waits on a variable product for WooCommerce to resolve a
+	 * default or deep-linked variation before settling for the parent.
+	 */
+	const VARIATION_RESOLVE_WAIT_MS = 1200;
+
+	/**
+	 * Settle time after a form interaction before re-reading the variation id input.
+	 * The blocks form writes it through the Interactivity API on the next render.
+	 */
+	const VARIATION_INPUT_SETTLE_MS = 150;
+
+	/**
 	 * Mailchimp Pixel Tracking Handler
 	 */
 	const MailchimpPixelTracking = {
@@ -29,6 +41,11 @@
 		_rfcTimer: null,
 		_atcFetching: false,
 		_rfcFetching: false,
+		// PRODUCT_VIEWED state for a variable product being resolved to a variation
+		_viewTimer: null,
+		_viewedParent: null,
+		_viewedKeys: null,
+		_inputTimer: null,
 
 		/**
 		 * Initialize tracking.
@@ -36,6 +53,18 @@
 		 */
 		init: function () {
 			const self = this;
+
+			// Registered before the SDK wait on purpose: that wait runs for seconds, and an
+			// integration that resolves its variation early must not race us.
+			window.mcPixel = window.mcPixel || {};
+			window.mcPixel.setVariation = function (variationId, product) {
+				self.setVariation(variationId, product);
+			};
+			document.addEventListener('mailchimp_woocommerce_set_variation', function (event) {
+				const detail = event.detail || {};
+				self.setVariation(detail.variationId, detail.product);
+			});
+
 			this.waitForPixelSDK(PIXEL_SDK_WAIT_CONFIG)
 				.then(function () {
 					self.sendPageEvents();
@@ -184,7 +213,7 @@
 								//console.log('Mailchimp Pixel: Skipping PRODUCT_VIEWED (superseded by cart event for same product)');
 								break;
 							}
-							this.sendProductViewed(data.product);
+							this.trackProductViewed(data.product);
 						}
 						break;
 					case 'CART_VIEWED':
@@ -220,18 +249,229 @@
 		},
 
 		/**
+		 * PRODUCT_VIEWED for the single product page.
+		 *
+		 * A variable product renders before the customer has picked anything, so the
+		 * server-side payload only knows the parent. WooCommerce announces the chosen
+		 * variation on the .variations_form with found_variation, so we hold the event
+		 * until that fires - or until it's clear nothing is going to resolve.
+		 *
+		 * @param {Object} product Parent product data from PHP
+		 */
+		trackProductViewed: function (product) {
+			const self = this;
+			this._viewedKeys = this._viewedKeys || {};
+
+			// not a variable product - the server already knew everything there is to know
+			if (!window.mcPixel.data.product_variations) {
+				this.sendProductViewedOnce(product, product.id);
+				return;
+			}
+
+			this._viewedParent = product;
+			this.attachVariationListeners();
+
+			const resolved = this.currentVariationId();
+			if (resolved) {
+				this.sendProductViewedOnce(this.resolveVariationPayload({ variation_id: resolved }), resolved);
+				return;
+			}
+
+			// nothing picked yet, but a default variation or ?attribute_* deep link still
+			// resolves a tick after the form initialises - give WooCommerce that tick
+			// before settling for the parent
+			this._viewTimer = setTimeout(function () {
+				self.sendProductViewedOnce(product, product.id);
+			}, VARIATION_RESOLVE_WAIT_MS);
+		},
+
+		/**
+		 * One PRODUCT_VIEWED per thing actually viewed: the parent, then each variation
+		 * the customer lands on. Switching back to an earlier pick sends nothing, so
+		 * clicking through a dropdown doesn't turn into a burst of events.
+		 *
+		 * @param {Object} product Product data to send
+		 * @param {string} key Dedup key - the variation id, or the parent id
+		 */
+		sendProductViewedOnce: function (product, key) {
+			clearTimeout(this._viewTimer);
+			if (this._viewedKeys[key]) {
+				return;
+			}
+			// only claim the key once it actually went out - an integration can call
+			// setVariation() before the SDK is up, and that must not count as sent
+			if (this.sendProductViewed(product)) {
+				this._viewedKeys[key] = true;
+			}
+		},
+
+		/**
+		 * Public API for themes, swatch plugins and custom templates.
+		 *
+		 * Detection covers what WooCommerce itself ships: the classic variations form,
+		 * and the hidden variation_id input the block form maintains. Anything else - a
+		 * custom swatch UI, a page builder widget, a headless front end - can announce
+		 * the selection itself, either directly:
+		 *
+		 *     window.mcPixel.setVariation( 123 );
+		 *
+		 * or, when it cannot reach our global, by dispatching an event:
+		 *
+		 *     document.dispatchEvent( new CustomEvent(
+		 *         'mailchimp_woocommerce_set_variation',
+		 *         { detail: { variationId: 123 } }
+		 *     ) );
+		 *
+		 * Pass a second argument to supply the whole product payload instead of letting
+		 * us resolve it. Sending the same variation twice is a no-op either way.
+		 *
+		 * @param {number|string} variationId Variation being viewed
+		 * @param {Object} [product] Optional product payload, sent as-is
+		 */
+		setVariation: function (variationId, product) {
+			const id = String(variationId || '');
+
+			if (!id || id === '0') {
+				return;
+			}
+			// an integration may beat PRODUCT_VIEWED to it - nothing to dedup against yet
+			this._viewedKeys = this._viewedKeys || {};
+			this.sendProductViewedOnce(
+				product || this.resolveVariationPayload({ variation_id: id }),
+				id
+			);
+		},
+
+		/**
+		 * found_variation is WooCommerce's own signal that every attribute is chosen and
+		 * a variation matched. Bound delegated off body so a form rendered late - blocks,
+		 * lazy themes, quick-view modals - is still covered.
+		 */
+		attachVariationListeners: function () {
+			const self = this;
+
+			$(document.body).on('found_variation', '.variations_form', function (event, variation) {
+				if (!variation || !variation.variation_id) {
+					return;
+				}
+				self.sendProductViewedOnce(
+					self.resolveVariationPayload(variation),
+					String(variation.variation_id)
+				);
+			});
+
+			// covers the block form, which fires no event at all
+			this.watchVariationInput();
+		},
+
+		/**
+		 * WooCommerce often resolves a variation before we boot - the SDK wait runs over a
+		 * second, and the form fires found_variation during its own init. The form parks
+		 * the answer in its variation_id input, so read that rather than assuming we were
+		 * listening at the right moment.
+		 *
+		 * @return {string} Resolved variation id, or '' when nothing is selected
+		 */
+		currentVariationId: function () {
+			// Classic puts this in .variations_form, blocks puts it in .single_variation_wrap
+			// inside its own form element - so key off the input, not either wrapper.
+			const inputs = document.querySelectorAll('form input[name="variation_id"], form input.variation_id');
+
+			for (let i = 0; i < inputs.length; i++) {
+				const id = parseInt(inputs[i].value, 10);
+				if (id > 0) {
+					return String(id);
+				}
+			}
+
+			return '';
+		},
+
+		/**
+		 * Catch variation changes on templates that announce nothing.
+		 *
+		 * The blocks "Add to Cart with Options" form runs on the Interactivity API and
+		 * fires no jQuery event and no CustomEvent, so found_variation never arrives.
+		 * What it does keep is the hidden variation_id input - WooCommerce renders it
+		 * specifically so "extensions or Express Payment methods" can read the form
+		 * state - so re-read that whenever the customer touches the form. Its value is
+		 * set as a property by the Interactivity API, which a MutationObserver would
+		 * never see, hence driving off the interaction instead.
+		 */
+		watchVariationInput: function () {
+			const self = this;
+
+			const recheck = function (event) {
+				// blocks renders its attribute options as buttons, so change alone misses them
+				if (!event.target || !event.target.closest || !event.target.closest('form')) {
+					return;
+				}
+				clearTimeout(self._inputTimer);
+				self._inputTimer = setTimeout(function () {
+					const id = self.currentVariationId();
+					if (id) {
+						self.sendProductViewedOnce(self.resolveVariationPayload({ variation_id: id }), id);
+					}
+				}, VARIATION_INPUT_SETTLE_MS);
+			};
+
+			document.addEventListener('change', recheck, true);
+			document.addEventListener('click', recheck, true);
+		},
+
+		/**
+		 * Turn a resolved variation into the product shape the pixel expects.
+		 *
+		 * Prefer the server-rendered variation: it carries the sku, categories and
+		 * parent-derived permalink that the event payload has no idea about, and it
+		 * matches what add-to-cart sends for the same variation. Past the pre-render cap
+		 * there is nothing to look up, so patch the parent with what the event does give
+		 * us - the id being right matters more than the rest.
+		 *
+		 * @param {Object} variation found_variation payload (or just {variation_id})
+		 * @return {Object} Product data for the pixel
+		 */
+		resolveVariationPayload: function (variation) {
+			const parent = this._viewedParent || {};
+			const id = String(variation.variation_id);
+			const rendered = window.mcPixel.data.product_variations[id];
+
+			if (rendered) {
+				return rendered;
+			}
+
+			const patched = $.extend({}, parent, {
+				id: id,
+				productId: parent.productId || parent.id || id
+			});
+			if (variation.sku) {
+				patched.sku = variation.sku;
+			}
+			if (variation.display_price !== undefined && variation.display_price !== null) {
+				patched.price = parseFloat(variation.display_price);
+			}
+			if (variation.image && variation.image.full_src) {
+				patched.imageUrl = variation.image.full_src;
+			}
+
+			return patched;
+		},
+
+		/**
 		 * Send PRODUCT_VIEWED event
 		 *
 		 * @param {Object} product Product data
 		 */
 		sendProductViewed: function (product) {
-			if (!this.isPixelSDKReady()) return;
+			if (!this.isPixelSDKReady()) return false;
 
 			window.$mcSite.pixel.api.track('PRODUCT_VIEWED', {
 				product: product
 			}).catch((error) => {
 				console.error('Mailchimp Pixel: Error tracking PRODUCT_VIEWED', error);
 			});
+
+			return true;
 		},
 
 		/**

@@ -222,4 +222,23 @@ if (mailchimp_waiting_for_account_confirmation() && $active_breadcrumb !== MC_WC
         </div>
         <?php endif; ?>
 	</form>
+
+	<?php if ( mailchimp_support_chat_enabled() ) : ?>
+	<!-- Support chat: Zendesk is only loaded after this button is clicked -->
+	<div class="mc-wc-support-chat">
+		<p class="mc-wc-support-chat-error" role="alert" hidden></p>
+		<button type="button" class="mc-wc-support-chat-button" aria-label="<?php esc_attr_e( 'Chat with support', 'mailchimp-for-woocommerce' ); ?>" aria-describedby="mc-wc-support-chat-tooltip">
+			<svg class="mc-wc-support-chat-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+				<path d="M12 3C6.9 3 3 6.5 3 10.8c0 2.3 1.1 4.3 2.9 5.7L5 20.5l4.3-2.2c.9.2 1.8.3 2.7.3 5.1 0 9-3.5 9-7.8S17.1 3 12 3Z" fill="currentColor"/>
+				<circle cx="8.5" cy="10.8" r="1.2" fill="#734FA8"/><circle cx="12" cy="10.8" r="1.2" fill="#734FA8"/><circle cx="15.5" cy="10.8" r="1.2" fill="#734FA8"/>
+			</svg>
+			<span class="mc-wc-support-chat-spinner" aria-hidden="true"></span>
+		</button>
+		<span id="mc-wc-support-chat-tooltip" class="mc-wc-support-chat-tooltip" role="tooltip">
+
+			<strong class="mc-wc-support-chat-label"><?php esc_html_e( 'Chat with support', 'mailchimp-for-woocommerce' ); ?></strong>
+			<span><?php esc_html_e( 'Share your store and Mailchimp account details with our support team.', 'mailchimp-for-woocommerce' ); ?></span>
+		</span>
+	</div>
+	<?php endif; ?>
 </div>

@@ -39,6 +39,12 @@ class MailChimp_WooCommerce_Pixel_Tracking
      */
     protected static $_instance = null;
 
+    /** @var int Product id already recorded as viewed, so the two paths don't duplicate work */
+    protected $tracked_product_view = 0;
+
+    /** @var int Product id the query identified, resolved in the footer or not at all */
+    protected $pending_product_view = 0;
+
     protected $track_on_next_page_load = false;
 
     /**
@@ -78,7 +84,30 @@ class MailChimp_WooCommerce_Pixel_Tracking
     protected function attach_event_data()
     {
         // Product detail page - single product viewed
-        add_action('woocommerce_after_single_product', array( $this, 'track_product_view' ));
+        // The classic template hook stays exactly as it was - it is still what records
+        // the view on any store that renders content-single-product.php, and it is the
+        // only thing that catches [product_page id=X], where that template is rendered
+        // on a page whose query knows nothing about the product.
+        add_action('woocommerce_after_single_product', array( $this, 'track_product_view_from_template' ));
+
+        // The fallback below exists for builders that never reach that template. Bricks
+        // is the confirmed case: its WooCommerce hooks are opt-in, and its own docs tell
+        // the user to hand-place {do_action:woocommerce_after_single_product}, so a
+        // default Bricks store fires nothing and the view is lost entirely. (Elementor
+        // does fire these - elementor/elementor#20132 only has them landing in the wrong
+        // position, which cannot affect us because we append to script_data, never echo.)
+        //
+        // It is deliberately split in two so a normal store is untouched:
+        //
+        //   'wp'              - note the id and nothing else. No product is loaded, no
+        //                       filter of anyone else's is fired, no global is written.
+        //   'wp_footer' (5)   - the page has fully rendered by now, so if the template
+        //                       hook did its job this is a no-op and execution order is
+        //                       byte-identical to before. Only when nothing recorded a
+        //                       view do we load the product, and doing that in the footer
+        //                       is no earlier than any other footer script would.
+        add_action('wp', array( $this, 'detect_product_view' ));
+        add_action('wp_footer', array( $this, 'track_pending_product_view' ), 5);
 
         // Add to cart (non-AJAX) - store product data for added_to_cart event
         add_action('woocommerce_add_to_cart', array( $this, 'track_add_to_cart' ), 10, 6);
@@ -160,13 +189,129 @@ class MailChimp_WooCommerce_Pixel_Tracking
     /**
      * Track product view on single product page
      */
-    public function track_product_view()
+    public function detect_product_view()
+    {
+        if (function_exists('is_product') && is_product()) {
+            // an int, nothing more - the product is not loaded until the footer, and only
+            // then if the classic template hook never recorded the view itself
+            $this->pending_product_view = (int) get_queried_object_id();
+        }
+    }
+
+    /**
+     * Last-chance product view for stores whose template never fired the hook.
+     *
+     * Runs in the footer, after the page has rendered, so on a store where
+     * woocommerce_after_single_product did fire this does nothing at all and the
+     * plugin behaves exactly as it did before the fallback existed.
+     */
+    public function track_pending_product_view()
+    {
+        if (! $this->pending_product_view || $this->tracked_product_view) {
+            return;
+        }
+
+        $this->record_product_view(wc_get_product($this->pending_product_view));
+    }
+
+    /**
+     * Track product view from the classic single-product template.
+     *
+     * Kept alongside the 'wp' hook for [product_page id=X] and the Single Product block,
+     * which render this template on a page where is_product() is false - so the query
+     * says nothing and only the global identifies what is on screen.
+     */
+    public function track_product_view_from_template()
     {
         global $product;
-        if ($product && is_product()) {
-            $this->append_script_data('product', $this->get_formatted_product($product));
-            $this->append_script_data('events', 'PRODUCT_VIEWED');
+
+        $this->record_product_view($product);
+    }
+
+    /**
+     * Record a product view once, whichever hook got here first.
+     *
+     * @param WC_Product|mixed $product Product being viewed
+     */
+    protected function record_product_view($product)
+    {
+        if (! $product instanceof WC_Product) {
+            return;
         }
+
+        // both hooks fire on a classic product page - don't rebuild the variation map
+        if ($this->tracked_product_view === $product->get_id()) {
+            return;
+        }
+        $this->tracked_product_view = $product->get_id();
+
+        $this->append_script_data('product', $this->get_formatted_product($product));
+        $this->append_script_data('events', 'PRODUCT_VIEWED');
+
+        // A variable product renders before the customer has chosen anything, so the
+        // payload above can only describe the parent - which is why the variation id
+        // lands on add-to-cart but never on the view. Ship the variations with the
+        // page so the browser can swap in the right one once WooCommerce resolves it.
+        if ($product->is_type('variable')) {
+            $this->append_script_data('product_variations', (object) $this->get_viewed_variations($product));
+        }
+    }
+
+    /**
+     * Pre-render the variations of the product being viewed, keyed by variation id.
+     *
+     * WooCommerce's found_variation event hands the browser a variation id plus display
+     * fields, but not the catalog data the pixel sends (sku, categories, the permalink
+     * WC_Product_Variation builds off the parent). Formatting them here keeps a viewed
+     * variation byte-identical to the same variation added to the cart.
+     *
+     * Capped for the same reason WooCommerce stops inlining its own variation form data:
+     * a product with hundreds of variations would bloat every render. Past the cap the JS
+     * patches the parent payload from the event instead, so the id is still correct.
+     *
+     * @param  WC_Product_Variable $product Product being viewed
+     * @return array Map of variation ID => formatted product
+     */
+    protected function get_viewed_variations($product)
+    {
+        $map      = array();
+        $children = $product->get_children();
+
+        // Default to WooCommerce's own inlining threshold rather than a number of our own,
+        // so we ship variation data on exactly the products WooCommerce already ships it
+        // for - and a store that tuned that down for page weight gets the same treatment
+        // here without having to configure it twice.
+        $default = (int) apply_filters('woocommerce_ajax_variation_threshold', 30, $product);
+        $limit   = (int) apply_filters('mailchimp_woocommerce_pixel_variation_limit', $default, $product);
+
+        if ($limit > 0 && count($children) > $limit) {
+            return $map;
+        }
+
+        // One query for all variation posts instead of one per wc_get_product() below.
+        // Same thing WooCommerce does before it loops variations to build a price hash.
+        if (is_callable('_prime_post_caches')) {
+            _prime_post_caches($children);
+        }
+
+        foreach ($children as $child_id) {
+            $variation = wc_get_product($child_id);
+            if ($variation && $variation->is_type('variation')) {
+                $map[(string) $variation->get_id()] = $this->get_formatted_product($variation);
+            }
+        }
+
+        /**
+         * Filter the variation payloads shipped with a product view.
+         *
+         * Lets an integration add variations we skipped past the cap, or correct a
+         * payload its own pricing/naming rules own. Keys must be variation ids as
+         * strings - the JS looks up whatever the browser reports by exact key.
+         *
+         * @param array      $map     Map of variation ID => formatted product
+         * @param WC_Product $product Parent product being viewed
+         */
+        return apply_filters('mailchimp_woocommerce_pixel_product_variations', $map, $product);
     }
 
     /**
@@ -528,7 +673,11 @@ class MailChimp_WooCommerce_Pixel_Tracking
      */
     protected function get_formatted_product($product, $quantity = null)
     {
-        $parent_id = $product->get_parent_id();
+        // Only variations roll up to a parent. Other product types can carry a
+        // non-zero post_parent (legacy grouped children, some bundle/composite
+        // plugins) but the catalog syncs them under their OWN id, so treating
+        // that parent as the productId would point at a product with no such variant.
+        $parent_id = $this->get_parent_product_id($product);
         $image_id  = $product->get_image_id();
 
         $formatted = array(
@@ -539,7 +688,11 @@ class MailChimp_WooCommerce_Pixel_Tracking
             'currency'   => get_woocommerce_currency(),
             'sku'        => $product->get_sku() ? $product->get_sku() : '',
             'imageUrl'   => $image_id ? wp_get_attachment_url($image_id) : '',
-            'productUrl' => get_permalink($product->get_id()),
+            // Must be the product object's own method, not get_permalink($id):
+            // product_variation is registered public=false/rewrite=false, so the
+            // global function returns a URL that 404s. WC_Product_Variation
+            // overrides this to return the parent permalink + attribute args.
+            'productUrl' => $product->get_permalink(),
             'vendor'     => '',
             'categories' => $this->get_product_categories($product),
         );
@@ -552,6 +705,24 @@ class MailChimp_WooCommerce_Pixel_Tracking
     }
 
     /**
+     * Resolve the catalog parent id for a product.
+     *
+     * Returns 0 for anything that is not a variation, so only true variations
+     * report a parent productId to the pixel.
+     *
+     * @param  WC_Product $product Product object
+     * @return int Parent product ID, or 0 when the product is its own parent
+     */
+    protected function get_parent_product_id($product)
+    {
+        if (! is_callable(array($product, 'is_type')) || ! $product->is_type('variation')) {
+            return 0;
+        }
+
+        return (int) $product->get_parent_id();
+    }
+
+    /**
      * Get product categories
      *
      * @param  WC_Product $product Product object
@@ -559,7 +730,8 @@ class MailChimp_WooCommerce_Pixel_Tracking
      */
     protected function get_product_categories($product)
     {
-        $product_id = $product->get_parent_id() ? $product->get_parent_id() : $product->get_id();
+        $parent_id  = $this->get_parent_product_id($product);
+        $product_id = $parent_id ? $parent_id : $product->get_id();
         $terms      = get_the_terms($product_id, 'product_cat');
 
         if (! $terms || is_wp_error($terms)) {
@@ -688,6 +860,38 @@ class MailChimp_WooCommerce_Pixel_Tracking
     }
 
     /**
+     * Build a variation ID => parent product ID lookup for the current cart.
+     *
+     * The WooCommerce Blocks Store API cart item schema exposes no parent
+     * product id (CartItemSchema sets 'id' => $product->get_id(), which is the
+     * variation id for variable products), so the block JS cannot resolve the
+     * parent on its own. We hand it a map built from the cart as it stands at
+     * render time, which covers remove-from-cart and block checkout line items.
+     * Add-to-cart is covered separately: the Store API product response does
+     * carry 'parent'.
+     *
+     * @return array Map of variation ID => parent product ID, both as strings
+     */
+    protected function get_variation_parent_map()
+    {
+        $map = array();
+
+        if (! WC()->cart) {
+            return $map;
+        }
+
+        foreach (WC()->cart->get_cart() as $cart_item) {
+            $variation_id = (int) ($cart_item['variation_id'] ?? 0);
+            $product_id   = (int) ($cart_item['product_id'] ?? 0);
+            if ($variation_id && $product_id && $variation_id !== $product_id) {
+                $map[(string) $variation_id] = (string) $product_id;
+            }
+        }
+
+        return $map;
+    }
+
+    /**
      * Get cart ID from WooCommerce session
      *
      * @return string Cart ID
@@ -756,6 +960,7 @@ class MailChimp_WooCommerce_Pixel_Tracking
         window.mcPixel = window.mcPixel || {};
         window.mcPixel._handled = {};
         window.mcPixel.cartId = '<?php echo esc_js($this->get_cart_id()); ?>';
+        window.mcPixel.parentMap = <?php echo wp_json_encode((object) $this->get_variation_parent_map(), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES); ?>;
         <?php if (! empty($this->script_data)) : ?>
         window.mcPixel.data = <?php echo $this->get_script_data(); ?>;
         <?php endif; ?>
@@ -765,6 +970,10 @@ class MailChimp_WooCommerce_Pixel_Tracking
 
     /**
      * Enqueue tracking script
+     *
+     * Versioned off the plugin version, not a literal: the file is served with a
+     * one-year max-age, so a hardcoded ?ver= means a shipped change to this script
+     * never reaches a browser or CDN that already cached the old one.
      */
     public function enqueue_tracking_script()
     {
@@ -772,7 +981,7 @@ class MailChimp_WooCommerce_Pixel_Tracking
             'mailchimp-woocommerce-pixel-tracking',
             plugin_dir_url(dirname(__DIR__)) . 'public/js/mailchimp-woocommerce-pixel-tracking.js',
             array( 'jquery' ),
-            '1.0.0',
+            mailchimp_environment_variables()->version,
             true
         );
 

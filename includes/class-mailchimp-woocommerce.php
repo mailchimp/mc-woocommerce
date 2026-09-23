@@ -279,6 +279,7 @@ class MailChimp_WooCommerce
         $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_switch_account', $plugin_admin, 'connect_account_flow_switch_account' );
         $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_check_login_session', $plugin_admin, 'mailchimp_woocommerce_ajax_check_login_session' );
         $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_support_form', $plugin_admin, 'mailchimp_woocommerce_ajax_support_form' );
+        $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_support_chat_identity', $plugin_admin, 'mailchimp_woocommerce_ajax_support_chat_identity' );
 
         // add Shop Manager capability to save options
         $this->loader->add_action('option_page_capability_mailchimp-woocommerce', $plugin_admin, 'mailchimp_woocommerce_option_page_capability');
@@ -480,8 +481,6 @@ class MailChimp_WooCommerce
 			$this->loader->add_action('profile_update', $service, 'handleUserUpdated', 100, 2);
 
 			// get user by hash ( public and private )
-            $this->loader->add_action('wp_ajax_mailchimp_get_user_by_hash', $service, 'get_user_by_hash');
-            $this->loader->add_action('wp_ajax_nopriv_mailchimp_get_user_by_hash', $service, 'get_user_by_hash');
 
             // set user by email hash ( public and private )
             $this->loader->add_action('wp_ajax_mailchimp_set_user_by_email', $service, 'set_user_by_email');

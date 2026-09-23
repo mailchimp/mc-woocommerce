@@ -1,5 +1,6 @@
 <?php
 /** Run with: php tests/regression/cart-ownership.php */
+if (PHP_SAPI !== 'cli') { exit; } // CLI only - never executable over the web
 // Saved carts are keyed on md5(email). The email alone must never let a request read, overwrite,
 // or delete someone else's cart - only the cart's token (or being logged in as that email) can.
 error_reporting(E_ALL & ~E_DEPRECATED);

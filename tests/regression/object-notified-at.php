@@ -1,5 +1,6 @@
 <?php
 /** Run with: php tests/regression/object-notified-at.php */
+if (PHP_SAPI !== 'cli') { exit; } // CLI only - never executable over the web
 // Load only the queue helpers, avoiding WordPress bootstrap side effects.
 $bootstrap = file_get_contents(dirname(__DIR__, 2) . '/bootstrap.php');
 foreach (array('function mailchimp_as_push(', 'function mailchimp_handle_or_queue_live(') as $needle) {

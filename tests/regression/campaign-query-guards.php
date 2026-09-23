@@ -1,5 +1,6 @@
 <?php
 /** Run with: php tests/regression/campaign-query-guards.php */
+if (PHP_SAPI !== 'cli') { exit; } // CLI only - never executable over the web
 class MailChimp_WooCommerce_Options {}
 function mailchimp_allowed_to_use_cookie($key) { return true; }
 function mailchimp_set_cookie($key, $value, $duration, $path) { $GLOBALS['cookies'][$key] = $value; }

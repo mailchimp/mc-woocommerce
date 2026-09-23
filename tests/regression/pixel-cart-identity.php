@@ -1,5 +1,6 @@
 <?php
 /** Run with: php tests/regression/pixel-cart-identity.php */
+namespace { if (PHP_SAPI !== 'cli') { exit; } } // CLI only - never executable over the web
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1 {
     class CartItemSchema { const IDENTIFIER = 'cart-item'; }
 }

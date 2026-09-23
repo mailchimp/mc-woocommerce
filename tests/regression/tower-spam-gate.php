@@ -1,5 +1,6 @@
 <?php
 /** Run with: php tests/regression/tower-spam-gate.php */
+if (PHP_SAPI !== 'cli') { exit; } // CLI only - never executable over the web
 // Load only the transient helpers and the API class, avoiding WordPress bootstrap side effects.
 $bootstrap = file_get_contents(dirname(__DIR__, 2) . '/bootstrap.php');
 foreach (array('function mailchimp_get_transient(', 'function mailchimp_set_transient(', 'function mailchimp_get_transient_value(') as $needle) {

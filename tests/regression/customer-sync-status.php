@@ -1,5 +1,6 @@
 <?php
 /** Run with: php tests/regression/customer-sync-status.php */
+if (PHP_SAPI !== 'cli') { exit; } // CLI only - never executable over the web
 // "Sync as non-subscribed" says what a contact should START as. The initial sync must send it
 // as status_if_new so Mailchimp only applies it when it creates the contact - sending
 // status: transactional would knock existing subscribers back down to transactional.

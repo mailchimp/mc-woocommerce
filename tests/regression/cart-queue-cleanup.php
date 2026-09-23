@@ -1,5 +1,6 @@
 <?php
 /** Run with: php tests/regression/cart-queue-cleanup.php */
+if (PHP_SAPI !== 'cli') { exit; } // CLI only - never executable over the web
 // Load only the queue helper, avoiding WordPress bootstrap side effects.
 $bootstrap = file_get_contents(dirname(__DIR__, 2) . '/bootstrap.php');
 $start = strpos($bootstrap, 'function mailchimp_delete_job_by_id(');

@@ -1,5 +1,6 @@
 <?php
 /** Run with: php tests/regression/support-chat-gate.php */
+if (PHP_SAPI !== 'cli') { exit; } // CLI only - never executable over the web
 // Load only the gate and transient helpers, avoiding WordPress bootstrap side effects.
 $bootstrap = file_get_contents(dirname(__DIR__, 2) . '/bootstrap.php');
 foreach (array('function mailchimp_support_chat_enabled(', 'function mailchimp_support_chat_script_url(', 'function mailchimp_get_transient(', 'function mailchimp_set_transient(', 'function mailchimp_get_transient_value(') as $needle) {

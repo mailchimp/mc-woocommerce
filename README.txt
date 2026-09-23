@@ -3,11 +3,11 @@ Contributors: ryanhungate, Mailchimp
 Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 6.2
-Tested up to: 7.0
+Tested up to: 7.1
 Stable tag: 6.2
 Requires PHP: 7.4
 WC requires at least: 8.2
-WC tested up to: 11.0
+WC tested up to: 11.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your Mailchimp audience to track sales, create targeted emails, send abandoned cart emails, and more.

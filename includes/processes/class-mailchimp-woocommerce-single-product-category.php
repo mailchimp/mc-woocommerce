@@ -129,11 +129,17 @@ class Mailchimp_WooCommerce_Single_Product_Category extends Mailchimp_Woocommerc
      */
     public function handleFailedProductsSync($product_ids)
     {
+        // follow-up jobs inherit this job's live flag and notified_at
+        $followups = array();
         foreach ($product_ids as $product_id) {
-            mailchimp_handle_or_queue(new MailChimp_WooCommerce_Single_Product($product_id));
+            $followups[] = array(new MailChimp_WooCommerce_Single_Product($product_id), 0);
         }
+        $followups[] = array(new self($this->id, false), 1);
 
-        mailchimp_handle_or_queue(new self($this->id, false), 1);
+        foreach ($followups as list($job, $delay)) {
+            $job->is_live_event = $this->is_live_event;
+            mailchimp_handle_or_queue($job->set_notified_at($this->get_notified_at()), $delay);
+        }
     }
 
     /**

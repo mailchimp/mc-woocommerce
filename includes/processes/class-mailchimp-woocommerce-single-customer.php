@@ -164,7 +164,14 @@ class MailChimp_Woocommerce_Single_Customer extends Mailchimp_Woocommerce_Job
                 }
             }
 
-            $subscriber = $api->update($list_id, $email, $subscriber_status, $merge_fields, null, $language);
+            // "sync as non-subscribed" describes what a contact should start as, not what
+            // they must become: sending status: transactional on the PUT would knock an
+            // existing subscriber back down to transactional. status_if_new only applies
+            // when Mailchimp has to create the contact, so members keep the status they
+            // already chose.
+            $only_if_new = $subscribe_setting === '0';
+
+            $subscriber = $api->update($list_id, $email, $subscriber_status, $merge_fields, null, $language, null, $only_if_new);
 
             $current_status = $subscriber['status'];
 

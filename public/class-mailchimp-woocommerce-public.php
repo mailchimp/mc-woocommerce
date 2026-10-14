@@ -154,7 +154,7 @@ class MailChimp_WooCommerce_Public extends MailChimp_WooCommerce_Options {
             !empty($gdpr_fields) ? $gdpr_fields : null
         );
 
-        mailchimp_handle_or_queue($job);
+        mailchimp_handle_or_queue_live($job);
 
     }
 

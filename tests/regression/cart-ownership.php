@@ -9,7 +9,6 @@ class MailChimp_WooCommerce_Cart_Update {
     public $prepend_to_queue = false;
     public $token;
     public function __construct(...$args) { $this->args = $args; }
-    public function setStatus($status) { return $this; }
     public function setCartToken($token) { $this->token = $token; return $this; }
 }
 require dirname(__DIR__, 2) . '/includes/class-mailchimp-woocommerce-service.php';

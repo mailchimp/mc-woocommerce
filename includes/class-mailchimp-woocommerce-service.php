@@ -13,7 +13,6 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     protected $user_email = null;
     protected $previous_email = null;
     protected $user_language = null;
-    protected $cart_subscribe = null;
     protected $force_cart_post = false;
     protected $cart_was_submitted = false;
     protected $cart_was_deleted = false;
@@ -404,8 +403,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                 // fire up the job handler
                 $handler = new MailChimp_WooCommerce_Cart_Update($uid, $user_email, $this->cart, $language, $session_id);
 
-                // if they had the checkbox checked - go ahead and subscribe them if this is the first post.
-                $handler->setStatus($this->cart_subscribe);
+                // a cart carries no consent: the newsletter checkbox is captured when the order is placed.
                 $handler->setCartToken($token);
                 $handler->prepend_to_queue = true;
                 mailchimp_handle_or_queue_live($handler);
@@ -1373,9 +1371,8 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                 $this->user_language = $_POST['mc_language'];
             }
 
-            if (isset($_POST['subscribed'])) {
-                $this->cart_subscribe = (bool) $_POST['subscribed'];
-            }
+            // the request may carry the newsletter checkbox state, but anyone can send one naming any address,
+            // so it is not consent. The checkout records the checkbox when the order is placed (onOrderSave).
 
             $this->handleCartUpdated();
 
@@ -1478,8 +1475,7 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             return false;
         }
 
-        $user = wp_get_current_user();
-        if ($user && $user->ID > 0 && strtolower(trim($user->user_email)) === strtolower(trim($email))) {
+        if ($this->currentUserOwnsEmail($email)) {
             return true;
         }
 
@@ -1495,6 +1491,24 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         $token = $this->getCartToken();
 
         return !empty($saved->token) && !empty($token) && hash_equals((string) $saved->token, $token);
+    }
+
+    /**
+     * Whether the request is from a shopper logged in to the account that holds $email.
+     *
+     * @param string $email
+     * @return bool
+     */
+    protected function currentUserOwnsEmail($email)
+    {
+        if (empty($email)) {
+            return false;
+        }
+
+        $user = wp_get_current_user();
+
+        return $user && $user->ID > 0 && !empty($user->user_email)
+            && strtolower(trim($user->user_email)) === strtolower(trim($email));
     }
 
     /**

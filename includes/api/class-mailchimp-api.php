@@ -16,6 +16,19 @@ class MailChimp_WooCommerce_MailChimpApi {
 	/** @var null|MailChimp_WooCommerce_MailChimpApi */
 	protected static $instance = null;
 
+	// static, not per-instance: several jobs build their own API objects.
+	/** @var null|int */
+	protected static $job_notified_at = null;
+
+	/**
+	 * Set by the job runner for the duration of one job; null clears it.
+	 *
+	 * @param int|null $timestamp
+	 */
+	public static function setJobNotifiedAt( $timestamp ) {
+		static::$job_notified_at = ! empty( $timestamp ) ? (int) $timestamp : null;
+	}
+
 	/**
 	 * @return null|MailChimp_WooCommerce_MailChimpApi
 	 */
@@ -396,7 +409,8 @@ class MailChimp_WooCommerce_MailChimpApi {
 			// If mailchimp says is already a member lets send the update by PUT
 			if ( mailchimp_string_contains( $e->getMessage(), 'is already a list member' ) ) {
 				return $this->applyPutRequestOnSubscriber( $list_id, $email, $data );
-			} elseif ( $data['status'] !== 'subscribed' || ! mailchimp_string_contains( $e->getMessage(), 'compliance state' ) ) {
+			} elseif ( ( $data['status'] ?? null ) !== 'subscribed' || ! mailchimp_string_contains( $e->getMessage(), 'compliance state' ) ) {
+				// an only_if_new payload carries status_if_new instead of status
 				throw $e;
 			}
 
@@ -2860,7 +2874,8 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 */
 	private function allowedToSubmitSpam() {
 		// check to see if we've already set the transient.
-		$status = mailchimp_get_transient( 'tower' );
+		// the raw transient is a ['value' => ...] wrapper, so unwrap it before comparing.
+		$status = mailchimp_get_transient_value( 'tower' );
 
 		// if we've got it - just return it now.
 		if ( ! empty( $status ) ) {
@@ -2870,10 +2885,10 @@ class MailChimp_WooCommerce_MailChimpApi {
 		// call the API to see if we need to block traffic or not
 		// this only impacts reporting spam metrics, does not impact local site blocking
 		$response = wp_remote_get( 'https://tower.vextras.com/api/traffic' );
-		$body     = json_decode( $response['body'] );
-		$status   = $body ? $body->status : 'red';
+		$body     = is_wp_error( $response ) ? null : json_decode( wp_remote_retrieve_body( $response ) );
+		$status   = $body && ! empty( $body->status ) ? $body->status : 'red';
 
-		// set this for 5 minutes.
+		// set this for 2 minutes - a failed check is cached as red too, so Tower isn't hit on every report.
 		mailchimp_set_transient( 'tower', $status, 120 );
 
 		return $status === 'green';
@@ -3158,6 +3173,10 @@ class MailChimp_WooCommerce_MailChimpApi {
 
         if ($this->is_syncing) {
             $headers[] = 'X-Data-Mode: historical';
+        }
+
+        if (static::$job_notified_at) {
+            $headers[] = 'X-Object-Notified-At: ' . static::$job_notified_at;
         }
 
         if ($this->auto_doi) {

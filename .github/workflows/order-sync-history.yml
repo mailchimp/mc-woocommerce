@@ -7,7 +7,7 @@ on:
       - 'tests/regression/order-sync-history.php'
       - '.github/workflows/order-sync-history.yml'
   push:
-    branches: [master]
+    branches: [master, '6.4']
     paths:
       - 'bootstrap.php'
       - 'includes/**'

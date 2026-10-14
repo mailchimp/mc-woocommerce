@@ -249,7 +249,7 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
         $handler->is_update = false;
         $handler->is_admin_save = is_admin();
 
-        mailchimp_handle_or_queue($handler, 15);
+        mailchimp_handle_or_queue_live($handler, 15);
     }
 
     /**
@@ -276,7 +276,7 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
 					$language = $languageArray[0];
 				}
 
-				mailchimp_handle_or_queue(
+				mailchimp_handle_or_queue_live(
                     new MailChimp_WooCommerce_User_Submit(
                         $user_id,
                         '1',

@@ -227,6 +227,9 @@ class MailChimp_WooCommerce
 
 		$plugin_admin = MailChimp_WooCommerce_Admin::instance();
 
+        $order_sync_history = new MailChimp_WooCommerce_Order_Sync_History();
+        $this->loader->add_action('add_meta_boxes', $order_sync_history, 'register_meta_box');
+
 		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_styles');
 		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
 

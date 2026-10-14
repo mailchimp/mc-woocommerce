@@ -27,6 +27,7 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_Rest_Api' => 'includes/class-mailchimp-woocommerce-rest-api.php',
         'Mailchimp_Wocoomerce_CLI' => 'includes/class-mailchimp-woocommerce-cli.php',
         'MailChimp_WooCommerce_HPOS' => 'includes/class-mailchimp-woocommerce-hpos.php',
+        'MailChimp_WooCommerce_Order_Sync_History' => 'includes/class-mailchimp-woocommerce-order-sync-history.php',
         'Mailchimp_Woocommerce_Block_Editor' => 'includes/class-mailchimp-woocommerce-block-editor.php',
 
         // includes/api/assets

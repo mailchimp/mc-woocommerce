@@ -18,6 +18,7 @@ add_action( 'woocommerce_blocks_loaded', function() {
 
 		require_once dirname( __FILE__ ) . '/woocommerce-blocks-integration.php';
         require_once dirname( __FILE__ ) . '/woocommerce-blocks-extend-store-endpoint.php';
+        require_once dirname( __FILE__ ) . '/woocommerce-blocks-extend-cart-item.php';
 
 		add_action(
 			'woocommerce_blocks_checkout_block_registration',
@@ -27,6 +28,9 @@ add_action( 'woocommerce_blocks_loaded', function() {
 		);
 
 		Mailchimp_Woocommerce_Newsletter_Blocks_Extend_Store_Endpoint::init();
+        if (!defined('MAILCHIMP_PIXEL_ENABLED') || MAILCHIMP_PIXEL_ENABLED === true) {
+            Mailchimp_Woocommerce_Blocks_Extend_Cart_Item::init();
+        }
 
         if (mailchimp_sms_consent_active()) {
             add_action( 'woocommerce_store_api_checkout_update_order_from_request', array( 'Mailchimp_Woocommerce_Sms_Blocks_Integration', 'order_processed' ), 10, 2 );

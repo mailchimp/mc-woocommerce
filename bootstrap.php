@@ -900,6 +900,33 @@ function mailchimp_common_loopback_ips(){
 }
 
 /**
+ * @return string
+ */
+function mailchimp_get_store_domain() {
+    // Connected Sites uses the public host, not the WordPress core directory.
+    $host = wp_parse_url(home_url(), PHP_URL_HOST);
+    return is_string($host) ? strtolower($host) : '';
+}
+
+/**
+ * Match the public domain while retaining stores registered by older releases.
+ * Do not strip arbitrary paths or www: those can identify a different store.
+ *
+ * @param string $domain Mailchimp's stored domain or legacy URL.
+ * @return bool
+ */
+function mailchimp_store_domain_matches($domain) {
+    $host = mailchimp_get_store_domain();
+    if (!is_string($domain) || $domain === '' || $host === '') {
+        return false;
+    }
+
+    $domain = rtrim($domain, '/');
+    return in_array(strtolower($domain), array($host, 'https://' . $host, 'http://' . $host), true) ||
+        in_array($domain, array(rtrim(home_url(), '/'), rtrim(get_option('siteurl'), '/')), true);
+}
+
+/**
  * @return mixed|string
  */
 function mailchimp_get_store_id() {
@@ -927,7 +954,8 @@ function mailchimp_get_store_id() {
             if (!empty($stores)) {
                 //iterate thru stores, find correct store ID and save it to db
                 foreach ($stores as $mc_store) {
-                    if ($mc_store->getDomain() === get_option('siteurl')) {
+                    if (strtolower((string) $mc_store->getPlatform()) === 'woocommerce' &&
+                        mailchimp_store_domain_matches($mc_store->getDomain())) {
                         // Route through the helper so our in-process caches
                         // and object-cache invalidations stay consistent.
                         \Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp-woocommerce-store_id', $mc_store->getId(), 'yes');

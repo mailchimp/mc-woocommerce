@@ -2387,6 +2387,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			return false;
 		}
 
+		$domain = mailchimp_get_store_domain();
+		if ( empty( $domain ) ) {
+			throw new MailChimp_WooCommerce_Error( 'The public site address must contain a valid host.' );
+		}
+
 		$new = false;
 
 		if ( ! ( $store = $this->api()->getStore( $store_id ) ) ) {
@@ -2408,7 +2413,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		// set the basics
 		$store->setName( html_entity_decode($this->array_get( $data, 'store_name', get_option( 'blogname' ) )) );
-		$store->setDomain( get_option( 'siteurl' ) );
+		$store->setDomain( $domain );
 		$store->setEmailAddress( $this->array_get( $data, 'admin_email', get_option('admin_email') ) );
 		$store->setAddress( $this->address( $data ) );
 		$store->setListId( $list_id );
@@ -2433,7 +2438,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				$stores = $this->api()->stores();
 				// iterate thru stores, find correct store ID and save it to db
 				foreach ( $stores as $mc_store ) {
-					if ( $mc_store->getDomain() === $store->getDomain() && $store->getPlatform() == 'woocommerce' ) {
+					if ( strtolower( (string) $mc_store->getPlatform() ) === 'woocommerce' &&
+						mailchimp_store_domain_matches( $mc_store->getDomain() ) ) {
 						\Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp-woocommerce-store_id', $mc_store->getId(), 'yes' );
 						// update the store with the previous listID
 						$store->setListId( $mc_store->getListId() );

@@ -26,8 +26,9 @@ class WC_Order {
     public function add_meta_data($key, $value, $unique = false) { $this->metadata[] = array('id' => 0, 'key' => $key, 'value' => $value); }
     public function delete_meta_data_by_mid($id) { $this->deleted[] = $id; }
     public function save_meta_data() {
-        check(MailChimp_WooCommerce_Order_Sync_History::is_recording(42), 'Guard is active during persistence');
-        check(!MailChimp_WooCommerce_Order_Sync_History::is_recording(43), 'Guard is specific to the recorded order');
+        check(MailChimp_WooCommerce_Order_Sync_History::is_writing(42), 'Guard is active during persistence');
+        check(!MailChimp_WooCommerce_Order_Sync_History::is_writing(43), 'Guard is specific to the recorded order');
+        check(!apply_filters(MailChimp_WooCommerce_Order_Sync_History::SKIP_SAVE_FILTER, true), 'HPOS full save is disabled during persistence');
         if (isset($GLOBALS['on_history_save'])) { ($GLOBALS['on_history_save'])(); }
         if ($GLOBALS['cfg']['storage_error']) { throw new RuntimeException('Fixture storage error'); }
         $GLOBALS['metadata'] = array_values(array_filter($GLOBALS['metadata'], function($row) { return !in_array($row['id'], $this->deleted, true); }));
@@ -43,7 +44,21 @@ function wc_get_order($id) { if ($GLOBALS['cfg']['read_error']) { throw new Runt
 class MailChimp_WooCommerce_HPOS { public static function get_order($id) { return wc_get_order($id); } public static function enabled() { return $GLOBALS['hpos']; } }
 class Mailchimp_Woocommerce_DB_Helpers { public static function get_option($key) { return array('mailchimp_auto_subscribe' => $GLOBALS['cfg']['subscribe_setting']); } }
 function get_user_by($key, $id) { return (object) array('roles' => array($GLOBALS['cfg']['role'])); }
-function apply_filters($name, $value) { return $name === 'mailchimp_campaign_user_roles' ? array() : $value; }
+// WordPress callback stub, named exactly as the core function.
+// phpcs:ignore PHPCompatibility.FunctionNameRestrictions.ReservedFunctionNames.FunctionDoubleUnderscore
+function __return_false($value = null) { return false; }
+function add_filter($name, $callback, $priority = 10) { $GLOBALS['filters'][$name][$priority][] = $callback; }
+function remove_filter($name, $callback, $priority = 10) {
+    foreach ($GLOBALS['filters'][$name][$priority] ?? array() as $index => $registered) {
+        if ($registered === $callback) { unset($GLOBALS['filters'][$name][$priority][$index]); }
+    }
+}
+function apply_filters($name, $value) {
+    $priorities = $GLOBALS['filters'][$name] ?? array();
+    ksort($priorities);
+    foreach ($priorities as $callbacks) { foreach ($callbacks as $callback) { $value = $callback($value); } }
+    return $name === 'mailchimp_campaign_user_roles' ? array() : $value;
+}
 function mailchimp_is_configured() { return $GLOBALS['cfg']['configured']; }
 function mailchimp_get_api() { return $GLOBALS['api']; }
 function mailchimp_get_store_id() { return 'store'; }
@@ -121,6 +136,7 @@ function run_case($cfg, $reason, $full_sync = false, $update = false) {
     check(last_event()['reason'] === $reason, 'Expected recorded reason: ' . $reason);
     check(last_event()['mode'] === ($full_sync ? 'initial' : 'live'), 'Capture original sync mode');
     check(strpos(json_encode(events()), 'shopper@example.test') === false, 'History excludes customer emails');
+    check(!MailChimp_WooCommerce_Order_Sync_History::is_writing() && apply_filters(MailChimp_WooCommerce_Order_Sync_History::SKIP_SAVE_FILTER, true), 'Every sync path releases its guard and save filter');
     return $result;
 }
 run_case(array('configured' => false), 'not_configured');
@@ -158,15 +174,27 @@ check(events()[0]['outcome'] === 'synced', 'A follow-up failure must not erase a
 reset_history(array('storage_error' => true));
 check((new MailChimp_WooCommerce_Single_Order(42))->process() === array('id' => 42), 'Storage failure must not break sync');
 check(!events(), 'Failed persistence must not invent recorded success');
-check(!MailChimp_WooCommerce_Order_Sync_History::is_recording(42), 'Persistence exception clears the guard');
+check(!MailChimp_WooCommerce_Order_Sync_History::is_writing(42), 'Persistence exception clears the guard');
 reset_history();
 $GLOBALS['on_history_save'] = function() {
     unset($GLOBALS['on_history_save']);
     check(MailChimp_WooCommerce_Order_Sync_History::record(42, 'skipped', 'draft'), 'Nested history write succeeds');
-    check(MailChimp_WooCommerce_Order_Sync_History::is_recording(42), 'Nested write preserves the outer guard');
+    check(MailChimp_WooCommerce_Order_Sync_History::is_writing(42), 'Nested write preserves the outer guard');
+    check(!apply_filters(MailChimp_WooCommerce_Order_Sync_History::SKIP_SAVE_FILTER, true), 'Nested write preserves the outer save filter');
 };
 check(MailChimp_WooCommerce_Order_Sync_History::record(42, 'skipped', 'draft'), 'Outer history write succeeds');
-check(!MailChimp_WooCommerce_Order_Sync_History::is_recording(42), 'Outermost history write clears the guard');
+check(!MailChimp_WooCommerce_Order_Sync_History::is_writing(42), 'Outermost history write clears the guard');
+check(apply_filters(MailChimp_WooCommerce_Order_Sync_History::SKIP_SAVE_FILTER, true), 'Outermost write removes its save filter');
+foreach (array(false, true) as $storage_error) {
+    reset_history(array('storage_error' => $storage_error));
+    add_filter(MailChimp_WooCommerce_Order_Sync_History::SKIP_SAVE_FILTER, '__return_false', PHP_INT_MAX);
+    check(MailChimp_WooCommerce_Order_Sync_History::record(42, 'skipped', 'draft') === !$storage_error, 'Storage result is preserved');
+    check(!apply_filters(MailChimp_WooCommerce_Order_Sync_History::SKIP_SAVE_FILTER, true), 'An existing filter survives success and failure');
+    check(!MailChimp_WooCommerce_Order_Sync_History::is_writing(), 'Success and failure clear the outermost guard');
+    remove_filter(MailChimp_WooCommerce_Order_Sync_History::SKIP_SAVE_FILTER, '__return_false', PHP_INT_MAX);
+    check(apply_filters(MailChimp_WooCommerce_Order_Sync_History::SKIP_SAVE_FILTER, true), 'No owned filter leaks after success or failure');
+}
+
 reset_history();
 for ($i = 0; $i < 25; ++$i) { check(MailChimp_WooCommerce_Order_Sync_History::record(42, 'skipped', 'draft'), 'Record persisted'); }
 check(count(events()) === 20, 'Retain only 20 recent records');

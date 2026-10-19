@@ -33,9 +33,11 @@ metadata row, written through WooCommerce CRUD APIs for either storage mode.
 While history is persisted, a request-local guard prevents the recorded order's
 HPOS metadata-save hook from queuing another Mailchimp sync (sc-52738). The guard
 is per order, survives nested history writes, and clears even on an exception.
-WooCommerce's normal metadata storage, cache invalidation and compatibility
-backfill still run. HPOS may update the order's modified timestamp as part of
-that write; it must not create a new Mailchimp job. Later edits and status
+On WooCommerce 8.8+, the HPOS save-after-meta-change filter also prevents an
+unnecessary full order save and modified-date change. Each write owns its filter
+callback, preserving outer writes and filters installed by other callers. Older
+WooCommerce versions can still perform the full save; the per-order guard
+prevents it from creating a new Mailchimp job. Later edits and status
 changes, and updates to other orders, still sync normally.
 Pruning removes the oldest rows by metadata ID; the panel always displays at
 most 20. Concurrent attempts can temporarily retain more than 20 rows until a
@@ -89,8 +91,10 @@ executing the job, so same-second behavior cannot hide the HPOS loop. A normal
 order-type exclusion exercises the sync job's history path without contacting
 Mailchimp; a test API adapter rejects any attempted network call. It checks
 that history inserts/pruning do not requeue the order, genuine edits and status
-changes still queue, another order can sync during recording, and a persistence
-exception does not suppress subsequent edits. Fixtures are removed afterwards.
+changes still queue, another order can sync during recording, nested writes
+retain the outer guard and save filter, existing filters survive cleanup, and
+a persistence exception does not suppress subsequent edits. Fixtures are removed
+afterwards.
 It does not validate Mailchimp acceptance or delivery. The GitHub workflow runs
 this on WooCommerce 8.2.0/PHP 7.4 and WooCommerce 11.2.1/PHP 8.2.
 Compatibility mode checks cover the queue loop and unrelated backfilled metadata.

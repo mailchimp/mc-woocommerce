@@ -4,12 +4,14 @@
 class MailChimp_WooCommerce_Order_Sync_History {
     const META_KEY = '_mailchimp_woocommerce_sync_history';
     const MAX_ENTRIES = 20;
-
+    /** HPOS saves the whole order after a meta change unless this filter says no. */
+    const SKIP_SAVE_FILTER = 'woocommerce_orders_table_datastore_should_save_after_meta_change';
     /** @var array<int, bool> Orders whose diagnostic metadata is being saved. */
-    private static $recording_orders = array();
+    private static $writing_orders = array();
 
-    public static function is_recording($order_id) {
-        return isset(self::$recording_orders[(int) $order_id]);
+    /** With no ID, preserve the existing request-wide diagnostic query. */
+    public static function is_writing($order_id = null) {
+        return $order_id === null ? !empty(self::$writing_orders) : isset(self::$writing_orders[(int) $order_id]);
     }
 
     public static function outcomes() {
@@ -77,24 +79,39 @@ class MailChimp_WooCommerce_Order_Sync_History {
                 'mode' => $full_sync ? 'initial' : 'live',
                 'order_status' => substr(sanitize_key(is_string($order_status) ? $order_status : $order->get_status()), 0, 40),
             ), false);
-            // HPOS can turn a metadata write into a full order save and fire
-            // woocommerce_update_order. Do not queue another sync for our own
-            // diagnostic write. Keep WooCommerce's storage/cache/backfill hooks.
-            $id = (int) $order->get_id();
-            $was_recording = self::is_recording($id);
-            self::$recording_orders[$id] = true;
-            try {
-                $order->save_meta_data();
-            } finally {
-                if (!$was_recording) {
-                    unset(self::$recording_orders[$id]);
-                }
-            }
+            self::save_silently($order);
             return true;
         } catch (Throwable $e) {
             // Diagnostics must never fail a sync or expose a raw API exception.
             error_log('Mailchimp order sync history could not be stored.');
             return false;
+        }
+    }
+
+    /**
+     * Persist meta without WooCommerce treating it as an order update.
+     *
+     * Under HPOS, save_meta_data() calls $order->save() to bump the modified
+     * date, which fires woocommerce_update_order and re-enters the sync job.
+     * WooCommerce core disables that with this same filter around its own
+     * internal meta writes. The per-order guard covers WooCommerce versions that
+     * predate the filter and any other path that reaches the update hook.
+     */
+    private static function save_silently($order) {
+        $id = (int) $order->get_id();
+        $was_writing = self::is_writing($id);
+        self::$writing_orders[$id] = true;
+        // Each invocation owns its callback: nested writes and other callers
+        // may already have installed a filter at this priority.
+        $skip_save = static function($should_save) { return false; };
+        add_filter(self::SKIP_SAVE_FILTER, $skip_save, PHP_INT_MAX);
+        try {
+            $order->save_meta_data();
+        } finally {
+            remove_filter(self::SKIP_SAVE_FILTER, $skip_save, PHP_INT_MAX);
+            if (!$was_writing) {
+                unset(self::$writing_orders[$id]);
+            }
         }
     }
 

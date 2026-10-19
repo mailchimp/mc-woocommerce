@@ -716,9 +716,10 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 	 * @param $order
 	 */
 	public function handleOrderUpdate($order_id, $order = null) {
-        if (MailChimp_WooCommerce_Order_Sync_History::is_recording($order_id)) {
-            return;
-        }
+		// Recording sync history writes order meta; that save must never re-queue the order.
+		if (MailChimp_WooCommerce_Order_Sync_History::is_writing($order_id)) {
+			return;
+		}
 		if (empty($order)) $order = MailChimp_WooCommerce_HPOS::get_order($order_id);
         if ($order && $order->get_status() === 'checkout-draft' && $order->is_created_via( 'store-api' )) {
             if ($order->get_billing_email()) {

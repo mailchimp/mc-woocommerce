@@ -52,6 +52,8 @@ $observed_updates = array();
 $observe = function($id) use (&$observed_updates) { $observed_updates[] = $id; };
 $nested = null;
 $fail = null;
+$nested_failure = null;
+$existing_filter_installed = false;
 add_filter('pre_wp_mail', $no_mail);
 add_filter('pre_http_request', $no_http);
 add_action('woocommerce_update_order', $observe, 1);
@@ -79,6 +81,7 @@ try {
 
     // Real order-update hook -> serialized SQL payload -> Action Scheduler ->
     // real sync job -> history CRUD -> HPOS update hook. No stub order/storage.
+    $modified_before = wc_get_order($id)->get_date_modified()->getTimestamp();
     do_action('woocommerce_update_order', $id, wc_get_order($id));
     $actions = $pending($id);
     $check(count($actions) === 1, 'An order update queues one real sync action');
@@ -92,7 +95,13 @@ try {
     global $wpdb;
     $check((int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}mailchimp_jobs WHERE obj_id = %s", $id)) === 0, 'Processed SQL payload is gone; no replacement payload');
     if (MailChimp_WooCommerce_HPOS::enabled()) {
-        $check(count(array_filter($observed_updates, function($value) use ($id) { return $value === $id; })) >= 2, 'Real HPOS metadata write fired its update hook');
+        $update_count = count(array_filter($observed_updates, function($value) use ($id) { return $value === $id; }));
+        if (version_compare(WC_VERSION, '8.8', '>=')) {
+            $check($update_count === 1, 'Modern HPOS history avoids the full order save and update hook');
+            $check(wc_get_order($id)->get_date_modified()->getTimestamp() === $modified_before, 'Modern HPOS history preserves the modified date');
+        } else {
+            $check($update_count >= 2, 'Older HPOS fires its update hook, exercising the per-order fallback');
+        }
     }
 
     // Real edits still queue after history recording has returned.
@@ -130,6 +139,65 @@ try {
     $check(count($pending($other_id)) === 1, 'Another order still syncs during history recording');
     $clear($other_id);
 
+    // A nested writer must not remove the outer writer's guard or filter,
+    // including when the nested metadata callback throws.
+    foreach (array(false, true) as $throw_nested) {
+        $nested = function($meta_id, $object_id, $key) use ($id, $throw_nested, $check, &$nested, &$nested_failure) {
+            if ((int) $object_id !== $id || $key !== MailChimp_WooCommerce_Order_Sync_History::META_KEY) { return; }
+            remove_action('added_order_meta', $nested, 10);
+            $nested_failure = function($meta_id, $object_id, $key) use ($id) {
+                if ((int) $object_id === $id && $key === MailChimp_WooCommerce_Order_Sync_History::META_KEY) {
+                    throw new RuntimeException('Deliberate nested history callback failure');
+                }
+            };
+            if ($throw_nested) { add_action('added_order_meta', $nested_failure, 10, 3); }
+            try {
+                $result = MailChimp_WooCommerce_Order_Sync_History::record($id, 'skipped', 'draft');
+            } finally {
+                remove_action('added_order_meta', $nested_failure, 10);
+            }
+            $check($result === !$throw_nested, 'Nested persistence result is preserved');
+            $check(MailChimp_WooCommerce_Order_Sync_History::is_writing($id), 'Nested success or failure preserves the outer order guard');
+            $check(!apply_filters(MailChimp_WooCommerce_Order_Sync_History::SKIP_SAVE_FILTER, true), 'Nested success or failure preserves the outer save filter');
+        };
+        add_action('added_order_meta', $nested, 10, 3);
+        $check(MailChimp_WooCommerce_Order_Sync_History::record($id, 'synced', 'order_updated'), 'Outer write survives nested persistence');
+        remove_action('added_order_meta', $nested, 10);
+        $check(!MailChimp_WooCommerce_Order_Sync_History::is_writing(), 'Outermost write clears all order guards');
+        $check(apply_filters(MailChimp_WooCommerce_Order_Sync_History::SKIP_SAVE_FILTER, true), 'Outermost write removes its save filter');
+        $check(count($pending($id)) === 0, 'Nested history does not queue another sync');
+    }
+
+    add_filter(MailChimp_WooCommerce_Order_Sync_History::SKIP_SAVE_FILTER, '__return_false', PHP_INT_MAX);
+    $existing_filter_installed = true;
+    $check(MailChimp_WooCommerce_Order_Sync_History::record($id, 'skipped', 'draft'), 'History with an existing save filter succeeds');
+    $check(has_filter(MailChimp_WooCommerce_Order_Sync_History::SKIP_SAVE_FILTER, '__return_false') === PHP_INT_MAX, 'An existing identical-priority filter survives successful history');
+    remove_filter(MailChimp_WooCommerce_Order_Sync_History::SKIP_SAVE_FILTER, '__return_false', PHP_INT_MAX);
+    $existing_filter_installed = false;
+
+    // A storage callback failure must not leave a guard suppressing later edits.
+    $fail = function($meta_id, $object_id, $key) use ($id) {
+        if ((int) $object_id === $id && $key === MailChimp_WooCommerce_Order_Sync_History::META_KEY) {
+            throw new RuntimeException('Deliberate local persistence callback failure');
+        }
+    };
+    add_filter(MailChimp_WooCommerce_Order_Sync_History::SKIP_SAVE_FILTER, '__return_false', PHP_INT_MAX);
+    $existing_filter_installed = true;
+    add_action('added_order_meta', $fail, 10, 3);
+    $check(!MailChimp_WooCommerce_Order_Sync_History::record($id, 'failed', 'api_error'), 'Persistence exception is contained');
+    remove_action('added_order_meta', $fail, 10);
+    $check(has_filter(MailChimp_WooCommerce_Order_Sync_History::SKIP_SAVE_FILTER, '__return_false') === PHP_INT_MAX, 'An existing filter survives a history exception');
+    remove_filter(MailChimp_WooCommerce_Order_Sync_History::SKIP_SAVE_FILTER, '__return_false', PHP_INT_MAX);
+    $existing_filter_installed = false;
+    $check(apply_filters(MailChimp_WooCommerce_Order_Sync_History::SKIP_SAVE_FILTER, true), 'No owned filter leaks after a history exception');
+    $check(!MailChimp_WooCommerce_Order_Sync_History::is_writing(), 'A history exception clears its order guard');
+    $clear($id);
+    $order = wc_get_order($id);
+    $order->set_customer_note('Real edit after failed history write');
+    $order->save();
+    $check(count($pending($id)) === 1, 'Genuine edits still queue after a history exception');
+    $clear($id);
+
     // Pruning can itself cause HPOS update hooks, not only the first insert.
     for ($i = 0; $i < 25; ++$i) {
         $order = wc_get_order($id);
@@ -145,20 +213,6 @@ try {
         $check(get_post_meta($id, '_history_loop_unrelated', true) === 'preserve', 'HPOS compatibility backfill preserves unrelated metadata');
     }
 
-    // A storage callback failure must not leave a guard suppressing later edits.
-    $fail = function($meta_id, $object_id, $key) use ($id) {
-        if ((int) $object_id === $id && $key === MailChimp_WooCommerce_Order_Sync_History::META_KEY) {
-            throw new RuntimeException('Deliberate local persistence callback failure');
-        }
-    };
-    add_action('added_order_meta', $fail, 10, 3);
-    $check(!MailChimp_WooCommerce_Order_Sync_History::record($id, 'failed', 'api_error'), 'Persistence exception is contained');
-    remove_action('added_order_meta', $fail, 10);
-    $clear($id);
-    $order = wc_get_order($id);
-    $order->set_customer_note('Real edit after failed history write');
-    $order->save();
-    $check(count($pending($id)) === 1, 'Genuine edits still queue after a history exception');
     echo json_encode(array('checks' => $checks, 'wordpress' => get_bloginfo('version'), 'woocommerce' => WC_VERSION,
         'php' => PHP_VERSION, 'storage' => MailChimp_WooCommerce_HPOS::enabled() ? 'hpos' : 'legacy',
         'compatibility_sync' => $backfill, 'result' => 'passed')) . "\n";
@@ -166,6 +220,8 @@ try {
     remove_action('woocommerce_update_order', $observe, 1);
     if ($nested) { remove_action('added_order_meta', $nested, 10); }
     if ($fail) { remove_action('added_order_meta', $fail, 10); }
+    if ($nested_failure) { remove_action('added_order_meta', $nested_failure, 10); }
+    if ($existing_filter_installed) { remove_filter(MailChimp_WooCommerce_Order_Sync_History::SKIP_SAVE_FILTER, '__return_false', PHP_INT_MAX); }
     remove_filter('mailchimp_should_push_order_post_type_list', $skip);
     wp_cache_delete('mailchimp-woocommerce-options', 'mailchimp-woocommerce');
     Mailchimp_History_No_Network_Api::reset();

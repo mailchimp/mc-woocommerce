@@ -92,7 +92,7 @@ class MailChimp_WooCommerce
         $username = $is_options && array_key_exists('mailchimp_account_info_username', $plugin_options) ?
             $plugin_options['mailchimp_account_info_username'] : false;
 
-        $api_key_parts = str_getcsv($api_key, '-');
+        $api_key_parts = str_getcsv($api_key, '-', '"', '');
         $data_center = isset($api_key_parts[1]) ? $api_key_parts[1] : 'us1';
 
         return static::$logging_config = (object)array(
@@ -227,6 +227,9 @@ class MailChimp_WooCommerce
 
 		$plugin_admin = MailChimp_WooCommerce_Admin::instance();
 
+        $order_sync_history = new MailChimp_WooCommerce_Order_Sync_History();
+        $this->loader->add_action('add_meta_boxes', $order_sync_history, 'register_meta_box');
+
 		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_styles');
 		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
 
@@ -279,6 +282,7 @@ class MailChimp_WooCommerce
         $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_switch_account', $plugin_admin, 'connect_account_flow_switch_account' );
         $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_check_login_session', $plugin_admin, 'mailchimp_woocommerce_ajax_check_login_session' );
         $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_support_form', $plugin_admin, 'mailchimp_woocommerce_ajax_support_form' );
+        $this->loader->add_action( 'wp_ajax_mailchimp_woocommerce_support_chat_identity', $plugin_admin, 'mailchimp_woocommerce_ajax_support_chat_identity' );
 
         // add Shop Manager capability to save options
         $this->loader->add_action('option_page_capability_mailchimp-woocommerce', $plugin_admin, 'mailchimp_woocommerce_option_page_capability');
@@ -359,11 +363,12 @@ class MailChimp_WooCommerce
 			$this->loader->add_action($render_on, $service, 'applyNewsletterField');
 
 			$this->loader->add_action('woocommerce_ppe_checkout_order_review', $service, 'applyNewsletterField');
-			$this->loader->add_action('woocommerce_register_form', $service, 'applyNewsletterFieldToRegisterForm');
 
 			$this->loader->add_action('woocommerce_checkout_order_processed', $service, 'processNewsletterField', 10, 2);
 			$this->loader->add_action('woocommerce_ppe_do_payaction', $service, 'processPayPalNewsletterField');
-			$this->loader->add_action('woocommerce_register_post', $service, 'processRegistrationForm', 10, 3);
+
+            $this->loader->add_action('woocommerce_register_form', $service, 'applyNewsletterFieldToRegisterForm');
+            $this->loader->add_action('woocommerce_register_post', $service, 'processRegistrationForm', 10, 3);
 		}
 	}
 
@@ -376,13 +381,17 @@ class MailChimp_WooCommerce
             $sms_consent->setVersion($this->version);
 
             $render_on = $sms_consent->getOption('mailchimp_sms_consent_checkbox_action', 'woocommerce_after_checkout_billing_form');
-            $sms_consent_allowed = MailChimp_Sms_Consent::isAllowedToUse();
+            $sms_consent_allowed = mailchimp_sms_consent_enabled();
 
             if ($sms_consent_allowed) {
                 $this->loader->add_action($render_on, $sms_consent, 'applyField');
 
                 $this->loader->add_action('woocommerce_checkout_order_processed', $sms_consent, 'processSmsConsentField', 10, 2);
                 $this->loader->add_action('woocommerce_ppe_do_payaction', $sms_consent, 'processPayPalSmsConsentField');
+                $this->loader->add_action('woocommerce_register_post', $sms_consent, 'processRegistrationForm', 10, 3);
+
+                $this->loader->add_action('woocommerce_register_form', $sms_consent, 'applySmsFieldToRegisterForm');
+                $this->loader->add_action('woocommerce_register_post', $sms_consent, 'processRegistrationForm', 10, 3);
             }
         }
     }
@@ -424,7 +433,8 @@ class MailChimp_WooCommerce
             $this->loader->add_filter('woocommerce_update_cart_action_cart_updated', $service, 'handleCartUpdated');
 			$this->loader->add_action('woocommerce_cart_item_set_quantity', $service, 'handleCartUpdated');
 			$this->loader->add_action('woocommerce_add_to_cart', $service, 'handleCartUpdated');
-			$this->loader->add_action('woocommerce_cart_item_removed', $service, 'handleCartUpdated');
+			$this->loader->add_action('woocommerce_cart_item_removed', $service, 'handleCartItemRemoved');
+			$this->loader->add_action('woocommerce_cart_emptied', $service, 'handleCartEmptied');
 
 			// save post hooks
 			$this->loader->add_action('woocommerce_new_order', $service, 'handleOrderCreate', 200, 2);
@@ -474,8 +484,6 @@ class MailChimp_WooCommerce
 			$this->loader->add_action('profile_update', $service, 'handleUserUpdated', 100, 2);
 
 			// get user by hash ( public and private )
-            $this->loader->add_action('wp_ajax_mailchimp_get_user_by_hash', $service, 'get_user_by_hash');
-            $this->loader->add_action('wp_ajax_nopriv_mailchimp_get_user_by_hash', $service, 'get_user_by_hash');
 
             // set user by email hash ( public and private )
             $this->loader->add_action('wp_ajax_mailchimp_set_user_by_email', $service, 'set_user_by_email');

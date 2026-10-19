@@ -345,6 +345,11 @@ a.button.create-account {
 	position: absolute;
 }
 
+#mailchimp-oauth-connect .sync-loader {
+	margin-inline-start: 10px;
+	mix-blend-mode: multiply;
+}
+
 #mailchimp-oauth-connected {
 	color: #7FAD45;
 }
@@ -613,6 +618,10 @@ a.button.create-account {
 	color: #DBD9D2;
 }
 
+#mailchimp-oauth-connect .sync-loader {
+	margin-inline-start: 10px;
+	mix-blend-mode: multiply;
+}
 .sync-content-wrapper .sync-stats-card .sync-loader {
 	font-family: proxima-nova, Arial, Helvetica, sans-serif;
 	font-size: 22px;

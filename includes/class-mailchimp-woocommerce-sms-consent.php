@@ -68,6 +68,15 @@ class MailChimp_Sms_Consent extends MailChimp_WooCommerce_Options
         return static::$_instance;
     }
 
+    public function applySmsFieldToRegisterForm($form)
+    {
+        $show_field = apply_filters('mailchimp_woocommerce_account_register_sms_field_field', true);
+
+        if ($show_field) {
+            $this->applyField($form);
+        }
+    }
+
 	/**
 	 * @param $checkout
 	 */
@@ -79,9 +88,9 @@ class MailChimp_Sms_Consent extends MailChimp_WooCommerce_Options
         }
 
         // Check if merchant has approved SMS application
-//        if (!$this->merchantHasSmsApproved()) {
-//            return;
-//        }
+        if (!$this->merchantHasSmsApproved()) {
+            return;
+        }
 
         // Compliance: checkbox must always be unchecked by default, label and disclaimer are fixed
         $sms_label = __('Text me with news and offers', 'mailchimp-for-woocommerce');
@@ -388,7 +397,7 @@ class MailChimp_Sms_Consent extends MailChimp_WooCommerce_Options
 
     public static function isAllowedToUse()
     {
-        return mailchimp_sms_consent_enabled();
+        return mailchimp_sms_consent_active();
     }
 
     /**
@@ -397,6 +406,20 @@ class MailChimp_Sms_Consent extends MailChimp_WooCommerce_Options
     public function processPayPalSmsConsentField($order)
     {
         $this->handleSmsStatus($order->get_id());
+    }
+
+    /**
+     * @param $sanitized_user_login
+     * @param $user_email
+     * @param $reg_errors
+     */
+    public function processRegistrationForm($sanitized_user_login, $user_email, $reg_errors)
+    {
+        if (defined('WOOCOMMERCE_CHECKOUT')) {
+            return; // Ship checkout
+        }
+
+        $this->handleSmsStatus();
     }
 
     /**

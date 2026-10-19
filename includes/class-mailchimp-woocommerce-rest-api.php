@@ -1069,7 +1069,7 @@ class MailChimp_WooCommerce_Rest_Api
         // get the auth token from either a header, or the query string
         $token = (string) $this->getAuthToken($request);
         // get the token and pull out both the consumer key and consumer secret split by the :
-        $parts = str_getcsv($token, ':');
+        $parts = str_getcsv($token, ':', '"', '');
         // if we don't have 2 items, that's invalid
         if (count($parts) !== 2) {
             mailchimp_debug('authorize', "token invalid format", ['token_present' => !empty($token)]);

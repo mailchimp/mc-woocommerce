@@ -11,9 +11,23 @@ class MailChimp_WooCommerce_MailChimpApi {
 	protected $auth_type   = 'key';
     protected $allow_audience_put = true;
     protected $auto_doi = false;
+    protected $is_syncing = null;
 
 	/** @var null|MailChimp_WooCommerce_MailChimpApi */
 	protected static $instance = null;
+
+	// static, not per-instance: several jobs build their own API objects.
+	/** @var null|int */
+	protected static $job_notified_at = null;
+
+	/**
+	 * Set by the job runner for the duration of one job; null clears it.
+	 *
+	 * @param int|null $timestamp
+	 */
+	public static function setJobNotifiedAt( $timestamp ) {
+		static::$job_notified_at = ! empty( $timestamp ) ? (int) $timestamp : null;
+	}
 
 	/**
 	 * @return null|MailChimp_WooCommerce_MailChimpApi
@@ -42,6 +56,17 @@ class MailChimp_WooCommerce_MailChimpApi {
 		}
 	}
 
+    public function setIsSyncing($bool = true)
+    {
+        $this->is_syncing = (bool) $bool;
+        return $this;
+    }
+
+    public function isSyncing()
+    {
+        return $this->is_syncing;
+    }
+
     /**
      * @param $bool
      * @return $this
@@ -68,7 +93,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 * @return $this
 	 */
 	public function setApiKey( $key ) {
-		$parts = str_getcsv( $key, '-' );
+		$parts = str_getcsv( $key, '-' , '"', '');
 
 		if ( count( $parts ) == 2 ) {
 			$this->data_center = $parts[1];
@@ -384,7 +409,8 @@ class MailChimp_WooCommerce_MailChimpApi {
 			// If mailchimp says is already a member lets send the update by PUT
 			if ( mailchimp_string_contains( $e->getMessage(), 'is already a list member' ) ) {
 				return $this->applyPutRequestOnSubscriber( $list_id, $email, $data );
-			} elseif ( $data['status'] !== 'subscribed' || ! mailchimp_string_contains( $e->getMessage(), 'compliance state' ) ) {
+			} elseif ( ( $data['status'] ?? null ) !== 'subscribed' || ! mailchimp_string_contains( $e->getMessage(), 'compliance state' ) ) {
+				// an only_if_new payload carries status_if_new instead of status
 				throw $e;
 			}
 
@@ -720,7 +746,9 @@ class MailChimp_WooCommerce_MailChimpApi {
             'sms_phone' => $sms_phone,
             'marketing_consent' => array(
                 'status' => $subscribed ? 'confirmed' : 'pending',
-                'source' => 'Mailchimp for Woocommerce',
+                'source' => array(
+                    'name' => 'Mailchimp for Woocommerce',
+                ),
             ),
         );
 
@@ -756,7 +784,9 @@ class MailChimp_WooCommerce_MailChimpApi {
                 'email' => $email,
                 'marketing_consent' => [
                     'status' => $email_subscribed ? 'confirmed' : 'unknown',
-                    'source' => 'Mailchimp for Woocommerce',
+                    'source' => array(
+                        'name' => 'Mailchimp for Woocommerce',
+                    ),
                 ]
             ],
             'sms_channel' => $sms_channel,
@@ -816,7 +846,9 @@ class MailChimp_WooCommerce_MailChimpApi {
             'sms_phone' => $sms_phone,
             'marketing_consent' => array(
                 'status' => $subscribed ? 'confirmed' : 'unsubscribed',
-                'source' => 'Mailchimp for Woocommerce',
+                'source' => array(
+                    'name' => 'Mailchimp for Woocommerce',
+                ),
             ),
         );
 
@@ -1024,7 +1056,7 @@ class MailChimp_WooCommerce_MailChimpApi {
             // Try to get SMS settings for the audience
             $result = $this->get( "lists/{$list_id}/sms-program" );
 
-            if ( isset( $result['sms_enabled'] ) && $result['sms_enabled'] ) {
+            if (!empty($result['sms_program'][0]['can_send'])) {
                 return array(
                     'enabled' => true,
                     'sending_countries' => isset( $result['sending_countries'] ) ? $result['sending_countries'] : array(),
@@ -1047,10 +1079,10 @@ class MailChimp_WooCommerce_MailChimpApi {
      */
     public function getCachedSmsApplicationStatus( $list_id ) {
         $transient_key = "mailchimp_sms_status_{$list_id}";
-        $cached = mailchimp_get_transient( $transient_key );
+        $cached = mailchimp_get_transient( $transient_key, false );
 
         if ( $cached !== false ) {
-            return $cached;
+            return $cached['value'];
         }
 
         try {
@@ -1062,7 +1094,6 @@ class MailChimp_WooCommerce_MailChimpApi {
             return false;
         }
     }
-
     /**
      * Check if a country is in the merchant's SMS sending countries
      *
@@ -2618,6 +2649,9 @@ class MailChimp_WooCommerce_MailChimpApi {
 			return $GDPRfields;
 		}
 
+        $filteredMinutes = (int) apply_filters('mailchimp_checkout_overwrite_gdpr_cache_minutes', $minutes);
+        $minutes = $filteredMinutes <= 0 ? $minutes : $filteredMinutes;
+
 		try {
 			$GDPRfields = $this->getGDPRFields( $list_id );
 			set_transient( $transient, $GDPRfields, 60 * $minutes );
@@ -2840,7 +2874,8 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 */
 	private function allowedToSubmitSpam() {
 		// check to see if we've already set the transient.
-		$status = mailchimp_get_transient( 'tower' );
+		// the raw transient is a ['value' => ...] wrapper, so unwrap it before comparing.
+		$status = mailchimp_get_transient_value( 'tower' );
 
 		// if we've got it - just return it now.
 		if ( ! empty( $status ) ) {
@@ -2850,10 +2885,10 @@ class MailChimp_WooCommerce_MailChimpApi {
 		// call the API to see if we need to block traffic or not
 		// this only impacts reporting spam metrics, does not impact local site blocking
 		$response = wp_remote_get( 'https://tower.vextras.com/api/traffic' );
-		$body     = json_decode( $response['body'] );
-		$status   = $body ? $body->status : 'red';
+		$body     = is_wp_error( $response ) ? null : json_decode( wp_remote_retrieve_body( $response ) );
+		$status   = $body && ! empty( $body->status ) ? $body->status : 'red';
 
-		// set this for 5 minutes.
+		// set this for 2 minutes - a failed check is cached as red too, so Tower isn't hit on every report.
 		mailchimp_set_transient( 'tower', $status, 120 );
 
 		return $status === 'green';
@@ -3136,8 +3171,12 @@ class MailChimp_WooCommerce_MailChimpApi {
             $headers
         );
 
-        if ($env->initial_sync) {
+        if ($this->is_syncing) {
             $headers[] = 'X-Data-Mode: historical';
+        }
+
+        if (static::$job_notified_at) {
+            $headers[] = 'X-Object-Notified-At: ' . static::$job_notified_at;
         }
 
         if ($this->auto_doi) {

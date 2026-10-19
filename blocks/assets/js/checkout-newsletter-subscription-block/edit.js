@@ -40,7 +40,11 @@ export const Edit = ( { attributes, setAttributes } ) => {
 					disabled={ true }
 					style={{marginTop: 0}}
 				>
-					<span>{ text }</span>
+					<RichText
+						value={ text }
+						onChange={ ( value ) => setAttributes( { text: value } ) }
+						placeholder={ __( 'Enter opt-in text…', 'mailchimp-for-woocommerce' ) }
+					/>
 				</CheckboxControl>
 			</div>
 			{

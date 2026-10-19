@@ -336,7 +336,10 @@ a.button.create-account {
 	color: #8C8C8C;
 	position: absolute;
 }
-
+#mailchimp-oauth-connect .sync-loader {
+	margin-inline-start: 10px;
+	mix-blend-mode: multiply;
+}
 #mailchimp-oauth-connected {
 	color: #7FAD45;
 }

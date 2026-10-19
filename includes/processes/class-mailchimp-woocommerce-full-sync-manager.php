@@ -100,6 +100,9 @@ if ( ! class_exists( 'MailChimp_WooCommerce_Process_Full_Sync_Manager' ) ) {
 			$sync_started_at = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.started_at');
 			$sync_completed_at = \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-sync.completed_at');
 
+            // delete the initial sync flag
+            \Mailchimp_Woocommerce_DB_Helpers::delete_option("mailchimp-woocommerce-sync.initial_sync");
+
 			$sync_total_time = $sync_completed_at - $sync_started_at;
 			$time = gmdate("H:i:s",$sync_total_time);
 

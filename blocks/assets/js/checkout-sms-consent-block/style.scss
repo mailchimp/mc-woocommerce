@@ -95,11 +95,18 @@
 /* Styling native country `<select/>`. */
 
 .PhoneInputCountry {
-	position: relative;
+	position: absolute;
+	left: 15px;
+	top: 50%;
+	transform: translateY(-50%);
 	align-self: stretch;
 	display: flex;
 	align-items: center;
 	margin-right: var(--PhoneInputCountrySelect-marginRight);
+}
+
+.PhoneInput #mailchimp-sms-phone {
+	padding-left: 68px;
 }
 
 .PhoneInputCountrySelect {

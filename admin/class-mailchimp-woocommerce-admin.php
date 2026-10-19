@@ -132,13 +132,13 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	 * @since    1.0.0
 	 */
 	public function enqueue_styles( $hook ) {
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin.css', array(), $this->version . '.21' );
+		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin.css', array(), $this->version );
 
 		if ( strpos( $hook, 'page_mailchimp-woocommerce' ) !== false || strpos( $hook, 'create-mailchimp-account' ) !== false) {
 			if ( get_bloginfo( 'version' ) < '5.3' ) {
 				wp_enqueue_style( $this->plugin_name . '-settings', plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin-settings-5.2.css', array(), $this->version );
 			}
-			wp_enqueue_style( $this->plugin_name . '-settings', plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin-settings.css', array(), $this->version . '.01' );
+			wp_enqueue_style( $this->plugin_name . '-settings', plugin_dir_url( __FILE__ ) . 'css/mailchimp-woocommerce-admin-settings.css', array(), $this->version );
 			// Update v2
 			wp_enqueue_style( $this->plugin_name . '-settings-v2', plugin_dir_url( __FILE__ ) . 'v2/assets/css/styles.css', array(), $this->version);
 			// End update v2
@@ -201,6 +201,30 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			wp_enqueue_script( $this->plugin_name . 'create-account');
 			wp_enqueue_script( $this->plugin_name . '-v2');
 			wp_enqueue_script( 'swal', '//cdn.jsdelivr.net/npm/sweetalert2@8', '', $this->version );
+
+			// local loader only - the Zendesk script itself is injected after the merchant clicks the support button.
+			$support_chat_script_url = mailchimp_support_chat_script_url();
+			if ( $support_chat_script_url ) {
+				wp_enqueue_script( $this->plugin_name . '-support-chat', plugin_dir_url( __FILE__ ) . 'v2/assets/js/support-chat.js', array(), $this->version.'-chat', true );
+				wp_localize_script(
+					$this->plugin_name . '-support-chat',
+					'mailchimpSupportChat',
+					array(
+						'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
+						'nonce'      => wp_create_nonce( 'mailchimp_woocommerce_support_chat' ),
+						'scriptUrl'  => $support_chat_script_url,
+						// lets a chat opened on an earlier page come back without admin-ajax, and
+						// keeps the identity server side instead of in the browser's localStorage
+						'userId'     => get_current_user_id(),
+						'identity'   => $this->get_support_chat_identity(),
+						'l10n'       => array(
+							'loading'    => __( 'Connecting to support...', 'mailchimp-for-woocommerce' ),
+							'failed'     => __( 'Support chat could not load. Please disable any ad or script blockers and try again.', 'mailchimp-for-woocommerce' ),
+							'chat_label' => __( 'Mailchimp app support', 'mailchimp-for-woocommerce' ),
+						),
+					)
+				);
+			}
 		}
 	}
 
@@ -573,6 +597,31 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             // we have some stores that are in a perpetual state of syncing - causing issues with support.
             // trying to adjust things on plugin update
 			//$this->fix_is_syncing_problem();
+
+			// Stores that completed a sync on older versions can still carry a
+			// stale sync.initial_sync flag, which makes every API call send
+			// X-Data-Mode: historical — live orders get treated as historical
+			// data. Only safe to clear when no sync is running; an in-flight
+			// initial sync legitimately needs the flag.
+			if ( ! (bool) mailchimp_get_data( 'sync.syncing' ) ) {
+				\Mailchimp_Woocommerce_DB_Helpers::delete_option( 'mailchimp-woocommerce-sync.initial_sync' );
+				// rebuild the per-request env snapshot so the rest of this
+				// request stops sending the historical header immediately.
+				mailchimp_environment_variables( true );
+			}
+		}
+
+		// Carts-table one-time migration: add the ownership token column. Rows saved before this
+		// have no token, so only a logged-in owner can change them until they're re-saved.
+		// Same option flag + hourly backoff pattern as the index update below.
+		if ( ! \Mailchimp_Woocommerce_DB_Helpers::get_option( $this->plugin_name . '_cart_table_token_update' )
+			&& ! get_transient( 'mailchimp_woocommerce_cart_token_check_backoff' ) ) {
+			set_transient( 'mailchimp_woocommerce_cart_token_check_backoff', 1, HOUR_IN_SECONDS );
+
+			$column_exists = $wpdb->get_var( "SHOW COLUMNS FROM {$wpdb->prefix}mailchimp_carts LIKE 'token'" );
+			if ( $column_exists || $wpdb->query( "ALTER TABLE {$wpdb->prefix}mailchimp_carts ADD COLUMN token VARCHAR(64) DEFAULT NULL" ) !== false ) {
+				\Mailchimp_Woocommerce_DB_Helpers::update_option( $this->plugin_name . '_cart_table_token_update', true );
+			}
 		}
 
 		// Carts-table one-time cleanup: add PRIMARY KEY on email column and
@@ -1084,6 +1133,12 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
                 $mailchimp_login_id = array_key_exists('login_id', $profile) ? $profile['login_id'] : false;
                 $this->setData('account_name', $name);
                 $this->setData('mailchimp_login_id', $mailchimp_login_id);
+                // an account switch must not keep the previous account's plan
+                if ( ! empty( $profile['pricing_plan_type'] ) ) {
+                    $this->setData( 'mailchimp_plan', $profile['pricing_plan_type'] );
+                } else {
+                    \Mailchimp_Woocommerce_DB_Helpers::delete_option( "{$this->plugin_name}-mailchimp_plan" );
+                }
 			}
 			$data['api_ping_error'] = false;
 		} catch ( Exception $e ) {
@@ -1331,6 +1386,82 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				)
 			);
 		}
+	}
+
+	/**
+	 * Identity for the Zendesk support chat. Only called after the merchant
+	 * clicks the support button - nothing is sent to Zendesk before that.
+	 */
+	public function mailchimp_woocommerce_ajax_support_chat_identity() {
+		check_ajax_referer( 'mailchimp_woocommerce_support_chat', 'nonce' );
+		$this->adminOnlyMiddleware();
+
+		if ( ! mailchimp_support_chat_enabled() ) {
+			wp_send_json_error( array( 'message' => 'Support chat is currently unavailable.' ) );
+		}
+
+		$user      = wp_get_current_user();
+		$connected = mailchimp_get_api_key() && $this->validateApiKey();
+		$plan      = $connected ? $this->getPlanName() : null;
+		$user_id   = $connected ? ( $this->getUserID() ?: null ) : null;
+
+		$store_name = $this->getOption( 'store_name' );
+
+		$identity = array(
+			'woo'       => array(
+				'name'        => $store_name ? $store_name : get_option( 'blogname' ),
+				'domain'      => wp_parse_url( home_url(), PHP_URL_HOST ),
+				'owner'       => $user->display_name,
+				'email'       => $user->user_email,
+				'sync_status' => $this->getSupportSyncStatus(),
+			),
+			'mailchimp' => array(
+				'store_id' => mailchimp_get_store_id(),
+				'user_id'  => $user_id,
+				'plan'     => $plan,
+			),
+		);
+
+		// the next plugin page rebuilds the chat from this instead of asking again
+		mailchimp_set_transient( $this->support_chat_identity_key(), $identity, 12 * HOUR_IN_SECONDS );
+
+		wp_send_json_success( $identity );
+	}
+
+	/**
+	 * The identity the current user's chat booted with, while it's still being restored
+	 * across page loads. Per WordPress user, so a shared browser never hands one admin's
+	 * details to the next.
+	 *
+	 * @return array|null
+	 */
+	protected function get_support_chat_identity() {
+		$identity = mailchimp_get_transient_value( $this->support_chat_identity_key() );
+
+		return is_array( $identity ) ? $identity : null;
+	}
+
+	/**
+	 * @return string
+	 */
+	protected function support_chat_identity_key() {
+		return 'support_chat_identity_' . get_current_user_id();
+	}
+
+	/**
+	 * @return string
+	 */
+	protected function getSupportSyncStatus() {
+		if ( ! mailchimp_is_configured() ) {
+			return 'setup_required';
+		}
+		if ( ! mailchimp_has_started_syncing() ) {
+			return 'not_synced';
+		}
+		if ( mailchimp_get_data( 'sync.syncing' ) || ! mailchimp_get_data( 'sync.completed_at' ) ) {
+			return 'syncing';
+		}
+		return 'synced';
 	}
 
 	/**
@@ -1984,6 +2115,38 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         }
 
         return false;
+    }
+
+    /**
+     * Mailchimp pricing plan, fetched once and stored. Refreshed whenever the
+     * account is (re)connected; cleared on disconnect.
+     *
+     * @return string|null
+     */
+    public function getPlanName()
+    {
+        if ( ( $plan = $this->getData( 'mailchimp_plan', false ) ) ) {
+            return $plan;
+        }
+
+        if ( ! $this->validateApiKey() ) {
+            return null;
+        }
+
+        try {
+            $profile = $this->api()->getProfile();
+        } catch ( Throwable $e ) {
+            mailchimp_debug( 'admin', 'unable to load Mailchimp plan', array( 'error' => $e->getMessage() ) );
+            return null;
+        }
+
+        if ( empty( $profile['pricing_plan_type'] ) ) {
+            return null;
+        }
+
+        $this->setData( 'mailchimp_plan', $profile['pricing_plan_type'] );
+
+        return $profile['pricing_plan_type'];
     }
 
 	public function inject_sync_ajax_call() {

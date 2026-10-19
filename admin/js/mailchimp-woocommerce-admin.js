@@ -309,6 +309,8 @@
 			$('#mailchimp-oauth-api-key-valid').hide();
 			$('#mailchimp-oauth-error').hide();
 			$('#mailchimp-oauth-waiting').show();
+
+			$(this).find('.sync-loader').show();
 			
 			$.post(ajaxurl, startData, function(startResponse) {
 				if (startResponse.success) {
@@ -376,6 +378,7 @@
 						// hide/show messages
 						$('#mailchimp-oauth-error').hide();
 						$('#mailchimp-oauth-waiting').hide();
+						$('#mailchimp-oauth-connect .sync-loader').hide();
 						$('#mailchimp-oauth-connecting').show();
 
 						var checkData = {

@@ -83,6 +83,37 @@ function getCartId() {
 }
 
 /**
+ * Look up the parent product id for a variation id.
+ *
+ * The map is seeded by PHP from the current cart (window.mcPixel.parentMap) and
+ * extended at runtime whenever we see a Store API product response, which does
+ * carry a `parent` field. Cart item responses do not, hence the lookup.
+ *
+ * @param {string|number} id Variation (or product) id
+ * @return {string} Parent product id, or '' when there is no known parent
+ */
+function getParentId( id ) {
+	const map = ( window.mcPixel && window.mcPixel.parentMap ) || {};
+	return map[ String( id ) ] || '';
+}
+
+/**
+ * Record a variation => parent mapping so later cart events can resolve it.
+ *
+ * @param {string|number} id       Variation id
+ * @param {string|number} parentId Parent product id
+ */
+function rememberParentId( id, parentId ) {
+	if ( ! window.mcPixel || ! parentId || String( parentId ) === String( id ) ) {
+		return;
+	}
+	if ( ! window.mcPixel.parentMap ) {
+		window.mcPixel.parentMap = {};
+	}
+	window.mcPixel.parentMap[ String( id ) ] = String( parentId );
+}
+
+/**
  * Track an event via the Pixel SDK.
  *
  * @param {string} eventName Event name
@@ -118,9 +149,17 @@ function formatBlockProduct( product ) {
 	const divisor = Math.pow( 10, currencyMinorUnit );
 	const price = prices.price ? parseInt( prices.price, 10 ) / divisor : 0;
 
+	// ProductSchema exposes `parent` (the parent product id) for variations.
+	// Cache it so cart items — whose schema has no parent — can resolve later.
+	const id = String( product.id );
+	const identity = ( product.extensions || {} )[ 'mailchimp-pixel' ] || {};
+	const parent = identity.product_id || product.parent;
+	const parentId = parent ? String( parent ) : '';
+	rememberParentId( id, parentId );
+
 	return {
-		id: String( product.id ),
-		productId: String( product.id ),
+		id: id,
+		productId: parentId || id,
 		title: product.name || '',
 		price: price,
 		currency: ( prices.currency_code || '' ).toUpperCase(),
@@ -150,9 +189,18 @@ function formatCartItem( cartItem ) {
 	const divisor = Math.pow( 10, currencyMinorUnit );
 	const price = prices.price ? parseInt( prices.price, 10 ) / divisor : 0;
 
+	// The Store API extension stays current when items are added after page load.
+	// Retain the render-time map for responses without extension data.
+	const id = String( cartItem.id );
+	const identity = ( cartItem.extensions || {} )[ 'mailchimp-pixel' ] || {};
+	const productId = identity.product_id
+		? String( identity.product_id )
+		: getParentId( id ) || id;
+	rememberParentId( id, productId );
+
 	return {
-		id: String( cartItem.id ),
-		productId: String( cartItem.id ),
+		id: id,
+		productId,
 		title: cartItem.name || '',
 		price: price,
 		currency: ( prices.currency_code || '' ).toUpperCase(),

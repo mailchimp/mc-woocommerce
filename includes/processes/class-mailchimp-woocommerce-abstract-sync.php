@@ -209,7 +209,9 @@ abstract class MailChimp_WooCommerce_Abstract_Sync extends Mailchimp_Woocommerce
         foreach ($page->items as $resource) {
             switch ($this->getResourceType()) {
                case 'customers':
-                   mailchimp_handle_or_queue(new MailChimp_Woocommerce_Single_Customer($resource));
+                   $customer = new MailChimp_Woocommerce_Single_Customer($resource);
+                   $customer->set_full_sync(true);
+                   mailchimp_handle_or_queue($customer);
                    break;
                case 'coupons':
                     mailchimp_handle_or_queue(new MailChimp_WooCommerce_SingleCoupon($resource));

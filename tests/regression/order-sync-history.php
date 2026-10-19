@@ -26,6 +26,9 @@ class WC_Order {
     public function add_meta_data($key, $value, $unique = false) { $this->metadata[] = array('id' => 0, 'key' => $key, 'value' => $value); }
     public function delete_meta_data_by_mid($id) { $this->deleted[] = $id; }
     public function save_meta_data() {
+        check(MailChimp_WooCommerce_Order_Sync_History::is_recording(42), 'Guard is active during persistence');
+        check(!MailChimp_WooCommerce_Order_Sync_History::is_recording(43), 'Guard is specific to the recorded order');
+        if (isset($GLOBALS['on_history_save'])) { ($GLOBALS['on_history_save'])(); }
         if ($GLOBALS['cfg']['storage_error']) { throw new RuntimeException('Fixture storage error'); }
         $GLOBALS['metadata'] = array_values(array_filter($GLOBALS['metadata'], function($row) { return !in_array($row['id'], $this->deleted, true); }));
         foreach ($this->metadata as $row) { if (!$row['id']) { $row['id'] = ++$GLOBALS['next_meta_id']; $GLOBALS['metadata'][] = $row; } }
@@ -155,6 +158,15 @@ check(events()[0]['outcome'] === 'synced', 'A follow-up failure must not erase a
 reset_history(array('storage_error' => true));
 check((new MailChimp_WooCommerce_Single_Order(42))->process() === array('id' => 42), 'Storage failure must not break sync');
 check(!events(), 'Failed persistence must not invent recorded success');
+check(!MailChimp_WooCommerce_Order_Sync_History::is_recording(42), 'Persistence exception clears the guard');
+reset_history();
+$GLOBALS['on_history_save'] = function() {
+    unset($GLOBALS['on_history_save']);
+    check(MailChimp_WooCommerce_Order_Sync_History::record(42, 'skipped', 'draft'), 'Nested history write succeeds');
+    check(MailChimp_WooCommerce_Order_Sync_History::is_recording(42), 'Nested write preserves the outer guard');
+};
+check(MailChimp_WooCommerce_Order_Sync_History::record(42, 'skipped', 'draft'), 'Outer history write succeeds');
+check(!MailChimp_WooCommerce_Order_Sync_History::is_recording(42), 'Outermost history write clears the guard');
 reset_history();
 for ($i = 0; $i < 25; ++$i) { check(MailChimp_WooCommerce_Order_Sync_History::record(42, 'skipped', 'draft'), 'Record persisted'); }
 check(count(events()) === 20, 'Retain only 20 recent records');

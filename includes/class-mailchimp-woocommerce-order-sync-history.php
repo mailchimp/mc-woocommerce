@@ -5,6 +5,13 @@ class MailChimp_WooCommerce_Order_Sync_History {
     const META_KEY = '_mailchimp_woocommerce_sync_history';
     const MAX_ENTRIES = 20;
 
+    /** @var array<int, bool> Orders whose diagnostic metadata is being saved. */
+    private static $recording_orders = array();
+
+    public static function is_recording($order_id) {
+        return isset(self::$recording_orders[(int) $order_id]);
+    }
+
     public static function outcomes() {
         return array(
             'synced' => __('Synced', 'mailchimp-for-woocommerce'),
@@ -70,7 +77,19 @@ class MailChimp_WooCommerce_Order_Sync_History {
                 'mode' => $full_sync ? 'initial' : 'live',
                 'order_status' => substr(sanitize_key(is_string($order_status) ? $order_status : $order->get_status()), 0, 40),
             ), false);
-            $order->save_meta_data();
+            // HPOS can turn a metadata write into a full order save and fire
+            // woocommerce_update_order. Do not queue another sync for our own
+            // diagnostic write. Keep WooCommerce's storage/cache/backfill hooks.
+            $id = (int) $order->get_id();
+            $was_recording = self::is_recording($id);
+            self::$recording_orders[$id] = true;
+            try {
+                $order->save_meta_data();
+            } finally {
+                if (!$was_recording) {
+                    unset(self::$recording_orders[$id]);
+                }
+            }
             return true;
         } catch (Throwable $e) {
             // Diagnostics must never fail a sync or expose a raw API exception.

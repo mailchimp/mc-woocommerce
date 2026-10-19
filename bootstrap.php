@@ -1987,9 +1987,16 @@ function mailchimp_on_all_plugins_loaded() {
     run_mailchimp_woocommerce();
 }
 
-function mailchimp_get_allowed_capability() {
+/**
+ * Resolve the plugin capability for the current user or an API-key owner.
+ *
+ * @param int|null $user_id Explicit user ID, or null for the current user.
+ * @return string
+ */
+function mailchimp_get_allowed_capability($user_id = null) {
     $capability = 'manage_options';
-    if (current_user_can('manage_woocommerce') && mailchimp_get_option('mailchimp_permission_cap') == 'manage_woocommerce') {
+    $can_manage_woocommerce = $user_id === null ? current_user_can('manage_woocommerce') : user_can($user_id, 'manage_woocommerce');
+    if ($can_manage_woocommerce && mailchimp_get_option('mailchimp_permission_cap') == 'manage_woocommerce') {
         return 'manage_woocommerce';
     }
     return apply_filters('mailchimp_allowed_capability', $capability);

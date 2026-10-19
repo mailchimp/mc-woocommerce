@@ -4,6 +4,18 @@
 class MailChimp_WooCommerce_Order_Sync_History {
     const META_KEY = '_mailchimp_woocommerce_sync_history';
     const MAX_ENTRIES = 20;
+    /** HPOS saves the whole order after a meta change unless this filter says no. */
+    const SKIP_SAVE_FILTER = 'woocommerce_orders_table_datastore_should_save_after_meta_change';
+    private static $writing = false;
+
+    /**
+     * True while a history row is being persisted. The order update hook must
+     * ignore saves made during this window, or recording a sync would queue
+     * another sync, which records again, forever.
+     */
+    public static function is_writing() {
+        return self::$writing;
+    }
 
     public static function outcomes() {
         return array(
@@ -70,12 +82,32 @@ class MailChimp_WooCommerce_Order_Sync_History {
                 'mode' => $full_sync ? 'initial' : 'live',
                 'order_status' => substr(sanitize_key(is_string($order_status) ? $order_status : $order->get_status()), 0, 40),
             ), false);
-            $order->save_meta_data();
+            self::save_silently($order);
             return true;
         } catch (Throwable $e) {
             // Diagnostics must never fail a sync or expose a raw API exception.
             error_log('Mailchimp order sync history could not be stored.');
             return false;
+        }
+    }
+
+    /**
+     * Persist meta without WooCommerce treating it as an order update.
+     *
+     * Under HPOS, save_meta_data() calls $order->save() to bump the modified
+     * date, which fires woocommerce_update_order and re-enters the sync job.
+     * WooCommerce core disables that with this same filter around its own
+     * internal meta writes. The static flag covers WooCommerce versions that
+     * predate the filter and any other path that reaches the update hook.
+     */
+    private static function save_silently($order) {
+        self::$writing = true;
+        add_filter(self::SKIP_SAVE_FILTER, '__return_false', PHP_INT_MAX);
+        try {
+            $order->save_meta_data();
+        } finally {
+            remove_filter(self::SKIP_SAVE_FILTER, '__return_false', PHP_INT_MAX);
+            self::$writing = false;
         }
     }
 

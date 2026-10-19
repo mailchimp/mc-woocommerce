@@ -408,23 +408,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				}
 			}
 
-			// Cache GDPR fields for 10 minutes to avoid hammering the API.
-			// Uses native get_transient/set_transient (object-cache-aware —
-			// single Redis op with native TTL when available, no wp_options
-			// writes). Single shared transient with updateGDPRFields() so
-			// only one write path maintains the cache.
-			if ( mailchimp_is_configured() && ( $list_id = mailchimp_get_list_id() ) ) {
-				$transient  = "mailchimp-woocommerce-gdpr-fields.{$list_id}";
-				$GDPRfields = get_transient( $transient );
-				if ( ! is_array( $GDPRfields ) ) {
-					try {
-						$GDPRfields = mailchimp_get_api()->getGDPRFields( $list_id );
-						set_transient( $transient, is_array( $GDPRfields ) ? $GDPRfields : array(), 600 );
-					} catch ( Exception $e ) {
-						set_transient( $transient, array(), 60 );
-					}
-				}
-			}
+            if (mailchimp_is_configured()) {
+                $this->safelyUpdateGDPRFields();
+            }
 
 			if ( isset( $_GET['log_removed'] ) && $_GET['log_removed'] == '1' ) {
 				add_settings_error( 'mailchimp_log_settings', '', __( 'Log file deleted.', 'mailchimp-for-woocommerce' ), 'info' );
@@ -1856,6 +1842,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				$data['mailchimp_list'] = $this->swapped_list_id;
 			}
 
+            $this->updateGDPRFields($data['mailchimp_list']);
+
 			// start the sync automatically if the sync is false
 			if ( $store_created && ( (bool) $this->getData( 'sync.started_at', false ) === false ) ) {
 				// tell the next page view to start the sync with a transient since the data isn't available yet
@@ -2339,32 +2327,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
     protected function updateGDPRFields($list_id)
     {
-        if ( empty( $list_id ) ) {
-            return;
-        }
-
-        $transient = "mailchimp-woocommerce-gdpr-fields.{$list_id}";
-
-        // Single source of truth — coordinate with setup() via the SAME
-        // transient and TTL. If it's still warm, skip the API call and the
-        // write entirely. The old `.last_saved` marker + separate "no TTL"
-        // write path used to trigger a duplicate API call + 4+ transient
-        // writes every few minutes; a single TTL'd transient replaces all
-        // of that.
-        if ( get_transient( $transient ) !== false ) {
-            return;
-        }
-
-        try {
-            $GDPRfields = mailchimp_get_api()->getGDPRFields( $list_id );
-            set_transient( $transient, is_array( $GDPRfields ) ? $GDPRfields : array(), 600 );
-            mailchimp_log( 'admin', 'updated GDPR fields', array( 'fields' => $GDPRfields ) );
-        } catch ( Exception $e ) {
-            // Negative-cache the failure for 60s so we don't hammer the API
-            // during an outage. Next refresh cycle will retry.
-            set_transient( $transient, array(), 60 );
-            mailchimp_error( 'admin', 'updating GDPR fields failed ' . $e->getMessage() );
-        }
+        // Shared cache reader queues a refresh without blocking the admin request.
+        mailchimp_get_api()->getCachedGDPRFields($list_id);
     }
 
 	/**

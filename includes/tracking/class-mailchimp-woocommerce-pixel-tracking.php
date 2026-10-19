@@ -950,7 +950,7 @@ class MailChimp_WooCommerce_Pixel_Tracking
     /**
      * Output inline script data to footer
      *
-     * Always outputs window.mcPixel with cartId so block JS can access it.
+     * When the snippet is enabled, outputs window.mcPixel with cartId for block JS.
      * Only outputs data if there are events to send.
      */
     public function inline_script_data()
@@ -976,7 +976,7 @@ class MailChimp_WooCommerce_Pixel_Tracking
      *
      * The tracking JS waits for the Pixel SDK that the connected site code
      * snippet loads, so it is only useful when that snippet is present:
-     * code snippet setting active and a script fragment on file. Mirrors
+     * code snippet setting active, footer filter allows it, and a fragment on file. Mirrors
      * the condition MailChimp_WooCommerce_Public::add_inline_footer_script()
      * uses to print the snippet itself.
      *
@@ -986,7 +986,7 @@ class MailChimp_WooCommerce_Pixel_Tracking
     {
         $code_snippet_activated = (bool) \Mailchimp_Woocommerce_DB_Helpers::get_option('mailchimp-woocommerce-code-snippet', true);
 
-        if (! $code_snippet_activated) {
+        if (! $code_snippet_activated || ! apply_filters('mailchimp_add_inline_footer_script', true)) {
             return false;
         }
 

@@ -3192,3 +3192,37 @@ function mailchimp_account_events() {
         ),
     );
 }
+
+/**
+ * Match a requested log file name against this plugin's own log files that
+ * actually exist in the WooCommerce log directory.
+ *
+ * Mirrors the allow-list the log viewer uses (see
+ * mailchimp_woocommerce_ajax_load_log_file): only files that live in WC_LOG_DIR,
+ * carry the plugin prefix and end in .log are eligible, keyed by sanitize_title
+ * so a stored handle maps back to a real file. Returns the real file name, or
+ * null when nothing legitimate matches. Pass scandir( WC_LOG_DIR ) as $files so
+ * this stays a pure, testable mapping and a crafted name can never resolve to a
+ * path outside the log directory.
+ *
+ * @param string|null $requested_log_file
+ * @param array       $files
+ * @return string|null
+ */
+function mailchimp_woocommerce_match_log_file($requested_log_file, $files) {
+    if ($requested_log_file === null || $requested_log_file === '') {
+        return null;
+    }
+    $logs = array();
+    foreach ((array) $files as $value) {
+        if (in_array($value, array('.', '..'), true)) {
+            continue;
+        }
+        if (mailchimp_string_contains($value, 'mailchimp_woocommerce') && substr($value, -4) === '.log') {
+            $logs[sanitize_title($value)] = $value;
+        }
+    }
+    $key = sanitize_title($requested_log_file);
+    return isset($logs[$key]) ? $logs[$key] : null;
+}
+

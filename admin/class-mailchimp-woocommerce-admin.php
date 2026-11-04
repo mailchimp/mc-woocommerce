@@ -2708,9 +2708,20 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			wp_send_json_error( __( 'No log file provided', 'mailchimp-for-woocommerce' ) );
 			return;
 		}
-		$requested_log_file = $_POST['log_file'];
+		// Only this plugin's own log files that actually exist in the WooCommerce
+		// log directory may be removed. Resolving the request against a directory
+		// listing stops a crafted name from reaching a file outside that directory.
+		$requested_log_file = sanitize_text_field( wp_unslash( $_POST['log_file'] ) );
+		$files              = defined( 'WC_LOG_DIR' ) ? @scandir( WC_LOG_DIR ) : array();
+		$log_file           = mailchimp_woocommerce_match_log_file( $requested_log_file, $files );
+		if ( null === $log_file ) {
+			wp_send_json_error( __( 'Invalid log file', 'mailchimp-for-woocommerce' ) );
+			return;
+		}
+		// Hand WooCommerce the matched file name, not the request: its handler keys
+		// the log directory by sanitize_title() too, so this resolves to that file.
 		$log_handler        = new WC_Log_Handler_File();
-		$removed            = $log_handler->remove( str_replace( '-log', '.log', $requested_log_file ) );
+		$removed            = $log_handler->remove( $log_file );
 
         Mailchimp_Woocommerce_Event::track('navigation_logs:delete', new DateTime());
 

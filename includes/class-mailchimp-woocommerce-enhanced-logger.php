@@ -336,9 +336,10 @@ class MailChimp_WooCommerce_Enhanced_Logger {
         );
         
         foreach ($services as $service) {
+            // No sslverify override: WordPress verifies the certificate against its
+            // bundled CA file by default, the same as every Mailchimp API call.
             $response = wp_remote_get($service, array(
-                'timeout' => 2,
-                'sslverify' => false
+                'timeout' => 2
             ));
             
             if (!is_wp_error($response)) {

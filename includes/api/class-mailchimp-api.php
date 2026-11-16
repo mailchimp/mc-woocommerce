@@ -31,26 +31,27 @@ class MailChimp_WooCommerce_MailChimpApi {
 		static::$job_notified_at = is_int( $timestamp ) && $timestamp > 0 ? $timestamp : null;
 	}
 
-	/** Restore the previous request context on return, exception, or nested call. */
-	public static function withJobNotifiedAt( $timestamp, \Closure $callback ) {
-		$previous = static::$job_notified_at;
-		$previous_live = static::$live_notified_at;
-		static::setJobNotifiedAt( $timestamp );
-		static::$live_notified_at = null;
-		try {
-			return $callback();
-		} finally {
-			static::$job_notified_at = $previous;
-			static::$live_notified_at = $previous_live;
-		}
-	}
-
-	/** Run an immediate live mutation without inheriting the enclosing job's metadata. */
-	public function executeCallbackWithoutJobMeta(\Closure $callback) {
+	/**
+	 * Run a callback with this API instance and restore both timestamp contexts in finally.
+	 * Omit the second argument for an immediate live mutation (event time). Supplying
+	 * a positive integer uses that queued job's first eligibility time; explicitly
+	 * passing null or invalid metadata suppresses the timestamp, never using time().
+	 * Historical requests and GET requests remain suppressed by the header builder.
+	 *
+	 * @param \Closure $callback Receives this API instance.
+	 * @param int|null $use_job_meta_timestamp Original queued job eligibility time.
+	 * @return mixed Callback result.
+	 */
+	public function executeCallback(\Closure $callback, $use_job_meta_timestamp = null) {
 		$previous_job = static::$job_notified_at;
 		$previous_live = static::$live_notified_at;
-		static::$job_notified_at = null;
-		static::$live_notified_at = time();
+		if (func_num_args() > 1) {
+			static::setJobNotifiedAt($use_job_meta_timestamp);
+			static::$live_notified_at = null;
+		} else {
+			static::$job_notified_at = null;
+			static::$live_notified_at = time();
+		}
 		try {
 			return $callback($this);
 		} finally {

@@ -26,7 +26,18 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 * @param int|null $timestamp
 	 */
 	public static function setJobNotifiedAt( $timestamp ) {
-		static::$job_notified_at = ! empty( $timestamp ) ? (int) $timestamp : null;
+		static::$job_notified_at = is_int( $timestamp ) && $timestamp > 0 ? $timestamp : null;
+	}
+
+	/** Restore the previous request context on return, exception, or nested call. */
+	public static function withJobNotifiedAt( $timestamp, $callback, $args = array() ) {
+		$previous = static::$job_notified_at;
+		static::setJobNotifiedAt( $timestamp );
+		try {
+			return call_user_func_array( $callback, $args );
+		} finally {
+			static::$job_notified_at = $previous;
+		}
 	}
 
 	/**
@@ -3160,7 +3171,7 @@ class MailChimp_WooCommerce_MailChimpApi {
             $headers[] = 'X-Data-Mode: historical';
         }
 
-        if (static::$job_notified_at) {
+        if (!$this->is_syncing && static::$job_notified_at !== null && in_array(strtoupper($method), array('POST', 'PUT', 'PATCH', 'DELETE'), true)) {
             $headers[] = 'X-Object-Notified-At: ' . static::$job_notified_at;
         }
 

@@ -11,6 +11,10 @@ class MailChimp_WooCommerce_Cart_Update {
     public function __construct(...$args) { $this->args = $args; }
     public function setCartToken($token) { $this->token = $token; return $this; }
 }
+$bootstrap = file_get_contents(dirname(__DIR__, 2) . '/bootstrap.php');
+$start = strpos($bootstrap, 'function mailchimp_call_live_hook(');
+eval(substr($bootstrap, $start, strpos($bootstrap, '/**', $start) - $start));
+require dirname(__DIR__, 2) . '/includes/api/class-mailchimp-api.php';
 require dirname(__DIR__, 2) . '/includes/class-mailchimp-woocommerce-service.php';
 
 function mailchimp_hash_trim_lower($str) { return md5(trim(strtolower($str))); }

@@ -3,7 +3,7 @@
 if (PHP_SAPI !== 'cli') { exit; } // CLI only - never executable over the web
 // Load only the queue helpers, avoiding WordPress bootstrap side effects.
 $bootstrap = file_get_contents(dirname(__DIR__, 2) . '/bootstrap.php');
-foreach (array('function mailchimp_as_push(', 'function mailchimp_handle_or_queue_live(', 'function mailchimp_call_live_hook(') as $needle) {
+foreach (array('function mailchimp_as_push(', 'function mailchimp_handle_or_queue_live(') as $needle) {
     $start = strpos($bootstrap, $needle);
     $end = strpos($bootstrap, "\n/**", $start);
     eval(substr($bootstrap, $start, $end - $start));
@@ -124,26 +124,83 @@ check(run_job('fail') !== null, 'failing live job must still send the header');
 $GLOBALS['headers'] = (new HeaderApi())->headers();
 check(notified_header() === null, 'header must not leak past the job');
 
-// Immediate live hook calls carry event time for mutations and restore outer context.
+// Immediate live callbacks carry event time for mutations and restore outer context.
 foreach (array('POST', 'PUT', 'PATCH', 'DELETE') as $method) {
     $before = time();
-    $headers = mailchimp_call_live_hook(array(new HeaderApi(), 'headers'), array($method));
+    $headers = (new HeaderApi())->executeCallbackWithoutJobMeta(function (MailChimp_WooCommerce_MailChimpApi $api) use ($method) {
+        return $api->headers($method);
+    });
     $GLOBALS['headers'] = $headers;
     check(notified_header() >= $before && notified_header() <= time(), 'immediate mutation timestamp missing');
     $GLOBALS['headers'] = (new HeaderApi())->headers($method);
     check(notified_header() === null, 'immediate context leaked');
 }
-$GLOBALS['headers'] = mailchimp_call_live_hook(array(new HeaderApi(), 'headers'), array('GET'));
+$GLOBALS['headers'] = (new HeaderApi())->executeCallbackWithoutJobMeta(function (MailChimp_WooCommerce_MailChimpApi $api) {
+    return $api->headers('GET');
+});
 check(notified_header() === null, 'immediate GET must omit timestamp');
+$api = new HeaderApi();
+$job_meta = new ReflectionProperty(MailChimp_WooCommerce_MailChimpApi::class, 'job_notified_at');
+$job_meta->setAccessible(true);
+MailChimp_WooCommerce_MailChimpApi::withJobNotifiedAt(123, function () use ($api, $job_meta) {
+    $result = $api->executeCallbackWithoutJobMeta(function (MailChimp_WooCommerce_MailChimpApi $callback_api) use ($api, $job_meta) {
+        check($callback_api === $api, 'callback must receive the API instance');
+        check($job_meta->getValue() === null, 'inherited job metadata must be cleared inside the callback');
+        $GLOBALS['headers'] = $callback_api->headers('DELETE');
+        check(notified_header() !== 123, 'immediate mutation must not inherit the job timestamp');
+        MailChimp_WooCommerce_MailChimpApi::withJobNotifiedAt(null, function () use ($callback_api) {
+            $GLOBALS['headers'] = $callback_api->headers('POST');
+            check(notified_header() === null, 'nested historical job must suppress immediate timestamp');
+        });
+        $GLOBALS['headers'] = $callback_api->headers('POST');
+        check(notified_header() !== null, 'immediate context must resume after nested historical job');
+        return 'callback result';
+    });
+    check($result === 'callback result', 'callback return value lost');
+    $GLOBALS['headers'] = $api->headers();
+    check(notified_header() === 123, 'callback must restore exact outer job metadata');
+    try {
+        $api->executeCallbackWithoutJobMeta(function (MailChimp_WooCommerce_MailChimpApi $callback_api) use ($api, $job_meta) {
+            check($callback_api === $api && $job_meta->getValue() === null, 'nested callback must clear job metadata');
+            $api->executeCallbackWithoutJobMeta(function (MailChimp_WooCommerce_MailChimpApi $inner) {
+                $GLOBALS['headers'] = $inner->headers('DELETE');
+                check(notified_header() !== null, 'nested immediate callback must carry its own timestamp');
+                throw new RuntimeException('nested failure');
+            });
+        });
+        throw new RuntimeException('exception was swallowed');
+    } catch (RuntimeException $e) {
+        check($e->getMessage() === 'nested failure', 'original exception must propagate');
+    }
+    check($job_meta->getValue() === 123, 'nested failure must restore exact outer job metadata');
+    $GLOBALS['headers'] = $api->headers();
+    check(notified_header() === 123, 'nested failure must restore outer timestamp');
+});
+try {
+    $api->executeCallbackWithoutJobMeta(function (MailChimp_WooCommerce_MailChimpApi $callback_api) {
+        return $callback_api->getHeadersForPostOrPut('{}');
+    });
+    throw new RuntimeException('protected method was accessible');
+} catch (Error $e) {
+    check(strpos($e->getMessage(), 'protected method') !== false, 'external closure must retain its own visibility scope');
+}
 MailChimp_WooCommerce_MailChimpApi::withJobNotifiedAt(123, function () {
     try {
-        mailchimp_call_live_hook(function () { throw new RuntimeException('nested failure'); });
+        (new HeaderApi())->executeCallbackWithoutJobMeta(function () { throw new RuntimeException('nested failure'); });
     } catch (RuntimeException $e) {}
     $GLOBALS['headers'] = (new HeaderApi())->headers();
     check(notified_header() === 123, 'nested failure must restore outer timestamp');
 });
 $GLOBALS['headers'] = (new HeaderApi())->headers();
 check(notified_header() === null, 'outer timestamp leaked after nesting');
+$job_meta->setValue('legacy-invalid');
+$api->executeCallbackWithoutJobMeta(function (MailChimp_WooCommerce_MailChimpApi $callback_api) use ($job_meta) {
+    check($job_meta->getValue() === null, 'invalid inherited metadata must be cleared in callback');
+    $GLOBALS['headers'] = $callback_api->headers('POST');
+    check(notified_header() !== null, 'invalid inherited metadata must not block the immediate mutation');
+});
+check($job_meta->getValue() === 'legacy-invalid', 'callback must restore even invalid prior metadata exactly');
+$job_meta->setValue(null);
 MailChimp_WooCommerce_MailChimpApi::withJobNotifiedAt(456, function () {
     $api = new HeaderApi();
     $api->setIsSyncing(true);

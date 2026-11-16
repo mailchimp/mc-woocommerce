@@ -19,6 +19,8 @@ class MailChimp_WooCommerce_MailChimpApi {
 	// static, not per-instance: several jobs build their own API objects.
 	/** @var null|int */
 	protected static $job_notified_at = null;
+	/** @var null|int Immediate live-hook timestamp, separate from queued-job metadata. */
+	protected static $live_notified_at = null;
 
 	/**
 	 * Set by the job runner for the duration of one job; null clears it.
@@ -32,11 +34,28 @@ class MailChimp_WooCommerce_MailChimpApi {
 	/** Restore the previous request context on return, exception, or nested call. */
 	public static function withJobNotifiedAt( $timestamp, $callback, $args = array() ) {
 		$previous = static::$job_notified_at;
+		$previous_live = static::$live_notified_at;
 		static::setJobNotifiedAt( $timestamp );
+		static::$live_notified_at = null;
 		try {
 			return call_user_func_array( $callback, $args );
 		} finally {
 			static::$job_notified_at = $previous;
+			static::$live_notified_at = $previous_live;
+		}
+	}
+
+	/** Run an immediate live mutation without inheriting the enclosing job's metadata. */
+	public function executeCallbackWithoutJobMeta(\Closure $callback) {
+		$previous_job = static::$job_notified_at;
+		$previous_live = static::$live_notified_at;
+		static::$job_notified_at = null;
+		static::$live_notified_at = time();
+		try {
+			return $callback($this);
+		} finally {
+			static::$job_notified_at = $previous_job;
+			static::$live_notified_at = $previous_live;
 		}
 	}
 
@@ -3171,8 +3190,9 @@ class MailChimp_WooCommerce_MailChimpApi {
             $headers[] = 'X-Data-Mode: historical';
         }
 
-        if (!$this->is_syncing && static::$job_notified_at !== null && in_array(strtoupper($method), array('POST', 'PUT', 'PATCH', 'DELETE'), true)) {
-            $headers[] = 'X-Object-Notified-At: ' . static::$job_notified_at;
+        $notified_at = static::$live_notified_at !== null ? static::$live_notified_at : static::$job_notified_at;
+        if (!$this->is_syncing && $notified_at !== null && in_array(strtoupper($method), array('POST', 'PUT', 'PATCH', 'DELETE'), true)) {
+            $headers[] = 'X-Object-Notified-At: ' . $notified_at;
         }
 
         if ($this->auto_doi) {

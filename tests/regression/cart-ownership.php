@@ -11,9 +11,6 @@ class MailChimp_WooCommerce_Cart_Update {
     public function __construct(...$args) { $this->args = $args; }
     public function setCartToken($token) { $this->token = $token; return $this; }
 }
-$bootstrap = file_get_contents(dirname(__DIR__, 2) . '/bootstrap.php');
-$start = strpos($bootstrap, 'function mailchimp_call_live_hook(');
-eval(substr($bootstrap, $start, strpos($bootstrap, '/**', $start) - $start));
 require dirname(__DIR__, 2) . '/includes/api/class-mailchimp-api.php';
 require dirname(__DIR__, 2) . '/includes/class-mailchimp-woocommerce-service.php';
 
@@ -65,10 +62,15 @@ class FakeCartsTable {
         return 1;
     }
 }
+class OwnershipApi extends MailChimp_WooCommerce_MailChimpApi {
+    private $service;
+    public function __construct($service) { $this->service = $service; }
+    public function deleteCartByID($store, $id) { return $this->service->deleteCartByID($store, $id); }
+}
 class OwnershipService extends MailChimp_Service {
     public $remote_deletes = array();
     public function __construct() { $this->validated_cart_db = true; $this->is_admin = false; }
-    public function api() { return $this; }
+    public function api() { return new OwnershipApi($this); }
     public function getUniqueStoreID() { return "store"; }
     public function setLandingSiteCookie() { return $this; }
     public function deleteCartByID($store, $id) { $this->remote_deletes[] = $id; return true; }

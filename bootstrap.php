@@ -675,12 +675,6 @@ function mailchimp_handle_or_queue_live(Mailchimp_Woocommerce_Job $job, $delay =
     mailchimp_handle_or_queue($job->mark_live_event(), $delay);
 }
 
-/** Scope the actual event time to one immediate live-hook API call. */
-function mailchimp_call_live_hook($callback, $args = array())
-{
-    return MailChimp_WooCommerce_MailChimpApi::withJobNotifiedAt(time(), $callback, $args);
-}
-
 /**
  * Remove pending actions and their persisted payloads for one job class/object.
  * Already-running actions cannot be unscheduled.

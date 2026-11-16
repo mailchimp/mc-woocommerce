@@ -16,6 +16,7 @@ class MailChimp_WooCommerce_Cart_Update {
     public function setCartToken($token) { $this->token = $token; return $this; }
     public function __call($method, $args) { throw new RuntimeException("the cart job must not be told a status ({$method})"); }
 }
+require dirname(__DIR__, 2) . '/includes/api/class-mailchimp-api.php';
 require dirname(__DIR__, 2) . '/includes/class-mailchimp-woocommerce-service.php';
 
 function mailchimp_hash_trim_lower($str) { return md5(trim(strtolower($str))); }
@@ -68,9 +69,14 @@ class FakeCartsTable {
 }
 // respondJSON() exits the request; surface the response instead so the script can keep going.
 class Responded extends Exception { public $data; public function __construct($data) { $this->data = $data; parent::__construct(); } }
+class ConsentApi extends MailChimp_WooCommerce_MailChimpApi {
+    private $service;
+    public function __construct($service) { $this->service = $service; }
+    public function deleteCartByID($store, $id) { return $this->service->deleteCartByID($store, $id); }
+}
 class ConsentService extends MailChimp_Service {
     public function __construct() { $this->validated_cart_db = true; $this->is_admin = false; }
-    public function api() { return $this; }
+    public function api() { return new ConsentApi($this); }
     public function getUniqueStoreID() { return "store"; }
     public function deleteCartByID($store, $id) { return true; }
     protected function respondJSON($data) { throw new Responded($data); }

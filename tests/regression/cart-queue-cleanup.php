@@ -6,6 +6,7 @@ $bootstrap = file_get_contents(dirname(__DIR__, 2) . '/bootstrap.php');
 $start = strpos($bootstrap, 'function mailchimp_delete_job_by_id(');
 $end = strpos($bootstrap, '/**', $start);
 eval(substr($bootstrap, $start, $end - $start));
+require dirname(__DIR__, 2) . '/includes/api/class-mailchimp-api.php';
 class MailChimp_WooCommerce_Options {}
 require dirname(__DIR__, 2) . '/includes/class-mailchimp-woocommerce-service.php';
 function mailchimp_log(...$args) {}
@@ -40,6 +41,11 @@ class QueueDatabase {
         return $before - count($this->jobs);
     }
 }
+class CartCleanupApi extends MailChimp_WooCommerce_MailChimpApi {
+    private $service;
+    public function __construct($service) { $this->service = $service; }
+    public function deleteCartByID($store, $id) { return $this->service->deleteCartByID($store, $id); }
+}
 class CartCleanupService extends MailChimp_Service {
     public $is_admin = false;
     public $has_cart = true;
@@ -49,7 +55,7 @@ class CartCleanupService extends MailChimp_Service {
     public function getCurrentUserEmail() { return 'test@example.test'; }
     public function getUniqueStoreID() { return 'store'; }
     protected function getCart($uid) { return $this->has_cart ? (object) array('id' => $uid, 'token' => str_repeat('a', 32)) : false; }
-    public function api() { return $this; }
+    public function api() { return new CartCleanupApi($this); }
     public function deleteCartByID($store, $id) {
         ++$this->remote_calls;
         if ($this->remote_throws) { throw new RuntimeException('remote unavailable'); }

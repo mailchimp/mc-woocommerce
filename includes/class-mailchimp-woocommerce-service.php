@@ -298,7 +298,9 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         // drop the local row too, otherwise a later ?mc_cart_id= click re-hydrates the emptied
         // cart into the woo session and pushes it straight back up to Mailchimp.
         $this->deleteCart($uid);
-        if ($this->api()->deleteCartByID($this->getUniqueStoreID(), $uid)) {
+        if ($this->api()->executeCallback(function (MailChimp_WooCommerce_MailChimpApi $api) use ($uid) {
+            return $api->deleteCartByID($this->getUniqueStoreID(), $uid);
+        })) {
             mailchimp_log('ac.cart_emptied', "Deleted cart [$user_email] :: ID [$uid]");
         }
 
@@ -373,7 +375,9 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
                 $previous_email = mailchimp_hash_trim_lower($previous);
                 $this->deleteCart($previous_email);
-                if ($this->api()->deleteCartByID($unique_sid, $previous_email)) {
+                if ($this->api()->executeCallback(function (MailChimp_WooCommerce_MailChimpApi $api) use ($unique_sid, $previous_email) {
+                    return $api->deleteCartByID($unique_sid, $previous_email);
+                })) {
                     mailchimp_log('ac.cart_swap', "Deleted cart [$previous] :: ID [$previous_email]");
                 }
             }
@@ -385,7 +389,9 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             }
 
             // delete the current cart record if there is one
-            $this->api()->deleteCartByID($unique_sid, $uid);
+            $this->api()->executeCallback(function (MailChimp_WooCommerce_MailChimpApi $api) use ($unique_sid, $uid) {
+                return $api->deleteCartByID($unique_sid, $uid);
+            });
 
             if ($this->cart && !empty($this->cart)) {
 
@@ -467,7 +473,9 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
     public function handleAPICouponTrashed($object, $response, $request)
     {
         try {
-            $deleted = mailchimp_get_api()->deletePromoRule(mailchimp_get_store_id(), $request['id']);
+            $deleted = mailchimp_get_api()->executeCallback(function (MailChimp_WooCommerce_MailChimpApi $api) use ($request) {
+                return $api->deletePromoRule(mailchimp_get_store_id(), $request['id']);
+            });
             if ($deleted) mailchimp_log('api.promo_code.deleted', "deleted promo code {$request['id']}");
             else mailchimp_log('api.promo_code.delete_fail', "Unable to delete promo code {$request['id']}");
         } catch (Exception $e) {
@@ -664,7 +672,9 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
 			$product_id = $product ? $product->get_parent_id() : null;
 
-			$deleted = mailchimp_get_api()->deleteStoreProductVariation(mailchimp_get_store_id(), $product_id, $variation_id);
+			$deleted = mailchimp_get_api()->executeCallback(function (MailChimp_WooCommerce_MailChimpApi $api) use ($product_id, $variation_id) {
+				return $api->deleteStoreProductVariation(mailchimp_get_store_id(), $product_id, $variation_id);
+			});
 			if ($deleted) mailchimp_log('product_variation.deleted', "deleted product variation {$variation_id}");
 			else mailchimp_log('product_variation.delete_fail', "Unable to deleted product variation {$variation_id}");
 		} catch (Exception $e) {
@@ -741,7 +751,9 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
         switch (get_post_type($post_id)) {
             case 'shop_coupon':
                 try {
-                    $deleted = mailchimp_get_api()->deletePromoRule(mailchimp_get_store_id(), $post_id);
+                    $deleted = mailchimp_get_api()->executeCallback(function (MailChimp_WooCommerce_MailChimpApi $api) use ($post_id) {
+                        return $api->deletePromoRule(mailchimp_get_store_id(), $post_id);
+                    });
                     if ($deleted) mailchimp_log('promo_code.deleted', "deleted promo code {$post_id}");
                     else mailchimp_log('promo_code.delete_fail', "Unable to delete promo code {$post_id}");
                 } catch (Exception $e) {
@@ -750,7 +762,9 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                 break;
             case 'product':
                 try {
-                    $deleted = mailchimp_get_api()->deleteStoreProduct(mailchimp_get_store_id(), $post_id);
+                    $deleted = mailchimp_get_api()->executeCallback(function (MailChimp_WooCommerce_MailChimpApi $api) use ($post_id) {
+                        return $api->deleteStoreProduct(mailchimp_get_store_id(), $post_id);
+                    });
                     if ($deleted) mailchimp_log('product.deleted', "deleted product {$post_id}");
                     else mailchimp_log('product.delete_fail', "Unable to deleted product {$post_id}");
                 } catch (Exception $e) {
@@ -820,7 +834,9 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
                     'term' => $term
                 ]);
 
-                mailchimp_get_api()->updateProductCategory(mailchimp_get_store_id(), $term_id, $product_category);
+                mailchimp_get_api()->executeCallback(function (MailChimp_WooCommerce_MailChimpApi $api) use ($term_id, $product_category) {
+                    return $api->updateProductCategory(mailchimp_get_store_id(), $term_id, $product_category);
+                });
 
                 mailchimp_log('product_cat.update',"Updated product category $term_id");
             }
@@ -1674,13 +1690,13 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
 
             $job_id = $job_row->id;
 
-            // live jobs tell Mailchimp when they were scheduled to run
-            MailChimp_WooCommerce_MailChimpApi::setJobNotifiedAt(
+            // Explicitly pass even null for historical/invalid jobs: never stamp them with time().
+            mailchimp_get_api()->executeCallback(
+                function (MailChimp_WooCommerce_MailChimpApi $api) use ($job) {
+                    return $job->handle();
+                },
                 $job instanceof Mailchimp_Woocommerce_Job && $job->is_live_event ? $job->get_notified_at() : null
             );
-
-            // process job
-            $job->handle();
 
             // delete processed job
             $sql = $wpdb->prepare("DELETE FROM {$wpdb->prefix}mailchimp_jobs WHERE id = %s AND obj_id = %s", array($job_id, $obj_id));
@@ -1691,9 +1707,6 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             $message = !empty($e->getMessage()) ? ' - ' . $e->getMessage() :'';
 
             mailchimp_debug('action_scheduler.process_job.fail', (isset($job) ? get_class($job) : '') . ' :: obj_id '.$obj_id . ' :: ' .get_class($e) . $message);
-        } finally {
-            // Action Scheduler runs many jobs per request - don't leak into the next one.
-            MailChimp_WooCommerce_MailChimpApi::setJobNotifiedAt(null);
         }
         return false;
     }

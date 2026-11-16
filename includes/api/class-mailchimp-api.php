@@ -19,6 +19,8 @@ class MailChimp_WooCommerce_MailChimpApi {
 	// static, not per-instance: several jobs build their own API objects.
 	/** @var null|int */
 	protected static $job_notified_at = null;
+	/** @var null|int Immediate live-hook timestamp, separate from queued-job metadata. */
+	protected static $live_notified_at = null;
 
 	/**
 	 * Set by the job runner for the duration of one job; null clears it.
@@ -26,7 +28,36 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 * @param int|null $timestamp
 	 */
 	public static function setJobNotifiedAt( $timestamp ) {
-		static::$job_notified_at = ! empty( $timestamp ) ? (int) $timestamp : null;
+		static::$job_notified_at = is_int( $timestamp ) && $timestamp > 0 ? $timestamp : null;
+	}
+
+	/**
+	 * Run a callback with this API instance and restore both timestamp contexts in finally.
+	 * Omit the second argument for an immediate live mutation (event time). Supplying
+	 * a positive integer uses that queued job's first eligibility time; explicitly
+	 * passing null or invalid metadata suppresses the timestamp, never using time().
+	 * Historical requests and GET requests remain suppressed by the header builder.
+	 *
+	 * @param \Closure $callback Receives this API instance.
+	 * @param int|null $use_job_meta_timestamp Original queued job eligibility time.
+	 * @return mixed Callback result.
+	 */
+	public function executeCallback(\Closure $callback, $use_job_meta_timestamp = null) {
+		$previous_job = static::$job_notified_at;
+		$previous_live = static::$live_notified_at;
+		if (func_num_args() > 1) {
+			static::setJobNotifiedAt($use_job_meta_timestamp);
+			static::$live_notified_at = null;
+		} else {
+			static::$job_notified_at = null;
+			static::$live_notified_at = time();
+		}
+		try {
+			return $callback($this);
+		} finally {
+			static::$job_notified_at = $previous_job;
+			static::$live_notified_at = $previous_live;
+		}
 	}
 
 	/**
@@ -3160,8 +3191,9 @@ class MailChimp_WooCommerce_MailChimpApi {
             $headers[] = 'X-Data-Mode: historical';
         }
 
-        if (static::$job_notified_at) {
-            $headers[] = 'X-Object-Notified-At: ' . static::$job_notified_at;
+        $notified_at = static::$live_notified_at !== null ? static::$live_notified_at : static::$job_notified_at;
+        if (!$this->is_syncing && $notified_at !== null && in_array(strtoupper($method), array('POST', 'PUT', 'PATCH', 'DELETE'), true)) {
+            $headers[] = 'X-Object-Notified-At: ' . $notified_at;
         }
 
         if ($this->auto_doi) {

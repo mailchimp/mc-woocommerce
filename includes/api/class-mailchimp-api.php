@@ -1319,7 +1319,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 * @throws MailChimp_WooCommerce_RateLimitError
 	 * @throws MailChimp_WooCommerce_ServerError
 	 */
-	public function orders( $store_id, $page = 1, $count = 10, DateTime $since = null, $campaign_id = null ) {
+	public function orders( $store_id, $page = 1, $count = 10, ?DateTime $since = null, $campaign_id = null ) {
 		return $this->get(
 			'ecommerce/stores/' . $store_id . '/orders',
 			array(

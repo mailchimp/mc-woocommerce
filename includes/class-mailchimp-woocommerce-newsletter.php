@@ -47,15 +47,11 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
         $allow_admin = defined('MAILCHIMP_ALLOW_ADMIN_NEWSLETTER') && MAILCHIMP_ALLOW_ADMIN_NEWSLETTER;
 
         if ($allow_admin || !is_admin()) {
-            $api = mailchimp_get_api();
-
-            // get the gdpr fields from the cache - or call it again and save for 5 minutes.
-            $GDPRfields = $api->getCachedGDPRFields(mailchimp_get_list_id());
-
-            // if the user has chosen to hide the checkbox, don't do anything.
+            // Hidden checkout fields need neither cached definitions nor a refresh.
             if (($default_setting = $this->getOption('mailchimp_checkbox_defaults', 'check')) === 'hide') {
                 return;
             }
+            $GDPRfields = mailchimp_get_api()->getCachedGDPRFields(mailchimp_get_list_id());
 
             // allow the user to specify the text in the newsletter label.
             $label = $this->getOption('newsletter_label');
@@ -79,6 +75,9 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
                 }
             }
 
+
+            // A cold cache must not silently opt a new customer into marketing.
+            if ($GDPRfields === null) { $status = false; }
 
             // echo out the subscription checkbox.
             $checkbox = '<p class="form-row form-row-wide mailchimp-newsletter">';

@@ -2638,29 +2638,11 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 * @param $list_id
 	 * @param int     $minutes
 	 *
-	 * @return array|mixed
+	 * @return array|null Cached definitions, or null while the first refresh is pending.
 	 */
 	public function getCachedGDPRFields( $list_id, $minutes = 5 ) {
-		$transient  = "mailchimp-woocommerce-gdpr-fields.{$list_id}";
-		$GDPRfields = get_transient( $transient );
-
-		// only return the values if it's a false - or an array
-		if ( is_array( $GDPRfields ) ) {
-			return $GDPRfields;
-		}
-
-        $filteredMinutes = (int) apply_filters('mailchimp_checkout_overwrite_gdpr_cache_minutes', $minutes);
-        $minutes = $filteredMinutes <= 0 ? $minutes : $filteredMinutes;
-
-		try {
-			$GDPRfields = $this->getGDPRFields( $list_id );
-			set_transient( $transient, $GDPRfields, 60 * $minutes );
-		} catch ( Exception $e ) {
-			$GDPRfields = array();
-		}
-
-		return $GDPRfields;
-	}
+        return MailChimp_WooCommerce_GDPR_Fields::get($list_id, $minutes);
+    }
 
 	/**
 	 * @param $list_id
@@ -2672,14 +2654,17 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 */
 	public function getGDPRFields( $list_id ) {
 		$one_member = $this->get( "lists/$list_id/members?fields=members.marketing_permissions&count=1" );
-		$fields     = array();
-
-		if ( is_array( $one_member ) &&
-			isset( $one_member['members'] ) &&
-			isset( $one_member['members'][0] ) &&
-			isset( $one_member['members'][0]['marketing_permissions'] ) ) {
-			$fields = $one_member['members'][0]['marketing_permissions'];
-		}
+        if (!is_array($one_member) || !isset($one_member['members']) || !is_array($one_member['members'])) {
+            throw new UnexpectedValueException('Invalid GDPR members response');
+        }
+        $fields = array();
+        if (!empty($one_member['members'])) {
+            if (!isset($one_member['members'][0]) || !is_array($one_member['members'][0]) ||
+                (isset($one_member['members'][0]['marketing_permissions']) && !is_array($one_member['members'][0]['marketing_permissions']))) {
+                throw new UnexpectedValueException('Invalid GDPR permissions response');
+            }
+            $fields = isset($one_member['members'][0]['marketing_permissions']) ? $one_member['members'][0]['marketing_permissions'] : array();
+        }
 
 		return $fields;
 	}

@@ -15,6 +15,7 @@ spl_autoload_register(function($class) {
         // includes root
         'MailChimp_Service' => 'includes/class-mailchimp-woocommerce-service.php',
         'MailChimp_WooCommerce_Options' => 'includes/class-mailchimp-woocommerce-options.php',
+        'MailChimp_WooCommerce_GDPR_Fields' => 'includes/class-mailchimp-woocommerce-gdpr-fields.php',
         'MailChimp_Newsletter' => 'includes/class-mailchimp-woocommerce-newsletter.php',
         'MailChimp_Sms_Consent' => 'includes/class-mailchimp-woocommerce-sms-consent.php',
         'MailChimp_WooCommerce_Loader' => 'includes/class-mailchimp-woocommerce-loader.php',
@@ -106,6 +107,8 @@ spl_autoload_register(function($class) {
         require $path.$classes[$class];
     }
 });
+
+add_action(MailChimp_WooCommerce_GDPR_Fields::HOOK, array('MailChimp_WooCommerce_GDPR_Fields', 'refresh'), 10, 2);
 
 /**
  * Build (and cache per request) the environment-variables snapshot. This

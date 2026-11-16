@@ -6,15 +6,12 @@ class MailChimp_WooCommerce_Order_Sync_History {
     const MAX_ENTRIES = 20;
     /** HPOS saves the whole order after a meta change unless this filter says no. */
     const SKIP_SAVE_FILTER = 'woocommerce_orders_table_datastore_should_save_after_meta_change';
-    private static $writing = false;
+    /** @var array<int, bool> Orders whose diagnostic metadata is being saved. */
+    private static $writing_orders = array();
 
-    /**
-     * True while a history row is being persisted. The order update hook must
-     * ignore saves made during this window, or recording a sync would queue
-     * another sync, which records again, forever.
-     */
-    public static function is_writing() {
-        return self::$writing;
+    /** With no ID, preserve the existing request-wide diagnostic query. */
+    public static function is_writing($order_id = null) {
+        return $order_id === null ? !empty(self::$writing_orders) : isset(self::$writing_orders[(int) $order_id]);
     }
 
     public static function outcomes() {
@@ -97,17 +94,24 @@ class MailChimp_WooCommerce_Order_Sync_History {
      * Under HPOS, save_meta_data() calls $order->save() to bump the modified
      * date, which fires woocommerce_update_order and re-enters the sync job.
      * WooCommerce core disables that with this same filter around its own
-     * internal meta writes. The static flag covers WooCommerce versions that
+     * internal meta writes. The per-order guard covers WooCommerce versions that
      * predate the filter and any other path that reaches the update hook.
      */
     private static function save_silently($order) {
-        self::$writing = true;
-        add_filter(self::SKIP_SAVE_FILTER, '__return_false', PHP_INT_MAX);
+        $id = (int) $order->get_id();
+        $was_writing = self::is_writing($id);
+        self::$writing_orders[$id] = true;
+        // Each invocation owns its callback: nested writes and other callers
+        // may already have installed a filter at this priority.
+        $skip_save = static function($should_save) { return false; };
+        add_filter(self::SKIP_SAVE_FILTER, $skip_save, PHP_INT_MAX);
         try {
             $order->save_meta_data();
         } finally {
-            remove_filter(self::SKIP_SAVE_FILTER, '__return_false', PHP_INT_MAX);
-            self::$writing = false;
+            remove_filter(self::SKIP_SAVE_FILTER, $skip_save, PHP_INT_MAX);
+            if (!$was_writing) {
+                unset(self::$writing_orders[$id]);
+            }
         }
     }
 

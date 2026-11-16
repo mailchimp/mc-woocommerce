@@ -214,4 +214,39 @@ MailChimp_WooCommerce_MailChimpApi::withJobNotifiedAt(456, function () {
 $GLOBALS['headers'] = (new HeaderApi())->headers();
 check(notified_header() === null, 'nested historical context leaked');
 
+// Job context accepts only a Closure; the caller invokes the job directly.
+try {
+    MailChimp_WooCommerce_MailChimpApi::withJobNotifiedAt(123, array(new NotifiedJob('array-callback'), 'handle'));
+    throw new RuntimeException('job context accepted method-name dispatch');
+} catch (TypeError $e) {
+    // Array callables must not be accepted by the context API.
+}
+$api = new HeaderApi();
+$result = MailChimp_WooCommerce_MailChimpApi::withJobNotifiedAt(111, function () use ($api) {
+    $GLOBALS['headers'] = $api->headers();
+    check(notified_header() === 111, 'outer job context missing');
+    $nested = MailChimp_WooCommerce_MailChimpApi::withJobNotifiedAt(222, function () use ($api) {
+        $GLOBALS['headers'] = $api->headers();
+        check(notified_header() === 222, 'nested job context missing');
+        return 'nested result';
+    });
+    check($nested === 'nested result', 'nested job callback result lost');
+    $GLOBALS['headers'] = $api->headers();
+    check(notified_header() === 111, 'nested job context did not restore outer context');
+    try {
+        MailChimp_WooCommerce_MailChimpApi::withJobNotifiedAt(333, function () {
+            throw new RuntimeException('job callback failure');
+        });
+        throw new RuntimeException('job callback exception was swallowed');
+    } catch (RuntimeException $e) {
+        check($e->getMessage() === 'job callback failure', 'job callback original exception lost');
+    }
+    $GLOBALS['headers'] = $api->headers();
+    check(notified_header() === 111, 'failed nested job context did not restore outer context');
+    return 'outer result';
+});
+check($result === 'outer result', 'job callback result lost');
+$GLOBALS['headers'] = $api->headers();
+check(notified_header() === null, 'job context leaked after callback return');
+
 echo "Object notified-at regression checks passed.\n";

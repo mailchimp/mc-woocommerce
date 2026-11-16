@@ -1694,7 +1694,9 @@ class MailChimp_Service extends MailChimp_WooCommerce_Options
             // process job
             MailChimp_WooCommerce_MailChimpApi::withJobNotifiedAt(
                 $job instanceof Mailchimp_Woocommerce_Job && $job->is_live_event ? $job->get_notified_at() : null,
-                array($job, 'handle')
+                function () use ($job) {
+                    return $job->handle();
+                }
             );
 
             // delete processed job

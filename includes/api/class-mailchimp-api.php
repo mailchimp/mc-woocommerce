@@ -32,13 +32,13 @@ class MailChimp_WooCommerce_MailChimpApi {
 	}
 
 	/** Restore the previous request context on return, exception, or nested call. */
-	public static function withJobNotifiedAt( $timestamp, $callback, $args = array() ) {
+	public static function withJobNotifiedAt( $timestamp, \Closure $callback ) {
 		$previous = static::$job_notified_at;
 		$previous_live = static::$live_notified_at;
 		static::setJobNotifiedAt( $timestamp );
 		static::$live_notified_at = null;
 		try {
-			return call_user_func_array( $callback, $args );
+			return $callback();
 		} finally {
 			static::$job_notified_at = $previous;
 			static::$live_notified_at = $previous_live;

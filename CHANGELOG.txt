@@ -1,4 +1,5 @@
 == Changelog ==
+= 6.4 =
 = 6.3 =
 * Adds a "Connect to support" button to the plugin settings page that opens a Zendesk live chat when clicked
 * Adds product-view pixel tracking on page-builder product templates, including Bricks

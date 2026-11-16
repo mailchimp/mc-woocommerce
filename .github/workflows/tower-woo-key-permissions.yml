@@ -1,0 +1,72 @@
+name: Tower Woo key permission regression
+on:
+  pull_request:
+    paths:
+      - 'bootstrap.php'
+      - 'includes/**'
+      - 'tests/integration/tower-woo-key-permissions.php'
+      - '.github/workflows/tower-woo-key-permissions.yml'
+  push:
+    branches: [master, '6.4']
+    paths:
+      - 'bootstrap.php'
+      - 'includes/**'
+      - 'tests/integration/tower-woo-key-permissions.php'
+      - '.github/workflows/tower-woo-key-permissions.yml'
+permissions:
+  contents: read
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: '7.4'
+            wordpress: '6.2'
+            woocommerce: '8.2.0'
+          - php: '8.2'
+            wordpress: '7.0'
+            woocommerce: '11.2.1'
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+          MYSQL_DATABASE: qit_test
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli
+          ini-values: memory_limit=512M
+          tools: wp-cli
+          coverage: none
+      - name: Install disposable WordPress and WooCommerce
+        env:
+          WP_VERSION: ${{ matrix.wordpress }}
+          WC_VERSION: ${{ matrix.woocommerce }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/qit-wp"
+          cd "$RUNNER_TEMP/qit-wp"
+          wp core download --version="$WP_VERSION"
+          wp config create --dbname=qit_test --dbuser=root --dbpass='' --dbhost=127.0.0.1
+          wp config set DISABLE_WP_CRON true --raw
+          wp core install --url=http://localhost --title='QIT permission test' --admin_user=localqa --admin_password=disposable-local-only --admin_email=qa@example.test --skip-email
+          wp plugin install woocommerce --version="$WC_VERSION" --activate
+          ln -s "$GITHUB_WORKSPACE" wp-content/plugins/mailchimp-for-woocommerce
+          wp plugin activate mailchimp-for-woocommerce
+      - name: Verify API-key scopes and owners through real REST dispatch
+        env:
+          MC_WOO_QIT_LOCAL_QA: '1'
+        run: |
+          cd "$RUNNER_TEMP/qit-wp"
+          wp eval-file "$GITHUB_WORKSPACE/tests/integration/tower-woo-key-permissions.php"

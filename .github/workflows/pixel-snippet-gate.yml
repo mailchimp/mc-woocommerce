@@ -1,0 +1,35 @@
+name: Pixel snippet gate regression
+on:
+  pull_request:
+    paths:
+      - 'includes/tracking/class-mailchimp-woocommerce-pixel-tracking.php'
+      - 'public/class-mailchimp-woocommerce-public.php'
+      - 'bootstrap.php'
+      - 'blocks/build/pixel-tracking*'
+      - 'tests/regression/pixel-snippet-gate.php'
+      - '.github/workflows/pixel-snippet-gate.yml'
+  push:
+    branches: ['6.4']
+    paths:
+      - 'includes/tracking/class-mailchimp-woocommerce-pixel-tracking.php'
+      - 'public/class-mailchimp-woocommerce-public.php'
+      - 'bootstrap.php'
+      - 'blocks/build/pixel-tracking*'
+      - 'tests/regression/pixel-snippet-gate.php'
+      - '.github/workflows/pixel-snippet-gate.yml'
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      matrix:
+        php: ['7.4', '8.2']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+      - run: php tests/regression/pixel-snippet-gate.php

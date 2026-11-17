@@ -2506,6 +2506,33 @@ function mailchimp_get_outbound_ip() {
 }
 
 /**
+ * Base URL of the Mailchimp for WooCommerce auth server, optionally followed
+ * by a path. Defining MAILCHIMP_AUTH_SERVER_URL in wp-config.php points the
+ * connect flow at another host; anything that is not a plain http(s) origin
+ * is ignored and the production host is used.
+ *
+ * @param string $path
+ * @return string
+ */
+function mailchimp_get_auth_server_url($path = '') {
+    $base = 'https://woocommerce.mailchimpapp.com';
+    if (mailchimp_auth_server_is_overridden()) {
+        $base = rtrim(trim(MAILCHIMP_AUTH_SERVER_URL), '/');
+    }
+    return $path === '' ? $base : $base . '/' . ltrim($path, '/');
+}
+
+/**
+ * @return bool
+ */
+function mailchimp_auth_server_is_overridden() {
+    if (!defined('MAILCHIMP_AUTH_SERVER_URL') || !is_string(MAILCHIMP_AUTH_SERVER_URL)) {
+        return false;
+    }
+    return (bool) preg_match('#^https?://[a-z0-9.-]+(:\d+)?/?$#i', trim(MAILCHIMP_AUTH_SERVER_URL));
+}
+
+/**
  * @return bool
  */
 function mailchimp_render_gdpr_fields() {

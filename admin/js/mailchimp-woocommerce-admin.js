@@ -324,7 +324,7 @@
 		});
 
 		function openOAuthPopup(token) {
-			var domain = 'https://woocommerce.mailchimpapp.com';
+			var domain = phpVars.authServerUrl || 'https://woocommerce.mailchimpapp.com';
 					var options = {
 						path: domain+'/auth/start/'+token,
 						windowName: 'Mailchimp For WooCommerce OAuth',
@@ -337,7 +337,7 @@
 						'status=no, menubar=no, scrollbars=no, resizable=no, ' +
 						'copyhistory=no, width=' + options.width +
 						', height=' + options.height + ', top=' + top + ', left=' + left +
-						', domain='+domain.replace('https://', '');
+						', domain='+domain.replace(/^https?:\/\//, '');
 
 			// open Mailchimp OAuth popup
 			var popup = window.open(options.path, options.windowName, window_options);

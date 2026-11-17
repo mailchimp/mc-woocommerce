@@ -170,7 +170,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				array(
 					'removeReviewBannerRestUrl' => MailChimp_WooCommerce_Rest_Api::url( 'review-banner' ),
 					'restNonce'                 => wp_create_nonce( 'wp_rest' ),
-					'l10n'                      => array(
+					'authServerUrl'             => mailchimp_get_auth_server_url(),
+					'l10n'                     => array(
 						'are_you_sure'                 => __( 'Are you sure?', 'mailchimp-for-woocommerce' ),
 						'log_delete_subtitle'          => __( 'You will not be able to revert.', 'mailchimp-for-woocommerce' ),
 						'log_delete_confirm'           => __( 'Yes, delete it!', 'mailchimp-for-woocommerce' ),
@@ -1159,7 +1160,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		);
 
         Mailchimp_Woocommerce_Event::track('connect_accounts_oauth:start', new DateTime());
-		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/start', $pload );
+		$response = wp_remote_post( mailchimp_get_auth_server_url( 'api/start' ), $pload );
 
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
@@ -1198,7 +1199,16 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			'headers' => array(),
 		);
 
-		$response = wp_safe_remote_post( $url, $pload );
+		// an auth server override usually points at a private or local host, which
+		// the "safe" request would refuse, so only the configured host is allowed.
+		if ( mailchimp_auth_server_is_overridden() ) {
+			if ( strpos( $url, mailchimp_get_auth_server_url( 'api/status/' ) ) !== 0 ) {
+				wp_send_json_error( array( 'message' => 'Invalid auth server URL' ) );
+			}
+			$response = wp_remote_post( $url, $pload );
+		} else {
+			$response = wp_safe_remote_post( $url, $pload );
+		}
 
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
@@ -1228,7 +1238,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             ),
             'body'    => json_encode( $args ),
         );
-        $response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/finish', $pload );
+        $response = wp_remote_post( mailchimp_get_auth_server_url( 'api/finish' ), $pload );
 
         // need to return the error message if this is the problem.
         if ( $response instanceof WP_Error ) {
@@ -1300,7 +1310,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$this->adminOnlyMiddleware();
 
 		$username = sanitize_text_field( $_POST['username'] );
-		$response = wp_remote_get( 'https://woocommerce.mailchimpapp.com/api/usernames/available/' . $username );
+		$response = wp_remote_get( mailchimp_get_auth_server_url( 'api/usernames/available/' ) . $username );
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
 			wp_send_json_error( $response );
@@ -1315,7 +1325,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				)
 			);
 		} else {
-			$suggestion = wp_remote_get( 'https://woocommerce.mailchimpapp.com/api/usernames/suggestions/' . preg_replace( '/[^A-Za-z0-9\-\@\.]/', '', $username ) );
+			$suggestion = wp_remote_get( mailchimp_get_auth_server_url( 'api/usernames/suggestions/' ) . preg_replace( '/[^A-Za-z0-9\-\@\.]/', '', $username ) );
 			// need to return the error message if this is the problem.
 			if ( $suggestion instanceof WP_Error ) {
 				wp_send_json_error( $suggestion );
@@ -1356,7 +1366,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	public function mailchimp_woocommerce_ajax_support_form() {
 		$this->adminOnlyMiddleware();
 		$pload    = $this->getPostData();
-		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/support', $pload );
+		$response = wp_remote_post( mailchimp_get_auth_server_url( 'api/support' ), $pload );
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
 			wp_send_json_error( $response );
@@ -1486,7 +1496,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			),
 			'timeout' => 30,
 		);
-		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/support', $pload );
+		$response = wp_remote_post( mailchimp_get_auth_server_url( 'api/support' ), $pload );
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
 			wp_send_json_error( $response );
@@ -1520,7 +1530,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		Mailchimp_Woocommerce_Event::track('connect_accounts:activate_account', new DateTime());
 		$this->adminOnlyMiddleware();
 		$pload = $this->getPostData();
-		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/signup/', $pload );
+		$response = wp_remote_post( mailchimp_get_auth_server_url( 'api/signup/' ), $pload );
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
             mailchimp_error('admin', "create account error", ['error' => $response->get_error_message()]);
@@ -1574,7 +1584,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         } else {
             $response_error = json_decode( $response_body->error, true );
             $username = preg_replace( '/[^A-Za-z0-9\-\@\.]/', '', $_POST['data']['username'] );
-            $suggestion         = wp_remote_get( 'https://woocommerce.mailchimpapp.com/api/usernames/suggestions/' . $username );
+            $suggestion         = wp_remote_get( mailchimp_get_auth_server_url( 'api/usernames/suggestions/' ) . $username );
             $suggested_username = json_decode( $suggestion['body'] )->data;
 
             wp_send_json_error(
@@ -2645,7 +2655,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			$post_data['remove_email'] = true;
 		}
 
-		$route = 'https://woocommerce.mailchimpapp.com/api/opt_in_status';
+		$route = mailchimp_get_auth_server_url( 'api/opt_in_status' );
 
 		return wp_remote_post(
 			esc_url_raw( $route ),

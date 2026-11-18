@@ -56,6 +56,9 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
             // allow the user to specify the text in the newsletter label.
             $label = $this->getOption('newsletter_label');
             if ($label == '') $label = __('Subscribe to our newsletter', 'mailchimp-for-woocommerce');
+            // merchants may put a link and a line break in the label (privacy policy links),
+            // so filter to exactly what the settings screen allows instead of plain text escaping.
+            $label = wp_kses($label, mailchimp_newsletter_label_allowed_html());
             // if the user chose 'check' or nothing at all, we default to true.
             $default_checked = $default_setting === 'check';
             $gdpr_statuses = false;
@@ -91,14 +94,15 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
             if (!empty($GDPRfields) && is_array($GDPRfields)) {
                 $checkbox .= "<div style='display: " . ($gdpr_statuses ? 'none' : 'block') . "'>";
                 $checkbox .= "<div id='mailchimp-gdpr-fields'><p>";
-                $checkbox .= __('Please select all the ways you would like to hear from us', 'mailchimp-for-woocommerce');
+                $checkbox .= esc_html__('Please select all the ways you would like to hear from us', 'mailchimp-for-woocommerce');
                 $checkbox .= "<div class='clear' ></div>";
 
                 foreach ($GDPRfields as $key => $field) {
-                    $marketing_permission_id = $field['marketing_permission_id'];
+                    // these come from the merchant's Mailchimp audience, treat them as plain text.
+                    $marketing_permission_id = esc_attr($field['marketing_permission_id']);
 
                     $gdpr_checked = $field['enabled'];
-                    $text = $field['text'];
+                    $text = esc_html($field['text']);
 
                     // Add to the checkbox output
                     $checkbox .= "<input type='hidden' value='0' name='mailchimp_woocommerce_gdpr[{$marketing_permission_id}]'>";

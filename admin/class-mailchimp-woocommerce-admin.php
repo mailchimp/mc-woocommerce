@@ -1689,14 +1689,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             $checkbox = $input['mailchimp_checkbox_defaults'];
         }
 
-        $allowed_html = array(
-            'a'  => array(
-                'href'   => array(),
-                'title'  => array(),
-                'target' => array(),
-            ),
-            'br' => array(),
-        );
+        $allowed_html = mailchimp_newsletter_label_allowed_html();
 
         $defaults = $this->loadWooStoreData();
 

@@ -2564,6 +2564,24 @@ function mailchimp_render_gdpr_fields() {
     return true;
 }
 
+/**
+ * The only markup a merchant may use in the checkout newsletter label:
+ * a link (privacy policy etc) and a line break. Used when the setting is
+ * saved and again when the label is printed.
+ *
+ * @return array
+ */
+function mailchimp_newsletter_label_allowed_html() {
+	return array(
+		'a'  => array(
+			'href'   => array(),
+			'title'  => array(),
+			'target' => array(),
+		),
+		'br' => array(),
+	);
+}
+
 function mailchimp_expanded_alowed_tags() {
 	$my_allowed = wp_kses_allowed_html( 'post' );
 	// iframe

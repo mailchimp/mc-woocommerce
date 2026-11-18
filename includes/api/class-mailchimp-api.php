@@ -185,7 +185,7 @@ class MailChimp_WooCommerce_MailChimpApi {
             if (($dc = $this->data_center)) {
                 $token = str_replace("-$dc", "", $token);
             }
-            $metdata_response = wp_remote_get( "https://login.mailchimp.com/oauth2/metadata?oauth_token={$token}", array(
+            $metdata_response = wp_remote_get( mailchimp_get_login_url( 'oauth2/metadata' ) . "?oauth_token={$token}", array(
                 'headers' => array(
                     'Accept' => 'application/json',
                 ),

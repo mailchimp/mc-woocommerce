@@ -1152,6 +1152,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			'secret' => $secret,
 		);
 
+		// MAILCHIMP_E2E: have the auth server run this login against Mailchimp's E2E stack.
+		if ( mailchimp_is_e2e_environment() ) {
+			$args['environment'] = 'e2e';
+		}
+
 		$pload = array(
 			'headers' => array(
 				'Content-type' => 'application/json',
@@ -1168,6 +1173,14 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 
 		if ( $response['response']['code'] == 201 ) {
+			// an auth server that does not know about environments ignores the flag and
+			// would hand back a production token, so it has to confirm the environment.
+			if ( mailchimp_is_e2e_environment() ) {
+				$started = json_decode( $response['body'], true );
+				if ( ! is_array( $started ) || ! isset( $started['environment'] ) || 'e2e' !== $started['environment'] ) {
+					wp_send_json_error( array( 'message' => 'The auth server does not support the Mailchimp E2E environment.' ) );
+				}
+			}
 			\Mailchimp_Woocommerce_DB_Helpers::set_transient( 'mailchimp-woocommerce-oauth-secret', $secret, 60 * 60 );
 			wp_send_json_success( $response );
 		} else {

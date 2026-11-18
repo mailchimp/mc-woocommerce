@@ -2533,6 +2533,28 @@ function mailchimp_auth_server_is_overridden() {
 }
 
 /**
+ * True when wp-config.php has define( 'MAILCHIMP_E2E', true ). The connect flow
+ * then asks the auth server for Mailchimp's E2E environment and the plugin talks
+ * to the E2E login host. Internal testing only.
+ *
+ * @return bool
+ */
+function mailchimp_is_e2e_environment() {
+    return defined('MAILCHIMP_E2E') && filter_var(MAILCHIMP_E2E, FILTER_VALIDATE_BOOLEAN) === true;
+}
+
+/**
+ * Base URL of Mailchimp's login host (OAuth metadata), optionally followed by a path.
+ *
+ * @param string $path
+ * @return string
+ */
+function mailchimp_get_login_url($path = '') {
+    $base = mailchimp_is_e2e_environment() ? 'https://e2e-login.mailchimp.com' : 'https://login.mailchimp.com';
+    return $path === '' ? $base : $base . '/' . ltrim($path, '/');
+}
+
+/**
  * @return bool
  */
 function mailchimp_render_gdpr_fields() {

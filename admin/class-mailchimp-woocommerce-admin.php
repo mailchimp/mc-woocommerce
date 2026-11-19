@@ -2616,15 +2616,20 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$job           = new MailChimp_WooCommerce_Tower( mailchimp_get_store_id() );
 		$response_body = $job->toggle( $opt );
 
-		// if success, set internal option to check for opt and display on sync page
-		if ( $response_body && isset($response_body->success) && $response_body->success == true ) {
-			$this->setData( 'tower.opt', $opt );
+		$confirmed = $response_body && isset($response_body->success) && $response_body->success == true;
+
+		// toggle() keeps the opt and the support token in step with what happened. Switching off
+		// always takes effect on this store, even when Tower could not be told about it.
+		if ( $confirmed || ! (bool) $opt ) {
+			if ( ! $confirmed ) {
+				mailchimp_error( 'tower_status', 'remote support was switched off on this store, but Tower did not confirm it' );
+			}
 			wp_send_json_success( __( 'Saved', 'mailchimp-for-woocommerce' ) );
 		} else {
 			// if error, keep option to original value
 			wp_send_json_error(
 				array(
-					'error' => $response_body->message,
+					'error' => $response_body && isset( $response_body->message ) ? $response_body->message : __( 'Remote support could not be enabled. Please try again.', 'mailchimp-for-woocommerce' ),
 					'opt'   => $original_opt,
 				)
 			);

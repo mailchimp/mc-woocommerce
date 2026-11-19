@@ -189,7 +189,7 @@ class MailChimp_WooCommerce_Rest_Api
      */
     public function verify_tower_connection(WP_REST_Request $request)
     {
-        $this->authorize('tower.token', $request);
+        $this->authorize('tower.token', $request, true);
         return $this->mailchimp_rest_response(array('success' => true));
     }
 
@@ -409,7 +409,6 @@ class MailChimp_WooCommerce_Rest_Api
         $tower = new MailChimp_WooCommerce_Tower(mailchimp_get_store_id());
         $result = $tower->toggle($toggle);
         if ( $result && isset($result->success) && $result->success) {
-            \Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp-woocommerce-tower.opt', $toggle, 'yes');
             return $this->mailchimp_rest_response(array(
                 'success' => true,
                 'store_id' => mailchimp_get_store_id(),
@@ -1026,10 +1025,11 @@ class MailChimp_WooCommerce_Rest_Api
 	/**
 	 * @param $key
 	 * @param WP_REST_Request $request
+	 * @param bool $allow_pending only the verify route, which Tower calls while support is being enabled.
 	 *
 	 * @return bool
 	 */
-    private function authorize($key, WP_REST_Request $request)
+    private function authorize($key, WP_REST_Request $request, $allow_pending = false)
     {
         $allowed_keys = array(
             'tower.token',
@@ -1044,6 +1044,18 @@ class MailChimp_WooCommerce_Rest_Api
         $token = $this->getAuthToken($request);
         // pull the saved data
         $saved = mailchimp_get_data($key);
+
+        if ($key === 'tower.token') {
+            // the support token is only good while the merchant has remote support switched on.
+            if (!mailchimp_get_data('tower.opt')) {
+                $saved = null;
+            }
+            // while support is being enabled, Tower verifies the new token before it is saved.
+            if ($allow_pending && ($pending = \Mailchimp_Woocommerce_DB_Helpers::get_transient('mailchimp-woocommerce-tower.pending_token')) &&
+                is_string($pending) && is_string($token) && ($token === $pending || base64_decode($token) === $pending)) {
+                $saved = $pending;
+            }
+        }
 
         // if we don't have a token - or we don't have the saved comparison
         // or the token doesn't equal the saved token, throw an error.

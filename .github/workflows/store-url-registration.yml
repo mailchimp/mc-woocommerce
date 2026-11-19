@@ -31,6 +31,9 @@ jobs:
           - php: '8.2'
             wordpress: '7.0'
             woocommerce: '11.2.1'
+          - php: '8.4'
+            wordpress: '7.0'
+            woocommerce: '11.2.1'
     services:
       mysql:
         image: mysql:8.0

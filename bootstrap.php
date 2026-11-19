@@ -2450,11 +2450,6 @@ function mailchimp_member_sms_update($user_email = null, $order_id = null, $user
  */
 function mailchimp_set_cookie($name, $value, $expire, $path, $domain = '', $secure = true, $httponly = false, $samesite = 'Strict') {
 
-    if (PHP_VERSION_ID < 70300) {
-        @setcookie($name, $value, $expire, $path . '; samesite=' . $samesite, $domain, $secure, $httponly);
-        return;
-    }
-
     // allow the cookie options to be filtered
     $cookie_data = apply_filters('mailchimp_cookie_data', [
         'name' => $name,

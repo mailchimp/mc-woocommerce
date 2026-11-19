@@ -1,5 +1,18 @@
 == Changelog ==
 = 6.4 =
+* Adds an order sync history panel to the WooCommerce order screen showing why an order synced or was skipped
+* Requires WordPress 6.6 or later for the rebuilt checkout blocks
+* Checkout no longer waits on Mailchimp for GDPR marketing permission fields; they are read locally and refreshed in the background
+* Registers the store's public address with Mailchimp, including stores in a sub-directory
+* Loads pixel tracking only when the Mailchimp site code snippet is active
+* Restricts remote support routes to WooCommerce API keys with the right permissions
+* Escapes account details and checkout consent text in rendered pages
+* Limits log deletion to the plugin's own log files
+* Verifies the server certificate when looking up the store's server address
+* Stops sending partial customer addresses to Mailchimp
+* Improves cart recovery and subscriber status handling
+* Fixes a PHP 8.4 deprecation warning for a nullable parameter
+* Updates JavaScript dependencies in the checkout blocks
 = 6.3 =
 * Adds a "Connect to support" button to the plugin settings page that opens a Zendesk live chat when clicked
 * Adds product-view pixel tracking on page-builder product templates, including Bricks

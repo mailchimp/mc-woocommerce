@@ -2,12 +2,12 @@
 Contributors: ryanhungate, Mailchimp
 Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
-Requires at least: 6.2
+Requires at least: 6.6
 Tested up to: 7.1
 Stable tag: 6.3
 Requires PHP: 7.4
 WC requires at least: 8.2
-WC tested up to: 11.1
+WC tested up to: 11.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Connect your store to your Mailchimp audience to track sales, create targeted emails, send abandoned cart emails, and more.
@@ -35,7 +35,7 @@ WordPress.com compatibility is limited to Business tier users only.
 ###Before You Start
 Here are some things to know before you begin this process.
 - This plugin requires you to have the [WooCommerce plugin](https://woocommerce.com/) already installed and activated in WordPress.
-- Your hosting environment must meet [WooCommerce's minimum requirements](https://docs.woocommerce.com/document/server-requirements), including PHP 7.0 or greater.
+- Your hosting environment must meet [WooCommerce's server requirements](https://woocommerce.com/document/server-requirements/). PHP 7.4 is the minimum; PHP 8.3 or newer is recommended.
 - `WP_CRON` must be activated with your hosting provider to sync data. Please verify that it is enabled.
 - We recommend you use this plugin in a staging environment before installing it on production servers. To learn more about staging environments, [check out these related Wordpress plugins](https://wordpress.org/plugins/search.php?q=staging).
 - Mailchimp for WooCommerce syncs the customer’s first name, last name, email address, and orders.
@@ -85,3 +85,16 @@ Zendesk [Terms of Service](https://www.zendesk.com/company/agreements-and-terms/
 
 == Changelog ==
 = 6.4 =
+* Adds an order sync history panel to the WooCommerce order screen showing why an order synced or was skipped
+* Requires WordPress 6.6 or later for the rebuilt checkout blocks
+* Checkout no longer waits on Mailchimp for GDPR marketing permission fields; they are read locally and refreshed in the background
+* Registers the store's public address with Mailchimp, including stores in a sub-directory
+* Loads pixel tracking only when the Mailchimp site code snippet is active
+* Restricts remote support routes to WooCommerce API keys with the right permissions
+* Escapes account details and checkout consent text in rendered pages
+* Limits log deletion to the plugin's own log files
+* Verifies the server certificate when looking up the store's server address
+* Stops sending partial customer addresses to Mailchimp
+* Improves cart recovery and subscriber status handling
+* Fixes a PHP 8.4 deprecation warning for a nullable parameter
+* Updates JavaScript dependencies in the checkout blocks

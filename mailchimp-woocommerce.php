@@ -24,10 +24,11 @@
  * Text Domain:       mailchimp-for-woocommerce
  * Domain Path:       /languages
  * Requires Plugins: woocommerce
- * Requires at least: 6.2
+ * Requires at least: 6.6
  * Tested up to: 7.1
  * WC requires at least: 8.2
- * WC tested up to: 11.1
+ * WC tested up to: 11.3
+ * Requires PHP: 7.4
  */
 
 // If this file is called directly, abort.

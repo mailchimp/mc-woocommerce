@@ -3251,7 +3251,10 @@ class MailChimp_WooCommerce_MailChimpApi {
             mailchimp_debug('api.debug', 'message headers', ['headers' => $info['request_header']]);
         }
 
-		curl_close( $curl );
+		// only PHP 7 needs this - it does nothing on 8.0+ and is deprecated from 8.5.
+		if ( PHP_VERSION_ID < 80000 ) {
+			curl_close( $curl );
+		}
 
 		// Initialize error info array
 		if ( $err ) {

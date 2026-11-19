@@ -137,7 +137,8 @@ check(preg_match('/->update\([^;]*\btrue\)\s*;/', $job) === 1 && preg_match_all(
 $bootstrap = file_get_contents(dirname(__DIR__, 2) . '/bootstrap.php');
 $fn = substr($bootstrap, strpos($bootstrap, 'function mailchimp_member_data_update('));
 $fn = substr($fn, 0, strpos($fn, "\n}\n"));
-check(preg_match('/->update\(\s*\$list_id,\s*\$user_email,\s*\$status_if_new,[^;]*\$caller === \'cart\'\s*\)/s', $fn) === 1, 'mailchimp_member_data_update must send status_if_new for the cart caller');
+check(strpos($fn, "\$only_if_new = \$only_if_new === null ? \$caller === 'cart' : (bool) \$only_if_new;") !== false, 'the cart caller must default to status_if_new');
+check(preg_match('/->update\(\s*\$list_id,\s*\$user_email,\s*\$status_if_new,[^;]*\$only_if_new\s*\)/s', $fn) === 1, 'mailchimp_member_data_update must send status_if_new for the cart caller');
 
 // --- and the service no longer reads the flag at all ------------------------------------------------
 $service = file_get_contents(dirname(__DIR__, 2) . '/includes/class-mailchimp-woocommerce-service.php');

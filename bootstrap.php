@@ -2110,7 +2110,15 @@ function mailchimp_settings_errors() {
  * @throws MailChimp_WooCommerce_RateLimitError
  * @throws MailChimp_WooCommerce_ServerError
  */
-function mailchimp_member_data_update($user_email = null, $language = null, $caller = '', $status_if_new = 'transactional', $order = null, $gdpr_fields = null, $live_traffic = null) {
+function mailchimp_member_data_update($user_email = null, $language = null, $caller = '', $status_if_new = 'transactional', $order = null, $gdpr_fields = null, $live_traffic = null, $only_if_new = null) {
+    // carts never change an existing contact's status; other callers have to ask for that.
+    $only_if_new = $only_if_new === null ? $caller === 'cart' : (bool) $only_if_new;
+    // Mailchimp only accepts a status name. A boolean (or anything else) is a caller bug:
+    // map it to a name and make sure it can only apply to a contact Mailchimp has to create.
+    if (!is_string($status_if_new) || $status_if_new === '') {
+        $status_if_new = $status_if_new === true ? 'subscribed' : 'transactional';
+        $only_if_new = true;
+    }
     mailchimp_debug('debug', "mailchimp_member_data_update", array(
         'user_email' => $user_email,
         'user_language' => $language,
@@ -2165,7 +2173,7 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
                     null,
                     $language,
                     $gdpr_fields_to_save,
-                    $caller === 'cart'
+                    $only_if_new
                 );
 
             // if we are passing over a value that's not subscribed and mailchimp returns subscribed

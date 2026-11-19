@@ -400,9 +400,12 @@ class MailChimp_WooCommerce_Single_Order extends Mailchimp_Woocommerce_Job
             mailchimp_log('order_submit.success', $log);
 
             if ($new_order && $this->is_full_sync) {
-                // if the customer has a flag to double opt in - we need to push this data over to MailChimp as pending
-                $status_if_new = (isset($should_auto_subscribe) && $should_auto_subscribe) || $order->getCustomer()->getOptInStatus();
-                mailchimp_member_data_update($email, $this->user_language, 'order', $status_if_new, $order, $this->gdpr_fields, false);
+                // Mailchimp needs a status name here, not a boolean (issue #1475).
+                $wants_subscribed = (isset($should_auto_subscribe) && $should_auto_subscribe) || $order->getCustomer()->getOptInStatus();
+                $status_if_new = $wants_subscribed ? 'subscribed' : 'transactional';
+                // a historical order is not new consent: only_if_new sends this as status_if_new, so a
+                // contact already in the audience (unsubscribed included) keeps the status they have.
+                mailchimp_member_data_update($email, $this->user_language, 'order', $status_if_new, $order, $this->gdpr_fields, false, true);
             }
 
             return $api_response;

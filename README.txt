@@ -96,5 +96,6 @@ Zendesk [Terms of Service](https://www.zendesk.com/company/agreements-and-terms/
 * Verifies the server certificate when looking up the store's server address
 * Stops sending partial customer addresses to Mailchimp
 * Improves cart recovery and subscriber status handling
+* Fixes the contact update that failed after each order during the initial sync, without changing the status of existing contacts
 * Fixes a PHP 8.4 deprecation warning for a nullable parameter
 * Updates JavaScript dependencies in the checkout blocks

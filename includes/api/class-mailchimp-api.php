@@ -12,6 +12,8 @@ class MailChimp_WooCommerce_MailChimpApi {
     protected $allow_audience_put = true;
     protected $auto_doi = false;
     protected $is_syncing = null;
+	/** @var null|array HTTP status and decoded body of the most recent API response, for error reporting. */
+	protected $last_response = null;
 
 	/** @var null|MailChimp_WooCommerce_MailChimpApi */
 	protected static $instance = null;
@@ -1596,15 +1598,46 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 * @return bool
 	 */
 	public function deleteStore( $store_id ) {
+		$this->last_response = null;
 		try {
-			return (bool) $this->delete( "ecommerce/stores/$store_id" );
-		} catch ( MailChimp_WooCommerce_Error $e ) {
-			mailchimp_error( "delete_store {$store_id}", $e->getMessage() );
-			return false;
-		} catch ( Exception $e ) {
-			mailchimp_error( "delete_store {$store_id}", $e->getMessage() );
-			return false;
+			if ( $this->delete( "ecommerce/stores/$store_id" ) ) {
+				return true;
+			}
+			// no exception, but Mailchimp did not confirm the delete either.
+			$this->logDeleteStoreFailure( $store_id, 'Mailchimp did not confirm the delete' );
+		} catch ( Throwable $e ) {
+			$this->logDeleteStoreFailure( $store_id, $e->getMessage(), $e );
 		}
+		return false;
+	}
+
+	/**
+	 * A store that could not be deleted stays behind in the Mailchimp account, so always say why.
+	 *
+	 * @param $store_id
+	 * @param string $reason
+	 * @param null|Throwable $e
+	 */
+	protected function logDeleteStoreFailure( $store_id, $reason, $e = null ) {
+		$last    = is_array( $this->last_response ) ? $this->last_response : array();
+		$body    = isset( $last['data'] ) && is_array( $last['data'] ) ? $last['data'] : array();
+		$status  = isset( $last['http_code'] ) ? (int) $last['http_code'] : ( $e ? (int) $e->getCode() : 0 );
+		$context = array(
+			'http_status' => $status > 0 ? $status : 'no response',
+		);
+		// the 403 exception carries no message of its own.
+		if ( $reason === '' ) {
+			$reason = $status === 403 ? 'Mailchimp refused the request (forbidden or rate limited)' : 'no reason given';
+		}
+		foreach ( array( 'title', 'detail' ) as $key ) {
+			if ( isset( $body[ $key ] ) && is_string( $body[ $key ] ) ) {
+				$context[ $key ] = $body[ $key ];
+			}
+		}
+		if ( $e ) {
+			$context['exception'] = get_class( $e );
+		}
+		mailchimp_error( 'store.delete', "Store {$store_id} was not deleted from Mailchimp: {$reason}", $context );
 	}
 
 	/**
@@ -3277,12 +3310,16 @@ class MailChimp_WooCommerce_MailChimpApi {
 				);
 			}
 
+			$this->last_response = array( 'http_code' => 0, 'data' => null );
+
 			throw new MailChimp_WooCommerce_Error( 'CURL error :: ' . $err, 500 );
 		}
 
 		$data = json_decode( $response, true );
 
 		$http_code  = ! empty( $info ) && isset( $info['http_code'] ) ? $info['http_code'] : -1;
+
+		$this->last_response = array( 'http_code' => (int) $http_code, 'data' => $data );
 		$called_url = ! empty( $info ) && isset( $info['url'] ) ? $info['url'] : 'none';
 
 		// let's block these from doing anything below because the API seems to be having trouble.

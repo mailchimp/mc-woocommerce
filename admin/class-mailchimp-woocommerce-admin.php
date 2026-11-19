@@ -69,10 +69,14 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		if ( ( $store_id = mailchimp_get_store_id() ) && ( $mc = mailchimp_get_api() ) ) {
 			\Mailchimp_Woocommerce_DB_Helpers::set_transient( 'mailchimp_disconnecting_store', true, 15 );
 			if ( $mc->deleteStore( $store_id ) ) {
-				mailchimp_log( 'store.disconnected', 'Store id ' . mailchimp_get_store_id() . ' has been disconnected' );
+				mailchimp_log( 'store.disconnected', 'Store id ' . $store_id . ' has been disconnected' );
 			} else {
-				mailchimp_log( 'store.NOT DISCONNECTED', 'Store id ' . mailchimp_get_store_id() . ' has NOT been disconnected' );
+				// deleteStore() has just logged the reason under store.delete.
+				mailchimp_error( 'store.NOT DISCONNECTED', 'Store id ' . $store_id . ' has NOT been deleted from Mailchimp. The plugin was disconnected on this site, but the store is still in the Mailchimp account.' );
 			}
+		} elseif ( $clean_hooks ) {
+			// a real disconnect (not the reset before a new connection) that had nothing to delete with.
+			mailchimp_log( 'store.NOT DISCONNECTED', 'No delete was sent to Mailchimp while disconnecting because ' . ( empty( $store_id ) ? 'this site has no store id' : 'there is no API key' ) . '.' );
 		}
 
         if ($clean_hooks) {

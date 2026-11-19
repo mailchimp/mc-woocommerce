@@ -39,7 +39,7 @@ jobs:
       matrix:
         include:
           - php: '7.4'
-            wordpress: '6.2'
+            wordpress: '6.6'
             woocommerce: '8.2.0'
           - php: '8.2'
             wordpress: '7.0'

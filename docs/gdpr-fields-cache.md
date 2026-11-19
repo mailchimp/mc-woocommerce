@@ -39,6 +39,6 @@ WooCommerce and this plugin, and no external object cache. It invokes the real
 classic checkout renderer, newsletter Block data provider, shared admin priming,
 SQL-backed Action Scheduler and cache APIs. Only the Mailchimp response is
 substituted: a slow fixture proves checkout makes zero API calls while the worker
-handles success/failure. Fixtures are cleaned up. CI covers WordPress 6.2 /
+handles success/failure. Fixtures are cleaned up. CI covers WordPress 6.6 /
 WooCommerce 8.2 / PHP 7.4 and WordPress 7.0 / WooCommerce 11.2.1 / PHP 8.2.
 Live Mailchimp performance and third-party checkout customizations require staging QA.

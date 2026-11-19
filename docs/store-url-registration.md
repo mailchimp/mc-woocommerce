@@ -36,7 +36,7 @@ blocked. It covers normal, Bedrock, separate public/core hosts, subfolder/port,
 filtered public URLs, legacy identity recovery, duplicate conflicts, unrelated
 platforms/paths/hosts, API failures, and invalid public addresses.
 
-CI runs WordPress 6.2 / WooCommerce 8.2.0 / PHP 7.4 and WordPress 7.0 /
+CI runs WordPress 6.6 / WooCommerce 8.2.0 / PHP 7.4 and WordPress 7.0 /
 WooCommerce 11.2.1 / PHP 8.2.
 
 ## Connected staging QA before release

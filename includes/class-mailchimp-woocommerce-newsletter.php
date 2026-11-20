@@ -47,19 +47,18 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
         $allow_admin = defined('MAILCHIMP_ALLOW_ADMIN_NEWSLETTER') && MAILCHIMP_ALLOW_ADMIN_NEWSLETTER;
 
         if ($allow_admin || !is_admin()) {
-            $api = mailchimp_get_api();
-
-            // get the gdpr fields from the cache - or call it again and save for 5 minutes.
-            $GDPRfields = $api->getCachedGDPRFields(mailchimp_get_list_id());
-
-            // if the user has chosen to hide the checkbox, don't do anything.
+            // Hidden checkout fields need neither cached definitions nor a refresh.
             if (($default_setting = $this->getOption('mailchimp_checkbox_defaults', 'check')) === 'hide') {
                 return;
             }
+            $GDPRfields = mailchimp_get_api()->getCachedGDPRFields(mailchimp_get_list_id());
 
             // allow the user to specify the text in the newsletter label.
             $label = $this->getOption('newsletter_label');
             if ($label == '') $label = __('Subscribe to our newsletter', 'mailchimp-for-woocommerce');
+            // merchants may put a link and a line break in the label (privacy policy links),
+            // so filter to exactly what the settings screen allows instead of plain text escaping.
+            $label = wp_kses($label, mailchimp_newsletter_label_allowed_html());
             // if the user chose 'check' or nothing at all, we default to true.
             $default_checked = $default_setting === 'check';
             $gdpr_statuses = false;
@@ -80,6 +79,9 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
             }
 
 
+            // A cold cache must not silently opt a new customer into marketing.
+            if ($GDPRfields === null) { $status = false; }
+
             // echo out the subscription checkbox.
             $checkbox = '<p class="form-row form-row-wide mailchimp-newsletter">';
             $checkbox .= '<label for="mailchimp_woocommerce_newsletter" class="woocommerce-form__label woocommerce-form__label-for-checkbox inline">';
@@ -92,14 +94,15 @@ class MailChimp_Newsletter extends MailChimp_WooCommerce_Options
             if (!empty($GDPRfields) && is_array($GDPRfields)) {
                 $checkbox .= "<div style='display: " . ($gdpr_statuses ? 'none' : 'block') . "'>";
                 $checkbox .= "<div id='mailchimp-gdpr-fields'><p>";
-                $checkbox .= __('Please select all the ways you would like to hear from us', 'mailchimp-for-woocommerce');
+                $checkbox .= esc_html__('Please select all the ways you would like to hear from us', 'mailchimp-for-woocommerce');
                 $checkbox .= "<div class='clear' ></div>";
 
                 foreach ($GDPRfields as $key => $field) {
-                    $marketing_permission_id = $field['marketing_permission_id'];
+                    // these come from the merchant's Mailchimp audience, treat them as plain text.
+                    $marketing_permission_id = esc_attr($field['marketing_permission_id']);
 
                     $gdpr_checked = $field['enabled'];
-                    $text = $field['text'];
+                    $text = esc_html($field['text']);
 
                     // Add to the checkbox output
                     $checkbox .= "<input type='hidden' value='0' name='mailchimp_woocommerce_gdpr[{$marketing_permission_id}]'>";

@@ -12,6 +12,8 @@ class MailChimp_WooCommerce_MailChimpApi {
     protected $allow_audience_put = true;
     protected $auto_doi = false;
     protected $is_syncing = null;
+	/** @var null|array HTTP status and decoded body of the most recent API response, for error reporting. */
+	protected $last_response = null;
 
 	/** @var null|MailChimp_WooCommerce_MailChimpApi */
 	protected static $instance = null;
@@ -19,6 +21,8 @@ class MailChimp_WooCommerce_MailChimpApi {
 	// static, not per-instance: several jobs build their own API objects.
 	/** @var null|int */
 	protected static $job_notified_at = null;
+	/** @var null|int Immediate live-hook timestamp, separate from queued-job metadata. */
+	protected static $live_notified_at = null;
 
 	/**
 	 * Set by the job runner for the duration of one job; null clears it.
@@ -26,7 +30,36 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 * @param int|null $timestamp
 	 */
 	public static function setJobNotifiedAt( $timestamp ) {
-		static::$job_notified_at = ! empty( $timestamp ) ? (int) $timestamp : null;
+		static::$job_notified_at = is_int( $timestamp ) && $timestamp > 0 ? $timestamp : null;
+	}
+
+	/**
+	 * Run a callback with this API instance and restore both timestamp contexts in finally.
+	 * Omit the second argument for an immediate live mutation (event time). Supplying
+	 * a positive integer uses that queued job's first eligibility time; explicitly
+	 * passing null or invalid metadata suppresses the timestamp, never using time().
+	 * Historical requests and GET requests remain suppressed by the header builder.
+	 *
+	 * @param \Closure $callback Receives this API instance.
+	 * @param int|null $use_job_meta_timestamp Original queued job eligibility time.
+	 * @return mixed Callback result.
+	 */
+	public function executeCallback(\Closure $callback, $use_job_meta_timestamp = null) {
+		$previous_job = static::$job_notified_at;
+		$previous_live = static::$live_notified_at;
+		if (func_num_args() > 1) {
+			static::setJobNotifiedAt($use_job_meta_timestamp);
+			static::$live_notified_at = null;
+		} else {
+			static::$job_notified_at = null;
+			static::$live_notified_at = time();
+		}
+		try {
+			return $callback($this);
+		} finally {
+			static::$job_notified_at = $previous_job;
+			static::$live_notified_at = $previous_live;
+		}
 	}
 
 	/**
@@ -154,7 +187,7 @@ class MailChimp_WooCommerce_MailChimpApi {
             if (($dc = $this->data_center)) {
                 $token = str_replace("-$dc", "", $token);
             }
-            $metdata_response = wp_remote_get( "https://login.mailchimp.com/oauth2/metadata?oauth_token={$token}", array(
+            $metdata_response = wp_remote_get( mailchimp_get_login_url( 'oauth2/metadata' ) . "?oauth_token={$token}", array(
                 'headers' => array(
                     'Accept' => 'application/json',
                 ),
@@ -1288,7 +1321,7 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 * @throws MailChimp_WooCommerce_RateLimitError
 	 * @throws MailChimp_WooCommerce_ServerError
 	 */
-	public function orders( $store_id, $page = 1, $count = 10, DateTime $since = null, $campaign_id = null ) {
+	public function orders( $store_id, $page = 1, $count = 10, ?DateTime $since = null, $campaign_id = null ) {
 		return $this->get(
 			'ecommerce/stores/' . $store_id . '/orders',
 			array(
@@ -1565,15 +1598,46 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 * @return bool
 	 */
 	public function deleteStore( $store_id ) {
+		$this->last_response = null;
 		try {
-			return (bool) $this->delete( "ecommerce/stores/$store_id" );
-		} catch ( MailChimp_WooCommerce_Error $e ) {
-			mailchimp_error( "delete_store {$store_id}", $e->getMessage() );
-			return false;
-		} catch ( Exception $e ) {
-			mailchimp_error( "delete_store {$store_id}", $e->getMessage() );
-			return false;
+			if ( $this->delete( "ecommerce/stores/$store_id" ) ) {
+				return true;
+			}
+			// no exception, but Mailchimp did not confirm the delete either.
+			$this->logDeleteStoreFailure( $store_id, 'Mailchimp did not confirm the delete' );
+		} catch ( Throwable $e ) {
+			$this->logDeleteStoreFailure( $store_id, $e->getMessage(), $e );
 		}
+		return false;
+	}
+
+	/**
+	 * A store that could not be deleted stays behind in the Mailchimp account, so always say why.
+	 *
+	 * @param $store_id
+	 * @param string $reason
+	 * @param null|Throwable $e
+	 */
+	protected function logDeleteStoreFailure( $store_id, $reason, $e = null ) {
+		$last    = is_array( $this->last_response ) ? $this->last_response : array();
+		$body    = isset( $last['data'] ) && is_array( $last['data'] ) ? $last['data'] : array();
+		$status  = isset( $last['http_code'] ) ? (int) $last['http_code'] : ( $e ? (int) $e->getCode() : 0 );
+		$context = array(
+			'http_status' => $status > 0 ? $status : 'no response',
+		);
+		// the 403 exception carries no message of its own.
+		if ( $reason === '' ) {
+			$reason = $status === 403 ? 'Mailchimp refused the request (forbidden or rate limited)' : 'no reason given';
+		}
+		foreach ( array( 'title', 'detail' ) as $key ) {
+			if ( isset( $body[ $key ] ) && is_string( $body[ $key ] ) ) {
+				$context[ $key ] = $body[ $key ];
+			}
+		}
+		if ( $e ) {
+			$context['exception'] = get_class( $e );
+		}
+		mailchimp_error( 'store.delete', "Store {$store_id} was not deleted from Mailchimp: {$reason}", $context );
 	}
 
 	/**
@@ -2638,29 +2702,11 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 * @param $list_id
 	 * @param int     $minutes
 	 *
-	 * @return array|mixed
+	 * @return array|null Cached definitions, or null while the first refresh is pending.
 	 */
 	public function getCachedGDPRFields( $list_id, $minutes = 5 ) {
-		$transient  = "mailchimp-woocommerce-gdpr-fields.{$list_id}";
-		$GDPRfields = get_transient( $transient );
-
-		// only return the values if it's a false - or an array
-		if ( is_array( $GDPRfields ) ) {
-			return $GDPRfields;
-		}
-
-        $filteredMinutes = (int) apply_filters('mailchimp_checkout_overwrite_gdpr_cache_minutes', $minutes);
-        $minutes = $filteredMinutes <= 0 ? $minutes : $filteredMinutes;
-
-		try {
-			$GDPRfields = $this->getGDPRFields( $list_id );
-			set_transient( $transient, $GDPRfields, 60 * $minutes );
-		} catch ( Exception $e ) {
-			$GDPRfields = array();
-		}
-
-		return $GDPRfields;
-	}
+        return MailChimp_WooCommerce_GDPR_Fields::get($list_id, $minutes);
+    }
 
 	/**
 	 * @param $list_id
@@ -2672,14 +2718,17 @@ class MailChimp_WooCommerce_MailChimpApi {
 	 */
 	public function getGDPRFields( $list_id ) {
 		$one_member = $this->get( "lists/$list_id/members?fields=members.marketing_permissions&count=1" );
-		$fields     = array();
-
-		if ( is_array( $one_member ) &&
-			isset( $one_member['members'] ) &&
-			isset( $one_member['members'][0] ) &&
-			isset( $one_member['members'][0]['marketing_permissions'] ) ) {
-			$fields = $one_member['members'][0]['marketing_permissions'];
-		}
+        if (!is_array($one_member) || !isset($one_member['members']) || !is_array($one_member['members'])) {
+            throw new UnexpectedValueException('Invalid GDPR members response');
+        }
+        $fields = array();
+        if (!empty($one_member['members'])) {
+            if (!isset($one_member['members'][0]) || !is_array($one_member['members'][0]) ||
+                (isset($one_member['members'][0]['marketing_permissions']) && !is_array($one_member['members'][0]['marketing_permissions']))) {
+                throw new UnexpectedValueException('Invalid GDPR permissions response');
+            }
+            $fields = isset($one_member['members'][0]['marketing_permissions']) ? $one_member['members'][0]['marketing_permissions'] : array();
+        }
 
 		return $fields;
 	}
@@ -3175,8 +3224,9 @@ class MailChimp_WooCommerce_MailChimpApi {
             $headers[] = 'X-Data-Mode: historical';
         }
 
-        if (static::$job_notified_at) {
-            $headers[] = 'X-Object-Notified-At: ' . static::$job_notified_at;
+        $notified_at = static::$live_notified_at !== null ? static::$live_notified_at : static::$job_notified_at;
+        if (!$this->is_syncing && $notified_at !== null && in_array(strtoupper($method), array('POST', 'PUT', 'PATCH', 'DELETE'), true)) {
+            $headers[] = 'X-Object-Notified-At: ' . $notified_at;
         }
 
         if ($this->auto_doi) {
@@ -3234,7 +3284,10 @@ class MailChimp_WooCommerce_MailChimpApi {
             mailchimp_debug('api.debug', 'message headers', ['headers' => $info['request_header']]);
         }
 
-		curl_close( $curl );
+		// only PHP 7 needs this - it does nothing on 8.0+ and is deprecated from 8.5.
+		if ( PHP_VERSION_ID < 80000 ) {
+			curl_close( $curl );
+		}
 
 		// Initialize error info array
 		if ( $err ) {
@@ -3257,12 +3310,16 @@ class MailChimp_WooCommerce_MailChimpApi {
 				);
 			}
 
+			$this->last_response = array( 'http_code' => 0, 'data' => null );
+
 			throw new MailChimp_WooCommerce_Error( 'CURL error :: ' . $err, 500 );
 		}
 
 		$data = json_decode( $response, true );
 
 		$http_code  = ! empty( $info ) && isset( $info['http_code'] ) ? $info['http_code'] : -1;
+
+		$this->last_response = array( 'http_code' => (int) $http_code, 'data' => $data );
 		$called_url = ! empty( $info ) && isset( $info['url'] ) ? $info['url'] : 'none';
 
 		// let's block these from doing anything below because the API seems to be having trouble.

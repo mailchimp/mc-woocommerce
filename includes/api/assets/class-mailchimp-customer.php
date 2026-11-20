@@ -432,6 +432,12 @@ class MailChimp_WooCommerce_Customer {
 	public function toArray() {
 		$address = $this->getAddress()->toArray();
 
+		// Mailchimp copies the customer address into the contact's ADDRESS merge field. One without a
+		// street, city or postcode leaves the contact ignoring later merge field updates.
+		if ( empty( $address['address1'] ) || empty( $address['city'] ) || empty( $address['postal_code'] ) ) {
+			$address = array();
+		}
+
 		$array = array(
 			'id'            => (string) $this->getId(),
 			'email_address' => (string) $this->getEmailAddress(),

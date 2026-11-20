@@ -26,8 +26,8 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Job' ) ) {
 		 * @return $this
 		 */
 		public function set_notified_at( $timestamp ) {
-			if ( empty( $this->notified_at ) && ! empty( $timestamp ) ) {
-				$this->notified_at = (int) $timestamp;
+			if ( $this->notified_at === null && is_int( $timestamp ) && $timestamp > 0 ) {
+				$this->notified_at = $timestamp;
 			}
 			return $this;
 		}
@@ -36,7 +36,7 @@ if ( ! class_exists( 'Mailchimp_Woocommerce_Job' ) ) {
 		 * @return int|null
 		 */
 		public function get_notified_at() {
-			return ! empty( $this->notified_at ) ? (int) $this->notified_at : null;
+			return is_int( $this->notified_at ) && $this->notified_at > 0 ? $this->notified_at : null;
 		}
 
 		/**

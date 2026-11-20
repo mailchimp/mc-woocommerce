@@ -811,10 +811,17 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 		$akamai_block   = false;
 
 		if ( (bool) $enable ) {
-			mailchimp_set_data( 'tower.token', $support_token = wp_generate_password(12, false, false) );
+			// Tower calls /tower/verify with this token before it confirms, so it has to be
+			// good for that one call now. It only becomes the support token once Tower says yes.
+			$support_token = wp_generate_password(12, false, false);
+			\Mailchimp_Woocommerce_DB_Helpers::set_transient( 'mailchimp-woocommerce-tower.pending_token', $support_token, 60 );
 		} else {
+			// Tower needs the current token to remove the store, but the merchant's opt-out
+			// applies on this store right away, whatever Tower answers.
 			$support_token = mailchimp_get_data( 'tower.token' );
+			\Mailchimp_Woocommerce_DB_Helpers::delete_option( 'mailchimp-woocommerce-tower.token' );
 			\Mailchimp_Woocommerce_DB_Helpers::delete_option( 'mailchimp-woocommerce-tower.support_token' );
+			mailchimp_set_data( 'tower.opt', 0 );
 		}
 
         if (defined('MAILCHIMP_DEBUG') && MAILCHIMP_DEBUG === true) {
@@ -882,6 +889,7 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 			$data = array();
 		}
 
+		$result = null;
 		try {
 			$payload  = array(
 				'headers' => array(
@@ -903,19 +911,26 @@ class MailChimp_WooCommerce_Tower extends Mailchimp_Woocommerce_Job {
 				'timeout' => 30,
 			);
 			$response = wp_remote_post( $post_url, $payload );
-            if (isset($response['code']) && $response['code'] !== 200) {
-                return ['success' => false, 'code' => $response['code'], 'message' => $response['message']];
-            }
             if (defined('MAILCHIMP_DEBUG') && MAILCHIMP_DEBUG === true) {
                 mailchimp_debug('tower.remote_support', "trace.step_3", array(
                     'response' => $response,
                 ));
             }
-			return json_decode( $response['body'] );
+			$result = json_decode( $response['body'] );
 		} catch ( Throwable $e ) {
             mailchimp_error("could not toggle support", $e->getMessage());
-			return null;
 		}
+
+		if ( (bool) $enable ) {
+			\Mailchimp_Woocommerce_DB_Helpers::delete_transient( 'mailchimp-woocommerce-tower.pending_token' );
+			// a failed enable leaves no new token behind, and whatever was there before stays as it was.
+			if ( is_object( $result ) && ! empty( $result->success ) ) {
+				mailchimp_set_data( 'tower.token', $support_token );
+				mailchimp_set_data( 'tower.opt', 1 );
+			}
+		}
+
+		return $result;
 	}
 
 	/**

@@ -15,6 +15,7 @@ spl_autoload_register(function($class) {
         // includes root
         'MailChimp_Service' => 'includes/class-mailchimp-woocommerce-service.php',
         'MailChimp_WooCommerce_Options' => 'includes/class-mailchimp-woocommerce-options.php',
+        'MailChimp_WooCommerce_GDPR_Fields' => 'includes/class-mailchimp-woocommerce-gdpr-fields.php',
         'MailChimp_Newsletter' => 'includes/class-mailchimp-woocommerce-newsletter.php',
         'MailChimp_Sms_Consent' => 'includes/class-mailchimp-woocommerce-sms-consent.php',
         'MailChimp_WooCommerce_Loader' => 'includes/class-mailchimp-woocommerce-loader.php',
@@ -27,6 +28,7 @@ spl_autoload_register(function($class) {
         'MailChimp_WooCommerce_Rest_Api' => 'includes/class-mailchimp-woocommerce-rest-api.php',
         'Mailchimp_Wocoomerce_CLI' => 'includes/class-mailchimp-woocommerce-cli.php',
         'MailChimp_WooCommerce_HPOS' => 'includes/class-mailchimp-woocommerce-hpos.php',
+        'MailChimp_WooCommerce_Order_Sync_History' => 'includes/class-mailchimp-woocommerce-order-sync-history.php',
         'Mailchimp_Woocommerce_Block_Editor' => 'includes/class-mailchimp-woocommerce-block-editor.php',
 
         // includes/api/assets
@@ -106,6 +108,8 @@ spl_autoload_register(function($class) {
     }
 });
 
+add_action(MailChimp_WooCommerce_GDPR_Fields::HOOK, array('MailChimp_WooCommerce_GDPR_Fields', 'refresh'), 10, 2);
+
 /**
  * Build (and cache per request) the environment-variables snapshot. This
  * function gets called from dozens of logging / version / config sites per
@@ -135,7 +139,7 @@ function mailchimp_environment_variables($refresh = false) {
     $cached = (object) array(
         'repo' => 'master',
         'environment' => 'production', // staging or production
-        'version' => '6.3',
+        'version' => '6.4',
         'php_version' => phpversion(),
         'wp_version' => (empty($wp_version) ? 'Unknown' : $wp_version),
         'wc_version' => function_exists('WC') ? WC()->version : null,
@@ -899,6 +903,33 @@ function mailchimp_common_loopback_ips(){
 }
 
 /**
+ * @return string
+ */
+function mailchimp_get_store_domain() {
+    // Connected Sites uses the public host, not the WordPress core directory.
+    $host = wp_parse_url(home_url(), PHP_URL_HOST);
+    return is_string($host) ? strtolower($host) : '';
+}
+
+/**
+ * Match the public domain while retaining stores registered by older releases.
+ * Do not strip arbitrary paths or www: those can identify a different store.
+ *
+ * @param string $domain Mailchimp's stored domain or legacy URL.
+ * @return bool
+ */
+function mailchimp_store_domain_matches($domain) {
+    $host = mailchimp_get_store_domain();
+    if (!is_string($domain) || $domain === '' || $host === '') {
+        return false;
+    }
+
+    $domain = rtrim($domain, '/');
+    return in_array(strtolower($domain), array($host, 'https://' . $host, 'http://' . $host), true) ||
+        in_array($domain, array(rtrim(home_url(), '/'), rtrim(get_option('siteurl'), '/')), true);
+}
+
+/**
  * @return mixed|string
  */
 function mailchimp_get_store_id() {
@@ -926,7 +957,8 @@ function mailchimp_get_store_id() {
             if (!empty($stores)) {
                 //iterate thru stores, find correct store ID and save it to db
                 foreach ($stores as $mc_store) {
-                    if ($mc_store->getDomain() === get_option('siteurl')) {
+                    if (strtolower((string) $mc_store->getPlatform()) === 'woocommerce' &&
+                        mailchimp_store_domain_matches($mc_store->getDomain())) {
                         // Route through the helper so our in-process caches
                         // and object-cache invalidations stay consistent.
                         \Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp-woocommerce-store_id', $mc_store->getId(), 'yes');
@@ -1986,9 +2018,16 @@ function mailchimp_on_all_plugins_loaded() {
     run_mailchimp_woocommerce();
 }
 
-function mailchimp_get_allowed_capability() {
+/**
+ * Resolve the plugin capability for the current user or an API-key owner.
+ *
+ * @param int|null $user_id Explicit user ID, or null for the current user.
+ * @return string
+ */
+function mailchimp_get_allowed_capability($user_id = null) {
     $capability = 'manage_options';
-    if (current_user_can('manage_woocommerce') && mailchimp_get_option('mailchimp_permission_cap') == 'manage_woocommerce') {
+    $can_manage_woocommerce = $user_id === null ? current_user_can('manage_woocommerce') : user_can($user_id, 'manage_woocommerce');
+    if ($can_manage_woocommerce && mailchimp_get_option('mailchimp_permission_cap') == 'manage_woocommerce') {
         return 'manage_woocommerce';
     }
     return apply_filters('mailchimp_allowed_capability', $capability);
@@ -2071,7 +2110,15 @@ function mailchimp_settings_errors() {
  * @throws MailChimp_WooCommerce_RateLimitError
  * @throws MailChimp_WooCommerce_ServerError
  */
-function mailchimp_member_data_update($user_email = null, $language = null, $caller = '', $status_if_new = 'transactional', $order = null, $gdpr_fields = null, $live_traffic = null) {
+function mailchimp_member_data_update($user_email = null, $language = null, $caller = '', $status_if_new = 'transactional', $order = null, $gdpr_fields = null, $live_traffic = null, $only_if_new = null) {
+    // carts never change an existing contact's status; other callers have to ask for that.
+    $only_if_new = $only_if_new === null ? $caller === 'cart' : (bool) $only_if_new;
+    // Mailchimp only accepts a status name. A boolean (or anything else) is a caller bug:
+    // map it to a name and make sure it can only apply to a contact Mailchimp has to create.
+    if (!is_string($status_if_new) || $status_if_new === '') {
+        $status_if_new = $status_if_new === true ? 'subscribed' : 'transactional';
+        $only_if_new = true;
+    }
     mailchimp_debug('debug', "mailchimp_member_data_update", array(
         'user_email' => $user_email,
         'user_language' => $language,
@@ -2126,7 +2173,7 @@ function mailchimp_member_data_update($user_email = null, $language = null, $cal
                     null,
                     $language,
                     $gdpr_fields_to_save,
-                    $caller === 'cart'
+                    $only_if_new
                 );
 
             // if we are passing over a value that's not subscribed and mailchimp returns subscribed
@@ -2411,11 +2458,6 @@ function mailchimp_member_sms_update($user_email = null, $order_id = null, $user
  */
 function mailchimp_set_cookie($name, $value, $expire, $path, $domain = '', $secure = true, $httponly = false, $samesite = 'Strict') {
 
-    if (PHP_VERSION_ID < 70300) {
-        @setcookie($name, $value, $expire, $path . '; samesite=' . $samesite, $domain, $secure, $httponly);
-        return;
-    }
-
     // allow the cookie options to be filtered
     $cookie_data = apply_filters('mailchimp_cookie_data', [
         'name' => $name,
@@ -2467,6 +2509,55 @@ function mailchimp_get_outbound_ip() {
 }
 
 /**
+ * Base URL of the Mailchimp for WooCommerce auth server, optionally followed
+ * by a path. Defining MAILCHIMP_AUTH_SERVER_URL in wp-config.php points the
+ * connect flow at another host; anything that is not a plain http(s) origin
+ * is ignored and the production host is used.
+ *
+ * @param string $path
+ * @return string
+ */
+function mailchimp_get_auth_server_url($path = '') {
+    $base = 'https://woocommerce.mailchimpapp.com';
+    if (mailchimp_auth_server_is_overridden()) {
+        $base = rtrim(trim(MAILCHIMP_AUTH_SERVER_URL), '/');
+    }
+    return $path === '' ? $base : $base . '/' . ltrim($path, '/');
+}
+
+/**
+ * @return bool
+ */
+function mailchimp_auth_server_is_overridden() {
+    if (!defined('MAILCHIMP_AUTH_SERVER_URL') || !is_string(MAILCHIMP_AUTH_SERVER_URL)) {
+        return false;
+    }
+    return (bool) preg_match('#^https?://[a-z0-9.-]+(:\d+)?/?$#i', trim(MAILCHIMP_AUTH_SERVER_URL));
+}
+
+/**
+ * True when wp-config.php has define( 'MAILCHIMP_E2E', true ). The connect flow
+ * then asks the auth server for Mailchimp's E2E environment and the plugin talks
+ * to the E2E login host. Internal testing only.
+ *
+ * @return bool
+ */
+function mailchimp_is_e2e_environment() {
+    return defined('MAILCHIMP_E2E') && filter_var(MAILCHIMP_E2E, FILTER_VALIDATE_BOOLEAN) === true;
+}
+
+/**
+ * Base URL of Mailchimp's login host (OAuth metadata), optionally followed by a path.
+ *
+ * @param string $path
+ * @return string
+ */
+function mailchimp_get_login_url($path = '') {
+    $base = mailchimp_is_e2e_environment() ? 'https://e2e-login.mailchimp.com' : 'https://login.mailchimp.com';
+    return $path === '' ? $base : $base . '/' . ltrim($path, '/');
+}
+
+/**
  * @return bool
  */
 function mailchimp_render_gdpr_fields() {
@@ -2474,6 +2565,24 @@ function mailchimp_render_gdpr_fields() {
         return false;
     }
     return true;
+}
+
+/**
+ * The only markup a merchant may use in the checkout newsletter label:
+ * a link (privacy policy etc) and a line break. Used when the setting is
+ * saved and again when the label is printed.
+ *
+ * @return array
+ */
+function mailchimp_newsletter_label_allowed_html() {
+	return array(
+		'a'  => array(
+			'href'   => array(),
+			'title'  => array(),
+			'target' => array(),
+		),
+		'br' => array(),
+	);
 }
 
 function mailchimp_expanded_alowed_tags() {
@@ -3191,3 +3300,37 @@ function mailchimp_account_events() {
         ),
     );
 }
+
+/**
+ * Match a requested log file name against this plugin's own log files that
+ * actually exist in the WooCommerce log directory.
+ *
+ * Mirrors the allow-list the log viewer uses (see
+ * mailchimp_woocommerce_ajax_load_log_file): only files that live in WC_LOG_DIR,
+ * carry the plugin prefix and end in .log are eligible, keyed by sanitize_title
+ * so a stored handle maps back to a real file. Returns the real file name, or
+ * null when nothing legitimate matches. Pass scandir( WC_LOG_DIR ) as $files so
+ * this stays a pure, testable mapping and a crafted name can never resolve to a
+ * path outside the log directory.
+ *
+ * @param string|null $requested_log_file
+ * @param array       $files
+ * @return string|null
+ */
+function mailchimp_woocommerce_match_log_file($requested_log_file, $files) {
+    if ($requested_log_file === null || $requested_log_file === '') {
+        return null;
+    }
+    $logs = array();
+    foreach ((array) $files as $value) {
+        if (in_array($value, array('.', '..'), true)) {
+            continue;
+        }
+        if (mailchimp_string_contains($value, 'mailchimp_woocommerce') && substr($value, -4) === '.log') {
+            $logs[sanitize_title($value)] = $value;
+        }
+    }
+    $key = sanitize_title($requested_log_file);
+    return isset($logs[$key]) ? $logs[$key] : null;
+}
+

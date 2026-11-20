@@ -130,19 +130,19 @@ class MailChimp_WooCommerce_Rest_Api
         register_rest_route(static::$namespace, "/tower/subscriber_stats", array(
             'methods' => 'POST',
             'callback' => array($this, 'get_local_count_by_status'),
-            'permission_callback' => '__return_true',
+            'permission_callback' => array($this, 'permission_woo_read_callback'),
         ));
 
         register_rest_route(static::$namespace, "/tower/toggle_remote_support", array(
             'methods' => 'POST',
             'callback' => array($this, 'toggle_remote_support'),
-            'permission_callback' => '__return_true',
+            'permission_callback' => array($this, 'permission_woo_write_callback'),
         ));
 
         register_rest_route(static::$namespace, "/tower/get_store_id", array(
             'methods' => 'GET',
             'callback' => array($this, 'get_store_id'),
-            'permission_callback' => '__return_true',
+            'permission_callback' => array($this, 'permission_woo_read_callback'),
         ));
 
         register_rest_route(static::$namespace, '/pixel/atc', [
@@ -189,7 +189,7 @@ class MailChimp_WooCommerce_Rest_Api
      */
     public function verify_tower_connection(WP_REST_Request $request)
     {
-        $this->authorize('tower.token', $request);
+        $this->authorize('tower.token', $request, true);
         return $this->mailchimp_rest_response(array('success' => true));
     }
 
@@ -390,7 +390,6 @@ class MailChimp_WooCommerce_Rest_Api
      */
     public function get_store_id(WP_REST_Request $request)
     {
-        $this->authorizeWooToken($request);
         return $this->mailchimp_rest_response(array(
             'success' => true,
             'store_id' => mailchimp_get_store_id(),
@@ -399,8 +398,6 @@ class MailChimp_WooCommerce_Rest_Api
 
     public function toggle_remote_support(WP_REST_Request $request)
     {
-        $this->authorizeWooToken($request);
-
         $body = $request->get_json_params();
         $toggle = isset($body['toggle']) ? $body['toggle'] : null;
         if (!is_bool($toggle)) {
@@ -412,7 +409,6 @@ class MailChimp_WooCommerce_Rest_Api
         $tower = new MailChimp_WooCommerce_Tower(mailchimp_get_store_id());
         $result = $tower->toggle($toggle);
         if ( $result && isset($result->success) && $result->success) {
-            \Mailchimp_Woocommerce_DB_Helpers::update_option('mailchimp-woocommerce-tower.opt', $toggle, 'yes');
             return $this->mailchimp_rest_response(array(
                 'success' => true,
                 'store_id' => mailchimp_get_store_id(),
@@ -427,8 +423,6 @@ class MailChimp_WooCommerce_Rest_Api
 
     public function get_local_count_by_status(WP_REST_Request $request)
     {
-        $this->authorizeWooToken($request);
-
         $list_id = mailchimp_get_list_id();
         if (empty($list_id)) {
             return $this->mailchimp_rest_response(array(
@@ -1031,10 +1025,11 @@ class MailChimp_WooCommerce_Rest_Api
 	/**
 	 * @param $key
 	 * @param WP_REST_Request $request
+	 * @param bool $allow_pending only the verify route, which Tower calls while support is being enabled.
 	 *
 	 * @return bool
 	 */
-    private function authorize($key, WP_REST_Request $request)
+    private function authorize($key, WP_REST_Request $request, $allow_pending = false)
     {
         $allowed_keys = array(
             'tower.token',
@@ -1050,6 +1045,18 @@ class MailChimp_WooCommerce_Rest_Api
         // pull the saved data
         $saved = mailchimp_get_data($key);
 
+        if ($key === 'tower.token') {
+            // the support token is only good while the merchant has remote support switched on.
+            if (!mailchimp_get_data('tower.opt')) {
+                $saved = null;
+            }
+            // while support is being enabled, Tower verifies the new token before it is saved.
+            if ($allow_pending && ($pending = \Mailchimp_Woocommerce_DB_Helpers::get_transient('mailchimp-woocommerce-tower.pending_token')) &&
+                is_string($pending) && is_string($token) && ($token === $pending || base64_decode($token) === $pending)) {
+                $saved = $pending;
+            }
+        }
+
         // if we don't have a token - or we don't have the saved comparison
         // or the token doesn't equal the saved token, throw an error.
         if (empty($token) || empty($saved) || ($token !== $saved && base64_decode($token) !== $saved)) {
@@ -1060,29 +1067,55 @@ class MailChimp_WooCommerce_Rest_Api
     }
 
     /**
-     * @param WP_REST_Request $request
-     * @return true
+     * Woo key reads include subscriber_stats, despite its POST transport.
+     *
+     * @param WP_REST_Request $request Request to authorize.
+     * @return true|WP_Error
      */
-    private function authorizeWooToken(WP_REST_Request $request)
+    public function permission_woo_read_callback(WP_REST_Request $request)
+    {
+        return $this->authorizeWooToken($request, 'read');
+    }
+
+    /**
+     * @param WP_REST_Request $request Request to authorize.
+     * @return true|WP_Error
+     */
+    public function permission_woo_write_callback(WP_REST_Request $request)
+    {
+        return $this->authorizeWooToken($request, 'write');
+    }
+
+    /**
+     * Validate credentials, key scope and the key owner's current capability.
+     * A valid key is not itself authorization to manage this plugin.
+     *
+     * @param WP_REST_Request $request Request to authorize.
+     * @param string $permission Required key scope.
+     * @return true|WP_Error
+     */
+    private function authorizeWooToken(WP_REST_Request $request, $permission)
     {
         global $wpdb;
-        // get the auth token from either a header, or the query string
-        $token = (string) $this->getAuthToken($request);
-        // get the token and pull out both the consumer key and consumer secret split by the :
-        $parts = str_getcsv($token, ':', '"', '');
-        // if we don't have 2 items, that's invalid
-        if (count($parts) !== 2) {
-            mailchimp_debug('authorize', "token invalid format", ['token_present' => !empty($token)]);
-            wp_send_json_error(array('message' => 'unauthorized'), 403);
+        $token = $this->getAuthToken($request);
+        $parts = is_string($token) ? explode(':', $token) : array();
+        if (count($parts) !== 2 || $parts[0] === '' || $parts[1] === '') {
+            return new WP_Error('mailchimp_woocommerce_unauthorized', 'Unauthorized.', array('status' => 401));
         }
         list($key, $secret) = $parts;
-        $consumer_key = wc_api_hash(sanitize_text_field($key));
         $table = $wpdb->prefix . 'woocommerce_api_keys';
-        $sql = $wpdb->prepare("SELECT * FROM {$table} WHERE consumer_key = %s AND consumer_secret = %s", array($consumer_key, $secret));
-        $api_key = $wpdb->get_row( $sql );
-        if (empty($api_key)) {
-            mailchimp_debug('authorize', "token not found", ['token_present' => !empty($token)]);
-            wp_send_json_error(array('message' => 'unauthorized'), 403);
+        $api_key = $wpdb->get_row($wpdb->prepare(
+            "SELECT user_id, permissions, consumer_secret FROM {$table} WHERE consumer_key = %s",
+            wc_api_hash($key)
+        ));
+        // SQL string comparisons may be case-insensitive; compare the secret exactly.
+        if (!$api_key || !hash_equals((string) $api_key->consumer_secret, $secret)) {
+            return new WP_Error('mailchimp_woocommerce_unauthorized', 'Unauthorized.', array('status' => 401));
+        }
+        $owner = get_user_by('id', $api_key->user_id);
+        if (!$owner || !user_can($owner, mailchimp_get_allowed_capability($owner->ID)) ||
+            !in_array($api_key->permissions, array($permission, 'read_write'), true)) {
+            return new WP_Error('mailchimp_woocommerce_forbidden', 'Insufficient permissions.', array('status' => 403));
         }
         return true;
     }
@@ -1107,7 +1140,7 @@ class MailChimp_WooCommerce_Rest_Api
 	 */
     private function getBearerTokenHeader(WP_REST_Request $request)
     {
-        $header = $request->get_header('Authorization');
+        $header = (string) $request->get_header('Authorization');
         $position = strrpos($header, 'Bearer ');
         if ($position !== false) {
             $header = substr($header, $position + 7);

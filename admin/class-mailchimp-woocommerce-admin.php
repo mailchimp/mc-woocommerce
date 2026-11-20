@@ -69,10 +69,14 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		if ( ( $store_id = mailchimp_get_store_id() ) && ( $mc = mailchimp_get_api() ) ) {
 			\Mailchimp_Woocommerce_DB_Helpers::set_transient( 'mailchimp_disconnecting_store', true, 15 );
 			if ( $mc->deleteStore( $store_id ) ) {
-				mailchimp_log( 'store.disconnected', 'Store id ' . mailchimp_get_store_id() . ' has been disconnected' );
+				mailchimp_log( 'store.disconnected', 'Store id ' . $store_id . ' has been disconnected' );
 			} else {
-				mailchimp_log( 'store.NOT DISCONNECTED', 'Store id ' . mailchimp_get_store_id() . ' has NOT been disconnected' );
+				// deleteStore() has just logged the reason under store.delete.
+				mailchimp_error( 'store.NOT DISCONNECTED', 'Store id ' . $store_id . ' has NOT been deleted from Mailchimp. The plugin was disconnected on this site, but the store is still in the Mailchimp account.' );
 			}
+		} elseif ( $clean_hooks ) {
+			// a real disconnect (not the reset before a new connection) that had nothing to delete with.
+			mailchimp_log( 'store.NOT DISCONNECTED', 'No delete was sent to Mailchimp while disconnecting because ' . ( empty( $store_id ) ? 'this site has no store id' : 'there is no API key' ) . '.' );
 		}
 
         if ($clean_hooks) {
@@ -170,7 +174,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				array(
 					'removeReviewBannerRestUrl' => MailChimp_WooCommerce_Rest_Api::url( 'review-banner' ),
 					'restNonce'                 => wp_create_nonce( 'wp_rest' ),
-					'l10n'                      => array(
+					'authServerUrl'             => mailchimp_get_auth_server_url(),
+					'l10n'                     => array(
 						'are_you_sure'                 => __( 'Are you sure?', 'mailchimp-for-woocommerce' ),
 						'log_delete_subtitle'          => __( 'You will not be able to revert.', 'mailchimp-for-woocommerce' ),
 						'log_delete_confirm'           => __( 'Yes, delete it!', 'mailchimp-for-woocommerce' ),
@@ -408,23 +413,9 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				}
 			}
 
-			// Cache GDPR fields for 10 minutes to avoid hammering the API.
-			// Uses native get_transient/set_transient (object-cache-aware —
-			// single Redis op with native TTL when available, no wp_options
-			// writes). Single shared transient with updateGDPRFields() so
-			// only one write path maintains the cache.
-			if ( mailchimp_is_configured() && ( $list_id = mailchimp_get_list_id() ) ) {
-				$transient  = "mailchimp-woocommerce-gdpr-fields.{$list_id}";
-				$GDPRfields = get_transient( $transient );
-				if ( ! is_array( $GDPRfields ) ) {
-					try {
-						$GDPRfields = mailchimp_get_api()->getGDPRFields( $list_id );
-						set_transient( $transient, is_array( $GDPRfields ) ? $GDPRfields : array(), 600 );
-					} catch ( Exception $e ) {
-						set_transient( $transient, array(), 60 );
-					}
-				}
-			}
+            if (mailchimp_is_configured()) {
+                $this->safelyUpdateGDPRFields();
+            }
 
 			if ( isset( $_GET['log_removed'] ) && $_GET['log_removed'] == '1' ) {
 				add_settings_error( 'mailchimp_log_settings', '', __( 'Log file deleted.', 'mailchimp-for-woocommerce' ), 'info' );
@@ -1165,6 +1156,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			'secret' => $secret,
 		);
 
+		// MAILCHIMP_E2E: have the auth server run this login against Mailchimp's E2E stack.
+		if ( mailchimp_is_e2e_environment() ) {
+			$args['environment'] = 'e2e';
+		}
+
 		$pload = array(
 			'headers' => array(
 				'Content-type' => 'application/json',
@@ -1173,7 +1169,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		);
 
         Mailchimp_Woocommerce_Event::track('connect_accounts_oauth:start', new DateTime());
-		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/start', $pload );
+		$response = wp_remote_post( mailchimp_get_auth_server_url( 'api/start' ), $pload );
 
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
@@ -1181,6 +1177,14 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		}
 
 		if ( $response['response']['code'] == 201 ) {
+			// an auth server that does not know about environments ignores the flag and
+			// would hand back a production token, so it has to confirm the environment.
+			if ( mailchimp_is_e2e_environment() ) {
+				$started = json_decode( $response['body'], true );
+				if ( ! is_array( $started ) || ! isset( $started['environment'] ) || 'e2e' !== $started['environment'] ) {
+					wp_send_json_error( array( 'message' => 'The auth server does not support the Mailchimp E2E environment.' ) );
+				}
+			}
 			\Mailchimp_Woocommerce_DB_Helpers::set_transient( 'mailchimp-woocommerce-oauth-secret', $secret, 60 * 60 );
 			wp_send_json_success( $response );
 		} else {
@@ -1212,7 +1216,16 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			'headers' => array(),
 		);
 
-		$response = wp_safe_remote_post( $url, $pload );
+		// an auth server override usually points at a private or local host, which
+		// the "safe" request would refuse, so only the configured host is allowed.
+		if ( mailchimp_auth_server_is_overridden() ) {
+			if ( strpos( $url, mailchimp_get_auth_server_url( 'api/status/' ) ) !== 0 ) {
+				wp_send_json_error( array( 'message' => 'Invalid auth server URL' ) );
+			}
+			$response = wp_remote_post( $url, $pload );
+		} else {
+			$response = wp_safe_remote_post( $url, $pload );
+		}
 
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
@@ -1242,7 +1255,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             ),
             'body'    => json_encode( $args ),
         );
-        $response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/finish', $pload );
+        $response = wp_remote_post( mailchimp_get_auth_server_url( 'api/finish' ), $pload );
 
         // need to return the error message if this is the problem.
         if ( $response instanceof WP_Error ) {
@@ -1314,7 +1327,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$this->adminOnlyMiddleware();
 
 		$username = sanitize_text_field( $_POST['username'] );
-		$response = wp_remote_get( 'https://woocommerce.mailchimpapp.com/api/usernames/available/' . $username );
+		$response = wp_remote_get( mailchimp_get_auth_server_url( 'api/usernames/available/' ) . $username );
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
 			wp_send_json_error( $response );
@@ -1329,7 +1342,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				)
 			);
 		} else {
-			$suggestion = wp_remote_get( 'https://woocommerce.mailchimpapp.com/api/usernames/suggestions/' . preg_replace( '/[^A-Za-z0-9\-\@\.]/', '', $username ) );
+			$suggestion = wp_remote_get( mailchimp_get_auth_server_url( 'api/usernames/suggestions/' ) . preg_replace( '/[^A-Za-z0-9\-\@\.]/', '', $username ) );
 			// need to return the error message if this is the problem.
 			if ( $suggestion instanceof WP_Error ) {
 				wp_send_json_error( $suggestion );
@@ -1370,7 +1383,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 	public function mailchimp_woocommerce_ajax_support_form() {
 		$this->adminOnlyMiddleware();
 		$pload    = $this->getPostData();
-		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/support', $pload );
+		$response = wp_remote_post( mailchimp_get_auth_server_url( 'api/support' ), $pload );
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
 			wp_send_json_error( $response );
@@ -1500,7 +1513,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			),
 			'timeout' => 30,
 		);
-		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/support', $pload );
+		$response = wp_remote_post( mailchimp_get_auth_server_url( 'api/support' ), $pload );
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
 			wp_send_json_error( $response );
@@ -1534,7 +1547,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		Mailchimp_Woocommerce_Event::track('connect_accounts:activate_account', new DateTime());
 		$this->adminOnlyMiddleware();
 		$pload = $this->getPostData();
-		$response = wp_remote_post( 'https://woocommerce.mailchimpapp.com/api/signup/', $pload );
+		$response = wp_remote_post( mailchimp_get_auth_server_url( 'api/signup/' ), $pload );
 		// need to return the error message if this is the problem.
 		if ( $response instanceof WP_Error ) {
             mailchimp_error('admin', "create account error", ['error' => $response->get_error_message()]);
@@ -1588,7 +1601,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
         } else {
             $response_error = json_decode( $response_body->error, true );
             $username = preg_replace( '/[^A-Za-z0-9\-\@\.]/', '', $_POST['data']['username'] );
-            $suggestion         = wp_remote_get( 'https://woocommerce.mailchimpapp.com/api/usernames/suggestions/' . $username );
+            $suggestion         = wp_remote_get( mailchimp_get_auth_server_url( 'api/usernames/suggestions/' ) . $username );
             $suggested_username = json_decode( $suggestion['body'] )->data;
 
             wp_send_json_error(
@@ -1680,14 +1693,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
             $checkbox = $input['mailchimp_checkbox_defaults'];
         }
 
-        $allowed_html = array(
-            'a'  => array(
-                'href'   => array(),
-                'title'  => array(),
-                'target' => array(),
-            ),
-            'br' => array(),
-        );
+        $allowed_html = mailchimp_newsletter_label_allowed_html();
 
         $defaults = $this->loadWooStoreData();
 
@@ -1855,6 +1861,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			if ( $this->swapped_list_id ) {
 				$data['mailchimp_list'] = $this->swapped_list_id;
 			}
+
+            $this->updateGDPRFields($data['mailchimp_list']);
 
 			// start the sync automatically if the sync is false
 			if ( $store_created && ( (bool) $this->getData( 'sync.started_at', false ) === false ) ) {
@@ -2339,32 +2347,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
     protected function updateGDPRFields($list_id)
     {
-        if ( empty( $list_id ) ) {
-            return;
-        }
-
-        $transient = "mailchimp-woocommerce-gdpr-fields.{$list_id}";
-
-        // Single source of truth — coordinate with setup() via the SAME
-        // transient and TTL. If it's still warm, skip the API call and the
-        // write entirely. The old `.last_saved` marker + separate "no TTL"
-        // write path used to trigger a duplicate API call + 4+ transient
-        // writes every few minutes; a single TTL'd transient replaces all
-        // of that.
-        if ( get_transient( $transient ) !== false ) {
-            return;
-        }
-
-        try {
-            $GDPRfields = mailchimp_get_api()->getGDPRFields( $list_id );
-            set_transient( $transient, is_array( $GDPRfields ) ? $GDPRfields : array(), 600 );
-            mailchimp_log( 'admin', 'updated GDPR fields', array( 'fields' => $GDPRfields ) );
-        } catch ( Exception $e ) {
-            // Negative-cache the failure for 60s so we don't hammer the API
-            // during an outage. Next refresh cycle will retry.
-            set_transient( $transient, array(), 60 );
-            mailchimp_error( 'admin', 'updating GDPR fields failed ' . $e->getMessage() );
-        }
+        // Shared cache reader queues a refresh without blocking the admin request.
+        mailchimp_get_api()->getCachedGDPRFields($list_id);
     }
 
 	/**
@@ -2385,6 +2369,11 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		if ( empty( $list_id ) || empty( $store_id ) ) {
 			return false;
+		}
+
+		$domain = mailchimp_get_store_domain();
+		if ( empty( $domain ) ) {
+			throw new MailChimp_WooCommerce_Error( 'The public site address must contain a valid host.' );
 		}
 
 		$new = false;
@@ -2408,7 +2397,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 
 		// set the basics
 		$store->setName( html_entity_decode($this->array_get( $data, 'store_name', get_option( 'blogname' ) )) );
-		$store->setDomain( get_option( 'siteurl' ) );
+		$store->setDomain( $domain );
 		$store->setEmailAddress( $this->array_get( $data, 'admin_email', get_option('admin_email') ) );
 		$store->setAddress( $this->address( $data ) );
 		$store->setListId( $list_id );
@@ -2433,7 +2422,8 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 				$stores = $this->api()->stores();
 				// iterate thru stores, find correct store ID and save it to db
 				foreach ( $stores as $mc_store ) {
-					if ( $mc_store->getDomain() === $store->getDomain() && $store->getPlatform() == 'woocommerce' ) {
+					if ( strtolower( (string) $mc_store->getPlatform() ) === 'woocommerce' &&
+						mailchimp_store_domain_matches( $mc_store->getDomain() ) ) {
 						\Mailchimp_Woocommerce_DB_Helpers::update_option( 'mailchimp-woocommerce-store_id', $mc_store->getId(), 'yes' );
 						// update the store with the previous listID
 						$store->setListId( $mc_store->getListId() );
@@ -2630,15 +2620,20 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 		$job           = new MailChimp_WooCommerce_Tower( mailchimp_get_store_id() );
 		$response_body = $job->toggle( $opt );
 
-		// if success, set internal option to check for opt and display on sync page
-		if ( $response_body && isset($response_body->success) && $response_body->success == true ) {
-			$this->setData( 'tower.opt', $opt );
+		$confirmed = $response_body && isset($response_body->success) && $response_body->success == true;
+
+		// toggle() keeps the opt and the support token in step with what happened. Switching off
+		// always takes effect on this store, even when Tower could not be told about it.
+		if ( $confirmed || ! (bool) $opt ) {
+			if ( ! $confirmed ) {
+				mailchimp_error( 'tower_status', 'remote support was switched off on this store, but Tower did not confirm it' );
+			}
 			wp_send_json_success( __( 'Saved', 'mailchimp-for-woocommerce' ) );
 		} else {
 			// if error, keep option to original value
 			wp_send_json_error(
 				array(
-					'error' => $response_body->message,
+					'error' => $response_body && isset( $response_body->message ) ? $response_body->message : __( 'Remote support could not be enabled. Please try again.', 'mailchimp-for-woocommerce' ),
 					'opt'   => $original_opt,
 				)
 			);
@@ -2675,7 +2670,7 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			$post_data['remove_email'] = true;
 		}
 
-		$route = 'https://woocommerce.mailchimpapp.com/api/opt_in_status';
+		$route = mailchimp_get_auth_server_url( 'api/opt_in_status' );
 
 		return wp_remote_post(
 			esc_url_raw( $route ),
@@ -2708,9 +2703,20 @@ class MailChimp_WooCommerce_Admin extends MailChimp_WooCommerce_Options {
 			wp_send_json_error( __( 'No log file provided', 'mailchimp-for-woocommerce' ) );
 			return;
 		}
-		$requested_log_file = $_POST['log_file'];
+		// Only this plugin's own log files that actually exist in the WooCommerce
+		// log directory may be removed. Resolving the request against a directory
+		// listing stops a crafted name from reaching a file outside that directory.
+		$requested_log_file = sanitize_text_field( wp_unslash( $_POST['log_file'] ) );
+		$files              = defined( 'WC_LOG_DIR' ) ? @scandir( WC_LOG_DIR ) : array();
+		$log_file           = mailchimp_woocommerce_match_log_file( $requested_log_file, $files );
+		if ( null === $log_file ) {
+			wp_send_json_error( __( 'Invalid log file', 'mailchimp-for-woocommerce' ) );
+			return;
+		}
+		// Hand WooCommerce the matched file name, not the request: its handler keys
+		// the log directory by sanitize_title() too, so this resolves to that file.
 		$log_handler        = new WC_Log_Handler_File();
-		$removed            = $log_handler->remove( str_replace( '-log', '.log', $requested_log_file ) );
+		$removed            = $log_handler->remove( $log_file );
 
         Mailchimp_Woocommerce_Event::track('navigation_logs:delete', new DateTime());
 

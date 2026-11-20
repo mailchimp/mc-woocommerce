@@ -13,6 +13,7 @@
 * Improves cart recovery and subscriber status handling
 * Fixes a PHP 8.4 deprecation warning for a nullable parameter
 * Updates JavaScript dependencies in the checkout blocks
+* Fixes the contact update that failed after each order during the initial sync, without changing the status of existing contacts
 = 6.3 =
 * Adds a "Connect to support" button to the plugin settings page that opens a Zendesk live chat when clicked
 * Adds product-view pixel tracking on page-builder product templates, including Bricks

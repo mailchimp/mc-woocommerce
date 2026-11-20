@@ -4,7 +4,7 @@ Tags: ecommerce,email,workflows,mailchimp
 Donate link: https://mailchimp.com
 Requires at least: 6.6
 Tested up to: 7.1
-Stable tag: 6.3
+Stable tag: 6.4
 Requires PHP: 7.4
 WC requires at least: 8.2
 WC tested up to: 11.3
@@ -99,3 +99,4 @@ Zendesk [Terms of Service](https://www.zendesk.com/company/agreements-and-terms/
 * Fixes the contact update that failed after each order during the initial sync, without changing the status of existing contacts
 * Fixes a PHP 8.4 deprecation warning for a nullable parameter
 * Updates JavaScript dependencies in the checkout blocks
+* Fixes the contact update that failed after each order during the initial sync, without changing the status of existing contacts

@@ -99,4 +99,3 @@ Zendesk [Terms of Service](https://www.zendesk.com/company/agreements-and-terms/
 * Fixes the contact update that failed after each order during the initial sync, without changing the status of existing contacts
 * Fixes a PHP 8.4 deprecation warning for a nullable parameter
 * Updates JavaScript dependencies in the checkout blocks
-* Fixes the contact update that failed after each order during the initial sync, without changing the status of existing contacts

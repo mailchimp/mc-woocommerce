@@ -126,11 +126,12 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
 	 */
 	public function get_script_data()
     {
-        $gdpr = $this->getGdprFields();
+        $optin_status = $this->getOptinStatus();
+        $gdpr = $optin_status === 'hide' ? array() : $this->getGdprFields();
         $data = array(
             'optinDefaultText' => __( 'I want to receive updates about products and promotions.', 'mailchimp-newsletter' ),
         );
-        $data['gdprStatus'] = $this->getOptinStatus();
+        $data['gdprStatus'] = $gdpr === null && $optin_status !== 'hide' ? 'uncheck' : $optin_status;
 
         if (is_user_logged_in()) {
             $subscribed = is_user_logged_in() && get_user_meta(get_current_user_id(), 'mailchimp_woocommerce_is_subscribed', true);
@@ -329,7 +330,7 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
     }
 
     /**
-     * @return array
+     * @return array|null
      */
 	protected function getGdprFields()
     {
@@ -340,7 +341,7 @@ class Mailchimp_Woocommerce_Newsletter_Blocks_Integration implements Integration
             return array();
         }
         $fields = mailchimp_get_api()->getCachedGDPRFields($list_id);
-        return is_array($fields) ? $fields : array();
+        return $fields;
     }
 
 	/**

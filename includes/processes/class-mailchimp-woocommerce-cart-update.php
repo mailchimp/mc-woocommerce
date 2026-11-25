@@ -17,7 +17,6 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
     public $cart_data;
     public $ip_address;
     public $user_language;
-    public $status = false;
     // the cart's ownership token - the recovery link needs it to restore the cart on another device.
     public $cart_token;
 
@@ -60,13 +59,6 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
     public function setCartToken($token)
     {
         $this->cart_token = $token;
-
-        return $this;
-    }
-
-    public function setStatus($status)
-    {
-        $this->status = (bool) $status;
 
         return $this;
     }
@@ -131,7 +123,8 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
             $customer = new MailChimp_WooCommerce_Customer();
             $customer->setId($this->id);
             $customer->setEmailAddress($this->email);
-            $customer->setOptInStatus($this->status);
+            // a cart never subscribes anyone - consent is captured from the order or by an admin.
+            $customer->setOptInStatus(false);
 
             $cart = new MailChimp_WooCommerce_Cart();
             $cart->setId($this->id);
@@ -172,7 +165,8 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
                     $list_id = mailchimp_get_list_id();
                     $email = $customer->getEmailAddress();
                     mailchimp_debug('abandoned_cart.error', "Contact {$email} was not found in audience during cart update, adding to audience and retrying.");
-                    $subscriber = $api->update($list_id, $email, 'transactional', [], null, null);
+                    // status_if_new: a cart may add a contact as transactional, never change an existing status.
+                    $subscriber = $api->update($list_id, $email, 'transactional', [], [], null, null, true);
                     if ($subscriber) {
                         // if the post is successful we're all good.
                         $api->addCart($store_id, $cart, false);
@@ -200,10 +194,8 @@ class MailChimp_WooCommerce_Cart_Update extends Mailchimp_Woocommerce_Job
                 mailchimp_log('abandoned_cart.success', "email: {$customer->getEmailAddress()}");
             }
 
-            // Maybe sync subscriber to set correct member.language
-            // Pass subscriber status if user opted in via newsletter checkbox
-            $subscriber_status = $this->status ? 'subscribed' : 'transactional';
-            mailchimp_member_data_update($this->email, $this->user_language, 'cart', $subscriber_status);
+            // Maybe sync subscriber to set correct member.language - as transactional, never subscribed.
+            mailchimp_member_data_update($this->email, $this->user_language, 'cart', 'transactional');
 
         } catch (MailChimp_WooCommerce_RateLimitError $e) {
             sleep(3);

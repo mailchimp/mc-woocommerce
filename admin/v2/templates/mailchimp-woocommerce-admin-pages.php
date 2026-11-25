@@ -170,11 +170,6 @@ if (mailchimp_waiting_for_account_confirmation() && $active_breadcrumb !== MC_WC
 		</div>
 		<?php endif; ?>
 
-		<?php if ( ! defined( 'PHP_VERSION_ID' ) || ( PHP_VERSION_ID < 70000 ) ) : ?>
-			<div data-dismissible="notice-php-version" class="error notice notice-error">
-				<p><?php esc_html_e( 'Mailchimp says: Please upgrade your PHP version to a minimum of 7.0', 'mailchimp-for-woocommerce' ); ?></p>
-			</div>
-		<?php endif; ?>
 		<?php if ( ! empty( $has_api_error ) ) : ?>
 			<div data-dismissible="notice-api-error" class="error notice notice-error is-dismissible">
 				<p>

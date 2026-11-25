@@ -103,15 +103,15 @@
         <div class="mc-wc-tab-content-description">
         <?php
         if ( $is_has_wc_checkout_block ):
-            echo sprintf(
+            echo wp_kses_post( sprintf(
                 __( 'Your checkout page is using WooCommerce blocks. Settings are available within the block options while editing the <a href=%s target="_blank">checkout page</a>.', 'mailchimp-for-woocommerce' ),
-                get_the_permalink($checkout_page_id)
-            );
+                '"' . esc_url( get_the_permalink( $checkout_page_id ) ) . '"'
+            ) );
         else:
-            echo sprintf(
+            echo wp_kses_post( sprintf(
                 __( 'Your checkout page is using WooCommerce the Classic Checkout Shortcode. To change the opt-in checkbox at checkout, input one of the <a href=%s target="_blank">available WooCommerce form actions</a>.', 'mailchimp-for-woocommerce' ),
-                esc_url( 'https://woocommerce.com/document/tutorial-customising-checkout-fields-using-actions-and-filters/')
-            );
+                '"' . esc_url( 'https://woocommerce.com/document/tutorial-customising-checkout-fields-using-actions-and-filters/' ) . '"'
+            ) );
         endif;
         ?>
         </div>
@@ -128,7 +128,7 @@
                     <div class="mc-wc-radio">
                         <label class="mc-wc-radio-label">
                             <input type="radio" name="<?php echo esc_attr( $this->plugin_name ); ?>[mailchimp_checkbox_defaults]" value="<?php echo esc_attr($attribute['value']); ?>"<?php echo $attribute['value'] === $checkbox_default_settings ? ' checked="checked" ' : ''; ?>>
-                            <?php echo $attribute['label']; ?>
+                            <?php echo esc_html( $attribute['label'] ); ?>
                         </label>
                     </div>
                     <?php endforeach; ?>
